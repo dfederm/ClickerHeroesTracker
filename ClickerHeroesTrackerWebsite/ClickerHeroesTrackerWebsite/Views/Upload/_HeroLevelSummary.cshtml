@@ -1,0 +1,16 @@
+﻿@model ClickerHeroesTrackerWebsite.Models.Upload.HeroLevelSummaryViewModel
+
+<h4>Hero Summary:</h4>
+<table>
+    <tr>
+        <th>Hero</th>
+        <th>Gilds</th>
+    </tr>
+    @foreach (var hero in Model.HeroGilds)
+    {
+        <tr>
+            <td>@hero.Key:</td>
+            <td class="text-right">@hero.Value</td>
+        </tr>
+    }
+</table>

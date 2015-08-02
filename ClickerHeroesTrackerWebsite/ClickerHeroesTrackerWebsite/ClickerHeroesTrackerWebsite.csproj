@@ -205,7 +205,13 @@
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
     <Compile Include="Models\AccountViewModels.cs" />
+    <Compile Include="Models\Game\Achievement.cs" />
+    <Compile Include="Models\Game\Hero.cs" />
+    <Compile Include="Models\Game\HeroUpgrade.cs" />
+    <Compile Include="Models\SaveData\HeroData.cs" />
+    <Compile Include="Models\SaveData\HeroesData.cs" />
     <Compile Include="Models\Upload\AncientLevelSummaryViewModel.cs" />
+    <Compile Include="Models\Upload\ComputedStatsViewModel.cs" />
     <Compile Include="Models\Upload\ConfirmViewModel.cs" />
     <Compile Include="Models\Game\Ancient.cs" />
     <Compile Include="Models\IdentityModels.cs" />
@@ -213,6 +219,7 @@
     <Compile Include="Models\SaveData\AncientData.cs" />
     <Compile Include="Models\SaveData\AncientsData.cs" />
     <Compile Include="Models\SaveData\SaveData.cs" />
+    <Compile Include="Models\Upload\HeroLevelSummaryViewModel.cs" />
     <Compile Include="Models\Upload\SuggestedAncientLevelsViewModel.cs" />
     <Compile Include="Models\Upload\UploadViewModel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -252,8 +259,6 @@
     <Content Include="Views\_ViewStart.cshtml" />
     <Content Include="Views\Shared\Error.cshtml" />
     <Content Include="Views\Shared\_Layout.cshtml" />
-    <Content Include="Views\Home\About.cshtml" />
-    <Content Include="Views\Home\Contact.cshtml" />
     <Content Include="Views\Home\Index.cshtml" />
     <Content Include="Views\Account\_ExternalLoginsListPartial.cshtml" />
     <Content Include="Views\Account\ConfirmEmail.cshtml" />
@@ -280,6 +285,8 @@
     <Content Include="Views\Upload\Confirm.cshtml" />
     <Content Include="Views\Upload\_AncientLevelSummary.cshtml" />
     <Content Include="Views\Upload\_SuggestedAncientLevels.cshtml" />
+    <Content Include="Views\Upload\_HeroLevelSummary.cshtml" />
+    <Content Include="Views\Upload\_ComputedStats.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

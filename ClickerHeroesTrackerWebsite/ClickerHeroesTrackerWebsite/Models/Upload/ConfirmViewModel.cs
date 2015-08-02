@@ -35,10 +35,16 @@
 
             // Finally, populate the view models
             this.AncientLevelSummaryViewModel = new AncientLevelSummaryViewModel(savedGame.AncientsData);
+            this.HeroLevelSummaryViewModel = new HeroLevelSummaryViewModel(savedGame.HeroesData);
+            this.ComputedStatsViewModel = new ComputedStatsViewModel(savedGame);
             this.SuggestedAncientLevelsViewModel = new SuggestedAncientLevelsViewModel(savedGame.AncientsData);
         }
 
         public AncientLevelSummaryViewModel AncientLevelSummaryViewModel { get; private set; }
+
+        public HeroLevelSummaryViewModel HeroLevelSummaryViewModel { get; private set; }
+
+        public ComputedStatsViewModel ComputedStatsViewModel { get; private set; }
 
         public SuggestedAncientLevelsViewModel SuggestedAncientLevelsViewModel { get; private set; }
 

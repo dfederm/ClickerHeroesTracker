@@ -91,6 +91,8 @@ namespace ClickerHeroesTrackerWebsite.Tests.Models
         public void ConfirmViewModel_E2ETest()
         {
             var viewModel = new ConfirmViewModel(ValidEncodedSaveData);
+
+            Assert.IsNotNull(viewModel.AncientLevelSummaryViewModel);
             Assert.IsNotNull(viewModel.AncientLevelSummaryViewModel.AncientLevels);
             Assert.AreEqual(29, viewModel.AncientLevelSummaryViewModel.AncientLevels.Count);
 
@@ -100,6 +102,32 @@ namespace ClickerHeroesTrackerWebsite.Tests.Models
                 Assert.IsFalse(string.IsNullOrWhiteSpace(pair.Key));
                 Assert.IsFalse(string.IsNullOrWhiteSpace(pair.Value));
             }
+
+            Assert.IsNotNull(viewModel.HeroLevelSummaryViewModel);
+            Assert.IsNotNull(viewModel.HeroLevelSummaryViewModel.HeroGilds);
+            Assert.AreEqual(35, viewModel.HeroLevelSummaryViewModel.HeroGilds.Count);
+
+            foreach (var pair in viewModel.HeroLevelSummaryViewModel.HeroGilds)
+            {
+                Assert.IsNotNull(pair);
+                Assert.IsFalse(string.IsNullOrWhiteSpace(pair.Key));
+                Assert.IsFalse(string.IsNullOrWhiteSpace(pair.Value));
+            }
+
+            Assert.IsNotNull(viewModel.SuggestedAncientLevelsViewModel);
+            Assert.IsNotNull(viewModel.SuggestedAncientLevelsViewModel.SuggestedAncientLevels);
+            Assert.AreEqual(8, viewModel.SuggestedAncientLevelsViewModel.SuggestedAncientLevels.Length);
+
+            foreach (var suggestedAncientLevel in viewModel.SuggestedAncientLevelsViewModel.SuggestedAncientLevels)
+            {
+                Assert.IsNotNull(suggestedAncientLevel);
+                Assert.IsFalse(string.IsNullOrWhiteSpace(suggestedAncientLevel.AncientName));
+                Assert.AreNotEqual(0, suggestedAncientLevel.CurrentLevel);
+                Assert.AreNotEqual(0, suggestedAncientLevel.SuggestedLevel);
+            }
+
+            Assert.IsNotNull(viewModel.ComputedStatsViewModel);
+            Assert.AreEqual(25.218864687071534, viewModel.ComputedStatsViewModel.AchievementMultiplier);
         }
     }
 }
