@@ -1,0 +1,16 @@
+﻿@model ClickerHeroesTrackerWebsite.Models.Upload.AncientLevelSummaryViewModel
+
+<h4>Ancient Summary:</h4>
+<table>
+    <tr>
+        <th>Ancient</th>
+        <th>Level</th>
+    </tr>
+    @foreach (var ancient in Model.AncientLevels)
+    {
+        <tr>
+            <td>@ancient.Key:</td>
+            <td class="text-right">@ancient.Value</td>
+        </tr>
+    }
+</table>

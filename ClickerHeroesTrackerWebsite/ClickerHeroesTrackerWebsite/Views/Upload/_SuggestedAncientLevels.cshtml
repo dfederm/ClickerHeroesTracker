@@ -1,0 +1,21 @@
+﻿@model ClickerHeroesTrackerWebsite.Models.Upload.SuggestedAncientLevelsViewModel
+
+<h4>Rules of Thumb:</h4>
+Note that Iris is not correct until we start calculating Optimal Level.
+<table>
+    <tr>
+        <th>Ancient</th>
+        <th>Current Level</th>
+        <th>Suggested Level</th>
+        <th>Difference</th>
+    </tr>
+    @foreach (var ancient in Model.SuggestedAncientLevels)
+    {
+        <tr>
+            <td>@ancient.AncientName:</td>
+            <td class="text-right">@ancient.CurrentLevel:</td>
+            <td class="text-right">@ancient.SuggestedLevel</td>
+            <td class="text-right">@ancient.LevelDifference</td>
+        </tr>
+    }
+</table>
