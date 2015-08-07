@@ -1,11 +1,9 @@
-﻿using System;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using ClickerHeroesTrackerWebsite.Models;
-using System.Text;
-using ClickerHeroesTrackerWebsite.Models.Upload;
-
-namespace ClickerHeroesTrackerWebsite.Tests.Models
+﻿namespace ClickerHeroesTrackerWebsite.Tests.Models
 {
+    using Microsoft.VisualStudio.TestTools.UnitTesting;
+    using System.Text;
+    using ClickerHeroesTrackerWebsite.Models.Upload;
+
     [TestClass]
     public class ConfirmViewModelTests
     {

@@ -6,6 +6,8 @@
     {
         private static Dictionary<int, HeroUpgrade> upgrades = new Dictionary<int, HeroUpgrade>();
 
+        private static double maximumDamageMultiplier = 1d;
+
         static HeroUpgrade()
         {
             // Populated by: http://s3-us-west-2.amazonaws.com/clickerheroes/ancientssoul.html
@@ -65,7 +67,18 @@
 
             // Add itself to the static collection
             upgrades.Add(this.Id, this);
+
+            // Add to the maximum possible damage multiplier, ie. if one were to have them all.
+            maximumDamageMultiplier *= damageMultiplier;
         }
+
+        public static double MaximumDamageMultiplier
+        {
+            get
+            {
+                return maximumDamageMultiplier;
+            }
+        } 
 
         public int Id { get; private set; }
 

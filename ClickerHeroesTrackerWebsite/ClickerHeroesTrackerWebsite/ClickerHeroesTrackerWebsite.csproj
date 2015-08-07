@@ -206,10 +206,16 @@
     </Compile>
     <Compile Include="Models\AccountViewModels.cs" />
     <Compile Include="Models\Game\Achievement.cs" />
+    <Compile Include="Models\Game\ItemTypes.cs" />
+    <Compile Include="Models\SaveData\Extensions.cs" />
     <Compile Include="Models\Game\Hero.cs" />
     <Compile Include="Models\Game\HeroUpgrade.cs" />
     <Compile Include="Models\SaveData\HeroData.cs" />
     <Compile Include="Models\SaveData\HeroesData.cs" />
+    <Compile Include="Models\SaveData\ItemData.cs" />
+    <Compile Include="Models\SaveData\ItemsData.cs" />
+    <Compile Include="Models\Simulation\LevelingPlan.cs" />
+    <Compile Include="Models\Simulation\Simulation.cs" />
     <Compile Include="Models\Upload\AncientLevelSummaryViewModel.cs" />
     <Compile Include="Models\Upload\ComputedStatsViewModel.cs" />
     <Compile Include="Models\Upload\ConfirmViewModel.cs" />
@@ -232,6 +238,7 @@
     <Content Include="fonts\glyphicons-halflings-regular.svg" />
     <Content Include="Global.asax" />
     <Content Include="Content\Site.css" />
+    <Content Include="Models\Game\Population.txt" />
     <Content Include="Scripts\bootstrap.js" />
     <Content Include="Scripts\bootstrap.min.js" />
     <Content Include="ApplicationInsights.config" />

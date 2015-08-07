@@ -37,7 +37,7 @@
             this.AncientLevelSummaryViewModel = new AncientLevelSummaryViewModel(savedGame.AncientsData);
             this.HeroLevelSummaryViewModel = new HeroLevelSummaryViewModel(savedGame.HeroesData);
             this.ComputedStatsViewModel = new ComputedStatsViewModel(savedGame);
-            this.SuggestedAncientLevelsViewModel = new SuggestedAncientLevelsViewModel(savedGame.AncientsData);
+            this.SuggestedAncientLevelsViewModel = new SuggestedAncientLevelsViewModel(savedGame.AncientsData, this.ComputedStatsViewModel.OptimalLevel);
         }
 
         public AncientLevelSummaryViewModel AncientLevelSummaryViewModel { get; private set; }

@@ -6,7 +6,7 @@
 
     public class SuggestedAncientLevelsViewModel
     {
-        public SuggestedAncientLevelsViewModel(AncientsData ancientsData)
+        public SuggestedAncientLevelsViewModel(AncientsData ancientsData, int optimalLevel)
         {
             var currentSiyaLevel = GetCurrentAncientLevel(ancientsData, Ancient.Siyalatas);
             var currentArgaivLevel = GetCurrentAncientLevel(ancientsData, Ancient.Argaiv);
@@ -23,7 +23,7 @@
             var suggestedLiberLevel = (int)Math.Round(suggestedSiyaLevel * 0.93);
             var suggestedMammonLevel = suggestedLiberLevel;
             var suggestedMimzeeLevel = suggestedLiberLevel;
-            var suggestedIrisLevel = currentIrisLevel;
+            var suggestedIrisLevel = optimalLevel - 1001;
             var suggestedSolomonLevel = (int)Math.Round(1.15 * Math.Pow(Math.Log10(3.25 * Math.Pow(suggestedSiyaLevel, 2)), 0.4) * Math.Pow(suggestedSiyaLevel, 0.8));
 
             this.SuggestedAncientLevels = new SuggestedAncientLevelData[]
