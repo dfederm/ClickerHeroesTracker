@@ -1,9 +1,8 @@
 ﻿namespace ClickerHeroesTrackerWebsite.Tests.Models
 {
     using Microsoft.VisualStudio.TestTools.UnitTesting;
-    using System.Text;
-    using ClickerHeroesTrackerWebsite.Models.Upload;
     using ClickerHeroesTrackerWebsite.Models.Simulation;
+    using ClickerHeroesTrackerWebsite.Models.Calculator;
 
     [TestClass]
     public class SimulationTests
@@ -17,8 +16,8 @@
 
         private static void Validate(string encodedSaveData, double level, double time, double souls, double ratio)
         {
-            var decodedSaveData = ConfirmViewModel.DecodeSaveData(encodedSaveData);
-            var saveData = ConfirmViewModel.DeserializeSavedGame(decodedSaveData);
+            var decodedSaveData = CalculatorViewModel.DecodeSaveData(encodedSaveData);
+            var saveData = CalculatorViewModel.DeserializeSavedGame(decodedSaveData);
             var simulationResult = new Simulation(saveData, null).Run();
 
             Assert.IsNotNull(simulationResult);

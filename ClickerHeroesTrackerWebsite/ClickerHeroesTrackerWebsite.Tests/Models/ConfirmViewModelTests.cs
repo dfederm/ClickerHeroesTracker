@@ -2,7 +2,7 @@
 {
     using Microsoft.VisualStudio.TestTools.UnitTesting;
     using System.Text;
-    using ClickerHeroesTrackerWebsite.Models.Upload;
+    using ClickerHeroesTrackerWebsite.Models.Calculator;
 
     [TestClass]
     public class ConfirmViewModelTests
@@ -24,7 +24,7 @@
         [TestMethod]
         public void ConfirmViewModel_DecodeSaveData_Valid()
         {
-            var saveData = ConfirmViewModel.DecodeSaveData(ValidEncodedSaveData);
+            var saveData = CalculatorViewModel.DecodeSaveData(ValidEncodedSaveData);
             Assert.IsNotNull(saveData);
             Assert.AreNotEqual(0, saveData.Length);
         }
@@ -32,28 +32,28 @@
         [TestMethod]
         public void ConfirmViewModel_DecodeSaveData_MissingAntiCheat()
         {
-            var saveData = ConfirmViewModel.DecodeSaveData(InvalidEncodedSaveData_MissingAntiCheat);
+            var saveData = CalculatorViewModel.DecodeSaveData(InvalidEncodedSaveData_MissingAntiCheat);
             Assert.IsNull(saveData);
         }
 
         [TestMethod]
         public void ConfirmViewModel_DecodeSaveData_BadHash()
         {
-            var saveData = ConfirmViewModel.DecodeSaveData(InvalidEncodedSaveData_BadHash);
+            var saveData = CalculatorViewModel.DecodeSaveData(InvalidEncodedSaveData_BadHash);
             Assert.IsNull(saveData);
         }
 
         [TestMethod]
         public void ConfirmViewModel_DecodeSaveData_BadData()
         {
-            var saveData = ConfirmViewModel.DecodeSaveData(InvalidEncodedSaveData_BadData);
+            var saveData = CalculatorViewModel.DecodeSaveData(InvalidEncodedSaveData_BadData);
             Assert.IsNull(saveData);
         }
 
         [TestMethod]
         public void ConfirmViewModel_DeserializeSavedGame_Valid()
         {
-            var savedGame = ConfirmViewModel.DeserializeSavedGame(ValidSaveData);
+            var savedGame = CalculatorViewModel.DeserializeSavedGame(ValidSaveData);
             Assert.IsNotNull(savedGame);
             Assert.IsNotNull(savedGame.AncientsData);
             Assert.IsNotNull(savedGame.AncientsData.Ancients);
@@ -62,14 +62,14 @@
         [TestMethod]
         public void ConfirmViewModel_DeserializeSavedGame_NotJson()
         {
-            var savedGame = ConfirmViewModel.DeserializeSavedGame(InvalidSaveData_NotJson);
+            var savedGame = CalculatorViewModel.DeserializeSavedGame(InvalidSaveData_NotJson);
             Assert.IsNull(savedGame);
         }
 
         [TestMethod]
         public void ConfirmViewModel_DeserializeSavedGame_EmptyObject()
         {
-            var savedGame = ConfirmViewModel.DeserializeSavedGame(InvalidSaveData_EmptyObject);
+            var savedGame = CalculatorViewModel.DeserializeSavedGame(InvalidSaveData_EmptyObject);
             Assert.IsNull(savedGame);
         }
 
@@ -77,7 +77,7 @@
         public void ConfirmViewModel_TestConsistentcy()
         {
             // For other tests, make sure our valid data is the same across tests.
-            var saveData = ConfirmViewModel.DecodeSaveData(ValidEncodedSaveData);
+            var saveData = CalculatorViewModel.DecodeSaveData(ValidEncodedSaveData);
             Assert.AreEqual(ValidSaveData.Length, saveData.Length);
             for (int i = 0; i < ValidSaveData.Length; i++)
             {
@@ -88,7 +88,7 @@
         [TestMethod]
         public void ConfirmViewModel_E2ETest()
         {
-            var viewModel = new ConfirmViewModel(ValidEncodedSaveData);
+            var viewModel = new CalculatorViewModel(ValidEncodedSaveData);
 
             Assert.IsNotNull(viewModel.AncientLevelSummaryViewModel);
             Assert.IsNotNull(viewModel.AncientLevelSummaryViewModel.AncientLevels);
@@ -97,13 +97,13 @@
             foreach (var pair in viewModel.AncientLevelSummaryViewModel.AncientLevels)
             {
                 Assert.IsNotNull(pair);
-                Assert.IsFalse(string.IsNullOrWhiteSpace(pair.Key));
-                Assert.IsFalse(string.IsNullOrWhiteSpace(pair.Value));
+                Assert.IsNotNull(pair.Key);
+                Assert.IsTrue(pair.Value >= 0);
             }
 
             Assert.IsNotNull(viewModel.HeroLevelSummaryViewModel);
             Assert.IsNotNull(viewModel.HeroLevelSummaryViewModel.HeroGilds);
-            Assert.AreEqual(35, viewModel.HeroLevelSummaryViewModel.HeroGilds.Count);
+            Assert.AreEqual(2, viewModel.HeroLevelSummaryViewModel.HeroGilds.Count);
 
             foreach (var pair in viewModel.HeroLevelSummaryViewModel.HeroGilds)
             {
@@ -125,7 +125,6 @@
             }
 
             Assert.IsNotNull(viewModel.ComputedStatsViewModel);
-            Assert.AreEqual(25.218864687071534, viewModel.ComputedStatsViewModel.AchievementMultiplier);
         }
     }
 }

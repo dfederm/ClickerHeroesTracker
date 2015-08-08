@@ -1,23 +1,21 @@
-﻿namespace ClickerHeroesTrackerWebsite.Models.Upload
+﻿namespace ClickerHeroesTrackerWebsite.Models.Calculator
 {
-    using Game;
+    using Upload;
     using SaveData;
     using System;
-    using System.Collections.Generic;
     using System.IO;
-    using System.Linq;
     using System.Runtime.Serialization;
     using System.Runtime.Serialization.Json;
     using System.Security.Cryptography;
     using System.Text;
 
-    public class ConfirmViewModel
+    public class CalculatorViewModel
     {
         private static DataContractJsonSerializer serializer = new DataContractJsonSerializer(
             typeof(SavedGame),
             new DataContractJsonSerializerSettings { UseSimpleDictionaryFormat = true });
 
-        public ConfirmViewModel(string encodedSaveData)
+        public CalculatorViewModel(string encodedSaveData)
         {
             // Decode the save
             var jsonData = DecodeSaveData(encodedSaveData);

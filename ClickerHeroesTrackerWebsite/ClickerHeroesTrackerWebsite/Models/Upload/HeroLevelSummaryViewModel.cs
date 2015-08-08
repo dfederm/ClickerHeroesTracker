@@ -11,14 +11,19 @@
             var heroGilds = new List<KeyValuePair<string, string>>(heroesData.Heroes.Count);
             foreach (var heroData in heroesData.Heroes.Values)
             {
-                var ancient = Hero.Get(heroData.Id);
-                if (ancient == null)
+                var hero = Hero.Get(heroData.Id);
+                if (hero == null)
                 {
                     // A hero we didn't know about?
                     continue;
                 }
 
-                heroGilds.Add(new KeyValuePair<string, string>(ancient.Name, heroData.Gilds.ToString()));
+                // No need to show heroes with 0 gilds
+                // TODO enable inline expansion
+                if (heroData.Gilds > 0)
+                {
+                    heroGilds.Add(new KeyValuePair<string, string>(hero.Name, heroData.Gilds.ToString()));
+                }
             }
 
             this.HeroGilds = heroGilds;

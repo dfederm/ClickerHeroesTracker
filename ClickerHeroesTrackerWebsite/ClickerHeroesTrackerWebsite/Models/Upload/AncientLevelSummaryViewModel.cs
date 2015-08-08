@@ -9,7 +9,7 @@
     {
         public AncientLevelSummaryViewModel(AncientsData ancientsData)
         {
-            var ancientLevels = new List<KeyValuePair<string, string>>(ancientsData.Ancients.Count);
+            var ancientLevels = new List<KeyValuePair<Ancient, int>>(ancientsData.Ancients.Count);
             foreach (var ancientData in ancientsData.Ancients.Values)
             {
                 var ancient = Ancient.Get(ancientData.Id);
@@ -19,12 +19,12 @@
                     continue;
                 }
 
-                ancientLevels.Add(new KeyValuePair<string, string>(ancient.Name, ancientData.Level.ToString()));
+                ancientLevels.Add(new KeyValuePair<Ancient, int>(ancient, ancientData.Level));
             }
 
-            this.AncientLevels = ancientLevels.OrderBy(x => x.Key).ToList();
+            this.AncientLevels = ancientLevels.OrderBy(x => x.Key.Name).ToList();
         }
 
-        public IList<KeyValuePair<string, string>> AncientLevels { get; private set; }
+        public IList<KeyValuePair<Ancient, int>> AncientLevels { get; private set; }
     }
 }

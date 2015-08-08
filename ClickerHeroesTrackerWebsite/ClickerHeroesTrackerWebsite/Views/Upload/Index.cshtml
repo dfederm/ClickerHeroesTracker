@@ -10,7 +10,7 @@
 <div class="row">
     <div class="col-md-8">
         <section id="uploadForm">
-            @using (Html.BeginForm("Confirm", "Upload", FormMethod.Post, new { @class = "form-horizontal", role = "form" }))
+            @using (Html.BeginForm("Index", "Calculator", FormMethod.Post, new { @class = "form-horizontal", role = "form" }))
             {
                 @Html.AntiForgeryToken()
                 <h4>Upload your save.</h4>
@@ -21,6 +21,24 @@
                     <div class="col-md-10">
                         @Html.TextAreaFor(m => m.EncodedSaveData, new { @class = "form-control" })
                         @Html.ValidationMessageFor(m => m.EncodedSaveData, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-md-offset-2 col-md-10">
+                        @if (Request.IsAuthenticated)
+                        {
+                            <div class="checkbox">
+                                @Html.CheckBoxFor(m => m.AddToProgress, new { @checked = "1" })
+                                @Html.LabelFor(m => m.AddToProgress)
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="text-warning">
+                                Progress can only be tracked over time for logged in users.
+                                Please @Html.ActionLink("Log in", "Login", "Account") or @Html.ActionLink("Register", "Register", "Account").
+                            </div>
+                        }
                     </div>
                 </div>
                 <div class="form-group">

@@ -198,6 +198,7 @@
     <Compile Include="App_Start\RouteConfig.cs" />
     <Compile Include="App_Start\Startup.Auth.cs" />
     <Compile Include="Controllers\AccountController.cs" />
+    <Compile Include="Controllers\CalculatorController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\ManageController.cs" />
     <Compile Include="Controllers\UploadController.cs" />
@@ -218,7 +219,7 @@
     <Compile Include="Models\Simulation\Simulation.cs" />
     <Compile Include="Models\Upload\AncientLevelSummaryViewModel.cs" />
     <Compile Include="Models\Upload\ComputedStatsViewModel.cs" />
-    <Compile Include="Models\Upload\ConfirmViewModel.cs" />
+    <Compile Include="Models\Calculator\CalculatorViewModel.cs" />
     <Compile Include="Models\Game\Ancient.cs" />
     <Compile Include="Models\IdentityModels.cs" />
     <Compile Include="Models\ManageViewModels.cs" />
@@ -289,11 +290,11 @@
     <Content Include="Views\Shared\_LoginPartial.cshtml" />
     <Content Include="Service References\Application Insights\ConnectedService.json" />
     <Content Include="Views\Upload\Index.cshtml" />
-    <Content Include="Views\Upload\Confirm.cshtml" />
-    <Content Include="Views\Upload\_AncientLevelSummary.cshtml" />
-    <Content Include="Views\Upload\_SuggestedAncientLevels.cshtml" />
-    <Content Include="Views\Upload\_HeroLevelSummary.cshtml" />
-    <Content Include="Views\Upload\_ComputedStats.cshtml" />
+    <Content Include="Views\Calculator\Index.cshtml" />
+    <Content Include="Views\Calculator\_AncientLevelSummary.cshtml" />
+    <Content Include="Views\Calculator\_SuggestedAncientLevels.cshtml" />
+    <Content Include="Views\Calculator\_HeroLevelSummary.cshtml" />
+    <Content Include="Views\Calculator\_ComputedStats.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
