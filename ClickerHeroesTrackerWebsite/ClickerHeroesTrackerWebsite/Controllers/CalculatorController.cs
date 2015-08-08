@@ -3,10 +3,10 @@
     using Models.Upload;
     using Models.Calculator;
     using System.Web.Mvc;
-    using Models;
     using System.Configuration;
     using System.Data.SqlClient;
     using System.Data;
+    using Microsoft.AspNet.Identity;
 
     public class CalculatorController : Controller
     {
@@ -18,7 +18,7 @@
 
             if (uploadViewModel.AddToProgress && this.Request.IsAuthenticated)
             {
-                var user = this.User.Identity as ApplicationUser;
+                var userId = this.User.Identity.GetUserId();
                 var connectionString = ConfigurationManager.ConnectionStrings["DefaultConnection"].ConnectionString;
                 using (var connection = new SqlConnection(connectionString))
                 {
@@ -28,7 +28,7 @@
                         command.CommandType = CommandType.StoredProcedure;
 
                         // Upload data
-                        command.Parameters.AddWithValue("@UserId", user.Id);
+                        command.Parameters.AddWithValue("@UserId", userId);
                         command.Parameters.AddWithValue("@UploadContent", uploadViewModel.EncodedSaveData);
 
                         // Computed stats
