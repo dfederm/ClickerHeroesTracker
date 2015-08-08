@@ -3,19 +3,20 @@
     using Game;
     using ClickerHeroesTrackerWebsite.Models.SaveData;
     using System;
+    using System.Collections.Generic;
 
     public class SuggestedAncientLevelsViewModel
     {
-        public SuggestedAncientLevelsViewModel(AncientsData ancientsData, int optimalLevel)
+        public SuggestedAncientLevelsViewModel(IDictionary<Ancient, int> ancientLevels, int optimalLevel)
         {
-            var currentSiyaLevel = GetCurrentAncientLevel(ancientsData, Ancient.Siyalatas);
-            var currentArgaivLevel = GetCurrentAncientLevel(ancientsData, Ancient.Argaiv);
-            var currentMorgLevel = GetCurrentAncientLevel(ancientsData, Ancient.Morgulis);
-            var currentLiberLevel = GetCurrentAncientLevel(ancientsData, Ancient.Libertas);
-            var currentMammonLevel = GetCurrentAncientLevel(ancientsData, Ancient.Mammon);
-            var currentMimzeeLevel = GetCurrentAncientLevel(ancientsData, Ancient.Mimzee);
-            var currentIrisLevel = GetCurrentAncientLevel(ancientsData, Ancient.Iris);
-            var currentSolomonLevel = GetCurrentAncientLevel(ancientsData, Ancient.Solomon);
+            var currentSiyaLevel = GetCurrentAncientLevel(ancientLevels, Ancient.Siyalatas);
+            var currentArgaivLevel = GetCurrentAncientLevel(ancientLevels, Ancient.Argaiv);
+            var currentMorgLevel = GetCurrentAncientLevel(ancientLevels, Ancient.Morgulis);
+            var currentLiberLevel = GetCurrentAncientLevel(ancientLevels, Ancient.Libertas);
+            var currentMammonLevel = GetCurrentAncientLevel(ancientLevels, Ancient.Mammon);
+            var currentMimzeeLevel = GetCurrentAncientLevel(ancientLevels, Ancient.Mimzee);
+            var currentIrisLevel = GetCurrentAncientLevel(ancientLevels, Ancient.Iris);
+            var currentSolomonLevel = GetCurrentAncientLevel(ancientLevels, Ancient.Solomon);
 
             var suggestedSiyaLevel = currentSiyaLevel;
             var suggestedArgaivLevel = suggestedSiyaLevel + 9;
@@ -41,11 +42,11 @@
 
         public SuggestedAncientLevelData[] SuggestedAncientLevels { get; private set; }
 
-        private static int GetCurrentAncientLevel(AncientsData ancientsData, Ancient ancient)
+        private static int GetCurrentAncientLevel(IDictionary<Ancient, int> ancientLevels, Ancient ancient)
         {
-            AncientData ancientData;
-            return ancientsData.Ancients.TryGetValue(ancient.Id, out ancientData)
-                ? ancientData.Level
+            int level;
+            return ancientLevels.TryGetValue(ancient, out level)
+                ? level
                 : 0;
         }
 

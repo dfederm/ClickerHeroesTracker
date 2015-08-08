@@ -101,6 +101,7 @@
                 Assert.IsTrue(pair.Value >= 0);
             }
 
+            /*
             Assert.IsNotNull(viewModel.HeroLevelSummaryViewModel);
             Assert.IsNotNull(viewModel.HeroLevelSummaryViewModel.HeroGilds);
             Assert.AreEqual(2, viewModel.HeroLevelSummaryViewModel.HeroGilds.Count);
@@ -111,6 +112,7 @@
                 Assert.IsFalse(string.IsNullOrWhiteSpace(pair.Key));
                 Assert.IsFalse(string.IsNullOrWhiteSpace(pair.Value));
             }
+            */
 
             Assert.IsNotNull(viewModel.SuggestedAncientLevelsViewModel);
             Assert.IsNotNull(viewModel.SuggestedAncientLevelsViewModel.SuggestedAncientLevels);

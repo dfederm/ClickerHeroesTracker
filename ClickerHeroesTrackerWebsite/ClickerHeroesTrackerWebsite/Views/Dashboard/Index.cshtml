@@ -1,0 +1,14 @@
+﻿@using ClickerHeroesTrackerWebsite.Models.Dashboard
+@model DashboardViewModel
+
+@{
+            ViewBag.Title = "Dashboard";
+}
+
+<h2>Dashboard</h2>
+
+<div class="row">
+    <div class="col-md-6">
+        @Html.Partial("_UploadDataSummary", Model.UploadDataSummary)
+    </div>
+</div>

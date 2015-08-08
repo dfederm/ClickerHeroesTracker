@@ -3,6 +3,7 @@
     using ClickerHeroesTrackerWebsite.Models.SaveData;
     using ClickerHeroesTrackerWebsite.Models.Simulation;
     using System;
+    using System.Data.SqlClient;
 
     public class ComputedStatsViewModel
     {
@@ -13,15 +14,26 @@
 
             this.SoulsPerHour = Math.Round(simulationResult.Ratio * 3600);
             this.OptimalLevel = simulationResult.Level;
-            this.OptimalSoulsPerAscension = Math.Round(simulationResult.Souls);
+            this.OptimalSoulsPerAscension = (int)Math.Round(simulationResult.Souls);
             this.OptimalAscensionTime = (int)Math.Round(simulationResult.Time / 60);
+        }
+
+        public ComputedStatsViewModel(SqlDataReader reader)
+        {
+            if (reader.Read())
+            {
+                this.OptimalLevel = (short)reader["OptimalLevel"];
+                this.SoulsPerHour = (int)reader["SoulsPerHour"];
+                this.OptimalSoulsPerAscension = (int)reader["SoulsPerAscension"];
+                this.OptimalAscensionTime = (short)reader["AscensionTime"];
+            }
         }
 
         public double SoulsPerHour { get; private set; }
 
         public int OptimalLevel { get; private set; }
 
-        public double OptimalSoulsPerAscension { get; private set; }
+        public int OptimalSoulsPerAscension { get; private set; }
 
         public int OptimalAscensionTime { get; private set; }
     }

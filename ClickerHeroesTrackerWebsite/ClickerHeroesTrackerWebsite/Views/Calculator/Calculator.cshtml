@@ -12,19 +12,20 @@
         @Html.Partial("_AncientLevelSummary", Model.AncientLevelSummaryViewModel)
     </div>
     <div class="col-md-4">
-        @Html.Partial("_HeroLevelSummary", Model.HeroLevelSummaryViewModel)
+        @Html.Partial("_SuggestedAncientLevels", Model.SuggestedAncientLevelsViewModel)
     </div>
     <div class="col-md-4">
         @Html.Partial("_ComputedStats", Model.ComputedStatsViewModel)
     </div>
 </div>
-<div class="row">
-    <div class="col-md-6">
-        @Html.Partial("_SuggestedAncientLevels", Model.SuggestedAncientLevelsViewModel)
+@* We don't store this data yet, so don't display it
+    <div class="row">
+        <div class="col-md-4">
+            @Html.Partial("_HeroLevelSummary", Model.HeroLevelSummaryViewModel)
+        </div>
+        <div class="col-md-4">
+            <h4>Hero Gild Suggestions:</h4>
+            Coming Soon!
+        </div>
     </div>
-    <div class="col-md-6">
-        <h4>Hero Gild Suggestions:</h4>
-        <!-- TODO: Gilds -->
-        Coming Soon!
-    </div>
-</div>
+*@

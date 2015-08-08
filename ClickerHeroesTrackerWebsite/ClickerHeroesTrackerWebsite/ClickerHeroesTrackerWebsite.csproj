@@ -199,6 +199,7 @@
     <Compile Include="App_Start\Startup.Auth.cs" />
     <Compile Include="Controllers\AccountController.cs" />
     <Compile Include="Controllers\CalculatorController.cs" />
+    <Compile Include="Controllers\DashboardController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\ManageController.cs" />
     <Compile Include="Controllers\UploadController.cs" />
@@ -207,6 +208,10 @@
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
     <Compile Include="Models\AccountViewModels.cs" />
+    <Compile Include="Models\Dashboard\DashboardViewModel.cs" />
+    <Compile Include="Models\Dashboard\UploadData.cs" />
+    <Compile Include="Models\Dashboard\UploadDataSummary.cs" />
+    <Compile Include="Models\DatabaseCommand.cs" />
     <Compile Include="Models\Game\Achievement.cs" />
     <Compile Include="Models\Game\ItemTypes.cs" />
     <Compile Include="Models\SaveData\Extensions.cs" />
@@ -291,11 +296,13 @@
     <Content Include="Views\Shared\_LoginPartial.cshtml" />
     <Content Include="Service References\Application Insights\ConnectedService.json" />
     <Content Include="Views\Upload\Index.cshtml" />
-    <Content Include="Views\Calculator\Index.cshtml" />
+    <Content Include="Views\Calculator\Calculator.cshtml" />
     <Content Include="Views\Calculator\_AncientLevelSummary.cshtml" />
     <Content Include="Views\Calculator\_SuggestedAncientLevels.cshtml" />
     <Content Include="Views\Calculator\_HeroLevelSummary.cshtml" />
     <Content Include="Views\Calculator\_ComputedStats.cshtml" />
+    <Content Include="Views\Dashboard\Index.cshtml" />
+    <Content Include="Views\Dashboard\_UploadDataSummary.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

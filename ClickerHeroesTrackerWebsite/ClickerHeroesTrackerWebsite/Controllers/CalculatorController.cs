@@ -3,59 +3,89 @@
     using Models.Upload;
     using Models.Calculator;
     using System.Web.Mvc;
-    using System.Configuration;
-    using System.Data.SqlClient;
     using System.Data;
     using Microsoft.AspNet.Identity;
+    using Models;
 
+    [Authorize]
     public class CalculatorController : Controller
     {
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Index(UploadViewModel uploadViewModel)
+        [AllowAnonymous]
+        public ActionResult Upload(UploadViewModel uploadViewModel)
         {
             var model = new CalculatorViewModel(uploadViewModel.EncodedSaveData);
 
-            if (uploadViewModel.AddToProgress && this.Request.IsAuthenticated)
+            if (uploadViewModel.AddToProgress
+                && model.IsValid
+                && this.Request.IsAuthenticated)
             {
                 var userId = this.User.Identity.GetUserId();
-                var connectionString = ConfigurationManager.ConnectionStrings["DefaultConnection"].ConnectionString;
-                using (var connection = new SqlConnection(connectionString))
+                using (var command = new DatabaseCommand("UploadSaveData"))
                 {
-                    connection.Open();
-                    using (var command = new SqlCommand("UploadSaveData", connection))
+                    // Upload data
+                    command.AddParameter("@UserId", userId);
+                    command.AddParameter("@UploadContent", uploadViewModel.EncodedSaveData);
+
+                    // Computed stats
+                    command.AddParameter("@OptimalLevel", model.ComputedStatsViewModel.OptimalLevel);
+                    command.AddParameter("@SoulsPerHour", model.ComputedStatsViewModel.SoulsPerHour);
+                    command.AddParameter("@SoulsPerAscension", model.ComputedStatsViewModel.OptimalSoulsPerAscension);
+                    command.AddParameter("@AscensionTime", model.ComputedStatsViewModel.OptimalAscensionTime);
+
+                    // Ancient levels
+                    DataTable ancientLevelTable = new DataTable();
+                    ancientLevelTable.Columns.Add("AncientId", typeof(int));
+                    ancientLevelTable.Columns.Add("Level", typeof(int));
+                    foreach (var pair in model.AncientLevelSummaryViewModel.AncientLevels)
                     {
-                        command.CommandType = CommandType.StoredProcedure;
-
-                        // Upload data
-                        command.Parameters.AddWithValue("@UserId", userId);
-                        command.Parameters.AddWithValue("@UploadContent", uploadViewModel.EncodedSaveData);
-
-                        // Computed stats
-                        command.Parameters.AddWithValue("@OptimalLevel", model.ComputedStatsViewModel.OptimalLevel);
-                        command.Parameters.AddWithValue("@SoulsPerHour", model.ComputedStatsViewModel.SoulsPerHour);
-                        command.Parameters.AddWithValue("@SoulsPerAscension", model.ComputedStatsViewModel.OptimalSoulsPerAscension);
-                        command.Parameters.AddWithValue("@AscensionTime", model.ComputedStatsViewModel.OptimalAscensionTime);
-
-                        // Ancient levels
-                        DataTable ancientLevelTable = new DataTable();
-                        ancientLevelTable.Columns.Add("AncientId", typeof(int));
-                        ancientLevelTable.Columns.Add("Level", typeof(int));
-                        foreach (var pair in model.AncientLevelSummaryViewModel.AncientLevels)
-                        {
-                            ancientLevelTable.Rows.Add(pair.Key.Id, pair.Value);
-                        }
-
-                        var ancientLevelsParam = command.Parameters.AddWithValue("@AncientLevelUploads", ancientLevelTable);
-                        ancientLevelsParam.SqlDbType = SqlDbType.Structured;
-                        ancientLevelsParam.TypeName = "dbo.AncientLevelUpload";
-
-                        command.ExecuteNonQuery();
+                        ancientLevelTable.Rows.Add(pair.Key.Id, pair.Value);
                     }
+
+                    command.AddTableParameter("@AncientLevelUploads", "AncientLevelUpload", ancientLevelTable);
+
+                    command.ExecuteNonQuery();
                 }
             }
 
-            return this.View(model);
+            return this.GetResult(model, true);
+        }
+
+        public ActionResult View(int uploadId)
+        {
+            var userId = this.User.Identity.GetUserId();
+            var model = new CalculatorViewModel(userId, uploadId);
+            return this.GetResult(model, false);
+        }
+
+        private ActionResult GetResult(CalculatorViewModel model, bool wasDataPosted)
+        {
+            string errorMessage = null;
+            if (!model.IsValid)
+            {
+                if (wasDataPosted)
+                {
+                    errorMessage = "The uploaded save was not valid";
+                }
+                else
+                {
+                    errorMessage = "The upload does not exist";
+                }
+            }
+
+            if (!model.IsPermitted)
+            {
+                errorMessage = "You are not permitted to view others' uploads";
+            }
+
+            if (errorMessage != null)
+            {
+                this.ViewBag.ErrorMessage = errorMessage;
+                return this.View("Error");
+            }
+
+            return this.View("Calculator", model);
         }
     }
 }

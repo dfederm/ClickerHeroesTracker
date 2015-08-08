@@ -10,7 +10,7 @@
 <div class="row">
     <div class="col-md-8">
         <section id="uploadForm">
-            @using (Html.BeginForm("Index", "Calculator", FormMethod.Post, new { @class = "form-horizontal", role = "form" }))
+            @using (Html.BeginForm("Upload", "Calculator", FormMethod.Post, new { @class = "form-horizontal", role = "form" }))
             {
                 @Html.AntiForgeryToken()
                 <h4>Upload your save.</h4>

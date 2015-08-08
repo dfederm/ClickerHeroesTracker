@@ -1,0 +1,16 @@
+﻿@model ClickerHeroesTrackerWebsite.Models.Dashboard.UploadDataSummary
+
+<h4>Recent Uploads:</h4>
+<table>
+    <tr>
+        <th>Upload Time</th>
+        <th></th>
+    </tr>
+    @foreach (var upload in Model.Uploads)
+    {
+        <tr>
+            <td>@upload.UploadTime.ToString("G")</td>
+            <td>@Html.ActionLink("View", "View", "Calculator", new { uploadId = upload.UploadId }, null)</td>
+        </tr>
+    }
+</table>

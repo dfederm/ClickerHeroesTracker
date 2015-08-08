@@ -32,15 +32,72 @@
             }
 
             // Finally, populate the view models
+            this.IsPermitted = true;
+            this.IsValid = true;
+            this.UploadTime = DateTime.UtcNow;
+
             this.AncientLevelSummaryViewModel = new AncientLevelSummaryViewModel(savedGame.AncientsData);
-            this.HeroLevelSummaryViewModel = new HeroLevelSummaryViewModel(savedGame.HeroesData);
+            ////this.HeroLevelSummaryViewModel = new HeroLevelSummaryViewModel(savedGame.HeroesData);
             this.ComputedStatsViewModel = new ComputedStatsViewModel(savedGame);
-            this.SuggestedAncientLevelsViewModel = new SuggestedAncientLevelsViewModel(savedGame.AncientsData, this.ComputedStatsViewModel.OptimalLevel);
+            this.SuggestedAncientLevelsViewModel = new SuggestedAncientLevelsViewModel(
+                this.AncientLevelSummaryViewModel.AncientLevels,
+                this.ComputedStatsViewModel.OptimalLevel);
         }
+
+        public CalculatorViewModel(string userId, int uploadId)
+        {
+            using (var command = new DatabaseCommand("GetUploadDetails"))
+            {
+                command.AddParameter("@UploadId", uploadId);
+
+                var reader = command.ExecuteReader();
+
+                // General upload data
+                if (reader.Read())
+                {
+                    var uploadUserId = (string)reader["UserId"];
+                    var uploadTime = (DateTime)reader["UploadTime"];
+
+                    this.IsPermitted = userId == uploadUserId;
+                    this.UploadTime = uploadTime;
+                }
+                else
+                {
+                    return;
+                }
+
+                if (!reader.NextResult())
+                {
+                    return;
+                }
+
+                // Get ancient levels
+                this.AncientLevelSummaryViewModel = new AncientLevelSummaryViewModel(reader);
+
+                if (!reader.NextResult())
+                {
+                    return;
+                }
+
+                this.ComputedStatsViewModel = new ComputedStatsViewModel(reader);
+
+                this.SuggestedAncientLevelsViewModel = new SuggestedAncientLevelsViewModel(
+                    this.AncientLevelSummaryViewModel.AncientLevels,
+                    this.ComputedStatsViewModel.OptimalLevel);
+
+                this.IsValid = true;
+            }
+        }
+
+        public bool IsPermitted { get; private set; }
+
+        public bool IsValid { get; private set; }
+
+        public DateTime UploadTime { get; private set; }
 
         public AncientLevelSummaryViewModel AncientLevelSummaryViewModel { get; private set; }
 
-        public HeroLevelSummaryViewModel HeroLevelSummaryViewModel { get; private set; }
+        ////public HeroLevelSummaryViewModel HeroLevelSummaryViewModel { get; private set; }
 
         public ComputedStatsViewModel ComputedStatsViewModel { get; private set; }
 
