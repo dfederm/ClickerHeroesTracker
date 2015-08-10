@@ -209,9 +209,11 @@
     </Compile>
     <Compile Include="Models\AccountViewModels.cs" />
     <Compile Include="Models\Dashboard\DashboardViewModel.cs" />
+    <Compile Include="Models\Dashboard\ProgressData.cs" />
     <Compile Include="Models\Dashboard\UploadData.cs" />
     <Compile Include="Models\Dashboard\UploadDataSummary.cs" />
     <Compile Include="Models\DatabaseCommand.cs" />
+    <Compile Include="Models\Extensions.cs" />
     <Compile Include="Models\Game\Achievement.cs" />
     <Compile Include="Models\Game\ItemTypes.cs" />
     <Compile Include="Models\SaveData\Extensions.cs" />
@@ -237,6 +239,7 @@
     <Compile Include="Models\Upload\UploadViewModel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Startup.cs" />
+    <Compile Include="Views\HtmlHelpers.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Content\bootstrap.css" />
@@ -303,6 +306,7 @@
     <Content Include="Views\Calculator\_ComputedStats.cshtml" />
     <Content Include="Views\Dashboard\Index.cshtml" />
     <Content Include="Views\Dashboard\_UploadDataSummary.cshtml" />
+    <Content Include="Views\Dashboard\_ProgressSummary.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

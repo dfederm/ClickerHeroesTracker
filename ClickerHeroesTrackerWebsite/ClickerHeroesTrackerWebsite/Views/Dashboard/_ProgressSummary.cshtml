@@ -1,0 +1,82 @@
+﻿@using ClickerHeroesTrackerWebsite.Models
+@using ClickerHeroesTrackerWebsite.Views
+
+@model ClickerHeroesTrackerWebsite.Models.Dashboard.ProgressData
+
+<h4>Progress summary:</h4>
+<div id="progressSummary" style="width:100%; height:400px;"></div>
+@using (Html.BeginScripts())
+{
+    <script src="http://code.highcharts.com/highcharts.js"></script>
+    <script type="text/javascript">
+        Highcharts.setOptions(
+		{
+		    global:
+			{
+			    useUTC: false
+			},
+		    lang:
+			{
+			    thousandsSep: ','
+			}
+		});
+
+        $(function () {
+            $('#progressSummary').highcharts(
+            {
+                chart:
+                {
+                    type: 'line'
+                },
+                title:
+                {
+                    text: 'Souls per Hour'
+                },
+                xAxis:
+                {
+                    tickInterval: 24 * 3600 * 1000, // one day
+                    type: 'datetime',
+                    tickWidth: 0,
+                    gridLineWidth: 1,
+                    labels: {
+                        align: 'left',
+                        x: 3,
+                        y: -3,
+                        format: '{value:%d/%m}'
+                    }
+                },
+                yAxis:
+                {
+                    labels:
+                    {
+                        align: 'left',
+                        x: 3,
+                        y: 16,
+                        format: '{value:.,0f}'
+                    },
+                    showFirstLabel: false
+                },
+                legend:
+				{
+				    enabled: false
+				},
+                series:
+                [
+                    {
+                        name: "Souls/hr",
+                        data:
+                        [
+                            @foreach(var data in Model.SoulsPerHourData)
+                            {
+                                <text>[
+                                    </text>@data.Key.ToJavascriptTime()<text>,
+                                    </text>@data.Value<text>
+                                ],</text>
+                            }
+                        ]
+                    },
+                ]
+            });
+        });
+    </script>
+}

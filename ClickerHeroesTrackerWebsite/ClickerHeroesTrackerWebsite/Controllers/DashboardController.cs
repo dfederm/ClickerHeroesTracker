@@ -1,9 +1,6 @@
 ﻿namespace ClickerHeroesTrackerWebsite.Controllers
 {
     using Models.Dashboard;
-    using Microsoft.AspNet.Identity;
-    using Models;
-    using System.Collections.Generic;
     using System.Web.Mvc;
 
     [Authorize]

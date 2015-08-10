@@ -10,9 +10,11 @@
             var userId = user.Identity.GetUserId();
 
             this.UploadDataSummary = new UploadDataSummary(userId);
-
+            this.ProgressData = new ProgressData(userId);
         }
 
         public UploadDataSummary UploadDataSummary { get; private set; }
+
+        public ProgressData ProgressData { get; private set; }
     }
 }
