@@ -15,6 +15,11 @@
         [AllowAnonymous]
         public ActionResult Upload(UploadViewModel uploadViewModel)
         {
+            if (!ModelState.IsValid)
+            {
+                return this.RedirectToAction("Index", "Upload");
+            }
+
             var model = new CalculatorViewModel(uploadViewModel.EncodedSaveData);
 
             if (uploadViewModel.AddToProgress

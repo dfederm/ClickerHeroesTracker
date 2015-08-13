@@ -66,8 +66,12 @@
 
                     levelData.Add(uploadTime, level);
                 }
+
+                this.IsValid = true;
             }
         }
+
+        public bool IsValid { get; private set; }
 
         public IDictionary<DateTime, int> OptimalLevelData { get; private set; }
 

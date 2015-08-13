@@ -28,7 +28,10 @@
             }
 
             this.Uploads = uploads;
+            this.IsValid = uploads.Count > 0;
         }
+
+        public bool IsValid { get; private set; }
 
         public IList<UploadData> Uploads { get; private set; }
     }

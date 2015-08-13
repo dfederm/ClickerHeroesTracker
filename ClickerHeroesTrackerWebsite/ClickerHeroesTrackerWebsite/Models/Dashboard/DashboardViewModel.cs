@@ -12,7 +12,11 @@
 
             this.UploadDataSummary = new UploadDataSummary(userId);
             this.ProgressData = new ProgressData(userId, DateTime.UtcNow.AddDays(-7), null);
+
+            this.IsValid = this.UploadDataSummary.IsValid && this.ProgressData.IsValid;
         }
+
+        public bool IsValid { get; private set; }
 
         public UploadDataSummary UploadDataSummary { get; private set; }
 
