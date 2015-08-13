@@ -1,0 +1,14 @@
+﻿@using ClickerHeroesTrackerWebsite.Models.Dashboard;
+
+@model RivalDataList
+
+<h4>Rivals:</h4>
+<table>
+    @foreach (var rival in Model.Rivals)
+    {
+        <tr>
+            <td>@rival.UserName</td>
+            <td>@Html.ActionLink("View", "Rival", "Dashboard", new { rivalId = rival.RivalId }, null)</td>
+        </tr>
+    }
+</table>

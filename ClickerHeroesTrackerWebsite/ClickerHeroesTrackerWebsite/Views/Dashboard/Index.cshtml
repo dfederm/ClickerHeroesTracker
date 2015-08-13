@@ -14,4 +14,10 @@
     <div class="col-md-6">
         @Html.Partial("_ProgressSummary", Model.ProgressData)
     </div>
+    @if (Model.RivalDataList.IsValid)
+    {
+        <div class="col-md-6">
+            @Html.Partial("_RivalDataList", Model.RivalDataList)
+        </div>
+    }
 </div>

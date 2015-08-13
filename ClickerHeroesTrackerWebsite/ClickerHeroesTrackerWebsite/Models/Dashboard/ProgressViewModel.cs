@@ -9,8 +9,16 @@
         public ProgressViewModel(IPrincipal user)
         {
             var userId = user.Identity.GetUserId();
+            var startTime = DateTime.UtcNow.AddDays(-7);
+            using (var command = new DatabaseCommand("GetProgressData"))
+            {
+                command.AddParameter("@UserId", userId);
+                command.AddParameter("@StartTime", startTime);
 
-            this.ProgressData = new ProgressData(userId, DateTime.UtcNow.AddDays(-7), null);
+                var reader = command.ExecuteReader();
+
+                this.ProgressData = new ProgressData(reader);
+            }
 
             this.IsValid = this.ProgressData.IsValid;
         }

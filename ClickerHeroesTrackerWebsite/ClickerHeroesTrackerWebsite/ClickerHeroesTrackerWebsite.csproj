@@ -212,6 +212,9 @@
     <Compile Include="Models\Dashboard\GraphData.cs" />
     <Compile Include="Models\Dashboard\ProgressData.cs" />
     <Compile Include="Models\Dashboard\ProgressViewModel.cs" />
+    <Compile Include="Models\Dashboard\RivalData.cs" />
+    <Compile Include="Models\Dashboard\RivalDataList.cs" />
+    <Compile Include="Models\Dashboard\RivalViewModel.cs" />
     <Compile Include="Models\Dashboard\UploadData.cs" />
     <Compile Include="Models\Dashboard\UploadDataSummary.cs" />
     <Compile Include="Models\DatabaseCommand.cs" />
@@ -308,6 +311,8 @@
     <Content Include="Views\Dashboard\_GraphScripts.cshtml" />
     <Content Include="Views\Dashboard\Progress.cshtml" />
     <Content Include="Views\Dashboard\_Graph.cshtml" />
+    <Content Include="Views\Dashboard\_RivalDataList.cshtml" />
+    <Content Include="Views\Dashboard\Rival.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

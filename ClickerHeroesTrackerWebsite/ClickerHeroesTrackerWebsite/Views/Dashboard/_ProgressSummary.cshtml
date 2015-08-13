@@ -5,4 +5,4 @@
 <h4 class="pull-left">Progress summary:</h4>
 <h5 class="pull-right">@Html.ActionLink("See all", "Progress")</h5>
 @Html.Partial("_GraphScripts")
-@Html.Partial("_Graph", new GraphData { Id = "progressSummary", Title = "Souls/hr", Data = Model.SoulsPerHourData })
+@Html.Partial("_Graph", new GraphData { Id = "progressSummary", Title = "Souls/hr", Series1 = Model.SoulsPerHourData })
