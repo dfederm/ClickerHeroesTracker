@@ -32,7 +32,7 @@
             name: "Khrysos",
             title: "Ancient of Inheritance",
             description: "undefined",
-            maxLevel: -1,
+            maxLevel: 10,
             power: 1.5);
         public static readonly Ancient Thusia = new Ancient(
             id: 7,
@@ -67,28 +67,28 @@
             name: "Dogcog",
             title: "Ancient of Thrift",
             description: "undefined",
-            maxLevel: -1,
+            maxLevel: 25,
             power: 1);
         public static readonly Ancient Fortuna = new Ancient(
             id: 12,
             name: "Fortuna",
             title: "Ancient of Chance",
             description: "undefined",
-            maxLevel: -1,
+            maxLevel: 40,
             power: 1);
         public static readonly Ancient Atman = new Ancient(
             id: 13,
             name: "Atman",
             title: "Ancient of Souls",
             description: "undefined",
-            maxLevel: -1,
+            maxLevel: 25,
             power: 1.5);
         public static readonly Ancient Dora = new Ancient(
             id: 14,
             name: "Dora",
             title: "Ancient of Discovery",
             description: "undefined",
-            maxLevel: -1,
+            maxLevel: 50,
             power: 1);
         public static readonly Ancient Bhaal = new Ancient(
             id: 15,
@@ -116,7 +116,7 @@
             name: "Bubos",
             title: "Ancient of Diseases",
             description: "undefined",
-            maxLevel: -1,
+            maxLevel: 25,
             power: 1);
         public static readonly Ancient Fragsworth = new Ancient(
             id: 19,
@@ -130,56 +130,56 @@
             name: "Vaagur",
             title: "Ancient of Impatience",
             description: "undefined",
-            maxLevel: -1,
+            maxLevel: 15,
             power: 1);
         public static readonly Ancient Kumawakamaru = new Ancient(
             id: 21,
             name: "Kumawakamaru",
             title: "Ancient of Shadows",
             description: "undefined",
-            maxLevel: -1,
+            maxLevel: 5,
             power: 1);
         public static readonly Ancient Chawedo = new Ancient(
             id: 22,
             name: "Chawedo",
             title: "Ancient of Agitation",
             description: "undefined",
-            maxLevel: -1,
+            maxLevel: 30,
             power: 1);
         public static readonly Ancient Hecatoncheir = new Ancient(
             id: 23,
             name: "Hecatoncheir",
             title: "Ancient of Wallops",
             description: "undefined",
-            maxLevel: -1,
+            maxLevel: 30,
             power: 1);
         public static readonly Ancient Berserker = new Ancient(
             id: 24,
             name: "Berserker",
             title: "Ancient of Rage",
             description: "undefined",
-            maxLevel: -1,
+            maxLevel: 30,
             power: 1);
         public static readonly Ancient Sniperino = new Ancient(
             id: 25,
             name: "Sniperino",
             title: "Ancient of Accuracy",
             description: "undefined",
-            maxLevel: -1,
+            maxLevel: 30,
             power: 1);
         public static readonly Ancient Kleptos = new Ancient(
             id: 26,
             name: "Kleptos",
             title: "Ancient of Thieves",
             description: "undefined",
-            maxLevel: -1,
+            maxLevel: 30,
             power: 1);
         public static readonly Ancient Energon = new Ancient(
             id: 27,
             name: "Energon",
             title: "Ancient of Battery Life",
             description: "undefined",
-            maxLevel: -1,
+            maxLevel: 30,
             power: 1);
         public static readonly Ancient Argaiv = new Ancient(
             id: 28,
@@ -207,9 +207,9 @@
             name: "Revolc",
             title: "Ancient of Luck",
             description: "undefined",
-            maxLevel: -1,
+            maxLevel: 15,
             power: 0);
- 
+
         private Ancient(
             int id,
             string name,

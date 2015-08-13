@@ -16,7 +16,7 @@ for (var key in data.ancients)
     out += "    name: \"" + ancient.name.substring(0, ancient.name.indexOf(',')) + "\",\n";
     out += "    title: \"" + ancient.name.substring(ancient.name.indexOf(',') + 2) + "\",\n";
     out += "    description: \"" + ancient.desc + "\",\n";
-    out += "    maxLevel: "+(ancient.maxlvl ? ancient.maxlvl : -1)+",\n";
+    out += "    maxLevel: "+(ancient.maxLevel ? ancient.maxLevel : -1)+",\n";
 	var power = 0;
     if (ancient.levelCostFormula.startsWith('linear'))
 	{

@@ -6,16 +6,26 @@
 
     public class ProgressData
     {
-        public ProgressData(string userId)
+        public ProgressData(
+            string userId,
+            DateTime? startTime,
+            DateTime? endTime)
         {
             using (var command = new DatabaseCommand("GetProgressData"))
             {
                 command.AddParameter("@UserId", userId);
 
-                ////command.AddParameter("@StartTime", default(DateTime));
-                ////command.AddParameter("@EndTime", default(DateTime));
+                if (startTime != null)
+                {
+                    command.AddParameter("@StartTime", startTime.Value);
+                }
 
-                this.OptimalLevelData = new SortedDictionary<DateTime, short>();
+                if (endTime != null)
+                {
+                    command.AddParameter("@EndTime", endTime.Value);
+                }
+
+                this.OptimalLevelData = new SortedDictionary<DateTime, int>();
                 this.SoulsPerHourData = new SortedDictionary<DateTime, int>();
 
                 var reader = command.ExecuteReader();
@@ -59,7 +69,7 @@
             }
         }
 
-        public IDictionary<DateTime, short> OptimalLevelData { get; private set; }
+        public IDictionary<DateTime, int> OptimalLevelData { get; private set; }
 
         public IDictionary<DateTime, int> SoulsPerHourData { get; private set; }
 

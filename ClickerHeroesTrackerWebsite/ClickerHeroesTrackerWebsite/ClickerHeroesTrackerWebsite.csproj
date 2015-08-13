@@ -209,7 +209,9 @@
     </Compile>
     <Compile Include="Models\AccountViewModels.cs" />
     <Compile Include="Models\Dashboard\DashboardViewModel.cs" />
+    <Compile Include="Models\Dashboard\GraphData.cs" />
     <Compile Include="Models\Dashboard\ProgressData.cs" />
+    <Compile Include="Models\Dashboard\ProgressViewModel.cs" />
     <Compile Include="Models\Dashboard\UploadData.cs" />
     <Compile Include="Models\Dashboard\UploadDataSummary.cs" />
     <Compile Include="Models\DatabaseCommand.cs" />
@@ -307,6 +309,9 @@
     <Content Include="Views\Dashboard\Index.cshtml" />
     <Content Include="Views\Dashboard\_UploadDataSummary.cshtml" />
     <Content Include="Views\Dashboard\_ProgressSummary.cshtml" />
+    <Content Include="Views\Dashboard\_GraphScripts.cshtml" />
+    <Content Include="Views\Dashboard\Progress.cshtml" />
+    <Content Include="Views\Dashboard\_Graph.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

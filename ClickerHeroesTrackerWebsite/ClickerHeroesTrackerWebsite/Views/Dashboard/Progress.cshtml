@@ -1,0 +1,27 @@
+﻿@using ClickerHeroesTrackerWebsite.Models.Dashboard
+@model ProgressViewModel
+
+@{
+    ViewBag.Title = "Progress";
+}
+
+<h2>Progress</h2>
+
+@Html.Partial("_GraphScripts")
+
+<div class="row">
+    <div class="col-md-6">
+        @Html.Partial("_Graph", new GraphData { Id = "soulsPerHourGraph", Title = "Souls/hr", Data = Model.ProgressData.SoulsPerHourData })
+    </div>
+    <div class="col-md-6">
+        @Html.Partial("_Graph", new GraphData { Id = "optimalLevelGraph", Title = "Optimal Level", Data = Model.ProgressData.OptimalLevelData })
+    </div>
+</div>
+<div class="row">
+    @foreach (var ancientLevels in Model.ProgressData.AncientLevelData)
+    {
+        <div class="col-md-4">
+            @Html.Partial("_Graph", new GraphData { Id = ancientLevels.Key.Name + "Graph", Title = ancientLevels.Key.Name, Data = ancientLevels.Value })
+        </div>
+    }
+</div>

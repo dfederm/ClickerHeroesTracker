@@ -4,17 +4,14 @@
     using System;
     using System.Security.Principal;
 
-    public class DashboardViewModel
+    public class ProgressViewModel
     {
-        public DashboardViewModel(IPrincipal user)
+        public ProgressViewModel(IPrincipal user)
         {
             var userId = user.Identity.GetUserId();
 
-            this.UploadDataSummary = new UploadDataSummary(userId);
             this.ProgressData = new ProgressData(userId, DateTime.UtcNow.AddDays(-7), null);
         }
-
-        public UploadDataSummary UploadDataSummary { get; private set; }
 
         public ProgressData ProgressData { get; private set; }
     }
