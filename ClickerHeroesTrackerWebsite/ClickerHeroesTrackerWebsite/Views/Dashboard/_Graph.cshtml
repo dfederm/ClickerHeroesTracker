@@ -57,12 +57,12 @@
                             @foreach(var data in Model.Series1)
                             {
                                 <text>[
-                                    </text>@data.Key.ToJavascriptTime()<text>,
+                                    </text>@data.Key.ToJavascriptTime(Model.TimeZone)<text>,
                                     </text>@data.Value<text>
                             ],</text>
                             }
                             @* To force the graph to go up the the current time, no matter the last data point *@
-                            [@DateTime.UtcNow.ToJavascriptTime(), @Model.Series1.Last().Value]
+                            [@DateTime.UtcNow.ToJavascriptTime(Model.TimeZone), @Model.Series1.Last().Value]
                         ]
                     },
                     @if (Model.Series2 != null)
@@ -74,12 +74,12 @@
                                 </text>foreach(var data in Model.Series2)
                                 {
                                     <text>[
-                                        </text>@data.Key.ToJavascriptTime()<text>,
+                                        </text>@data.Key.ToJavascriptTime(Model.TimeZone)<text>,
                                         </text>@data.Value<text>
                                     ],</text>
                                 }
                                 @* To force the graph to go up the the current time, no matter the last data point *@
-                                <text>[</text>@DateTime.UtcNow.ToJavascriptTime()<text>, </text>@Model.Series2.Last().Value<text>]
+                                <text>[</text>@DateTime.UtcNow.ToJavascriptTime(Model.TimeZone)<text>, </text>@Model.Series2.Last().Value<text>]
                             ]
                         },</text>
                     }

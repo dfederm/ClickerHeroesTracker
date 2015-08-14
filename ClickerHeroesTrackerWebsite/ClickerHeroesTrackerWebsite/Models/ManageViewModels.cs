@@ -1,14 +1,31 @@
-﻿using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using Microsoft.AspNet.Identity;
-using Microsoft.Owin.Security;
-
-namespace ClickerHeroesTrackerWebsite.Models
+﻿namespace ClickerHeroesTrackerWebsite.Models
 {
+    using System.Collections.Generic;
+    using System.ComponentModel.DataAnnotations;
+    using Microsoft.AspNet.Identity;
+    using Microsoft.Owin.Security;
+    using System;
+    using System.Linq;
+
     public class IndexViewModel
     {
+        public static IEnumerable<TimeZoneSelectItem> TimeZones = TimeZoneInfo
+            .GetSystemTimeZones()
+            .Select(tz => new TimeZoneSelectItem { Id = tz.Id, Name = tz.DisplayName });
+
+        public class TimeZoneSelectItem
+        {
+            public string Id { get; set; }
+
+            public string Name { get; set; }
+        }
+
         public bool HasPassword { get; set; }
+
         public IList<UserLoginInfo> Logins { get; set; }
+
+        [Display(Name = "Time Zone")]
+        public string TimeZoneId { get; set; }
     }
 
     public class ManageLoginsViewModel

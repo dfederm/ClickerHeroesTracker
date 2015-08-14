@@ -13,17 +13,17 @@
 
 <div class="row">
     <div class="col-md-6">
-        @Html.Partial("_Graph", new GraphData { Id = "soulsPerHourGraph", Title = "Souls/hr", Series1Name = User.Identity.GetUserName(), Series1 = Model.UserProgressData.SoulsPerHourData, Series2Name = Model.RivalUserName, Series2 = Model.RivalProgressData.SoulsPerHourData })
+        @Html.Partial("_Graph", new GraphData { Id = "soulsPerHourGraph", TimeZone = Model.UserProgressData.UserSettings.TimeZone, Title = "Souls/hr", Series1Name = User.Identity.GetUserName(), Series1 = Model.UserProgressData.SoulsPerHourData, Series2Name = Model.RivalUserName, Series2 = Model.RivalProgressData.SoulsPerHourData })
     </div>
     <div class="col-md-6">
-        @Html.Partial("_Graph", new GraphData { Id = "optimalLevelGraph", Title = "Optimal Level", Series1Name = User.Identity.GetUserName(), Series1 = Model.UserProgressData.OptimalLevelData, Series2Name = Model.RivalUserName, Series2 = Model.RivalProgressData.OptimalLevelData })
+        @Html.Partial("_Graph", new GraphData { Id = "optimalLevelGraph", TimeZone = Model.UserProgressData.UserSettings.TimeZone, Title = "Optimal Level", Series1Name = User.Identity.GetUserName(), Series1 = Model.UserProgressData.OptimalLevelData, Series2Name = Model.RivalUserName, Series2 = Model.RivalProgressData.OptimalLevelData })
     </div>
 </div>
 <div class="row">
     @foreach (var ancientLevels in Model.UserProgressData.AncientLevelData)
     {
         <div class="col-md-4">
-            @Html.Partial("_Graph", new GraphData { Id = ancientLevels.Key.Name + "Graph", Title = ancientLevels.Key.Name, Series1Name = User.Identity.GetUserName(), Series1 = ancientLevels.Value, Series2Name = Model.RivalUserName, Series2 = Model.RivalProgressData.AncientLevelData.ContainsKey(ancientLevels.Key) ? Model.RivalProgressData.AncientLevelData[ancientLevels.Key] : null })
+            @Html.Partial("_Graph", new GraphData { Id = ancientLevels.Key.Name + "Graph", TimeZone = Model.UserProgressData.UserSettings.TimeZone, Title = ancientLevels.Key.Name, Series1Name = User.Identity.GetUserName(), Series1 = ancientLevels.Value, Series2Name = Model.RivalUserName, Series2 = Model.RivalProgressData.AncientLevelData.ContainsKey(ancientLevels.Key) ? Model.RivalProgressData.AncientLevelData[ancientLevels.Key] : null })
         </div>
     }
 </div>

@@ -11,17 +11,17 @@
 
 <div class="row">
     <div class="col-md-6">
-        @Html.Partial("_Graph", new GraphData { Id = "soulsPerHourGraph", Title = "Souls/hr", Series1Name = "Souls/hr", Series1 = Model.ProgressData.SoulsPerHourData })
+        @Html.Partial("_Graph", new GraphData { Id = "soulsPerHourGraph", TimeZone = Model.ProgressData.UserSettings.TimeZone, Title = "Souls/hr", Series1Name = "Souls/hr", Series1 = Model.ProgressData.SoulsPerHourData })
     </div>
     <div class="col-md-6">
-        @Html.Partial("_Graph", new GraphData { Id = "optimalLevelGraph", Title = "Optimal Level", Series1Name = "Optimal Level", Series1 = Model.ProgressData.OptimalLevelData })
+        @Html.Partial("_Graph", new GraphData { Id = "optimalLevelGraph", TimeZone = Model.ProgressData.UserSettings.TimeZone, Title = "Optimal Level", Series1Name = "Optimal Level", Series1 = Model.ProgressData.OptimalLevelData })
     </div>
 </div>
 <div class="row">
     @foreach (var ancientLevels in Model.ProgressData.AncientLevelData)
     {
         <div class="col-md-4">
-            @Html.Partial("_Graph", new GraphData { Id = ancientLevels.Key.Name + "Graph", Title = ancientLevels.Key.Name, Series1Name = ancientLevels.Key.Name, Series1 = ancientLevels.Value })
+            @Html.Partial("_Graph", new GraphData { Id = ancientLevels.Key.Name + "Graph", TimeZone = Model.ProgressData.UserSettings.TimeZone, Title = ancientLevels.Key.Name, Series1Name = ancientLevels.Key.Name, Series1 = ancientLevels.Value })
         </div>
     }
 </div>

@@ -6,7 +6,7 @@
 
     public class UploadDataSummary
     {
-        public UploadDataSummary(string userId)
+        public UploadDataSummary(string userId, UserSettings userSettings)
         {
             const int NumUploads = 5;
             var uploads = new List<UploadData>(NumUploads);
@@ -28,10 +28,13 @@
             }
 
             this.Uploads = uploads;
+            this.UserSettings = userSettings;
             this.IsValid = uploads.Count > 0;
         }
 
         public bool IsValid { get; private set; }
+
+        public UserSettings UserSettings { get; private set; }
 
         public IList<UploadData> Uploads { get; private set; }
     }

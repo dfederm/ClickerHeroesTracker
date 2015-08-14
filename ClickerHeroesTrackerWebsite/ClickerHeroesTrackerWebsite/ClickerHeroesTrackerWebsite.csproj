@@ -242,6 +242,7 @@
     <Compile Include="Models\Upload\HeroLevelSummaryViewModel.cs" />
     <Compile Include="Models\Upload\SuggestedAncientLevelsViewModel.cs" />
     <Compile Include="Models\Upload\UploadViewModel.cs" />
+    <Compile Include="Models\UserSettings.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Startup.cs" />
     <Compile Include="Views\HtmlHelpers.cs" />

@@ -9,7 +9,7 @@
     @foreach (var upload in Model.Uploads)
     {
         <tr>
-            <td>@upload.UploadTime.ToString("G")</td>
+            <td>@TimeZoneInfo.ConvertTime(upload.UploadTime, TimeZoneInfo.Utc, Model.UserSettings.TimeZone).ToString("G")</td>
             <td>@Html.ActionLink("View", "View", "Calculator", new { uploadId = upload.UploadId }, null)</td>
         </tr>
     }

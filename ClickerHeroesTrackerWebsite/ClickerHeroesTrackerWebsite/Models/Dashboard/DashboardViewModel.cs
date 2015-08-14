@@ -9,9 +9,13 @@
         public DashboardViewModel(IPrincipal user)
         {
             var userId = user.Identity.GetUserId();
+
+            var userSettings = new UserSettings(userId);
+            userSettings.Fill();
+
             var startTime = DateTime.UtcNow.AddDays(-7);
 
-            this.UploadDataSummary = new UploadDataSummary(userId);
+            this.UploadDataSummary = new UploadDataSummary(userId, userSettings);
 
             using (var command = new DatabaseCommand("GetProgressData"))
             {
@@ -20,7 +24,7 @@
 
                 var reader = command.ExecuteReader();
 
-                this.ProgressData = new ProgressData(reader);
+                this.ProgressData = new ProgressData(reader, userSettings);
             }
 
             this.RivalDataList = new RivalDataList(userId);

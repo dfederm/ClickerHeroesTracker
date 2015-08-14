@@ -10,6 +10,9 @@
         {
             var userId = user.Identity.GetUserId();
 
+            var userSettings = new UserSettings(userId);
+            userSettings.Fill();
+
             var startTime = DateTime.UtcNow.AddDays(-7);
             using (var command = new DatabaseCommand("GetRivalData"))
             {
@@ -19,7 +22,7 @@
 
                 var reader = command.ExecuteReader();
 
-                this.UserProgressData = new ProgressData(reader);
+                this.UserProgressData = new ProgressData(reader, userSettings);
                 if (!reader.NextResult())
                 {
                     return;
@@ -39,7 +42,7 @@
                     return;
                 }
 
-                this.RivalProgressData = new ProgressData(reader);
+                this.RivalProgressData = new ProgressData(reader, userSettings);
             }
 
             this.IsValid = !string.IsNullOrEmpty(this.RivalUserName)

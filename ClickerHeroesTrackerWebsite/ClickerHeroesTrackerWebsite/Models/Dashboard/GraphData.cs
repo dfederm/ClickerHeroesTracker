@@ -7,6 +7,8 @@
     {
         public string Id { get; set; }
 
+        public TimeZoneInfo TimeZone { get; set; }
+
         public string Title { get; set; }
 
         public string Series1Name { get; set; }

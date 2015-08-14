@@ -7,8 +7,10 @@
 
     public class ProgressData
     {
-        public ProgressData(SqlDataReader reader)
+        public ProgressData(SqlDataReader reader, UserSettings userSettings)
         {
+            this.UserSettings = userSettings;
+
             this.OptimalLevelData = new SortedDictionary<DateTime, int>();
             this.SoulsPerHourData = new SortedDictionary<DateTime, int>();
 
@@ -54,6 +56,8 @@
         }
 
         public bool IsValid { get; private set; }
+
+        public UserSettings UserSettings { get; private set; }
 
         public IDictionary<DateTime, int> OptimalLevelData { get; private set; }
 

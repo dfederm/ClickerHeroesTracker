@@ -61,12 +61,28 @@ namespace ClickerHeroesTrackerWebsite.Controllers
                 : "";
 
             var userId = User.Identity.GetUserId();
-            var model = new IndexViewModel
-            {
-                HasPassword = HasPassword(),
-                Logins = await UserManager.GetLoginsAsync(userId)
-            };
-            return View(model);
+
+            var userSettings = new UserSettings(userId);
+            userSettings.Fill();
+
+            return await GetIndexResult(userId, userSettings);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<ActionResult> Index(IndexViewModel indexViewModel)
+        {
+            ViewBag.StatusMessage = "Changes Saved";
+
+            var userId = User.Identity.GetUserId();
+
+            var userSettings = new UserSettings(userId);
+            userSettings.Fill();
+
+            userSettings.TimeZone = TimeZoneInfo.FindSystemTimeZoneById(indexViewModel.TimeZoneId);
+            userSettings.Save();
+
+            return await GetIndexResult(userId, userSettings);
         }
 
         //
@@ -213,7 +229,18 @@ namespace ClickerHeroesTrackerWebsite.Controllers
             base.Dispose(disposing);
         }
 
-#region Helpers
+        private async Task<ActionResult> GetIndexResult(string userId, UserSettings userSettings)
+        {
+            var model = new IndexViewModel
+            {
+                HasPassword = HasPassword(),
+                Logins = await UserManager.GetLoginsAsync(userId),
+                TimeZoneId = userSettings.TimeZone.Id
+            };
+
+            return View(model);
+        }
+
         // Used for XSRF protection when adding external logins
         private const string XsrfKey = "XsrfId";
 
@@ -250,7 +277,5 @@ namespace ClickerHeroesTrackerWebsite.Controllers
             RemoveLoginSuccess,
             Error
         }
-
-#endregion
     }
 }
