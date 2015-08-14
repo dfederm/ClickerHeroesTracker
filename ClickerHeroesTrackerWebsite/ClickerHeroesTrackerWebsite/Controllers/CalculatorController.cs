@@ -78,8 +78,7 @@
                     errorMessage = "The upload does not exist";
                 }
             }
-
-            if (!model.IsPermitted)
+            else if (!model.IsPermitted)
             {
                 errorMessage = "You are not permitted to view others' uploads";
             }

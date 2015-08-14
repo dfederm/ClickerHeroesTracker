@@ -56,7 +56,7 @@
             {
                 this.AncientName = ancient.Name;
                 this.CurrentLevel = currentLevel.ToString();
-                this.SuggestedLevel = suggestedLevel.ToString();
+                this.SuggestedLevel = Math.Max(suggestedLevel, 0).ToString();
                 this.LevelDifference = (suggestedLevel - currentLevel).ToString();
             }
 
