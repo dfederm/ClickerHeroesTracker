@@ -66,14 +66,16 @@
             return itemLevels;
         }
 
-        private static void AddItemLevels(Dictionary<Ancient, int> itemLevels, int itemType, int itemLevel)
+        private static void AddItemLevels(Dictionary<Ancient, int> itemLevels, int? itemType, int? itemLevel)
         {
-            if (itemLevel == 0)
+            if (itemType == null
+                || itemLevel == null
+                || itemLevel.Value == 0)
             {
                 return;
             }
 
-            var ancient = ItemTypes.GetAncient(itemType);
+            var ancient = ItemTypes.GetAncient(itemType.Value);
             if (ancient == null)
             {
                 return;
@@ -82,11 +84,11 @@
             int currentLevel;
             if (itemLevels.TryGetValue(ancient, out currentLevel))
             {
-                itemLevels[ancient] = currentLevel + itemLevel;
+                itemLevels[ancient] = currentLevel + itemLevel.Value;
             }
             else
             {
-                itemLevels.Add(ancient, itemLevel);
+                itemLevels.Add(ancient, itemLevel.Value);
             }
         }
     }
