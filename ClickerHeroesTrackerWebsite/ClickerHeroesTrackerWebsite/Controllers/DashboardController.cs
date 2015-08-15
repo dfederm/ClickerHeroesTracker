@@ -3,7 +3,7 @@
     using Models.Dashboard;
     using System.Web.Mvc;
 
-    //[Authorize]
+    [Authorize]
     public class DashboardController : Controller
     {
         public ActionResult Index()
