@@ -54,9 +54,11 @@
         {
             public SuggestedAncientLevelData(Ancient ancient, int currentLevel, int suggestedLevel)
             {
+                suggestedLevel = Math.Max(suggestedLevel, 0);
+
                 this.AncientName = ancient.Name;
                 this.CurrentLevel = currentLevel.ToString();
-                this.SuggestedLevel = Math.Max(suggestedLevel, 0).ToString();
+                this.SuggestedLevel = suggestedLevel.ToString();
                 this.LevelDifference = (suggestedLevel - currentLevel).ToString();
             }
 

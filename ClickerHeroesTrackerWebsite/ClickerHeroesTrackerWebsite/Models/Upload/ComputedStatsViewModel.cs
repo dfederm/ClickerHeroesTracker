@@ -15,7 +15,9 @@
             this.SoulsPerHour = Math.Round(simulationResult.Ratio * 3600);
             this.OptimalLevel = simulationResult.Level;
             this.OptimalSoulsPerAscension = (int)Math.Round(simulationResult.Souls);
-            this.OptimalAscensionTime = (int)Math.Round(simulationResult.Time / 60);
+            this.OptimalAscensionTime = (short)Math.Min(
+                Math.Round(simulationResult.Time / 60),
+                short.MaxValue);
         }
 
         public ComputedStatsViewModel(SqlDataReader reader)
@@ -35,6 +37,6 @@
 
         public int OptimalSoulsPerAscension { get; private set; }
 
-        public int OptimalAscensionTime { get; private set; }
+        public short OptimalAscensionTime { get; private set; }
     }
 }
