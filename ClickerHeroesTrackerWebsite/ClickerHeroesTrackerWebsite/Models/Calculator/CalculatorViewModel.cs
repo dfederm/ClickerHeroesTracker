@@ -15,7 +15,7 @@
             typeof(SavedGame),
             new DataContractJsonSerializerSettings { UseSimpleDictionaryFormat = true });
 
-        public CalculatorViewModel(string encodedSaveData)
+        public CalculatorViewModel(string encodedSaveData, string userId)
         {
             // Decode the save
             var jsonData = DecodeSaveData(encodedSaveData);
@@ -31,6 +31,9 @@
                 return;
             }
 
+            var userSettings = new UserSettings(userId);
+            userSettings.Fill();
+
             // Finally, populate the view models
             this.IsPermitted = true;
             this.IsValid = true;
@@ -41,11 +44,15 @@
             this.ComputedStatsViewModel = new ComputedStatsViewModel(savedGame);
             this.SuggestedAncientLevelsViewModel = new SuggestedAncientLevelsViewModel(
                 this.AncientLevelSummaryViewModel.AncientLevels,
-                this.ComputedStatsViewModel.OptimalLevel);
+                this.ComputedStatsViewModel.OptimalLevel,
+                userSettings);
         }
 
-        public CalculatorViewModel(string userId, int uploadId)
+        public CalculatorViewModel(int uploadId, string userId)
         {
+            var userSettings = new UserSettings(userId);
+            userSettings.Fill();
+
             using (var command = new DatabaseCommand("GetUploadDetails"))
             {
                 command.AddParameter("@UploadId", uploadId);
@@ -83,7 +90,8 @@
 
                 this.SuggestedAncientLevelsViewModel = new SuggestedAncientLevelsViewModel(
                     this.AncientLevelSummaryViewModel.AncientLevels,
-                    this.ComputedStatsViewModel.OptimalLevel);
+                    this.ComputedStatsViewModel.OptimalLevel,
+                    userSettings);
 
                 this.IsValid = true;
             }

@@ -18,13 +18,15 @@
                 return this.RedirectToAction("Index", "Upload");
             }
 
-            var model = new CalculatorViewModel(uploadViewModel.EncodedSaveData);
+            var userId = this.User.Identity.GetUserId();
+
+            var model = new CalculatorViewModel(uploadViewModel.EncodedSaveData, userId);
 
             if (uploadViewModel.AddToProgress
                 && model.IsValid
-                && this.Request.IsAuthenticated)
+                && this.Request.IsAuthenticated
+                && userId != null)
             {
-                var userId = this.User.Identity.GetUserId();
                 using (var command = new DatabaseCommand("UploadSaveData"))
                 {
                     // Upload data
@@ -58,7 +60,7 @@
         public ActionResult View(int uploadId)
         {
             var userId = this.User.Identity.GetUserId();
-            var model = new CalculatorViewModel(userId, uploadId);
+            var model = new CalculatorViewModel(uploadId, userId);
             return this.GetResult(model, false);
         }
 

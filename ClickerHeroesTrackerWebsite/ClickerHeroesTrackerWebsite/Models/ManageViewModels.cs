@@ -29,6 +29,9 @@
 
         [Display(Name = "Public uploads")]
         public bool AreUploadsPublic { get; set; }
+
+        [Display(Name = "Solomon formula")]
+        public string SolomonFormula { get; set; }
     }
 
     public class ManageLoginsViewModel

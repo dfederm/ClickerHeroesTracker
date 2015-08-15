@@ -21,6 +21,11 @@
 
         public void Fill()
         {
+            if (this.userId == null)
+            {
+                return;
+            }
+
             using (var command = new DatabaseCommand("GetUserSettings"))
             {
                 command.AddParameter("@UserId", this.userId);
@@ -83,6 +88,18 @@
             set
             {
                 this.SetValue(2, value.ToString());
+            }
+        }
+
+        public bool UseReducedSolomonFormula
+        {
+            get
+            {
+                return this.GetValue(3, bool.TryParse, false);
+            }
+            set
+            {
+                this.SetValue(3, value.ToString());
             }
         }
 

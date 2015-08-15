@@ -1,4 +1,7 @@
-﻿@model ClickerHeroesTrackerWebsite.Models.Upload.SuggestedAncientLevelsViewModel
+﻿@using ClickerHeroesTrackerWebsite.Models.Upload;
+@using ClickerHeroesTrackerWebsite.Models.Game;
+
+@model SuggestedAncientLevelsViewModel
 
 <h4>Suggested Leveling Plan:</h4>
 <div class="text-muted">
@@ -7,14 +10,23 @@
 <table>
     <tr>
         <th>Ancient</th>
-        <th>Current Level</th>
-        <th>Suggested Level</th>
+        <th>Current</th>
+        <th>Suggested</th>
         <th>Difference</th>
     </tr>
     @foreach (var ancient in Model.SuggestedAncientLevels)
     {
         <tr>
-            <td>@ancient.AncientName:</td>
+            <td>
+                @ancient.AncientName:
+                @if (ancient.AncientName == Ancient.Solomon.Name)
+                {
+                    var solomonTooltip = this.Request.IsAuthenticated
+                        ? "This is using your settings for the Solomon formula preference. You can change this on your settings page."
+                        : "By default we use the \"Ln\" Solomon formula. You may change this by logging in and changing your settings.";
+                    <a href="/Manage" class="text-muted" data-toggle="tooltip" data-placement="right" title="@solomonTooltip">(?)</a>
+                }
+            </td>
             <td class="text-right">@ancient.CurrentLevel:</td>
             <td class="text-right">@ancient.SuggestedLevel</td>
             <td class="text-right">@ancient.LevelDifference</td>

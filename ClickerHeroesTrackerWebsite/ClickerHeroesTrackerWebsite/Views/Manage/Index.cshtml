@@ -7,6 +7,11 @@
 
 <h2>@ViewBag.Title.</h2>
 
+@{
+    var checkedAttribute = new { @checked = "1" };
+}
+
+
 <p class="text-success">@ViewBag.StatusMessage</p>
 <div>
     <h4>Change your account settings</h4>
@@ -48,14 +53,19 @@
                 <a href="#" class="text-muted" data-toggle="tooltip" data-placement="bottom" title="Allow your uploads to be viewed by others if you choose to share the url with them">(?)</a>
             </dt>
             <dd>
-                @if (Model.AreUploadsPublic)
-                {
-                    @Html.CheckBoxFor(m => m.AreUploadsPublic, new { @checked = "1" })
-                }
-                else
-                {
-                    @Html.CheckBoxFor(m => m.AreUploadsPublic)
-                }
+                @Html.CheckBoxFor(m => m.AreUploadsPublic, Model.AreUploadsPublic ? checkedAttribute : null)
+            </dd>
+        </dl>
+        <dl class="dl-horizontal">
+            <dt>
+                @Html.LabelFor(m => m.SolomonFormula)
+            </dt>
+            <dd>
+                @Html.RadioButtonFor(m => m.SolomonFormula, "Ln", Model.SolomonFormula.Equals("Ln", StringComparison.OrdinalIgnoreCase) ? checkedAttribute : null)
+                Ln <a href="#" class="text-muted" data-toggle="tooltip" data-placement="right" title="This formula is for optimal efficiency, but some consider it more boring as it causes you to dump many levels into Solomon">(?)</a>
+                <br />
+                @Html.RadioButtonFor(m => m.SolomonFormula, "Log", Model.SolomonFormula.Equals("Log", StringComparison.OrdinalIgnoreCase) ? checkedAttribute : null)
+                Log <a href="#" class="text-muted" data-toggle="tooltip" data-placement="right" title="This formula favors Solomon a little less. It's less efficient than the Ln formula, but some consider it more exciting as you will spend less time dumping levels into Solomon">(?)</a>
             </dd>
         </dl>
         <dl class="dl-horizontal">

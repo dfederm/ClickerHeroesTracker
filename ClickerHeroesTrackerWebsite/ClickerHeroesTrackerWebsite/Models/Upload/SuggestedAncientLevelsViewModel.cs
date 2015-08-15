@@ -1,13 +1,15 @@
 ﻿namespace ClickerHeroesTrackerWebsite.Models.Upload
 {
     using Game;
-    using ClickerHeroesTrackerWebsite.Models.SaveData;
     using System;
     using System.Collections.Generic;
 
     public class SuggestedAncientLevelsViewModel
     {
-        public SuggestedAncientLevelsViewModel(IDictionary<Ancient, int> ancientLevels, int optimalLevel)
+        public SuggestedAncientLevelsViewModel(
+            IDictionary<Ancient, int> ancientLevels,
+            int optimalLevel,
+            UserSettings userSettings)
         {
             var currentSiyaLevel = GetCurrentAncientLevel(ancientLevels, Ancient.Siyalatas);
             var currentArgaivLevel = GetCurrentAncientLevel(ancientLevels, Ancient.Argaiv);
@@ -25,7 +27,9 @@
             var suggestedMammonLevel = suggestedLiberLevel;
             var suggestedMimzeeLevel = suggestedLiberLevel;
             var suggestedIrisLevel = optimalLevel - 1001;
-            var suggestedSolomonLevel = (int)Math.Round(1.15 * Math.Pow(Math.Log(3.25 * Math.Pow(suggestedSiyaLevel, 2)), 0.4) * Math.Pow(suggestedSiyaLevel, 0.8));
+            var suggestedSolomonLevel = userSettings.UseReducedSolomonFormula
+                ? (int)Math.Round(1.15 * Math.Pow(Math.Log10(3.25 * Math.Pow(suggestedSiyaLevel, 2)), 0.4) * Math.Pow(suggestedSiyaLevel, 0.8))
+                : (int)Math.Round(1.15 * Math.Pow(Math.Log(3.25 * Math.Pow(suggestedSiyaLevel, 2)), 0.4) * Math.Pow(suggestedSiyaLevel, 0.8));
 
             this.SuggestedAncientLevels = new SuggestedAncientLevelData[]
             {
