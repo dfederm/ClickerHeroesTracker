@@ -221,6 +221,7 @@
     <Compile Include="Models\Extensions.cs" />
     <Compile Include="Models\Game\Achievement.cs" />
     <Compile Include="Models\Game\ItemTypes.cs" />
+    <Compile Include="Models\Home\ChangelogViewModel.cs" />
     <Compile Include="Models\SaveData\Extensions.cs" />
     <Compile Include="Models\Game\Hero.cs" />
     <Compile Include="Models\Game\HeroUpgrade.cs" />
@@ -314,6 +315,9 @@
     <Content Include="Views\Dashboard\_Graph.cshtml" />
     <Content Include="Views\Dashboard\_RivalDataList.cshtml" />
     <Content Include="Views\Dashboard\Rival.cshtml" />
+    <Content Include="Views\Home\New.cshtml" />
+    <Content Include="Views\Home\_Changelog.cshtml" />
+    <Content Include="Views\Home\_ComingSoon.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

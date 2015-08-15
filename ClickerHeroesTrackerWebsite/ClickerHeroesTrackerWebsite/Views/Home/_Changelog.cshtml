@@ -1,0 +1,45 @@
+﻿@using ClickerHeroesTrackerWebsite.Models.Home
+
+@model ChangelogViewModel
+
+<h2>What's New</h2>
+@if (Model.IsFull)
+{
+    <h3>Saturday, August 15, 2015</h3>
+}
+<ul>
+    <li>Added @Html.ActionLink("What's New", "New", "Home") to notify users of new features and bug fixes</li>
+    <li>Added a @Html.ActionLink("user setting", "Index", "Manage") to allow the user to choose between the "Ln" and "Log" Solomon formula</li>
+</ul>
+
+@if (Model.IsFull)
+{
+    <h3>Friday, August 14, 2015</h3>
+    <ul>
+        <li>Fix upload issue related to large ascension times</li>
+        <li>
+            Loosened passwork requirements.<br />
+            Old Requirements:
+            <ul>
+                <li>Require at least 6 characters</li>
+                <li>Require special character</li>
+                <li>Require digit</li>
+                <li>Require lowercase character</li>
+                <li>Require uppercase character</li>
+            </ul>
+            New requirements:
+            <ul>
+                <li>Require at least 4 characters</li>
+            </ul>
+        </li>
+        <li>Changed the suggested level for Solomon to use the "Ln" formula instead of the "Log" formula.</li>
+        <li>Added a @Html.ActionLink("user setting", "Index", "Manage") to allow uploads to be public. You can now share the url for your upload so others may see it.</li>
+    </ul>
+
+    <h3>Thursday, August 13, 2015</h3>
+    <ul>
+        <li>Launch!</li>
+        <li>Fixed issue with negative suggested ancient levels</li>
+        <li>Fixed issue with certain uploads failing due unexpected relic values</li>
+    </ul>
+}

@@ -1,4 +1,6 @@
-﻿@{
+﻿@using ClickerHeroesTrackerWebsite.Models.Home
+
+@{
     ViewBag.Title = "Home Page";
 }
 
@@ -7,4 +9,11 @@
     <p class="lead">Try uploading your save to get started</p>
     
     <p>@Html.ActionLink("Upload »", "Index", "Upload", null, new { @class = "btn btn-primary btn-lg" })</p>
+</div>
+<div class="row">
+    <div class="col-md-4">
+        @Html.Partial("_Changelog", new ChangelogViewModel(false))
+
+        <p>@Html.ActionLink("See all »", "New", "Home", null, new { @class = "btn btn-default" })</p>
+    </div>
 </div>
