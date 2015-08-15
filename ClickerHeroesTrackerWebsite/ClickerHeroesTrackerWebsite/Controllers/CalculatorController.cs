@@ -7,12 +7,10 @@
     using Microsoft.AspNet.Identity;
     using Models;
 
-    [Authorize]
     public class CalculatorController : Controller
     {
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [AllowAnonymous]
         public ActionResult Upload(UploadViewModel uploadViewModel)
         {
             if (!ModelState.IsValid)
@@ -80,7 +78,7 @@
             }
             else if (!model.IsPermitted)
             {
-                errorMessage = "You are not permitted to view others' uploads";
+                errorMessage = "This upload belongs to a user with private uploads";
             }
 
             if (errorMessage != null)

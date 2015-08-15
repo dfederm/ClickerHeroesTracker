@@ -74,6 +74,18 @@
             }
         }
 
+        public bool AreUploadsPublic
+        {
+            get
+            {
+                return this.GetValue(2, bool.TryParse, false);
+            }
+            set
+            {
+                this.SetValue(2, value.ToString());
+            }
+        }
+
         private static bool TryParseTimeZone(string value, out TimeZoneInfo timeZone)
         {
             try

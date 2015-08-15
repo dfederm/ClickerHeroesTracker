@@ -26,6 +26,9 @@
 
         [Display(Name = "Time Zone")]
         public string TimeZoneId { get; set; }
+
+        [Display(Name = "Public uploads")]
+        public bool AreUploadsPublic { get; set; }
     }
 
     public class ManageLoginsViewModel

@@ -58,7 +58,7 @@
                     var uploadUserId = (string)reader["UserId"];
                     var uploadTime = (DateTime)reader["UploadTime"];
 
-                    this.IsPermitted = userId == uploadUserId;
+                    this.IsPermitted = GetIsPermitted(userId, uploadUserId);
                     this.UploadTime = uploadTime;
                 }
                 else
@@ -161,6 +161,19 @@
                     return null;
                 }
             }
+        }
+
+        private static bool GetIsPermitted(string userId, string uploadUserId)
+        {
+            if (userId == uploadUserId)
+            {
+                return true;
+            }
+
+            var uploadUserSettings = new UserSettings(uploadUserId);
+            uploadUserSettings.Fill();
+
+            return uploadUserSettings.AreUploadsPublic;
         }
     }
 }

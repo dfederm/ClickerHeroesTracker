@@ -80,6 +80,7 @@ namespace ClickerHeroesTrackerWebsite.Controllers
             userSettings.Fill();
 
             userSettings.TimeZone = TimeZoneInfo.FindSystemTimeZoneById(indexViewModel.TimeZoneId);
+            userSettings.AreUploadsPublic = indexViewModel.AreUploadsPublic;
             userSettings.Save();
 
             return await GetIndexResult(userId, userSettings);
@@ -235,7 +236,8 @@ namespace ClickerHeroesTrackerWebsite.Controllers
             {
                 HasPassword = HasPassword(),
                 Logins = await UserManager.GetLoginsAsync(userId),
-                TimeZoneId = userSettings.TimeZone.Id
+                TimeZoneId = userSettings.TimeZone.Id,
+                AreUploadsPublic = userSettings.AreUploadsPublic,
             };
 
             return View(model);

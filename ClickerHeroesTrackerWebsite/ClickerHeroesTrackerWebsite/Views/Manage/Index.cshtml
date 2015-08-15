@@ -38,8 +38,24 @@
         <dl class="dl-horizontal">
             <dt>@Html.LabelFor(m => m.TimeZoneId)</dt>
             <dd>
-                @Html.DropDownListFor(m => m.TimeZoneId, new SelectList(IndexViewModel.TimeZones, "Id", "Name", Model.TimeZoneId))
-                <button id="autodetectTimeZone">Autodetect</button>
+                @Html.DropDownListFor(m => m.TimeZoneId, new SelectList(IndexViewModel.TimeZones, "Id", "Name", Model.TimeZoneId), new { @class = "input-sm" })
+                <button id="autodetectTimeZone" class="btn btn-default">Autodetect</button>
+            </dd>
+        </dl>
+        <dl class="dl-horizontal">
+            <dt>
+                @Html.LabelFor(m => m.AreUploadsPublic)
+                <a href="#" class="text-muted" data-toggle="tooltip" data-placement="bottom" title="Allow your uploads to be viewed by others if you choose to share the url with them">(?)</a>
+            </dt>
+            <dd>
+                @if (Model.AreUploadsPublic)
+                {
+                    @Html.CheckBoxFor(m => m.AreUploadsPublic, new { @checked = "1" })
+                }
+                else
+                {
+                    @Html.CheckBoxFor(m => m.AreUploadsPublic)
+                }
             </dd>
         </dl>
         <dl class="dl-horizontal">
@@ -75,4 +91,10 @@
             evt.preventDefault();
         });
     </script>
+
+    @* Wire up tooltips *@
+    <script type="text/javascript">
+        $('[data-toggle="tooltip"]').tooltip();
+    </script>
+
 }
