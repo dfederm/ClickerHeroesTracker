@@ -25,7 +25,7 @@
             var suggestedMammonLevel = suggestedLiberLevel;
             var suggestedMimzeeLevel = suggestedLiberLevel;
             var suggestedIrisLevel = optimalLevel - 1001;
-            var suggestedSolomonLevel = (int)Math.Round(1.15 * Math.Pow(Math.Log10(3.25 * Math.Pow(suggestedSiyaLevel, 2)), 0.4) * Math.Pow(suggestedSiyaLevel, 0.8));
+            var suggestedSolomonLevel = (int)Math.Round(1.15 * Math.Pow(Math.Log(3.25 * Math.Pow(suggestedSiyaLevel, 2)), 0.4) * Math.Pow(suggestedSiyaLevel, 0.8));
 
             this.SuggestedAncientLevels = new SuggestedAncientLevelData[]
             {
