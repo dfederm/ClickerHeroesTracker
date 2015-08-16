@@ -5,15 +5,20 @@
 <h2>What's New</h2>
 @if (Model.IsFull)
 {
-    <h3>Saturday, August 15, 2015</h3>
+    <h3>Sunday, August 16, 2015</h3>
 }
 <ul>
-    <li>Added @Html.ActionLink("What's New", "New", "Home") to notify users of new features and bug fixes</li>
-    <li>Added a @Html.ActionLink("user setting", "Index", "Manage") to allow the user to choose between the "Ln" and "Log" Solomon formula</li>
+    <li>Added ability for users to reset their passwords</li>
 </ul>
 
 @if (Model.IsFull)
 {
+    <h3>Saturday, August 15, 2015</h3>
+    <ul>
+        <li>Added @Html.ActionLink("What's New", "New", "Home") to notify users of new features and bug fixes</li>
+        <li>Added a @Html.ActionLink("user setting", "Index", "Manage") to allow the user to choose between the "Ln" and "Log" Solomon formula</li>
+    </ul>
+
     <h3>Friday, August 14, 2015</h3>
     <ul>
         <li>Fix upload issue related to large ascension times</li>

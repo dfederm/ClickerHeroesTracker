@@ -88,7 +88,7 @@
         [TestMethod]
         public void ConfirmViewModel_E2ETest()
         {
-            var viewModel = new CalculatorViewModel(ValidEncodedSaveData);
+            var viewModel = new CalculatorViewModel(ValidEncodedSaveData, null);
 
             Assert.IsNotNull(viewModel.AncientLevelSummaryViewModel);
             Assert.IsNotNull(viewModel.AncientLevelSummaryViewModel.AncientLevels);
