@@ -1,5 +1,6 @@
 ﻿namespace ClickerHeroesTrackerWebsite.Models.Dashboard
 {
+    using ClickerHeroesTrackerWebsite.Models;
     using ClickerHeroesTrackerWebsite.Models.Game;
     using System;
     using System.Collections.Generic;
@@ -17,8 +18,8 @@
             while (reader.Read())
             {
                 var uploadTime = (DateTime)reader["UploadTime"];
-                this.OptimalLevelData.Add(uploadTime, (short)reader["OptimalLevel"]);
-                this.SoulsPerHourData.Add(uploadTime, (int)reader["SoulsPerHour"]);
+                this.OptimalLevelData.AddOrUpdate(uploadTime, (short)reader["OptimalLevel"]);
+                this.SoulsPerHourData.AddOrUpdate(uploadTime, (int)reader["SoulsPerHour"]);
             }
 
             if (!reader.NextResult())
@@ -49,7 +50,7 @@
                     this.AncientLevelData.Add(ancient, levelData);
                 }
 
-                levelData.Add(uploadTime, level);
+                levelData.AddOrUpdate(uploadTime, level);
             }
 
             this.IsValid = true;

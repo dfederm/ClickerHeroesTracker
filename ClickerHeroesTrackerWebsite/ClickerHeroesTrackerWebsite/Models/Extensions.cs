@@ -1,6 +1,7 @@
 ﻿namespace ClickerHeroesTrackerWebsite.Models
 {
     using System;
+    using System.Collections.Generic;
 
     public static class Extensions
     {
@@ -17,6 +18,18 @@
             totalMilliseconds -= totalMilliseconds % 1000;
 
             return totalMilliseconds;
+        }
+
+        public static void AddOrUpdate<TKey, TValue>(this IDictionary<TKey, TValue> dictionay, TKey key, TValue value)
+        {
+            if (dictionay.ContainsKey(key))
+            {
+                dictionay[key] = value;
+            }
+            else
+            {
+                dictionay.Add(key, value);
+            }
         }
     }
 }
