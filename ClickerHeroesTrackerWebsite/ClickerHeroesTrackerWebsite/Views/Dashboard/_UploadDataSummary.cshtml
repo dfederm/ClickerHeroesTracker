@@ -1,7 +1,7 @@
 ﻿@model ClickerHeroesTrackerWebsite.Models.Dashboard.UploadDataSummary
 
 <h4>Recent Uploads:</h4>
-<table>
+<table class="table">
     <tr>
         <th>
             Upload Time
@@ -13,7 +13,7 @@
     {
         <tr>
             <td>@TimeZoneInfo.ConvertTime(upload.UploadTime, TimeZoneInfo.Utc, Model.UserSettings.TimeZone).ToString("G")</td>
-            <td>@Html.ActionLink("View", "View", "Calculator", new { uploadId = upload.UploadId }, null)</td>
+            <td class="text-right">@Html.ActionLink("View", "View", "Calculator", new { uploadId = upload.UploadId }, null)</td>
         </tr>
     }
 </table>

@@ -2,7 +2,9 @@
 
 @model ProgressData
 
-<h4 class="pull-left">Progress summary:</h4>
-<h5 class="pull-right">@Html.ActionLink("See all", "Progress")</h5>
+<div class="clearfix">
+    <h4 class="pull-left">Progress summary:</h4>
+    <h5 class="pull-right">@Html.ActionLink("See all", "Progress")</h5>
+</div>
 @Html.Partial("_GraphScripts")
 @Html.Partial("_Graph", new GraphData { Id = "progressSummary", TimeZone = Model.UserSettings.TimeZone, Title = "Souls/hr", Series1 = Model.SoulsPerHourData })
