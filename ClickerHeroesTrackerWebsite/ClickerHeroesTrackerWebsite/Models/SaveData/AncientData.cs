@@ -1,14 +1,14 @@
 ﻿namespace ClickerHeroesTrackerWebsite.Models.SaveData
 {
-    using System.Runtime.Serialization;
+    using Newtonsoft.Json;
 
-    [DataContract]
+    [JsonObject]
     public class AncientData
     {
-        [DataMember(Name = "id", IsRequired = true)]
+        [JsonProperty(PropertyName = "id", Required = Required.Always)]
         public int Id { get; set; }
 
-        [DataMember(Name = "level", IsRequired = true)]
+        [JsonProperty(PropertyName = "level", Required = Required.Always)]
         public int Level { get; set; }
     }
 }

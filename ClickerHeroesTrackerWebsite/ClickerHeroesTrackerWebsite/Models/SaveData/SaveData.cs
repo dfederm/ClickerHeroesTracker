@@ -1,33 +1,33 @@
 ﻿namespace ClickerHeroesTrackerWebsite.Models.SaveData
 {
+    using Newtonsoft.Json;
     using System.Collections.Generic;
-    using System.Runtime.Serialization;
 
-    [DataContract]
+    [JsonObject]
     public class SavedGame
     {
-        [DataMember(Name = "ancients", IsRequired = true)]
+        [JsonProperty(PropertyName = "ancients", Required = Required.Always)]
         public AncientsData AncientsData { get; set; }
 
-        [DataMember(Name = "heroCollection", IsRequired = true)]
+        [JsonProperty(PropertyName = "heroCollection", Required = Required.Always)]
         public HeroesData HeroesData { get; set; }
 
-        [DataMember(Name = "items", IsRequired = true)]
+        [JsonProperty(PropertyName = "items", Required = Required.Always)]
         public ItemsData ItemsData { get; set; }
 
-        [DataMember(Name = "achievements", IsRequired = true)]
+        [JsonProperty(PropertyName = "achievements", Required = Required.Always)]
         public IDictionary<int, bool> AchievementsData { get; set; }
 
-        [DataMember(Name = "upgrades", IsRequired = true)]
+        [JsonProperty(PropertyName = "upgrades", Required = Required.Always)]
         public IDictionary<int, bool> UpgradeData { get; set; }
 
-        [DataMember(Name = "allDpsMultiplier", IsRequired = true)]
+        [JsonProperty(PropertyName = "allDpsMultiplier", Required = Required.Always)]
         public double AllDpsMultiplier { get; set; }
 
-        [DataMember(Name = "heroSouls", IsRequired = true)]
+        [JsonProperty(PropertyName = "heroSouls", Required = Required.Always)]
         public double HeroSouls { get; set; }
 
-        [DataMember(Name = "paidForRubyMultiplier", IsRequired = true)]
+        [JsonProperty(PropertyName = "paidForRubyMultiplier", Required = Required.Always)]
         public bool HasRubyMultiplier { get; set; }
     }
 }

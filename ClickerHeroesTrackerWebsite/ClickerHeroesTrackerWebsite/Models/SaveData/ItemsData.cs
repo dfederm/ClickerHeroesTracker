@@ -1,15 +1,15 @@
 ﻿namespace ClickerHeroesTrackerWebsite.Models.SaveData
 {
+    using Newtonsoft.Json;
     using System.Collections.Generic;
-    using System.Runtime.Serialization;
 
-    [DataContract]
+    [JsonObject]
     public class ItemsData
     {
-        [DataMember(Name = "slots", IsRequired = true)]
+        [JsonProperty(PropertyName = "slots", Required = Required.Always)]
         public IDictionary<int, int> Slots { get; set; }
 
-        [DataMember(Name = "items", IsRequired = true)]
+        [JsonProperty(PropertyName = "items", Required = Required.Always)]
         public IDictionary<int, ItemData> Items { get; set; }
     }
 }

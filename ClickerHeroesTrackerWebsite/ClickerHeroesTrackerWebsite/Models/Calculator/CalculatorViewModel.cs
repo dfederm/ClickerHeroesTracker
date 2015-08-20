@@ -4,16 +4,13 @@
     using SaveData;
     using System;
     using System.IO;
-    using System.Runtime.Serialization;
-    using System.Runtime.Serialization.Json;
     using System.Security.Cryptography;
     using System.Text;
+    using Newtonsoft.Json;
 
     public class CalculatorViewModel
     {
-        private static DataContractJsonSerializer serializer = new DataContractJsonSerializer(
-            typeof(SavedGame),
-            new DataContractJsonSerializerSettings { UseSimpleDictionaryFormat = true });
+        private static readonly JsonSerializer serializer = CreateSerializer();
 
         public CalculatorViewModel(string encodedSaveData, string userId)
         {
@@ -111,6 +108,18 @@
 
         public SuggestedAncientLevelsViewModel SuggestedAncientLevelsViewModel { get; private set; }
 
+        private static JsonSerializer CreateSerializer()
+        {
+            var settings = new JsonSerializerSettings();
+            settings.Error += (sender, args) =>
+            {
+                // Just swallow
+                args.ErrorContext.Handled = true;
+            };
+
+            return JsonSerializer.Create(settings);
+        }
+
         internal static byte[] DecodeSaveData(string encodedSaveData)
         {
             const string AntiCheatCode = "Fe12NAfA3R6z4k0z";
@@ -159,14 +168,9 @@
         {
             using (var stream = new MemoryStream(saveData))
             {
-                // Need to try/catch since this is still based on user input
-                try
+                using (var reader = new StreamReader(stream))
                 {
-                    return (SavedGame)serializer.ReadObject(stream);
-                }
-                catch(SerializationException)
-                {
-                    return null;
+                    return serializer.Deserialize<SavedGame>(new JsonTextReader(reader));
                 }
             }
         }

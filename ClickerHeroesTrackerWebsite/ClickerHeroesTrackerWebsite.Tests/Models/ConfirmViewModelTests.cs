@@ -70,11 +70,11 @@
         public void ConfirmViewModel_DeserializeSavedGame_EmptyObject()
         {
             var savedGame = CalculatorViewModel.DeserializeSavedGame(InvalidSaveData_EmptyObject);
-            Assert.IsNull(savedGame);
+            Assert.IsNotNull(savedGame);
         }
 
         [TestMethod]
-        public void ConfirmViewModel_TestConsistentcy()
+        public void ConfirmViewModel_TestConsistency()
         {
             // For other tests, make sure our valid data is the same across tests.
             var saveData = CalculatorViewModel.DecodeSaveData(ValidEncodedSaveData);
