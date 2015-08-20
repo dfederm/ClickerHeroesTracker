@@ -1,7 +1,10 @@
 ﻿namespace ClickerHeroesTrackerWebsite.Models.Dashboard
 {
+    using Graph;
     using Microsoft.AspNet.Identity;
     using System;
+    using System.Collections.Generic;
+    using System.Linq;
     using System.Security.Principal;
 
     public class ProgressViewModel
@@ -14,6 +17,7 @@
             userSettings.Fill();
 
             var startTime = DateTime.UtcNow.AddDays(-7);
+            ProgressData data;
             using (var command = new DatabaseCommand("GetProgressData"))
             {
                 command.AddParameter("@UserId", userId);
@@ -21,14 +25,111 @@
 
                 var reader = command.ExecuteReader();
 
-                this.ProgressData = new ProgressData(reader, userSettings);
+                data = new ProgressData(reader, userSettings);
             }
 
-            this.IsValid = this.ProgressData.IsValid;
+            this.ProminentGraphs = new List<GraphViewModel>
+            {
+                CreateGraph(
+                    "soulsPerHourGraph",
+                    "Souls/hr",
+                    data.SoulsPerHourData,
+                    userSettings.TimeZone),
+                CreateGraph(
+                    "optimalLevelGraph",
+                    "Optimal Level",
+                    data.OptimalLevelData,
+                    userSettings.TimeZone),
+            };
+            this.SecondaryGraphs = data
+                .AncientLevelData
+                .Select(x => CreateGraph(
+                    x.Key.Name + "Graph",
+                    x.Key.Name,
+                    x.Value,
+                    userSettings.TimeZone))
+                .ToList();
+
+            this.IsValid = data.IsValid;
         }
+
+        public IList<GraphViewModel> ProminentGraphs { get; private set; }
+
+        public IList<GraphViewModel> SecondaryGraphs { get; private set; }
 
         public bool IsValid { get; private set; }
 
-        public ProgressData ProgressData { get; private set; }
+        private GraphViewModel CreateGraph(
+            string id,
+            string title,
+            IDictionary<DateTime, int> data,
+            TimeZoneInfo timeZone)
+        {
+            return new GraphViewModel
+            {
+                Id = id,
+                Data = new GraphData
+                {
+                    Chart = new Chart
+                    {
+                        Type = ChartType.Line
+                    },
+                    Title = new Title
+                    {
+                        Text = title
+                    },
+                    XAxis = new Axis
+                    {
+                        TickInterval = 24 * 3600 * 1000, // one day
+                        Type = AxisType.Datetime,
+                        TickWidth = 0,
+                        GridLineWidth = 1,
+                        Labels = new Labels
+                        {
+                            Align = Align.Left,
+                            X = 3,
+                            Y = -3,
+                            Format = "{value:%m/%d}"
+                        }
+                    },
+                    YAxis = new Axis
+                    {
+                        Labels = new Labels
+                        {
+                            Align = Align.Left,
+                            X = 3,
+                            Y = 16,
+                            Format = "{value:.,0f}"
+                        },
+                        ShowFirstLabel = false
+                    },
+                    Legend = new Legend
+                    {
+                        Enabled = false
+                    },
+                    Series = new Series[]
+                    {
+                        new Series
+                        {
+                            Data = data
+                                .Select(datum => new Point
+                                {
+                                    X = datum.Key.ToJavascriptTime(timeZone),
+                                    Y = datum.Value
+                                })
+                                .Concat(new[]
+                                {
+                                    new Point
+                                    {
+                                        X = DateTime.UtcNow.ToJavascriptTime(timeZone),
+                                        Y = data.Last().Value
+                                    }
+                                })
+                                .ToList()
+                        }
+                    }
+                }
+            };
+        }
     }
 }

@@ -1,7 +1,10 @@
 ﻿namespace ClickerHeroesTrackerWebsite.Models.Dashboard
 {
+    using Graph;
     using Microsoft.AspNet.Identity;
     using System;
+    using System.Collections.Generic;
+    using System.Linq;
     using System.Security.Principal;
 
     public class RivalViewModel
@@ -9,11 +12,15 @@
         public RivalViewModel(IPrincipal user, int rivalId)
         {
             var userId = user.Identity.GetUserId();
+            var userName = user.Identity.GetUserName();
 
             var userSettings = new UserSettings(userId);
             userSettings.Fill();
 
             var startTime = DateTime.UtcNow.AddDays(-7);
+
+            ProgressData userData;
+            ProgressData rivalData;
             using (var command = new DatabaseCommand("GetRivalData"))
             {
                 command.AddParameter("@UserId", userId);
@@ -22,7 +29,7 @@
 
                 var reader = command.ExecuteReader();
 
-                this.UserProgressData = new ProgressData(reader, userSettings);
+                userData = new ProgressData(reader, userSettings);
                 if (!reader.NextResult())
                 {
                     return;
@@ -42,20 +49,143 @@
                     return;
                 }
 
-                this.RivalProgressData = new ProgressData(reader, userSettings);
+                rivalData = new ProgressData(reader, userSettings);
             }
 
+            this.ProminentGraphs = new List<GraphViewModel>
+            {
+                CreateGraph(
+                    "soulsPerHourGraph",
+                    "Souls/hr",
+                    userName,
+                    userData.SoulsPerHourData,
+                    this.RivalUserName,
+                    rivalData.SoulsPerHourData,
+                    userSettings.TimeZone),
+                CreateGraph(
+                    "optimalLevelGraph",
+                    "Optimal Level",
+                    userName,
+                    userData.OptimalLevelData,
+                    this.RivalUserName,
+                    rivalData.OptimalLevelData,
+                    userSettings.TimeZone),
+            };
+            this.SecondaryGraphs = userData
+                .AncientLevelData
+                .Select(x => CreateGraph(
+                    x.Key.Name + "Graph",
+                    x.Key.Name,
+                    userName,
+                    x.Value,
+                    this.RivalUserName,
+                    rivalData.AncientLevelData.SafeGet(x.Key),
+                    userSettings.TimeZone))
+                .ToList();
+
             this.IsValid = !string.IsNullOrEmpty(this.RivalUserName)
-                && this.UserProgressData.IsValid
-                && this.RivalProgressData.IsValid;
+                && userData.IsValid
+                && rivalData.IsValid;
         }
 
         public bool IsValid { get; private set; }
 
         public string RivalUserName { get; private set; }
 
-        public ProgressData UserProgressData { get; private set; }
+        public IList<GraphViewModel> ProminentGraphs { get; private set; }
 
-        public ProgressData RivalProgressData { get; private set; }
+        public IList<GraphViewModel> SecondaryGraphs { get; private set; }
+
+        private GraphViewModel CreateGraph(
+            string id,
+            string title,
+            string userName,
+            IDictionary<DateTime, int> userData,
+            string rivalName,
+            IDictionary<DateTime, int> rivalData,
+            TimeZoneInfo timeZone)
+        {
+            var series = new List<Series>();
+            this.TryAddSeries(series, timeZone, userName, userData);
+            this.TryAddSeries(series, timeZone, rivalName, rivalData);
+
+            return new GraphViewModel
+            {
+                Id = id,
+                Data = new GraphData
+                {
+                    Chart = new Chart
+                    {
+                        Type = ChartType.Line
+                    },
+                    Title = new Title
+                    {
+                        Text = title
+                    },
+                    XAxis = new Axis
+                    {
+                        TickInterval = 24 * 3600 * 1000, // one day
+                        Type = AxisType.Datetime,
+                        TickWidth = 0,
+                        GridLineWidth = 1,
+                        Labels = new Labels
+                        {
+                            Align = Align.Left,
+                            X = 3,
+                            Y = -3,
+                            Format = "{value:%m/%d}"
+                        }
+                    },
+                    YAxis = new Axis
+                    {
+                        Labels = new Labels
+                        {
+                            Align = Align.Left,
+                            X = 3,
+                            Y = 16,
+                            Format = "{value:.,0f}"
+                        },
+                        ShowFirstLabel = false
+                    },
+                    Legend = new Legend
+                    {
+                        Enabled = false
+                    },
+                    Series = series
+                }
+            };
+        }
+
+        private List<Series> TryAddSeries(
+            List<Series> series,
+            TimeZoneInfo timeZone,
+            string name,
+            IDictionary<DateTime, int> data)
+        {
+            if (data != null && data.Count > 0)
+            {
+                series.Add(new Series
+                {
+                    Name = name,
+                    Data = data
+                                .Select(datum => new Point
+                                {
+                                    X = datum.Key.ToJavascriptTime(timeZone),
+                                    Y = datum.Value
+                                })
+                                .Concat(new[]
+                                {
+                                    new Point
+                                    {
+                                        X = DateTime.UtcNow.ToJavascriptTime(timeZone),
+                                        Y = data.Last().Value
+                                    }
+                                })
+                                .ToList()
+                });
+            }
+
+            return series;
+        }
     }
 }

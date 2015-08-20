@@ -227,7 +227,19 @@
     </Compile>
     <Compile Include="Models\AccountViewModels.cs" />
     <Compile Include="Models\Dashboard\DashboardViewModel.cs" />
-    <Compile Include="Models\Dashboard\GraphData.cs" />
+    <Compile Include="Models\Dashboard\Graph\Align.cs" />
+    <Compile Include="Models\Dashboard\Graph\Axis.cs" />
+    <Compile Include="Models\Dashboard\Graph\AxisType.cs" />
+    <Compile Include="Models\Dashboard\Graph\Chart.cs" />
+    <Compile Include="Models\Dashboard\Graph\ChartType.cs" />
+    <Compile Include="Models\Dashboard\Graph\GraphData.cs" />
+    <Compile Include="Models\Dashboard\Graph\GraphViewModel.cs" />
+    <Compile Include="Models\Dashboard\Graph\Labels.cs" />
+    <Compile Include="Models\Dashboard\Graph\Legend.cs" />
+    <Compile Include="Models\Dashboard\Graph\Point.cs" />
+    <Compile Include="Models\Dashboard\Graph\PointConverter.cs" />
+    <Compile Include="Models\Dashboard\Graph\Series.cs" />
+    <Compile Include="Models\Dashboard\Graph\Title.cs" />
     <Compile Include="Models\Dashboard\ProgressData.cs" />
     <Compile Include="Models\Dashboard\ProgressViewModel.cs" />
     <Compile Include="Models\Dashboard\RivalData.cs" />

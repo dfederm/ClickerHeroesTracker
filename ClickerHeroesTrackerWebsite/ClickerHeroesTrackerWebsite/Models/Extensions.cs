@@ -31,5 +31,11 @@
                 dictionay.Add(key, value);
             }
         }
+
+        public static TValue SafeGet<TKey, TValue>(this IDictionary<TKey, TValue> dictionay, TKey key)
+        {
+            TValue value;
+            return dictionay.TryGetValue(key, out value) ? value : default(TValue);
+        }
     }
 }
