@@ -103,6 +103,18 @@
             }
         }
 
+        public PlayStyle PlayStyle
+        {
+            get
+            {
+                return this.GetValue(4, Enum.TryParse, PlayStyle.Idle);
+            }
+            set
+            {
+                this.SetValue(4, value.ToString());
+            }
+        }
+
         private static bool TryParseTimeZone(string value, out TimeZoneInfo timeZone)
         {
             try

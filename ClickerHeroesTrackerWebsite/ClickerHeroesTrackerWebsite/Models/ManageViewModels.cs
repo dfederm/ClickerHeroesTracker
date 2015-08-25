@@ -32,6 +32,9 @@
 
         [Display(Name = "Solomon formula")]
         public string SolomonFormula { get; set; }
+
+        [Display(Name = "Play Style")]
+        public string PlayStyle { get; set; }
     }
 
     public class ManageLoginsViewModel

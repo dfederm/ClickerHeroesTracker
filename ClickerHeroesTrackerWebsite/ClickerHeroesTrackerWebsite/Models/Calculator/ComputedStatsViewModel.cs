@@ -7,8 +7,10 @@
 
     public class ComputedStatsViewModel
     {
-        public ComputedStatsViewModel(SavedGame savedGame)
+        public ComputedStatsViewModel(SavedGame savedGame, UserSettings userSettings)
         {
+            this.UserSettings = userSettings;
+
             // No activities for now; assume idle mode
             var simulationResult = new Simulation(savedGame, null).Run();
 
@@ -20,8 +22,10 @@
                 short.MaxValue);
         }
 
-        public ComputedStatsViewModel(SqlDataReader reader)
+        public ComputedStatsViewModel(SqlDataReader reader, UserSettings userSettings)
         {
+            this.UserSettings = userSettings;
+
             if (reader.Read())
             {
                 this.OptimalLevel = (short)reader["OptimalLevel"];
@@ -30,6 +34,8 @@
                 this.OptimalAscensionTime = (short)reader["AscensionTime"];
             }
         }
+
+        public UserSettings UserSettings { get; private set; }
 
         public double SoulsPerHour { get; private set; }
 

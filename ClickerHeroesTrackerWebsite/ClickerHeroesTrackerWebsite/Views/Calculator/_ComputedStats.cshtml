@@ -1,11 +1,20 @@
-﻿@using ClickerHeroesTrackerWebsite.Models.Calculator;
+﻿@using ClickerHeroesTrackerWebsite.Models;
+@using ClickerHeroesTrackerWebsite.Models.Calculator;
 
 @model ComputedStatsViewModel
 
 <h4>Computed Stats:</h4>
-<div class="text-muted">
+<p class="text-muted">
     Based on the <a href="http://s3-us-west-2.amazonaws.com/clickerheroes/ancientssoul.html" target="_blank">calculator</a> by /u/rler.
-</div>
+</p>
+
+@if (Model.UserSettings.PlayStyle != PlayStyle.Idle)
+{
+    <p class="text-danger">
+        Currently these stats are computed only for Idle play style. The numbers may be incorrect for other play styles.
+    </p>
+}
+
 <table class="table">
     <tr>
         <td>Souls/hr</td>

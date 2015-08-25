@@ -37,5 +37,11 @@
             TValue value;
             return dictionay.TryGetValue(key, out value) ? value : default(TValue);
         }
+
+        public static TEnum SafeParseEnum<TEnum>(this string str) where TEnum : struct
+        {
+            TEnum value;
+            return Enum.TryParse<TEnum>(str, out value) ? value : default(TEnum);
+        }
     }
 }

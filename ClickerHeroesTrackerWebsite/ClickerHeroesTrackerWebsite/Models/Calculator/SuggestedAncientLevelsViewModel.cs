@@ -11,6 +11,8 @@
             int optimalLevel,
             UserSettings userSettings)
         {
+            this.UserSettings = userSettings;
+
             var currentSiyaLevel = GetCurrentAncientLevel(ancientLevels, Ancient.Siyalatas);
             var currentArgaivLevel = GetCurrentAncientLevel(ancientLevels, Ancient.Argaiv);
             var currentMorgLevel = GetCurrentAncientLevel(ancientLevels, Ancient.Morgulis);
@@ -43,6 +45,8 @@
                 new SuggestedAncientLevelData(Ancient.Solomon, currentSolomonLevel, suggestedSolomonLevel),
             };
         }
+
+        public UserSettings UserSettings { get; private set; }
 
         public SuggestedAncientLevelData[] SuggestedAncientLevels { get; private set; }
 

@@ -1,12 +1,19 @@
-﻿@using ClickerHeroesTrackerWebsite.Models.Calculator;
+﻿@using ClickerHeroesTrackerWebsite.Models;
+@using ClickerHeroesTrackerWebsite.Models.Calculator;
 @using ClickerHeroesTrackerWebsite.Models.Game;
 
 @model SuggestedAncientLevelsViewModel
 
 <h4>Suggested Leveling Plan:</h4>
-<div class="text-muted">
+<p class="text-muted">
     Based on the <a href="http://redd.it/339m3j" target="_blank">Rules of Thumb</a>.
-</div>
+</p>
+
+@{ var cssClass = Model.UserSettings.PlayStyle == PlayStyle.Idle ? "text-muted" : "text-danger"; }
+<p class="@cssClass">
+    Currently these suggestions are optimized for Idle play style. You may change your play style in your @Html.ActionLink("settings", "Index", "Manage")
+</p>
+
 <table class="table">
     <tr>
         <th>Ancient</th>
@@ -28,8 +35,20 @@
                 }
             </td>
             <td class="text-right">@ancient.CurrentLevel:</td>
-            <td class="text-right">@ancient.SuggestedLevel</td>
-            <td class="text-right">@ancient.LevelDifference</td>
+
+            @if (ancient.AncientName == Ancient.Siyalatas.Name)
+            {
+                <td class="text-right">
+                    N/A
+                    <a href="#" class="text-muted" data-toggle="tooltip" data-placement="bottom" title="The formulae are based on this ancient. If all suggestions below are negative or zero, level this ancient.">(?)</a>
+                </td>
+                <td></td>
+            }
+            else
+            {
+                <td class="text-right">@ancient.SuggestedLevel</td>
+                <td class="text-right">@ancient.LevelDifference</td>
+            }
         </tr>
     }
 </table>

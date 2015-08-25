@@ -69,6 +69,20 @@
             </dd>
         </dl>
         <dl class="dl-horizontal">
+            <dt>
+                @Html.LabelFor(m => m.PlayStyle)
+                <a href="https://www.reddit.com/r/ClickerHeroes/wiki/introduction#wiki_types_of_playstyle_builds" target="_blank" class="text-muted" data-toggle="tooltip" data-placement="bottom" title="This is how you play the game. Click for details on Idle and Active. Hybrid is basically Idle but using all cooldowns before ascending.">(?)</a>
+            </dt>
+            <dd>
+                @foreach (var enumValue in Enum.GetNames(typeof(PlayStyle)))
+                {
+                    @Html.RadioButtonFor(m => m.PlayStyle, enumValue, Model.PlayStyle.Equals(enumValue, StringComparison.OrdinalIgnoreCase) ? checkedAttribute : null);
+                    @enumValue;
+                    <br />
+                }
+            </dd>
+        </dl>
+        <dl class="dl-horizontal">
             <dt></dt>
             <dd>
                 <input type="submit" class="btn btn-default" value="Save Changes" />
