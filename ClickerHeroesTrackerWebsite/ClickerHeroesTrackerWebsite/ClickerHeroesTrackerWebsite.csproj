@@ -261,8 +261,8 @@
     <Compile Include="Models\SaveData\ItemsData.cs" />
     <Compile Include="Models\Simulation\LevelingPlan.cs" />
     <Compile Include="Models\Simulation\Simulation.cs" />
-    <Compile Include="Models\Upload\AncientLevelSummaryViewModel.cs" />
-    <Compile Include="Models\Upload\ComputedStatsViewModel.cs" />
+    <Compile Include="Models\Calculator\AncientLevelSummaryViewModel.cs" />
+    <Compile Include="Models\Calculator\ComputedStatsViewModel.cs" />
     <Compile Include="Models\Calculator\CalculatorViewModel.cs" />
     <Compile Include="Models\Game\Ancient.cs" />
     <Compile Include="Models\IdentityModels.cs" />
@@ -270,8 +270,8 @@
     <Compile Include="Models\SaveData\AncientData.cs" />
     <Compile Include="Models\SaveData\AncientsData.cs" />
     <Compile Include="Models\SaveData\SaveData.cs" />
-    <Compile Include="Models\Upload\HeroLevelSummaryViewModel.cs" />
-    <Compile Include="Models\Upload\SuggestedAncientLevelsViewModel.cs" />
+    <Compile Include="Models\Calculator\HeroLevelSummaryViewModel.cs" />
+    <Compile Include="Models\Calculator\SuggestedAncientLevelsViewModel.cs" />
     <Compile Include="Models\Upload\UploadViewModel.cs" />
     <Compile Include="Models\UserSettings.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

@@ -1,4 +1,4 @@
-﻿namespace ClickerHeroesTrackerWebsite.Models.Upload
+﻿namespace ClickerHeroesTrackerWebsite.Models.Calculator
 {
     using Game;
     using SaveData;
