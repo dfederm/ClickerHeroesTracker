@@ -40,6 +40,13 @@
             parameter.TypeName = tableTypeName;
         }
 
+        public SqlParameter AddReturnParameter()
+        {
+            var returnParameter = this.command.Parameters.Add("RetVal", SqlDbType.Int);
+            returnParameter.Direction = ParameterDirection.ReturnValue;
+            return returnParameter;
+        }
+
         public void ExecuteNonQuery()
         {
             this.command.ExecuteNonQuery();

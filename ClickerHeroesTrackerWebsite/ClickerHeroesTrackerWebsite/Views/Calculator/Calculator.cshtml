@@ -7,15 +7,42 @@
 
 <h2>@ViewBag.Title.</h2>
 
+<div class="clearfix">
+    <ul class="list-inline pull-left">
+        <li>
+            <label>User:</label>
+            @Model.UploadUserName
+        </li>
+        <li>
+            <label>Upload Time:</label>
+            @TimeZoneInfo.ConvertTime(Model.UploadTime, TimeZoneInfo.Utc, Model.UserSettings.TimeZone).ToString("G")
+        </li>
+    </ul>
+    @if (Model.IsOwn || Model.IsPublic)
+    {
+        <div class="pull-right">
+            @if (Model.IsPublic)
+            {
+                <label>Share:</label>
+                @Html.TextBox("ShareLink", "http://clickerheroestracker.azurewebsites.net/Calculator/View?uploadId=" + Model.UploadId, new { onclick = "$(this).select()", @class = "input-sm" });
+            }
+            else
+            {
+                <text>Your uploads are not public. You can change this in your @Html.ActionLink("settings", "Index", "Manage")</text>
+            }
+        </div>
+    }
+</div>
+
 <div class="row">
     <div class="col-md-4">
-        @Html.Partial("_AncientLevelSummary", Model.AncientLevelSummaryViewModel)
+        @Html.Partial("_ComputedStats", Model.ComputedStatsViewModel)
     </div>
     <div class="col-md-4">
         @Html.Partial("_SuggestedAncientLevels", Model.SuggestedAncientLevelsViewModel)
     </div>
     <div class="col-md-4">
-        @Html.Partial("_ComputedStats", Model.ComputedStatsViewModel)
+        @Html.Partial("_AncientLevelSummary", Model.AncientLevelSummaryViewModel)
     </div>
 </div>
 @* We don't store this data yet, so don't display it

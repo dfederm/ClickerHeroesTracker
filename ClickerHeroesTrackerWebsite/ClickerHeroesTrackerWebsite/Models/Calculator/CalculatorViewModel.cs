@@ -1,18 +1,20 @@
 ﻿namespace ClickerHeroesTrackerWebsite.Models.Calculator
 {
-    using Upload;
     using SaveData;
     using System;
     using System.IO;
     using System.Security.Cryptography;
     using System.Text;
     using Newtonsoft.Json;
+    using System.Data;
+    using System.Security.Principal;
+    using Microsoft.AspNet.Identity;
 
     public class CalculatorViewModel
     {
         private static readonly JsonSerializer serializer = CreateSerializer();
 
-        public CalculatorViewModel(string encodedSaveData, string userId)
+        public CalculatorViewModel(string encodedSaveData, IIdentity user, bool addToProgress)
         {
             // Decode the save
             var jsonData = DecodeSaveData(encodedSaveData);
@@ -28,27 +30,65 @@
                 return;
             }
 
-            var userSettings = new UserSettings(userId);
-            userSettings.Fill();
+            var userId = user.GetUserId();
+            this.UserSettings = new UserSettings(userId);
+            this.UserSettings.Fill();
 
             // Finally, populate the view models
-            this.IsPermitted = true;
-            this.IsValid = true;
+            this.IsPublic = this.UserSettings.AreUploadsPublic;
+            this.IsOwn = this.IsPermitted = this.IsValid = true;
+
+            this.UploadUserName = user.GetUserName();
             this.UploadTime = DateTime.UtcNow;
 
             this.AncientLevelSummaryViewModel = new AncientLevelSummaryViewModel(savedGame.AncientsData);
             ////this.HeroLevelSummaryViewModel = new HeroLevelSummaryViewModel(savedGame.HeroesData);
-            this.ComputedStatsViewModel = new ComputedStatsViewModel(savedGame, userSettings);
+            this.ComputedStatsViewModel = new ComputedStatsViewModel(savedGame, this.UserSettings);
             this.SuggestedAncientLevelsViewModel = new SuggestedAncientLevelsViewModel(
                 this.AncientLevelSummaryViewModel.AncientLevels,
                 this.ComputedStatsViewModel.OptimalLevel,
-                userSettings);
+                this.UserSettings);
+
+            if (addToProgress && user.IsAuthenticated)
+            {
+                using (var command = new DatabaseCommand("UploadSaveData"))
+                {
+                    // Upload data
+                    command.AddParameter("@UserId", userId);
+                    command.AddParameter("@UploadContent", encodedSaveData);
+
+                    // Computed stats
+                    command.AddParameter("@OptimalLevel", this.ComputedStatsViewModel.OptimalLevel);
+                    command.AddParameter("@SoulsPerHour", this.ComputedStatsViewModel.SoulsPerHour);
+                    command.AddParameter("@SoulsPerAscension", this.ComputedStatsViewModel.OptimalSoulsPerAscension);
+                    command.AddParameter("@AscensionTime", this.ComputedStatsViewModel.OptimalAscensionTime);
+
+                    // Ancient levels
+                    DataTable ancientLevelTable = new DataTable();
+                    ancientLevelTable.Columns.Add("AncientId", typeof(int));
+                    ancientLevelTable.Columns.Add("Level", typeof(int));
+                    foreach (var pair in this.AncientLevelSummaryViewModel.AncientLevels)
+                    {
+                        ancientLevelTable.Rows.Add(pair.Key.Id, pair.Value);
+                    }
+
+                    command.AddTableParameter("@AncientLevelUploads", "AncientLevelUpload", ancientLevelTable);
+
+                    var returnParameter = command.AddReturnParameter();
+
+                    command.ExecuteNonQuery();
+
+                    this.UploadId = (int)returnParameter.Value;
+                }
+            }
         }
 
         public CalculatorViewModel(int uploadId, string userId)
         {
-            var userSettings = new UserSettings(userId);
-            userSettings.Fill();
+            this.UserSettings = new UserSettings(userId);
+            this.UserSettings.Fill();
+
+            this.UploadId = uploadId;
 
             using (var command = new DatabaseCommand("GetUploadDetails"))
             {
@@ -60,9 +100,25 @@
                 if (reader.Read())
                 {
                     var uploadUserId = (string)reader["UserId"];
+                    var uploadUserName = (string)reader["UserName"];
                     var uploadTime = (DateTime)reader["UploadTime"];
+                    ////var uploadContent = (string)reader["UploadContent"];
 
-                    this.IsPermitted = GetIsPermitted(userId, uploadUserId);
+                    this.IsOwn = userId == uploadUserId;
+                    if (this.IsOwn)
+                    {
+                        this.IsPublic = this.UserSettings.AreUploadsPublic;
+                        this.IsPermitted = true;
+                    }
+                    else
+                    {
+                        var uploadUserSettings = new UserSettings(uploadUserId);
+                        uploadUserSettings.Fill();
+
+                        this.IsPublic = this.IsPermitted = uploadUserSettings.AreUploadsPublic;
+                    }
+
+                    this.UploadUserName = uploadUserName;
                     this.UploadTime = uploadTime;
                 }
                 else
@@ -83,20 +139,30 @@
                     return;
                 }
 
-                this.ComputedStatsViewModel = new ComputedStatsViewModel(reader, userSettings);
+                this.ComputedStatsViewModel = new ComputedStatsViewModel(reader, this.UserSettings);
 
                 this.SuggestedAncientLevelsViewModel = new SuggestedAncientLevelsViewModel(
                     this.AncientLevelSummaryViewModel.AncientLevels,
                     this.ComputedStatsViewModel.OptimalLevel,
-                    userSettings);
+                    this.UserSettings);
 
                 this.IsValid = true;
             }
         }
 
+        public UserSettings UserSettings { get; private set; }
+
+        public bool IsOwn { get; private set; }
+
         public bool IsPermitted { get; private set; }
 
+        public bool IsPublic { get; private set; }
+
         public bool IsValid { get; private set; }
+
+        public int UploadId { get; private set; }
+
+        public string UploadUserName { get; private set; }
 
         public DateTime UploadTime { get; private set; }
 
@@ -173,19 +239,6 @@
                     return serializer.Deserialize<SavedGame>(new JsonTextReader(reader));
                 }
             }
-        }
-
-        private static bool GetIsPermitted(string userId, string uploadUserId)
-        {
-            if (userId == uploadUserId)
-            {
-                return true;
-            }
-
-            var uploadUserSettings = new UserSettings(uploadUserId);
-            uploadUserSettings.Fill();
-
-            return uploadUserSettings.AreUploadsPublic;
         }
     }
 }

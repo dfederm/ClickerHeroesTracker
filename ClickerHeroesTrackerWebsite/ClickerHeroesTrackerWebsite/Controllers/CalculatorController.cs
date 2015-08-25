@@ -3,9 +3,7 @@
     using Models.Upload;
     using Models.Calculator;
     using System.Web.Mvc;
-    using System.Data;
     using Microsoft.AspNet.Identity;
-    using Models;
 
     public class CalculatorController : Controller
     {
@@ -18,42 +16,7 @@
                 return this.RedirectToAction("Index", "Upload");
             }
 
-            var userId = this.User.Identity.GetUserId();
-
-            var model = new CalculatorViewModel(uploadViewModel.EncodedSaveData, userId);
-
-            if (uploadViewModel.AddToProgress
-                && model.IsValid
-                && this.Request.IsAuthenticated
-                && userId != null)
-            {
-                using (var command = new DatabaseCommand("UploadSaveData"))
-                {
-                    // Upload data
-                    command.AddParameter("@UserId", userId);
-                    command.AddParameter("@UploadContent", uploadViewModel.EncodedSaveData);
-
-                    // Computed stats
-                    command.AddParameter("@OptimalLevel", model.ComputedStatsViewModel.OptimalLevel);
-                    command.AddParameter("@SoulsPerHour", model.ComputedStatsViewModel.SoulsPerHour);
-                    command.AddParameter("@SoulsPerAscension", model.ComputedStatsViewModel.OptimalSoulsPerAscension);
-                    command.AddParameter("@AscensionTime", model.ComputedStatsViewModel.OptimalAscensionTime);
-
-                    // Ancient levels
-                    DataTable ancientLevelTable = new DataTable();
-                    ancientLevelTable.Columns.Add("AncientId", typeof(int));
-                    ancientLevelTable.Columns.Add("Level", typeof(int));
-                    foreach (var pair in model.AncientLevelSummaryViewModel.AncientLevels)
-                    {
-                        ancientLevelTable.Rows.Add(pair.Key.Id, pair.Value);
-                    }
-
-                    command.AddTableParameter("@AncientLevelUploads", "AncientLevelUpload", ancientLevelTable);
-
-                    command.ExecuteNonQuery();
-                }
-            }
-
+            var model = new CalculatorViewModel(uploadViewModel.EncodedSaveData, this.User.Identity, uploadViewModel.AddToProgress);
             return this.GetResult(model, true);
         }
 
