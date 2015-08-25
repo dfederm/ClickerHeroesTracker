@@ -9,9 +9,9 @@
     Based on the <a href="http://redd.it/339m3j" target="_blank">Rules of Thumb</a>.
 </p>
 
-@{ var cssClass = Model.UserSettings.PlayStyle == PlayStyle.Idle ? "text-muted" : "text-danger"; }
+@{ var cssClass = Model.UserSettings.PlayStyle != PlayStyle.Active ? "text-muted" : "text-danger"; }
 <p class="@cssClass">
-    Currently these suggestions are optimized for Idle play style. You may change your play style in your @Html.ActionLink("settings", "Index", "Manage")
+    Currently these suggestions are not optimized for Active play style. You may change your play style in your @Html.ActionLink("settings", "Index", "Manage")
 </p>
 
 <table class="table">
@@ -21,7 +21,7 @@
         <th>Suggested</th>
         <th>Difference</th>
     </tr>
-    @foreach (var ancient in Model.SuggestedAncientLevels)
+    @foreach (var ancient in Model.SuggestedAncientLevels.Where(x => x.SupportedPlayStyles.Contains(Model.UserSettings.PlayStyle)))
     {
         <tr>
             <td>
