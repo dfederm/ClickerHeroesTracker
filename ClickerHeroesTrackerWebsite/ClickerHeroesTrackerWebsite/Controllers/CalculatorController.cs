@@ -22,8 +22,7 @@
 
         public ActionResult View(int uploadId)
         {
-            var userId = this.User.Identity.GetUserId();
-            var model = new CalculatorViewModel(uploadId, userId);
+            var model = new CalculatorViewModel(uploadId, this.User);
             return this.GetResult(model, false);
         }
 

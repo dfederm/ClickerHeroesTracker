@@ -75,8 +75,9 @@
             }
         }
 
-        public CalculatorViewModel(int uploadId, string userId)
+        public CalculatorViewModel(int uploadId, IPrincipal user)
         {
+            var userId = user.Identity.GetUserId();
             this.UserSettings = new UserSettings(userId);
             this.UserSettings.Fill();
 
@@ -94,7 +95,7 @@
                     var uploadUserId = reader["UserId"].ToString();
                     var uploadUserName = reader["UserName"].ToString();
                     var uploadTime = Convert.ToDateTime(reader["UploadTime"]);
-                    ////var uploadContent = reader["UploadContent"].ToString();
+                    var uploadContent = reader["UploadContent"].ToString();
 
                     this.IsOwn = userId == uploadUserId;
                     if (this.IsOwn)
@@ -107,11 +108,13 @@
                         var uploadUserSettings = new UserSettings(uploadUserId);
                         uploadUserSettings.Fill();
 
-                        this.IsPublic = this.IsPermitted = uploadUserSettings.AreUploadsPublic;
+                        this.IsPublic = uploadUserSettings.AreUploadsPublic;
+                        this.IsPermitted = this.IsPublic || user.IsInRole("Admin");
                     }
 
                     this.UploadUserName = uploadUserName;
                     this.UploadTime = uploadTime;
+                    this.UploadContent = uploadContent;
                 }
                 else
                 {
@@ -157,6 +160,8 @@
         public string UploadUserName { get; private set; }
 
         public DateTime UploadTime { get; private set; }
+
+        public string UploadContent { get; private set; }
 
         public AncientLevelSummaryViewModel AncientLevelSummaryViewModel { get; private set; }
 
