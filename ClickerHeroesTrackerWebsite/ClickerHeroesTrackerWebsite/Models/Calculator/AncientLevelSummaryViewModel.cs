@@ -11,7 +11,7 @@
     {
         public AncientLevelSummaryViewModel(AncientsData ancientsData)
         {
-            var ancientLevels = new SortedDictionary<Ancient, int>(AncientComparer.Instance);
+            var ancientLevels = new SortedDictionary<Ancient, long>(AncientComparer.Instance);
             foreach (var ancientData in ancientsData.Ancients.Values)
             {
                 var ancient = Ancient.Get(ancientData.Id);
@@ -29,11 +29,11 @@
 
         public AncientLevelSummaryViewModel(SqlDataReader reader)
         {
-            var ancientLevels = new SortedDictionary<Ancient, int>(AncientComparer.Instance);
+            var ancientLevels = new SortedDictionary<Ancient, long>(AncientComparer.Instance);
             while (reader.Read())
             {
-                var ancientId = (byte)reader["AncientId"];
-                var level = (int)reader["Level"];
+                var ancientId = Convert.ToInt32(reader["AncientId"]);
+                var level = Convert.ToInt64(reader["Level"]);
 
                 var ancient = Ancient.Get(ancientId);
 
@@ -43,7 +43,7 @@
             this.AncientLevels = ancientLevels;
         }
 
-        public IDictionary<Ancient, int> AncientLevels { get; private set; }
+        public IDictionary<Ancient, long> AncientLevels { get; private set; }
 
         private class AncientComparer : IComparer<Ancient>
         {

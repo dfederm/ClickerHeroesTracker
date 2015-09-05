@@ -11,6 +11,7 @@
     using Models.SaveData;
     using Models.Calculator;
     using System.Data;
+    using System;
 
     [Authorize(Roles = "Admin")]
     public class AdminController : Controller
@@ -48,19 +49,19 @@
             DataTable computedStatsTable = new DataTable();
             computedStatsTable.Columns.Add("UploadId", typeof(int));
             computedStatsTable.Columns.Add("OptimalLevel", typeof(short));
-            computedStatsTable.Columns.Add("SoulsPerHour", typeof(int));
-            computedStatsTable.Columns.Add("SoulsPerAscension", typeof(int));
+            computedStatsTable.Columns.Add("SoulsPerHour", typeof(long));
+            computedStatsTable.Columns.Add("SoulsPerAscension", typeof(long));
             computedStatsTable.Columns.Add("AscensionTime", typeof(short));
-            computedStatsTable.Columns.Add("TitanDamange", typeof(int));
-            computedStatsTable.Columns.Add("SoulsSpent", typeof(int));
+            computedStatsTable.Columns.Add("TitanDamange", typeof(long));
+            computedStatsTable.Columns.Add("SoulsSpent", typeof(long));
 
             using (var command = new DatabaseCommand("GetAllUploadContent"))
             {
                 var reader = command.ExecuteReader();
                 while (reader.Read())
                 {
-                    var uploadId = (int)reader["Id"];
-                    var uploadContent = (string)reader["UploadContent"];
+                    var uploadId = Convert.ToInt32(reader["Id"]);
+                    var uploadContent = reader["UploadContent"].ToString();
 
                     var savedGame = SavedGame.Parse(uploadContent);
                     if (savedGame == null)

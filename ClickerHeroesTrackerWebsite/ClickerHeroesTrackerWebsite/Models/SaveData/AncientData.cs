@@ -9,9 +9,9 @@
         public int Id { get; set; }
 
         [JsonProperty(PropertyName = "level", Required = Required.Always)]
-        public int Level { get; set; }
+        public long Level { get; set; }
 
         [JsonProperty(PropertyName = "spentHeroSouls", Required = Required.Always)]
-        public int SpentHeroSouls { get; set; }
+        public long SpentHeroSouls { get; set; }
     }
 }

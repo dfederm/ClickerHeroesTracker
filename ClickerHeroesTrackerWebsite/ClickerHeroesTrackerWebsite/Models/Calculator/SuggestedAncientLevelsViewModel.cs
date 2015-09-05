@@ -19,7 +19,7 @@
         });
 
         public SuggestedAncientLevelsViewModel(
-            IDictionary<Ancient, int> ancientLevels,
+            IDictionary<Ancient, long> ancientLevels,
             int optimalLevel,
             UserSettings userSettings)
         {
@@ -40,14 +40,14 @@
 
             var suggestedSiyaLevel = currentSiyaLevel;
             var suggestedArgaivLevel = suggestedSiyaLevel + 9;
-            var suggestedMorgLevel = (int)Math.Round(Math.Pow(suggestedSiyaLevel, 2) + (43.67 * suggestedSiyaLevel) + 33.58);
-            var suggestedGoldLevel = (int)Math.Round(suggestedSiyaLevel * 0.93);
-            var suggestedClickLevel = (int)Math.Round(suggestedSiyaLevel * 0.5);
-            var suggestedJuggernautLevel = (int)Math.Round(suggestedClickLevel * 0.2);
+            var suggestedMorgLevel = (long)Math.Round(Math.Pow(suggestedSiyaLevel, 2) + (43.67 * suggestedSiyaLevel) + 33.58);
+            var suggestedGoldLevel = (long)Math.Round(suggestedSiyaLevel * 0.93);
+            var suggestedClickLevel = (long)Math.Round(suggestedSiyaLevel * 0.5);
+            var suggestedJuggernautLevel = (long)Math.Round(suggestedClickLevel * 0.2);
             var suggestedIrisLevel = optimalLevel - 1001;
             var suggestedSolomonLevel = userSettings.UseReducedSolomonFormula
-                ? (int)Math.Round(1.15 * Math.Pow(Math.Log10(3.25 * Math.Pow(suggestedSiyaLevel, 2)), 0.4) * Math.Pow(suggestedSiyaLevel, 0.8))
-                : (int)Math.Round(1.15 * Math.Pow(Math.Log(3.25 * Math.Pow(suggestedSiyaLevel, 2)), 0.4) * Math.Pow(suggestedSiyaLevel, 0.8));
+                ? (long)Math.Round(1.15 * Math.Pow(Math.Log10(3.25 * Math.Pow(suggestedSiyaLevel, 2)), 0.4) * Math.Pow(suggestedSiyaLevel, 0.8))
+                : (long)Math.Round(1.15 * Math.Pow(Math.Log(3.25 * Math.Pow(suggestedSiyaLevel, 2)), 0.4) * Math.Pow(suggestedSiyaLevel, 0.8));
 
             this.SuggestedAncientLevels = new SuggestedAncientLevelData[]
             {
@@ -70,9 +70,9 @@
 
         public SuggestedAncientLevelData[] SuggestedAncientLevels { get; private set; }
 
-        private static int GetCurrentAncientLevel(IDictionary<Ancient, int> ancientLevels, Ancient ancient)
+        private static long GetCurrentAncientLevel(IDictionary<Ancient, long> ancientLevels, Ancient ancient)
         {
-            int level;
+            long level;
             return ancientLevels.TryGetValue(ancient, out level)
                 ? level
                 : 0;
@@ -82,8 +82,8 @@
         {
             public SuggestedAncientLevelData(
                 Ancient ancient,
-                int currentLevel,
-                int suggestedLevel,
+                long currentLevel,
+                long suggestedLevel,
                 ISet<PlayStyle> supportedPlayStyles)
             {
                 suggestedLevel = Math.Max(suggestedLevel, 0);

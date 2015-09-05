@@ -72,7 +72,7 @@
         private GraphViewModel CreateGraph(
             string id,
             string title,
-            IDictionary<DateTime, int> data,
+            IDictionary<DateTime, long> data,
             TimeZoneInfo timeZone)
         {
             return new GraphViewModel

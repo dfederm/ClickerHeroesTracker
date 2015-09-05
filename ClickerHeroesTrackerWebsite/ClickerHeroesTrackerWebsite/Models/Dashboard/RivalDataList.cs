@@ -1,5 +1,6 @@
 ﻿namespace ClickerHeroesTrackerWebsite.Models.Dashboard
 {
+    using System;
     using System.Collections.Generic;
 
     public class RivalDataList
@@ -15,8 +16,8 @@
                 var reader = command.ExecuteReader();
                 while (reader.Read())
                 {
-                    var rivalId = (int)reader["Id"];
-                    var rivalUserName = (string)reader["RivalUserName"];
+                    var rivalId = Convert.ToInt32(reader["Id"]);
+                    var rivalUserName = reader["RivalUserName"].ToString();
                     var rivalData = new RivalData(rivalId, rivalUserName);
                     rivals.Add(rivalData);
                 }

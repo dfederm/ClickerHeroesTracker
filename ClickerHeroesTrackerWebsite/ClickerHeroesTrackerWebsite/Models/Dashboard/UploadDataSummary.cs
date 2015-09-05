@@ -20,8 +20,8 @@
                 var reader = command.ExecuteReader();
                 while (reader.Read())
                 {
-                    var uploadId = (int)reader["Id"];
-                    var uploadTime = (DateTime)reader["UploadTime"];
+                    var uploadId = Convert.ToInt32(reader["Id"]);
+                    var uploadTime = Convert.ToDateTime(reader["UploadTime"]);
                     var uploadData = new UploadData(uploadId, uploadTime);
                     uploads.Add(uploadData);
                 }

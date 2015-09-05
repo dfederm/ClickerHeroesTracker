@@ -54,7 +54,7 @@
             var factors = this.GetFactors();
 
             var khrysosLevel = this.savedGame.AncientsData.GetAncientLevel(Ancient.Khrysos);
-            var currentGold = khrysosLevel > 0 ? Hero.Get(khrysosLevel + 1).Cost : 0;
+            var currentGold = khrysosLevel > 0 ? Hero.Get((int)khrysosLevel + 1).Cost : 0;
             var startingZone = 2 + (int)this.GetFactor(Ancient.Iris, 1, 1);
             currentGold += 10
                 * MonsterLife(startingZone)
@@ -73,7 +73,7 @@
                 this.GetFactor(Ancient.Dogcog, 0.02, 0.01));
 
             SimulateResult best = null;
-            for (var level = 5; level <= 4000; level += 5)
+            for (short level = 5; level <= 4000; level += 5)
             {
                 if (level < startingZone)
                 {
@@ -244,7 +244,7 @@
                 var levelLife = MonsterLife(i) * (10 - kumawakamaruLevel);
                 life += levelLife;
                 gold += levelLife * MonsterGoldFactor(i);
-                numMobs += 10 - kumawakamaruLevel;
+                numMobs += 10 - (int)kumawakamaruLevel;
             }
 
             var avgGold = gold / Math.Max(numMobs, 1);
@@ -304,7 +304,7 @@
             var ancientLevel = this.savedGame.AncientsData.GetAncientLevel(ancient);
 
             // Adjust ancient levels based on how they scale
-            int ancientValue;
+            long ancientValue;
             if (ancient == Ancient.Solomon)
             {
                 ancientValue = SolomonValue(ancientLevel);
@@ -325,7 +325,7 @@
             int itemValue;
             if (ancient == Ancient.Libertas)
             {
-                itemValue = IdleValue(itemLevel);
+                itemValue = (int)IdleValue(itemLevel);
             }
             else
             {
@@ -366,7 +366,7 @@
             return achievementMultiplier;
         }
 
-        private static double AncientPrice(Ancient ancient, int level)
+        private static double AncientPrice(Ancient ancient, long level)
         {
             var price = Math.Round(Math.Pow(level, ancient.Power));
             if (ancient == Ancient.Kumawakamaru)
@@ -377,7 +377,7 @@
             return price;
         }
 
-        private static int IdleValue(int level)
+        private static long IdleValue(long level)
         {
             var value = 0;
             var add = 25;
@@ -401,7 +401,7 @@
             return value + add * level;
         }
 
-        private static int SolomonValue(int level)
+        private static long SolomonValue(long level)
         {
             var value = 0;
             var add = 5;
@@ -456,7 +456,7 @@
 
         public sealed class SimulateResult
         {
-            public SimulateResult(int level, double time, double souls, double ratio)
+            public SimulateResult(short level, double time, double souls, double ratio)
             {
                 this.Level = level;
                 this.Time = time;
@@ -464,7 +464,7 @@
                 this.Ratio = ratio;
             }
 
-            public int Level { get; private set; }
+            public short Level { get; private set; }
 
             public double Time { get; private set; }
 

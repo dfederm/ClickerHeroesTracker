@@ -6,7 +6,7 @@
 
     public static class Extensions
     {
-        public static int GetAncientLevel(this AncientsData ancientsData, Ancient ancient)
+        public static long GetAncientLevel(this AncientsData ancientsData, Ancient ancient)
         {
             AncientData ancientData;
             return ancientsData.Ancients.TryGetValue(ancient.Id, out ancientData)

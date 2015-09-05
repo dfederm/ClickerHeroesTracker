@@ -33,8 +33,8 @@
                 var reader = command.ExecuteReader();
                 while (reader.Read())
                 {
-                    var settingId = (byte)reader["SettingId"];
-                    var settingValue = (string)reader["SettingValue"];
+                    var settingId = Convert.ToByte(reader["SettingId"]);
+                    var settingValue = reader["SettingValue"].ToString();
                     settingValues.Add(settingId, settingValue);
                 }
             }

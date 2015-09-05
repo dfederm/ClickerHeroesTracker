@@ -58,7 +58,7 @@
                     // Ancient levels
                     DataTable ancientLevelTable = new DataTable();
                     ancientLevelTable.Columns.Add("AncientId", typeof(int));
-                    ancientLevelTable.Columns.Add("Level", typeof(int));
+                    ancientLevelTable.Columns.Add("Level", typeof(long));
                     foreach (var pair in this.AncientLevelSummaryViewModel.AncientLevels)
                     {
                         ancientLevelTable.Rows.Add(pair.Key.Id, pair.Value);
@@ -70,7 +70,7 @@
 
                     command.ExecuteNonQuery();
 
-                    this.UploadId = (int)returnParameter.Value;
+                    this.UploadId = Convert.ToInt32(returnParameter.Value);
                 }
             }
         }
@@ -91,10 +91,10 @@
                 // General upload data
                 if (reader.Read())
                 {
-                    var uploadUserId = (string)reader["UserId"];
-                    var uploadUserName = (string)reader["UserName"];
-                    var uploadTime = (DateTime)reader["UploadTime"];
-                    ////var uploadContent = (string)reader["UploadContent"];
+                    var uploadUserId = reader["UserId"].ToString();
+                    var uploadUserName = reader["UserName"].ToString();
+                    var uploadTime = Convert.ToDateTime(reader["UploadTime"]);
+                    ////var uploadContent = reader["UploadContent"].ToString();
 
                     this.IsOwn = userId == uploadUserId;
                     if (this.IsOwn)

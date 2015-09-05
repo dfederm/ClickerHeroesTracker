@@ -37,7 +37,7 @@
 
                 if (reader.Read())
                 {
-                    this.RivalUserName = (string)reader["RivalUserName"];
+                    this.RivalUserName = reader["RivalUserName"].ToString();
                 }
                 else
                 {
@@ -116,9 +116,9 @@
             string id,
             string title,
             string userName,
-            IDictionary<DateTime, int> userData,
+            IDictionary<DateTime, long> userData,
             string rivalName,
-            IDictionary<DateTime, int> rivalData,
+            IDictionary<DateTime, long> rivalData,
             TimeZoneInfo timeZone)
         {
             var series = new List<Series>();
@@ -176,7 +176,7 @@
             List<Series> series,
             TimeZoneInfo timeZone,
             string name,
-            IDictionary<DateTime, int> data)
+            IDictionary<DateTime, long> data)
         {
             if (data != null && data.Count > 0)
             {
