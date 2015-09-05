@@ -37,7 +37,7 @@
         public bool HasRubyMultiplier { get; set; }
 
         [JsonProperty(PropertyName = "titanDamage", Required = Required.Always)]
-        public int TitanDamage { get; set; }
+        public long TitanDamage { get; set; }
 
         public static SavedGame Parse(string encodedSaveData)
         {
