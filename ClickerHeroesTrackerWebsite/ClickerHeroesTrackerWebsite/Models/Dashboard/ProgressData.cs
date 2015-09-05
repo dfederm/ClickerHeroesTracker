@@ -14,12 +14,16 @@
 
             this.OptimalLevelData = new SortedDictionary<DateTime, int>();
             this.SoulsPerHourData = new SortedDictionary<DateTime, int>();
+            this.TitanDamageData = new SortedDictionary<DateTime, int>();
+            this.SoulsSpentData = new SortedDictionary<DateTime, int>();
 
             while (reader.Read())
             {
                 var uploadTime = (DateTime)reader["UploadTime"];
                 this.OptimalLevelData.AddOrUpdate(uploadTime, (short)reader["OptimalLevel"]);
                 this.SoulsPerHourData.AddOrUpdate(uploadTime, (int)reader["SoulsPerHour"]);
+                this.TitanDamageData.AddOrUpdate(uploadTime, (int)reader["TitanDamage"]);
+                this.SoulsSpentData.AddOrUpdate(uploadTime, (int)reader["SoulsSpent"]);
             }
 
             if (!reader.NextResult())
@@ -63,6 +67,10 @@
         public IDictionary<DateTime, int> OptimalLevelData { get; private set; }
 
         public IDictionary<DateTime, int> SoulsPerHourData { get; private set; }
+
+        public IDictionary<DateTime, int> TitanDamageData { get; private set; }
+
+        public IDictionary<DateTime, int> SoulsSpentData { get; private set; }
 
         public IDictionary<Ancient, IDictionary<DateTime, int>> AncientLevelData { get; private set; }
 

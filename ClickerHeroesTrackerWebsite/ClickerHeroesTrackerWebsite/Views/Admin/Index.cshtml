@@ -1,0 +1,19 @@
+﻿
+@{
+    ViewBag.Title = "Admin";
+}
+
+<h2>Admin</h2>
+
+<p class="text-success">@ViewBag.Message</p>
+
+<div class="row">
+    <div class="col-md-4">
+        <h3>Commands</h3>
+        <ul>
+            <li>
+                @Html.ActionLink("Update Computed Stats", "UpdateComputedStats") - Recalculate computed stats for all uploads.
+            </li>
+        </ul>
+    </div>
+</div>

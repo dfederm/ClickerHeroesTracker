@@ -10,5 +10,8 @@
 
         [JsonProperty(PropertyName = "level", Required = Required.Always)]
         public int Level { get; set; }
+
+        [JsonProperty(PropertyName = "spentHeroSouls", Required = Required.Always)]
+        public int SpentHeroSouls { get; set; }
     }
 }

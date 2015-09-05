@@ -3,6 +3,7 @@
     using Microsoft.VisualStudio.TestTools.UnitTesting;
     using ClickerHeroesTrackerWebsite.Models.Simulation;
     using ClickerHeroesTrackerWebsite.Models.Calculator;
+    using ClickerHeroesTrackerWebsite.Models.SaveData;
 
     [TestClass]
     public class SimulationTests
@@ -16,8 +17,8 @@
 
         private static void Validate(string encodedSaveData, double level, double time, double souls, double ratio)
         {
-            var decodedSaveData = CalculatorViewModel.DecodeSaveData(encodedSaveData);
-            var saveData = CalculatorViewModel.DeserializeSavedGame(decodedSaveData);
+            var decodedSaveData = SavedGame.DecodeSaveData(encodedSaveData);
+            var saveData = SavedGame.DeserializeSavedGame(decodedSaveData);
             var simulationResult = new Simulation(saveData, null).Run();
 
             Assert.IsNotNull(simulationResult);

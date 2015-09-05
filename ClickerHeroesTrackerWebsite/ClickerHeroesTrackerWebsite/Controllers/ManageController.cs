@@ -13,28 +13,14 @@ namespace ClickerHeroesTrackerWebsite.Controllers
     [Authorize]
     public class ManageController : Controller
     {
-        private ApplicationSignInManager _signInManager;
-        private ApplicationUserManager _userManager;
-
-        public ManageController()
-        {
-        }
-
-        public ManageController(ApplicationUserManager userManager, ApplicationSignInManager signInManager)
-        {
-            UserManager = userManager;
-            SignInManager = signInManager;
-        }
+        private ApplicationSignInManager signInManager;
+        private ApplicationUserManager userManager;
 
         public ApplicationSignInManager SignInManager
         {
             get
             {
-                return _signInManager ?? HttpContext.GetOwinContext().Get<ApplicationSignInManager>();
-            }
-            private set 
-            { 
-                _signInManager = value; 
+                return signInManager ?? (signInManager = HttpContext.GetOwinContext().Get<ApplicationSignInManager>());
             }
         }
 
@@ -42,11 +28,7 @@ namespace ClickerHeroesTrackerWebsite.Controllers
         {
             get
             {
-                return _userManager ?? HttpContext.GetOwinContext().GetUserManager<ApplicationUserManager>();
-            }
-            private set
-            {
-                _userManager = value;
+                return userManager ?? (userManager = HttpContext.GetOwinContext().GetUserManager<ApplicationUserManager>());
             }
         }
 
@@ -223,10 +205,19 @@ namespace ClickerHeroesTrackerWebsite.Controllers
 
         protected override void Dispose(bool disposing)
         {
-            if (disposing && _userManager != null)
+            if (disposing)
             {
-                _userManager.Dispose();
-                _userManager = null;
+                if (this.userManager != null)
+                {
+                    this.userManager.Dispose();
+                    this.userManager = null;
+                }
+
+                if (this.signInManager != null)
+                {
+                    this.signInManager.Dispose();
+                    this.signInManager = null;
+                }
             }
 
             base.Dispose(disposing);

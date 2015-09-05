@@ -40,6 +40,16 @@
                     "Optimal Level",
                     data.OptimalLevelData,
                     userSettings.TimeZone),
+                CreateGraph(
+                    "soulsSpentGraph",
+                    "Souls Spent",
+                    data.SoulsSpentData,
+                    userSettings.TimeZone),
+                CreateGraph(
+                    "titanDamageGraph",
+                    "Titan Damage",
+                    data.TitanDamageData,
+                    userSettings.TimeZone),
             };
             this.SecondaryGraphs = data
                 .AncientLevelData

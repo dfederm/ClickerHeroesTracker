@@ -25,7 +25,7 @@
         public static int GetHeroGilds(this HeroesData heroesData, Hero hero)
         {
             HeroData heroData;
-            return heroesData.Heroes.TryGetValue(hero.Id, out heroData)
+            return heroesData != null && heroesData.Heroes.TryGetValue(hero.Id, out heroData)
                 ? heroData.Gilds
                 : 0;
         }
@@ -42,25 +42,28 @@
         {
             var itemLevels = new Dictionary<Ancient, int>();
 
-            var numActiveItems = Math.Min(4, itemsData.Slots.Count);
-            for (var i = 0; i < numActiveItems; i++)
+            if (itemsData != null)
             {
-                int itemId;
-                if (!itemsData.Slots.TryGetValue(i + 1, out itemId))
+                var numActiveItems = Math.Min(4, itemsData.Slots.Count);
+                for (var i = 0; i < numActiveItems; i++)
                 {
-                    continue;
-                }
+                    int itemId;
+                    if (!itemsData.Slots.TryGetValue(i + 1, out itemId))
+                    {
+                        continue;
+                    }
 
-                ItemData itemData;
-                if (!itemsData.Items.TryGetValue(itemId, out itemData))
-                {
-                    continue;
-                }
+                    ItemData itemData;
+                    if (!itemsData.Items.TryGetValue(itemId, out itemData))
+                    {
+                        continue;
+                    }
 
-                AddItemLevels(itemLevels, itemData.Bonus1Type, itemData.Bonus1Level);
-                AddItemLevels(itemLevels, itemData.Bonus2Type, itemData.Bonus2Level);
-                AddItemLevels(itemLevels, itemData.Bonus3Type, itemData.Bonus3Level);
-                AddItemLevels(itemLevels, itemData.Bonus4Type, itemData.Bonus4Level);
+                    AddItemLevels(itemLevels, itemData.Bonus1Type, itemData.Bonus1Level);
+                    AddItemLevels(itemLevels, itemData.Bonus2Type, itemData.Bonus2Level);
+                    AddItemLevels(itemLevels, itemData.Bonus3Type, itemData.Bonus3Level);
+                    AddItemLevels(itemLevels, itemData.Bonus4Type, itemData.Bonus4Level);
+                }
             }
 
             return itemLevels;

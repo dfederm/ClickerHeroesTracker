@@ -70,6 +70,22 @@
                     this.RivalUserName,
                     rivalData.OptimalLevelData,
                     userSettings.TimeZone),
+                CreateGraph(
+                    "soulsSpentGraph",
+                    "Souls Spent",
+                    userName,
+                    userData.SoulsSpentData,
+                    this.RivalUserName,
+                    rivalData.SoulsSpentData,
+                    userSettings.TimeZone),
+                CreateGraph(
+                    "titanDamageGraph",
+                    "Titan Damage",
+                    userName,
+                    userData.TitanDamageData,
+                    this.RivalUserName,
+                    rivalData.TitanDamageData,
+                    userSettings.TimeZone),
             };
             this.SecondaryGraphs = userData
                 .AncientLevelData

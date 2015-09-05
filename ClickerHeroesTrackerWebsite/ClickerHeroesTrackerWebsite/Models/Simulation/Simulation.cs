@@ -344,19 +344,22 @@
         private double AchievementDamageMultiplier()
         {
             var achievementMultiplier = 1d;
-            foreach (var pair in this.savedGame.AchievementsData)
+            if (this.savedGame.AchievementsData != null)
             {
-                var id = pair.Key;
-                var haveAchievement = pair.Value;
-                if (!haveAchievement)
+                foreach (var pair in this.savedGame.AchievementsData)
                 {
-                    continue;
-                }
+                    var id = pair.Key;
+                    var haveAchievement = pair.Value;
+                    if (!haveAchievement)
+                    {
+                        continue;
+                    }
 
-                var achievement = Achievement.Get(id);
-                if (achievement != null)
-                {
-                    achievementMultiplier *= achievement.Multiplier;
+                    var achievement = Achievement.Get(id);
+                    if (achievement != null)
+                    {
+                        achievementMultiplier *= achievement.Multiplier;
+                    }
                 }
             }
 
