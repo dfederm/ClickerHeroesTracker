@@ -30,68 +30,71 @@
                 data = new ProgressData(reader, userSettings);
             }
 
-            this.ProgressSummaryGraph = new GraphData
+            if (data.SoulsPerHourData.Count > 0)
             {
-                Chart = new Chart
+                this.ProgressSummaryGraph = new GraphData
                 {
-                    Type = ChartType.Line
-                },
-                Title = new Title
-                {
-                    Text = "Souls/hr"
-                },
-                XAxis = new Axis
-                {
-                    TickInterval = 24 * 3600 * 1000, // one day
-                    Type = AxisType.Datetime,
-                    TickWidth = 0,
-                    GridLineWidth = 1,
-                    Labels = new Labels
+                    Chart = new Chart
                     {
-                        Align = Align.Left,
-                        X = 3,
-                        Y = -3,
-                        Format = "{value:%m/%d}"
-                    }
-                },
-                YAxis = new Axis
-                {
-                    Labels = new Labels
-                    {
-                        Align = Align.Left,
-                        X = 3,
-                        Y = 16,
-                        Format = "{value:.,0f}"
+                        Type = ChartType.Line
                     },
-                    ShowFirstLabel = false
-                },
-                Legend = new Legend
-                {
-                    Enabled = false
-                },
-                Series = new Series[]
-                {
-                    new Series
+                    Title = new Title
                     {
-                        Data = data
-                            .SoulsPerHourData
-                            .Select(datum => new Point
-                            {
-                                X = datum.Key.ToJavascriptTime(userSettings.TimeZone),
-                                Y = datum.Value
-                            })
-                            .Concat(new[]
-                            {
-                                new Point
+                        Text = "Souls/hr"
+                    },
+                    XAxis = new Axis
+                    {
+                        TickInterval = 24 * 3600 * 1000, // one day
+                        Type = AxisType.Datetime,
+                        TickWidth = 0,
+                        GridLineWidth = 1,
+                        Labels = new Labels
+                        {
+                            Align = Align.Left,
+                            X = 3,
+                            Y = -3,
+                            Format = "{value:%m/%d}"
+                        }
+                    },
+                    YAxis = new Axis
+                    {
+                        Labels = new Labels
+                        {
+                            Align = Align.Left,
+                            X = 3,
+                            Y = 16,
+                            Format = "{value:.,0f}"
+                        },
+                        ShowFirstLabel = false
+                    },
+                    Legend = new Legend
+                    {
+                        Enabled = false
+                    },
+                    Series = new Series[]
+                    {
+                        new Series
+                        {
+                            Data = data
+                                .SoulsPerHourData
+                                .Select(datum => new Point
                                 {
-                                    X = DateTime.UtcNow.ToJavascriptTime(userSettings.TimeZone),
-                                    Y = data.SoulsPerHourData.Last().Value
-                                }
-                            })
-                            .ToList()
+                                    X = datum.Key.ToJavascriptTime(userSettings.TimeZone),
+                                    Y = datum.Value
+                                })
+                                .Concat(new[]
+                                {
+                                    new Point
+                                    {
+                                        X = DateTime.UtcNow.ToJavascriptTime(userSettings.TimeZone),
+                                        Y = data.SoulsPerHourData.Last().Value
+                                    }
+                                })
+                                .ToList()
+                        }
                     }
-                }
-            };
+                };
+            }
 
             this.RivalDataList = new RivalDataList(userId);
 
