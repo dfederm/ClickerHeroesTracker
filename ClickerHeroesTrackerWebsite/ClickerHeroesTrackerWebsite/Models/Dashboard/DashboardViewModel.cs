@@ -17,7 +17,7 @@
 
             var startTime = DateTime.UtcNow.AddDays(-7);
 
-            this.UploadDataSummary = new UploadDataSummary(userId, userSettings);
+            this.UploadDataSummary = new UploadDataSummary(userId, userSettings, 0, 10);
 
             ProgressData data;
             using (var command = new DatabaseCommand("GetProgressData"))

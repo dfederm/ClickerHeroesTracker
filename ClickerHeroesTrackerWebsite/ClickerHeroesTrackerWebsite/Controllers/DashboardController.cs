@@ -1,7 +1,10 @@
 ﻿namespace ClickerHeroesTrackerWebsite.Controllers
 {
+    using Models;
+    using Microsoft.AspNet.Identity;
     using Models.Dashboard;
     using System.Web.Mvc;
+    using System;
 
     [Authorize]
     public class DashboardController : Controller
@@ -14,6 +17,22 @@
                 this.ViewBag.ErrorMessage = "You have no uploaded data!";
                 return View("Error");
             }
+
+            return View(model);
+        }
+
+        public ActionResult Uploads(int? page)
+        {
+            var userId = this.User.Identity.GetUserId();
+
+            var userSettings = new UserSettings(userId);
+            userSettings.Fill();
+
+            var model = new UploadDataSummary(
+                userId,
+                userSettings,
+                page.GetValueOrDefault(),
+                20);
 
             return View(model);
         }

@@ -1,0 +1,56 @@
+﻿@using ClickerHeroesTrackerWebsite.Models.Dashboard
+@model UploadDataSummary
+
+@{
+    ViewBag.Title = "Uploads";
+}
+
+<h2>Uploads</h2>
+
+<div class="row">
+    <div class="col-md-6">
+        @Html.Partial("_UploadDataSummary", Model)
+    </div>
+</div>
+
+@if (Model.TotalUploads > Model.Count)
+{
+    <ul class="pagination">
+        @{ 
+            var minPage = 0;
+            var maxPage = Math.Ceiling((double)Model.TotalUploads / Model.Count) - 1;
+            var startPage = Math.Max(minPage, Math.Min(maxPage - 4, Model.Page - 2));
+            var numPages = Math.Min(5, maxPage - minPage);
+
+            var previousButtonCssClass = Model.Page <= minPage ? "disabled" : null;
+            var nextButtonCssClass = Model.Page >= maxPage ? "disabled" : null;
+        }
+
+        <li class="@previousButtonCssClass">
+            @Html.ActionLink("«", "Uploads", new { page = Model.Page - 1 })
+        </li>
+
+        @for (var i = 0; i < numPages; i++)
+        {
+            var page = startPage + i;
+            var pageCssClass = Model.Page == page ? "active" : null;
+
+            <li class="@pageCssClass">
+                @Html.ActionLink((page + 1).ToString(), "Uploads", new { page = page })
+            </li>
+        }
+
+        <li class="@nextButtonCssClass">
+            @Html.ActionLink("»", "Uploads", new { page = Model.Page + 1 })
+        </li>
+    </ul>
+}
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+
+    @* Wire up tooltips *@
+    <script type="text/javascript">
+        $('[data-toggle="tooltip"]').tooltip();
+    </script>
+}
