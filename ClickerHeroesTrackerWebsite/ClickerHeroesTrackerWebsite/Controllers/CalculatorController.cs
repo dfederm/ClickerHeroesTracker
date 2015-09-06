@@ -20,16 +20,18 @@
             return this.GetResult(model, true);
         }
 
-        public ActionResult View(int uploadId)
+        public ActionResult View(int? uploadId)
         {
-            var model = new CalculatorViewModel(uploadId, this.User);
+            CalculatorViewModel model = uploadId.HasValue
+                ? new CalculatorViewModel(uploadId.Value, this.User)
+                : null;
             return this.GetResult(model, false);
         }
 
         private ActionResult GetResult(CalculatorViewModel model, bool wasDataPosted)
         {
             string errorMessage = null;
-            if (!model.IsValid)
+            if (model == null || !model.IsValid)
             {
                 if (wasDataPosted)
                 {
