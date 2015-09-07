@@ -5,15 +5,42 @@
 
 <h2>Admin</h2>
 
-<p class="text-success">@ViewBag.Message</p>
+@if (@ViewBag.Message != null)
+{
+    <p class="text-success">@ViewBag.Message</p>
+}
+
+@if (@ViewBag.Error != null)
+{
+    <p class="text-danger">@ViewBag.Error</p>
+}
 
 <div class="row">
     <div class="col-md-4">
         <h3>Commands</h3>
-        <ul>
-            <li>
-                @Html.ActionLink("Update Computed Stats", "UpdateComputedStats") - Recalculate computed stats for all uploads.
-            </li>
-        </ul>
+        <div>
+            Recalculate computed stats for an upload.
+            @using (Html.BeginForm("UpdateComputedStats", "Admin", FormMethod.Get, new { @class = "form-horizontal", role = "form" }))
+            {
+                <dl class="dl-horizontal">
+                    <dt>Upload Ids</dt>
+                    <dd>
+                        <input type="text" name="uploadIds" class="input-sm" />
+                        <div class="text-muted">
+                            Use commas to separate the Ids.
+                        </div>
+                        <div class="text-muted">
+                            Leave blank to recompute all uploads.
+                        </div>
+                    </dd>
+                </dl>
+                <dl class="dl-horizontal">
+                    <dt></dt>
+                    <dd>
+                        <input type="submit" class="btn btn-default" value="Recompute" />
+                    </dd>
+                </dl>
+            }
+        </div>
     </div>
 </div>

@@ -12,6 +12,7 @@
     using Models.Calculator;
     using System.Data;
     using System;
+    using System.Linq;
 
     [Authorize(Roles = "Admin")]
     public class AdminController : Controller
@@ -44,7 +45,7 @@
         }
 
         // GET: UpdateComputedStats
-        public ActionResult UpdateComputedStats()
+        public ActionResult UpdateComputedStats(string uploadIds)
         {
             DataTable computedStatsTable = new DataTable();
             computedStatsTable.Columns.Add("UploadId", typeof(int));
@@ -55,30 +56,54 @@
             computedStatsTable.Columns.Add("TitanDamange", typeof(long));
             computedStatsTable.Columns.Add("SoulsSpent", typeof(long));
 
-            using (var command = new DatabaseCommand("GetAllUploadContent"))
+            if (uploadIds != null)
             {
-                var reader = command.ExecuteReader();
-                while (reader.Read())
+                if (uploadIds.Equals("ALL", StringComparison.OrdinalIgnoreCase))
                 {
-                    var uploadId = Convert.ToInt32(reader["Id"]);
-                    var uploadContent = reader["UploadContent"].ToString();
-
-                    var savedGame = SavedGame.Parse(uploadContent);
-                    if (savedGame == null)
+                    using (var command = new DatabaseCommand("GetAllUploadContent"))
                     {
-                        continue;
+                        var reader = command.ExecuteReader();
+                        while (reader.Read())
+                        {
+                            var uploadId = Convert.ToInt32(reader["Id"]);
+                            var uploadContent = reader["UploadContent"].ToString();
+                            AddComputedStatsRow(computedStatsTable, uploadId, uploadContent);
+                        }
                     }
-
-                    var computedStats = new ComputedStatsViewModel(savedGame, null);
-                    computedStatsTable.Rows.Add(
-                        uploadId,
-                        computedStats.OptimalLevel,
-                        computedStats.SoulsPerHour,
-                        computedStats.OptimalSoulsPerAscension,
-                        computedStats.OptimalAscensionTime,
-                        computedStats.TitanDamage,
-                        computedStats.SoulsSpent);
                 }
+                else
+                {
+                    var uploadIdsRaw = uploadIds.Split(',');
+                    foreach (var uploadIdRaw in uploadIdsRaw)
+                    {
+                        int uploadId;
+                        if (int.TryParse(uploadIdRaw.Trim(), out uploadId))
+                        {
+                            using (var command = new DatabaseCommand("GetUploadDetails"))
+                            {
+                                command.AddParameter("@UploadId", uploadId);
+
+                                var reader = command.ExecuteReader();
+
+                                // General upload data
+                                reader.Read();
+                                var uploadContent = reader["UploadContent"].ToString();
+                                reader.NextResult();
+
+                                // Skip ancient levels
+                                reader.NextResult();
+
+                                AddComputedStatsRow(computedStatsTable, uploadId, uploadContent);
+                            }
+                        }
+                    }
+                }
+            }
+
+            if (computedStatsTable.Rows.Count == 0)
+            {
+                this.ViewBag.Error = "No valid upload ids";
+                return View("Index");
             }
 
             using (var command = new DatabaseCommand("UpdateComputedStats"))
@@ -89,6 +114,25 @@
 
             this.ViewBag.Message = "Recomputed stats for " + computedStatsTable.Rows.Count + " uploads";
             return View("Index");
+        }
+
+        private static void AddComputedStatsRow(DataTable computedStatsTable, int uploadId, string uploadContent)
+        {
+            var savedGame = SavedGame.Parse(uploadContent);
+            if (savedGame == null)
+            {
+                return;
+            }
+
+            var computedStats = new ComputedStatsViewModel(savedGame, null);
+            computedStatsTable.Rows.Add(
+                uploadId,
+                computedStats.OptimalLevel,
+                computedStats.SoulsPerHour,
+                computedStats.OptimalSoulsPerAscension,
+                computedStats.OptimalAscensionTime,
+                computedStats.TitanDamage,
+                computedStats.SoulsSpent);
         }
     }
 }
