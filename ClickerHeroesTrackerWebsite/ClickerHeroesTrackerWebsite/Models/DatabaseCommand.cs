@@ -4,11 +4,10 @@
     using System.Configuration;
     using System.Data;
     using System.Data.SqlClient;
+    using System.Web;
 
     public sealed class DatabaseCommand : IDisposable
     {
-        private SqlConnection connection;
-
         private SqlCommand command;
 
         private bool isDisposed = false;
@@ -20,9 +19,8 @@
                 throw new ArgumentException("value may not be emtpy", "storedProcedureName");
             }
 
-            var connectionString = ConfigurationManager.ConnectionStrings["DefaultConnection"].ConnectionString;
-            this.connection = new SqlConnection(connectionString);
-            this.connection.Open();
+            var connection = HttpContext.Current.Items["SqlConnection"] as SqlConnection
+                    ?? (SqlConnection)(HttpContext.Current.Items["SqlConnection"] = CreateConnection());
 
             this.command = new SqlCommand(storedProcedureName, connection);
             this.command.CommandType = CommandType.StoredProcedure;
@@ -49,25 +47,44 @@
 
         public void ExecuteNonQuery()
         {
-            this.command.ExecuteNonQuery();
+            using (new DependencyScope())
+            {
+                this.command.ExecuteNonQuery();
+            }
         }
 
         public SqlDataReader ExecuteReader()
         {
-            return this.command.ExecuteReader();
+            using (new DependencyScope())
+            {
+                return this.command.ExecuteReader();
+            }
         }
 
         public void Dispose()
         {
-            if (!isDisposed)
+            if (!this.isDisposed)
             {
-                this.connection.Dispose();
-                this.connection = null;
-
                 this.command.Dispose();
                 this.command = null;
 
-                isDisposed = true;
+                this.isDisposed = true;
+            }
+        }
+
+        private static SqlConnection CreateConnection()
+        {
+            var connectionString = ConfigurationManager.ConnectionStrings["DefaultConnection"].ConnectionString;
+
+            Telemetry.Client.TrackEvent("SqlConnectionOpen");
+
+            using (new DependencyScope())
+            {
+                // Although this class creates the object, we want to cache and reuse the connection for the whole request.
+                // We expect DatabaseConnectionClosingFilter to close the connection.
+                var connection = new SqlConnection(connectionString);
+                connection.Open();
+                return connection;
             }
         }
     }

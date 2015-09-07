@@ -1,6 +1,6 @@
 ﻿namespace ClickerHeroesTrackerWebsite.Filters
 {
-    using Microsoft.ApplicationInsights;
+    using Models;
     using System.Web.Mvc;
 
     public class HandleAndInstrumentErrorFilter : HandleErrorAttribute
@@ -11,8 +11,7 @@
             {
                 if (filterContext.HttpContext.IsCustomErrorEnabled)
                 {
-                    var telemetry = new TelemetryClient();
-                    telemetry.TrackException(filterContext.Exception);
+                    Telemetry.Client.TrackException(filterContext.Exception);
                 }
             }
 

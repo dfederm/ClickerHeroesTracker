@@ -1,6 +1,6 @@
 ﻿namespace ClickerHeroesTrackerWebsite.Filters
 {
-    using Microsoft.ApplicationInsights;
+    using Models;
     using Microsoft.AspNet.Identity;
     using System.Collections.Generic;
     using System.Web;
@@ -12,8 +12,7 @@
         {
             var user = filterContext.HttpContext.User.Identity;
 
-            var telemetry = new TelemetryClient();
-            telemetry.TrackEvent(
+            Telemetry.Client.TrackEvent(
                 "Request",
                 new Dictionary<string, string>
                 {

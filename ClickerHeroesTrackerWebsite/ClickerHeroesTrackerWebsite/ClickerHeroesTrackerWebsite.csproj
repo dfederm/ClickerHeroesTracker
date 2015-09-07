@@ -222,12 +222,16 @@
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\ManageController.cs" />
     <Compile Include="Controllers\UploadController.cs" />
+    <Compile Include="Filters\DatabaseConnectionClosingFilter.cs" />
     <Compile Include="Filters\HandleAndInstrumentErrorFilter.cs" />
+    <Compile Include="Filters\MeasureLatencyFilter.cs" />
     <Compile Include="Filters\UserInstrumentationFilter.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
     <Compile Include="Models\AccountViewModels.cs" />
+    <Compile Include="Models\DependencyScope.cs" />
+    <Compile Include="Models\LatencyCounter.cs" />
     <Compile Include="Models\PlayStyle.cs" />
     <Compile Include="Models\Dashboard\DashboardViewModel.cs" />
     <Compile Include="Models\Dashboard\Graph\Align.cs" />
@@ -275,6 +279,7 @@
     <Compile Include="Models\SaveData\SaveData.cs" />
     <Compile Include="Models\Calculator\HeroLevelSummaryViewModel.cs" />
     <Compile Include="Models\Calculator\SuggestedAncientLevelsViewModel.cs" />
+    <Compile Include="Models\Telemetry.cs" />
     <Compile Include="Models\Upload\UploadViewModel.cs" />
     <Compile Include="Models\UserSettings.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

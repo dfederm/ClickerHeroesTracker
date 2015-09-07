@@ -20,19 +20,21 @@
 
                 var returnParameter = command.AddReturnParameter();
 
-                var reader = command.ExecuteReader();
-                while (reader.Read())
+                using (var reader = command.ExecuteReader())
                 {
-                    var uploadId = Convert.ToInt32(reader["Id"]);
-                    var uploadTime = Convert.ToDateTime(reader["UploadTime"]);
-                    var uploadData = new UploadData(uploadId, uploadTime);
-                    uploads.Add(uploadData);
+                    while (reader.Read())
+                    {
+                        var uploadId = Convert.ToInt32(reader["Id"]);
+                        var uploadTime = Convert.ToDateTime(reader["UploadTime"]);
+                        var uploadData = new UploadData(uploadId, uploadTime);
+                        uploads.Add(uploadData);
+                    }
+
+                    // Move beyond the result above.
+                    reader.NextResult();
+
+                    this.TotalUploads = Convert.ToInt32(returnParameter.Value);
                 }
-
-                // Move beyond the result above.
-                reader.NextResult();
-
-                this.TotalUploads = Convert.ToInt32(returnParameter.Value);
             }
 
             this.Uploads = uploads;

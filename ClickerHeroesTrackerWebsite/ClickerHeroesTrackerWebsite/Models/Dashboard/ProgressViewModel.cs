@@ -23,9 +23,10 @@
                 command.AddParameter("@UserId", userId);
                 command.AddParameter("@StartTime", startTime);
 
-                var reader = command.ExecuteReader();
-
-                data = new ProgressData(reader, userSettings);
+                using (var reader = command.ExecuteReader())
+                {
+                    data = new ProgressData(reader, userSettings);
+                }
             }
 
             this.ProminentGraphs = new List<GraphViewModel>

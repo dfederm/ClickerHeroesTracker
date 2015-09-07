@@ -62,12 +62,14 @@
                 {
                     using (var command = new DatabaseCommand("GetAllUploadContent"))
                     {
-                        var reader = command.ExecuteReader();
-                        while (reader.Read())
+                        using (var reader = command.ExecuteReader())
                         {
-                            var uploadId = Convert.ToInt32(reader["Id"]);
-                            var uploadContent = reader["UploadContent"].ToString();
-                            AddComputedStatsRow(computedStatsTable, uploadId, uploadContent);
+                            while (reader.Read())
+                            {
+                                var uploadId = Convert.ToInt32(reader["Id"]);
+                                var uploadContent = reader["UploadContent"].ToString();
+                                AddComputedStatsRow(computedStatsTable, uploadId, uploadContent);
+                            }
                         }
                     }
                 }
@@ -83,17 +85,14 @@
                             {
                                 command.AddParameter("@UploadId", uploadId);
 
-                                var reader = command.ExecuteReader();
+                                using (var reader = command.ExecuteReader())
+                                {
+                                    // General upload data
+                                    reader.Read();
+                                    var uploadContent = reader["UploadContent"].ToString();
 
-                                // General upload data
-                                reader.Read();
-                                var uploadContent = reader["UploadContent"].ToString();
-                                reader.NextResult();
-
-                                // Skip ancient levels
-                                reader.NextResult();
-
-                                AddComputedStatsRow(computedStatsTable, uploadId, uploadContent);
+                                    AddComputedStatsRow(computedStatsTable, uploadId, uploadContent);
+                                }
                             }
                         }
                     }

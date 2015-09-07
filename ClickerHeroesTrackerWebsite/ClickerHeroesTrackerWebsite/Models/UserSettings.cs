@@ -30,12 +30,14 @@
             {
                 command.AddParameter("@UserId", this.userId);
 
-                var reader = command.ExecuteReader();
-                while (reader.Read())
+                using (var reader = command.ExecuteReader())
                 {
-                    var settingId = Convert.ToByte(reader["SettingId"]);
-                    var settingValue = reader["SettingValue"].ToString();
-                    settingValues.Add(settingId, settingValue);
+                    while (reader.Read())
+                    {
+                        var settingId = Convert.ToByte(reader["SettingId"]);
+                        var settingValue = reader["SettingValue"].ToString();
+                        settingValues.Add(settingId, settingValue);
+                    }
                 }
             }
         }

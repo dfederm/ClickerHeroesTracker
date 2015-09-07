@@ -87,54 +87,55 @@
             {
                 command.AddParameter("@UploadId", uploadId);
 
-                var reader = command.ExecuteReader();
-
-                // General upload data
-                if (reader.Read())
+                using (var reader = command.ExecuteReader())
                 {
-                    var uploadUserId = reader["UserId"].ToString();
-                    var uploadUserName = reader["UserName"].ToString();
-                    var uploadTime = Convert.ToDateTime(reader["UploadTime"]);
-                    var uploadContent = reader["UploadContent"].ToString();
-
-                    this.IsOwn = userId == uploadUserId;
-                    if (this.IsOwn)
+                    // General upload data
+                    if (reader.Read())
                     {
-                        this.IsPublic = this.UserSettings.AreUploadsPublic;
-                        this.IsPermitted = true;
+                        var uploadUserId = reader["UserId"].ToString();
+                        var uploadUserName = reader["UserName"].ToString();
+                        var uploadTime = Convert.ToDateTime(reader["UploadTime"]);
+                        var uploadContent = reader["UploadContent"].ToString();
+
+                        this.IsOwn = userId == uploadUserId;
+                        if (this.IsOwn)
+                        {
+                            this.IsPublic = this.UserSettings.AreUploadsPublic;
+                            this.IsPermitted = true;
+                        }
+                        else
+                        {
+                            var uploadUserSettings = new UserSettings(uploadUserId);
+                            uploadUserSettings.Fill();
+
+                            this.IsPublic = uploadUserSettings.AreUploadsPublic;
+                            this.IsPermitted = this.IsPublic || user.IsInRole("Admin");
+                        }
+
+                        this.UploadUserName = uploadUserName;
+                        this.UploadTime = uploadTime;
+                        this.UploadContent = uploadContent;
                     }
                     else
                     {
-                        var uploadUserSettings = new UserSettings(uploadUserId);
-                        uploadUserSettings.Fill();
-
-                        this.IsPublic = uploadUserSettings.AreUploadsPublic;
-                        this.IsPermitted = this.IsPublic || user.IsInRole("Admin");
+                        return;
                     }
 
-                    this.UploadUserName = uploadUserName;
-                    this.UploadTime = uploadTime;
-                    this.UploadContent = uploadContent;
-                }
-                else
-                {
-                    return;
-                }
+                    if (!reader.NextResult())
+                    {
+                        return;
+                    }
 
-                if (!reader.NextResult())
-                {
-                    return;
+                    // Get ancient levels
+                    this.AncientLevelSummaryViewModel = new AncientLevelSummaryViewModel(reader);
+
+                    if (!reader.NextResult())
+                    {
+                        return;
+                    }
+
+                    this.ComputedStatsViewModel = new ComputedStatsViewModel(reader, this.UserSettings);
                 }
-
-                // Get ancient levels
-                this.AncientLevelSummaryViewModel = new AncientLevelSummaryViewModel(reader);
-
-                if (!reader.NextResult())
-                {
-                    return;
-                }
-
-                this.ComputedStatsViewModel = new ComputedStatsViewModel(reader, this.UserSettings);
 
                 this.SuggestedAncientLevelsViewModel = new SuggestedAncientLevelsViewModel(
                     this.AncientLevelSummaryViewModel.AncientLevels,

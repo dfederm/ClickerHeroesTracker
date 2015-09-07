@@ -27,29 +27,30 @@
                 command.AddParameter("@RivalId", rivalId);
                 command.AddParameter("@StartTime", startTime);
 
-                var reader = command.ExecuteReader();
-
-                userData = new ProgressData(reader, userSettings);
-                if (!reader.NextResult())
+                using (var reader = command.ExecuteReader())
                 {
-                    return;
-                }
+                    userData = new ProgressData(reader, userSettings);
+                    if (!reader.NextResult())
+                    {
+                        return;
+                    }
 
-                if (reader.Read())
-                {
-                    this.RivalUserName = reader["RivalUserName"].ToString();
-                }
-                else
-                {
-                    return;
-                }
+                    if (reader.Read())
+                    {
+                        this.RivalUserName = reader["RivalUserName"].ToString();
+                    }
+                    else
+                    {
+                        return;
+                    }
 
-                if (!reader.NextResult())
-                {
-                    return;
-                }
+                    if (!reader.NextResult())
+                    {
+                        return;
+                    }
 
-                rivalData = new ProgressData(reader, userSettings);
+                    rivalData = new ProgressData(reader, userSettings);
+                }
             }
 
             this.ProminentGraphs = new List<GraphViewModel>

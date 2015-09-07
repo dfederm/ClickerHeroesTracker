@@ -13,13 +13,15 @@
             {
                 command.AddParameter("@UserId", userId);
 
-                var reader = command.ExecuteReader();
-                while (reader.Read())
+                using (var reader = command.ExecuteReader())
                 {
-                    var rivalId = Convert.ToInt32(reader["Id"]);
-                    var rivalUserName = reader["RivalUserName"].ToString();
-                    var rivalData = new RivalData(rivalId, rivalUserName);
-                    rivals.Add(rivalData);
+                    while (reader.Read())
+                    {
+                        var rivalId = Convert.ToInt32(reader["Id"]);
+                        var rivalUserName = reader["RivalUserName"].ToString();
+                        var rivalData = new RivalData(rivalId, rivalUserName);
+                        rivals.Add(rivalData);
+                    }
                 }
             }
 
