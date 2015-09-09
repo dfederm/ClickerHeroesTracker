@@ -5,26 +5,26 @@
 
     public class MeasureLatencyFilter : IActionFilter, IResultFilter, IExceptionFilter
     {
-        public void OnActionExecuted(ActionExecutedContext filterContext)
+        public void OnActionExecuting(ActionExecutingContext filterContext)
         {
             LatencyCounter.TotalLatency.Start();
             LatencyCounter.InternalLatency.Start();
             LatencyCounter.ActionLatency.Start();
         }
 
-        public void OnActionExecuting(ActionExecutingContext filterContext)
+        public void OnActionExecuted(ActionExecutedContext filterContext)
         {
             LatencyCounter.ActionLatency.Record();
-        }
-
-        public void OnResultExecuted(ResultExecutedContext filterContext)
-        {
-            LatencyCounter.ResultLatency.Start();
         }
 
         public void OnResultExecuting(ResultExecutingContext filterContext)
         {
-            LatencyCounter.ActionLatency.Record();
+            LatencyCounter.ResultLatency.Start();
+        }
+
+        public void OnResultExecuted(ResultExecutedContext filterContext)
+        {
+            LatencyCounter.ResultLatency.Record();
             LatencyCounter.InternalLatency.Record();
             LatencyCounter.DependencyLatency.Record();
             LatencyCounter.TotalLatency.Record();

@@ -8,7 +8,7 @@
 
     public class UserInstrumentationFilter : IActionFilter
     {
-        public void OnActionExecuted(ActionExecutedContext filterContext)
+        public void OnActionExecuting(ActionExecutingContext filterContext)
         {
             var user = filterContext.HttpContext.User.Identity;
 
@@ -22,7 +22,7 @@
                 });
         }
 
-        public void OnActionExecuting(ActionExecutingContext filterContext)
+        public void OnActionExecuted(ActionExecutedContext filterContext)
         {
         }
 
