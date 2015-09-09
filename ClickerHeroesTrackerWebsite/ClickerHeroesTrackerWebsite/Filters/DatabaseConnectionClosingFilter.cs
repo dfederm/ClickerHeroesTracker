@@ -6,11 +6,11 @@
 
     public class DatabaseConnectionClosingFilter : IActionFilter
     {
-        public void OnActionExecuted(ActionExecutedContext filterContext)
+        public void OnActionExecuting(ActionExecutingContext filterContext)
         {
         }
 
-        public void OnActionExecuting(ActionExecutingContext filterContext)
+        public void OnActionExecuted(ActionExecutedContext filterContext)
         {
             var connection = filterContext.HttpContext.Items["SqlConnection"] as SqlConnection;
             if (connection != null)
