@@ -87,34 +87,16 @@
             {
                 command.AddParameter("@UploadId", uploadId);
 
+                string uploadUserId;
                 using (var reader = command.ExecuteReader())
                 {
                     // General upload data
                     if (reader.Read())
                     {
-                        var uploadUserId = reader["UserId"].ToString();
-                        var uploadUserName = reader["UserName"].ToString();
-                        var uploadTime = Convert.ToDateTime(reader["UploadTime"]);
-                        var uploadContent = reader["UploadContent"].ToString();
-
-                        this.IsOwn = userId == uploadUserId;
-                        if (this.IsOwn)
-                        {
-                            this.IsPublic = this.UserSettings.AreUploadsPublic;
-                            this.IsPermitted = true;
-                        }
-                        else
-                        {
-                            var uploadUserSettings = new UserSettings(uploadUserId);
-                            uploadUserSettings.Fill();
-
-                            this.IsPublic = uploadUserSettings.AreUploadsPublic;
-                            this.IsPermitted = this.IsPublic || user.IsInRole("Admin");
-                        }
-
-                        this.UploadUserName = uploadUserName;
-                        this.UploadTime = uploadTime;
-                        this.UploadContent = uploadContent;
+                        uploadUserId = reader["UserId"].ToString();
+                        this.UploadUserName = reader["UserName"].ToString(); ;
+                        this.UploadTime = Convert.ToDateTime(reader["UploadTime"]);
+                        this.UploadContent = reader["UploadContent"].ToString();
                     }
                     else
                     {
@@ -135,6 +117,21 @@
                     }
 
                     this.ComputedStatsViewModel = new ComputedStatsViewModel(reader, this.UserSettings);
+                }
+
+                this.IsOwn = userId == uploadUserId;
+                if (this.IsOwn)
+                {
+                    this.IsPublic = this.UserSettings.AreUploadsPublic;
+                    this.IsPermitted = true;
+                }
+                else
+                {
+                    var uploadUserSettings = new UserSettings(uploadUserId);
+                    uploadUserSettings.Fill();
+
+                    this.IsPublic = uploadUserSettings.AreUploadsPublic;
+                    this.IsPermitted = this.IsPublic || user.IsInRole("Admin");
                 }
 
                 this.SuggestedAncientLevelsViewModel = new SuggestedAncientLevelsViewModel(
