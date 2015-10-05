@@ -56,6 +56,11 @@
             computedStatsTable.Columns.Add("TitanDamange", typeof(long));
             computedStatsTable.Columns.Add("SoulsSpent", typeof(long));
 
+            DataTable ancientLevelsTable = new DataTable();
+            ancientLevelsTable.Columns.Add("UploadId", typeof(int));
+            ancientLevelsTable.Columns.Add("AncientId", typeof(byte));
+            ancientLevelsTable.Columns.Add("Level", typeof(long));
+
             if (uploadIds != null)
             {
                 if (uploadIds.Equals("ALL", StringComparison.OrdinalIgnoreCase))
@@ -68,7 +73,7 @@
                             {
                                 var uploadId = Convert.ToInt32(reader["Id"]);
                                 var uploadContent = reader["UploadContent"].ToString();
-                                AddComputedStatsRow(computedStatsTable, uploadId, uploadContent);
+                                AddRows(computedStatsTable, ancientLevelsTable, uploadId, uploadContent);
                             }
                         }
                     }
@@ -91,7 +96,7 @@
                                     reader.Read();
                                     var uploadContent = reader["UploadContent"].ToString();
 
-                                    AddComputedStatsRow(computedStatsTable, uploadId, uploadContent);
+                                    AddRows(computedStatsTable, ancientLevelsTable, uploadId, uploadContent);
                                 }
                             }
                         }
@@ -99,23 +104,28 @@
                 }
             }
 
-            if (computedStatsTable.Rows.Count == 0)
+            if (computedStatsTable.Rows.Count == 0 || ancientLevelsTable.Rows.Count == 0)
             {
                 this.ViewBag.Error = "No valid upload ids";
                 return View("Index");
             }
 
-            using (var command = new DatabaseCommand("UpdateComputedStats"))
+            using (var command = new DatabaseCommand("UpdateUploadData"))
             {
                 command.AddTableParameter("@ComputedStatsUpdates", "ComputedStatsUpdate", computedStatsTable);
+                command.AddTableParameter("@AncientLevelsUpdates", "AncientLevelsUpdate", ancientLevelsTable);
                 command.ExecuteNonQuery();
             }
 
-            this.ViewBag.Message = "Recomputed stats for " + computedStatsTable.Rows.Count + " uploads";
+            this.ViewBag.Message = "Updated " + computedStatsTable.Rows.Count + " uploads";
             return View("Index");
         }
 
-        private static void AddComputedStatsRow(DataTable computedStatsTable, int uploadId, string uploadContent)
+        private static void AddRows(
+            DataTable computedStatsTable,
+            DataTable ancientLevelsTable,
+            int uploadId,
+            string uploadContent)
         {
             var savedGame = SavedGame.Parse(uploadContent);
             if (savedGame == null)
@@ -132,6 +142,15 @@
                 computedStats.OptimalAscensionTime,
                 computedStats.TitanDamage,
                 computedStats.SoulsSpent);
+
+            var ancientLevels = new AncientLevelSummaryViewModel(savedGame.AncientsData);
+            foreach (var ancientLevel in ancientLevels.AncientLevels)
+            {
+                ancientLevelsTable.Rows.Add(
+                    uploadId,
+                    ancientLevel.Key.Id,
+                    ancientLevel.Value);
+            }
         }
     }
 }
