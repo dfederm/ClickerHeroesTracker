@@ -43,7 +43,7 @@
             var suggestedMorgLevel = (long)Math.Round(Math.Pow(suggestedSiyaLevel, 2) + (43.67 * suggestedSiyaLevel) + 33.58);
             var suggestedGoldLevel = (long)Math.Round(suggestedSiyaLevel * 0.93);
             var suggestedClickLevel = (long)Math.Round(suggestedSiyaLevel * 0.5);
-            var suggestedJuggernautLevel = (long)Math.Round(suggestedClickLevel * 0.2);
+            var suggestedJuggernautLevel = (long)Math.Round(Math.Pow(suggestedClickLevel, 0.8));
             var suggestedIrisLevel = optimalLevel - 1001;
             var suggestedSolomonLevel = userSettings.UseReducedSolomonFormula
                 ? (long)Math.Round(1.15 * Math.Pow(Math.Log10(3.25 * Math.Pow(suggestedSiyaLevel, 2)), 0.4) * Math.Pow(suggestedSiyaLevel, 0.8))
