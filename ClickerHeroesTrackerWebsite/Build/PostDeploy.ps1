@@ -1,15 +1,15 @@
 Param(
-	[string]$Site = $env:Site,
-	[string]$Slot = $env:Slot
+	[string]$WebsiteName = $env:WebsiteName,
+	[string]$StagingSlot = $env:StagingSlot
 )
 
 try
 {
-	$siteUrl = "http://" + $Site
+	$siteUrl = "http://" + $WebsiteName
 
-	if (![string]::IsNullOrEmpty($Slot))
+	if (![string]::IsNullOrEmpty($StagingSlot))
 	{
-		$siteUrl += "-" + $Slot
+		$siteUrl += "-" + $StagingSlot
 	}
 
 	$siteUrl += ".azurewebsites.net/"
