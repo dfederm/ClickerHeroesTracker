@@ -5,10 +5,14 @@ Param(
 
 try
 {
+	# Log params
+	Write-Host "SourceDirectory=$SourceDirectory"
+	Write-Host "SourceVersion=$SourceVersion"
+
 	$versionPattern = "(\d+)\.(\d+)\.(\d+)\.(\d+)"
 
-	# The string is of the form CS<changelist>, so cut off the "CS" part
-	$SourceVersion = $SourceVersion.Substring(2)
+	# The string is of the form C<changelist>, so cut off the "C" part
+	$SourceVersion = $SourceVersion.Substring(1)
 
 	Write-Host "Using version $SourceVersion"
  

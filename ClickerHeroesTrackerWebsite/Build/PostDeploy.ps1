@@ -5,6 +5,10 @@ Param(
 
 try
 {
+	# Log params
+	Write-Host "WebsiteName=$WebsiteName"
+	Write-Host "StagingSlot=$StagingSlot"
+
 	$siteUrl = "http://" + $WebsiteName
 
 	if (![string]::IsNullOrEmpty($StagingSlot))
