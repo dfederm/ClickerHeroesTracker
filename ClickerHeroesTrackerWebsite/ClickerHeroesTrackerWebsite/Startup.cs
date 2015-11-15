@@ -8,6 +8,7 @@ namespace ClickerHeroesTrackerWebsite
     {
         public void Configuration(IAppBuilder app)
         {
+            ConfigureContainer(app);
             ConfigureAuth(app);
         }
     }
