@@ -7,6 +7,15 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ClickerHeroesTrackerWebsite
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ClickerHeroesTrackerWebsite.Tests", "ClickerHeroesTrackerWebsite.Tests\ClickerHeroesTrackerWebsite.Tests.csproj", "{F82B0586-9E62-43FA-BEDF-1A162C2935FD}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Build", "Build", "{B99EE4D7-6FCF-4181-99B0-D5ACABDFFB2A}"
+	ProjectSection(SolutionItems) = preProject
+		Build\PostDeploy.ps1 = Build\PostDeploy.ps1
+		Build\PreBuild.ps1 = Build\PreBuild.ps1
+		Build\SetEnvironment.bat = Build\SetEnvironment.bat
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ClickerHeroesTrackerWebsite.IntegrationTests", "ClickerHeroesTrackerWebsite.IntegrationTests\ClickerHeroesTrackerWebsite.IntegrationTests.csproj", "{BABC2536-C712-4AE2-AA28-9A08A2EEA317}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,12 +30,16 @@ Global
 		{F82B0586-9E62-43FA-BEDF-1A162C2935FD}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F82B0586-9E62-43FA-BEDF-1A162C2935FD}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F82B0586-9E62-43FA-BEDF-1A162C2935FD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BABC2536-C712-4AE2-AA28-9A08A2EEA317}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BABC2536-C712-4AE2-AA28-9A08A2EEA317}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BABC2536-C712-4AE2-AA28-9A08A2EEA317}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BABC2536-C712-4AE2-AA28-9A08A2EEA317}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(TeamFoundationVersionControl) = preSolution
-		SccNumberOfProjects = 3
+		SccNumberOfProjects = 4
 		SccEnterpriseProvider = {4CA58AB2-18FA-4F8D-95D4-32DDF27D184C}
 		SccTeamFoundationServer = https://dfederm.visualstudio.com/defaultcollection
 		SccLocalPath0 = .
@@ -36,5 +49,8 @@ Global
 		SccProjectUniqueName2 = ClickerHeroesTrackerWebsite\\ClickerHeroesTrackerWebsite.csproj
 		SccProjectName2 = ClickerHeroesTrackerWebsite
 		SccLocalPath2 = ClickerHeroesTrackerWebsite
+		SccProjectUniqueName3 = ClickerHeroesTrackerWebsite.IntegrationTests\\ClickerHeroesTrackerWebsite.IntegrationTests.csproj
+		SccProjectName3 = ClickerHeroesTrackerWebsite.IntegrationTests
+		SccLocalPath3 = ClickerHeroesTrackerWebsite.IntegrationTests
 	EndGlobalSection
 EndGlobal
