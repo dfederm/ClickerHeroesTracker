@@ -3,7 +3,6 @@
     using Models.Upload;
     using Models.Calculator;
     using System.Web.Mvc;
-    using Microsoft.AspNet.Identity;
 
     public class CalculatorController : Controller
     {

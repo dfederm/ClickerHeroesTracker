@@ -1,18 +1,11 @@
 ﻿namespace ClickerHeroesTrackerWebsite.Controllers
 {
     using Models;
-    using Microsoft.AspNet.Identity;
-    using Microsoft.AspNet.Identity.EntityFramework;
-    using Microsoft.AspNet.Identity.Owin;
-    using System.Threading.Tasks;
-    using System.Web;
     using System.Web.Mvc;
-    using System.Collections.Generic;
     using Models.SaveData;
     using Models.Calculator;
     using System.Data;
     using System;
-    using System.Linq;
 
     [Authorize(Roles = "Admin")]
     public class AdminController : Controller

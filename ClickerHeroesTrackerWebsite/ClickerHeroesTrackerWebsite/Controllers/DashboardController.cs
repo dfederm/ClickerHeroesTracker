@@ -4,7 +4,6 @@
     using Microsoft.AspNet.Identity;
     using Models.Dashboard;
     using System.Web.Mvc;
-    using System;
 
     [Authorize]
     public class DashboardController : Controller

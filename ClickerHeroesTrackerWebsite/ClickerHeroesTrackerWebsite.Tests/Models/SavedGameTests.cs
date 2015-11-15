@@ -2,7 +2,6 @@
 {
     using Microsoft.VisualStudio.TestTools.UnitTesting;
     using System.Text;
-    using ClickerHeroesTrackerWebsite.Models.Calculator;
     using ClickerHeroesTrackerWebsite.Models.SaveData;
 
     [TestClass]

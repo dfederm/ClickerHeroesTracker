@@ -4,7 +4,6 @@
     using SaveData;
     using System.Collections.Generic;
     using System.Data.SqlClient;
-    using System.Linq;
     using System;
 
     public class AncientLevelSummaryViewModel

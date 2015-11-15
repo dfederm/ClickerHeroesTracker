@@ -1,6 +1,5 @@
 ﻿namespace ClickerHeroesTrackerWebsite.Controllers
 {
-    using Models.Home;
     using System.Web.Mvc;
 
     public class HomeController : Controller
