@@ -7,7 +7,7 @@ try
 {
 	# Log params
 	Write-Host "WebsiteName=$WebsiteName"
-	Write-Host "StagingSlot=$Slot"
+	Write-Host "Slot=$Slot"
 
 	$siteUrl = "http://" + $WebsiteName
 
