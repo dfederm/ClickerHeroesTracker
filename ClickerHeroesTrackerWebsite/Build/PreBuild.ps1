@@ -8,7 +8,7 @@ try
 	$versionPattern = "(\d+)\.(\d+)\.(\d+)\.(\d+)"
 
 	# The string is of the form CS<changelist>, so cut off the "CS" part
-	$SourceVersion = $changeset.Substring(2)
+	$SourceVersion = $SourceVersion.Substring(2)
 
 	Write-Host "Using version $SourceVersion"
  
