@@ -1,19 +1,19 @@
 Param(
-	[string]$WebsiteName = $env:WebsiteName,
-	[string]$StagingSlot = $env:StagingSlot
+	[string]$WebsiteName,
+	[string]$Slot
 )
 
 try
 {
 	# Log params
 	Write-Host "WebsiteName=$WebsiteName"
-	Write-Host "StagingSlot=$StagingSlot"
+	Write-Host "StagingSlot=$Slot"
 
 	$siteUrl = "http://" + $WebsiteName
 
-	if (![string]::IsNullOrEmpty($StagingSlot))
+	if (![string]::IsNullOrEmpty($Slot))
 	{
-		$siteUrl += "-" + $StagingSlot
+		$siteUrl += "-" + $Slot
 	}
 
 	$siteUrl += ".azurewebsites.net/"

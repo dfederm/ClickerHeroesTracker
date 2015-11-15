@@ -1,6 +1,6 @@
 Param(
-	[string]$SourceDirectory = $env:BUILD_SOURCESDIRECTORY,
-	[string]$SourceVersion = $env:BUILD_SOURCEVERSION
+	[string]$SourceDirectory,
+	[string]$SourceVersion
 )
 
 try

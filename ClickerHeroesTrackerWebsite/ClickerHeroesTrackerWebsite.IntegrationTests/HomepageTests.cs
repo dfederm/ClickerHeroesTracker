@@ -12,7 +12,7 @@
         [TestMethod]
         public void Homepage_BasicTest()
         {
-            var response = new HtmlResponse("http://localhost:51083/");
+            var response = new HtmlResponse("/");
             Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
         }
     }

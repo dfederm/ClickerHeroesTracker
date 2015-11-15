@@ -1,3 +1,3 @@
-SET CloudBuild=true
+SET IsInCloud=true
 SET WebsiteName=%1
-SET StagingSlot=%2
+SET Slot=%2

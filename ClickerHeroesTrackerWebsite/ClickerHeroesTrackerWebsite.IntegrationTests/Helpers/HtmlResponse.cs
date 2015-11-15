@@ -1,17 +1,20 @@
 ﻿namespace ClickerHeroesTrackerWebsite.IntegrationTests.Helpers
 {
+    using System;
     using System.IO;
     using System.Net;
 
     internal sealed class HtmlResponse
     {
+        private static string urlPrefix = GetUrlPrefix();
+
         private readonly HttpWebResponse response;
 
         private string content;
 
         public HtmlResponse(string url)
         {
-            var request = (HttpWebRequest)WebRequest.Create(url);
+            var request = (HttpWebRequest)WebRequest.Create(urlPrefix + url);
             try
             {
                 this.response = (HttpWebResponse)request.GetResponse();
@@ -36,6 +39,32 @@
             {
                 return this.content = (this.content = new StreamReader(this.response.GetResponseStream()).ReadToEnd());
             }
+        }
+
+        private static string GetUrlPrefix()
+        {
+            const string Protocol = "http://";
+            string host;
+
+            if (Environment.GetEnvironmentVariable("IsInCloud") == null)
+            {
+                host = "localhost:51083";
+            }
+            else
+            {
+                var websiteName = Environment.GetEnvironmentVariable("WebsiteName");
+                var slot = Environment.GetEnvironmentVariable("Slot");
+
+                host = websiteName;
+                if (slot != null)
+                {
+                    host += "-" + slot;
+                }
+
+                host += ".azurewebsites.net";
+            }
+
+            return Protocol + host;
         }
     }
 }
