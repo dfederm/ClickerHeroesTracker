@@ -9,7 +9,7 @@ try
 	Write-Host "SourceDirectory=$SourceDirectory"
 	Write-Host "SourceVersion=$SourceVersion"
 
-	$versionPattern = "(\d+)\.(\d+)\.(\d+)\.(\d+)"
+	$versionPattern = "(\\d+)\\.(\\d+)\\.(\\d+)\\.(\\d+)"
 
 	# The string is of the form C<changelist>, so cut off the "C" part
 	$SourceVersion = $SourceVersion.Substring(1)
@@ -25,8 +25,7 @@ try
  
 		# Replace the version number
 		$content = Get-Content -Path $assemblyInfoFile
-		$content = $content -Replace $versionPattern,"$1.$2.$SourceVersion.$4"
-		Write-Host "New Content: $content"
+		$content = $content -Replace $versionPattern,"`$1.`$2.$SourceVersion.`$4"
 
 		# Re-write the file
 		Set-Content -Path $assemblyInfoFile -Value $content
