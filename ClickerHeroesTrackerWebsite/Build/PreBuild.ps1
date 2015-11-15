@@ -20,7 +20,7 @@ try
  
 	# Replace the version number
 	$content = Get-Content -Path $assemblyInfoFile
-	$content = $content -Replace $versionPattern "$1.$2.$SourceVersion.$4"
+	$content = $content -Replace $versionPattern,"$1.$2.$SourceVersion.$4"
 
 	# Re-write the file
 	Set-Content -Path $assemblyInfoFile -Value $content
