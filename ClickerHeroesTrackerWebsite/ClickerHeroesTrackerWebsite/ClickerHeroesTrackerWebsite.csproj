@@ -295,8 +295,6 @@
     <Compile Include="Models\Dashboard\RivalData.cs" />
     <Compile Include="Models\Dashboard\RivalDataList.cs" />
     <Compile Include="Models\Dashboard\RivalViewModel.cs" />
-    <Compile Include="Models\Dashboard\UploadData.cs" />
-    <Compile Include="Models\Dashboard\UploadDataSummary.cs" />
     <Compile Include="Models\DatabaseCommand.cs" />
     <Compile Include="Models\Extensions.cs" />
     <Compile Include="Models\Game\Achievement.cs" />
@@ -406,7 +404,6 @@
     <Content Include="Views\Calculator\_HeroLevelSummary.cshtml" />
     <Content Include="Views\Calculator\_ComputedStats.cshtml" />
     <Content Include="Views\Dashboard\Index.cshtml" />
-    <Content Include="Views\Dashboard\_UploadDataSummary.cshtml" />
     <Content Include="Views\Dashboard\_ProgressSummary.cshtml" />
     <Content Include="Views\Dashboard\_GraphScripts.cshtml" />
     <Content Include="Views\Dashboard\Progress.cshtml" />
@@ -432,6 +429,7 @@
     <WCFMetadata Include="Service References\" />
   </ItemGroup>
   <ItemGroup>
+    <TypeScriptCompile Include="Scripts\Helpers.ts" />
     <TypeScriptCompile Include="Scripts\typings\jquery\jquery.d.ts" />
     <TypeScriptCompile Include="Scripts\typings\Models\PaginationMetadata.d.ts" />
     <TypeScriptCompile Include="Scripts\typings\Models\Uploads\UploadSummary.d.ts" />

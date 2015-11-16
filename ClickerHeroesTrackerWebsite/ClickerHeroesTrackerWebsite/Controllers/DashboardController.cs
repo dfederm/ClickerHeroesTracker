@@ -20,20 +20,9 @@
             return View(model);
         }
 
-        public ActionResult Uploads(int? page)
+        public ActionResult Uploads()
         {
-            var userId = this.User.Identity.GetUserId();
-
-            var userSettings = new UserSettings(userId);
-            userSettings.Fill();
-
-            var model = new UploadDataSummary(
-                userId,
-                userSettings,
-                page.GetValueOrDefault(),
-                20);
-
-            return View(model);
+            return View();
         }
 
         public ActionResult Progress()
