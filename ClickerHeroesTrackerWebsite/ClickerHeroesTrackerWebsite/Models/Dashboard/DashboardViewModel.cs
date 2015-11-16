@@ -17,8 +17,6 @@
 
             var startTime = DateTime.UtcNow.AddDays(-7);
 
-            this.UploadDataSummary = new UploadDataSummary(userId, userSettings, 0, 10);
-
             ProgressData data;
             using (var command = new DatabaseCommand("GetProgressData"))
             {
@@ -99,12 +97,10 @@
 
             this.RivalDataList = new RivalDataList(userId);
 
-            this.IsValid = this.UploadDataSummary.IsValid && data.IsValid;
+            this.IsValid = data.IsValid;
         }
 
         public bool IsValid { get; private set; }
-
-        public UploadDataSummary UploadDataSummary { get; private set; }
 
         public GraphData ProgressSummaryGraph { get; private set; }
 

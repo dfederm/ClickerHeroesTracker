@@ -5,6 +5,8 @@
     using System.Net.Http.Headers;
     using System.Web.Http;
     using Newtonsoft.Json;
+    using Newtonsoft.Json.Converters;
+    using Newtonsoft.Json.Serialization;
     using Owin;
 
     public partial class Startup
@@ -25,6 +27,12 @@
 
             // Omit nulls
             config.Formatters.JsonFormatter.SerializerSettings.NullValueHandling = NullValueHandling.Ignore;
+
+            // Use camel-casing for fields (lower case first character)
+            config.Formatters.JsonFormatter.SerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver();
+
+            // Convert enum values to strings
+            config.Formatters.JsonFormatter.SerializerSettings.Converters.Add(new StringEnumConverter { CamelCaseText = true });
 
             // Use attribute-based routing
             config.MapHttpAttributeRoutes();
