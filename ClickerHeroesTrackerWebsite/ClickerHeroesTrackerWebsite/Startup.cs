@@ -10,6 +10,7 @@ namespace ClickerHeroesTrackerWebsite
         {
             ConfigureContainer(app);
             ConfigureAuth(app);
+            ConfigureWebApi(app);
         }
     }
 }
