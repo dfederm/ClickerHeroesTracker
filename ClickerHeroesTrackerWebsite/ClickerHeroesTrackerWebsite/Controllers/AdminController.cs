@@ -10,7 +10,7 @@
     [Authorize(Roles = "Admin")]
     public class AdminController : Controller
     {
-        /*
+        /* Keeping here for reference, but use DI when we really need it.
         private ApplicationUserManager userManager;
         private ApplicationRoleManager roleManager;
 

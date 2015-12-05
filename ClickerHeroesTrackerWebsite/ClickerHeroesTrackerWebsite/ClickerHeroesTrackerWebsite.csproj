@@ -252,6 +252,8 @@
     <Compile Include="App_Start\Startup.Auth.cs" />
     <Compile Include="App_Start\Startup.Container.cs" />
     <Compile Include="App_Start\Startup.WebApi.cs" />
+    <Compile Include="Configuration\EnvironmentProvider.cs" />
+    <Compile Include="Configuration\IEnvironmentProvider.cs" />
     <Compile Include="Controllers\AccountController.cs" />
     <Compile Include="Controllers\AdminController.cs" />
     <Compile Include="Controllers\Api\UploadsController.cs" />
@@ -260,6 +262,7 @@
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\ManageController.cs" />
     <Compile Include="Controllers\UploadController.cs" />
+    <Compile Include="Controllers\VersionController.cs" />
     <Compile Include="Filters\DatabaseConnectionClosingFilter.cs" />
     <Compile Include="Filters\HandleAndInstrumentErrorFilter.cs" />
     <Compile Include="Filters\MeasureLatencyFilter.cs" />
@@ -324,8 +327,9 @@
     <Compile Include="Models\Upload\UploadViewModel.cs" />
     <Compile Include="Models\UserSettings.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Startup.cs" />
+    <Compile Include="App_Start\Startup.cs" />
     <Compile Include="Unity\UnityControllerFactory.cs" />
+    <Compile Include="Unity\UnityHttpControllerActivator.cs" />
     <Compile Include="Views\HtmlHelpers.cs" />
   </ItemGroup>
   <ItemGroup>

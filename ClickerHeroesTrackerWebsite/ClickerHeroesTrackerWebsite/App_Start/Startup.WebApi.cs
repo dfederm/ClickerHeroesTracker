@@ -11,10 +11,8 @@
 
     public partial class Startup
     {
-        private static void ConfigureWebApi(IAppBuilder app)
+        private static void ConfigureWebApi(IAppBuilder app, HttpConfiguration config)
         {
-            HttpConfiguration config = new HttpConfiguration();
-
             // Replace the Json formatter with out own.
             config.Formatters.Remove(config.Formatters.JsonFormatter);
             config.Formatters.Add(new BrowserJsonFormatter());
