@@ -5,5 +5,7 @@
         string Environment { get; }
 
         int Changelist { get; }
+
+        string BuildId { get; }
     }
 }

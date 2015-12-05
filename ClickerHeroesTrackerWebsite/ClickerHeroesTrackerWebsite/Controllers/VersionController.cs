@@ -23,6 +23,7 @@
             {
                 Environment = this.environmentProvider.Environment,
                 Changelist = this.environmentProvider.Changelist,
+                BuildId = this.environmentProvider.BuildId,
             };
 
             return this.Request.CreateResponse(model);
