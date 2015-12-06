@@ -11,7 +11,6 @@
             filters.Add(new MeasureLatencyFilter());
 
             filters.Add(new HandleAndInstrumentErrorFilter());
-            filters.Add(new UserInstrumentationFilter());
             filters.Add(new DatabaseConnectionClosingFilter());
         }
     }

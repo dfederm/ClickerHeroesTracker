@@ -273,10 +273,10 @@
     <Compile Include="Filters\DatabaseConnectionClosingFilter.cs" />
     <Compile Include="Filters\HandleAndInstrumentErrorFilter.cs" />
     <Compile Include="Filters\MeasureLatencyFilter.cs" />
-    <Compile Include="Filters\UserInstrumentationFilter.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
+    <Compile Include="Instrumentation\UserInstrumentationMiddleware.cs" />
     <Compile Include="Models\AccountViewModels.cs" />
     <Compile Include="Models\Api\PaginationMetadata.cs" />
     <Compile Include="Models\Api\Uploads\RawUpload.cs" />
@@ -338,6 +338,7 @@
     <Compile Include="Unity\CallContextLifetimeManager.cs" />
     <Compile Include="Unity\UnityControllerActivator.cs" />
     <Compile Include="Unity\UnityHttpControllerActivator.cs" />
+    <Compile Include="Unity\UnityOwinMiddleware.cs" />
     <Compile Include="Views\HtmlHelpers.cs" />
   </ItemGroup>
   <ItemGroup>
