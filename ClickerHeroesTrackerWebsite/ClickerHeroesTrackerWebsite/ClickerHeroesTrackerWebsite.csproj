@@ -270,7 +270,6 @@
     <Compile Include="Database\IDatabaseCommand.cs" />
     <Compile Include="Database\IDatabaseCommandFactory.cs" />
     <Compile Include="Database\DatabaseCommandFactory.cs" />
-    <Compile Include="Filters\DatabaseConnectionClosingFilter.cs" />
     <Compile Include="Filters\HandleAndInstrumentErrorFilter.cs" />
     <Compile Include="Filters\MeasureLatencyFilter.cs" />
     <Compile Include="Global.asax.cs">
