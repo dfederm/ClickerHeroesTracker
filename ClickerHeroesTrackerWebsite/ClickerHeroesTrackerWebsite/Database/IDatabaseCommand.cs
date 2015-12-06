@@ -1,4 +1,8 @@
-﻿namespace ClickerHeroesTrackerWebsite.Database
+﻿// <copyright file="IDatabaseCommand.cs" company="Clicker Heroes Tracker">
+// Copyright (c) Clicker Heroes Tracker. All rights reserved.
+// </copyright>
+
+namespace ClickerHeroesTrackerWebsite.Database
 {
     using System;
     using System.Data.SqlClient;

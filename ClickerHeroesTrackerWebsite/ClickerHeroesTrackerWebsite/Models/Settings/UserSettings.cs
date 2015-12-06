@@ -1,10 +1,14 @@
-﻿namespace ClickerHeroesTrackerWebsite.Models.Settings
+﻿// <copyright file="UserSettings.cs" company="Clicker Heroes Tracker">
+// Copyright (c) Clicker Heroes Tracker. All rights reserved.
+// </copyright>
+
+namespace ClickerHeroesTrackerWebsite.Models.Settings
 {
-    using Utility;
-    using Database;
     using System;
     using System.Collections.Generic;
     using System.Data;
+    using Database;
+    using Utility;
 
     internal sealed class UserSettings : DisposableBase, IUserSettings
     {
@@ -34,6 +38,7 @@
             {
                 return this.GetValue(1, TryParseTimeZone, TimeZoneInfo.Utc);
             }
+
             set
             {
                 this.SetValue(1, value.Id);
@@ -46,6 +51,7 @@
             {
                 return this.GetValue(2, bool.TryParse, false);
             }
+
             set
             {
                 this.SetValue(2, value.ToString());
@@ -58,6 +64,7 @@
             {
                 return this.GetValue(3, bool.TryParse, false);
             }
+
             set
             {
                 this.SetValue(3, value.ToString());
@@ -70,6 +77,7 @@
             {
                 return this.GetValue(4, Enum.TryParse, PlayStyle.Idle);
             }
+
             set
             {
                 this.SetValue(4, value.ToString());
@@ -149,7 +157,7 @@
                 {
                     var settingId = Convert.ToByte(reader["SettingId"]);
                     var settingValue = reader["SettingValue"].ToString();
-                    settingValues.Add(settingId, settingValue);
+                    this.settingValues.Add(settingId, settingValue);
                 }
             }
         }

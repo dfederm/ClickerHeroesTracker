@@ -1,12 +1,16 @@
-﻿namespace ClickerHeroesTrackerWebsite.Views
+﻿// <copyright file="HtmlHelpers.cs" company="Clicker Heroes Tracker">
+// Copyright (c) Clicker Heroes Tracker. All rights reserved.
+// </copyright>
+
+namespace ClickerHeroesTrackerWebsite.Views
 {
-    using Utility;
     using System;
     using System.Collections.Generic;
     using System.IO;
     using System.Linq;
     using System.Web;
     using System.Web.Mvc;
+    using Utility;
 
     public static class HtmlHelpers
     {
@@ -14,6 +18,7 @@
         private class ScriptBlock : DisposableBase
         {
             private const string scriptsKey = "scripts";
+
             public static List<string> PageScripts
             {
                 get

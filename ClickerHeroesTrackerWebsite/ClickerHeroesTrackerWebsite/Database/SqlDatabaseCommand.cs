@@ -1,14 +1,15 @@
-﻿namespace ClickerHeroesTrackerWebsite.Database
+﻿// <copyright file="SqlDatabaseCommand.cs" company="Clicker Heroes Tracker">
+// Copyright (c) Clicker Heroes Tracker. All rights reserved.
+// </copyright>
+
+namespace ClickerHeroesTrackerWebsite.Database
 {
-    using Utility;
-    using Models;
     using System;
     using System.Collections.Generic;
-    using System.Configuration;
     using System.Data;
     using System.Data.SqlClient;
-    using System.Web;
     using Instrumentation;
+    using Utility;
 
     internal sealed class SqlDatabaseCommand : DisposableBase, IDatabaseCommand
     {
@@ -107,23 +108,6 @@
             {
                 this.command.Dispose();
                 this.command = null;
-            }
-        }
-
-        private static SqlConnection CreateConnection(ICounterProvider counterProvider)
-        {
-            var connectionString = ConfigurationManager.ConnectionStrings["DefaultConnection"].ConnectionString;
-
-            Telemetry.Client.TrackEvent("SqlConnectionOpen");
-
-            using (counterProvider.Suspend(Counter.Internal))
-            using (counterProvider.Measure(Counter.Dependency))
-            {
-                // Although this class creates the object, we want to cache and reuse the connection for the whole request.
-                // We expect DatabaseConnectionClosingFilter to close the connection.
-                var connection = new SqlConnection(connectionString);
-                connection.Open();
-                return connection;
             }
         }
     }

@@ -1,38 +1,20 @@
-﻿namespace ClickerHeroesTrackerWebsite.Controllers
+﻿// <copyright file="AdminController.cs" company="Clicker Heroes Tracker">
+// Copyright (c) Clicker Heroes Tracker. All rights reserved.
+// </copyright>
+
+namespace ClickerHeroesTrackerWebsite.Controllers
 {
-    using Models;
-    using System.Web.Mvc;
-    using Models.SaveData;
-    using Models.Calculator;
-    using System.Data;
     using System;
-    using Database;
     using System.Collections.Generic;
+    using System.Data;
+    using System.Web.Mvc;
+    using Database;
+    using Models.Calculator;
+    using Models.SaveData;
 
     [Authorize(Roles = "Admin")]
     public class AdminController : Controller
     {
-        /* Keeping here for reference, but use DI when we really need it.
-        private ApplicationUserManager userManager;
-        private ApplicationRoleManager roleManager;
-
-        public ApplicationUserManager UserManager
-        {
-            get
-            {
-                return userManager ?? HttpContext.GetOwinContext().GetUserManager<ApplicationUserManager>();
-            }
-        }
-
-        public ApplicationRoleManager RoleManager
-        {
-            get
-            {
-                return roleManager ?? HttpContext.GetOwinContext().GetUserManager<ApplicationRoleManager>();
-            }
-        }
-        */
-
         private readonly IDatabaseCommandFactory databaseCommandFactory;
 
         public AdminController(IDatabaseCommandFactory databaseCommandFactory)
@@ -43,7 +25,7 @@
         // GET: Admin
         public ActionResult Index()
         {
-            return View();
+            return this.View();
         }
 
         // GET: UpdateComputedStats
@@ -91,7 +73,7 @@
                                 CommandType.StoredProcedure,
                                 new Dictionary<string, object>
                                 {
-                                    { "@UploadId", uploadId }
+                                    { "@UploadId", uploadId },
                                 }))
                             using (var reader = command.ExecuteReader())
                             {
@@ -109,7 +91,7 @@
             if (computedStatsTable.Rows.Count == 0 || ancientLevelsTable.Rows.Count == 0)
             {
                 this.ViewBag.Error = "No valid upload ids";
-                return View("Index");
+                return this.View("Index");
             }
 
             using (var updateCommand = this.databaseCommandFactory.Create("UpdateUploadData", CommandType.StoredProcedure))
@@ -122,7 +104,7 @@
             }
 
             this.ViewBag.Message = "Updated " + computedStatsTable.Rows.Count + " uploads";
-            return View("Index");
+            return this.View("Index");
         }
 
         private static void AddRows(

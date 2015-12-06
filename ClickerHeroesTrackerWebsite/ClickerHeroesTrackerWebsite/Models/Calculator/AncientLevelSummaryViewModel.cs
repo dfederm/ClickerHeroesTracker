@@ -1,10 +1,14 @@
-﻿namespace ClickerHeroesTrackerWebsite.Models.Calculator
+﻿// <copyright file="AncientLevelSummaryViewModel.cs" company="Clicker Heroes Tracker">
+// Copyright (c) Clicker Heroes Tracker. All rights reserved.
+// </copyright>
+
+namespace ClickerHeroesTrackerWebsite.Models.Calculator
 {
-    using Game;
-    using SaveData;
+    using System;
     using System.Collections.Generic;
     using System.Data.SqlClient;
-    using System;
+    using Game;
+    using SaveData;
 
     public class AncientLevelSummaryViewModel
     {
@@ -46,7 +50,15 @@
 
         private class AncientComparer : IComparer<Ancient>
         {
-            public static AncientComparer Instance = new AncientComparer();
+            private static AncientComparer instance = new AncientComparer();
+
+            private static AncientComparer Instance
+            {
+                get
+                {
+                    return instance;
+                }
+            }
 
             public int Compare(Ancient x, Ancient y)
             {

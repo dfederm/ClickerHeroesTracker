@@ -1,14 +1,23 @@
-﻿namespace ClickerHeroesTrackerWebsite.Configuration
+﻿// <copyright file="EnvironmentProvider.cs" company="Clicker Heroes Tracker">
+// Copyright (c) Clicker Heroes Tracker. All rights reserved.
+// </copyright>
+
+namespace ClickerHeroesTrackerWebsite.Configuration
 {
-    using Newtonsoft.Json;
-    using Newtonsoft.Json.Linq;
     using System.Configuration;
     using System.IO;
-    using System.Reflection;
     using System.Web.Hosting;
+    using Newtonsoft.Json;
+    using Newtonsoft.Json.Linq;
 
+    /// <summary>
+    /// Basic implementation for retrieving the environment information from application settings, the build info files, and other sources.
+    /// </summary>
     public sealed class EnvironmentProvider : IEnvironmentProvider
     {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="EnvironmentProvider"/> class.
+        /// </summary>
         public EnvironmentProvider()
         {
             // This is a slot setting set in the Azure portal.
@@ -30,10 +39,13 @@
             }
         }
 
+        /// <inheritdoc />
         public string Environment { get; private set; }
 
+        /// <inheritdoc/>
         public int Changelist { get; private set; }
 
+        /// <inheritdoc/>
         public string BuildId { get; private set; }
     }
 }

@@ -1,8 +1,12 @@
-﻿namespace ClickerHeroesTrackerWebsite.Models.Calculator
+﻿// <copyright file="HeroLevelSummaryViewModel.cs" company="Clicker Heroes Tracker">
+// Copyright (c) Clicker Heroes Tracker. All rights reserved.
+// </copyright>
+
+namespace ClickerHeroesTrackerWebsite.Models.Calculator
 {
-    using Game;
-    using ClickerHeroesTrackerWebsite.Models.SaveData;
     using System.Collections.Generic;
+    using ClickerHeroesTrackerWebsite.Models.SaveData;
+    using Game;
 
     public class HeroLevelSummaryViewModel
     {

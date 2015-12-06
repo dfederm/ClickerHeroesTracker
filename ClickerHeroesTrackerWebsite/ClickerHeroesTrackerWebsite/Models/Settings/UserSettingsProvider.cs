@@ -1,8 +1,12 @@
-﻿namespace ClickerHeroesTrackerWebsite.Models.Settings
+﻿// <copyright file="UserSettingsProvider.cs" company="Clicker Heroes Tracker">
+// Copyright (c) Clicker Heroes Tracker. All rights reserved.
+// </copyright>
+
+namespace ClickerHeroesTrackerWebsite.Models.Settings
 {
-    using Database;
     using System;
     using System.Collections.Generic;
+    using Database;
 
     public class UserSettingsProvider : IUserSettingsProvider
     {
@@ -15,6 +19,7 @@
             this.databaseCommandFactory = databaseCommandFactory;
         }
 
+        /// <inheritdoc/>
         public IUserSettings Get(string userId)
         {
             // Use a cache to avoid hitting the database every time
@@ -28,6 +33,7 @@
             return settings;
         }
 
+        /// <inheritdoc/>
         public void FlushChanges()
         {
             foreach (var settings in this.cache.Values)

@@ -1,9 +1,13 @@
-﻿namespace ClickerHeroesTrackerWebsite.Models.Calculator
+﻿// <copyright file="SuggestedAncientLevelsViewModel.cs" company="Clicker Heroes Tracker">
+// Copyright (c) Clicker Heroes Tracker. All rights reserved.
+// </copyright>
+
+namespace ClickerHeroesTrackerWebsite.Models.Calculator
 {
-    using Settings;
-    using Game;
     using System;
     using System.Collections.Generic;
+    using Game;
+    using Settings;
 
     public class SuggestedAncientLevelsViewModel
     {

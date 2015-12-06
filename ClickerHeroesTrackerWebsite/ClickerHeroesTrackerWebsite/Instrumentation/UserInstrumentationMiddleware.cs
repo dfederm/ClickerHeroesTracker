@@ -1,11 +1,14 @@
-﻿namespace ClickerHeroesTrackerWebsite.Instrumentation
+﻿// <copyright file="UserInstrumentationMiddleware.cs" company="Clicker Heroes Tracker">
+// Copyright (c) Clicker Heroes Tracker. All rights reserved.
+// </copyright>
+
+namespace ClickerHeroesTrackerWebsite.Instrumentation
 {
-    using System;
-    using System.Threading.Tasks;
-    using Microsoft.Owin;
-    using Microsoft.ApplicationInsights;
     using System.Collections.Generic;
+    using System.Threading.Tasks;
+    using Microsoft.ApplicationInsights;
     using Microsoft.AspNet.Identity;
+    using Microsoft.Owin;
 
     public class UserInstrumentationMiddleware : OwinMiddleware
     {
@@ -17,6 +20,7 @@
             this.telemetryClient = telemetryClient;
         }
 
+        /// <inheritdoc/>
         public async override Task Invoke(IOwinContext context)
         {
             var user = context.Request.User.Identity;

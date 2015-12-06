@@ -1,4 +1,8 @@
-﻿namespace ClickerHeroesTrackerWebsite.Models.Game
+﻿// <copyright file="Ancient.cs" company="Clicker Heroes Tracker">
+// Copyright (c) Clicker Heroes Tracker. All rights reserved.
+// </copyright>
+
+namespace ClickerHeroesTrackerWebsite.Models.Game
 {
     using System.Collections.Generic;
 
@@ -13,6 +17,7 @@
             description: "undefined",
             maxLevel: -1,
             power: 1.5);
+
         public static readonly Ancient Libertas = new Ancient(
             id: 4,
             name: "Libertas",
@@ -20,6 +25,7 @@
             description: "undefined",
             maxLevel: -1,
             power: 1);
+
         public static readonly Ancient Siyalatas = new Ancient(
             id: 5,
             name: "Siyalatas",
@@ -27,6 +33,7 @@
             description: "undefined",
             maxLevel: -1,
             power: 1);
+
         public static readonly Ancient Khrysos = new Ancient(
             id: 6,
             name: "Khrysos",
@@ -34,6 +41,7 @@
             description: "undefined",
             maxLevel: 10,
             power: 1.5);
+
         public static readonly Ancient Thusia = new Ancient(
             id: 7,
             name: "Thusia",
@@ -41,6 +49,7 @@
             description: "undefined",
             maxLevel: -1,
             power: 1.5);
+
         public static readonly Ancient Mammon = new Ancient(
             id: 8,
             name: "Mammon",
@@ -48,6 +57,7 @@
             description: "undefined",
             maxLevel: -1,
             power: 1);
+
         public static readonly Ancient Mimzee = new Ancient(
             id: 9,
             name: "Mimzee",
@@ -55,6 +65,7 @@
             description: "undefined",
             maxLevel: -1,
             power: 1);
+
         public static readonly Ancient Pluto = new Ancient(
             id: 10,
             name: "Pluto",
@@ -62,6 +73,7 @@
             description: "undefined",
             maxLevel: -1,
             power: 1);
+
         public static readonly Ancient Dogcog = new Ancient(
             id: 11,
             name: "Dogcog",
@@ -69,6 +81,7 @@
             description: "undefined",
             maxLevel: 25,
             power: 1);
+
         public static readonly Ancient Fortuna = new Ancient(
             id: 12,
             name: "Fortuna",
@@ -76,6 +89,7 @@
             description: "undefined",
             maxLevel: 40,
             power: 1);
+
         public static readonly Ancient Atman = new Ancient(
             id: 13,
             name: "Atman",
@@ -83,6 +97,7 @@
             description: "undefined",
             maxLevel: 25,
             power: 1.5);
+
         public static readonly Ancient Dora = new Ancient(
             id: 14,
             name: "Dora",
@@ -90,6 +105,7 @@
             description: "undefined",
             maxLevel: 50,
             power: 1);
+
         public static readonly Ancient Bhaal = new Ancient(
             id: 15,
             name: "Bhaal",
@@ -97,6 +113,7 @@
             description: "undefined",
             maxLevel: -1,
             power: 1);
+
         public static readonly Ancient Morgulis = new Ancient(
             id: 16,
             name: "Morgulis",
@@ -104,6 +121,7 @@
             description: "undefined",
             maxLevel: -1,
             power: 0);
+
         public static readonly Ancient Chronos = new Ancient(
             id: 17,
             name: "Chronos",
@@ -111,6 +129,7 @@
             description: "undefined",
             maxLevel: -1,
             power: 1.5);
+
         public static readonly Ancient Bubos = new Ancient(
             id: 18,
             name: "Bubos",
@@ -118,6 +137,7 @@
             description: "undefined",
             maxLevel: 25,
             power: 1);
+
         public static readonly Ancient Fragsworth = new Ancient(
             id: 19,
             name: "Fragsworth",
@@ -125,6 +145,7 @@
             description: "undefined",
             maxLevel: -1,
             power: 1);
+
         public static readonly Ancient Vaagur = new Ancient(
             id: 20,
             name: "Vaagur",
@@ -132,6 +153,7 @@
             description: "undefined",
             maxLevel: 15,
             power: 1);
+
         public static readonly Ancient Kumawakamaru = new Ancient(
             id: 21,
             name: "Kumawakamaru",
@@ -139,6 +161,7 @@
             description: "undefined",
             maxLevel: 5,
             power: 1);
+
         public static readonly Ancient Chawedo = new Ancient(
             id: 22,
             name: "Chawedo",
@@ -146,6 +169,7 @@
             description: "undefined",
             maxLevel: 30,
             power: 1);
+
         public static readonly Ancient Hecatoncheir = new Ancient(
             id: 23,
             name: "Hecatoncheir",
@@ -153,6 +177,7 @@
             description: "undefined",
             maxLevel: 30,
             power: 1);
+
         public static readonly Ancient Berserker = new Ancient(
             id: 24,
             name: "Berserker",
@@ -160,6 +185,7 @@
             description: "undefined",
             maxLevel: 30,
             power: 1);
+
         public static readonly Ancient Sniperino = new Ancient(
             id: 25,
             name: "Sniperino",
@@ -167,6 +193,7 @@
             description: "undefined",
             maxLevel: 30,
             power: 1);
+
         public static readonly Ancient Kleptos = new Ancient(
             id: 26,
             name: "Kleptos",
@@ -174,6 +201,7 @@
             description: "undefined",
             maxLevel: 30,
             power: 1);
+
         public static readonly Ancient Energon = new Ancient(
             id: 27,
             name: "Energon",
@@ -181,6 +209,7 @@
             description: "undefined",
             maxLevel: 30,
             power: 1);
+
         public static readonly Ancient Argaiv = new Ancient(
             id: 28,
             name: "Argaiv",
@@ -188,6 +217,7 @@
             description: "undefined",
             maxLevel: -1,
             power: 1);
+
         public static readonly Ancient Juggernaut = new Ancient(
             id: 29,
             name: "Juggernaut",
@@ -195,6 +225,7 @@
             description: "undefined",
             maxLevel: -1,
             power: 1.5);
+
         public static readonly Ancient Iris = new Ancient(
             id: 30,
             name: "Iris",
@@ -202,6 +233,7 @@
             description: "undefined",
             maxLevel: -1,
             power: 1.5);
+
         public static readonly Ancient Revolc = new Ancient(
             id: 31,
             name: "Revolc",

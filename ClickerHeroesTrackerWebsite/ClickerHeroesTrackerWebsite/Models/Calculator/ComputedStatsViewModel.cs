@@ -1,11 +1,15 @@
-﻿namespace ClickerHeroesTrackerWebsite.Models.Calculator
+﻿// <copyright file="ComputedStatsViewModel.cs" company="Clicker Heroes Tracker">
+// Copyright (c) Clicker Heroes Tracker. All rights reserved.
+// </copyright>
+
+namespace ClickerHeroesTrackerWebsite.Models.Calculator
 {
-    using ClickerHeroesTrackerWebsite.Models.SaveData;
-    using Settings;
-    using ClickerHeroesTrackerWebsite.Models.Simulation;
     using System;
     using System.Data.SqlClient;
     using System.Linq;
+    using ClickerHeroesTrackerWebsite.Models.SaveData;
+    using ClickerHeroesTrackerWebsite.Models.Simulation;
+    using Settings;
 
     public class ComputedStatsViewModel
     {

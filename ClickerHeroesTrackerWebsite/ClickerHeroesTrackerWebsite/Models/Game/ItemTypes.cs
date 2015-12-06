@@ -1,7 +1,11 @@
-﻿using System.Collections.Generic;
+﻿// <copyright file="ItemTypes.cs" company="Clicker Heroes Tracker">
+// Copyright (c) Clicker Heroes Tracker. All rights reserved.
+// </copyright>
 
 namespace ClickerHeroesTrackerWebsite.Models.Game
 {
+    using System.Collections.Generic;
+
     public static class ItemTypes
     {
         private static Dictionary<int, Ancient> itemTypeMap = new Dictionary<int, Ancient> {

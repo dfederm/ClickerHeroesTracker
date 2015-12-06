@@ -1,14 +1,19 @@
-﻿namespace ClickerHeroesTrackerWebsite.Unity
+﻿// <copyright file="OwinContextLifetimeManager.cs" company="Clicker Heroes Tracker">
+// Copyright (c) Clicker Heroes Tracker. All rights reserved.
+// </copyright>
+
+namespace ClickerHeroesTrackerWebsite.Unity
 {
-    using Microsoft.Practices.Unity;
     using System;
     using System.Collections.Generic;
     using System.Web;
+    using Microsoft.Practices.Unity;
 
-    public class OwinContextLifetimeManager: LifetimeManager
+    public class OwinContextLifetimeManager : LifetimeManager
     {
         private readonly string key = Guid.NewGuid().ToString();
 
+        /// <inheritdoc/>
         public override object GetValue()
         {
             var environment = GetOwinEnvironment();
@@ -21,6 +26,7 @@
             return environment.TryGetValue(this.key, out value) ? value : null;
         }
 
+        /// <inheritdoc/>
         public override void SetValue(object newValue)
         {
             var environment = GetOwinEnvironment();
@@ -32,6 +38,7 @@
             environment.Add(this.key, newValue);
         }
 
+        /// <inheritdoc/>
         public override void RemoveValue()
         {
             var environment = GetOwinEnvironment();

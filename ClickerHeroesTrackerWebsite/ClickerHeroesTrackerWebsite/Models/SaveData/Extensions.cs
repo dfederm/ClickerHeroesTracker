@@ -1,8 +1,12 @@
-﻿namespace ClickerHeroesTrackerWebsite.Models.SaveData
+﻿// <copyright file="Extensions.cs" company="Clicker Heroes Tracker">
+// Copyright (c) Clicker Heroes Tracker. All rights reserved.
+// </copyright>
+
+namespace ClickerHeroesTrackerWebsite.Models.SaveData
 {
-    using ClickerHeroesTrackerWebsite.Models.Game;
     using System;
     using System.Collections.Generic;
+    using ClickerHeroesTrackerWebsite.Models.Game;
 
     public static class Extensions
     {

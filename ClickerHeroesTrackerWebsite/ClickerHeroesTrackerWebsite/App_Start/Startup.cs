@@ -1,14 +1,25 @@
-﻿namespace ClickerHeroesTrackerWebsite
+﻿// <copyright file="Startup.cs" company="Clicker Heroes Tracker">
+// Copyright (c) Clicker Heroes Tracker. All rights reserved.
+// </copyright>
+
+namespace ClickerHeroesTrackerWebsite
 {
     using System.Web.Http;
-    using Microsoft.Practices.Unity;
-    using Owin;
     using ClickerHeroesTrackerWebsite.Instrumentation;
     using ClickerHeroesTrackerWebsite.Unity;
+    using Microsoft.Practices.Unity;
     using Models.Settings;
+    using Owin;
 
+    /// <summary>
+    /// Startup class used by Owin.
+    /// </summary>
     public partial class Startup
     {
+        /// <summary>
+        /// Startup configuration. Called by Owin.
+        /// </summary>
+        /// <param name="app">The Owin app builder</param>
         public void Configuration(IAppBuilder app)
         {
             var container = ConfigureContainer();

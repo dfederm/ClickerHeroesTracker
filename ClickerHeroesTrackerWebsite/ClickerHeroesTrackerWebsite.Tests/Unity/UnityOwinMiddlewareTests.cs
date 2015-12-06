@@ -1,12 +1,16 @@
-﻿namespace ClickerHeroesTrackerWebsite.Tests.Unity
+﻿// <copyright file="UnityOwinMiddlewareTests.cs" company="Clicker Heroes Tracker">
+// Copyright (c) Clicker Heroes Tracker. All rights reserved.
+// </copyright>
+
+namespace ClickerHeroesTrackerWebsite.Tests.Unity
 {
-    using ClickerHeroesTrackerWebsite.Unity;
-    using Microsoft.VisualStudio.TestTools.UnitTesting;
-    using Microsoft.Owin;
-    using System.Threading.Tasks;
-    using Moq;
-    using Microsoft.Practices.Unity;
     using System.Collections.Generic;
+    using System.Threading.Tasks;
+    using ClickerHeroesTrackerWebsite.Unity;
+    using Microsoft.Owin;
+    using Microsoft.Practices.Unity;
+    using Microsoft.VisualStudio.TestTools.UnitTesting;
+    using Moq;
 
     [TestClass]
     public class UnityOwinMiddlewareTests
@@ -53,7 +57,7 @@
             {
                 this.ContainerControlledDependency = containerControlledDependency;
                 this.TransientDependency = transientDependency;
-                
+
                 // To track ans assert
                 Instances.Add(this);
             }

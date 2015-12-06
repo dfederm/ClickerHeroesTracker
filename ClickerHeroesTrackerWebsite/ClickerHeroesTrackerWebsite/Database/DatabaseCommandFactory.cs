@@ -1,18 +1,22 @@
-﻿namespace ClickerHeroesTrackerWebsite.Database
+﻿// <copyright file="DatabaseCommandFactory.cs" company="Clicker Heroes Tracker">
+// Copyright (c) Clicker Heroes Tracker. All rights reserved.
+// </copyright>
+
+namespace ClickerHeroesTrackerWebsite.Database
 {
-    using Microsoft.ApplicationInsights;
-    using System.Configuration;
-    using System.Data.SqlClient;
-    using System.Data;
     using System.Collections.Generic;
-    using Utility;
+    using System.Configuration;
+    using System.Data;
+    using System.Data.SqlClient;
     using Instrumentation;
+    using Microsoft.ApplicationInsights;
+    using Utility;
 
     public sealed class DatabaseCommandProvider : DisposableBase, IDatabaseCommandFactory
     {
         private static string connectionString = ConfigurationManager.ConnectionStrings["DefaultConnection"].ConnectionString;
 
-        private static Dictionary<string, object> EmptyParameters = new Dictionary<string, object>(0);
+        private static Dictionary<string, object> emptyParameters = new Dictionary<string, object>(0);
 
         private readonly TelemetryClient telemetryClient;
 
@@ -28,21 +32,25 @@
             this.counterProvider = counterProvider;
         }
 
+        /// <inheritdoc/>
         public IDatabaseCommand Create(string commandText)
         {
-            return this.Create(commandText, CommandType.Text, EmptyParameters);
+            return this.Create(commandText, CommandType.Text, emptyParameters);
         }
 
+        /// <inheritdoc/>
         public IDatabaseCommand Create(string commandText, IDictionary<string, object> parameters)
         {
             return this.Create(commandText, CommandType.Text, parameters);
         }
 
+        /// <inheritdoc/>
         public IDatabaseCommand Create(string commandText, CommandType commandType)
         {
-            return this.Create(commandText, commandType, EmptyParameters);
+            return this.Create(commandText, commandType, emptyParameters);
         }
 
+        /// <inheritdoc/>
         public IDatabaseCommand Create(string commandText, CommandType commandType, IDictionary<string, object> parameters)
         {
             this.EnsureNotDisposed();
@@ -68,6 +76,7 @@
                 this.counterProvider);
         }
 
+        /// <inheritdoc/>
         protected override void Dispose(bool isDisposing)
         {
             if (this.connection != null)

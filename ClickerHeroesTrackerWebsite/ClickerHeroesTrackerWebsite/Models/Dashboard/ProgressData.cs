@@ -1,11 +1,15 @@
-﻿namespace ClickerHeroesTrackerWebsite.Models.Dashboard
+﻿// <copyright file="ProgressData.cs" company="Clicker Heroes Tracker">
+// Copyright (c) Clicker Heroes Tracker. All rights reserved.
+// </copyright>
+
+namespace ClickerHeroesTrackerWebsite.Models.Dashboard
 {
-    using ClickerHeroesTrackerWebsite.Models;
-    using ClickerHeroesTrackerWebsite.Models.Game;
-    using Settings;
     using System;
     using System.Collections.Generic;
     using System.Data.SqlClient;
+    using ClickerHeroesTrackerWebsite.Models;
+    using ClickerHeroesTrackerWebsite.Models.Game;
+    using Settings;
 
     public class ProgressData
     {

@@ -1,19 +1,29 @@
-﻿namespace ClickerHeroesTrackerWebsite
+﻿// <copyright file="Startup.Container.cs" company="Clicker Heroes Tracker">
+// Copyright (c) Clicker Heroes Tracker. All rights reserved.
+// </copyright>
+
+namespace ClickerHeroesTrackerWebsite
 {
-    using System.Web.Mvc;
-    using Unity;
-    using Microsoft.Practices.Unity;
-    using Owin;
-    using Configuration;
     using System.Web.Http;
     using System.Web.Http.Dispatcher;
+    using System.Web.Mvc;
+    using Configuration;
     using Database;
-    using Microsoft.ApplicationInsights;
     using Instrumentation;
+    using Microsoft.ApplicationInsights;
+    using Microsoft.Practices.Unity;
     using Models.Settings;
+    using Unity;
 
+    /// <summary>
+    /// Configure the Unity container
+    /// </summary>
     public partial class Startup
     {
+        /// <summary>
+        /// Configure the Unity container
+        /// </summary>
+        /// <returns>The fully-configured Unity container</returns>
         private static IUnityContainer ConfigureContainer()
         {
             var container = new UnityContainer();

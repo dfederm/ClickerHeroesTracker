@@ -1,25 +1,33 @@
-﻿namespace ClickerHeroesTrackerWebsite.Filters
+﻿// <copyright file="MeasureLatencyFilter.cs" company="Clicker Heroes Tracker">
+// Copyright (c) Clicker Heroes Tracker. All rights reserved.
+// </copyright>
+
+namespace ClickerHeroesTrackerWebsite.Filters
 {
-    using Models;
     using System.Web.Mvc;
+    using Models;
 
     public class MeasureLatencyFilter : IActionFilter, IResultFilter
     {
+        /// <inheritdoc/>
         public void OnActionExecuting(ActionExecutingContext filterContext)
         {
             LatencyCounter.ActionLatency.Start();
         }
 
+        /// <inheritdoc/>
         public void OnActionExecuted(ActionExecutedContext filterContext)
         {
             LatencyCounter.ActionLatency.Record();
         }
 
+        /// <inheritdoc/>
         public void OnResultExecuting(ResultExecutingContext filterContext)
         {
             LatencyCounter.ResultLatency.Start();
         }
 
+        /// <inheritdoc/>
         public void OnResultExecuted(ResultExecutedContext filterContext)
         {
             LatencyCounter.ResultLatency.Record();

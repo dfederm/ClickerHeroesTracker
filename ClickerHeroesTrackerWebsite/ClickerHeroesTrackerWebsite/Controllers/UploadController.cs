@@ -1,4 +1,8 @@
-﻿namespace ClickerHeroesTrackerWebsite.Controllers
+﻿// <copyright file="UploadController.cs" company="Clicker Heroes Tracker">
+// Copyright (c) Clicker Heroes Tracker. All rights reserved.
+// </copyright>
+
+namespace ClickerHeroesTrackerWebsite.Controllers
 {
     using System.Web.Mvc;
 
@@ -8,7 +12,7 @@
         [HttpGet]
         public ActionResult Index()
         {
-            return View();
+            return this.View();
         }
     }
 }

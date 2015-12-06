@@ -1,8 +1,12 @@
-﻿namespace ClickerHeroesTrackerWebsite.Controllers
+﻿// <copyright file="DashboardController.cs" company="Clicker Heroes Tracker">
+// Copyright (c) Clicker Heroes Tracker. All rights reserved.
+// </copyright>
+
+namespace ClickerHeroesTrackerWebsite.Controllers
 {
-    using Models.Dashboard;
     using System.Web.Mvc;
     using Database;
+    using Models.Dashboard;
     using Models.Settings;
 
     [Authorize]
@@ -29,15 +33,15 @@
             if (!model.IsValid)
             {
                 this.ViewBag.ErrorMessage = "You have no uploaded data!";
-                return View("Error");
+                return this.View("Error");
             }
 
-            return View(model);
+            return this.View(model);
         }
 
         public ActionResult Uploads()
         {
-            return View();
+            return this.View();
         }
 
         public ActionResult Progress()
@@ -49,10 +53,10 @@
             if (!model.IsValid)
             {
                 this.ViewBag.ErrorMessage = "You have no uploaded data!";
-                return View("Error");
+                return this.View("Error");
             }
 
-            return View(model);
+            return this.View(model);
         }
 
         public ActionResult Rival()
@@ -72,10 +76,10 @@
             if (!model.IsValid)
             {
                 this.ViewBag.ErrorMessage = "There was a problem comparing your data to that rival. Man sure they're your rival and have upload data.";
-                return View("Error");
+                return this.View("Error");
             }
 
-            return View(model);
+            return this.View(model);
         }
     }
 }

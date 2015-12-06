@@ -1,10 +1,14 @@
-﻿namespace ClickerHeroesTrackerWebsite.Instrumentation
+﻿// <copyright file="CounterProvider.cs" company="Clicker Heroes Tracker">
+// Copyright (c) Clicker Heroes Tracker. All rights reserved.
+// </copyright>
+
+namespace ClickerHeroesTrackerWebsite.Instrumentation
 {
-    using ClickerHeroesTrackerWebsite.Utility;
-    using Microsoft.ApplicationInsights;
     using System;
     using System.Collections.Generic;
     using System.Diagnostics;
+    using ClickerHeroesTrackerWebsite.Utility;
+    using Microsoft.ApplicationInsights;
 
     public sealed class CounterProvider : DisposableBase, ICounterProvider
     {
@@ -19,26 +23,31 @@
             this.telemetryClient = telemetryClient;
         }
 
+        /// <inheritdoc/>
         public void Start(Counter counter)
         {
             this.Get(counter).Start();
         }
 
+        /// <inheritdoc/>
         public void Stop(Counter counter)
         {
             this.Get(counter).Stop();
         }
 
+        /// <inheritdoc/>
         public IDisposable Measure(Counter counter)
         {
             return new MeasureScope(this.Get(counter));
         }
 
+        /// <inheritdoc/>
         public IDisposable Suspend(Counter counter)
         {
             return new SuspendScope(this.Get(counter));
         }
 
+        /// <inheritdoc/>
         protected override void Dispose(bool isDisposing)
         {
             foreach (var pair in this.counters)

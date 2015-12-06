@@ -1,7 +1,11 @@
-﻿namespace ClickerHeroesTrackerWebsite.Models.SaveData
+﻿// <copyright file="AncientsData.cs" company="Clicker Heroes Tracker">
+// Copyright (c) Clicker Heroes Tracker. All rights reserved.
+// </copyright>
+
+namespace ClickerHeroesTrackerWebsite.Models.SaveData
 {
-    using Newtonsoft.Json;
     using System.Collections.Generic;
+    using Newtonsoft.Json;
 
     [JsonObject]
     public class AncientsData

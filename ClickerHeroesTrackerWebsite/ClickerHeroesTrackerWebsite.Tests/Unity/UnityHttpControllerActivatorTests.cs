@@ -1,13 +1,17 @@
-﻿namespace ClickerHeroesTrackerWebsite.Tests.Unity
+﻿// <copyright file="UnityHttpControllerActivatorTests.cs" company="Clicker Heroes Tracker">
+// Copyright (c) Clicker Heroes Tracker. All rights reserved.
+// </copyright>
+
+namespace ClickerHeroesTrackerWebsite.Tests.Unity
 {
+    using System;
+    using System.Net.Http;
+    using System.Threading;
+    using System.Threading.Tasks;
+    using System.Web.Http.Controllers;
     using ClickerHeroesTrackerWebsite.Unity;
     using Microsoft.Practices.Unity;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
-    using System.Net.Http;
-    using System.Web.Http.Controllers;
-    using System;
-    using System.Threading;
-    using System.Threading.Tasks;
 
     [TestClass]
     public class UnityHttpControllerActivatorTests

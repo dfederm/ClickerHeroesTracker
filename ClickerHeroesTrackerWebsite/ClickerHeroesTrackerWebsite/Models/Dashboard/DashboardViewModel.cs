@@ -1,13 +1,17 @@
-﻿namespace ClickerHeroesTrackerWebsite.Models.Dashboard
+﻿// <copyright file="DashboardViewModel.cs" company="Clicker Heroes Tracker">
+// Copyright (c) Clicker Heroes Tracker. All rights reserved.
+// </copyright>
+
+namespace ClickerHeroesTrackerWebsite.Models.Dashboard
 {
-    using Microsoft.AspNet.Identity;
     using System;
-    using System.Security.Principal;
-    using Graph;
-    using System.Linq;
-    using Database;
-    using System.Data;
     using System.Collections.Generic;
+    using System.Data;
+    using System.Linq;
+    using System.Security.Principal;
+    using Database;
+    using Graph;
+    using Microsoft.AspNet.Identity;
     using Settings;
 
     public class DashboardViewModel

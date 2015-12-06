@@ -1,7 +1,11 @@
-﻿namespace ClickerHeroesTrackerWebsite.Models.Settings
+﻿// <copyright file="UserSettingsFlushingMiddleware.cs" company="Clicker Heroes Tracker">
+// Copyright (c) Clicker Heroes Tracker. All rights reserved.
+// </copyright>
+
+namespace ClickerHeroesTrackerWebsite.Models.Settings
 {
-    using Microsoft.Owin;
     using System.Threading.Tasks;
+    using Microsoft.Owin;
 
     public class UserSettingsFlushingMiddleware : OwinMiddleware
     {
@@ -13,6 +17,7 @@
             this.userSettingsProvider = userSettingsProvider;
         }
 
+        /// <inheritdoc/>
         public async override Task Invoke(IOwinContext context)
         {
             await this.Next.Invoke(context);

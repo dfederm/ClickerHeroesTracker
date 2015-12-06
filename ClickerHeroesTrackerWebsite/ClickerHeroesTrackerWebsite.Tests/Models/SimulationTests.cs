@@ -1,8 +1,12 @@
-﻿namespace ClickerHeroesTrackerWebsite.Tests.Models
+﻿// <copyright file="SimulationTests.cs" company="Clicker Heroes Tracker">
+// Copyright (c) Clicker Heroes Tracker. All rights reserved.
+// </copyright>
+
+namespace ClickerHeroesTrackerWebsite.Tests.Models
 {
-    using Microsoft.VisualStudio.TestTools.UnitTesting;
-    using ClickerHeroesTrackerWebsite.Models.Simulation;
     using ClickerHeroesTrackerWebsite.Models.SaveData;
+    using ClickerHeroesTrackerWebsite.Models.Simulation;
+    using Microsoft.VisualStudio.TestTools.UnitTesting;
 
     [TestClass]
     public class SimulationTests

@@ -1,16 +1,22 @@
-﻿namespace ClickerHeroesTrackerWebsite
+﻿// <copyright file="EmailService.cs" company="Clicker Heroes Tracker">
+// Copyright (c) Clicker Heroes Tracker. All rights reserved.
+// </copyright>
+
+namespace ClickerHeroesTrackerWebsite
 {
-
     using System.Configuration;
-
     using System.Net;
     using System.Net.Mail;
     using System.Threading.Tasks;
     using Microsoft.AspNet.Identity;
     using SendGrid;
 
+    /// <summary>
+    /// Service that sends emails
+    /// </summary>
     public class EmailService : IIdentityMessageService
     {
+        /// <inheritdoc />
         public Task SendAsync(IdentityMessage message)
         {
             var myMessage = new SendGridMessage();

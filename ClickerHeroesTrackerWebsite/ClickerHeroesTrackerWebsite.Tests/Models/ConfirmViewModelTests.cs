@@ -1,9 +1,13 @@
-﻿namespace ClickerHeroesTrackerWebsite.Tests.Models
+﻿// <copyright file="ConfirmViewModelTests.cs" company="Clicker Heroes Tracker">
+// Copyright (c) Clicker Heroes Tracker. All rights reserved.
+// </copyright>
+
+namespace ClickerHeroesTrackerWebsite.Tests.Models
 {
-    using Microsoft.VisualStudio.TestTools.UnitTesting;
     using ClickerHeroesTrackerWebsite.Models.Calculator;
-    using Moq;
     using ClickerHeroesTrackerWebsite.Models.Settings;
+    using Microsoft.VisualStudio.TestTools.UnitTesting;
+    using Moq;
 
     [TestClass]
     public class ConfirmViewModelTests

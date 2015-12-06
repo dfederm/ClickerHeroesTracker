@@ -1,4 +1,8 @@
-﻿namespace ClickerHeroesTrackerWebsite.Models
+﻿// <copyright file="LatencyCounter.cs" company="Clicker Heroes Tracker">
+// Copyright (c) Clicker Heroes Tracker. All rights reserved.
+// </copyright>
+
+namespace ClickerHeroesTrackerWebsite.Models
 {
     using System.Diagnostics;
     using System.Web;

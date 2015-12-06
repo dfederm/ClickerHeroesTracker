@@ -1,12 +1,16 @@
-﻿namespace ClickerHeroesTrackerWebsite.Models.Calculator
+﻿// <copyright file="CalculatorViewModel.cs" company="Clicker Heroes Tracker">
+// Copyright (c) Clicker Heroes Tracker. All rights reserved.
+// </copyright>
+
+namespace ClickerHeroesTrackerWebsite.Models.Calculator
 {
-    using SaveData;
     using System;
+    using System.Collections.Generic;
     using System.Data;
     using System.Security.Principal;
-    using Microsoft.AspNet.Identity;
     using Database;
-    using System.Collections.Generic;
+    using Microsoft.AspNet.Identity;
+    using SaveData;
     using Settings;
 
     public class CalculatorViewModel

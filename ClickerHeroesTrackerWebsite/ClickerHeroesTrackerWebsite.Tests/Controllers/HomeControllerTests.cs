@@ -1,9 +1,13 @@
-﻿using System.Web.Mvc;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using ClickerHeroesTrackerWebsite.Controllers;
+﻿// <copyright file="HomeControllerTests.cs" company="Clicker Heroes Tracker">
+// Copyright (c) Clicker Heroes Tracker. All rights reserved.
+// </copyright>
 
 namespace ClickerHeroesTrackerWebsite.Tests.Controllers
 {
+    using System.Web.Mvc;
+    using ClickerHeroesTrackerWebsite.Controllers;
+    using Microsoft.VisualStudio.TestTools.UnitTesting;
+
     [TestClass]
     public class HomeControllerTests
     {

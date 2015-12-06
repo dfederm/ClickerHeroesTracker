@@ -1,15 +1,18 @@
-﻿namespace ClickerHeroesTrackerWebsite.Controllers.Api
+﻿// <copyright file="UploadsController.cs" company="Clicker Heroes Tracker">
+// Copyright (c) Clicker Heroes Tracker. All rights reserved.
+// </copyright>
+
+namespace ClickerHeroesTrackerWebsite.Controllers.Api
 {
     using System;
     using System.Collections.Generic;
     using System.Net;
     using System.Net.Http;
     using System.Web.Http;
+    using Database;
     using Microsoft.AspNet.Identity;
-    using Models;
     using Models.Api;
     using Models.Api.Uploads;
-    using Database;
 
     [RoutePrefix("api/uploads")]
     public sealed class UploadsController : ApiController

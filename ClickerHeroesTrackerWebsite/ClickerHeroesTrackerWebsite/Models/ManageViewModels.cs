@@ -1,11 +1,15 @@
-﻿namespace ClickerHeroesTrackerWebsite.Models
+﻿// <copyright file="ManageViewModels.cs" company="Clicker Heroes Tracker">
+// Copyright (c) Clicker Heroes Tracker. All rights reserved.
+// </copyright>
+
+namespace ClickerHeroesTrackerWebsite.Models
 {
+    using System;
     using System.Collections.Generic;
     using System.ComponentModel.DataAnnotations;
+    using System.Linq;
     using Microsoft.AspNet.Identity;
     using Microsoft.Owin.Security;
-    using System;
-    using System.Linq;
 
     public class IndexViewModel
     {
@@ -40,6 +44,7 @@
     public class ManageLoginsViewModel
     {
         public IList<UserLoginInfo> CurrentLogins { get; set; }
+
         public IList<AuthenticationDescription> OtherLogins { get; set; }
     }
 

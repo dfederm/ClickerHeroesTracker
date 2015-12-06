@@ -1,10 +1,14 @@
-﻿namespace ClickerHeroesTrackerWebsite.Models.Dashboard.Graph
+﻿// <copyright file="GraphData.cs" company="Clicker Heroes Tracker">
+// Copyright (c) Clicker Heroes Tracker. All rights reserved.
+// </copyright>
+
+namespace ClickerHeroesTrackerWebsite.Models.Dashboard.Graph
 {
+    using System.Collections.Generic;
+    using System.IO;
     using Newtonsoft.Json;
     using Newtonsoft.Json.Converters;
     using Newtonsoft.Json.Serialization;
-    using System.Collections.Generic;
-    using System.IO;
 
     // Structure defined here: http://api.highcharts.com/highcharts
     [JsonObject]

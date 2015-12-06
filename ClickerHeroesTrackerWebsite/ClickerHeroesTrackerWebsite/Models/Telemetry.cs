@@ -1,7 +1,11 @@
-﻿namespace ClickerHeroesTrackerWebsite.Models
+﻿// <copyright file="Telemetry.cs" company="Clicker Heroes Tracker">
+// Copyright (c) Clicker Heroes Tracker. All rights reserved.
+// </copyright>
+
+namespace ClickerHeroesTrackerWebsite.Models
 {
-    using Microsoft.ApplicationInsights;
     using System.Web;
+    using Microsoft.ApplicationInsights;
 
     public class Telemetry
     {

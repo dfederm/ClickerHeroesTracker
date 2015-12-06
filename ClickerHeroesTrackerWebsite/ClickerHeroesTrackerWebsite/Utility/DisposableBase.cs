@@ -1,4 +1,8 @@
-﻿namespace ClickerHeroesTrackerWebsite.Utility
+﻿// <copyright file="DisposableBase.cs" company="Clicker Heroes Tracker">
+// Copyright (c) Clicker Heroes Tracker. All rights reserved.
+// </copyright>
+
+namespace ClickerHeroesTrackerWebsite.Utility
 {
     using System;
 
@@ -14,6 +18,7 @@
             }
         }
 
+        /// <inheritdoc/>
         public void Dispose()
         {
             if (!this.isDisposed)

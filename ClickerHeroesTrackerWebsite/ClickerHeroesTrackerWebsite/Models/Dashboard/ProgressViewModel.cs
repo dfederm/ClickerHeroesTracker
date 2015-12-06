@@ -1,14 +1,18 @@
-﻿namespace ClickerHeroesTrackerWebsite.Models.Dashboard
+﻿// <copyright file="ProgressViewModel.cs" company="Clicker Heroes Tracker">
+// Copyright (c) Clicker Heroes Tracker. All rights reserved.
+// </copyright>
+
+namespace ClickerHeroesTrackerWebsite.Models.Dashboard
 {
-    using Settings;
-    using Database;
-    using Graph;
-    using Microsoft.AspNet.Identity;
     using System;
     using System.Collections.Generic;
     using System.Data;
     using System.Linq;
     using System.Security.Principal;
+    using Database;
+    using Graph;
+    using Microsoft.AspNet.Identity;
+    using Settings;
 
     public class ProgressViewModel
     {
@@ -39,22 +43,22 @@
 
             this.ProminentGraphs = new List<GraphViewModel>
             {
-                CreateGraph(
+                this.CreateGraph(
                     "soulsPerHourGraph",
                     "Souls/hr",
                     data.SoulsPerHourData,
                     userSettings.TimeZone),
-                CreateGraph(
+                this.CreateGraph(
                     "optimalLevelGraph",
                     "Optimal Level",
                     data.OptimalLevelData,
                     userSettings.TimeZone),
-                CreateGraph(
+                this.CreateGraph(
                     "soulsSpentGraph",
                     "Souls Spent",
                     data.SoulsSpentData,
                     userSettings.TimeZone),
-                CreateGraph(
+                this.CreateGraph(
                     "titanDamageGraph",
                     "Titan Damage",
                     data.TitanDamageData,
@@ -62,7 +66,7 @@
             };
             this.SecondaryGraphs = data
                 .AncientLevelData
-                .Select(x => CreateGraph(
+                .Select(x => this.CreateGraph(
                     x.Key.Name + "Graph",
                     x.Key.Name,
                     x.Value,

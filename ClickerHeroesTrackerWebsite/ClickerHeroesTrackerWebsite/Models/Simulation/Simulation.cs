@@ -1,9 +1,13 @@
-﻿namespace ClickerHeroesTrackerWebsite.Models.Simulation
+﻿// <copyright file="Simulation.cs" company="Clicker Heroes Tracker">
+// Copyright (c) Clicker Heroes Tracker. All rights reserved.
+// </copyright>
+
+namespace ClickerHeroesTrackerWebsite.Models.Simulation
 {
-    using ClickerHeroesTrackerWebsite.Models.Game;
-    using ClickerHeroesTrackerWebsite.Models.SaveData;
     using System;
     using System.Collections.Generic;
+    using ClickerHeroesTrackerWebsite.Models.Game;
+    using ClickerHeroesTrackerWebsite.Models.SaveData;
 
     public class Simulation
     {
@@ -82,7 +86,7 @@
 
                 var mobs = Math.Min(5, level - (int)this.GetFactor(Ancient.Iris, 1, 1));
                 var numDelays = (9 - this.savedGame.AncientsData.GetAncientLevel(Ancient.Kumawakamaru)) * (mobs - 1);
-                var levelInfo = GetLevelInfo(level, startingZone);
+                var levelInfo = this.GetLevelInfo(level, startingZone);
 
                 var addGold = levelInfo.Gold * factors.Gold;
                 var curDamage = Math.Max(levelingPlan.GetDamage(currentGold), 10);
@@ -95,7 +99,7 @@
 
                 var dTime = levelInfo.Life / curDamage;
                 currentTime += dTime + numDelays * 0.5;
-                currentSouls += HeroSoulRewards(level, solomon);
+                currentSouls += this.HeroSoulRewards(level, solomon);
                 currentGold += addGold + levelInfo.AvgGold * factors.GoldenClicks * dTime / (dTime + 0.5 * numDelays);
                 clicks += dTime * factors.ClickRate;
                 if (dTime * factors.ClickRate < numDelays)
@@ -192,7 +196,7 @@
                 + 0.1 * this.savedGame.HeroSouls;
             damageFactor *= this.AchievementDamageMultiplier();
             damageFactor *= HeroUpgrade.MaximumDamageMultiplier;
-            if (savedGame.HasRubyMultiplier)
+            if (this.savedGame.HasRubyMultiplier)
             {
                 damageFactor *= 2;
             }
@@ -266,7 +270,7 @@
 
             for (var i = 0; i < ancients.Length; i++)
             {
-                durations.Add(GetCooldownDuration(ancients[i]));
+                durations.Add(this.GetCooldownDuration(ancients[i]));
                 cooldowns.Add(ancients[i]);
             }
 
@@ -281,12 +285,12 @@
                 var duration = durations[i];
                 if (i == 0 || duration > durations[i - 1])
                 {
-                    var clickSpeed = clickRate + (cooldowns.Contains(Ancient.Chawedo) && GetCooldownDuration(Ancient.Chawedo) >= duration ? 10 : 0);
-                    var critChance = 0.09 + (cooldowns.Contains(Ancient.Sniperino) && GetCooldownDuration(Ancient.Sniperino) >= duration ? 0.50 : 0);
-                    var goldenClicks = (cooldowns.Contains(Ancient.Kleptos) && GetCooldownDuration(Ancient.Kleptos) >= duration ? clickSpeed * (1 + this.GetFactor(Ancient.Pluto, 0.3, 0.15)) : 0);
-                    var powersurge = (cooldowns.Contains(Ancient.Berserker) && GetCooldownDuration(Ancient.Berserker) >= duration ? 2 : 1);
-                    var goldFactor = (cooldowns.Contains(Ancient.Energon) && GetCooldownDuration(Ancient.Energon) >= duration ? 2 : 1);
-                    var superClicks = (cooldowns.Contains(Ancient.Hecatoncheir) && GetCooldownDuration(Ancient.Hecatoncheir) >= duration ? 3 : 1);
+                    var clickSpeed = clickRate + (cooldowns.Contains(Ancient.Chawedo) && this.GetCooldownDuration(Ancient.Chawedo) >= duration ? 10 : 0);
+                    var critChance = 0.09 + (cooldowns.Contains(Ancient.Sniperino) && this.GetCooldownDuration(Ancient.Sniperino) >= duration ? 0.50 : 0);
+                    var goldenClicks = (cooldowns.Contains(Ancient.Kleptos) && this.GetCooldownDuration(Ancient.Kleptos) >= duration ? clickSpeed * (1 + this.GetFactor(Ancient.Pluto, 0.3, 0.15)) : 0);
+                    var powersurge = (cooldowns.Contains(Ancient.Berserker) && this.GetCooldownDuration(Ancient.Berserker) >= duration ? 2 : 1);
+                    var goldFactor = (cooldowns.Contains(Ancient.Energon) && this.GetCooldownDuration(Ancient.Energon) >= duration ? 2 : 1);
+                    var superClicks = (cooldowns.Contains(Ancient.Hecatoncheir) && this.GetCooldownDuration(Ancient.Hecatoncheir) >= duration ? 3 : 1);
                     var dtime = (duration + 30) - (i > 0 ? (durations[i - 1] + 30) : 0);
                     var damage = dtime * powersurge * (1 + superClicks * (critChance * critMultiplier + 1) * clickSpeed * clickFactor);
 

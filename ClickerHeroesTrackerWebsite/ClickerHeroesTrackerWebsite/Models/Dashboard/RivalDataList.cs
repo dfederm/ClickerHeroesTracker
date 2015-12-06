@@ -1,9 +1,13 @@
-﻿namespace ClickerHeroesTrackerWebsite.Models.Dashboard
+﻿// <copyright file="RivalDataList.cs" company="Clicker Heroes Tracker">
+// Copyright (c) Clicker Heroes Tracker. All rights reserved.
+// </copyright>
+
+namespace ClickerHeroesTrackerWebsite.Models.Dashboard
 {
-    using Database;
     using System;
     using System.Collections.Generic;
     using System.Data;
+    using Database;
 
     public class RivalDataList
     {

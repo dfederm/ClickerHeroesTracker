@@ -1,4 +1,8 @@
-﻿namespace ClickerHeroesTrackerWebsite.Models.Settings
+﻿// <copyright file="IUserSettingsProvider.cs" company="Clicker Heroes Tracker">
+// Copyright (c) Clicker Heroes Tracker. All rights reserved.
+// </copyright>
+
+namespace ClickerHeroesTrackerWebsite.Models.Settings
 {
     public interface IUserSettingsProvider
     {

@@ -1,9 +1,13 @@
-﻿namespace ClickerHeroesTrackerWebsite.Models.Simulation
+﻿// <copyright file="LevelingPlan.cs" company="Clicker Heroes Tracker">
+// Copyright (c) Clicker Heroes Tracker. All rights reserved.
+// </copyright>
+
+namespace ClickerHeroesTrackerWebsite.Models.Simulation
 {
-    using SaveData;
-    using Game;
     using System;
     using System.Collections.Generic;
+    using Game;
+    using SaveData;
 
     public sealed class LevelingPlan
     {
@@ -13,7 +17,7 @@
 
         private double dogcogFactor;
 
-        // result plan steps 
+        // result plan steps
         private List<PlanStep> plan;
 
         private int planPos;
@@ -238,7 +242,7 @@
             var x4 = Math.Min(Math.Max(Math.Floor((level - 175d) / 25d), 0d) - x10, 154d);
             var x5 = (hero.IsRanger ? Math.Min(Math.Max(Math.Floor((level - 500d) / 25d), 0d), 9d) : 0d);
             return hero.Damage
-                * (1 + (0.5 + this.argaivFactor) * heroesData.GetHeroGilds(hero))
+                * (1 + (0.5 + this.argaivFactor) * this.heroesData.GetHeroGilds(hero))
                 * level
                 * Math.Pow(4, x4)
                 * Math.Pow(10, x10)
@@ -293,6 +297,7 @@
                 {
                     continue;
                 }
+
                 var newCost = this.Cost(hero, i) - currentCost;
                 var newRatio = (newDamage - currentDamage) / (newCost - currentCost);
                 return new LevelingPlanInfo(i, newDamage - currentDamage, newCost - currentCost);

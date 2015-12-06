@@ -1,10 +1,14 @@
-﻿namespace ClickerHeroesTrackerWebsite.Controllers
+﻿// <copyright file="CalculatorController.cs" company="Clicker Heroes Tracker">
+// Copyright (c) Clicker Heroes Tracker. All rights reserved.
+// </copyright>
+
+namespace ClickerHeroesTrackerWebsite.Controllers
 {
-    using Models.Upload;
-    using Models.Calculator;
     using System.Web.Mvc;
     using Database;
+    using Models.Calculator;
     using Models.Settings;
+    using Models.Upload;
 
     public class CalculatorController : Controller
     {
@@ -24,7 +28,7 @@
         [ValidateAntiForgeryToken]
         public ActionResult Upload(UploadViewModel uploadViewModel)
         {
-            if (!ModelState.IsValid)
+            if (!this.ModelState.IsValid)
             {
                 return this.RedirectToAction("Index", "Upload");
             }

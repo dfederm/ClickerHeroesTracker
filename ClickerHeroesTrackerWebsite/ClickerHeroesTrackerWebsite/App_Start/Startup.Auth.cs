@@ -1,15 +1,20 @@
-﻿namespace ClickerHeroesTrackerWebsite
+﻿
+﻿// <copyright file="Startup.Auth.cs" company="Clicker Heroes Tracker">
+// Copyright (c) Clicker Heroes Tracker. All rights reserved.
+// </copyright>
+
+namespace ClickerHeroesTrackerWebsite
 {
     using System;
     using System.Configuration;
-    using Authentication;
     using ClickerHeroesTrackerWebsite.Models;
-    using Configuration;
+
     using Microsoft.AspNet.Identity;
     using Microsoft.AspNet.Identity.Owin;
     using Microsoft.Owin;
     using Microsoft.Owin.Security.Cookies;
     using Owin;
+
     using static ClickerHeroesTrackerWebsite.Configuration.Environment;
 
     /// <summary>
@@ -17,7 +22,11 @@
     /// </summary>
     public partial class Startup
     {
-        // For more information on configuring authentication, please visit http://go.microsoft.com/fwlink/?LinkId=301864
+        /// <summary>
+        /// Configures the authentication middleware.
+        /// </summary>
+        /// <remarks>For more information on configuring authentication, please visit http://go.microsoft.com/fwlink/?LinkId=301864</remarks>
+        /// <param name="app">The Owin app builder</param>
         private static void ConfigureAuth(IAppBuilder app)
         {
             // Configure the db context, user manager and signin manager to use a single instance per request
@@ -36,12 +45,12 @@
                 Provider = new CookieAuthenticationProvider
                 {
                     // Enables the application to validate the security stamp when the user logs in.
-                    // This is a security feature which is used when you change a password or add an external login to your account.  
+                    // This is a security feature which is used when you change a password or add an external login to your account.
                     OnValidateIdentity = SecurityStampValidator.OnValidateIdentity<ApplicationUserManager, ApplicationUser>(
                         validateInterval: TimeSpan.FromMinutes(30),
                         regenerateIdentity: (manager, user) => user.GenerateUserIdentityAsync(manager))
                 }
-            });            
+            });
             app.UseExternalSignInCookie(DefaultAuthenticationTypes.ExternalCookie);
 
             // Uncomment the following lines to enable logging in with third party login providers
@@ -49,19 +58,19 @@
             var microsoftClientSecret = ConfigurationManager.AppSettings.Get("MicrosoftAuthentication_ClientSecret");
             app.UseMicrosoftAccountAuthentication(microsoftClientId, microsoftClientSecret);
 
-            //app.UseTwitterAuthentication(
-            //   consumerKey: "",
-            //   consumerSecret: "");
+            ////app.UseTwitterAuthentication(
+            ////   consumerKey: "",
+            ////   consumerSecret: "");
 
-            //app.UseFacebookAuthentication(
-            //   appId: "",
-            //   appSecret: "");
+            ////app.UseFacebookAuthentication(
+            ////   appId: "",
+            ////   appSecret: "");
 
-            //app.UseGoogleAuthentication(new GoogleOAuth2AuthenticationOptions()
-            //{
-            //    ClientId = "",
-            //    ClientSecret = ""
-            //});
+            ////app.UseGoogleAuthentication(new GoogleOAuth2AuthenticationOptions()
+            ////{
+            ////    ClientId = "",
+            ////    ClientSecret = ""
+            ////});
         }
     }
 }

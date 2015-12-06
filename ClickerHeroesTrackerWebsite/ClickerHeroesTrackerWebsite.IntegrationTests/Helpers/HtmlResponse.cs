@@ -1,4 +1,8 @@
-﻿namespace ClickerHeroesTrackerWebsite.IntegrationTests.Helpers
+﻿// <copyright file="HtmlResponse.cs" company="Clicker Heroes Tracker">
+// Copyright (c) Clicker Heroes Tracker. All rights reserved.
+// </copyright>
+
+namespace ClickerHeroesTrackerWebsite.IntegrationTests.Helpers
 {
     using System;
     using System.IO;

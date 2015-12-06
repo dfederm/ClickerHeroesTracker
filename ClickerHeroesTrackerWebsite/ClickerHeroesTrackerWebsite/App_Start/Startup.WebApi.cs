@@ -1,4 +1,8 @@
-﻿namespace ClickerHeroesTrackerWebsite
+﻿// <copyright file="Startup.WebApi.cs" company="Clicker Heroes Tracker">
+// Copyright (c) Clicker Heroes Tracker. All rights reserved.
+// </copyright>
+
+namespace ClickerHeroesTrackerWebsite
 {
     using System;
     using System.Net.Http.Formatting;
@@ -9,8 +13,16 @@
     using Newtonsoft.Json.Serialization;
     using Owin;
 
+    /// <summary>
+    /// Configure WebAPI
+    /// </summary>
     public partial class Startup
     {
+        /// <summary>
+        /// Configure WebAPI
+        /// </summary>
+        /// <param name="app">The Owin app builder</param>
+        /// <param name="config">The WebAPI configuration object</param>
         private static void ConfigureWebApi(IAppBuilder app, HttpConfiguration config)
         {
             // Replace the Json formatter with out own.

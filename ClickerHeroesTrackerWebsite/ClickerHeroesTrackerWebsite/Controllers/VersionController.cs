@@ -1,8 +1,12 @@
-﻿namespace ClickerHeroesTrackerWebsite.Controllers
+﻿// <copyright file="VersionController.cs" company="Clicker Heroes Tracker">
+// Copyright (c) Clicker Heroes Tracker. All rights reserved.
+// </copyright>
+
+namespace ClickerHeroesTrackerWebsite.Controllers
 {
-    using Configuration;
     using System.Net.Http;
     using System.Web.Http;
+    using Configuration;
 
     [RoutePrefix("version")]
     [Authorize(Roles = "Admin")]

@@ -1,4 +1,8 @@
-﻿namespace ClickerHeroesTrackerWebsite.Models.Game
+﻿// <copyright file="HeroUpgrade.cs" company="Clicker Heroes Tracker">
+// Copyright (c) Clicker Heroes Tracker. All rights reserved.
+// </copyright>
+
+namespace ClickerHeroesTrackerWebsite.Models.Game
 {
     using System.Collections.Generic;
 
@@ -78,7 +82,7 @@
             {
                 return maximumDamageMultiplier;
             }
-        } 
+        }
 
         public int Id { get; private set; }
 
