@@ -328,7 +328,7 @@
     <Compile Include="Models\UserSettings.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="App_Start\Startup.cs" />
-    <Compile Include="Unity\UnityControllerFactory.cs" />
+    <Compile Include="Unity\UnityControllerActivator.cs" />
     <Compile Include="Unity\UnityHttpControllerActivator.cs" />
     <Compile Include="Views\HtmlHelpers.cs" />
   </ItemGroup>

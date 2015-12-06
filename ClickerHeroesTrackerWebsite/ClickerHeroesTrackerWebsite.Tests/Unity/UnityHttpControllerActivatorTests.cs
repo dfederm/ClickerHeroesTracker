@@ -1,60 +1,50 @@
 ﻿namespace ClickerHeroesTrackerWebsite.Tests.Unity
 {
-    using System;
-    using System.Linq;
-    using System.Reflection;
-    using System.Web.Mvc;
-    using System.Web.Routing;
     using ClickerHeroesTrackerWebsite.Unity;
     using Microsoft.Practices.Unity;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
-    using Moq;
+    using System.Net.Http;
+    using System.Web.Http.Controllers;
+    using System;
+    using System.Threading;
+    using System.Threading.Tasks;
 
     [TestClass]
-    public class UnityControllerFactoryTests
+    public class UnityHttpControllerActivatorTests
     {
         [TestMethod]
-        public void UnityControllerFactory_GetControllerInstance_BasicTest()
+        public void UnityHttpControllerActivator_Create_BasicTest()
         {
             var unityContainer = new UnityContainer();
             unityContainer.RegisterType<ContainerControlledDependency>(new ContainerControlledLifetimeManager());
             unityContainer.RegisterType<TransientDependency>(new TransientLifetimeManager());
 
-            var requestContext = new RequestContext();
+            var requestMessage = new HttpRequestMessage();
+            var controllerDescriptor = new HttpControllerDescriptor();
 
-            var unityControllerFactory = new UnityControllerFactory(unityContainer);
-
-            // Use reflection to get GetControllerInstance. It's protected and the
-            // public method CreateController requires a bunch of MVC setup which is
-            // seemingly impossible to do in a unit test.
-            var getControllerInstanceMethod = (typeof(UnityControllerFactory)).GetMethod("GetControllerInstance", BindingFlags.Instance | BindingFlags.NonPublic);
-            Func<MockController> getControllerInstance = () =>
-            {
-                return (MockController)getControllerInstanceMethod.Invoke(
-                    unityControllerFactory,
-                    new object[] { requestContext, typeof(MockController) });
-            };
+            var unityControllerActivator = new UnityHttpControllerActivator(unityContainer);
 
             // Validate a controller creation
-            var controller1 = getControllerInstance();
+            var controller1 = (MockHttpController)unityControllerActivator.Create(requestMessage, controllerDescriptor, typeof(MockHttpController));
             Assert.IsNotNull(controller1);
             Assert.IsNotNull(controller1.ContainerControlledDependency);
             Assert.IsNotNull(controller1.TransientDependency);
 
             // Validate another controller creation
-            var controller2 = getControllerInstance();
+            var controller2 = (MockHttpController)unityControllerActivator.Create(requestMessage, controllerDescriptor, typeof(MockHttpController));
             Assert.IsNotNull(controller2);
             Assert.IsNotNull(controller2.ContainerControlledDependency);
             Assert.IsNotNull(controller2.TransientDependency);
 
             // Validate the lifetimes between the two resolution
+            Assert.AreNotEqual(controller1, controller2);
             Assert.AreEqual(controller1.ContainerControlledDependency, controller2.ContainerControlledDependency);
             Assert.AreNotEqual(controller1.TransientDependency, controller2.TransientDependency);
         }
 
-        private sealed class MockController : Controller
+        private sealed class MockHttpController : IHttpController
         {
-            public MockController(
+            public MockHttpController(
                 ContainerControlledDependency containerControlledDependency,
                 TransientDependency transientDependency)
             {
@@ -65,6 +55,11 @@
             public ContainerControlledDependency ContainerControlledDependency { get; private set; }
 
             public TransientDependency TransientDependency { get; private set; }
+
+            public Task<HttpResponseMessage> ExecuteAsync(HttpControllerContext controllerContext, CancellationToken cancellationToken)
+            {
+                throw new NotImplementedException();
+            }
         }
 
         private sealed class ContainerControlledDependency

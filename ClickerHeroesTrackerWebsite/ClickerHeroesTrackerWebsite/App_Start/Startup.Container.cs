@@ -18,7 +18,7 @@
             RegisterTypes(container);
 
             // MVC Controllers should be created by Unity
-            ControllerBuilder.Current.SetControllerFactory(new UnityControllerFactory(container));
+            ControllerBuilder.Current.SetControllerFactory(new DefaultControllerFactory(new UnityControllerActivator(container)));
 
             // Web Api controllers should be created by Unity
             var httpConfiguration = container.Resolve<HttpConfiguration>();
