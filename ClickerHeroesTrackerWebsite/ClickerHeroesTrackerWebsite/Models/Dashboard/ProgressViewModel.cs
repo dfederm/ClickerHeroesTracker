@@ -1,35 +1,40 @@
 ﻿namespace ClickerHeroesTrackerWebsite.Models.Dashboard
 {
+    using Settings;
     using Database;
     using Graph;
     using Microsoft.AspNet.Identity;
     using System;
     using System.Collections.Generic;
+    using System.Data;
     using System.Linq;
     using System.Security.Principal;
 
     public class ProgressViewModel
     {
-        public ProgressViewModel(IPrincipal user)
+        public ProgressViewModel(
+            IDatabaseCommandFactory databaseCommandFactory,
+            IUserSettingsProvider userSettingsProvider,
+            IPrincipal user)
         {
             var userId = user.Identity.GetUserId();
 
-            var userSettings = new UserSettings(userId);
-            userSettings.Fill();
+            var userSettings = userSettingsProvider.Get(userId);
 
             var startTime = DateTime.UtcNow.AddDays(-7);
             ProgressData data;
 
-            // BUGBUG 57 - Use IDatabaseCommandFactory
-            using (var command = new SqlDatabaseCommand("GetProgressData"))
-            {
-                command.AddParameter("@UserId", userId);
-                command.AddParameter("@StartTime", startTime);
-
-                using (var reader = command.ExecuteReader())
+            using (var command = databaseCommandFactory.Create(
+                "GetProgressData",
+                CommandType.StoredProcedure,
+                new Dictionary<string, object>
                 {
-                    data = new ProgressData(reader, userSettings);
-                }
+                    { "@UserId", userId },
+                    { "@StartTime", startTime },
+                }))
+            using (var reader = command.ExecuteReader())
+            {
+                data = new ProgressData(reader, userSettings);
             }
 
             this.ProminentGraphs = new List<GraphViewModel>

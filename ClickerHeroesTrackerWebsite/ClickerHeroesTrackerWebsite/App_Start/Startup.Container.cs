@@ -9,10 +9,12 @@
     using System.Web.Http.Dispatcher;
     using Database;
     using Microsoft.ApplicationInsights;
+    using Instrumentation;
+    using Models.Settings;
 
     public partial class Startup
     {
-        private static IUnityContainer ConfigureContainer(IAppBuilder app)
+        private static IUnityContainer ConfigureContainer()
         {
             var container = new UnityContainer();
 
@@ -35,9 +37,11 @@
             container.RegisterType<HttpConfiguration>(new ContainerControlledLifetimeManager(), new InjectionFactory(_ => new HttpConfiguration()));
             container.RegisterType<IEnvironmentProvider, EnvironmentProvider>(new ContainerControlledLifetimeManager());
 
-            // Call context (per request) registrations
-            container.RegisterType<IDatabaseCommandFactory, DatabaseCommandProvider>(new CallContextLifetimeManager());
-            container.RegisterType<TelemetryClient>(new CallContextLifetimeManager());
+            // Owin Context (per request) registrations
+            container.RegisterType<ICounterProvider, CounterProvider>(new OwinContextLifetimeManager());
+            container.RegisterType<IDatabaseCommandFactory, DatabaseCommandProvider>(new OwinContextLifetimeManager());
+            container.RegisterType<IUserSettingsProvider, UserSettingsProvider>(new OwinContextLifetimeManager());
+            container.RegisterType<TelemetryClient>(new OwinContextLifetimeManager());
         }
     }
 }

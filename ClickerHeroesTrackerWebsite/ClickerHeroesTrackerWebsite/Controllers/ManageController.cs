@@ -7,14 +7,22 @@ using Microsoft.AspNet.Identity;
 using Microsoft.AspNet.Identity.Owin;
 using Microsoft.Owin.Security;
 using ClickerHeroesTrackerWebsite.Models;
+using ClickerHeroesTrackerWebsite.Models.Settings;
 
 namespace ClickerHeroesTrackerWebsite.Controllers
 {
     [Authorize]
     public class ManageController : Controller
     {
+        private readonly IUserSettingsProvider userSettingsProvider;
+
         private ApplicationSignInManager signInManager;
         private ApplicationUserManager userManager;
+
+        public ManageController(IUserSettingsProvider userSettingsProvider)
+        {
+            this.userSettingsProvider = userSettingsProvider;
+        }
 
         public ApplicationSignInManager SignInManager
         {
@@ -44,8 +52,7 @@ namespace ClickerHeroesTrackerWebsite.Controllers
 
             var userId = User.Identity.GetUserId();
 
-            var userSettings = new UserSettings(userId);
-            userSettings.Fill();
+            var userSettings = this.userSettingsProvider.Get(userId);
 
             return await GetIndexResult(userId, userSettings);
         }
@@ -58,14 +65,12 @@ namespace ClickerHeroesTrackerWebsite.Controllers
 
             var userId = User.Identity.GetUserId();
 
-            var userSettings = new UserSettings(userId);
-            userSettings.Fill();
+            var userSettings = this.userSettingsProvider.Get(userId);
 
             userSettings.TimeZone = TimeZoneInfo.FindSystemTimeZoneById(indexViewModel.TimeZoneId);
             userSettings.AreUploadsPublic = indexViewModel.AreUploadsPublic;
             userSettings.UseReducedSolomonFormula = indexViewModel.SolomonFormula.Equals("Log", StringComparison.OrdinalIgnoreCase);
             userSettings.PlayStyle = indexViewModel.PlayStyle.SafeParseEnum<PlayStyle>();
-            userSettings.Save();
 
             return await GetIndexResult(userId, userSettings);
         }
@@ -223,7 +228,7 @@ namespace ClickerHeroesTrackerWebsite.Controllers
             base.Dispose(disposing);
         }
 
-        private async Task<ActionResult> GetIndexResult(string userId, UserSettings userSettings)
+        private async Task<ActionResult> GetIndexResult(string userId, IUserSettings userSettings)
         {
             var model = new IndexViewModel
             {

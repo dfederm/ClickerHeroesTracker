@@ -1,13 +1,14 @@
 ﻿namespace ClickerHeroesTrackerWebsite.Database
 {
     using Microsoft.ApplicationInsights;
-    using System;
     using System.Configuration;
     using System.Data.SqlClient;
     using System.Data;
     using System.Collections.Generic;
+    using Utility;
+    using Instrumentation;
 
-    public sealed class DatabaseCommandProvider : IDatabaseCommandFactory, IDisposable
+    public sealed class DatabaseCommandProvider : DisposableBase, IDatabaseCommandFactory
     {
         private static string connectionString = ConfigurationManager.ConnectionStrings["DefaultConnection"].ConnectionString;
 
@@ -15,13 +16,16 @@
 
         private readonly TelemetryClient telemetryClient;
 
+        private readonly ICounterProvider counterProvider;
+
         private SqlConnection connection;
 
-        private SqlDatabaseCommand lastCommand;
-
-        public DatabaseCommandProvider(TelemetryClient telemetryClient)
+        public DatabaseCommandProvider(
+            TelemetryClient telemetryClient,
+            ICounterProvider counterProvider)
         {
             this.telemetryClient = telemetryClient;
+            this.counterProvider = counterProvider;
         }
 
         public IDatabaseCommand Create(string commandText)
@@ -41,48 +45,42 @@
 
         public IDatabaseCommand Create(string commandText, CommandType commandType, IDictionary<string, object> parameters)
         {
-            // SQL only allows one command to be active per connection, so close any command active on this connection.
-            if (this.lastCommand != null)
-            {
-                this.lastCommand.Dispose();
-            }
+            this.EnsureNotDisposed();
 
             // Create the connection if it hasn't been created yet.
             if (this.connection == null)
             {
                 this.telemetryClient.TrackEvent("SqlConnectionOpen");
 
-                using (new DependencyScope())
+                using (this.counterProvider.Suspend(Counter.Internal))
+                using (this.counterProvider.Measure(Counter.Dependency))
                 {
                     this.connection = new SqlConnection(connectionString);
                     this.connection.Open();
                 }
             }
 
-            var command = new SqlDatabaseCommand(
+            return new SqlDatabaseCommand(
                 this.connection,
                 commandText,
                 commandType,
-                parameters);
-
-            this.lastCommand = command;
-
-            return command;
+                parameters,
+                this.counterProvider);
         }
 
-        public void Dispose()
+        protected override void Dispose(bool isDisposing)
         {
             if (this.connection != null)
             {
                 this.telemetryClient.TrackEvent("SqlConnectionClose");
-                this.connection.Dispose();
-                this.connection = null;
-            }
 
-            if (this.lastCommand != null)
-            {
-                this.lastCommand.Dispose();
-                this.lastCommand = null;
+                // SqlConntection throws if it's being disposed in a finalizer
+                if (isDisposing)
+                {
+                    this.connection.Dispose();
+                }
+
+                this.connection = null;
             }
         }
     }

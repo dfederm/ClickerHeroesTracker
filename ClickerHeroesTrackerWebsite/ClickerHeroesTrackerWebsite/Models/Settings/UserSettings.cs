@@ -1,11 +1,12 @@
-﻿namespace ClickerHeroesTrackerWebsite.Models
+﻿namespace ClickerHeroesTrackerWebsite.Models.Settings
 {
+    using Utility;
     using Database;
     using System;
     using System.Collections.Generic;
     using System.Data;
 
-    public class UserSettings
+    internal sealed class UserSettings : DisposableBase, IUserSettings
     {
         private delegate bool TryParse<T>(string rawValue, out T value);
 
@@ -13,63 +14,18 @@
 
         private readonly HashSet<byte> dirtySettings = new HashSet<byte>();
 
+        private readonly IDatabaseCommandFactory databaseCommandFactory;
+
         private readonly string userId;
 
-        public UserSettings(string userId)
+        public UserSettings(
+            IDatabaseCommandFactory databaseCommandFactory,
+            string userId)
         {
+            this.databaseCommandFactory = databaseCommandFactory;
             this.userId = userId;
-        }
 
-        public void Fill()
-        {
-            if (this.userId == null)
-            {
-                return;
-            }
-
-            // BUGBUG 57 - Use IDatabaseCommandFactory
-            using (var command = new SqlDatabaseCommand("GetUserSettings"))
-            {
-                command.AddParameter("@UserId", this.userId);
-
-                using (var reader = command.ExecuteReader())
-                {
-                    while (reader.Read())
-                    {
-                        var settingId = Convert.ToByte(reader["SettingId"]);
-                        var settingValue = reader["SettingValue"].ToString();
-                        settingValues.Add(settingId, settingValue);
-                    }
-                }
-            }
-        }
-
-        public void Save()
-        {
-            if (this.dirtySettings.Count == 0)
-            {
-                return;
-            }
-
-            // BUGBUG 57 - Use IDatabaseCommandFactory
-            using (var command = new SqlDatabaseCommand("SetUserSettings"))
-            {
-                command.AddParameter("@UserId", this.userId);
-
-                DataTable settingsTable = new DataTable();
-                settingsTable.Columns.Add("SettingId", typeof(byte));
-                settingsTable.Columns.Add("SettingValue", typeof(string));
-                foreach (var settingId in this.dirtySettings)
-                {
-                    settingsTable.Rows.Add(settingId, this.settingValues[settingId]);
-                }
-
-                command.AddTableParameter("@UserSettings", "UserSetting", settingsTable);
-
-                command.ExecuteNonQuery();
-            }
-
-            this.dirtySettings.Clear();
+            this.Fill();
         }
 
         public TimeZoneInfo TimeZone
@@ -120,6 +76,45 @@
             }
         }
 
+        internal void FlushChanges()
+        {
+            this.EnsureNotDisposed();
+
+            if (this.dirtySettings.Count == 0)
+            {
+                return;
+            }
+
+            using (var command = this.databaseCommandFactory.Create(
+                "SetUserSettings",
+                CommandType.StoredProcedure,
+                new Dictionary<string, object>
+                {
+                    { "@UserId", this.userId },
+                }))
+            {
+                DataTable settingsTable = new DataTable();
+                settingsTable.Columns.Add("SettingId", typeof(byte));
+                settingsTable.Columns.Add("SettingValue", typeof(string));
+                foreach (var settingId in this.dirtySettings)
+                {
+                    settingsTable.Rows.Add(settingId, this.settingValues[settingId]);
+                }
+
+                // BUGBUG 63 - Remove casts to SqlDatabaseCommand
+                ((SqlDatabaseCommand)command).AddTableParameter("@UserSettings", "UserSetting", settingsTable);
+
+                command.ExecuteNonQuery();
+            }
+
+            this.dirtySettings.Clear();
+        }
+
+        protected override void Dispose(bool isDisposing)
+        {
+            this.FlushChanges();
+        }
+
         private static bool TryParseTimeZone(string value, out TimeZoneInfo timeZone)
         {
             try
@@ -134,8 +129,35 @@
             }
         }
 
+        private void Fill()
+        {
+            if (this.userId == null)
+            {
+                return;
+            }
+
+            using (var command = this.databaseCommandFactory.Create(
+                "GetUserSettings",
+                CommandType.StoredProcedure,
+                new Dictionary<string, object>
+                {
+                    { "@UserId", this.userId },
+                }))
+            using (var reader = command.ExecuteReader())
+            {
+                while (reader.Read())
+                {
+                    var settingId = Convert.ToByte(reader["SettingId"]);
+                    var settingValue = reader["SettingValue"].ToString();
+                    settingValues.Add(settingId, settingValue);
+                }
+            }
+        }
+
         private T GetValue<T>(byte settingId, TryParse<T> parser, T defaultValue)
         {
+            this.EnsureNotDisposed();
+
             string rawValue;
             T value;
             return this.settingValues.TryGetValue(settingId, out rawValue)
@@ -146,6 +168,8 @@
 
         private void SetValue(byte settingId, string value)
         {
+            this.EnsureNotDisposed();
+
             if (value == null)
             {
                 return;

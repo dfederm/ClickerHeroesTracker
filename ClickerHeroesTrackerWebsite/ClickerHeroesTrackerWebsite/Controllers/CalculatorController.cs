@@ -3,9 +3,23 @@
     using Models.Upload;
     using Models.Calculator;
     using System.Web.Mvc;
+    using Database;
+    using Models.Settings;
 
     public class CalculatorController : Controller
     {
+        private readonly IDatabaseCommandFactory databaseCommandFactory;
+
+        private readonly IUserSettingsProvider userSettingsProvider;
+
+        public CalculatorController(
+            IDatabaseCommandFactory databaseCommandFactory,
+            IUserSettingsProvider userSettingsProvider)
+        {
+            this.databaseCommandFactory = databaseCommandFactory;
+            this.userSettingsProvider = userSettingsProvider;
+        }
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult Upload(UploadViewModel uploadViewModel)
@@ -15,14 +29,23 @@
                 return this.RedirectToAction("Index", "Upload");
             }
 
-            var model = new CalculatorViewModel(uploadViewModel.EncodedSaveData, this.User.Identity, uploadViewModel.AddToProgress);
+            var model = new CalculatorViewModel(
+                this.databaseCommandFactory,
+                this.userSettingsProvider,
+                uploadViewModel.EncodedSaveData,
+                this.User.Identity,
+                uploadViewModel.AddToProgress);
             return this.GetResult(model, true);
         }
 
         public ActionResult View(int? uploadId)
         {
             CalculatorViewModel model = uploadId.HasValue
-                ? new CalculatorViewModel(uploadId.Value, this.User)
+                ? new CalculatorViewModel(
+                    this.databaseCommandFactory,
+                    this.userSettingsProvider,
+                    uploadId.Value,
+                    this.User)
                 : null;
             return this.GetResult(model, false);
         }

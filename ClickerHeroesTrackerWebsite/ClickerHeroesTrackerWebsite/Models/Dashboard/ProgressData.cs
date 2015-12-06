@@ -2,13 +2,14 @@
 {
     using ClickerHeroesTrackerWebsite.Models;
     using ClickerHeroesTrackerWebsite.Models.Game;
+    using Settings;
     using System;
     using System.Collections.Generic;
     using System.Data.SqlClient;
 
     public class ProgressData
     {
-        public ProgressData(SqlDataReader reader, UserSettings userSettings)
+        public ProgressData(SqlDataReader reader, IUserSettings userSettings)
         {
             this.UserSettings = userSettings;
 
@@ -62,7 +63,7 @@
 
         public bool IsValid { get; private set; }
 
-        public UserSettings UserSettings { get; private set; }
+        public IUserSettings UserSettings { get; private set; }
 
         public IDictionary<DateTime, long> OptimalLevelData { get; private set; }
 

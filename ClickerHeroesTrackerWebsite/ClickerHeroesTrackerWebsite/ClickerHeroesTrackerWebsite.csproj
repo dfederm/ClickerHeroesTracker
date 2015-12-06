@@ -276,6 +276,10 @@
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
+    <Compile Include="Instrumentation\Counter.cs" />
+    <Compile Include="Instrumentation\CounterProvider.cs" />
+    <Compile Include="Instrumentation\ICounterProvider.cs" />
+    <Compile Include="Instrumentation\MeasureLatencyMiddleware.cs" />
     <Compile Include="Instrumentation\UserInstrumentationMiddleware.cs" />
     <Compile Include="Models\AccountViewModels.cs" />
     <Compile Include="Models\Api\PaginationMetadata.cs" />
@@ -283,7 +287,8 @@
     <Compile Include="Models\Api\Uploads\UploadDetails.cs" />
     <Compile Include="Models\Api\Uploads\UploadSummaryListResponse.cs" />
     <Compile Include="Models\Api\Uploads\UploadSummary.cs" />
-    <Compile Include="Database\DependencyScope.cs" />
+    <Compile Include="Models\Settings\IUserSettings.cs" />
+    <Compile Include="Models\Settings\IUserSettingsProvider.cs" />
     <Compile Include="Models\LatencyCounter.cs" />
     <Compile Include="Models\PlayStyle.cs" />
     <Compile Include="Models\Dashboard\DashboardViewModel.cs" />
@@ -317,6 +322,7 @@
     <Compile Include="Models\SaveData\HeroesData.cs" />
     <Compile Include="Models\SaveData\ItemData.cs" />
     <Compile Include="Models\SaveData\ItemsData.cs" />
+    <Compile Include="Models\Settings\UserSettingsProvider.cs" />
     <Compile Include="Models\Simulation\LevelingPlan.cs" />
     <Compile Include="Models\Simulation\Simulation.cs" />
     <Compile Include="Models\Calculator\AncientLevelSummaryViewModel.cs" />
@@ -332,13 +338,15 @@
     <Compile Include="Models\Calculator\SuggestedAncientLevelsViewModel.cs" />
     <Compile Include="Models\Telemetry.cs" />
     <Compile Include="Models\Upload\UploadViewModel.cs" />
-    <Compile Include="Models\UserSettings.cs" />
+    <Compile Include="Models\Settings\UserSettings.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="App_Start\Startup.cs" />
-    <Compile Include="Unity\CallContextLifetimeManager.cs" />
+    <Compile Include="Models\Settings\UserSettingsFlushingMiddleware.cs" />
+    <Compile Include="Unity\OwinContextLifetimeManager.cs" />
     <Compile Include="Unity\UnityControllerActivator.cs" />
     <Compile Include="Unity\UnityHttpControllerActivator.cs" />
     <Compile Include="Unity\UnityOwinMiddleware.cs" />
+    <Compile Include="Utility\DisposableBase.cs" />
     <Compile Include="Views\HtmlHelpers.cs" />
   </ItemGroup>
   <ItemGroup>

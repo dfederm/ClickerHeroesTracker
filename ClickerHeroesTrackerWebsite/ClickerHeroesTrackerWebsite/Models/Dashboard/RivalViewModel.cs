@@ -1,59 +1,65 @@
 ﻿namespace ClickerHeroesTrackerWebsite.Models.Dashboard
 {
+    using Settings;
     using Database;
     using Graph;
     using Microsoft.AspNet.Identity;
     using System;
     using System.Collections.Generic;
+    using System.Data;
     using System.Linq;
     using System.Security.Principal;
 
     public class RivalViewModel
     {
-        public RivalViewModel(IPrincipal user, int rivalId)
+        public RivalViewModel(
+            IDatabaseCommandFactory databaseCommandFactory,
+            IUserSettingsProvider userSettingsProvider,
+            IPrincipal user,
+            int rivalId)
         {
             var userId = user.Identity.GetUserId();
             var userName = user.Identity.GetUserName();
 
-            var userSettings = new UserSettings(userId);
-            userSettings.Fill();
+            var userSettings = userSettingsProvider.Get(userId);
 
             var startTime = DateTime.UtcNow.AddDays(-7);
 
             ProgressData userData;
             ProgressData rivalData;
 
-            // BUGBUG 57 - Use IDatabaseCommandFactory
-            using (var command = new SqlDatabaseCommand("GetRivalData"))
-            {
-                command.AddParameter("@UserId", userId);
-                command.AddParameter("@RivalId", rivalId);
-                command.AddParameter("@StartTime", startTime);
-
-                using (var reader = command.ExecuteReader())
+            using (var command = databaseCommandFactory.Create(
+                "GetRivalData",
+                CommandType.StoredProcedure,
+                new Dictionary<string, object>
                 {
-                    userData = new ProgressData(reader, userSettings);
-                    if (!reader.NextResult())
-                    {
-                        return;
-                    }
-
-                    if (reader.Read())
-                    {
-                        this.RivalUserName = reader["RivalUserName"].ToString();
-                    }
-                    else
-                    {
-                        return;
-                    }
-
-                    if (!reader.NextResult())
-                    {
-                        return;
-                    }
-
-                    rivalData = new ProgressData(reader, userSettings);
+                    { "@UserId", userId },
+                    { "@RivalId", rivalId },
+                    { "@StartTime", startTime },
+                }))
+            using (var reader = command.ExecuteReader())
+            {
+                userData = new ProgressData(reader, userSettings);
+                if (!reader.NextResult())
+                {
+                    return;
                 }
+
+                if (reader.Read())
+                {
+                    this.RivalUserName = reader["RivalUserName"].ToString();
+                }
+                else
+                {
+                    return;
+                }
+
+                if (!reader.NextResult())
+                {
+                    return;
+                }
+
+                rivalData = new ProgressData(reader, userSettings);
             }
 
             this.ProminentGraphs = new List<GraphViewModel>

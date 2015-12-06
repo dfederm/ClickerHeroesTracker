@@ -1,11 +1,10 @@
 ﻿namespace ClickerHeroesTrackerWebsite.Database
 {
+    using System;
     using System.Data.SqlClient;
 
-    public interface IDatabaseCommand
+    public interface IDatabaseCommand : IDisposable
     {
-        void AddParameter(string parameterName, object value);
-
         void ExecuteNonQuery();
 
         // BUGBUG 59 - Remove the raw SqlDataReader usage

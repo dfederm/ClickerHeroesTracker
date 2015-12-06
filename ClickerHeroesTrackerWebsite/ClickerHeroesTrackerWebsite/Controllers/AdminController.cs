@@ -7,6 +7,7 @@
     using System.Data;
     using System;
     using Database;
+    using System.Collections.Generic;
 
     [Authorize(Roles = "Admin")]
     public class AdminController : Controller
@@ -31,6 +32,13 @@
             }
         }
         */
+
+        private readonly IDatabaseCommandFactory databaseCommandFactory;
+
+        public AdminController(IDatabaseCommandFactory databaseCommandFactory)
+        {
+            this.databaseCommandFactory = databaseCommandFactory;
+        }
 
         // GET: Admin
         public ActionResult Index()
@@ -59,17 +67,14 @@
             {
                 if (uploadIds.Equals("ALL", StringComparison.OrdinalIgnoreCase))
                 {
-                    // BUGBUG 57 - Use IDatabaseCommandFactory
-                    using (var command = new SqlDatabaseCommand("GetAllUploadContent"))
+                    using (var command = this.databaseCommandFactory.Create("GetAllUploadContent", CommandType.StoredProcedure))
+                    using (var reader = command.ExecuteReader())
                     {
-                        using (var reader = command.ExecuteReader())
+                        while (reader.Read())
                         {
-                            while (reader.Read())
-                            {
-                                var uploadId = Convert.ToInt32(reader["Id"]);
-                                var uploadContent = reader["UploadContent"].ToString();
-                                AddRows(computedStatsTable, ancientLevelsTable, uploadId, uploadContent);
-                            }
+                            var uploadId = Convert.ToInt32(reader["Id"]);
+                            var uploadContent = reader["UploadContent"].ToString();
+                            AddRows(computedStatsTable, ancientLevelsTable, uploadId, uploadContent);
                         }
                     }
                 }
@@ -81,19 +86,20 @@
                         int uploadId;
                         if (int.TryParse(uploadIdRaw.Trim(), out uploadId))
                         {
-                            // BUGBUG 57 - Use IDatabaseCommandFactory
-                            using (var command = new SqlDatabaseCommand("GetUploadDetails"))
-                            {
-                                command.AddParameter("@UploadId", uploadId);
-
-                                using (var reader = command.ExecuteReader())
+                            using (var command = this.databaseCommandFactory.Create(
+                                "GetUploadDetails",
+                                CommandType.StoredProcedure,
+                                new Dictionary<string, object>
                                 {
-                                    // General upload data
-                                    reader.Read();
-                                    var uploadContent = reader["UploadContent"].ToString();
+                                    { "@UploadId", uploadId }
+                                }))
+                            using (var reader = command.ExecuteReader())
+                            {
+                                // General upload data
+                                reader.Read();
+                                var uploadContent = reader["UploadContent"].ToString();
 
-                                    AddRows(computedStatsTable, ancientLevelsTable, uploadId, uploadContent);
-                                }
+                                AddRows(computedStatsTable, ancientLevelsTable, uploadId, uploadContent);
                             }
                         }
                     }
@@ -106,12 +112,13 @@
                 return View("Index");
             }
 
-            // BUGBUG 57 - Use IDatabaseCommandFactory
-            using (var command = new SqlDatabaseCommand("UpdateUploadData"))
+            using (var updateCommand = this.databaseCommandFactory.Create("UpdateUploadData", CommandType.StoredProcedure))
             {
-                command.AddTableParameter("@ComputedStatsUpdates", "ComputedStatsUpdate", computedStatsTable);
-                command.AddTableParameter("@AncientLevelsUpdates", "AncientLevelsUpdate", ancientLevelsTable);
-                command.ExecuteNonQuery();
+                // BUGBUG 63 - Remove casts to SqlDatabaseCommand
+                ((SqlDatabaseCommand)updateCommand).AddTableParameter("@ComputedStatsUpdates", "ComputedStatsUpdate", computedStatsTable);
+                ((SqlDatabaseCommand)updateCommand).AddTableParameter("@AncientLevelsUpdates", "AncientLevelsUpdate", ancientLevelsTable);
+
+                updateCommand.ExecuteNonQuery();
             }
 
             this.ViewBag.Message = "Updated " + computedStatsTable.Rows.Count + " uploads";

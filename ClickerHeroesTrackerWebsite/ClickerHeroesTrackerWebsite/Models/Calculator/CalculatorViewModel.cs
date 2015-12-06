@@ -6,10 +6,17 @@
     using System.Security.Principal;
     using Microsoft.AspNet.Identity;
     using Database;
+    using System.Collections.Generic;
+    using Settings;
 
     public class CalculatorViewModel
     {
-        public CalculatorViewModel(string encodedSaveData, IIdentity user, bool addToProgress)
+        public CalculatorViewModel(
+            IDatabaseCommandFactory databaseCommandFactory,
+            IUserSettingsProvider userSettingsProvider,
+            string encodedSaveData,
+            IIdentity user,
+            bool addToProgress)
         {
             var savedGame = SavedGame.Parse(encodedSaveData);
             if (savedGame == null)
@@ -18,8 +25,7 @@
             }
 
             var userId = user?.GetUserId();
-            this.UserSettings = new UserSettings(userId);
-            this.UserSettings.Fill();
+            this.UserSettings = userSettingsProvider.Get(userId);
 
             // Finally, populate the view models
             this.IsPublic = this.UserSettings.AreUploadsPublic;
@@ -38,21 +44,24 @@
 
             if (addToProgress && user.IsAuthenticated)
             {
-                // BUGBUG 57 - Use IDatabaseCommandFactory
-                using (var command = new SqlDatabaseCommand("UploadSaveData"))
+                using (var command = databaseCommandFactory.Create(
+                    "UploadSaveData",
+                    CommandType.StoredProcedure,
+                    new Dictionary<string, object>
+                    {
+                        // Upload data
+                        { "@UserId", userId },
+                        { "@UploadContent", encodedSaveData },
+
+                        // Computed stats
+                        { "@OptimalLevel", this.ComputedStatsViewModel.OptimalLevel },
+                        { "@SoulsPerHour", this.ComputedStatsViewModel.SoulsPerHour },
+                        { "@SoulsPerAscension", this.ComputedStatsViewModel.OptimalSoulsPerAscension },
+                        { "@AscensionTime", this.ComputedStatsViewModel.OptimalAscensionTime },
+                        { "@TitanDamage", this.ComputedStatsViewModel.TitanDamage },
+                        { "@SoulsSpent", this.ComputedStatsViewModel.SoulsSpent },
+                    }))
                 {
-                    // Upload data
-                    command.AddParameter("@UserId", userId);
-                    command.AddParameter("@UploadContent", encodedSaveData);
-
-                    // Computed stats
-                    command.AddParameter("@OptimalLevel", this.ComputedStatsViewModel.OptimalLevel);
-                    command.AddParameter("@SoulsPerHour", this.ComputedStatsViewModel.SoulsPerHour);
-                    command.AddParameter("@SoulsPerAscension", this.ComputedStatsViewModel.OptimalSoulsPerAscension);
-                    command.AddParameter("@AscensionTime", this.ComputedStatsViewModel.OptimalAscensionTime);
-                    command.AddParameter("@TitanDamage", this.ComputedStatsViewModel.TitanDamage);
-                    command.AddParameter("@SoulsSpent", this.ComputedStatsViewModel.SoulsSpent);
-
                     // Ancient levels
                     DataTable ancientLevelTable = new DataTable();
                     ancientLevelTable.Columns.Add("AncientId", typeof(int));
@@ -62,9 +71,11 @@
                         ancientLevelTable.Rows.Add(pair.Key.Id, pair.Value);
                     }
 
-                    command.AddTableParameter("@AncientLevelUploads", "AncientLevelUpload", ancientLevelTable);
+                    // BUGBUG 63 - Remove casts to SqlDatabaseCommand
+                    ((SqlDatabaseCommand)command).AddTableParameter("@AncientLevelUploads", "AncientLevelUpload", ancientLevelTable);
 
-                    var returnParameter = command.AddReturnParameter();
+                    // BUGBUG 63 - Remove casts to SqlDatabaseCommand
+                    var returnParameter = ((SqlDatabaseCommand)command).AddReturnParameter();
 
                     command.ExecuteNonQuery();
 
@@ -73,50 +84,55 @@
             }
         }
 
-        public CalculatorViewModel(int uploadId, IPrincipal user)
+        public CalculatorViewModel(
+            IDatabaseCommandFactory databaseCommandFactory,
+            IUserSettingsProvider userSettingsProvider,
+            int uploadId,
+            IPrincipal user)
         {
             var userId = user.Identity.GetUserId();
-            this.UserSettings = new UserSettings(userId);
-            this.UserSettings.Fill();
+            this.UserSettings = userSettingsProvider.Get(userId);
 
             this.UploadId = uploadId;
 
-            // BUGBUG 57 - Use IDatabaseCommandFactory
-            using (var command = new SqlDatabaseCommand("GetUploadDetails"))
-            {
-                command.AddParameter("@UploadId", uploadId);
+            string uploadUserId;
 
-                string uploadUserId;
-                using (var reader = command.ExecuteReader())
+            using (var command = databaseCommandFactory.Create(
+                "GetUploadDetails",
+                CommandType.StoredProcedure,
+                new Dictionary<string, object>
                 {
-                    // General upload data
-                    if (reader.Read())
-                    {
-                        uploadUserId = reader["UserId"].ToString();
-                        this.UploadUserName = reader["UserName"].ToString(); ;
-                        this.UploadTime = Convert.ToDateTime(reader["UploadTime"]);
-                        this.UploadContent = reader["UploadContent"].ToString();
-                    }
-                    else
-                    {
-                        return;
-                    }
-
-                    if (!reader.NextResult())
-                    {
-                        return;
-                    }
-
-                    // Get ancient levels
-                    this.AncientLevelSummaryViewModel = new AncientLevelSummaryViewModel(reader);
-
-                    if (!reader.NextResult())
-                    {
-                        return;
-                    }
-
-                    this.ComputedStatsViewModel = new ComputedStatsViewModel(reader, this.UserSettings);
+                    { "@UploadId", uploadId }
+                }))
+            using (var reader = command.ExecuteReader())
+            {
+                // General upload data
+                if (reader.Read())
+                {
+                    uploadUserId = reader["UserId"].ToString();
+                    this.UploadUserName = reader["UserName"].ToString(); ;
+                    this.UploadTime = Convert.ToDateTime(reader["UploadTime"]);
+                    this.UploadContent = reader["UploadContent"].ToString();
                 }
+                else
+                {
+                    return;
+                }
+
+                if (!reader.NextResult())
+                {
+                    return;
+                }
+
+                // Get ancient levels
+                this.AncientLevelSummaryViewModel = new AncientLevelSummaryViewModel(reader);
+
+                if (!reader.NextResult())
+                {
+                    return;
+                }
+
+                this.ComputedStatsViewModel = new ComputedStatsViewModel(reader, this.UserSettings);
 
                 this.IsOwn = userId == uploadUserId;
                 if (this.IsOwn)
@@ -126,8 +142,7 @@
                 }
                 else
                 {
-                    var uploadUserSettings = new UserSettings(uploadUserId);
-                    uploadUserSettings.Fill();
+                    var uploadUserSettings = userSettingsProvider.Get(uploadUserId);
 
                     this.IsPublic = uploadUserSettings.AreUploadsPublic;
                     this.IsPermitted = this.IsPublic || user.IsInRole("Admin");
@@ -142,7 +157,7 @@
             }
         }
 
-        public UserSettings UserSettings { get; private set; }
+        public IUserSettings UserSettings { get; private set; }
 
         public bool IsOwn { get; private set; }
 

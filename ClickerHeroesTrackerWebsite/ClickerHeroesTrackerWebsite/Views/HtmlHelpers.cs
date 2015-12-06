@@ -1,5 +1,6 @@
 ﻿namespace ClickerHeroesTrackerWebsite.Views
 {
+    using Utility;
     using System;
     using System.Collections.Generic;
     using System.IO;
@@ -10,15 +11,18 @@
     public static class HtmlHelpers
     {
         /* Taken from: https://jadnb.wordpress.com/2011/02/16/rendering-scripts-from-partial-views-at-the-end-in-mvc/ */
-        private class ScriptBlock : IDisposable
+        private class ScriptBlock : DisposableBase
         {
             private const string scriptsKey = "scripts";
-            public static List<string> pageScripts
+            public static List<string> PageScripts
             {
                 get
                 {
                     if (HttpContext.Current.Items[scriptsKey] == null)
+                    {
                         HttpContext.Current.Items[scriptsKey] = new List<string>();
+                    }
+
                     return (List<string>)HttpContext.Current.Items[scriptsKey];
                 }
             }
@@ -31,9 +35,9 @@
                 this.webPageBase.OutputStack.Push(new StringWriter());
             }
 
-            public void Dispose()
+            protected override void Dispose(bool isDisposing)
             {
-                pageScripts.Add(((StringWriter)this.webPageBase.OutputStack.Pop()).ToString());
+                PageScripts.Add(((StringWriter)this.webPageBase.OutputStack.Pop()).ToString());
             }
         }
 
@@ -44,7 +48,7 @@
 
         public static MvcHtmlString PageScripts(this HtmlHelper helper)
         {
-            return MvcHtmlString.Create(string.Join(Environment.NewLine, ScriptBlock.pageScripts.Select(s => s.ToString())));
+            return MvcHtmlString.Create(string.Join(Environment.NewLine, ScriptBlock.PageScripts.Select(s => s.ToString())));
         }
     }
 }

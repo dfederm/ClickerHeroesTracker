@@ -2,6 +2,8 @@
 {
     using Microsoft.VisualStudio.TestTools.UnitTesting;
     using ClickerHeroesTrackerWebsite.Models.Calculator;
+    using Moq;
+    using ClickerHeroesTrackerWebsite.Models.Settings;
 
     [TestClass]
     public class ConfirmViewModelTests
@@ -11,7 +13,19 @@
         [TestMethod]
         public void ConfirmViewModel_BasicFunctionalityTest()
         {
-            var viewModel = new CalculatorViewModel(EncodedSaveData, null, false);
+            var mockUserSettings = new Mock<IUserSettings>(MockBehavior.Strict);
+            mockUserSettings.SetupGet(_ => _.AreUploadsPublic).Returns(false).Verifiable();
+            mockUserSettings.SetupGet(_ => _.UseReducedSolomonFormula).Returns(false).Verifiable();
+
+            var mockUserSettingsProvider = new Mock<IUserSettingsProvider>(MockBehavior.Strict);
+            mockUserSettingsProvider.Setup(_ => _.Get(null)).Returns(mockUserSettings.Object).Verifiable();
+
+            var viewModel = new CalculatorViewModel(null, mockUserSettingsProvider.Object, EncodedSaveData, null, false);
+
+            Assert.IsTrue(viewModel.IsValid);
+            Assert.IsFalse(viewModel.IsPublic);
+            Assert.IsTrue(viewModel.IsOwn);
+            Assert.IsTrue(viewModel.IsPermitted);
 
             Assert.IsNotNull(viewModel.AncientLevelSummaryViewModel);
             Assert.IsNotNull(viewModel.AncientLevelSummaryViewModel.AncientLevels);
@@ -50,6 +64,9 @@
             }
 
             Assert.IsNotNull(viewModel.ComputedStatsViewModel);
+
+            mockUserSettings.Verify();
+            mockUserSettingsProvider.Verify();
         }
     }
 }

@@ -80,7 +80,7 @@
                 { "@Count", count },
             };
 
-            var command = this.databaseCommandFactory.Create(CommandText, parameters);
+            using (var command = this.databaseCommandFactory.Create(CommandText, parameters))
             using (var reader = command.ExecuteReader())
             {
                 var uploads = new List<UploadSummary>(count);
@@ -108,7 +108,7 @@
                 { "@UserId", userId },
             };
 
-            var command = this.databaseCommandFactory.Create(GetUploadCountCommandText, parameters);
+            using (var command = this.databaseCommandFactory.Create(GetUploadCountCommandText, parameters))
             using (var reader = command.ExecuteReader())
             {
                 if (!reader.Read())

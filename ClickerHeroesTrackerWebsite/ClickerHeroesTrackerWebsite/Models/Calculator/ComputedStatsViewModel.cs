@@ -1,6 +1,7 @@
 ﻿namespace ClickerHeroesTrackerWebsite.Models.Calculator
 {
     using ClickerHeroesTrackerWebsite.Models.SaveData;
+    using Settings;
     using ClickerHeroesTrackerWebsite.Models.Simulation;
     using System;
     using System.Data.SqlClient;
@@ -8,7 +9,7 @@
 
     public class ComputedStatsViewModel
     {
-        public ComputedStatsViewModel(SavedGame savedGame, UserSettings userSettings)
+        public ComputedStatsViewModel(SavedGame savedGame, IUserSettings userSettings)
         {
             this.UserSettings = userSettings;
 
@@ -25,7 +26,7 @@
             this.SoulsSpent = savedGame.AncientsData.Ancients.Values.Aggregate(0L, (count, ancientData) => count + ancientData.SpentHeroSouls);
         }
 
-        public ComputedStatsViewModel(SqlDataReader reader, UserSettings userSettings)
+        public ComputedStatsViewModel(SqlDataReader reader, IUserSettings userSettings)
         {
             this.UserSettings = userSettings;
 
@@ -40,7 +41,7 @@
             }
         }
 
-        public UserSettings UserSettings { get; private set; }
+        public IUserSettings UserSettings { get; private set; }
 
         public long SoulsPerHour { get; private set; }
 

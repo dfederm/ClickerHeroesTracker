@@ -17,30 +17,6 @@
             this.stopwatch = new Stopwatch();
         }
 
-        public static LatencyCounter TotalLatency
-        {
-            get
-            {
-                return Get("Total");
-            }
-        }
-
-        public static LatencyCounter InternalLatency
-        {
-            get
-            {
-                return Get("Internal");
-            }
-        }
-
-        public static LatencyCounter DependencyLatency
-        {
-            get
-            {
-                return Get("Dependnecy");
-            }
-        }
-
         public static LatencyCounter ActionLatency
         {
             get

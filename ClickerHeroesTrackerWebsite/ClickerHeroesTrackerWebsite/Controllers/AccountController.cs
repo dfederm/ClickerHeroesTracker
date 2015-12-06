@@ -9,12 +9,20 @@
     using Microsoft.Owin.Security;
     using ClickerHeroesTrackerWebsite.Models;
     using System;
+    using Models.Settings;
 
     [Authorize]
     public class AccountController : Controller
     {
+        private readonly IUserSettingsProvider userSettingsProvider;
+
         private ApplicationSignInManager _signInManager;
         private ApplicationUserManager _userManager;
+
+        public AccountController(IUserSettingsProvider userSettingsProvider)
+        {
+            this.userSettingsProvider = userSettingsProvider;
+        }
 
         public ApplicationSignInManager SignInManager
         {
@@ -91,9 +99,8 @@
                 if (result.Succeeded)
                 {
                     // Save the user's initial settings
-                    var userSettings = new UserSettings(user.Id);
+                    var userSettings = this.userSettingsProvider.Get(user.Id);
                     userSettings.TimeZone = TimeZoneInfo.GetSystemTimeZones().FirstOrDefault(tz => tz.GetUtcOffset(DateTime.UtcNow).TotalMinutes == -model.TimezoneOffset);
-                    userSettings.Save();
 
                     await SignInManager.SignInAsync(user, isPersistent:false, rememberBrowser:false);
                     

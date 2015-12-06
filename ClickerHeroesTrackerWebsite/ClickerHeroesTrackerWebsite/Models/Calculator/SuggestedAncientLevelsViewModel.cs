@@ -1,5 +1,6 @@
 ﻿namespace ClickerHeroesTrackerWebsite.Models.Calculator
 {
+    using Settings;
     using Game;
     using System;
     using System.Collections.Generic;
@@ -21,7 +22,7 @@
         public SuggestedAncientLevelsViewModel(
             IDictionary<Ancient, long> ancientLevels,
             int optimalLevel,
-            UserSettings userSettings)
+            IUserSettings userSettings)
         {
             this.UserSettings = userSettings;
 
@@ -66,7 +67,7 @@
             };
         }
 
-        public UserSettings UserSettings { get; private set; }
+        public IUserSettings UserSettings { get; private set; }
 
         public SuggestedAncientLevelData[] SuggestedAncientLevels { get; private set; }
 
