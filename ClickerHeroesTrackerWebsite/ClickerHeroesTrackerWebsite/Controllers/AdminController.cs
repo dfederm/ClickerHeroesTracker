@@ -6,6 +6,7 @@
     using Models.Calculator;
     using System.Data;
     using System;
+    using Database;
 
     [Authorize(Roles = "Admin")]
     public class AdminController : Controller
@@ -58,7 +59,8 @@
             {
                 if (uploadIds.Equals("ALL", StringComparison.OrdinalIgnoreCase))
                 {
-                    using (var command = new DatabaseCommand("GetAllUploadContent"))
+                    // BUGBUG 57 - Use IDatabaseCommandFactory
+                    using (var command = new SqlDatabaseCommand("GetAllUploadContent"))
                     {
                         using (var reader = command.ExecuteReader())
                         {
@@ -79,7 +81,8 @@
                         int uploadId;
                         if (int.TryParse(uploadIdRaw.Trim(), out uploadId))
                         {
-                            using (var command = new DatabaseCommand("GetUploadDetails"))
+                            // BUGBUG 57 - Use IDatabaseCommandFactory
+                            using (var command = new SqlDatabaseCommand("GetUploadDetails"))
                             {
                                 command.AddParameter("@UploadId", uploadId);
 
@@ -103,7 +106,8 @@
                 return View("Index");
             }
 
-            using (var command = new DatabaseCommand("UpdateUploadData"))
+            // BUGBUG 57 - Use IDatabaseCommandFactory
+            using (var command = new SqlDatabaseCommand("UpdateUploadData"))
             {
                 command.AddTableParameter("@ComputedStatsUpdates", "ComputedStatsUpdate", computedStatsTable);
                 command.AddTableParameter("@AncientLevelsUpdates", "AncientLevelsUpdate", ancientLevelsTable);

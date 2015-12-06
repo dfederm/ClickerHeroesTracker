@@ -1,5 +1,6 @@
 ﻿namespace ClickerHeroesTrackerWebsite.Models
 {
+    using Database;
     using System;
     using System.Collections.Generic;
     using System.Data;
@@ -26,7 +27,8 @@
                 return;
             }
 
-            using (var command = new DatabaseCommand("GetUserSettings"))
+            // BUGBUG 57 - Use IDatabaseCommandFactory
+            using (var command = new SqlDatabaseCommand("GetUserSettings"))
             {
                 command.AddParameter("@UserId", this.userId);
 
@@ -49,7 +51,8 @@
                 return;
             }
 
-            using (var command = new DatabaseCommand("SetUserSettings"))
+            // BUGBUG 57 - Use IDatabaseCommandFactory
+            using (var command = new SqlDatabaseCommand("SetUserSettings"))
             {
                 command.AddParameter("@UserId", this.userId);
 

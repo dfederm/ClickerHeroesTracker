@@ -1,5 +1,6 @@
 ﻿namespace ClickerHeroesTrackerWebsite.Models.Dashboard
 {
+    using Database;
     using Graph;
     using Microsoft.AspNet.Identity;
     using System;
@@ -18,7 +19,9 @@
 
             var startTime = DateTime.UtcNow.AddDays(-7);
             ProgressData data;
-            using (var command = new DatabaseCommand("GetProgressData"))
+
+            // BUGBUG 57 - Use IDatabaseCommandFactory
+            using (var command = new SqlDatabaseCommand("GetProgressData"))
             {
                 command.AddParameter("@UserId", userId);
                 command.AddParameter("@StartTime", startTime);

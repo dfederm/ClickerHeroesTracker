@@ -1,29 +1,58 @@
-﻿namespace ClickerHeroesTrackerWebsite.Models
+﻿namespace ClickerHeroesTrackerWebsite.Database
 {
+    using Models;
     using System;
+    using System.Collections.Generic;
     using System.Configuration;
     using System.Data;
     using System.Data.SqlClient;
     using System.Web;
 
-    public sealed class DatabaseCommand : IDisposable
+    internal sealed class SqlDatabaseCommand : IDatabaseCommand, IDisposable
     {
         private SqlCommand command;
 
         private bool isDisposed = false;
 
-        public DatabaseCommand(string storedProcedureName)
+        public SqlDatabaseCommand(
+            SqlConnection connection,
+            string commandText,
+            CommandType commandType,
+            IDictionary<string, object> parameters)
         {
-            if (string.IsNullOrEmpty(storedProcedureName))
+            if (connection == null)
             {
-                throw new ArgumentException("value may not be emtpy", "storedProcedureName");
+                throw new ArgumentNullException("connection");
             }
 
-            var connection = HttpContext.Current.Items["SqlConnection"] as SqlConnection
-                    ?? (SqlConnection)(HttpContext.Current.Items["SqlConnection"] = CreateConnection());
+            if (string.IsNullOrEmpty(commandText))
+            {
+                throw new ArgumentException("value may not be empty", "commandText");
+            }
 
-            this.command = new SqlCommand(storedProcedureName, connection);
-            this.command.CommandType = CommandType.StoredProcedure;
+            if (parameters == null)
+            {
+                throw new ArgumentNullException("parameters");
+            }
+
+            this.command = new SqlCommand(commandText, connection);
+            this.command.CommandType = commandType;
+
+            foreach (var parameter in parameters)
+            {
+                this.command.Parameters.AddWithValue(parameter.Key, parameter.Value);
+            }
+        }
+
+        // BUGBUG 57 - Use IDatabaseCommandFactory instead
+        public SqlDatabaseCommand(string storedProcedureName)
+            : this(
+                HttpContext.Current.Items["SqlConnection"] as SqlConnection
+                    ?? (SqlConnection)(HttpContext.Current.Items["SqlConnection"] = CreateConnection()),
+                storedProcedureName,
+                CommandType.StoredProcedure,
+                new Dictionary<string, object>(0))
+        {
         }
 
         public void AddParameter(string parameterName, object value)

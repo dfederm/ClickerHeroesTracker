@@ -1,5 +1,6 @@
-﻿namespace ClickerHeroesTrackerWebsite.Models
+﻿namespace ClickerHeroesTrackerWebsite.Database
 {
+    using Models;
     using System;
 
     public sealed class DependencyScope : IDisposable

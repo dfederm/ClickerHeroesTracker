@@ -5,6 +5,7 @@
     using System.Security.Principal;
     using Graph;
     using System.Linq;
+    using Database;
 
     public class DashboardViewModel
     {
@@ -18,7 +19,9 @@
             var startTime = DateTime.UtcNow.AddDays(-7);
 
             ProgressData data;
-            using (var command = new DatabaseCommand("GetProgressData"))
+
+            // BUGBUG 57 - Use IDatabaseCommandFactory
+            using (var command = new SqlDatabaseCommand("GetProgressData"))
             {
                 command.AddParameter("@UserId", userId);
                 command.AddParameter("@StartTime", startTime);

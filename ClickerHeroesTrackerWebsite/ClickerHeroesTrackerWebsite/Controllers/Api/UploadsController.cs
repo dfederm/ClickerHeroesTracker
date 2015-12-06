@@ -9,10 +9,18 @@
     using Models;
     using Models.Api;
     using Models.Api.Uploads;
+    using Database;
 
     [RoutePrefix("api/uploads")]
     public sealed class UploadsController : ApiController
     {
+        private readonly IDatabaseCommandFactory databaseCommandFactory;
+
+        public UploadsController(IDatabaseCommandFactory databaseCommandFactory)
+        {
+            this.databaseCommandFactory = databaseCommandFactory;
+        }
+
         [Route("")]
         [HttpGet]
         [Authorize]
@@ -33,65 +41,11 @@
             }
 
             var userId = this.User.Identity.GetUserId();
-            var model = new UploadSummaryListResponse();
-
-            // Fetch data
-            var uploads = new List<UploadSummary>(count);
-            using (var command = new DatabaseCommand("GetUserUploads"))
+            var model = new UploadSummaryListResponse()
             {
-                command.AddParameter("@UserId", userId);
-                command.AddParameter("@Offset", (page - 1) * count);
-                command.AddParameter("@Count", count);
-
-                var returnParameter = command.AddReturnParameter();
-
-                using (var reader = command.ExecuteReader())
-                {
-                    while (reader.Read())
-                    {
-                        uploads.Add(new UploadSummary
-                        {
-                            Id = Convert.ToInt32(reader["Id"]),
-                            TimeSubmitted = Convert.ToDateTime(reader["UploadTime"])
-                        });
-                    }
-
-                    model.Uploads = uploads;
-
-                    // Move beyond the result above.
-                    reader.NextResult();
-
-                    var pagination = new PaginationMetadata
-                    {
-                        Count = Convert.ToInt32(returnParameter.Value)
-                    };
-
-                    var currentPath = this.Request.RequestUri.LocalPath;
-                    if (page > 1)
-                    {
-                        pagination.Previous = string.Format(
-                            "{0}?{1}={2}&{3}={4}",
-                            currentPath,
-                            nameof(page),
-                            page - 1,
-                            nameof(count),
-                            count);
-                    }
-
-                    if (page <= Math.Ceiling((float)pagination.Count / count))
-                    {
-                        pagination.Next = string.Format(
-                            "{0}?{1}={2}&{3}={4}",
-                            currentPath,
-                            nameof(page),
-                            page + 1,
-                            nameof(count),
-                            count);
-                    }
-
-                    model.Pagination = pagination;
-                }
-            }
+                Uploads = this.FetchUploads(userId, page, count),
+                Pagination = this.FetchPagination(userId, page, count),
+            };
 
             return this.Request.CreateResponse(model);
         }
@@ -108,6 +62,90 @@
         public HttpResponseMessage Post(RawUpload rawUpload)
         {
             return this.Request.CreateResponse(HttpStatusCode.OK);
+        }
+
+        private List<UploadSummary> FetchUploads(string userId, int page, int count)
+        {
+            const string CommandText = @"
+	            SELECT Id, UploadTime
+	            FROM Uploads
+	            WHERE UserId = @UserId
+	            ORDER BY UploadTime DESC
+		            OFFSET @Offset ROWS
+		            FETCH NEXT @Count ROWS ONLY;";
+            var parameters = new Dictionary<string, object>
+            {
+                { "@UserId", userId },
+                { "@Offset", (page - 1) * count },
+                { "@Count", count },
+            };
+
+            var command = this.databaseCommandFactory.Create(CommandText, parameters);
+            using (var reader = command.ExecuteReader())
+            {
+                var uploads = new List<UploadSummary>(count);
+                while (reader.Read())
+                {
+                    uploads.Add(new UploadSummary
+                    {
+                        Id = Convert.ToInt32(reader["Id"]),
+                        TimeSubmitted = Convert.ToDateTime(reader["UploadTime"])
+                    });
+                }
+
+                return uploads;
+            }
+        }
+
+        private PaginationMetadata FetchPagination(string userId, int page, int count)
+        {
+            const string GetUploadCountCommandText = @"
+	            SELECT COUNT(*) AS TotalUploads
+		        FROM Uploads
+		        WHERE UserId = @UserId";
+            var parameters = new Dictionary<string, object>
+            {
+                { "@UserId", userId },
+            };
+
+            var command = this.databaseCommandFactory.Create(GetUploadCountCommandText, parameters);
+            using (var reader = command.ExecuteReader())
+            {
+                if (!reader.Read())
+                {
+                    return null;
+                }
+
+                var pagination = new PaginationMetadata
+                {
+                    Count = Convert.ToInt32(reader["TotalUploads"])
+                };
+
+                var currentPath = this.Request.RequestUri.LocalPath;
+                if (page > 1)
+                {
+                    pagination.Previous = string.Format(
+                        "{0}?{1}={2}&{3}={4}",
+                        currentPath,
+                        nameof(page),
+                        page - 1,
+                        nameof(count),
+                        count);
+                }
+
+                if (page <= Math.Ceiling((float)pagination.Count / count))
+                {
+                    pagination.Next = string.Format(
+                        "{0}?{1}={2}&{3}={4}",
+                        currentPath,
+                        nameof(page),
+                        page + 1,
+                        nameof(count),
+                        count);
+                }
+
+                return pagination;
+            }
         }
 
         internal static class ParameterConstants

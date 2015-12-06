@@ -1,5 +1,6 @@
 ﻿namespace ClickerHeroesTrackerWebsite.Models.Dashboard
 {
+    using Database;
     using Graph;
     using Microsoft.AspNet.Identity;
     using System;
@@ -21,7 +22,9 @@
 
             ProgressData userData;
             ProgressData rivalData;
-            using (var command = new DatabaseCommand("GetRivalData"))
+
+            // BUGBUG 57 - Use IDatabaseCommandFactory
+            using (var command = new SqlDatabaseCommand("GetRivalData"))
             {
                 command.AddParameter("@UserId", userId);
                 command.AddParameter("@RivalId", rivalId);

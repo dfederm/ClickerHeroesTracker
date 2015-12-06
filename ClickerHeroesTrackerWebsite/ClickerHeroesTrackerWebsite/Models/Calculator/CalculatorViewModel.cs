@@ -5,6 +5,7 @@
     using System.Data;
     using System.Security.Principal;
     using Microsoft.AspNet.Identity;
+    using Database;
 
     public class CalculatorViewModel
     {
@@ -37,7 +38,8 @@
 
             if (addToProgress && user.IsAuthenticated)
             {
-                using (var command = new DatabaseCommand("UploadSaveData"))
+                // BUGBUG 57 - Use IDatabaseCommandFactory
+                using (var command = new SqlDatabaseCommand("UploadSaveData"))
                 {
                     // Upload data
                     command.AddParameter("@UserId", userId);
@@ -79,7 +81,8 @@
 
             this.UploadId = uploadId;
 
-            using (var command = new DatabaseCommand("GetUploadDetails"))
+            // BUGBUG 57 - Use IDatabaseCommandFactory
+            using (var command = new SqlDatabaseCommand("GetUploadDetails"))
             {
                 command.AddParameter("@UploadId", uploadId);
 

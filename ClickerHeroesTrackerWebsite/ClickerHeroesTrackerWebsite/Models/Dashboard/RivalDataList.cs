@@ -1,5 +1,6 @@
 ﻿namespace ClickerHeroesTrackerWebsite.Models.Dashboard
 {
+    using Database;
     using System;
     using System.Collections.Generic;
 
@@ -9,7 +10,8 @@
         {
             var rivals = new List<RivalData>();
 
-            using (var command = new DatabaseCommand("GetUserRivals"))
+            // BUGBUG 57 - Use IDatabaseCommandFactory
+            using (var command = new SqlDatabaseCommand("GetUserRivals"))
             {
                 command.AddParameter("@UserId", userId);
 

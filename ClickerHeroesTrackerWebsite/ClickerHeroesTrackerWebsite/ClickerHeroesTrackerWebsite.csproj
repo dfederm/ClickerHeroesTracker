@@ -267,6 +267,9 @@
     <Compile Include="Controllers\ManageController.cs" />
     <Compile Include="Controllers\UploadController.cs" />
     <Compile Include="Controllers\VersionController.cs" />
+    <Compile Include="Database\IDatabaseCommand.cs" />
+    <Compile Include="Database\IDatabaseCommandFactory.cs" />
+    <Compile Include="Database\DatabaseCommandFactory.cs" />
     <Compile Include="Filters\DatabaseConnectionClosingFilter.cs" />
     <Compile Include="Filters\HandleAndInstrumentErrorFilter.cs" />
     <Compile Include="Filters\MeasureLatencyFilter.cs" />
@@ -280,7 +283,7 @@
     <Compile Include="Models\Api\Uploads\UploadDetails.cs" />
     <Compile Include="Models\Api\Uploads\UploadSummaryListResponse.cs" />
     <Compile Include="Models\Api\Uploads\UploadSummary.cs" />
-    <Compile Include="Models\DependencyScope.cs" />
+    <Compile Include="Database\DependencyScope.cs" />
     <Compile Include="Models\LatencyCounter.cs" />
     <Compile Include="Models\PlayStyle.cs" />
     <Compile Include="Models\Dashboard\DashboardViewModel.cs" />
@@ -302,7 +305,7 @@
     <Compile Include="Models\Dashboard\RivalData.cs" />
     <Compile Include="Models\Dashboard\RivalDataList.cs" />
     <Compile Include="Models\Dashboard\RivalViewModel.cs" />
-    <Compile Include="Models\DatabaseCommand.cs" />
+    <Compile Include="Database\SqlDatabaseCommand.cs" />
     <Compile Include="Models\Extensions.cs" />
     <Compile Include="Models\Game\Achievement.cs" />
     <Compile Include="Models\Game\ItemTypes.cs" />
@@ -332,6 +335,7 @@
     <Compile Include="Models\UserSettings.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="App_Start\Startup.cs" />
+    <Compile Include="Unity\CallContextLifetimeManager.cs" />
     <Compile Include="Unity\UnityControllerActivator.cs" />
     <Compile Include="Unity\UnityHttpControllerActivator.cs" />
     <Compile Include="Views\HtmlHelpers.cs" />

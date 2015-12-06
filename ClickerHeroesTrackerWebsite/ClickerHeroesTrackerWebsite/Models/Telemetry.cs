@@ -5,8 +5,7 @@
 
     public class Telemetry
     {
-        private static TelemetryClient client = new TelemetryClient();
-
+        // BUGBUG 56 - Retrieve via DI
         public static TelemetryClient Client
         {
             get
