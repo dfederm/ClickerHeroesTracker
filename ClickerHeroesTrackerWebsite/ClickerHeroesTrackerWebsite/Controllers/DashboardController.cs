@@ -9,6 +9,9 @@ namespace ClickerHeroesTrackerWebsite.Controllers
     using Models.Dashboard;
     using Models.Settings;
 
+    /// <summary>
+    /// The Dashboard controller is where the user can see a dashboard of their data.
+    /// </summary>
     [Authorize]
     public class DashboardController : Controller
     {
@@ -16,6 +19,9 @@ namespace ClickerHeroesTrackerWebsite.Controllers
 
         private readonly IUserSettingsProvider userSettingsProvider;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="DashboardController"/> class.
+        /// </summary>
         public DashboardController(
             IDatabaseCommandFactory databaseCommandFactory,
             IUserSettingsProvider userSettingsProvider)
@@ -24,6 +30,10 @@ namespace ClickerHeroesTrackerWebsite.Controllers
             this.userSettingsProvider = userSettingsProvider;
         }
 
+        /// <summary>
+        /// The dashboard homepage
+        /// </summary>
+        /// <returns>The dashboard view</returns>
         public ActionResult Index()
         {
             var model = new DashboardViewModel(
@@ -39,11 +49,19 @@ namespace ClickerHeroesTrackerWebsite.Controllers
             return this.View(model);
         }
 
+        /// <summary>
+        /// View a list of the user's uploads
+        /// </summary>
+        /// <returns>The uploads view</returns>
         public ActionResult Uploads()
         {
             return this.View();
         }
 
+        /// <summary>
+        /// View the user's progress details
+        /// </summary>
+        /// <returns>The progress view</returns>
         public ActionResult Progress()
         {
             var model = new ProgressViewModel(
@@ -59,6 +77,10 @@ namespace ClickerHeroesTrackerWebsite.Controllers
             return this.View(model);
         }
 
+        /// <summary>
+        /// View the user's progress compared with a rival's
+        /// </summary>
+        /// <returns>The rival view</returns>
         public ActionResult Rival()
         {
             var rivalIdRaw = this.Request.QueryString["rivalId"];

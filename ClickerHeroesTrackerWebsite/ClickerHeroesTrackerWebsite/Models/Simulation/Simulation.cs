@@ -13,7 +13,8 @@ namespace ClickerHeroesTrackerWebsite.Models.Simulation
     {
         private static Dictionary<CooldownType, Ancient[]> cooldownTypes = new Dictionary<CooldownType, Ancient[]>
         {
-            { CooldownType.Full, new[]
+            {
+                CooldownType.Full, new[]
                 {
                     Ancient.Chawedo,
                     Ancient.Sniperino,
@@ -23,7 +24,8 @@ namespace ClickerHeroesTrackerWebsite.Models.Simulation
                     Ancient.Hecatoncheir,
                 }
             },
-            { CooldownType.Half, new[]
+            {
+                CooldownType.Half, new[]
                 {
                     Ancient.Chawedo,
                     Ancient.Sniperino,
@@ -31,7 +33,8 @@ namespace ClickerHeroesTrackerWebsite.Models.Simulation
                     Ancient.Energon,
                 }
             },
-            { CooldownType.Short, new[]
+            {
+                CooldownType.Short, new[]
                 {
                     Ancient.Chawedo,
                     Ancient.Berserker,
@@ -51,6 +54,14 @@ namespace ClickerHeroesTrackerWebsite.Models.Simulation
             this.savedGame = savedGame;
             this.activities = activities;
             this.itemLevels = this.savedGame.ItemsData.GetItemLevels();
+        }
+
+        public enum CooldownType
+        {
+            Full,
+            Half,
+            Short,
+            None
         }
 
         public SimulateResult Run()
@@ -93,16 +104,16 @@ namespace ClickerHeroesTrackerWebsite.Models.Simulation
                 curDamage *= factors.Damage;
                 if (this.activities != null)
                 {
-                    curDamage *= 1 + clicks * this.GetFactor(Ancient.Juggernaut, 0.0001, 0);
-                    curDamage *= Math.Pow(1.1, Math.Min(currentTime / 30 - 2, 0));
+                    curDamage *= 1 + (clicks * this.GetFactor(Ancient.Juggernaut, 0.0001, 0));
+                    curDamage *= Math.Pow(1.1, Math.Min((currentTime / 30) - 2, 0));
                 }
 
-                var dTime = levelInfo.Life / curDamage;
-                currentTime += dTime + numDelays * 0.5;
+                var time = levelInfo.Life / curDamage;
+                currentTime += time + (numDelays * 0.5);
                 currentSouls += this.HeroSoulRewards(level, solomon);
-                currentGold += addGold + levelInfo.AvgGold * factors.GoldenClicks * dTime / (dTime + 0.5 * numDelays);
-                clicks += dTime * factors.ClickRate;
-                if (dTime * factors.ClickRate < numDelays)
+                currentGold += addGold + (levelInfo.AvgGold * factors.GoldenClicks * time / (time + (0.5 * numDelays)));
+                clicks += time * factors.ClickRate;
+                if (time * factors.ClickRate < numDelays)
                 {
                     clicks = 0;
                 }
@@ -117,10 +128,77 @@ namespace ClickerHeroesTrackerWebsite.Models.Simulation
             return best;
         }
 
+        private static double AncientPrice(Ancient ancient, long level)
+        {
+            var price = Math.Round(Math.Pow(level, ancient.Power));
+            if (ancient == Ancient.Kumawakamaru)
+            {
+                price *= 10;
+            }
+
+            return price;
+        }
+
+        private static long IdleValue(long level)
+        {
+            var value = 0;
+            var add = 25;
+
+            // Only the first 9 levels get the 25% bonus
+            if (level > 9)
+            {
+                level -= 9;
+                value = add * 9;
+                add = 24;
+            }
+
+            // Bonus decreases 1% every 10 levels
+            while (add > 15 && level > 10)
+            {
+                value += add * 10;
+                add -= 1;
+                level -= 10;
+            }
+
+            return value + (add * level);
+        }
+
+        private static long SolomonValue(long level)
+        {
+            var value = 0;
+            var add = 5;
+            while (add > 1 && level > 20)
+            {
+                value += add * 20;
+                add -= 1;
+                level -= 20;
+            }
+
+            return value + (add * level);
+        }
+
+        private static double MonsterLife(int level)
+        {
+            return 10
+                * (Math.Pow(1.6, Math.Min(level, 140) - 1) + Math.Min(level, 140) - 1)
+                * Math.Pow(1.15, Math.Max(level - 140, 0));
+        }
+
+        private static double MonsterGoldFactor(int level)
+        {
+            var factor = 1.0 / 15;
+            if (level > 75)
+            {
+                factor *= Math.Min(3, Math.Pow(1.025, level - 75));
+            }
+
+            return factor;
+        }
+
         private Factors GetFactors()
         {
             var clickFactor = 0.035 * (1 + this.GetFactor(Ancient.Fragsworth, 0.2, 0.1));
-            var critMultiplier = 18 * (1 + this.GetFactor(Ancient.Bhaal, 0.15, 0.01)) - 1;
+            var critMultiplier = (18 * (1 + this.GetFactor(Ancient.Bhaal, 0.15, 0.01))) - 1;
 
             var avgDamage = 0d;
             var avgGold = 0d;
@@ -165,14 +243,14 @@ namespace ClickerHeroesTrackerWebsite.Models.Simulation
                     }
                 }
 
-                remainsIdle = remains - 60 * Math.Max(totalCount, 2);
+                remainsIdle = remains - (60 * Math.Max(totalCount, 2));
             }
 
             if (remainsClickRate > 1e-3)
             {
-                var dDamage = Math.Max(remains, 0) * (1 + (0.09 * critMultiplier + 1) * clickFactor * remainsClickRate);
-                avgDamage += dDamage;
-                avgGold += dDamage;
+                var damage = Math.Max(remains, 0) * (1 + (((0.09 * critMultiplier) + 1) * clickFactor * remainsClickRate));
+                avgDamage += damage;
+                avgGold += damage;
                 avgClickRate += Math.Max(remains, 0) * remainsClickRate;
             }
             else
@@ -181,8 +259,8 @@ namespace ClickerHeroesTrackerWebsite.Models.Simulation
                 remainsIdle = Math.Max(remainsIdle, 0);
                 var remainsDiff = remains - remainsIdle;
                 var siyaFactor = this.GetFactor(Ancient.Siyalatas, 0.01, 0.1);
-                avgDamage += remainsDiff + remainsIdle * (1 + siyaFactor);
-                avgGold += remainsDiff + remainsIdle * (1 + siyaFactor) * (1 + this.GetFactor(Ancient.Libertas, 0.01, 0.01));
+                avgDamage += remainsDiff + (remainsIdle * (1 + siyaFactor));
+                avgGold += remainsDiff + (remainsIdle * (1 + siyaFactor) * (1 + this.GetFactor(Ancient.Libertas, 0.01, 0.01)));
                 avgClickRate = 0;
             }
 
@@ -193,7 +271,7 @@ namespace ClickerHeroesTrackerWebsite.Models.Simulation
 
             var damageFactor = 1
                 + this.GetFactor(Ancient.Morgulis, 0.11, 0.1)
-                + 0.1 * this.savedGame.HeroSouls;
+                + (0.1 * this.savedGame.HeroSouls);
             damageFactor *= this.AchievementDamageMultiplier();
             damageFactor *= HeroUpgrade.MaximumDamageMultiplier;
             if (this.savedGame.HasRubyMultiplier)
@@ -206,7 +284,7 @@ namespace ClickerHeroesTrackerWebsite.Models.Simulation
             var mobTime = (10 - this.savedGame.AncientsData.GetAncientLevel(Ancient.Kumawakamaru)) * 4d;
             var bossTime = 10 * (1 - this.GetFactor(Ancient.Bubos, 0.02, 0.01));
             mobTime /= mobTime + bossTime;
-            var goldFactor = 1 + mobTime * 0.01 * (1 + this.GetFactor(Ancient.Dora, 0.2, 0.1)) * (10 * (1 + this.GetFactor(Ancient.Mimzee, 0.5, 0.25)) - 1);
+            var goldFactor = 1 + (mobTime * 0.01 * (1 + this.GetFactor(Ancient.Dora, 0.2, 0.1)) * ((10 * (1 + this.GetFactor(Ancient.Mimzee, 0.5, 0.25))) - 1));
             goldFactor *= 1 + this.GetFactor(Ancient.Mammon, 0.05, 0.05);
             avgGold *= goldFactor;
             avgGoldenClicks *= goldFactor;
@@ -223,7 +301,7 @@ namespace ClickerHeroesTrackerWebsite.Models.Simulation
             }
             else if (level > 100)
             {
-                var souls = Math.Floor(Math.Pow(((level - 100) / 5d + 4d) / 5d, 1.3d) * solomon);
+                var souls = Math.Floor(Math.Pow((((level - 100) / 5d) + 4d) / 5d, 1.3d) * solomon);
                 if (level % 100 != 0)
                 {
                     souls *= 0.25 + this.GetFactor(Ancient.Atman, 0.01, 0.01);
@@ -287,12 +365,12 @@ namespace ClickerHeroesTrackerWebsite.Models.Simulation
                 {
                     var clickSpeed = clickRate + (cooldowns.Contains(Ancient.Chawedo) && this.GetCooldownDuration(Ancient.Chawedo) >= duration ? 10 : 0);
                     var critChance = 0.09 + (cooldowns.Contains(Ancient.Sniperino) && this.GetCooldownDuration(Ancient.Sniperino) >= duration ? 0.50 : 0);
-                    var goldenClicks = (cooldowns.Contains(Ancient.Kleptos) && this.GetCooldownDuration(Ancient.Kleptos) >= duration ? clickSpeed * (1 + this.GetFactor(Ancient.Pluto, 0.3, 0.15)) : 0);
-                    var powersurge = (cooldowns.Contains(Ancient.Berserker) && this.GetCooldownDuration(Ancient.Berserker) >= duration ? 2 : 1);
-                    var goldFactor = (cooldowns.Contains(Ancient.Energon) && this.GetCooldownDuration(Ancient.Energon) >= duration ? 2 : 1);
-                    var superClicks = (cooldowns.Contains(Ancient.Hecatoncheir) && this.GetCooldownDuration(Ancient.Hecatoncheir) >= duration ? 3 : 1);
+                    var goldenClicks = cooldowns.Contains(Ancient.Kleptos) && this.GetCooldownDuration(Ancient.Kleptos) >= duration ? clickSpeed * (1 + this.GetFactor(Ancient.Pluto, 0.3, 0.15)) : 0;
+                    var powersurge = cooldowns.Contains(Ancient.Berserker) && this.GetCooldownDuration(Ancient.Berserker) >= duration ? 2 : 1;
+                    var goldFactor = cooldowns.Contains(Ancient.Energon) && this.GetCooldownDuration(Ancient.Energon) >= duration ? 2 : 1;
+                    var superClicks = cooldowns.Contains(Ancient.Hecatoncheir) && this.GetCooldownDuration(Ancient.Hecatoncheir) >= duration ? 3 : 1;
                     var dtime = (duration + 30) - (i > 0 ? (durations[i - 1] + 30) : 0);
-                    var damage = dtime * powersurge * (1 + superClicks * (critChance * critMultiplier + 1) * clickSpeed * clickFactor);
+                    var damage = dtime * powersurge * (1 + (superClicks * ((critChance * critMultiplier) + 1) * clickSpeed * clickFactor));
 
                     totalDamage += damage;
                     totalGold += damage * goldFactor;
@@ -313,7 +391,7 @@ namespace ClickerHeroesTrackerWebsite.Models.Simulation
             {
                 ancientValue = SolomonValue(ancientLevel);
             }
-            else if(ancient == Ancient.Siyalatas
+            else if (ancient == Ancient.Siyalatas
                 || ancient == Ancient.Libertas)
             {
                 ancientValue = IdleValue(ancientLevel);
@@ -368,81 +446,6 @@ namespace ClickerHeroesTrackerWebsite.Models.Simulation
             }
 
             return achievementMultiplier;
-        }
-
-        private static double AncientPrice(Ancient ancient, long level)
-        {
-            var price = Math.Round(Math.Pow(level, ancient.Power));
-            if (ancient == Ancient.Kumawakamaru)
-            {
-                price *= 10;
-            }
-
-            return price;
-        }
-
-        private static long IdleValue(long level)
-        {
-            var value = 0;
-            var add = 25;
-
-            // Only the first 9 levels get the 25% bonus
-            if (level > 9)
-            {
-                level -= 9;
-                value = add * 9;
-                add = 24;
-            }
-
-            // Bonus decreases 1% every 10 levels
-            while (add > 15 && level > 10)
-            {
-                value += add * 10;
-                add -= 1;
-                level -= 10;
-            }
-
-            return value + add * level;
-        }
-
-        private static long SolomonValue(long level)
-        {
-            var value = 0;
-            var add = 5;
-            while (add > 1 && level > 20)
-            {
-                value += add * 20;
-                add -= 1;
-                level -= 20;
-            }
-
-            return value + add * level;
-        }
-
-        private static double MonsterLife(int level)
-        {
-            return 10
-                * (Math.Pow(1.6, Math.Min(level, 140) - 1) + Math.Min(level, 140) - 1)
-                * Math.Pow(1.15, Math.Max(level - 140, 0));
-        }
-
-        private static double MonsterGoldFactor(int level)
-        {
-            var factor = 1.0 / 15;
-            if (level > 75)
-            {
-                factor *= Math.Min(3, Math.Pow(1.025, level - 75));
-            }
-
-            return factor;
-        }
-
-        public enum CooldownType
-        {
-            Full,
-            Half,
-            Short,
-            None
         }
 
         public sealed class Activity

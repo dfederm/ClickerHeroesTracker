@@ -6,9 +6,15 @@ namespace ClickerHeroesTrackerWebsite.Controllers
 {
     using System.Web.Mvc;
 
+    /// <summary>
+    /// The upload controller allows users to upload their saved games
+    /// </summary>
     public class UploadController : Controller
     {
-        // GET: Upload
+        /// <summary>
+        /// GET: Upload
+        /// </summary>
+        /// <returns>The upload view</returns>
         [HttpGet]
         public ActionResult Index()
         {

@@ -14,20 +14,32 @@ namespace ClickerHeroesTrackerWebsite.Controllers.Api
     using Models.Api;
     using Models.Api.Uploads;
 
+    /// <summary>
+    /// This controller handles the set of APIs that manage uploads
+    /// </summary>
     [RoutePrefix("api/uploads")]
     public sealed class UploadsController : ApiController
     {
         private readonly IDatabaseCommandFactory databaseCommandFactory;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="UploadsController"/> class.
+        /// </summary>
         public UploadsController(IDatabaseCommandFactory databaseCommandFactory)
         {
             this.databaseCommandFactory = databaseCommandFactory;
         }
 
+        /// <summary>
+        /// Gets the user's uploads
+        /// </summary>
+        /// <param name="page">The page of results to get</param>
+        /// <param name="count">The number of results per page</param>
+        /// <returns>A response with the schema <see cref="UploadSummaryListResponse"/></returns>
         [Route("")]
         [HttpGet]
         [Authorize]
-        public HttpResponseMessage UploadSummaryList(
+        public HttpResponseMessage List(
             int page = ParameterConstants.UploadSummaryList.Page.Default,
             int count = ParameterConstants.UploadSummaryList.Count.Default)
         {
@@ -53,13 +65,25 @@ namespace ClickerHeroesTrackerWebsite.Controllers.Api
             return this.Request.CreateResponse(model);
         }
 
+        /// <summary>
+        /// Retrieve the details for an upload.
+        /// </summary>
+        /// <remarks>BUGBUG 43 - Not implemented</remarks>
+        /// <param name="id">The upload id</param>
+        /// <returns>Empty 200, as this is not implemented yet</returns>
         [Route("{id:int}")]
         [HttpGet]
-        public HttpResponseMessage UploadSummary(int id)
+        public HttpResponseMessage Details(int id)
         {
             return this.Request.CreateResponse(HttpStatusCode.OK);
         }
 
+        /// <summary>
+        /// Add and an upload.
+        /// </summary>
+        /// <remarks>BUGBUG 44 - Not implemented</remarks>
+        /// <param name="rawUpload">The upload data</param>
+        /// <returns>Empty 200, as this is not implemented yet</returns>
         [Route("")]
         [HttpPost]
         public HttpResponseMessage Post(RawUpload rawUpload)

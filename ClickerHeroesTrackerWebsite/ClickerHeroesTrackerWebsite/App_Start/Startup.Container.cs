@@ -49,7 +49,7 @@ namespace ClickerHeroesTrackerWebsite
 
             // Owin Context (per request) registrations
             container.RegisterType<ICounterProvider, CounterProvider>(new OwinContextLifetimeManager());
-            container.RegisterType<IDatabaseCommandFactory, DatabaseCommandProvider>(new OwinContextLifetimeManager());
+            container.RegisterType<IDatabaseCommandFactory, DatabaseCommandFactory>(new OwinContextLifetimeManager());
             container.RegisterType<IUserSettingsProvider, UserSettingsProvider>(new OwinContextLifetimeManager());
             container.RegisterType<TelemetryClient>(new OwinContextLifetimeManager());
         }

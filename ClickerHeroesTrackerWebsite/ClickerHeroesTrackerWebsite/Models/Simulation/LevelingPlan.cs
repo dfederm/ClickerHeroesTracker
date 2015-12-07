@@ -118,15 +118,15 @@ namespace ClickerHeroesTrackerWebsite.Models.Simulation
             }
 
             // Fill in real computed plan damage and costs for each step
-		    this.planPos = 0;
+            this.planPos = 0;
             var heroDamage = new Dictionary<Hero, double>();
             var heroCost = new Dictionary<Hero, double>();
             currentDamage = 0d;
-		    var currentCost = 0d;
+            var currentCost = 0d;
             foreach (var hero in Hero.All)
             {
                 var damage = this.Damage(hero, baselineLevels[hero]);
-			    currentDamage += damage;
+                currentDamage += damage;
                 heroDamage.Add(hero, damage);
 
                 var cost = this.Cost(hero, baselineLevels[hero]);
@@ -135,8 +135,8 @@ namespace ClickerHeroesTrackerWebsite.Models.Simulation
             }
 
             this.currentDamage = currentDamage;
-		    this.currentCost = currentCost;
-		    for (var i = 0; i < this.plan.Count; i++)
+            this.currentCost = currentCost;
+            for (var i = 0; i < this.plan.Count; i++)
             {
                 var stepHero = this.plan[i].Hero;
 
@@ -146,10 +146,10 @@ namespace ClickerHeroesTrackerWebsite.Models.Simulation
                 this.plan[i].Damage = currentDamage;
 
                 var nextCost = this.Cost(stepHero, this.plan[i].Level);
-			    currentCost += nextCost - heroCost[stepHero];
+                currentCost += nextCost - heroCost[stepHero];
                 heroCost[stepHero] = nextCost;
-			    this.plan[i].Cost = currentCost;
-		    }
+                this.plan[i].Cost = currentCost;
+            }
         }
 
         public double GetOptimalHeroSouls(double gold)
@@ -168,8 +168,8 @@ namespace ClickerHeroesTrackerWebsite.Models.Simulation
             var heroCopy = $.extend(true, { }, Heroes);
             // heroCopy[-1] = { name: "Cid, the Helpful Adventurer", cost: 5, damage: 0, level: 0, upgrades: []};
 
-		    //Zero current levels
-		    for (var i in heroCopy)
+            //Zero current levels
+            for (var i in heroCopy)
             {
                 curLevels[i] = 0;
             }
@@ -179,7 +179,7 @@ namespace ClickerHeroesTrackerWebsite.Models.Simulation
             {
                 var cheapest = 0;
                 var cheapestCost = 0;
-			    for (var i in heroCopy)
+                for (var i in heroCopy)
                 {
                     var newCost = this.Cost(heroCopy[i], curLevels[i] + 25);
                     if (cheapestCost == 0 || newCost < cheapestCost)
@@ -226,12 +226,12 @@ namespace ClickerHeroesTrackerWebsite.Models.Simulation
             {
                 // Mid game (during leveling plan)
                 var costRatio = (gold - this.currentCost) / (this.plan[this.planPos].Cost - this.currentCost);
-                return this.currentDamage + (this.plan[this.planPos].Damage - this.currentDamage) * costRatio;
+                return this.currentDamage + ((this.plan[this.planPos].Damage - this.currentDamage) * costRatio);
             }
             else
             {
                 // Late game (after final hero capped to 4100)
-                return this.currentDamage * (1 + Math.Log(gold / this.currentCost) / (Math.Log(1.07) * 4100));
+                return this.currentDamage * (1 + (Math.Log(gold / this.currentCost) / (Math.Log(1.07) * 4100)));
             }
         }
 
@@ -240,9 +240,9 @@ namespace ClickerHeroesTrackerWebsite.Models.Simulation
         {
             var x10 = Math.Min(Math.Floor(level / 1000d), 3d);
             var x4 = Math.Min(Math.Max(Math.Floor((level - 175d) / 25d), 0d) - x10, 154d);
-            var x5 = (hero.IsRanger ? Math.Min(Math.Max(Math.Floor((level - 500d) / 25d), 0d), 9d) : 0d);
+            var x5 = hero.IsRanger ? Math.Min(Math.Max(Math.Floor((level - 500d) / 25d), 0d), 9d) : 0d;
             return hero.Damage
-                * (1 + (0.5 + this.argaivFactor) * this.heroesData.GetHeroGilds(hero))
+                * (1 + ((0.5 + this.argaivFactor) * this.heroesData.GetHeroGilds(hero)))
                 * level
                 * Math.Pow(4, x4)
                 * Math.Pow(10, x10)

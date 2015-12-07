@@ -10,12 +10,18 @@ namespace ClickerHeroesTrackerWebsite.Controllers
     using Models.Settings;
     using Models.Upload;
 
+    /// <summary>
+    /// The calculator controller shows stats for a given upload.
+    /// </summary>
     public class CalculatorController : Controller
     {
         private readonly IDatabaseCommandFactory databaseCommandFactory;
 
         private readonly IUserSettingsProvider userSettingsProvider;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CalculatorController"/> class.
+        /// </summary>
         public CalculatorController(
             IDatabaseCommandFactory databaseCommandFactory,
             IUserSettingsProvider userSettingsProvider)
@@ -24,6 +30,11 @@ namespace ClickerHeroesTrackerWebsite.Controllers
             this.userSettingsProvider = userSettingsProvider;
         }
 
+        /// <summary>
+        /// Commit an upload to the database and show the calculator for that upload.
+        /// </summary>
+        /// <param name="uploadViewModel">The user-submitted upload data</param>
+        /// <returns>The calculator view</returns>
         [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult Upload(UploadViewModel uploadViewModel)
@@ -42,6 +53,11 @@ namespace ClickerHeroesTrackerWebsite.Controllers
             return this.GetResult(model, true);
         }
 
+        /// <summary>
+        /// Show the calculator for an existing upload.
+        /// </summary>
+        /// <param name="uploadId">Id of the upload to view</param>
+        /// <returns>The calculator view</returns>
         public ActionResult View(int? uploadId)
         {
             CalculatorViewModel model = uploadId.HasValue

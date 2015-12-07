@@ -52,7 +52,7 @@ namespace ClickerHeroesTrackerWebsite.Models.Calculator
         {
             private static AncientComparer instance = new AncientComparer();
 
-            private static AncientComparer Instance
+            public static AncientComparer Instance
             {
                 get
                 {

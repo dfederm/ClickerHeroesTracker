@@ -41,7 +41,7 @@ namespace ClickerHeroesTrackerWebsite.IntegrationTests.Helpers
         {
             get
             {
-                return this.content = (this.content = new StreamReader(this.response.GetResponseStream()).ReadToEnd());
+                return this.content = this.content = new StreamReader(this.response.GetResponseStream()).ReadToEnd();
             }
         }
 

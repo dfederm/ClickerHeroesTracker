@@ -47,7 +47,7 @@ namespace ClickerHeroesTrackerWebsite.Tests.Unity
 
         private sealed class MockOwinMiddleware : OwinMiddleware
         {
-            public static List<MockOwinMiddleware> Instances = new List<MockOwinMiddleware>();
+            private static List<MockOwinMiddleware> instances = new List<MockOwinMiddleware>();
 
             public MockOwinMiddleware(
                 OwinMiddleware next,
@@ -58,8 +58,16 @@ namespace ClickerHeroesTrackerWebsite.Tests.Unity
                 this.ContainerControlledDependency = containerControlledDependency;
                 this.TransientDependency = transientDependency;
 
-                // To track ans assert
+                // To track and assert
                 Instances.Add(this);
+            }
+
+            public static List<MockOwinMiddleware> Instances
+            {
+                get
+                {
+                    return instances;
+                }
             }
 
             public ContainerControlledDependency ContainerControlledDependency { get; private set; }

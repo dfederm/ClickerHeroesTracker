@@ -16,7 +16,7 @@ namespace ClickerHeroesTrackerWebsite.Controllers
     using Models.Settings;
 
     /// <summary>
-    /// The Account controller is where users manage their account.
+    /// The Account controller is where users register and log in.
     /// </summary>
     [Authorize]
     public class AccountController : Controller

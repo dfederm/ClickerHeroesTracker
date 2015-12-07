@@ -15,6 +15,9 @@ namespace ClickerHeroesTrackerWebsite.Controllers
     using Microsoft.AspNet.Identity.Owin;
     using Microsoft.Owin.Security;
 
+    /// <summary>
+    /// The manage controller allows users to manage their settings.
+    /// </summary>
     [Authorize]
     public class ManageController : Controller
     {
@@ -26,16 +29,40 @@ namespace ClickerHeroesTrackerWebsite.Controllers
         private ApplicationSignInManager signInManager;
         private ApplicationUserManager userManager;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ManageController"/> class.
+        /// </summary>
         public ManageController(IUserSettingsProvider userSettingsProvider)
         {
             this.userSettingsProvider = userSettingsProvider;
         }
 
-        private enum ManageMessageId
+        /// <summary>
+        /// Represents a status message to the user
+        /// </summary>
+        /// <remarks>
+        /// Although public, this enum is not intended to be used outside the <see cref="ManageController"/>
+        /// </remarks>
+        public enum ManageMessageId
         {
+            /// <summary>
+            /// The user's password was successfully changed.
+            /// </summary>
             ChangePasswordSuccess,
+
+            /// <summary>
+            /// The user's password was successfully set.
+            /// </summary>
             SetPasswordSuccess,
+
+            /// <summary>
+            /// The user's external login was successfully removed.
+            /// </summary>
             RemoveLoginSuccess,
+
+            /// <summary>
+            /// An error happened
+            /// </summary>
             Error
         }
 
@@ -63,7 +90,11 @@ namespace ClickerHeroesTrackerWebsite.Controllers
             }
         }
 
-        // GET: /Manage/Index
+        /// <summary>
+        /// GET: /Manage/Index
+        /// </summary>
+        /// <param name="message">The status of the user's last operation</param>
+        /// <returns>The user's settings view</returns>
         public async Task<ActionResult> Index(ManageMessageId? message)
         {
             this.ViewBag.StatusMessage =
@@ -79,6 +110,11 @@ namespace ClickerHeroesTrackerWebsite.Controllers
             return await this.GetIndexResult(userId, userSettings);
         }
 
+        /// <summary>
+        /// The user submits a change to their settings
+        /// </summary>
+        /// <param name="indexViewModel">The user-submitted settings data</param>
+        /// <returns>The user's settings view</returns>
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<ActionResult> Index(IndexViewModel indexViewModel)
@@ -97,7 +133,12 @@ namespace ClickerHeroesTrackerWebsite.Controllers
             return await this.GetIndexResult(userId, userSettings);
         }
 
-        // POST: /Manage/RemoveLogin
+        /// <summary>
+        /// POST: /Manage/RemoveLogin
+        /// </summary>
+        /// <param name="loginProvider">The external login provider name</param>
+        /// <param name="providerKey">The login provider key</param>
+        /// <returns>A redirection to the manage logins page</returns>
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<ActionResult> RemoveLogin(string loginProvider, string providerKey)
@@ -122,13 +163,20 @@ namespace ClickerHeroesTrackerWebsite.Controllers
             return this.RedirectToAction("ManageLogins", new { Message = message });
         }
 
-        // GET: /Manage/ChangePassword
+        /// <summary>
+        /// GET: /Manage/ChangePassword
+        /// </summary>
+        /// <returns>The change password view</returns>
         public ActionResult ChangePassword()
         {
             return this.View();
         }
 
-        // POST: /Manage/ChangePassword
+        /// <summary>
+        /// POST: /Manage/ChangePassword
+        /// </summary>
+        /// <param name="model">The user-submitted change password data</param>
+        /// <returns>A redirect to the settings page or an error view</returns>
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<ActionResult> ChangePassword(ChangePasswordViewModel model)
@@ -154,13 +202,20 @@ namespace ClickerHeroesTrackerWebsite.Controllers
             return this.View(model);
         }
 
-        // GET: /Manage/SetPassword
+        /// <summary>
+        /// GET: /Manage/SetPassword
+        /// </summary>
+        /// <returns>The set password view</returns>
         public ActionResult SetPassword()
         {
             return this.View();
         }
 
-        // POST: /Manage/SetPassword
+        /// <summary>
+        /// POST: /Manage/SetPassword
+        /// </summary>
+        /// <param name="model">The user-submitted password data</param>
+        /// <returns>A redirect to the settings page or an error view</returns>
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<ActionResult> SetPassword(SetPasswordViewModel model)
@@ -186,7 +241,11 @@ namespace ClickerHeroesTrackerWebsite.Controllers
             return this.View(model);
         }
 
-        // GET: /Manage/ManageLogins
+        /// <summary>
+        /// GET: /Manage/ManageLogins
+        /// </summary>
+        /// <param name="message">The status of the user's last operation</param>
+        /// <returns>The user's settings view</returns>
         public async Task<ActionResult> ManageLogins(ManageMessageId? message)
         {
             this.ViewBag.StatusMessage =
@@ -200,7 +259,10 @@ namespace ClickerHeroesTrackerWebsite.Controllers
             }
 
             var userLogins = await this.UserManager.GetLoginsAsync(this.User.Identity.GetUserId());
-            var otherLogins = this.AuthenticationManager.GetExternalAuthenticationTypes().Where(auth => userLogins.All(ul => auth.AuthenticationType != ul.LoginProvider)).ToList();
+            var otherLogins = this.AuthenticationManager
+                .GetExternalAuthenticationTypes()
+                .Where(auth => userLogins.All(ul => !string.Equals(auth.AuthenticationType, ul.LoginProvider, StringComparison.OrdinalIgnoreCase)))
+                .ToList();
             this.ViewBag.ShowRemoveButton = user.PasswordHash != null || userLogins.Count > 1;
             return this.View(new ManageLoginsViewModel
             {
@@ -209,7 +271,11 @@ namespace ClickerHeroesTrackerWebsite.Controllers
             });
         }
 
-        // POST: /Manage/LinkLogin
+        /// <summary>
+        /// POST: /Manage/LinkLogin
+        /// </summary>
+        /// <param name="provider">The external login provider name</param>
+        /// <returns>A challenge result for the link</returns>
         [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult LinkLogin(string provider)
@@ -218,7 +284,10 @@ namespace ClickerHeroesTrackerWebsite.Controllers
             return new AccountController.ChallengeResult(provider, this.Url.Action("LinkLoginCallback", "Manage"), this.User.Identity.GetUserId());
         }
 
-        // GET: /Manage/LinkLoginCallback
+        /// <summary>
+        /// GET: /Manage/LinkLoginCallback
+        /// </summary>
+        /// <returns>A redirect to the external login manage page</returns>
         public async Task<ActionResult> LinkLoginCallback()
         {
             var loginInfo = await this.AuthenticationManager.GetExternalLoginInfoAsync(XsrfKey, this.User.Identity.GetUserId());

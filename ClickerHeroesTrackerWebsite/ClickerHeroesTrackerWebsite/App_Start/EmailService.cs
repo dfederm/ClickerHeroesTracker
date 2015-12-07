@@ -19,12 +19,12 @@ namespace ClickerHeroesTrackerWebsite
         /// <inheritdoc />
         public Task SendAsync(IdentityMessage message)
         {
-            var myMessage = new SendGridMessage();
-            myMessage.AddTo(message.Destination);
-            myMessage.From = new MailAddress("do-not-reply@clickerheroestracker.azurewebsites.net", "Clicker Heroes Tracker");
-            myMessage.Subject = message.Subject;
-            myMessage.Text = message.Body;
-            myMessage.Html = message.Body;
+            var sendGridMessage = new SendGridMessage();
+            sendGridMessage.AddTo(message.Destination);
+            sendGridMessage.From = new MailAddress("do-not-reply@clickerheroestracker.azurewebsites.net", "Clicker Heroes Tracker");
+            sendGridMessage.Subject = message.Subject;
+            sendGridMessage.Text = message.Body;
+            sendGridMessage.Html = message.Body;
 
             var userName = ConfigurationManager.AppSettings.Get("SendGrid_UserName");
             var password = ConfigurationManager.AppSettings.Get("SendGrid_Password");
@@ -38,7 +38,7 @@ namespace ClickerHeroesTrackerWebsite
             // Send the email.
             if (transportWeb != null)
             {
-                return transportWeb.DeliverAsync(myMessage);
+                return transportWeb.DeliverAsync(sendGridMessage);
             }
             else
             {

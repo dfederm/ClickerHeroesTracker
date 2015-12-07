@@ -12,23 +12,37 @@ namespace ClickerHeroesTrackerWebsite.Controllers
     using Models.Calculator;
     using Models.SaveData;
 
+    /// <summary>
+    /// The Admin controller is where Admin users can manage the site.
+    /// </summary>
     [Authorize(Roles = "Admin")]
     public class AdminController : Controller
     {
         private readonly IDatabaseCommandFactory databaseCommandFactory;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="AdminController"/> class.
+        /// </summary>
+        /// <param name="databaseCommandFactory">The database command factory</param>
         public AdminController(IDatabaseCommandFactory databaseCommandFactory)
         {
             this.databaseCommandFactory = databaseCommandFactory;
         }
 
-        // GET: Admin
+        /// <summary>
+        /// GET: Admin
+        /// </summary>
+        /// <returns>The admin homepage view</returns>
         public ActionResult Index()
         {
             return this.View();
         }
 
-        // GET: UpdateComputedStats
+        /// <summary>
+        /// GET: UpdateComputedStats
+        /// </summary>
+        /// <param name="uploadIds">The upload ids to recomute stats for</param>
+        /// <returns>The admin homepage view</returns>
         public ActionResult UpdateComputedStats(string uploadIds)
         {
             DataTable computedStatsTable = new DataTable();
@@ -68,13 +82,14 @@ namespace ClickerHeroesTrackerWebsite.Controllers
                         int uploadId;
                         if (int.TryParse(uploadIdRaw.Trim(), out uploadId))
                         {
+                            var commandParameters = new Dictionary<string, object>
+                            {
+                                { "@UploadId", uploadId },
+                            };
                             using (var command = this.databaseCommandFactory.Create(
                                 "GetUploadDetails",
                                 CommandType.StoredProcedure,
-                                new Dictionary<string, object>
-                                {
-                                    { "@UploadId", uploadId },
-                                }))
+                                commandParameters))
                             using (var reader = command.ExecuteReader())
                             {
                                 // General upload data

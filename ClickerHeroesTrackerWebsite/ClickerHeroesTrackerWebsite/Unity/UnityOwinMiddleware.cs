@@ -8,10 +8,19 @@ namespace ClickerHeroesTrackerWebsite.Unity
     using Microsoft.Owin;
     using Microsoft.Practices.Unity;
 
-    public sealed class UnityOwinMiddleware<T> : OwinMiddleware where T : OwinMiddleware
+    /// <summary>
+    /// Provides a mechanism for an <see cref="OwinMiddleware"/> to be resolved every request
+    /// through the Unity container.
+    /// </summary>
+    /// <typeparam name="T">The type of the <see cref="OwinMiddleware"/> to resolve.</typeparam>
+    public sealed class UnityOwinMiddleware<T> : OwinMiddleware
+        where T : OwinMiddleware
     {
         private readonly IUnityContainer container;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="UnityOwinMiddleware{T}"/> class.
+        /// </summary>
         public UnityOwinMiddleware(OwinMiddleware next, IUnityContainer container)
             : base(next)
         {

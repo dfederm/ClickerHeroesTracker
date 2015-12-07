@@ -14,8 +14,14 @@ namespace ClickerHeroesTrackerWebsite.Models.Dashboard
     using Microsoft.AspNet.Identity;
     using Settings;
 
+    /// <summary>
+    /// Represents a user's progress data
+    /// </summary>
     public class ProgressViewModel
     {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ProgressViewModel"/> class.
+        /// </summary>
         public ProgressViewModel(
             IDatabaseCommandFactory databaseCommandFactory,
             IUserSettingsProvider userSettingsProvider,
@@ -28,14 +34,15 @@ namespace ClickerHeroesTrackerWebsite.Models.Dashboard
             var startTime = DateTime.UtcNow.AddDays(-7);
             ProgressData data;
 
+            var commandParameters = new Dictionary<string, object>
+            {
+                { "@UserId", userId },
+                { "@StartTime", startTime },
+            };
             using (var command = databaseCommandFactory.Create(
                 "GetProgressData",
                 CommandType.StoredProcedure,
-                new Dictionary<string, object>
-                {
-                    { "@UserId", userId },
-                    { "@StartTime", startTime },
-                }))
+                commandParameters))
             using (var reader = command.ExecuteReader())
             {
                 data = new ProgressData(reader, userSettings);
@@ -76,10 +83,19 @@ namespace ClickerHeroesTrackerWebsite.Models.Dashboard
             this.IsValid = data.IsValid;
         }
 
+        /// <summary>
+        /// Gets the graph view models to display prominently
+        /// </summary>
         public IList<GraphViewModel> ProminentGraphs { get; private set; }
 
+        /// <summary>
+        /// Gets the graph view models to display secondary
+        /// </summary>
         public IList<GraphViewModel> SecondaryGraphs { get; private set; }
 
+        /// <summary>
+        /// Gets a value indicating whether the model is valid
+        /// </summary>
         public bool IsValid { get; private set; }
 
         private GraphViewModel CreateGraph(

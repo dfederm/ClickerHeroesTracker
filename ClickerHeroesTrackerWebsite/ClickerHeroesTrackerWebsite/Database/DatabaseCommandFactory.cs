@@ -12,7 +12,10 @@ namespace ClickerHeroesTrackerWebsite.Database
     using Microsoft.ApplicationInsights;
     using Utility;
 
-    public sealed class DatabaseCommandProvider : DisposableBase, IDatabaseCommandFactory
+    /// <summary>
+    /// A SQL command provider for the default connection string
+    /// </summary>
+    public sealed class DatabaseCommandFactory : DisposableBase, IDatabaseCommandFactory
     {
         private static string connectionString = ConfigurationManager.ConnectionStrings["DefaultConnection"].ConnectionString;
 
@@ -24,7 +27,10 @@ namespace ClickerHeroesTrackerWebsite.Database
 
         private SqlConnection connection;
 
-        public DatabaseCommandProvider(
+        /// <summary>
+        /// Initializes a new instance of the <see cref="DatabaseCommandFactory"/> class.
+        /// </summary>
+        public DatabaseCommandFactory(
             TelemetryClient telemetryClient,
             ICounterProvider counterProvider)
         {

@@ -8,7 +8,8 @@ namespace ClickerHeroesTrackerWebsite.Models.Game
 
     public static class ItemTypes
     {
-        private static Dictionary<int, Ancient> itemTypeMap = new Dictionary<int, Ancient> {
+        private static Dictionary<int, Ancient> itemTypeMap = new Dictionary<int, Ancient>
+        {
             { 1, Ancient.Siyalatas },
             { 2, Ancient.Fragsworth },
             { 3, Ancient.Chronos },
