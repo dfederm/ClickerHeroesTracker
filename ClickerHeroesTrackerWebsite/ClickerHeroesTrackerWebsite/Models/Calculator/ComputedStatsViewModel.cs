@@ -11,8 +11,14 @@ namespace ClickerHeroesTrackerWebsite.Models.Calculator
     using ClickerHeroesTrackerWebsite.Models.Simulation;
     using Settings;
 
+    /// <summary>
+    /// The model for the computed stats view.
+    /// </summary>
     public class ComputedStatsViewModel
     {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ComputedStatsViewModel"/> class.
+        /// </summary>
         public ComputedStatsViewModel(SavedGame savedGame, IUserSettings userSettings)
         {
             this.UserSettings = userSettings;
@@ -30,6 +36,9 @@ namespace ClickerHeroesTrackerWebsite.Models.Calculator
             this.SoulsSpent = savedGame.AncientsData.Ancients.Values.Aggregate(0L, (count, ancientData) => count + ancientData.SpentHeroSouls);
         }
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ComputedStatsViewModel"/> class.
+        /// </summary>
         public ComputedStatsViewModel(SqlDataReader reader, IUserSettings userSettings)
         {
             this.UserSettings = userSettings;
@@ -45,18 +54,39 @@ namespace ClickerHeroesTrackerWebsite.Models.Calculator
             }
         }
 
+        /// <summary>
+        /// Gets the current user settings.
+        /// </summary>
         public IUserSettings UserSettings { get; private set; }
 
+        /// <summary>
+        /// Gets the optimal souls earned per hour
+        /// </summary>
         public long SoulsPerHour { get; private set; }
 
+        /// <summary>
+        /// Gets the optimal level to ascend.
+        /// </summary>
         public short OptimalLevel { get; private set; }
 
+        /// <summary>
+        /// Gets the expected souls earned per ascension if ascending at the optimal level.
+        /// </summary>
         public long OptimalSoulsPerAscension { get; private set; }
 
+        /// <summary>
+        /// Gets the optimal time it takes to reach the optimal level.
+        /// </summary>
         public short OptimalAscensionTime { get; private set; }
 
+        /// <summary>
+        /// Gets the user's titan damage
+        /// </summary>
         public long TitanDamage { get; private set; }
 
+        /// <summary>
+        /// Gets the number of souls the user has spent.
+        /// </summary>
         public long SoulsSpent { get; private set; }
     }
 }

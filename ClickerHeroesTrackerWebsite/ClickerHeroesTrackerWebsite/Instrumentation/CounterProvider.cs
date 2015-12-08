@@ -10,6 +10,9 @@ namespace ClickerHeroesTrackerWebsite.Instrumentation
     using ClickerHeroesTrackerWebsite.Utility;
     using Microsoft.ApplicationInsights;
 
+    /// <summary>
+    /// Allows interaction with counters for a request, such as measuring latency.
+    /// </summary>
     public sealed class CounterProvider : DisposableBase, ICounterProvider
     {
         private static int totalCounters = Enum.GetValues(typeof(Counter)).Length;
@@ -18,6 +21,9 @@ namespace ClickerHeroesTrackerWebsite.Instrumentation
 
         private readonly TelemetryClient telemetryClient;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CounterProvider"/> class.
+        /// </summary>
         public CounterProvider(TelemetryClient telemetryClient)
         {
             this.telemetryClient = telemetryClient;

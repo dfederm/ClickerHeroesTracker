@@ -8,8 +8,14 @@ namespace ClickerHeroesTrackerWebsite.Models.Calculator
     using ClickerHeroesTrackerWebsite.Models.SaveData;
     using Game;
 
+    /// <summary>
+    /// The model for the hero level summary view.
+    /// </summary>
     public class HeroLevelSummaryViewModel
     {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="HeroLevelSummaryViewModel"/> class.
+        /// </summary>
         public HeroLevelSummaryViewModel(HeroesData heroesData)
         {
             var heroGilds = new List<KeyValuePair<string, string>>(heroesData.Heroes.Count);
@@ -33,6 +39,9 @@ namespace ClickerHeroesTrackerWebsite.Models.Calculator
             this.HeroGilds = heroGilds;
         }
 
+        /// <summary>
+        /// Gets a list of heros with their formatted number of gilds.
+        /// </summary>
         public IList<KeyValuePair<string, string>> HeroGilds { get; private set; }
     }
 }

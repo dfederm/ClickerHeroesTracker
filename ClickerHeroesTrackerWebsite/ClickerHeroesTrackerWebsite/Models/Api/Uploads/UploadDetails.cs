@@ -4,6 +4,9 @@
 
 namespace ClickerHeroesTrackerWebsite.Models.Api.Uploads
 {
+    /// <summary>
+    /// The details about a specific upload
+    /// </summary>
     public sealed class UploadDetails
     {
     }

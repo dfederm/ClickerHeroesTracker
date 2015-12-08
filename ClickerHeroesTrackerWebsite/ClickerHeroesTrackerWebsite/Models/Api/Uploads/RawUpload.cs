@@ -4,8 +4,14 @@
 
 namespace ClickerHeroesTrackerWebsite.Models.Api.Uploads
 {
+    /// <summary>
+    /// Raw upload data
+    /// </summary>
     public sealed class RawUpload
     {
+        /// <summary>
+        /// Gets or sets the encoded saved game data.
+        /// </summary>
         public string EncodedData { get; set; }
     }
 }

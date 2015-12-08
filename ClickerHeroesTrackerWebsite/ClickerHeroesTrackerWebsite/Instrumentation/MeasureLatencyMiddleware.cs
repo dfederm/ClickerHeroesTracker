@@ -7,10 +7,16 @@ namespace ClickerHeroesTrackerWebsite.Instrumentation
     using System.Threading.Tasks;
     using Microsoft.Owin;
 
+    /// <summary>
+    /// An <see cref="OwinMiddleware"/> which measures the latency for the request.
+    /// </summary>
     public sealed class MeasureLatencyMiddleware : OwinMiddleware
     {
         private readonly ICounterProvider counterProvider;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="MeasureLatencyMiddleware"/> class.
+        /// </summary>
         public MeasureLatencyMiddleware(OwinMiddleware next, ICounterProvider counterProvider)
             : base(next)
         {

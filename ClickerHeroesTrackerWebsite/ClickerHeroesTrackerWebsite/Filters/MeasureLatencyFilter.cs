@@ -7,6 +7,9 @@ namespace ClickerHeroesTrackerWebsite.Filters
     using System.Web.Mvc;
     using Models;
 
+    /// <summary>
+    /// Measures the latency of actions and result executions.
+    /// </summary>
     public class MeasureLatencyFilter : IActionFilter, IResultFilter
     {
         /// <inheritdoc/>

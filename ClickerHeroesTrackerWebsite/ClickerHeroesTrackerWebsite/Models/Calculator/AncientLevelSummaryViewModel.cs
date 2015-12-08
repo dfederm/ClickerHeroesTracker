@@ -10,8 +10,14 @@ namespace ClickerHeroesTrackerWebsite.Models.Calculator
     using Game;
     using SaveData;
 
+    /// <summary>
+    /// The model for the ancient level summary view.
+    /// </summary>
     public class AncientLevelSummaryViewModel
     {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="AncientLevelSummaryViewModel"/> class.
+        /// </summary>
         public AncientLevelSummaryViewModel(AncientsData ancientsData)
         {
             var ancientLevels = new SortedDictionary<Ancient, long>(AncientComparer.Instance);
@@ -30,6 +36,9 @@ namespace ClickerHeroesTrackerWebsite.Models.Calculator
             this.AncientLevels = ancientLevels;
         }
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="AncientLevelSummaryViewModel"/> class.
+        /// </summary>
         public AncientLevelSummaryViewModel(SqlDataReader reader)
         {
             var ancientLevels = new SortedDictionary<Ancient, long>(AncientComparer.Instance);
@@ -46,6 +55,9 @@ namespace ClickerHeroesTrackerWebsite.Models.Calculator
             this.AncientLevels = ancientLevels;
         }
 
+        /// <summary>
+        /// Gets the levels for each ancient.
+        /// </summary>
         public IDictionary<Ancient, long> AncientLevels { get; private set; }
 
         private class AncientComparer : IComparer<Ancient>

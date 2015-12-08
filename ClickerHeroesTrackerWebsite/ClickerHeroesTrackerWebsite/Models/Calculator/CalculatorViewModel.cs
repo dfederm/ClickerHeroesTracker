@@ -13,8 +13,14 @@ namespace ClickerHeroesTrackerWebsite.Models.Calculator
     using SaveData;
     using Settings;
 
+    /// <summary>
+    /// The model for the calculator view.
+    /// </summary>
     public class CalculatorViewModel
     {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CalculatorViewModel"/> class.
+        /// </summary>
         public CalculatorViewModel(
             IDatabaseCommandFactory databaseCommandFactory,
             IUserSettingsProvider userSettingsProvider,
@@ -48,23 +54,24 @@ namespace ClickerHeroesTrackerWebsite.Models.Calculator
 
             if (addToProgress && user.IsAuthenticated)
             {
+                var parameters = new Dictionary<string, object>
+                {
+                    // Upload data
+                    { "@UserId", userId },
+                    { "@UploadContent", encodedSaveData },
+
+                    // Computed stats
+                    { "@OptimalLevel", this.ComputedStatsViewModel.OptimalLevel },
+                    { "@SoulsPerHour", this.ComputedStatsViewModel.SoulsPerHour },
+                    { "@SoulsPerAscension", this.ComputedStatsViewModel.OptimalSoulsPerAscension },
+                    { "@AscensionTime", this.ComputedStatsViewModel.OptimalAscensionTime },
+                    { "@TitanDamage", this.ComputedStatsViewModel.TitanDamage },
+                    { "@SoulsSpent", this.ComputedStatsViewModel.SoulsSpent },
+                };
                 using (var command = databaseCommandFactory.Create(
                     "UploadSaveData",
                     CommandType.StoredProcedure,
-                    new Dictionary<string, object>
-                    {
-                        // Upload data
-                        { "@UserId", userId },
-                        { "@UploadContent", encodedSaveData },
-
-                        // Computed stats
-                        { "@OptimalLevel", this.ComputedStatsViewModel.OptimalLevel },
-                        { "@SoulsPerHour", this.ComputedStatsViewModel.SoulsPerHour },
-                        { "@SoulsPerAscension", this.ComputedStatsViewModel.OptimalSoulsPerAscension },
-                        { "@AscensionTime", this.ComputedStatsViewModel.OptimalAscensionTime },
-                        { "@TitanDamage", this.ComputedStatsViewModel.TitanDamage },
-                        { "@SoulsSpent", this.ComputedStatsViewModel.SoulsSpent },
-                    }))
+                    parameters))
                 {
                     // Ancient levels
                     DataTable ancientLevelTable = new DataTable();
@@ -88,6 +95,9 @@ namespace ClickerHeroesTrackerWebsite.Models.Calculator
             }
         }
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CalculatorViewModel"/> class.
+        /// </summary>
         public CalculatorViewModel(
             IDatabaseCommandFactory databaseCommandFactory,
             IUserSettingsProvider userSettingsProvider,
@@ -101,20 +111,21 @@ namespace ClickerHeroesTrackerWebsite.Models.Calculator
 
             string uploadUserId;
 
+            var parameters = new Dictionary<string, object>
+            {
+                { "@UploadId", uploadId },
+            };
             using (var command = databaseCommandFactory.Create(
                 "GetUploadDetails",
                 CommandType.StoredProcedure,
-                new Dictionary<string, object>
-                {
-                    { "@UploadId", uploadId }
-                }))
+                parameters))
             using (var reader = command.ExecuteReader())
             {
                 // General upload data
                 if (reader.Read())
                 {
                     uploadUserId = reader["UserId"].ToString();
-                    this.UploadUserName = reader["UserName"].ToString(); ;
+                    this.UploadUserName = reader["UserName"].ToString();
                     this.UploadTime = Convert.ToDateTime(reader["UploadTime"]);
                     this.UploadContent = reader["UploadContent"].ToString();
                 }
@@ -138,7 +149,7 @@ namespace ClickerHeroesTrackerWebsite.Models.Calculator
 
                 this.ComputedStatsViewModel = new ComputedStatsViewModel(reader, this.UserSettings);
 
-                this.IsOwn = userId == uploadUserId;
+                this.IsOwn = string.Equals(userId, uploadUserId, StringComparison.OrdinalIgnoreCase);
                 if (this.IsOwn)
                 {
                     this.IsPublic = this.UserSettings.AreUploadsPublic;
@@ -161,30 +172,66 @@ namespace ClickerHeroesTrackerWebsite.Models.Calculator
             }
         }
 
+        /// <summary>
+        /// Gets the current user settings.
+        /// </summary>
         public IUserSettings UserSettings { get; private set; }
 
+        /// <summary>
+        /// Gets a value indicating whether the upload is the user's own upload.
+        /// </summary>
         public bool IsOwn { get; private set; }
 
+        /// <summary>
+        /// Gets a value indicating whether the user is permitted to view the upload.
+        /// </summary>
         public bool IsPermitted { get; private set; }
 
+        /// <summary>
+        /// Gets a value indicating whether the upload is public.
+        /// </summary>
         public bool IsPublic { get; private set; }
 
+        /// <summary>
+        /// Gets a value indicating whether the model is valid
+        /// </summary>
         public bool IsValid { get; private set; }
 
+        /// <summary>
+        /// Gets the upload id.
+        /// </summary>
         public int UploadId { get; private set; }
 
+        /// <summary>
+        /// Gets the name of the user who owns the upload.
+        /// </summary>
         public string UploadUserName { get; private set; }
 
+        /// <summary>
+        /// Gets the time the upload was submitted.
+        /// </summary>
         public DateTime UploadTime { get; private set; }
 
+        /// <summary>
+        /// Gets the encoded upload data.
+        /// </summary>
         public string UploadContent { get; private set; }
 
+        /// <summary>
+        /// Gets a model for the ancient level summary view.
+        /// </summary>
         public AncientLevelSummaryViewModel AncientLevelSummaryViewModel { get; private set; }
 
         ////public HeroLevelSummaryViewModel HeroLevelSummaryViewModel { get; private set; }
 
+        /// <summary>
+        /// Gets a model for the computer stats view.
+        /// </summary>
         public ComputedStatsViewModel ComputedStatsViewModel { get; private set; }
 
+        /// <summary>
+        /// Gets a model for the suggested ancient levels view.
+        /// </summary>
         public SuggestedAncientLevelsViewModel SuggestedAncientLevelsViewModel { get; private set; }
     }
 }
