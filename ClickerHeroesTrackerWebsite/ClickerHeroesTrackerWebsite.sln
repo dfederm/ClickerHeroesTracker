@@ -10,6 +10,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Build", "Build", "{B99EE4D7-6FCF-4181-99B0-D5ACABDFFB2A}"
 	ProjectSection(SolutionItems) = preProject
 		Build\CodeAnalysis.ruleset = Build\CodeAnalysis.ruleset
+		Build\CodeAnalysis.Test.ruleset = Build\CodeAnalysis.Test.ruleset
 		Build\PostDeploy.ps1 = Build\PostDeploy.ps1
 		Build\PreBuild.ps1 = Build\PreBuild.ps1
 		Build\SetEnvironment.bat = Build\SetEnvironment.bat
