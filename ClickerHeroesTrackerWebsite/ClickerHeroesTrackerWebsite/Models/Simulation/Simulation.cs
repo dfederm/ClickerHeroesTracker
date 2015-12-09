@@ -456,9 +456,9 @@ namespace ClickerHeroesTrackerWebsite.Models.Simulation
                 this.ClickRate = clickRate;
             }
 
-            public int Count { get; private set; }
+            public int Count { get; }
 
-            public int ClickRate { get; private set; }
+            public int ClickRate { get; }
         }
 
         public sealed class SimulateResult
@@ -471,13 +471,13 @@ namespace ClickerHeroesTrackerWebsite.Models.Simulation
                 this.Ratio = ratio;
             }
 
-            public short Level { get; private set; }
+            public short Level { get; }
 
-            public double Time { get; private set; }
+            public double Time { get; }
 
-            public double Souls { get; private set; }
+            public double Souls { get; }
 
-            public double Ratio { get; private set; }
+            public double Ratio { get; }
         }
 
         private sealed class ActivityInfo
@@ -490,13 +490,13 @@ namespace ClickerHeroesTrackerWebsite.Models.Simulation
                 this.Duration = duration;
             }
 
-            public double Damage { get; private set; }
+            public double Damage { get; }
 
-            public double Gold { get; private set; }
+            public double Gold { get; }
 
-            public double GoldenClicks { get; private set; }
+            public double GoldenClicks { get; }
 
-            public int Duration { get; private set; }
+            public int Duration { get; }
         }
 
         private sealed class Factors
@@ -509,13 +509,13 @@ namespace ClickerHeroesTrackerWebsite.Models.Simulation
                 this.ClickRate = clickRate;
             }
 
-            public double Damage { get; private set; }
+            public double Damage { get; }
 
-            public double Gold { get; private set; }
+            public double Gold { get; }
 
-            public double GoldenClicks { get; private set; }
+            public double GoldenClicks { get; }
 
-            public double ClickRate { get; private set; }
+            public double ClickRate { get; }
         }
 
         private sealed class LevelInfo
@@ -527,11 +527,11 @@ namespace ClickerHeroesTrackerWebsite.Models.Simulation
                 this.AvgGold = avgGold;
             }
 
-            public double Life { get; private set; }
+            public double Life { get; }
 
-            public double Gold { get; private set; }
+            public double Gold { get; }
 
-            public double AvgGold { get; private set; }
+            public double AvgGold { get; }
         }
     }
 }

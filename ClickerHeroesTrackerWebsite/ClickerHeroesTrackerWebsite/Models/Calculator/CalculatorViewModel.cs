@@ -175,63 +175,63 @@ namespace ClickerHeroesTrackerWebsite.Models.Calculator
         /// <summary>
         /// Gets the current user settings.
         /// </summary>
-        public IUserSettings UserSettings { get; private set; }
+        public IUserSettings UserSettings { get; }
 
         /// <summary>
         /// Gets a value indicating whether the upload is the user's own upload.
         /// </summary>
-        public bool IsOwn { get; private set; }
+        public bool IsOwn { get; }
 
         /// <summary>
         /// Gets a value indicating whether the user is permitted to view the upload.
         /// </summary>
-        public bool IsPermitted { get; private set; }
+        public bool IsPermitted { get; }
 
         /// <summary>
         /// Gets a value indicating whether the upload is public.
         /// </summary>
-        public bool IsPublic { get; private set; }
+        public bool IsPublic { get; }
 
         /// <summary>
         /// Gets a value indicating whether the model is valid
         /// </summary>
-        public bool IsValid { get; private set; }
+        public bool IsValid { get; }
 
         /// <summary>
         /// Gets the upload id.
         /// </summary>
-        public int UploadId { get; private set; }
+        public int UploadId { get; }
 
         /// <summary>
         /// Gets the name of the user who owns the upload.
         /// </summary>
-        public string UploadUserName { get; private set; }
+        public string UploadUserName { get; }
 
         /// <summary>
         /// Gets the time the upload was submitted.
         /// </summary>
-        public DateTime UploadTime { get; private set; }
+        public DateTime UploadTime { get; }
 
         /// <summary>
         /// Gets the encoded upload data.
         /// </summary>
-        public string UploadContent { get; private set; }
+        public string UploadContent { get; }
 
         /// <summary>
         /// Gets a model for the ancient level summary view.
         /// </summary>
-        public AncientLevelSummaryViewModel AncientLevelSummaryViewModel { get; private set; }
+        public AncientLevelSummaryViewModel AncientLevelSummaryViewModel { get; }
 
-        ////public HeroLevelSummaryViewModel HeroLevelSummaryViewModel { get; private set; }
+        ////public HeroLevelSummaryViewModel HeroLevelSummaryViewModel { get; }
 
         /// <summary>
         /// Gets a model for the computer stats view.
         /// </summary>
-        public ComputedStatsViewModel ComputedStatsViewModel { get; private set; }
+        public ComputedStatsViewModel ComputedStatsViewModel { get; }
 
         /// <summary>
         /// Gets a model for the suggested ancient levels view.
         /// </summary>
-        public SuggestedAncientLevelsViewModel SuggestedAncientLevelsViewModel { get; private set; }
+        public SuggestedAncientLevelsViewModel SuggestedAncientLevelsViewModel { get; }
     }
 }

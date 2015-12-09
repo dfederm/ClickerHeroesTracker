@@ -283,7 +283,18 @@
     <Compile Include="Models\Api\Uploads\UploadDetails.cs" />
     <Compile Include="Models\Api\Uploads\UploadSummaryListResponse.cs" />
     <Compile Include="Models\Api\Uploads\UploadSummary.cs" />
-    <Compile Include="Models\ExternalLoginConfirmationViewModel.cs" />
+    <Compile Include="Models\Account\ExternalLoginConfirmationViewModel.cs" />
+    <Compile Include="Models\Account\ExternalLoginListViewModel.cs" />
+    <Compile Include="Models\Account\ForgotPasswordViewModel.cs" />
+    <Compile Include="Models\Account\ForgotViewModel.cs" />
+    <Compile Include="Models\Account\LoginViewModel.cs" />
+    <Compile Include="Models\Account\RegisterViewModel.cs" />
+    <Compile Include="Models\Account\ResetPasswordViewModel.cs" />
+    <Compile Include="Models\Account\SendCodeViewModel.cs" />
+    <Compile Include="Models\Manage\ChangePasswordViewModel.cs" />
+    <Compile Include="Models\Manage\IndexViewModel.cs" />
+    <Compile Include="Models\Manage\ManageLoginsViewModel.cs" />
+    <Compile Include="Models\Manage\SetPasswordViewModel.cs" />
     <Compile Include="Models\Settings\IUserSettings.cs" />
     <Compile Include="Models\Settings\IUserSettingsProvider.cs" />
     <Compile Include="Models\LatencyCounter.cs" />
@@ -327,7 +338,6 @@
     <Compile Include="Models\Calculator\CalculatorViewModel.cs" />
     <Compile Include="Models\Game\Ancient.cs" />
     <Compile Include="Models\IdentityModels.cs" />
-    <Compile Include="Models\ManageViewModels.cs" />
     <Compile Include="Models\SaveData\AncientData.cs" />
     <Compile Include="Models\SaveData\AncientsData.cs" />
     <Compile Include="Models\SaveData\SaveData.cs" />
@@ -336,6 +346,7 @@
     <Compile Include="Models\Telemetry.cs" />
     <Compile Include="Models\Upload\UploadViewModel.cs" />
     <Compile Include="Models\Settings\UserSettings.cs" />
+    <Compile Include="Models\Account\VerifyCodeViewModel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="App_Start\Startup.cs" />
     <Compile Include="Models\Settings\UserSettingsFlushingMiddleware.cs" />

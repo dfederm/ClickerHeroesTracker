@@ -42,6 +42,6 @@ namespace ClickerHeroesTrackerWebsite.Models.Calculator
         /// <summary>
         /// Gets a list of heros with their formatted number of gilds.
         /// </summary>
-        public IList<KeyValuePair<string, string>> HeroGilds { get; private set; }
+        public IList<KeyValuePair<string, string>> HeroGilds { get; }
     }
 }

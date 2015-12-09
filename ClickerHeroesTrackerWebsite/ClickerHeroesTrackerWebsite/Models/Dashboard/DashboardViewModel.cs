@@ -14,8 +14,14 @@ namespace ClickerHeroesTrackerWebsite.Models.Dashboard
     using Microsoft.AspNet.Identity;
     using Settings;
 
+    /// <summary>
+    /// The model for the dashboard view.
+    /// </summary>
     public class DashboardViewModel
     {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="DashboardViewModel"/> class.
+        /// </summary>
         public DashboardViewModel(
             IDatabaseCommandFactory databaseCommandFactory,
             IUserSettingsProvider userSettingsProvider,
@@ -28,14 +34,15 @@ namespace ClickerHeroesTrackerWebsite.Models.Dashboard
             var startTime = DateTime.UtcNow.AddDays(-7);
 
             ProgressData data;
+            var parameters = new Dictionary<string, object>
+            {
+                { "@UserId", userId },
+                { "@StartTime", startTime },
+            };
             using (var command = databaseCommandFactory.Create(
                 "GetProgressData",
                 CommandType.StoredProcedure,
-                new Dictionary<string, object>
-                {
-                    { "@UserId", userId },
-                    { "@StartTime", startTime },
-                }))
+                parameters))
             using (var reader = command.ExecuteReader())
             {
                 data = new ProgressData(reader, userSettings);
@@ -112,10 +119,19 @@ namespace ClickerHeroesTrackerWebsite.Models.Dashboard
             this.IsValid = data.IsValid;
         }
 
-        public bool IsValid { get; private set; }
+        /// <summary>
+        /// Gets a value indicating whether the model is valid
+        /// </summary>
+        public bool IsValid { get; }
 
-        public GraphData ProgressSummaryGraph { get; private set; }
+        /// <summary>
+        /// Gets the graph data for the progress summary
+        /// </summary>
+        public GraphData ProgressSummaryGraph { get; }
 
-        public RivalDataList RivalDataList { get; private set; }
+        /// <summary>
+        /// Gets the rivals list data.
+        /// </summary>
+        public RivalDataList RivalDataList { get; }
     }
 }

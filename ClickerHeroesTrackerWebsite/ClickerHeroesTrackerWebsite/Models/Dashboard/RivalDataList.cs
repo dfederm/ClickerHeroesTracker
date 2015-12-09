@@ -9,21 +9,28 @@ namespace ClickerHeroesTrackerWebsite.Models.Dashboard
     using System.Data;
     using Database;
 
+    /// <summary>
+    /// A model for the rival data list.
+    /// </summary>
     public class RivalDataList
     {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="RivalDataList"/> class.
+        /// </summary>
         public RivalDataList(
             IDatabaseCommandFactory databaseCommandFactory,
             string userId)
         {
             var rivals = new List<RivalData>();
 
+            var parameters = new Dictionary<string, object>
+            {
+                { "@UserId", userId }
+            };
             using (var command = databaseCommandFactory.Create(
                 "GetUserRivals",
                 CommandType.StoredProcedure,
-                new Dictionary<string, object>
-                {
-                    { "@UserId", userId }
-                }))
+                parameters))
             using (var reader = command.ExecuteReader())
             {
                 while (reader.Read())
@@ -39,8 +46,14 @@ namespace ClickerHeroesTrackerWebsite.Models.Dashboard
             this.IsValid = rivals.Count > 0;
         }
 
-        public bool IsValid { get; private set; }
+        /// <summary>
+        /// Gets a value indicating whether the model is valid.
+        /// </summary>
+        public bool IsValid { get; }
 
-        public IList<RivalData> Rivals { get; private set; }
+        /// <summary>
+        /// Gets the list of rival data.
+        /// </summary>
+        public IList<RivalData> Rivals { get; }
     }
 }

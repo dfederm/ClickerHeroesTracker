@@ -295,17 +295,17 @@ namespace ClickerHeroesTrackerWebsite.Models.Game
             }
         }
 
-        public int Id { get; private set; }
+        public int Id { get; }
 
-        public string Name { get; private set; }
+        public string Name { get; }
 
-        public double Cost { get; private set; }
+        public double Cost { get; }
 
-        public double Damage { get; private set; }
+        public double Damage { get; }
 
-        public double[] UpgradeCosts { get; private set; }
+        public double[] UpgradeCosts { get; }
 
-        public bool IsRanger { get; private set; }
+        public bool IsRanger { get; }
 
         public static Hero Get(int id)
         {

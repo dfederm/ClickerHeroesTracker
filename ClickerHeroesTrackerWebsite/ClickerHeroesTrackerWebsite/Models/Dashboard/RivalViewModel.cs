@@ -14,8 +14,14 @@ namespace ClickerHeroesTrackerWebsite.Models.Dashboard
     using Microsoft.AspNet.Identity;
     using Settings;
 
+    /// <summary>
+    /// A model for the rival view.
+    /// </summary>
     public class RivalViewModel
     {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="RivalViewModel"/> class.
+        /// </summary>
         public RivalViewModel(
             IDatabaseCommandFactory databaseCommandFactory,
             IUserSettingsProvider userSettingsProvider,
@@ -32,15 +38,16 @@ namespace ClickerHeroesTrackerWebsite.Models.Dashboard
             ProgressData userData;
             ProgressData rivalData;
 
+            var parameters = new Dictionary<string, object>
+            {
+                { "@UserId", userId },
+                { "@RivalId", rivalId },
+                { "@StartTime", startTime },
+            };
             using (var command = databaseCommandFactory.Create(
                 "GetRivalData",
                 CommandType.StoredProcedure,
-                new Dictionary<string, object>
-                {
-                    { "@UserId", userId },
-                    { "@RivalId", rivalId },
-                    { "@StartTime", startTime },
-                }))
+                parameters))
             using (var reader = command.ExecuteReader())
             {
                 userData = new ProgressData(reader, userSettings);
@@ -118,13 +125,25 @@ namespace ClickerHeroesTrackerWebsite.Models.Dashboard
                 && rivalData.IsValid;
         }
 
-        public bool IsValid { get; private set; }
+        /// <summary>
+        /// Gets a value indicating whether the model is valid.
+        /// </summary>
+        public bool IsValid { get; }
 
-        public string RivalUserName { get; private set; }
+        /// <summary>
+        /// Gets the rival's user name.
+        /// </summary>
+        public string RivalUserName { get; }
 
-        public IList<GraphViewModel> ProminentGraphs { get; private set; }
+        /// <summary>
+        /// Gets a list of prominent graphs.
+        /// </summary>
+        public IList<GraphViewModel> ProminentGraphs { get; }
 
-        public IList<GraphViewModel> SecondaryGraphs { get; private set; }
+        /// <summary>
+        /// Gets a list of secondary graphs.
+        /// </summary>
+        public IList<GraphViewModel> SecondaryGraphs { get; }
 
         private GraphViewModel CreateGraph(
             string id,
@@ -198,20 +217,20 @@ namespace ClickerHeroesTrackerWebsite.Models.Dashboard
                 {
                     Name = name,
                     Data = data
-                                .Select(datum => new Point
-                                {
-                                    X = datum.Key.ToJavascriptTime(timeZone),
-                                    Y = datum.Value
-                                })
-                                .Concat(new[]
-                                {
-                                    new Point
-                                    {
-                                        X = DateTime.UtcNow.ToJavascriptTime(timeZone),
-                                        Y = data.Last().Value
-                                    }
-                                })
-                                .ToList()
+                        .Select(datum => new Point
+                        {
+                            X = datum.Key.ToJavascriptTime(timeZone),
+                            Y = datum.Value
+                        })
+                        .Concat(new[]
+                        {
+                            new Point
+                            {
+                                X = DateTime.UtcNow.ToJavascriptTime(timeZone),
+                                Y = data.Last().Value
+                            }
+                        })
+                        .ToList()
                 });
             }
 

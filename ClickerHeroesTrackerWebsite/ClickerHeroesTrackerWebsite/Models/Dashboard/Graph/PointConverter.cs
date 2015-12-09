@@ -7,6 +7,13 @@ namespace ClickerHeroesTrackerWebsite.Models.Dashboard.Graph
     using System;
     using Newtonsoft.Json;
 
+    /// <summary>
+    /// Converts a <see cref="Point"/> object to json.
+    /// </summary>
+    /// <remarks>
+    /// Point formats: http://api.highcharts.com/highcharts#series&lt;line&gt;.data
+    /// We are using #2 right now.
+    /// </remarks>
     public sealed class PointConverter : JsonConverter
     {
         /// <inheritdoc/>

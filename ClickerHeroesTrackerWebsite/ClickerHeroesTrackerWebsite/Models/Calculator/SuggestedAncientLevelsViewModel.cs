@@ -9,6 +9,9 @@ namespace ClickerHeroesTrackerWebsite.Models.Calculator
     using Game;
     using Settings;
 
+    /// <summary>
+    /// The model for the suggested ancient levels view
+    /// </summary>
     public class SuggestedAncientLevelsViewModel
     {
         private static ISet<PlayStyle> allPlayStyles = new HashSet<PlayStyle>(new[]
@@ -23,6 +26,9 @@ namespace ClickerHeroesTrackerWebsite.Models.Calculator
             PlayStyle.Hybrid,
         });
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="SuggestedAncientLevelsViewModel"/> class.
+        /// </summary>
         public SuggestedAncientLevelsViewModel(
             IDictionary<Ancient, long> ancientLevels,
             int optimalLevel,
@@ -71,9 +77,15 @@ namespace ClickerHeroesTrackerWebsite.Models.Calculator
             };
         }
 
-        public IUserSettings UserSettings { get; private set; }
+        /// <summary>
+        /// Gets the current user's settings
+        /// </summary>
+        public IUserSettings UserSettings { get; }
 
-        public SuggestedAncientLevelData[] SuggestedAncientLevels { get; private set; }
+        /// <summary>
+        /// Gets a collection of suggested ancient levels
+        /// </summary>
+        public SuggestedAncientLevelData[] SuggestedAncientLevels { get; }
 
         private static long GetCurrentAncientLevel(IDictionary<Ancient, long> ancientLevels, Ancient ancient)
         {
@@ -83,8 +95,14 @@ namespace ClickerHeroesTrackerWebsite.Models.Calculator
                 : 0;
         }
 
+        /// <summary>
+        /// A model that represents the suggested ancient level data for one ancient.
+        /// </summary>
         public class SuggestedAncientLevelData
         {
+            /// <summary>
+            /// Initializes a new instance of the <see cref="SuggestedAncientLevelData"/> class.
+            /// </summary>
             public SuggestedAncientLevelData(
                 Ancient ancient,
                 long currentLevel,
@@ -100,15 +118,30 @@ namespace ClickerHeroesTrackerWebsite.Models.Calculator
                 this.SupportedPlayStyles = supportedPlayStyles;
             }
 
-            public string AncientName { get; private set; }
+            /// <summary>
+            /// Gets the ancient name
+            /// </summary>
+            public string AncientName { get; }
 
-            public string CurrentLevel { get; private set; }
+            /// <summary>
+            /// Gets the current ancient level
+            /// </summary>
+            public string CurrentLevel { get; }
 
-            public string SuggestedLevel { get; private set; }
+            /// <summary>
+            /// Gets the suggested ancient level
+            /// </summary>
+            public string SuggestedLevel { get; }
 
-            public string LevelDifference { get; private set; }
+            /// <summary>
+            /// Gets the difference in the suggested and current levels
+            /// </summary>
+            public string LevelDifference { get; }
 
-            public ISet<PlayStyle> SupportedPlayStyles { get; private set; }
+            /// <summary>
+            /// Gets the supported play styles for this suggestion.
+            /// </summary>
+            public ISet<PlayStyle> SupportedPlayStyles { get; }
         }
     }
 }

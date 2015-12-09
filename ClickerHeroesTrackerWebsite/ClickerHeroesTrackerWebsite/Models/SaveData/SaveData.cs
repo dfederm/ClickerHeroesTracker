@@ -14,7 +14,7 @@ namespace ClickerHeroesTrackerWebsite.Models.SaveData
     [JsonObject]
     public class SavedGame
     {
-        private static readonly JsonSerializer serializer = CreateSerializer();
+        private static readonly JsonSerializer Serializer = CreateSerializer();
 
         [JsonProperty(PropertyName = "ancients", Required = Required.Always)]
         public AncientsData AncientsData { get; set; }
@@ -106,7 +106,7 @@ namespace ClickerHeroesTrackerWebsite.Models.SaveData
             {
                 using (var reader = new StreamReader(stream))
                 {
-                    return serializer.Deserialize<SavedGame>(new JsonTextReader(reader));
+                    return Serializer.Deserialize<SavedGame>(new JsonTextReader(reader));
                 }
             }
         }

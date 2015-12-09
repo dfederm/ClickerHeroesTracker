@@ -315,9 +315,9 @@ namespace ClickerHeroesTrackerWebsite.Models.Simulation
                 this.Level = level;
             }
 
-            public Hero Hero { get; private set; }
+            public Hero Hero { get; }
 
-            public int Level { get; private set; }
+            public int Level { get; }
 
             public double Damage { get; set; }
 
@@ -333,11 +333,11 @@ namespace ClickerHeroesTrackerWebsite.Models.Simulation
                 this.CostIncrease = costIncrese;
             }
 
-            public int Level { get; private set; }
+            public int Level { get; }
 
-            public double DamageIncrease { get; private set; }
+            public double DamageIncrease { get; }
 
-            public double CostIncrease { get; private set; }
+            public double CostIncrease { get; }
         }
     }
 }

@@ -11,6 +11,6 @@ namespace ClickerHeroesTrackerWebsite.Models.Home
             this.IsFull = isFull;
         }
 
-        public bool IsFull { get; private set; }
+        public bool IsFull { get; }
     }
 }

@@ -14,6 +14,7 @@ namespace ClickerHeroesTrackerWebsite.Controllers
     using Microsoft.AspNet.Identity.Owin;
     using Microsoft.Owin.Security;
     using Models.Settings;
+    using Models.Account;
 
     /// <summary>
     /// The Account controller is where users register and log in.

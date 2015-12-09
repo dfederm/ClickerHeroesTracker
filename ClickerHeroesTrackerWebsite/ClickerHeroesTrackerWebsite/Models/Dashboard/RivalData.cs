@@ -4,16 +4,28 @@
 
 namespace ClickerHeroesTrackerWebsite.Models.Dashboard
 {
+    /// <summary>
+    /// Data describing a rival.
+    /// </summary>
     public class RivalData
     {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="RivalData"/> class.
+        /// </summary>
         public RivalData(int rivalId, string userName)
         {
             this.RivalId = rivalId;
             this.UserName = userName;
         }
 
-        public int RivalId { get; private set; }
+        /// <summary>
+        /// Gets the rilalry id.
+        /// </summary>
+        public int RivalId { get; }
 
-        public string UserName { get; private set; }
+        /// <summary>
+        /// Gets the rival's user name.
+        /// </summary>
+        public string UserName { get; }
 }
 }

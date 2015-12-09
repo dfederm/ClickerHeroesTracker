@@ -70,9 +70,9 @@ namespace ClickerHeroesTrackerWebsite.Tests.Unity
                 }
             }
 
-            public ContainerControlledDependency ContainerControlledDependency { get; private set; }
+            public ContainerControlledDependency ContainerControlledDependency { get; }
 
-            public TransientDependency TransientDependency { get; private set; }
+            public TransientDependency TransientDependency { get; }
 
             public new OwinMiddleware Next
             {

@@ -4,8 +4,14 @@
 
 namespace ClickerHeroesTrackerWebsite.Models.Dashboard.Graph
 {
+    /// <summary>
+    /// How the chart should be displayed
+    /// </summary>
     public enum ChartType
     {
+        /// <summary>
+        /// A line graph
+        /// </summary>
         Line,
     }
 }

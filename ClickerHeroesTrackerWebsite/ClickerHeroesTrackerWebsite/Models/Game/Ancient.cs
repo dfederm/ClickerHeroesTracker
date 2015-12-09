@@ -269,17 +269,17 @@ namespace ClickerHeroesTrackerWebsite.Models.Game
             }
         }
 
-        public int Id { get; private set; }
+        public int Id { get; }
 
-        public string Name { get; private set; }
+        public string Name { get; }
 
-        public string Title { get; private set; }
+        public string Title { get; }
 
-        public string Description { get; private set; }
+        public string Description { get; }
 
-        public int MaxLevel { get; private set; }
+        public int MaxLevel { get; }
 
-        public double Power { get; private set; }
+        public double Power { get; }
 
         public static Ancient Get(int id)
         {

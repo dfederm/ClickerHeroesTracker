@@ -11,8 +11,14 @@ namespace ClickerHeroesTrackerWebsite.Models.Dashboard
     using ClickerHeroesTrackerWebsite.Models.Game;
     using Settings;
 
+    /// <summary>
+    /// An aggregation of progress data for a user.
+    /// </summary>
     public class ProgressData
     {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ProgressData"/> class.
+        /// </summary>
         public ProgressData(SqlDataReader reader, IUserSettings userSettings)
         {
             this.UserSettings = userSettings;
@@ -65,23 +71,44 @@ namespace ClickerHeroesTrackerWebsite.Models.Dashboard
             this.IsValid = true;
         }
 
-        public bool IsValid { get; private set; }
+        /// <summary>
+        /// Gets a value indicating whether the model is valid.
+        /// </summary>
+        public bool IsValid { get; }
 
-        public IUserSettings UserSettings { get; private set; }
+        /// <summary>
+        /// Gets the curent user's settings.
+        /// </summary>
+        public IUserSettings UserSettings { get; }
 
-        public IDictionary<DateTime, long> OptimalLevelData { get; private set; }
+        /// <summary>
+        /// Gets the optimal level data, keyed on upload time.
+        /// </summary>
+        public IDictionary<DateTime, long> OptimalLevelData { get; }
 
-        public IDictionary<DateTime, long> SoulsPerHourData { get; private set; }
+        /// <summary>
+        /// Gets the souls per hour data, keyed on upload time.
+        /// </summary>
+        public IDictionary<DateTime, long> SoulsPerHourData { get; }
 
-        public IDictionary<DateTime, long> TitanDamageData { get; private set; }
+        /// <summary>
+        /// Gets the titan damage data, keyed on upload time.
+        /// </summary>
+        public IDictionary<DateTime, long> TitanDamageData { get; }
 
-        public IDictionary<DateTime, long> SoulsSpentData { get; private set; }
+        /// <summary>
+        /// Gets the souls spent data, keyed on upload time.
+        /// </summary>
+        public IDictionary<DateTime, long> SoulsSpentData { get; }
 
-        public IDictionary<Ancient, IDictionary<DateTime, long>> AncientLevelData { get; private set; }
+        /// <summary>
+        /// Gets the ancient level data, keyed on ancient. The inner dictionaries are keyed on upload time.
+        /// </summary>
+        public IDictionary<Ancient, IDictionary<DateTime, long>> AncientLevelData { get; }
 
         private class AncientComparer : IComparer<Ancient>
         {
-            public static AncientComparer Instance = new AncientComparer();
+            public static AncientComparer Instance { get; } = new AncientComparer();
 
             public int Compare(Ancient x, Ancient y)
             {

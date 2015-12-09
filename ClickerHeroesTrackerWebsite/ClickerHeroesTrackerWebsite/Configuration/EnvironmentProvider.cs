@@ -40,12 +40,12 @@ namespace ClickerHeroesTrackerWebsite.Configuration
         }
 
         /// <inheritdoc />
-        public string Environment { get; private set; }
+        public string Environment { get; }
 
         /// <inheritdoc/>
-        public int Changelist { get; private set; }
+        public int Changelist { get; }
 
         /// <inheritdoc/>
-        public string BuildId { get; private set; }
+        public string BuildId { get; }
     }
 }

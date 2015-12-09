@@ -84,9 +84,9 @@ namespace ClickerHeroesTrackerWebsite.Models.Game
             }
         }
 
-        public int Id { get; private set; }
+        public int Id { get; }
 
-        public double DamageMultiplier { get; private set; }
+        public double DamageMultiplier { get; }
 
         public static HeroUpgrade Get(int id)
         {

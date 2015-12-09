@@ -7,7 +7,7 @@ namespace ClickerHeroesTrackerWebsite.Models
     using System;
     using System.Collections.Generic;
 
-    public static class Extensions
+    internal static class Extensions
     {
         private static DateTime javascriptEpoch = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
 
@@ -42,7 +42,8 @@ namespace ClickerHeroesTrackerWebsite.Models
             return dictionay.TryGetValue(key, out value) ? value : default(TValue);
         }
 
-        public static TEnum SafeParseEnum<TEnum>(this string str) where TEnum : struct
+        public static TEnum SafeParseEnum<TEnum>(this string str)
+            where TEnum : struct
         {
             TEnum value;
             return Enum.TryParse<TEnum>(str, out value) ? value : default(TEnum);

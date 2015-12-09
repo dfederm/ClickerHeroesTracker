@@ -337,9 +337,9 @@ namespace ClickerHeroesTrackerWebsite.Models.Game
             acievements.Add(this.Id, this);
         }
 
-        public int Id { get; private set; }
+        public int Id { get; }
 
-        public double Multiplier { get; private set; }
+        public double Multiplier { get; }
 
         public static Achievement Get(int id)
         {

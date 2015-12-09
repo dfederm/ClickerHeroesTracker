@@ -58,7 +58,7 @@ namespace ClickerHeroesTrackerWebsite.Models.Calculator
         /// <summary>
         /// Gets the levels for each ancient.
         /// </summary>
-        public IDictionary<Ancient, long> AncientLevels { get; private set; }
+        public IDictionary<Ancient, long> AncientLevels { get; }
 
         private class AncientComparer : IComparer<Ancient>
         {

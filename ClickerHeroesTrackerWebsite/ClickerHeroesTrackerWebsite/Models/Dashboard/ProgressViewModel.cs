@@ -86,17 +86,17 @@ namespace ClickerHeroesTrackerWebsite.Models.Dashboard
         /// <summary>
         /// Gets the graph view models to display prominently
         /// </summary>
-        public IList<GraphViewModel> ProminentGraphs { get; private set; }
+        public IList<GraphViewModel> ProminentGraphs { get; }
 
         /// <summary>
         /// Gets the graph view models to display secondary
         /// </summary>
-        public IList<GraphViewModel> SecondaryGraphs { get; private set; }
+        public IList<GraphViewModel> SecondaryGraphs { get; }
 
         /// <summary>
         /// Gets a value indicating whether the model is valid
         /// </summary>
-        public bool IsValid { get; private set; }
+        public bool IsValid { get; }
 
         private GraphViewModel CreateGraph(
             string id,

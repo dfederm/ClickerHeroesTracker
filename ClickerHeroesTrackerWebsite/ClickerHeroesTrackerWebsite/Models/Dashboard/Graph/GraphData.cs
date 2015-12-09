@@ -10,29 +10,56 @@ namespace ClickerHeroesTrackerWebsite.Models.Dashboard.Graph
     using Newtonsoft.Json.Converters;
     using Newtonsoft.Json.Serialization;
 
-    // Structure defined here: http://api.highcharts.com/highcharts
+    /// <summary>
+    /// The top level data and configuration for a graph.
+    /// </summary>
+    /// <remarks>
+    /// Structure defined here: http://api.highcharts.com/highcharts
+    /// </remarks>
     [JsonObject]
     public class GraphData
     {
-        private static readonly JsonSerializer serializer = CreateSerializer();
+        private static readonly JsonSerializer Serializer = CreateSerializer();
 
+        /// <summary>
+        /// Gets or sets the options regarding the chart area and plot area as well as general chart options.
+        /// </summary>
         public Chart Chart { get; set; }
 
+        /// <summary>
+        /// Gets or sets the chart's main title.
+        /// </summary>
         public Title Title { get; set; }
 
+        /// <summary>
+        /// Gets or sets the X axis or category axis configuration.
+        /// </summary>
         public Axis XAxis { get; set; }
 
+        /// <summary>
+        /// Gets or sets the X axis or value axis configuration.
+        /// </summary>
         public Axis YAxis { get; set; }
 
+        /// <summary>
+        /// Gets or sets the legend configuration, a box containing a symbol and name for each series item or point item in the chart.
+        /// </summary>
         public Legend Legend { get; set; }
 
+        /// <summary>
+        /// Gets or sets a list of actual series to append to the chart.
+        /// </summary>
         public IList<Series> Series { get; set; }
 
+        /// <summary>
+        /// Serializes this obect to a json object string.
+        /// </summary>
+        /// <returns>A json string which represents this object's data</returns>
         public string ToJsonString()
         {
             using (var writer = new StringWriter())
             {
-                serializer.Serialize(writer, this);
+                Serializer.Serialize(writer, this);
                 return writer.ToString();
             }
         }

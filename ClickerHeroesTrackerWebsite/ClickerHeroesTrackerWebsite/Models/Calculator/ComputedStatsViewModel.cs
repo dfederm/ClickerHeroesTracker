@@ -57,36 +57,36 @@ namespace ClickerHeroesTrackerWebsite.Models.Calculator
         /// <summary>
         /// Gets the current user settings.
         /// </summary>
-        public IUserSettings UserSettings { get; private set; }
+        public IUserSettings UserSettings { get; }
 
         /// <summary>
         /// Gets the optimal souls earned per hour
         /// </summary>
-        public long SoulsPerHour { get; private set; }
+        public long SoulsPerHour { get; }
 
         /// <summary>
         /// Gets the optimal level to ascend.
         /// </summary>
-        public short OptimalLevel { get; private set; }
+        public short OptimalLevel { get; }
 
         /// <summary>
         /// Gets the expected souls earned per ascension if ascending at the optimal level.
         /// </summary>
-        public long OptimalSoulsPerAscension { get; private set; }
+        public long OptimalSoulsPerAscension { get; }
 
         /// <summary>
         /// Gets the optimal time it takes to reach the optimal level.
         /// </summary>
-        public short OptimalAscensionTime { get; private set; }
+        public short OptimalAscensionTime { get; }
 
         /// <summary>
         /// Gets the user's titan damage
         /// </summary>
-        public long TitanDamage { get; private set; }
+        public long TitanDamage { get; }
 
         /// <summary>
         /// Gets the number of souls the user has spent.
         /// </summary>
-        public long SoulsSpent { get; private set; }
+        public long SoulsSpent { get; }
     }
 }
