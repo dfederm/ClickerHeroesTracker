@@ -30,6 +30,10 @@ namespace ClickerHeroesTrackerWebsite.Models.Settings
             this.Fill();
         }
 
+        public UserSettings()
+        {
+        }
+
         private delegate bool TryParse<T>(string rawValue, out T value);
 
         public TimeZoneInfo TimeZone
@@ -88,6 +92,11 @@ namespace ClickerHeroesTrackerWebsite.Models.Settings
         {
             this.EnsureNotDisposed();
 
+            if (this.userId == null)
+            {
+                return;
+            }
+
             if (this.dirtySettings.Count == 0)
             {
                 return;
@@ -140,11 +149,6 @@ namespace ClickerHeroesTrackerWebsite.Models.Settings
 
         private void Fill()
         {
-            if (this.userId == null)
-            {
-                return;
-            }
-
             var parameters = new Dictionary<string, object>
             {
                 { "@UserId", this.userId },

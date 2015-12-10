@@ -5,9 +5,13 @@
 namespace ClickerHeroesTrackerWebsite.Models.Game
 {
     using System.Collections.Generic;
+    using System.Diagnostics.CodeAnalysis;
 
     public class Ancient
     {
+        private static readonly Dictionary<int, Ancient> Ancients = new Dictionary<int, Ancient>();
+
+        [SuppressMessage("StyleCop.CSharp.OrderingRules", "SA1202:ElementsMustBeOrderedByAccess", Justification = "Ancients must come first since the Ancient constructor adds to it.")]
         public static readonly Ancient Solomon = new Ancient(
             id: 3,
             name: "Solomon",
@@ -240,8 +244,6 @@ namespace ClickerHeroesTrackerWebsite.Models.Game
             maxLevel: 15,
             power: 0);
 
-        private static Dictionary<int, Ancient> ancients = new Dictionary<int, Ancient>();
-
         private Ancient(
             int id,
             string name,
@@ -258,14 +260,14 @@ namespace ClickerHeroesTrackerWebsite.Models.Game
             this.Power = power;
 
             // Add itself to the static collection
-            ancients.Add(this.Id, this);
+            Ancients.Add(this.Id, this);
         }
 
         public static IEnumerable<Ancient> All
         {
             get
             {
-                return ancients.Values;
+                return Ancients.Values;
             }
         }
 
@@ -284,7 +286,7 @@ namespace ClickerHeroesTrackerWebsite.Models.Game
         public static Ancient Get(int id)
         {
             Ancient ancient;
-            return ancients.TryGetValue(id, out ancient) ? ancient : null;
+            return Ancients.TryGetValue(id, out ancient) ? ancient : null;
         }
     }
 }

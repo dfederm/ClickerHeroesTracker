@@ -22,6 +22,12 @@ namespace ClickerHeroesTrackerWebsite.Models.Settings
         /// <inheritdoc/>
         public IUserSettings Get(string userId)
         {
+            // If the user isn't logged in, use the default settings
+            if (userId == null)
+            {
+                return new UserSettings();
+            }
+
             // Use a cache to avoid hitting the database every time
             UserSettings settings;
             if (!this.cache.TryGetValue(userId, out settings))

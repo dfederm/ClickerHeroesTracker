@@ -12,7 +12,7 @@ namespace ClickerHeroesTrackerWebsite.Views
     using System.Web.Mvc;
     using Utility;
 
-    internal static class HtmlHelpers
+    public static class HtmlHelpers
     {
         public static IDisposable BeginScripts(this HtmlHelper helper)
         {

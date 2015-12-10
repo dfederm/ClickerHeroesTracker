@@ -5,10 +5,14 @@
 namespace ClickerHeroesTrackerWebsite.Models.Game
 {
     using System.Collections.Generic;
+    using System.Diagnostics.CodeAnalysis;
 
     public class Hero
     {
+        private static readonly Dictionary<int, Hero> Heroes = new Dictionary<int, Hero>();
+
         // Cid is populated manually
+        [SuppressMessage("StyleCop.CSharp.OrderingRules", "SA1202:ElementsMustBeOrderedByAccess", Justification = "Ancients must come first since the Ancient constructor adds to it.")]
         public static readonly Hero CidtheHelpfulAdventurer = new Hero(
             id: 1,
             name: "Cid, the Helpful Adventurer",
@@ -266,8 +270,6 @@ namespace ClickerHeroesTrackerWebsite.Models.Game
             upgradeCosts: new[] { 1e+161d, 2.5e+161d, 1e+162d, 0d, 8e+162d },
             isRanger: true);
 
-        private static Dictionary<int, Hero> heroes = new Dictionary<int, Hero>();
-
         private Hero(
             int id,
             string name,
@@ -284,14 +286,14 @@ namespace ClickerHeroesTrackerWebsite.Models.Game
             this.IsRanger = isRanger;
 
             // Add itself to the static collection
-            heroes.Add(this.Id, this);
+            Heroes.Add(this.Id, this);
         }
 
         public static IEnumerable<Hero> All
         {
             get
             {
-                return heroes.Values;
+                return Heroes.Values;
             }
         }
 
@@ -310,7 +312,7 @@ namespace ClickerHeroesTrackerWebsite.Models.Game
         public static Hero Get(int id)
         {
             Hero hero;
-            return heroes.TryGetValue(id, out hero) ? hero : null;
+            return Heroes.TryGetValue(id, out hero) ? hero : null;
         }
     }
 }
