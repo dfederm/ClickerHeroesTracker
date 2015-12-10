@@ -16,8 +16,10 @@ namespace ClickerHeroesTrackerWebsite.IntegrationTests
         [TestMethod]
         public void Homepage_BasicTest()
         {
-            var response = new HtmlResponse("/");
-            Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
+            using (var response = new HtmlResponse("/"))
+            {
+                Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
+            }
         }
     }
 }

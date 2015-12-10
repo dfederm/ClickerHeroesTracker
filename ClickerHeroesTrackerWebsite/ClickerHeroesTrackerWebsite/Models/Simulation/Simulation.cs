@@ -58,9 +58,24 @@ namespace ClickerHeroesTrackerWebsite.Models.Simulation
 
         public enum CooldownType
         {
+            /// <summary>
+            /// Use cooldowns 1+2+3+4+5+7
+            /// </summary>
             Full,
+
+            /// <summary>
+            /// Use cooldowns 1+2+3+4
+            /// </summary>
             Half,
+
+            /// <summary>
+            /// Use cooldowns 1+2
+            /// </summary>
             Short,
+
+            /// <summary>
+            /// No cooldowns
+            /// </summary>
             None
         }
 

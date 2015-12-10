@@ -1,4 +1,4 @@
-﻿// <copyright file="SaveData.cs" company="Clicker Heroes Tracker">
+﻿// <copyright file="SavedGame.cs" company="Clicker Heroes Tracker">
 // Copyright (c) Clicker Heroes Tracker. All rights reserved.
 // </copyright>
 
@@ -6,6 +6,7 @@ namespace ClickerHeroesTrackerWebsite.Models.SaveData
 {
     using System;
     using System.Collections.Generic;
+    using System.Diagnostics.CodeAnalysis;
     using System.IO;
     using System.Security.Cryptography;
     using System.Text;
@@ -56,6 +57,7 @@ namespace ClickerHeroesTrackerWebsite.Models.SaveData
             return DeserializeSavedGame(jsonData);
         }
 
+        [SuppressMessage("Microsoft.Security.Cryptography", "CA5351:Do not use insecure cryptographic algorithm MD5", Justification = "The encoding algorithm requires MD5. It's not used for security.")]
         internal static byte[] DecodeSaveData(string encodedSaveData)
         {
             const string AntiCheatCode = "Fe12NAfA3R6z4k0z";

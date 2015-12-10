@@ -12,8 +12,6 @@ namespace ClickerHeroesTrackerWebsite.Models.Settings
 
     internal sealed class UserSettings : DisposableBase, IUserSettings
     {
-        private delegate bool TryParse<T>(string rawValue, out T value);
-
         private readonly Dictionary<byte, string> settingValues = new Dictionary<byte, string>();
 
         private readonly HashSet<byte> dirtySettings = new HashSet<byte>();
@@ -31,6 +29,8 @@ namespace ClickerHeroesTrackerWebsite.Models.Settings
 
             this.Fill();
         }
+
+        private delegate bool TryParse<T>(string rawValue, out T value);
 
         public TimeZoneInfo TimeZone
         {
@@ -93,13 +93,14 @@ namespace ClickerHeroesTrackerWebsite.Models.Settings
                 return;
             }
 
+            var parameters = new Dictionary<string, object>
+            {
+                { "@UserId", this.userId },
+            };
             using (var command = this.databaseCommandFactory.Create(
                 "SetUserSettings",
                 CommandType.StoredProcedure,
-                new Dictionary<string, object>
-                {
-                    { "@UserId", this.userId },
-                }))
+                parameters))
             {
                 DataTable settingsTable = new DataTable();
                 settingsTable.Columns.Add("SettingId", typeof(byte));
@@ -144,13 +145,14 @@ namespace ClickerHeroesTrackerWebsite.Models.Settings
                 return;
             }
 
+            var parameters = new Dictionary<string, object>
+            {
+                { "@UserId", this.userId },
+            };
             using (var command = this.databaseCommandFactory.Create(
                 "GetUserSettings",
                 CommandType.StoredProcedure,
-                new Dictionary<string, object>
-                {
-                    { "@UserId", this.userId },
-                }))
+                parameters))
             using (var reader = command.ExecuteReader())
             {
                 while (reader.Read())
@@ -187,7 +189,7 @@ namespace ClickerHeroesTrackerWebsite.Models.Settings
             string oldValue;
             if (this.settingValues.TryGetValue(settingId, out oldValue))
             {
-                if (!value.Equals(oldValue))
+                if (!value.Equals(oldValue, StringComparison.Ordinal))
                 {
                     this.settingValues[settingId] = value;
                     isDirty = true;

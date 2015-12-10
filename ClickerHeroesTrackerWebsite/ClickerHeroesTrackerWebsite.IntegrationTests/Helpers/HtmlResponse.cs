@@ -8,7 +8,7 @@ namespace ClickerHeroesTrackerWebsite.IntegrationTests.Helpers
     using System.IO;
     using System.Net;
 
-    internal sealed class HtmlResponse
+    internal sealed class HtmlResponse : IDisposable
     {
         private static string urlPrefix = GetUrlPrefix();
 
@@ -42,6 +42,14 @@ namespace ClickerHeroesTrackerWebsite.IntegrationTests.Helpers
             get
             {
                 return this.content = this.content = new StreamReader(this.response.GetResponseStream()).ReadToEnd();
+            }
+        }
+
+        public void Dispose()
+        {
+            if (this.response != null)
+            {
+                this.response.Dispose();
             }
         }
 

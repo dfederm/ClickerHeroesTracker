@@ -291,10 +291,13 @@
     <Compile Include="Models\Account\RegisterViewModel.cs" />
     <Compile Include="Models\Account\ResetPasswordViewModel.cs" />
     <Compile Include="Models\Account\SendCodeViewModel.cs" />
+    <Compile Include="Models\ApplicationDbContext.cs" />
+    <Compile Include="Models\ApplicationUser.cs" />
     <Compile Include="Models\Manage\ChangePasswordViewModel.cs" />
     <Compile Include="Models\Manage\IndexViewModel.cs" />
     <Compile Include="Models\Manage\ManageLoginsViewModel.cs" />
     <Compile Include="Models\Manage\SetPasswordViewModel.cs" />
+    <Compile Include="Models\SaveData\SavedGame.cs" />
     <Compile Include="Models\Settings\IUserSettings.cs" />
     <Compile Include="Models\Settings\IUserSettingsProvider.cs" />
     <Compile Include="Models\LatencyCounter.cs" />
@@ -337,10 +340,8 @@
     <Compile Include="Models\Calculator\ComputedStatsViewModel.cs" />
     <Compile Include="Models\Calculator\CalculatorViewModel.cs" />
     <Compile Include="Models\Game\Ancient.cs" />
-    <Compile Include="Models\IdentityModels.cs" />
     <Compile Include="Models\SaveData\AncientData.cs" />
     <Compile Include="Models\SaveData\AncientsData.cs" />
-    <Compile Include="Models\SaveData\SaveData.cs" />
     <Compile Include="Models\Calculator\HeroLevelSummaryViewModel.cs" />
     <Compile Include="Models\Calculator\SuggestedAncientLevelsViewModel.cs" />
     <Compile Include="Models\Telemetry.cs" />

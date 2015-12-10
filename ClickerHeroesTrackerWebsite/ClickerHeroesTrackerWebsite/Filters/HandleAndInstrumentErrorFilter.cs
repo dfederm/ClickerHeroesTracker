@@ -5,9 +5,9 @@
 namespace ClickerHeroesTrackerWebsite.Filters
 {
     using System;
+    using System.Web;
     using System.Web.Mvc;
     using Models;
-    using System.Web;
 
     /// <summary>
     /// An exception filter which handles and logs exceptions. Based on <see cref="HandleErrorAttribute"/>.

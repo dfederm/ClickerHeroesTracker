@@ -5,6 +5,7 @@
 namespace ClickerHeroesTrackerWebsite.Unity
 {
     using System;
+    using System.Diagnostics.CodeAnalysis;
     using System.Net.Http;
     using System.Web.Http.Controllers;
     using System.Web.Http.Dispatcher;
@@ -12,6 +13,7 @@ namespace ClickerHeroesTrackerWebsite.Unity
 
     public sealed class UnityHttpControllerActivator : IHttpControllerActivator
     {
+        [SuppressMessage("Microsoft.Usage", "CA2213:Disposable fields should be disposed", Justification = "The object does not own the container")]
         private IUnityContainer container;
 
         public UnityHttpControllerActivator(IUnityContainer container)

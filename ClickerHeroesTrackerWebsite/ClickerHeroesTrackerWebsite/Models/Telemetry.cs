@@ -7,7 +7,7 @@ namespace ClickerHeroesTrackerWebsite.Models
     using System.Web;
     using Microsoft.ApplicationInsights;
 
-    public class Telemetry
+    public static class Telemetry
     {
         // BUGBUG 56 - Retrieve via DI
         public static TelemetryClient Client
@@ -15,7 +15,7 @@ namespace ClickerHeroesTrackerWebsite.Models
             get
             {
                 return HttpContext.Current.Items["TelemetryClient"] as TelemetryClient
-                    ?? (TelemetryClient)(HttpContext.Current.Items["TelemetryClient"] = new TelemetryClient()); ;
+                    ?? (TelemetryClient)(HttpContext.Current.Items["TelemetryClient"] = new TelemetryClient());
             }
         }
     }

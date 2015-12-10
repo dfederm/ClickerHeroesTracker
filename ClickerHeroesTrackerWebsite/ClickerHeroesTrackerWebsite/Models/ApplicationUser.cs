@@ -1,4 +1,4 @@
-﻿// <copyright file="IdentityModels.cs" company="Clicker Heroes Tracker">
+﻿// <copyright file="ApplicationUser.cs" company="Clicker Heroes Tracker">
 // Copyright (c) Clicker Heroes Tracker. All rights reserved.
 // </copyright>
 
@@ -19,19 +19,6 @@ namespace ClickerHeroesTrackerWebsite.Models
 
             // Add custom user claims here
             return userIdentity;
-        }
-    }
-
-    public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
-    {
-        public ApplicationDbContext()
-            : base("DefaultConnection", throwIfV1Schema: false)
-        {
-        }
-
-        public static ApplicationDbContext Create()
-        {
-            return new ApplicationDbContext();
         }
     }
 }

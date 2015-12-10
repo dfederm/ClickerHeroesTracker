@@ -8,8 +8,6 @@ namespace ClickerHeroesTrackerWebsite.Models.Game
 
     public class Ancient
     {
-        private static Dictionary<int, Ancient> ancients = new Dictionary<int, Ancient>();
-
         public static readonly Ancient Solomon = new Ancient(
             id: 3,
             name: "Solomon",
@@ -241,6 +239,8 @@ namespace ClickerHeroesTrackerWebsite.Models.Game
             description: "undefined",
             maxLevel: 15,
             power: 0);
+
+        private static Dictionary<int, Ancient> ancients = new Dictionary<int, Ancient>();
 
         private Ancient(
             int id,

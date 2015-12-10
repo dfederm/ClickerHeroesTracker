@@ -12,16 +12,9 @@ namespace ClickerHeroesTrackerWebsite.Models
 
     public class IndexViewModel
     {
-        public static IEnumerable<TimeZoneSelectItem> TimeZones = TimeZoneInfo
+        public static IEnumerable<TimeZoneSelectItem> TimeZones { get; } = TimeZoneInfo
             .GetSystemTimeZones()
             .Select(tz => new TimeZoneSelectItem { Id = tz.Id, Name = tz.DisplayName });
-
-        public class TimeZoneSelectItem
-        {
-            public string Id { get; set; }
-
-            public string Name { get; set; }
-        }
 
         public bool HasPassword { get; set; }
 
@@ -38,5 +31,12 @@ namespace ClickerHeroesTrackerWebsite.Models
 
         [Display(Name = "Play Style")]
         public string PlayStyle { get; set; }
+
+        public class TimeZoneSelectItem
+        {
+            public string Id { get; set; }
+
+            public string Name { get; set; }
+        }
     }
 }

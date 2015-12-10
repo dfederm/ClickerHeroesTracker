@@ -8,8 +8,6 @@ namespace ClickerHeroesTrackerWebsite.Models.Game
 
     public class Hero
     {
-        private static Dictionary<int, Hero> heroes = new Dictionary<int, Hero>();
-
         // Cid is populated manually
         public static readonly Hero CidtheHelpfulAdventurer = new Hero(
             id: 1,
@@ -267,6 +265,8 @@ namespace ClickerHeroesTrackerWebsite.Models.Game
             damage: 2.536e+136d,
             upgradeCosts: new[] { 1e+161d, 2.5e+161d, 1e+162d, 0d, 8e+162d },
             isRanger: true);
+
+        private static Dictionary<int, Hero> heroes = new Dictionary<int, Hero>();
 
         private Hero(
             int id,

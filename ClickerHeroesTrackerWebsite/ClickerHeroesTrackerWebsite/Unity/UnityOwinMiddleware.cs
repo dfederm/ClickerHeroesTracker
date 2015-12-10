@@ -4,6 +4,7 @@
 
 namespace ClickerHeroesTrackerWebsite.Unity
 {
+    using System.Diagnostics.CodeAnalysis;
     using System.Threading.Tasks;
     using Microsoft.Owin;
     using Microsoft.Practices.Unity;
@@ -16,6 +17,7 @@ namespace ClickerHeroesTrackerWebsite.Unity
     public sealed class UnityOwinMiddleware<T> : OwinMiddleware
         where T : OwinMiddleware
     {
+        [SuppressMessage("Microsoft.Usage", "CA2213:Disposable fields should be disposed", Justification = "The object does not own the container")]
         private readonly IUnityContainer container;
 
         /// <summary>
