@@ -6,6 +6,9 @@ namespace ClickerHeroesTrackerWebsite.Models.Game
 {
     using System.Collections.Generic;
 
+    /// <summary>
+    /// Represents an achievement in the game
+    /// </summary>
     public class Achievement
     {
         private static Dictionary<int, Achievement> acievements = new Dictionary<int, Achievement>();
@@ -337,10 +340,20 @@ namespace ClickerHeroesTrackerWebsite.Models.Game
             acievements.Add(this.Id, this);
         }
 
+        /// <summary>
+        /// Gets the achievement id
+        /// </summary>
         public int Id { get; }
 
+        /// <summary>
+        /// Gets the damage multiplier granted by the achievement.
+        /// </summary>
         public double Multiplier { get; }
 
+        /// <summary>
+        /// Gets an achievement by id
+        /// </summary>
+        /// <returns>The achievement with the id, or null if one does not exist</returns>
         public static Achievement Get(int id)
         {
             Achievement acievement;

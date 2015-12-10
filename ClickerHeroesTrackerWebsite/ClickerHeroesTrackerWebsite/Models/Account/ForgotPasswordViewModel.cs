@@ -6,8 +6,14 @@ namespace ClickerHeroesTrackerWebsite.Models.Account
 {
     using System.ComponentModel.DataAnnotations;
 
+    /// <summary>
+    /// The model for the forgot password view
+    /// </summary>
     public class ForgotPasswordViewModel
     {
+        /// <summary>
+        /// Gets or sets the email address for the account.
+        /// </summary>
         [Required]
         [EmailAddress]
         [Display(Name = "Email")]

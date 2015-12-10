@@ -7,11 +7,19 @@ namespace ClickerHeroesTrackerWebsite.Models.Game
     using System.Collections.Generic;
     using System.Diagnostics.CodeAnalysis;
 
+    /// <summary>
+    /// Represents a hero in the game
+    /// </summary>
     public class Hero
     {
         private static readonly Dictionary<int, Hero> Heroes = new Dictionary<int, Hero>();
 
-        // Cid is populated manually
+        /// <summary>
+        /// The hero Cid
+        /// </summary>
+        /// <remarks>
+        /// Cid is populated manually
+        /// </remarks>
         [SuppressMessage("StyleCop.CSharp.OrderingRules", "SA1202:ElementsMustBeOrderedByAccess", Justification = "Ancients must come first since the Ancient constructor adds to it.")]
         public static readonly Hero CidtheHelpfulAdventurer = new Hero(
             id: 1,
@@ -20,9 +28,13 @@ namespace ClickerHeroesTrackerWebsite.Models.Game
             upgradeCosts: new[] { 100d, 250d, 1e3d, 8e3d, 80e3d, 400e3d, 4e6d },
             damage: 0d);
 
-        // Populated by: http://s3-us-west-2.amazonaws.com/clickerheroes/ancientssoul.html
+        // Heroes below populated by: http://s3-us-west-2.amazonaws.com/clickerheroes/ancientssoul.html
         // var out = ""; for (var key in Heroes) { var hero = Heroes[key]; out += "public static readonly Hero " + hero.name.replace(/[ ,']/g,"") + " = new Hero(\n    id: " + (parseInt(key)+2) + ",\n    name: \""+ hero.name +"\",\n    cost: " + hero.cost + "d,\n    damage: " + hero.damage + "d,\n    upgradeCosts: new[] { " + hero.upgrades.toString().replace(/,/g, 'd, ') + "d }" + (hero.has5x ? ",\n    isRanger: true" : "") + ");\n" };
         // TODO: move to SQL
+
+        /// <summary>
+        /// The hero Tree Beast
+        /// </summary>
         public static readonly Hero TreeBeast = new Hero(
             id: 2,
             name: "Tree Beast",
@@ -30,6 +42,9 @@ namespace ClickerHeroesTrackerWebsite.Models.Game
             damage: 100d,
             upgradeCosts: new[] { 500d, 1250d, 5000d, 40000d, 400000d });
 
+        /// <summary>
+        /// The hero Ivan
+        /// </summary>
         public static readonly Hero IvantheDrunkenBrawler = new Hero(
             id: 3,
             name: "Ivan, the Drunken Brawler",
@@ -37,6 +52,9 @@ namespace ClickerHeroesTrackerWebsite.Models.Game
             damage: 440d,
             upgradeCosts: new[] { 2500d, 6250d, 25000d, 200000d, 2000000d, 10000000d });
 
+        /// <summary>
+        /// The hero Brittany
+        /// </summary>
         public static readonly Hero BrittanytheBeachPrincess = new Hero(
             id: 4,
             name: "Brittany, the Beach Princess",
@@ -44,6 +62,9 @@ namespace ClickerHeroesTrackerWebsite.Models.Game
             damage: 1480d,
             upgradeCosts: new[] { 10000d, 25000d, 100000d, 800000d });
 
+        /// <summary>
+        /// The hero Fisherman
+        /// </summary>
         public static readonly Hero TheWanderingFisherman = new Hero(
             id: 5,
             name: "The Wandering Fisherman",
@@ -51,6 +72,9 @@ namespace ClickerHeroesTrackerWebsite.Models.Game
             damage: 1960d,
             upgradeCosts: new[] { 40000d, 100000d, 400000d, 3200000d, 32000000d });
 
+        /// <summary>
+        /// The hero Betty Clicker
+        /// </summary>
         public static readonly Hero BettyClicker = new Hero(
             id: 6,
             name: "Betty Clicker",
@@ -58,6 +82,9 @@ namespace ClickerHeroesTrackerWebsite.Models.Game
             damage: 976d,
             upgradeCosts: new[] { 200000d, 500000d, 2000000d, 16000000d, 160000000d });
 
+        /// <summary>
+        /// The hero Samurai
+        /// </summary>
         public static readonly Hero TheMaskedSamurai = new Hero(
             id: 7,
             name: "The Masked Samurai",
@@ -65,6 +92,9 @@ namespace ClickerHeroesTrackerWebsite.Models.Game
             damage: 74500d,
             upgradeCosts: new[] { 1000000d, 2500000d, 10000000d, 80000000d });
 
+        /// <summary>
+        /// The hero Leon
+        /// </summary>
         public static readonly Hero Leon = new Hero(
             id: 8,
             name: "Leon",
@@ -72,6 +102,9 @@ namespace ClickerHeroesTrackerWebsite.Models.Game
             damage: 86872d,
             upgradeCosts: new[] { 4000000d, 10000000d, 40000000d, 320000000d });
 
+        /// <summary>
+        /// The hero Great Forest Seer
+        /// </summary>
         public static readonly Hero TheGreatForestSeer = new Hero(
             id: 9,
             name: "The Great Forest Seer",
@@ -79,6 +112,9 @@ namespace ClickerHeroesTrackerWebsite.Models.Game
             damage: 942860d,
             upgradeCosts: new[] { 25000000d, 62500000d, 250000000d, 2000000000d });
 
+        /// <summary>
+        /// The hero Alexa
+        /// </summary>
         public static readonly Hero AlexatheAssassin = new Hero(
             id: 10,
             name: "Alexa, the Assassin",
@@ -86,6 +122,9 @@ namespace ClickerHeroesTrackerWebsite.Models.Game
             damage: 941625d,
             upgradeCosts: new[] { 150000000d, 375000000d, 1500000000d, 12000000000d, 120000000000d });
 
+        /// <summary>
+        /// The hero Natalia
+        /// </summary>
         public static readonly Hero NataliaIceApprentice = new Hero(
             id: 11,
             name: "Natalia, Ice Apprentice",
@@ -93,6 +132,9 @@ namespace ClickerHeroesTrackerWebsite.Models.Game
             damage: 15640000d,
             upgradeCosts: new[] { 1000000000d, 2500000000d, 10000000000d, 80000000000d });
 
+        /// <summary>
+        /// The hero Mercedes
+        /// </summary>
         public static readonly Hero MercedesDuchessofBlades = new Hero(
             id: 12,
             name: "Mercedes, Duchess of Blades",
@@ -100,6 +142,9 @@ namespace ClickerHeroesTrackerWebsite.Models.Game
             damage: 74420000d,
             upgradeCosts: new[] { 8000000000d, 20000000000d, 80000000000d, 640000000000d, 6400000000000d });
 
+        /// <summary>
+        /// The hero Bobby
+        /// </summary>
         public static readonly Hero BobbyBountyHunter = new Hero(
             id: 13,
             name: "Bobby, Bounty Hunter",
@@ -107,6 +152,9 @@ namespace ClickerHeroesTrackerWebsite.Models.Game
             damage: 340200000d,
             upgradeCosts: new[] { 65000000000d, 162000000000d, 650000000000d, 5200000000000d, 52000000000000d });
 
+        /// <summary>
+        /// The hero Fire Mage
+        /// </summary>
         public static readonly Hero BroyleLindovenFireMage = new Hero(
             id: 14,
             name: "Broyle Lindoven, Fire Mage",
@@ -114,6 +162,9 @@ namespace ClickerHeroesTrackerWebsite.Models.Game
             damage: 694800000d,
             upgradeCosts: new[] { 500000000000d, 1250000000000d, 5000000000000d, 40000000000000d, 400000000000000d });
 
+        /// <summary>
+        /// The hero Sir George II
+        /// </summary>
         public static readonly Hero SirGeorgeIIKingsGuard = new Hero(
             id: 15,
             name: "Sir George II, King's Guard",
@@ -121,6 +172,9 @@ namespace ClickerHeroesTrackerWebsite.Models.Game
             damage: 9200000000d,
             upgradeCosts: new[] { 4500000000000d, 11250000000000d, 45000000000000d, 360000000000000d, 3600000000000000d });
 
+        /// <summary>
+        /// The hero Midas
+        /// </summary>
         public static readonly Hero KingMidas = new Hero(
             id: 16,
             name: "King Midas",
@@ -128,6 +182,9 @@ namespace ClickerHeroesTrackerWebsite.Models.Game
             damage: 3017000000d,
             upgradeCosts: new[] { 40000000000000d, 100000000000000d, 400000000000000d, 3200000000000000d, 32000000000000000d, 160000000000000000d });
 
+        /// <summary>
+        /// The hero Referi Jerator
+        /// </summary>
         public static readonly Hero ReferiJeratorIceWizard = new Hero(
             id: 17,
             name: "Referi Jerator, Ice Wizard",
@@ -135,6 +192,9 @@ namespace ClickerHeroesTrackerWebsite.Models.Game
             damage: 400180000000d,
             upgradeCosts: new[] { 360000000000000d, 900000000000000d, 3600000000000000d, 28800000000000000d, 288000000000000000d });
 
+        /// <summary>
+        /// The hero Abaddon
+        /// </summary>
         public static readonly Hero Abaddon = new Hero(
             id: 18,
             name: "Abaddon",
@@ -142,6 +202,9 @@ namespace ClickerHeroesTrackerWebsite.Models.Game
             damage: 1492171875000d,
             upgradeCosts: new[] { 3200000000000000d, 8000000000000000d, 32000000000000000d, 256000000000000000d });
 
+        /// <summary>
+        /// The hero Ma Zhu
+        /// </summary>
         public static readonly Hero MaZhu = new Hero(
             id: 19,
             name: "Ma Zhu",
@@ -149,6 +212,9 @@ namespace ClickerHeroesTrackerWebsite.Models.Game
             damage: 16280000000000d,
             upgradeCosts: new[] { 27000000000000000d, 67500000000000000d, 270000000000000000d, 2160000000000000000d });
 
+        /// <summary>
+        /// The hero Amenhotep
+        /// </summary>
         public static readonly Hero Amenhotep = new Hero(
             id: 20,
             name: "Amenhotep",
@@ -156,6 +222,9 @@ namespace ClickerHeroesTrackerWebsite.Models.Game
             damage: 10670000000000d,
             upgradeCosts: new[] { 240000000000000000d, 600000000000000000d, 2400000000000000000d });
 
+        /// <summary>
+        /// The hero Beastlord
+        /// </summary>
         public static readonly Hero Beastlord = new Hero(
             id: 21,
             name: "Beastlord",
@@ -163,6 +232,9 @@ namespace ClickerHeroesTrackerWebsite.Models.Game
             damage: 393144000000000d,
             upgradeCosts: new[] { 3000000000000000000d, 7500000000000000000d, 30000000000000000000d, 240000000000000000000d, 2.4e+21d });
 
+        /// <summary>
+        /// The hero Athena
+        /// </summary>
         public static readonly Hero AthenaGoddessofWar = new Hero(
             id: 22,
             name: "Athena, Goddess of War",
@@ -170,6 +242,9 @@ namespace ClickerHeroesTrackerWebsite.Models.Game
             damage: 17376000000000000d,
             upgradeCosts: new[] { 90000000000000000000d, 225000000000000000000d, 900000000000000000000d, 0d, 7.2e+21d });
 
+        /// <summary>
+        /// The hero Aphrodite
+        /// </summary>
         public static readonly Hero AphroditeGoddessofLove = new Hero(
             id: 23,
             name: "Aphrodite, Goddess of Love",
@@ -177,6 +252,9 @@ namespace ClickerHeroesTrackerWebsite.Models.Game
             damage: 497984000000000000d,
             upgradeCosts: new[] { 3.5e+21d, 8.75e+21d, 3.5e+22d, 0d, 2.8e+23d, 2.8e+24d });
 
+        /// <summary>
+        /// The hero Shinatobe
+        /// </summary>
         public static readonly Hero ShinatobeWindDeity = new Hero(
             id: 24,
             name: "Shinatobe, Wind Deity",
@@ -184,6 +262,9 @@ namespace ClickerHeroesTrackerWebsite.Models.Game
             damage: 7336000000000000000d,
             upgradeCosts: new[] { 1.4e+23d, 3.5e+23d, 1.4e+24d, 1.12e+25d, 1.12e+26d });
 
+        /// <summary>
+        /// The hero Grant
+        /// </summary>
         public static readonly Hero GranttheGeneral = new Hero(
             id: 25,
             name: "Grant, the General",
@@ -191,6 +272,9 @@ namespace ClickerHeroesTrackerWebsite.Models.Game
             damage: 808000000000000000000d,
             upgradeCosts: new[] { 4.1999e+25d, 1.04e+26d, 4.19e+26d, 3.359e+27d });
 
+        /// <summary>
+        /// The hero Frostleaf
+        /// </summary>
         public static readonly Hero Frostleaf = new Hero(
             id: 26,
             name: "Frostleaf",
@@ -198,6 +282,9 @@ namespace ClickerHeroesTrackerWebsite.Models.Game
             damage: 2.98792e+23d,
             upgradeCosts: new[] { 2.1e+28d, 5.2499e+28d, 2.09e+29d, 1.679e+30d });
 
+        /// <summary>
+        /// The hero Dread Knight
+        /// </summary>
         public static readonly Hero DreadKnight = new Hero(
             id: 27,
             name: "Dread Knight",
@@ -206,6 +293,9 @@ namespace ClickerHeroesTrackerWebsite.Models.Game
             upgradeCosts: new[] { 1e+41d, 2.5e+41d, 1e+42d, 0d, 8e+42d },
             isRanger: true);
 
+        /// <summary>
+        /// The hero Atlas
+        /// </summary>
         public static readonly Hero Atlas = new Hero(
             id: 28,
             name: "Atlas",
@@ -214,6 +304,9 @@ namespace ClickerHeroesTrackerWebsite.Models.Game
             upgradeCosts: new[] { 1e+56d, 2.5e+56d, 1e+57d, 0d, 8e+57d },
             isRanger: true);
 
+        /// <summary>
+        /// The hero Terra
+        /// </summary>
         public static readonly Hero Terra = new Hero(
             id: 29,
             name: "Terra",
@@ -222,6 +315,9 @@ namespace ClickerHeroesTrackerWebsite.Models.Game
             upgradeCosts: new[] { 1e+71d, 2.5e+71d, 1e+72d, 0d, 8e+72d },
             isRanger: true);
 
+        /// <summary>
+        /// The hero Phthalo
+        /// </summary>
         public static readonly Hero Phthalo = new Hero(
             id: 30,
             name: "Phthalo",
@@ -230,6 +326,9 @@ namespace ClickerHeroesTrackerWebsite.Models.Game
             upgradeCosts: new[] { 1e+86d, 2.5e+86d, 1e+87d, 0d, 8e+87d },
             isRanger: true);
 
+        /// <summary>
+        /// The hero Banana
+        /// </summary>
         public static readonly Hero OrntchyaGladeyeDidensyBanana = new Hero(
             id: 31,
             name: "Orntchya Gladeye, Didensy Banana",
@@ -238,6 +337,9 @@ namespace ClickerHeroesTrackerWebsite.Models.Game
             upgradeCosts: new[] { 1e+101d, 2.5e+101d, 1e+102d, 0d, 8e+102d },
             isRanger: true);
 
+        /// <summary>
+        /// The hero Lilin
+        /// </summary>
         public static readonly Hero Lilin = new Hero(
             id: 32,
             name: "Lilin",
@@ -246,6 +348,9 @@ namespace ClickerHeroesTrackerWebsite.Models.Game
             upgradeCosts: new[] { 1e+116d, 2.5e+116d, 1e+117d, 0d, 8e+117d },
             isRanger: true);
 
+        /// <summary>
+        /// The hero Cadmia
+        /// </summary>
         public static readonly Hero Cadmia = new Hero(
             id: 33,
             name: "Cadmia",
@@ -254,6 +359,9 @@ namespace ClickerHeroesTrackerWebsite.Models.Game
             upgradeCosts: new[] { 1e+131d, 2.5e+131d, 1e+132d, 0d, 8e+132d },
             isRanger: true);
 
+        /// <summary>
+        /// The hero Alabaster
+        /// </summary>
         public static readonly Hero Alabaster = new Hero(
             id: 34,
             name: "Alabaster",
@@ -262,6 +370,9 @@ namespace ClickerHeroesTrackerWebsite.Models.Game
             upgradeCosts: new[] { 1e+146d, 2.5e+146d, 1e+147d, 0d, 8e+147d },
             isRanger: true);
 
+        /// <summary>
+        /// The hero Astraea
+        /// </summary>
         public static readonly Hero Astraea = new Hero(
             id: 35,
             name: "Astraea",
@@ -289,6 +400,9 @@ namespace ClickerHeroesTrackerWebsite.Models.Game
             Heroes.Add(this.Id, this);
         }
 
+        /// <summary>
+        /// Gets a collection of all heroes in the game.
+        /// </summary>
         public static IEnumerable<Hero> All
         {
             get
@@ -297,18 +411,40 @@ namespace ClickerHeroesTrackerWebsite.Models.Game
             }
         }
 
+        /// <summary>
+        /// Gets the id of the hero
+        /// </summary>
         public int Id { get; }
 
+        /// <summary>
+        /// Gets the hero name
+        /// </summary>
         public string Name { get; }
 
+        /// <summary>
+        /// Gets the base cost of the hero
+        /// </summary>
         public double Cost { get; }
 
+        /// <summary>
+        /// Gets the base damage of the hero
+        /// </summary>
         public double Damage { get; }
 
+        /// <summary>
+        /// Gets the cost of each hero upgrade
+        /// </summary>
         public double[] UpgradeCosts { get; }
 
+        /// <summary>
+        /// Gets a value indicating whether the hero is considered a ranger
+        /// </summary>
         public bool IsRanger { get; }
 
+        /// <summary>
+        /// Gets a hero by id
+        /// </summary>
+        /// <returns>The hero with the provided id, or null if one does not exist</returns>
         public static Hero Get(int id)
         {
             Hero hero;

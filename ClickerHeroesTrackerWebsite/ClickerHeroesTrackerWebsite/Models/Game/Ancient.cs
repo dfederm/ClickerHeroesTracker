@@ -7,10 +7,16 @@ namespace ClickerHeroesTrackerWebsite.Models.Game
     using System.Collections.Generic;
     using System.Diagnostics.CodeAnalysis;
 
+    /// <summary>
+    /// Represents the data for an ancient in the game.
+    /// </summary>
     public class Ancient
     {
         private static readonly Dictionary<int, Ancient> Ancients = new Dictionary<int, Ancient>();
 
+        /// <summary>
+        /// The ancient Solomon
+        /// </summary>
         [SuppressMessage("StyleCop.CSharp.OrderingRules", "SA1202:ElementsMustBeOrderedByAccess", Justification = "Ancients must come first since the Ancient constructor adds to it.")]
         public static readonly Ancient Solomon = new Ancient(
             id: 3,
@@ -20,6 +26,9 @@ namespace ClickerHeroesTrackerWebsite.Models.Game
             maxLevel: -1,
             power: 1.5);
 
+        /// <summary>
+        /// The ancient Libertas
+        /// </summary>
         public static readonly Ancient Libertas = new Ancient(
             id: 4,
             name: "Libertas",
@@ -28,6 +37,9 @@ namespace ClickerHeroesTrackerWebsite.Models.Game
             maxLevel: -1,
             power: 1);
 
+        /// <summary>
+        /// The ancient Siyalatas
+        /// </summary>
         public static readonly Ancient Siyalatas = new Ancient(
             id: 5,
             name: "Siyalatas",
@@ -36,6 +48,9 @@ namespace ClickerHeroesTrackerWebsite.Models.Game
             maxLevel: -1,
             power: 1);
 
+        /// <summary>
+        /// The ancient Khrysos
+        /// </summary>
         public static readonly Ancient Khrysos = new Ancient(
             id: 6,
             name: "Khrysos",
@@ -44,6 +59,9 @@ namespace ClickerHeroesTrackerWebsite.Models.Game
             maxLevel: 10,
             power: 1.5);
 
+        /// <summary>
+        /// The ancient Thusia
+        /// </summary>
         public static readonly Ancient Thusia = new Ancient(
             id: 7,
             name: "Thusia",
@@ -52,6 +70,9 @@ namespace ClickerHeroesTrackerWebsite.Models.Game
             maxLevel: -1,
             power: 1.5);
 
+        /// <summary>
+        /// The ancient Mammon
+        /// </summary>
         public static readonly Ancient Mammon = new Ancient(
             id: 8,
             name: "Mammon",
@@ -60,6 +81,9 @@ namespace ClickerHeroesTrackerWebsite.Models.Game
             maxLevel: -1,
             power: 1);
 
+        /// <summary>
+        /// The ancient Mimzee
+        /// </summary>
         public static readonly Ancient Mimzee = new Ancient(
             id: 9,
             name: "Mimzee",
@@ -68,6 +92,9 @@ namespace ClickerHeroesTrackerWebsite.Models.Game
             maxLevel: -1,
             power: 1);
 
+        /// <summary>
+        /// The ancient Pluto
+        /// </summary>
         public static readonly Ancient Pluto = new Ancient(
             id: 10,
             name: "Pluto",
@@ -76,6 +103,9 @@ namespace ClickerHeroesTrackerWebsite.Models.Game
             maxLevel: -1,
             power: 1);
 
+        /// <summary>
+        /// The ancient Dogcog
+        /// </summary>
         public static readonly Ancient Dogcog = new Ancient(
             id: 11,
             name: "Dogcog",
@@ -84,6 +114,9 @@ namespace ClickerHeroesTrackerWebsite.Models.Game
             maxLevel: 25,
             power: 1);
 
+        /// <summary>
+        /// The ancient Fortuna
+        /// </summary>
         public static readonly Ancient Fortuna = new Ancient(
             id: 12,
             name: "Fortuna",
@@ -92,6 +125,9 @@ namespace ClickerHeroesTrackerWebsite.Models.Game
             maxLevel: 40,
             power: 1);
 
+        /// <summary>
+        /// The ancient Atman
+        /// </summary>
         public static readonly Ancient Atman = new Ancient(
             id: 13,
             name: "Atman",
@@ -100,6 +136,9 @@ namespace ClickerHeroesTrackerWebsite.Models.Game
             maxLevel: 25,
             power: 1.5);
 
+        /// <summary>
+        /// The ancient Dora
+        /// </summary>
         public static readonly Ancient Dora = new Ancient(
             id: 14,
             name: "Dora",
@@ -108,6 +147,9 @@ namespace ClickerHeroesTrackerWebsite.Models.Game
             maxLevel: 50,
             power: 1);
 
+        /// <summary>
+        /// The ancient Bhaal
+        /// </summary>
         public static readonly Ancient Bhaal = new Ancient(
             id: 15,
             name: "Bhaal",
@@ -116,6 +158,9 @@ namespace ClickerHeroesTrackerWebsite.Models.Game
             maxLevel: -1,
             power: 1);
 
+        /// <summary>
+        /// The ancient Morgulis
+        /// </summary>
         public static readonly Ancient Morgulis = new Ancient(
             id: 16,
             name: "Morgulis",
@@ -124,6 +169,9 @@ namespace ClickerHeroesTrackerWebsite.Models.Game
             maxLevel: -1,
             power: 0);
 
+        /// <summary>
+        /// The ancient Chronos
+        /// </summary>
         public static readonly Ancient Chronos = new Ancient(
             id: 17,
             name: "Chronos",
@@ -132,6 +180,9 @@ namespace ClickerHeroesTrackerWebsite.Models.Game
             maxLevel: -1,
             power: 1.5);
 
+        /// <summary>
+        /// The ancient Bubos
+        /// </summary>
         public static readonly Ancient Bubos = new Ancient(
             id: 18,
             name: "Bubos",
@@ -140,6 +191,9 @@ namespace ClickerHeroesTrackerWebsite.Models.Game
             maxLevel: 25,
             power: 1);
 
+        /// <summary>
+        /// The ancient Fragsworth
+        /// </summary>
         public static readonly Ancient Fragsworth = new Ancient(
             id: 19,
             name: "Fragsworth",
@@ -148,6 +202,9 @@ namespace ClickerHeroesTrackerWebsite.Models.Game
             maxLevel: -1,
             power: 1);
 
+        /// <summary>
+        /// The ancient Vaagur
+        /// </summary>
         public static readonly Ancient Vaagur = new Ancient(
             id: 20,
             name: "Vaagur",
@@ -156,6 +213,9 @@ namespace ClickerHeroesTrackerWebsite.Models.Game
             maxLevel: 15,
             power: 1);
 
+        /// <summary>
+        /// The ancient Kumawakamaru
+        /// </summary>
         public static readonly Ancient Kumawakamaru = new Ancient(
             id: 21,
             name: "Kumawakamaru",
@@ -164,6 +224,9 @@ namespace ClickerHeroesTrackerWebsite.Models.Game
             maxLevel: 5,
             power: 1);
 
+        /// <summary>
+        /// The ancient Chawedo
+        /// </summary>
         public static readonly Ancient Chawedo = new Ancient(
             id: 22,
             name: "Chawedo",
@@ -172,6 +235,9 @@ namespace ClickerHeroesTrackerWebsite.Models.Game
             maxLevel: 30,
             power: 1);
 
+        /// <summary>
+        /// The ancient Hecatoncheir
+        /// </summary>
         public static readonly Ancient Hecatoncheir = new Ancient(
             id: 23,
             name: "Hecatoncheir",
@@ -180,6 +246,9 @@ namespace ClickerHeroesTrackerWebsite.Models.Game
             maxLevel: 30,
             power: 1);
 
+        /// <summary>
+        /// The ancient Berserker
+        /// </summary>
         public static readonly Ancient Berserker = new Ancient(
             id: 24,
             name: "Berserker",
@@ -188,6 +257,9 @@ namespace ClickerHeroesTrackerWebsite.Models.Game
             maxLevel: 30,
             power: 1);
 
+        /// <summary>
+        /// The ancient Sniperino
+        /// </summary>
         public static readonly Ancient Sniperino = new Ancient(
             id: 25,
             name: "Sniperino",
@@ -196,6 +268,9 @@ namespace ClickerHeroesTrackerWebsite.Models.Game
             maxLevel: 30,
             power: 1);
 
+        /// <summary>
+        /// The ancient Kleptos
+        /// </summary>
         public static readonly Ancient Kleptos = new Ancient(
             id: 26,
             name: "Kleptos",
@@ -204,6 +279,9 @@ namespace ClickerHeroesTrackerWebsite.Models.Game
             maxLevel: 30,
             power: 1);
 
+        /// <summary>
+        /// The ancient Energon
+        /// </summary>
         public static readonly Ancient Energon = new Ancient(
             id: 27,
             name: "Energon",
@@ -212,6 +290,9 @@ namespace ClickerHeroesTrackerWebsite.Models.Game
             maxLevel: 30,
             power: 1);
 
+        /// <summary>
+        /// The ancient Argaiv
+        /// </summary>
         public static readonly Ancient Argaiv = new Ancient(
             id: 28,
             name: "Argaiv",
@@ -220,6 +301,9 @@ namespace ClickerHeroesTrackerWebsite.Models.Game
             maxLevel: -1,
             power: 1);
 
+        /// <summary>
+        /// The ancient Juggernaut
+        /// </summary>
         public static readonly Ancient Juggernaut = new Ancient(
             id: 29,
             name: "Juggernaut",
@@ -228,6 +312,9 @@ namespace ClickerHeroesTrackerWebsite.Models.Game
             maxLevel: -1,
             power: 1.5);
 
+        /// <summary>
+        /// The ancient Iris
+        /// </summary>
         public static readonly Ancient Iris = new Ancient(
             id: 30,
             name: "Iris",
@@ -236,6 +323,9 @@ namespace ClickerHeroesTrackerWebsite.Models.Game
             maxLevel: -1,
             power: 1.5);
 
+        /// <summary>
+        /// The ancient Revolc
+        /// </summary>
         public static readonly Ancient Revolc = new Ancient(
             id: 31,
             name: "Revolc",
@@ -263,6 +353,9 @@ namespace ClickerHeroesTrackerWebsite.Models.Game
             Ancients.Add(this.Id, this);
         }
 
+        /// <summary>
+        /// Gets a collection or all ancients in the game.
+        /// </summary>
         public static IEnumerable<Ancient> All
         {
             get
@@ -271,18 +364,40 @@ namespace ClickerHeroesTrackerWebsite.Models.Game
             }
         }
 
+        /// <summary>
+        /// Gets the ancient id
+        /// </summary>
         public int Id { get; }
 
+        /// <summary>
+        /// Gets the ancient name
+        /// </summary>
         public string Name { get; }
 
+        /// <summary>
+        /// Gets the ancient's title
+        /// </summary>
         public string Title { get; }
 
+        /// <summary>
+        /// Gets the ancient's description
+        /// </summary>
         public string Description { get; }
 
+        /// <summary>
+        /// Gets the maximum level for the ancient, or -1 if it can level without limit.
+        /// </summary>
         public int MaxLevel { get; }
 
+        /// <summary>
+        /// Gets the power value used to calculate the cost of the ancient
+        /// </summary>
         public double Power { get; }
 
+        /// <summary>
+        /// Gets an ancient by id
+        /// </summary>
+        /// <returns>The ancient with the provided id, or null if there is none</returns>
         public static Ancient Get(int id)
         {
             Ancient ancient;
