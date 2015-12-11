@@ -6,6 +6,9 @@ namespace ClickerHeroesTrackerWebsite.Models.Game
 {
     using System.Collections.Generic;
 
+    /// <summary>
+    /// Represents an item (relic) type. Relics possess attributes related to a specific ancient.
+    /// </summary>
     public static class ItemTypes
     {
         private static Dictionary<int, Ancient> itemTypeMap = new Dictionary<int, Ancient>
@@ -36,6 +39,10 @@ namespace ClickerHeroesTrackerWebsite.Models.Game
             { 25, Ancient.Solomon }
         };
 
+        /// <summary>
+        /// Gets the <see cref="Ancient"/> associated with the item type's attributes.
+        /// </summary>
+        /// <returns>The ancient that represents the item type, or null if there isn't one.</returns>
         public static Ancient GetAncient(int itemType)
         {
             Ancient ancient;

@@ -7,9 +7,15 @@ namespace ClickerHeroesTrackerWebsite.Models.SaveData
     using System.Collections.Generic;
     using Newtonsoft.Json;
 
+    /// <summary>
+    /// Save data envelope for the <see cref="AncientData"/>.
+    /// </summary>
     [JsonObject]
     public class AncientsData
     {
+        /// <summary>
+        /// Gets or sets a collection of <see cref="AncientData"/>, keyed on ancient id.
+        /// </summary>
         [JsonProperty(PropertyName = "ancients", Required = Required.Always)]
         public IDictionary<int, AncientData> Ancients { get; set; }
     }

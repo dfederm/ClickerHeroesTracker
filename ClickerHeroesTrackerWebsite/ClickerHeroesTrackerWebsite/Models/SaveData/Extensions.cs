@@ -8,21 +8,13 @@ namespace ClickerHeroesTrackerWebsite.Models.SaveData
     using System.Collections.Generic;
     using ClickerHeroesTrackerWebsite.Models.Game;
 
-    public static class Extensions
+    internal static class Extensions
     {
         public static long GetAncientLevel(this AncientsData ancientsData, Ancient ancient)
         {
             AncientData ancientData;
             return ancientsData.Ancients.TryGetValue(ancient.Id, out ancientData)
                 ? ancientData.Level
-                : 0;
-        }
-
-        public static int GetHeroLevel(this HeroesData heroesData, Hero hero)
-        {
-            HeroData heroData;
-            return heroesData.Heroes.TryGetValue(hero.Id, out heroData)
-                ? heroData.Level
                 : 0;
         }
 

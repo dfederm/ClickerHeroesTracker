@@ -6,6 +6,9 @@ namespace ClickerHeroesTrackerWebsite.Models.Game
 {
     using System.Collections.Generic;
 
+    /// <summary>
+    /// Represents an upgrade for a hero in the game.
+    /// </summary>
     public class HeroUpgrade
     {
         private static Dictionary<int, HeroUpgrade> upgrades = new Dictionary<int, HeroUpgrade>();
@@ -76,6 +79,9 @@ namespace ClickerHeroesTrackerWebsite.Models.Game
             maximumDamageMultiplier *= damageMultiplier;
         }
 
+        /// <summary>
+        /// Gets the maximum overall damage multiplier granted by hero upgrades.
+        /// </summary>
         public static double MaximumDamageMultiplier
         {
             get
@@ -84,10 +90,20 @@ namespace ClickerHeroesTrackerWebsite.Models.Game
             }
         }
 
+        /// <summary>
+        /// Gets the hero upgrade id
+        /// </summary>
         public int Id { get; }
 
+        /// <summary>
+        /// Gets the overall damage multipplier this hero upgrade grants.
+        /// </summary>
         public double DamageMultiplier { get; }
 
+        /// <summary>
+        /// Gets a hero upgrade by id.
+        /// </summary>
+        /// <returns>The hero upgrade with the provided id, or null if there isn't one.</returns>
         public static HeroUpgrade Get(int id)
         {
             HeroUpgrade upgrade;

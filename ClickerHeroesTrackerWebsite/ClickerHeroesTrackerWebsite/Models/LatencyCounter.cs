@@ -7,7 +7,7 @@ namespace ClickerHeroesTrackerWebsite.Models
     using System.Diagnostics;
     using System.Web;
 
-    public class LatencyCounter
+    internal sealed class LatencyCounter
     {
         private readonly string name;
 
