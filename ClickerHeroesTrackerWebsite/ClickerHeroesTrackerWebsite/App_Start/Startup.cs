@@ -24,6 +24,9 @@ namespace ClickerHeroesTrackerWebsite
         {
             var container = ConfigureContainer();
 
+            // Needs to run first (and last) as it will end up disposing all objects using OwinContextLifetimeManager
+            app.Use<UnityPerOwinContextOwinMiddleware>();
+
             // We want to start measuring latency as soon as possible during a request.
             app.Use<UnityOwinMiddleware<MeasureLatencyMiddleware>>(container);
 

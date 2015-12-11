@@ -11,12 +11,12 @@ namespace ClickerHeroesTrackerWebsite.Unity
 
     public class OwinContextLifetimeManager : LifetimeManager
     {
-        private readonly string key = Guid.NewGuid().ToString();
+        private readonly object key = new object();
 
         /// <inheritdoc/>
         public override object GetValue()
         {
-            var environment = GetOwinEnvironment();
+            var environment = UnityPerOwinContextOwinMiddleware.GetUnityLifetimeCache();
             if (environment == null)
             {
                 return null;
@@ -29,7 +29,7 @@ namespace ClickerHeroesTrackerWebsite.Unity
         /// <inheritdoc/>
         public override void SetValue(object newValue)
         {
-            var environment = GetOwinEnvironment();
+            var environment = UnityPerOwinContextOwinMiddleware.GetUnityLifetimeCache();
             if (environment == null)
             {
                 return;
@@ -41,7 +41,7 @@ namespace ClickerHeroesTrackerWebsite.Unity
         /// <inheritdoc/>
         public override void RemoveValue()
         {
-            var environment = GetOwinEnvironment();
+            var environment = UnityPerOwinContextOwinMiddleware.GetUnityLifetimeCache();
             if (environment == null)
             {
                 return;
@@ -58,17 +58,6 @@ namespace ClickerHeroesTrackerWebsite.Unity
 
                 environment.Remove(this.key);
             }
-        }
-
-        private static IDictionary<string, object> GetOwinEnvironment()
-        {
-            var httpContext = HttpContext.Current;
-            if (httpContext == null)
-            {
-                return null;
-            }
-
-            return httpContext.GetOwinContext().Environment;
         }
     }
 }

@@ -352,6 +352,7 @@
     <Compile Include="Unity\UnityControllerActivator.cs" />
     <Compile Include="Unity\UnityHttpControllerActivator.cs" />
     <Compile Include="Unity\UnityOwinMiddleware.cs" />
+    <Compile Include="Unity\UnityPerOwinContextOwinMiddleware.cs" />
     <Compile Include="Utility\DisposableBase.cs" />
     <Compile Include="Views\HtmlHelpers.cs" />
   </ItemGroup>
