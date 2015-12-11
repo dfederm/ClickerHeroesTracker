@@ -30,9 +30,14 @@ namespace ClickerHeroesTrackerWebsite.Instrumentation
         public override Task Invoke(IOwinContext context)
         {
             var user = context.Request.User.Identity;
+            var userId = user.GetUserId();
+            if (userId != null)
+            {
+                this.telemetryClient.Context.User.AuthenticatedUserId = userId;
+            }
+
             var properties = new Dictionary<string, string>
             {
-                { "UserId", user.GetUserId() ?? "<anonymous>" },
                 { "UserName", user.GetUserName() ?? "<anonymous>" },
                 { "Referrer", context.Request.Headers["Referer"] ?? "<none>" },
             };
