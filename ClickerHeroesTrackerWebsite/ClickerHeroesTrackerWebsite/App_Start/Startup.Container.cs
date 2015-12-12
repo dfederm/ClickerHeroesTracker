@@ -14,6 +14,7 @@ namespace ClickerHeroesTrackerWebsite
     using Microsoft.Practices.Unity;
     using Microsoft.Practices.Unity.Mvc;
     using Models.Settings;
+    using UnityLib = Microsoft.Practices.Unity;
 
     /// <summary>
     /// Configure the Unity container
@@ -35,8 +36,11 @@ namespace ClickerHeroesTrackerWebsite
             FilterProviders.Providers.Remove(FilterProviders.Providers.OfType<FilterAttributeFilterProvider>().First());
             FilterProviders.Providers.Add(new UnityFilterAttributeFilterProvider(container));
 
-            // Mvc and Web Api Controllers should be created using Unity
-            DependencyResolver.SetResolver(new UnityDependencyResolver(container));
+            // Use unity to resolve Mvc dependencies
+            DependencyResolver.SetResolver(new UnityLib.Mvc.UnityDependencyResolver(container));
+
+            // Use unity to resolve WebApi dependencies
+            container.Resolve<HttpConfiguration>().DependencyResolver = new UnityLib.WebApi.UnityDependencyResolver(container);
 
             return container;
         }
