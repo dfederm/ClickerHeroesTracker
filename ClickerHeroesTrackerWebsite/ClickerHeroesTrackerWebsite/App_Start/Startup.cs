@@ -4,9 +4,12 @@
 
 namespace ClickerHeroesTrackerWebsite
 {
+    using System;
     using System.Web.Http;
     using ClickerHeroesTrackerWebsite.Instrumentation;
     using ClickerHeroesTrackerWebsite.Unity;
+    using Configuration;
+    using Microsoft.ApplicationInsights.Extensibility;
     using Microsoft.Practices.Unity;
     using Models.Settings;
     using Owin;
@@ -41,6 +44,13 @@ namespace ClickerHeroesTrackerWebsite
 
             // Configure Mvc
             ConfigureMvc(container);
+
+            // Only allow telemetry in production
+            var environmentProvider = container.Resolve<IEnvironmentProvider>();
+            if (!environmentProvider.Environment.Equals("Production", StringComparison.OrdinalIgnoreCase))
+            {
+                TelemetryConfiguration.Active.DisableTelemetry = true;
+            }
         }
     }
 }
