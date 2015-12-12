@@ -38,6 +38,9 @@ namespace ClickerHeroesTrackerWebsite
 
             // Routing middleware
             ConfigureWebApi(app, container.Resolve<HttpConfiguration>());
+
+            // Configure Mvc
+            ConfigureMvc(container);
         }
     }
 }

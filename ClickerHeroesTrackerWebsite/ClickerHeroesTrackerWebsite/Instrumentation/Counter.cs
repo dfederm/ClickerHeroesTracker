@@ -23,5 +23,15 @@ namespace ClickerHeroesTrackerWebsite.Instrumentation
         /// The latency waiting on external dependencies, like SQL.
         /// </summary>
         Dependency,
+
+        /// <summary>
+        /// The Mvc action latency
+        /// </summary>
+        Action,
+
+        /// <summary>
+        /// The Mvc result latency
+        /// </summary>
+        Result,
     }
 }

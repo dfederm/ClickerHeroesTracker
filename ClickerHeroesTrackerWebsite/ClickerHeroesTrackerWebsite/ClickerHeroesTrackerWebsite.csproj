@@ -251,12 +251,10 @@
     <Compile Include="App_Start\ApplicationRoleManager.cs" />
     <Compile Include="App_Start\ApplicationSignInManager.cs" />
     <Compile Include="App_Start\ApplicationUserManager.cs" />
-    <Compile Include="App_Start\BundleConfig.cs" />
     <Compile Include="App_Start\EmailService.cs" />
-    <Compile Include="App_Start\FilterConfig.cs" />
-    <Compile Include="App_Start\RouteConfig.cs" />
     <Compile Include="App_Start\Startup.Auth.cs" />
     <Compile Include="App_Start\Startup.Container.cs" />
+    <Compile Include="App_Start\Startup.Mvc.cs" />
     <Compile Include="App_Start\Startup.WebApi.cs" />
     <Compile Include="Configuration\EnvironmentProvider.cs" />
     <Compile Include="Configuration\IEnvironmentProvider.cs" />
@@ -272,11 +270,8 @@
     <Compile Include="Database\IDatabaseCommand.cs" />
     <Compile Include="Database\IDatabaseCommandFactory.cs" />
     <Compile Include="Database\DatabaseCommandFactory.cs" />
-    <Compile Include="Filters\HandleAndInstrumentErrorFilter.cs" />
-    <Compile Include="Filters\MeasureLatencyFilter.cs" />
-    <Compile Include="Global.asax.cs">
-      <DependentUpon>Global.asax</DependentUpon>
-    </Compile>
+    <Compile Include="Instrumentation\HandleAndInstrumentErrorFilter.cs" />
+    <Compile Include="Instrumentation\MeasureLatencyFilter.cs" />
     <Compile Include="Instrumentation\Counter.cs" />
     <Compile Include="Instrumentation\CounterProvider.cs" />
     <Compile Include="Instrumentation\ICounterProvider.cs" />
@@ -302,7 +297,6 @@
     <Compile Include="Models\SaveData\SavedGame.cs" />
     <Compile Include="Models\Settings\IUserSettings.cs" />
     <Compile Include="Models\Settings\IUserSettingsProvider.cs" />
-    <Compile Include="Models\LatencyCounter.cs" />
     <Compile Include="Models\PlayStyle.cs" />
     <Compile Include="Models\Dashboard\DashboardViewModel.cs" />
     <Compile Include="Models\Dashboard\Graph\Align.cs" />
@@ -346,7 +340,6 @@
     <Compile Include="Models\SaveData\AncientsData.cs" />
     <Compile Include="Models\Calculator\HeroLevelSummaryViewModel.cs" />
     <Compile Include="Models\Calculator\SuggestedAncientLevelsViewModel.cs" />
-    <Compile Include="Models\Telemetry.cs" />
     <Compile Include="Models\Upload\UploadViewModel.cs" />
     <Compile Include="Models\Settings\UserSettings.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -363,7 +356,6 @@
     <Content Include="Content\bootstrap.min.css" />
     <Content Include="favicon.ico" />
     <Content Include="fonts\glyphicons-halflings-regular.svg" />
-    <Content Include="Global.asax" />
     <Content Include="Content\Site.css" />
     <Content Include="Models\Game\Population.txt" />
     <Content Include="ApplicationInsights.config">
@@ -468,6 +460,7 @@
     </Content>
     <AdditionalFiles Include="..\Build\stylecop.json">
       <Link>stylecop.json</Link>
+      <Visible>false</Visible>
     </AdditionalFiles>
   </ItemGroup>
   <ItemGroup>

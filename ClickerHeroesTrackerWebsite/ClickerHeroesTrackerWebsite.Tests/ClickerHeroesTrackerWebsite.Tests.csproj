@@ -134,6 +134,7 @@
     <None Include="packages.config" />
     <AdditionalFiles Include="..\Build\stylecop.json">
       <Link>stylecop.json</Link>
+      <Visible>false</Visible>
     </AdditionalFiles>
   </ItemGroup>
   <ItemGroup>

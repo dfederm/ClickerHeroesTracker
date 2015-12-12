@@ -2,18 +2,29 @@
 // Copyright (c) Clicker Heroes Tracker. All rights reserved.
 // </copyright>
 
-namespace ClickerHeroesTrackerWebsite.Filters
+namespace ClickerHeroesTrackerWebsite.Instrumentation
 {
     using System;
     using System.Web;
     using System.Web.Mvc;
-    using Models;
+    using Microsoft.ApplicationInsights;
 
     /// <summary>
     /// An exception filter which handles and logs exceptions. Based on <see cref="HandleErrorAttribute"/>.
     /// </summary>
     public sealed class HandleAndInstrumentErrorFilter : IExceptionFilter
     {
+        // Must be a Func since the filter is a singleton and ICounterProvider has PerRequest lifetime.
+        private readonly Func<TelemetryClient> telemetryClientResolver;
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="HandleAndInstrumentErrorFilter"/> class.
+        /// </summary>
+        public HandleAndInstrumentErrorFilter(Func<TelemetryClient> telemetryClientResolver)
+        {
+            this.telemetryClientResolver = telemetryClientResolver;
+        }
+
         /// <inheritdoc/>
         public void OnException(ExceptionContext filterContext)
         {
@@ -43,7 +54,7 @@ namespace ClickerHeroesTrackerWebsite.Filters
             }
 
             // Instrument
-            Telemetry.Client.TrackException(exception);
+            this.telemetryClientResolver().TrackException(exception);
 
             // Return the error view
             var model = new HandleErrorInfo(
