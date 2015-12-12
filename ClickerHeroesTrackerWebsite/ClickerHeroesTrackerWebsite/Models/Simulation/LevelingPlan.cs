@@ -9,6 +9,9 @@ namespace ClickerHeroesTrackerWebsite.Models.Simulation
     using Game;
     using SaveData;
 
+    /// <summary>
+    /// Computes simulation data for a specific set of hero gilds and Argaiv and Dogcog factors.
+    /// </summary>
     public sealed class LevelingPlan
     {
         private HeroesData heroesData;
@@ -26,6 +29,9 @@ namespace ClickerHeroesTrackerWebsite.Models.Simulation
 
         private double currentCost;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="LevelingPlan"/> class.
+        /// </summary>
         public LevelingPlan(HeroesData heroesData, double argaivFactor, double dogcogFactor)
         {
             this.heroesData = heroesData;
@@ -152,6 +158,11 @@ namespace ClickerHeroesTrackerWebsite.Models.Simulation
             }
         }
 
+        /// <summary>
+        /// Get the number of souls attainable with the given amount of gold.
+        /// This just follows the plan until the gold is expended
+        /// </summary>
+        /// <returns>The number of souls attainable with this plan and the given gold</returns>
         public double GetOptimalHeroSouls(double gold)
         {
             if (gold < Hero.Frostleaf.Cost)
@@ -207,8 +218,11 @@ namespace ClickerHeroesTrackerWebsite.Models.Simulation
             */
         }
 
-        // Get damage attainable with the given amount of gold
-        // This just follows the plan until the gold is expended
+        /// <summary>
+        /// Get damage attainable with the given amount of gold.
+        /// This just follows the plan until the gold is expended
+        /// </summary>
+        /// <returns>The damage attainable with this plan and the given gold</returns>
         public double GetDamage(double gold)
         {
             while (this.planPos < this.plan.Count && gold >= this.plan[this.planPos].Cost)
@@ -235,7 +249,10 @@ namespace ClickerHeroesTrackerWebsite.Models.Simulation
             }
         }
 
-        // Compute DPS component of the hero at the given level
+        /// <summary>
+        /// Compute DPS component of the hero at the given level
+        /// </summary>
+        /// <returns>The dps of the hero at the given level.</returns>
         private double Damage(Hero hero, int level)
         {
             var x10 = Math.Min(Math.Floor(level / 1000d), 3d);

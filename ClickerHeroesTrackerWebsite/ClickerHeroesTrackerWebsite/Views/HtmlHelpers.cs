@@ -5,54 +5,67 @@
 namespace ClickerHeroesTrackerWebsite.Views
 {
     using System;
-    using System.Collections.Generic;
     using System.IO;
-    using System.Linq;
     using System.Web;
     using System.Web.Mvc;
     using Utility;
 
+    /// <summary>
+    /// <see cref="HtmlHelper"/> extensions to be used in Razor views.
+    /// </summary>
     public static class HtmlHelpers
     {
+        /// <summary>
+        /// Begins a block which should be buffered to the common script block.
+        /// </summary>
+        /// <remarks>
+        /// <see cref="PageScripts(HtmlHelper)"/> must be called sometime after all calls to this method.
+        /// </remarks>
+        /// <returns>A block that scopes the operation</returns>
         public static IDisposable BeginScripts(this HtmlHelper helper)
         {
-            return new ScriptBlock((WebViewPage)helper.ViewDataContainer);
+            return new ScriptBlock(
+                helper.ViewContext.HttpContext,
+                (WebViewPage)helper.ViewDataContainer);
         }
 
+        /// <summary>
+        /// Writes all content previously deferred using <see cref="BeginScripts(HtmlHelper)"/>.
+        /// </summary>
+        /// <returns>A string of the deferred content</returns>
         public static MvcHtmlString PageScripts(this HtmlHelper helper)
         {
-            return MvcHtmlString.Create(string.Join(Environment.NewLine, ScriptBlock.PageScripts.Select(s => s.ToString())));
+            var writer = ScriptBlock.GetWriter(helper.ViewContext.HttpContext);
+            return MvcHtmlString.Create(writer.ToString());
         }
 
-        /* Taken from: https://jadnb.wordpress.com/2011/02/16/rendering-scripts-from-partial-views-at-the-end-in-mvc/ */
+        // Taken from: https://jadnb.wordpress.com/2011/02/16/rendering-scripts-from-partial-views-at-the-end-in-mvc/
         private class ScriptBlock : DisposableBase
         {
             private const string ScriptsKey = "scripts";
 
-            private WebViewPage webPageBase;
+            private readonly WebViewPage webPageBase;
 
-            public ScriptBlock(WebViewPage webPageBase)
+            public ScriptBlock(HttpContextBase httpContext, WebViewPage webPageBase)
             {
                 this.webPageBase = webPageBase;
-                this.webPageBase.OutputStack.Push(new StringWriter());
+                this.webPageBase.OutputStack.Push(GetWriter(httpContext));
             }
 
-            public static List<string> PageScripts
+            public static StringWriter GetWriter(HttpContextBase httpContext)
             {
-                get
+                var writer = httpContext.Items[ScriptsKey] as StringWriter;
+                if (writer == null)
                 {
-                    if (HttpContext.Current.Items[ScriptsKey] == null)
-                    {
-                        HttpContext.Current.Items[ScriptsKey] = new List<string>();
-                    }
-
-                    return (List<string>)HttpContext.Current.Items[ScriptsKey];
+                    httpContext.Items[ScriptsKey] = writer = new StringWriter();
                 }
+
+                return writer;
             }
 
             protected override void Dispose(bool isDisposing)
             {
-                PageScripts.Add(((StringWriter)this.webPageBase.OutputStack.Pop()).ToString());
+                this.webPageBase.OutputStack.Pop();
             }
         }
     }

@@ -107,6 +107,10 @@
       <HintPath>..\packages\Unity.4.0.1\lib\net45\Microsoft.Practices.Unity.Configuration.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="Microsoft.Practices.Unity.Mvc, Version=4.0.0.0, Culture=neutral, PublicKeyToken=6d32ff45e0ccc69f, processorArchitecture=MSIL">
+      <HintPath>..\packages\Unity.Mvc.4.0.1\lib\net45\Microsoft.Practices.Unity.Mvc.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="Microsoft.Practices.Unity.RegistrationByConvention, Version=4.0.0.0, Culture=neutral, PublicKeyToken=6d32ff45e0ccc69f, processorArchitecture=MSIL">
       <HintPath>..\packages\Unity.4.0.1\lib\net45\Microsoft.Practices.Unity.RegistrationByConvention.dll</HintPath>
       <Private>True</Private>
@@ -348,11 +352,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="App_Start\Startup.cs" />
     <Compile Include="Models\Settings\UserSettingsFlushingMiddleware.cs" />
-    <Compile Include="Unity\OwinContextLifetimeManager.cs" />
-    <Compile Include="Unity\UnityControllerActivator.cs" />
-    <Compile Include="Unity\UnityHttpControllerActivator.cs" />
     <Compile Include="Unity\UnityOwinMiddleware.cs" />
-    <Compile Include="Unity\UnityPerOwinContextOwinMiddleware.cs" />
     <Compile Include="Utility\DisposableBase.cs" />
     <Compile Include="Views\HtmlHelpers.cs" />
   </ItemGroup>
@@ -463,7 +463,9 @@
     <Analyzer Include="..\packages\System.Security.Cryptography.Hashing.Algorithms.Analyzers.1.1.0\analyzers\dotnet\cs\System.Security.Cryptography.Hashing.Algorithms.CSharp.Analyzers.dll" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="packages.config" />
+    <Content Include="packages.config">
+      <SubType>Designer</SubType>
+    </Content>
     <AdditionalFiles Include="..\Build\stylecop.json">
       <Link>stylecop.json</Link>
     </AdditionalFiles>

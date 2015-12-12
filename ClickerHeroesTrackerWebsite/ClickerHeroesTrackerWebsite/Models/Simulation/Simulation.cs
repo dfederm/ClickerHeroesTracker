@@ -9,6 +9,9 @@ namespace ClickerHeroesTrackerWebsite.Models.Simulation
     using ClickerHeroesTrackerWebsite.Models.Game;
     using ClickerHeroesTrackerWebsite.Models.SaveData;
 
+    /// <summary>
+    /// Simulates a run.
+    /// </summary>
     public class Simulation
     {
         private static Dictionary<CooldownType, Ancient[]> cooldownTypes = new Dictionary<CooldownType, Ancient[]>
@@ -45,17 +48,23 @@ namespace ClickerHeroesTrackerWebsite.Models.Simulation
 
         private readonly SavedGame savedGame;
 
-        private readonly IDictionary<CooldownType, Activity> activities;
+        private readonly IDictionary<CooldownType, CooldownActivity> activities;
 
         private readonly IDictionary<Ancient, int> itemLevels;
 
-        public Simulation(SavedGame savedGame, IDictionary<CooldownType, Activity> activities)
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Simulation"/> class.
+        /// </summary>
+        public Simulation(SavedGame savedGame, IDictionary<CooldownType, CooldownActivity> activities)
         {
             this.savedGame = savedGame;
             this.activities = activities;
             this.itemLevels = this.savedGame.ItemsData.GetItemLevels();
         }
 
+        /// <summary>
+        /// The cooldown type the user plans to use.
+        /// </summary>
         public enum CooldownType
         {
             /// <summary>
@@ -79,6 +88,10 @@ namespace ClickerHeroesTrackerWebsite.Models.Simulation
             None
         }
 
+        /// <summary>
+        /// Runs the simulation.
+        /// </summary>
+        /// <returns>The simulation result</returns>
         public SimulateResult Run()
         {
             var factors = this.GetFactors();
@@ -463,21 +476,39 @@ namespace ClickerHeroesTrackerWebsite.Models.Simulation
             return achievementMultiplier;
         }
 
-        public sealed class Activity
+        /// <summary>
+        /// Represents a cooldown activity
+        /// </summary>
+        public sealed class CooldownActivity
         {
-            public Activity(int count, int clickRate)
+            /// <summary>
+            /// Initializes a new instance of the <see cref="CooldownActivity"/> class.
+            /// </summary>
+            public CooldownActivity(int count, int clickRate)
             {
                 this.Count = count;
                 this.ClickRate = clickRate;
             }
 
+            /// <summary>
+            /// Gets the number of times per 30 minutes the cooldown will be used.
+            /// </summary>
             public int Count { get; }
 
+            /// <summary>
+            /// Gets the number of clicks per second during this cooldown.
+            /// </summary>
             public int ClickRate { get; }
         }
 
+        /// <summary>
+        /// The result of the simulation.
+        /// </summary>
         public sealed class SimulateResult
         {
+            /// <summary>
+            /// Initializes a new instance of the <see cref="SimulateResult"/> class.
+            /// </summary>
             public SimulateResult(short level, double time, double souls, double ratio)
             {
                 this.Level = level;
@@ -486,12 +517,27 @@ namespace ClickerHeroesTrackerWebsite.Models.Simulation
                 this.Ratio = ratio;
             }
 
+            /// <summary>
+            /// Gets the level the simulation made it to.
+            /// </summary>
             public short Level { get; }
 
+            /// <summary>
+            /// Gets the time it will take to get to the simulated level.
+            /// </summary>
             public double Time { get; }
 
+            /// <summary>
+            /// Gets the expected total number of souls expected at the simulated level.
+            /// </summary>
             public double Souls { get; }
 
+            /// <summary>
+            /// Gets the ratio of expected souls to the expected time.
+            /// </summary>
+            /// <remarks>
+            /// This is used to determine the efficiency of a simulation.
+            /// </remarks>
             public double Ratio { get; }
         }
 

@@ -102,8 +102,7 @@
     <Rule Id="CA1504" Action="Warning" />
     <Rule Id="CA1505" Action="Warning" />
     <Rule Id="CA1506" Action="Warning" />
-    <!-- BUGBUG 66 - Re-enable CS1591 -->
-    <Rule Id="CS1591" Action="None" />
+    <Rule Id="CS1591" Action="Warning" />
     <Rule Id="CA1600" Action="Warning" />
     <Rule Id="CA1601" Action="Warning" />
     <Rule Id="CA1700" Action="Warning" />
@@ -245,8 +244,7 @@
     <Rule Id="CA5122" Action="Warning" />
   </Rules>
   <Rules AnalyzerId="Microsoft.CodeAnalysis.CSharp" RuleNamespace="Microsoft.CodeAnalysis.CSharp">
-    <!-- BUGBUG 66 - Re-enable CS8019 -->
-    <Rule Id="CS8019" Action="None" />
+    <Rule Id="CS8019" Action="Warning" />
     <Rule Id="CS8020" Action="Warning" />
     <Rule Id="CS8040" Action="Warning" />
   </Rules>
@@ -258,12 +256,10 @@
     <Rule Id="IDE0005" Action="None" />
   </Rules>
   <Rules AnalyzerId="StyleCop.Analyzers" RuleNamespace="StyleCop.Analyzers">
-    <!-- BUGBUG 66 - Re-enable SA1210 -->
-    <Rule Id="SA1210" Action="None" />
+    <Rule Id="SA1210" Action="Warning" />
     <Rule Id="SA1305" Action="Warning" />
     <Rule Id="SA1412" Action="Warning" />
-    <!-- BUGBUG 66 - Re-enable SA1600 -->
-    <Rule Id="SA1600" Action="None" />
+    <Rule Id="SA1600" Action="Warning" />
     <Rule Id="SA1611" Action="None" />
   </Rules>
   <Rules AnalyzerId="System.Runtime.Analyzers" RuleNamespace="System.Runtime.Analyzers">

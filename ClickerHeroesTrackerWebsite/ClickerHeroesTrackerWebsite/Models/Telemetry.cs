@@ -7,7 +7,7 @@ namespace ClickerHeroesTrackerWebsite.Models
     using System.Web;
     using Microsoft.ApplicationInsights;
 
-    public static class Telemetry
+    internal static class Telemetry
     {
         // BUGBUG 56 - Retrieve via DI
         public static TelemetryClient Client

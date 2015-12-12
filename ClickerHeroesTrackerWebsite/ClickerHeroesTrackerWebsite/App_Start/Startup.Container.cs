@@ -4,16 +4,16 @@
 
 namespace ClickerHeroesTrackerWebsite
 {
+    using System.Linq;
     using System.Web.Http;
-    using System.Web.Http.Dispatcher;
     using System.Web.Mvc;
     using Configuration;
     using Database;
     using Instrumentation;
     using Microsoft.ApplicationInsights;
     using Microsoft.Practices.Unity;
+    using Microsoft.Practices.Unity.Mvc;
     using Models.Settings;
-    using Unity;
 
     /// <summary>
     /// Configure the Unity container
@@ -31,12 +31,12 @@ namespace ClickerHeroesTrackerWebsite
             // Container registrations
             RegisterTypes(container);
 
-            // MVC Controllers should be created by Unity
-            ControllerBuilder.Current.SetControllerFactory(new DefaultControllerFactory(new UnityControllerActivator(container)));
+            // Inject filters using Unity
+            FilterProviders.Providers.Remove(FilterProviders.Providers.OfType<FilterAttributeFilterProvider>().First());
+            FilterProviders.Providers.Add(new UnityFilterAttributeFilterProvider(container));
 
-            // Web Api controllers should be created by Unity
-            var httpConfiguration = container.Resolve<HttpConfiguration>();
-            httpConfiguration.Services.Replace(typeof(IHttpControllerActivator), new UnityHttpControllerActivator(container));
+            // Mvc and Web Api Controllers should be created using Unity
+            DependencyResolver.SetResolver(new UnityDependencyResolver(container));
 
             return container;
         }
@@ -47,11 +47,11 @@ namespace ClickerHeroesTrackerWebsite
             container.RegisterType<HttpConfiguration>(new ContainerControlledLifetimeManager(), new InjectionFactory(_ => new HttpConfiguration()));
             container.RegisterType<IEnvironmentProvider, EnvironmentProvider>(new ContainerControlledLifetimeManager());
 
-            // Owin Context (per request) registrations
-            container.RegisterType<ICounterProvider, CounterProvider>(new OwinContextLifetimeManager());
-            container.RegisterType<IDatabaseCommandFactory, DatabaseCommandFactory>(new OwinContextLifetimeManager());
-            container.RegisterType<IUserSettingsProvider, UserSettingsProvider>(new OwinContextLifetimeManager());
-            container.RegisterType<TelemetryClient>(new OwinContextLifetimeManager());
+            // Per request registrations
+            container.RegisterType<ICounterProvider, CounterProvider>(new PerRequestLifetimeManager());
+            container.RegisterType<IDatabaseCommandFactory, DatabaseCommandFactory>(new PerRequestLifetimeManager());
+            container.RegisterType<IUserSettingsProvider, UserSettingsProvider>(new PerRequestLifetimeManager());
+            container.RegisterType<TelemetryClient>(new PerRequestLifetimeManager());
         }
     }
 }
