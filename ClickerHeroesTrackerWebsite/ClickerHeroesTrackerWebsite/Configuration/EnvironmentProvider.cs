@@ -4,6 +4,7 @@
 
 namespace ClickerHeroesTrackerWebsite.Configuration
 {
+    using System;
     using System.Configuration;
     using System.IO;
     using System.Web.Hosting;
@@ -21,7 +22,7 @@ namespace ClickerHeroesTrackerWebsite.Configuration
         public EnvironmentProvider()
         {
             // This is a slot setting set in the Azure portal.
-            this.Environment = ConfigurationManager.AppSettings.Get("Environment") ?? "Devmachine";
+            this.Environment = (Environment)Enum.Parse(typeof(Environment), ConfigurationManager.AppSettings.Get("Environment"));
 
             var buildInfoFile = HostingEnvironment.MapPath(@"~\App_Data\BuildInfo.json");
             if (!File.Exists(buildInfoFile))
@@ -40,7 +41,7 @@ namespace ClickerHeroesTrackerWebsite.Configuration
         }
 
         /// <inheritdoc />
-        public string Environment { get; }
+        public Environment Environment { get; }
 
         /// <inheritdoc/>
         public int Changelist { get; }

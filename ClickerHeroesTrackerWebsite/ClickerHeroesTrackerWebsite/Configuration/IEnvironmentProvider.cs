@@ -10,9 +10,9 @@ namespace ClickerHeroesTrackerWebsite.Configuration
     public interface IEnvironmentProvider
     {
         /// <summary>
-        /// Gets the environment name
+        /// Gets the current environment
         /// </summary>
-        string Environment { get; }
+        Environment Environment { get; }
 
         /// <summary>
         /// Gets the changlist of the last change that is part of the running build.

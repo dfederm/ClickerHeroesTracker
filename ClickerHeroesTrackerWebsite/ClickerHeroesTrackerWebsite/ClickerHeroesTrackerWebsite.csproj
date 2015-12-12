@@ -260,6 +260,7 @@
     <Compile Include="App_Start\Startup.Container.cs" />
     <Compile Include="App_Start\Startup.Mvc.cs" />
     <Compile Include="App_Start\Startup.WebApi.cs" />
+    <Compile Include="Configuration\Environment.cs" />
     <Compile Include="Configuration\EnvironmentProvider.cs" />
     <Compile Include="Configuration\IEnvironmentProvider.cs" />
     <Compile Include="Controllers\AccountController.cs" />

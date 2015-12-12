@@ -47,7 +47,7 @@ namespace ClickerHeroesTrackerWebsite
 
             // Only allow telemetry in production
             var environmentProvider = container.Resolve<IEnvironmentProvider>();
-            if (!environmentProvider.Environment.Equals("Production", StringComparison.OrdinalIgnoreCase))
+            if (environmentProvider.Environment != ClickerHeroesTrackerWebsite.Configuration.Environment.Production)
             {
                 TelemetryConfiguration.Active.DisableTelemetry = true;
             }
