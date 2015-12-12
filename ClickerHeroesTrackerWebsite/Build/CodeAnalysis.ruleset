@@ -244,7 +244,8 @@
     <Rule Id="CA5122" Action="Warning" />
   </Rules>
   <Rules AnalyzerId="Microsoft.CodeAnalysis.CSharp" RuleNamespace="Microsoft.CodeAnalysis.CSharp">
-    <Rule Id="CS8019" Action="Warning" />
+    <!-- Bug in Roslyn catches this in C:\Users\buildguest\AppData\Local\Temp\.NETFramework,Version=v4.6.AssemblyAttributes.cs -->
+    <Rule Id="CS8019" Action="None" />
     <Rule Id="CS8020" Action="Warning" />
     <Rule Id="CS8040" Action="Warning" />
   </Rules>
