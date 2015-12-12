@@ -55,7 +55,7 @@ namespace ClickerHeroesTrackerWebsite
             container.RegisterType<ICounterProvider, CounterProvider>(new PerRequestLifetimeManager());
             container.RegisterType<IDatabaseCommandFactory, DatabaseCommandFactory>(new PerRequestLifetimeManager());
             container.RegisterType<IUserSettingsProvider, UserSettingsProvider>(new PerRequestLifetimeManager());
-            container.RegisterType<TelemetryClient>(new PerRequestLifetimeManager());
+            container.RegisterType<TelemetryClient>(new PerRequestLifetimeManager(), new InjectionFactory(_ => new TelemetryClient()));
         }
     }
 }
