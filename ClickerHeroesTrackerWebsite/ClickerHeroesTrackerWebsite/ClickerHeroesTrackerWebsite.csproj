@@ -354,6 +354,7 @@
     <Compile Include="App_Start\Startup.cs" />
     <Compile Include="Models\Settings\UserSettingsFlushingMiddleware.cs" />
     <Compile Include="Unity\UnityOwinMiddleware.cs" />
+    <Compile Include="Unity\UnityPerRequestLifetimeDisposingMiddleware.cs" />
     <Compile Include="Utility\DisposableBase.cs" />
     <Compile Include="Views\HtmlHelpers.cs" />
   </ItemGroup>

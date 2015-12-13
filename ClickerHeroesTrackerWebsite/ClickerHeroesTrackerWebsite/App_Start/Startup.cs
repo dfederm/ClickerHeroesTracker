@@ -29,6 +29,9 @@ namespace ClickerHeroesTrackerWebsite
             var container = ConfigureContainer();
             var environmentProvider = container.Resolve<IEnvironmentProvider>();
 
+            // Should be first (and last) since it may dispose objects other middleware uses.
+            app.Use<UnityPerRequestLifetimeDisposingMiddleware>();
+
             // We want to start measuring latency as soon as possible during a request.
             app.Use<UnityOwinMiddleware<MeasureLatencyMiddleware>>(container);
 

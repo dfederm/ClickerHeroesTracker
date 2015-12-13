@@ -10,7 +10,7 @@ namespace ClickerHeroesTrackerWebsite.Models.Settings
     using Database;
     using Utility;
 
-    internal sealed class UserSettings : DisposableBase, IUserSettings
+    internal sealed class UserSettings : IUserSettings
     {
         private readonly Dictionary<byte, string> settingValues = new Dictionary<byte, string>();
 
@@ -90,8 +90,6 @@ namespace ClickerHeroesTrackerWebsite.Models.Settings
 
         internal void FlushChanges()
         {
-            this.EnsureNotDisposed();
-
             if (this.userId == null)
             {
                 return;
@@ -126,11 +124,6 @@ namespace ClickerHeroesTrackerWebsite.Models.Settings
             }
 
             this.dirtySettings.Clear();
-        }
-
-        protected override void Dispose(bool isDisposing)
-        {
-            this.FlushChanges();
         }
 
         private static bool TryParseTimeZone(string value, out TimeZoneInfo timeZone)
@@ -170,8 +163,6 @@ namespace ClickerHeroesTrackerWebsite.Models.Settings
 
         private T GetValue<T>(byte settingId, TryParse<T> parser, T defaultValue)
         {
-            this.EnsureNotDisposed();
-
             string rawValue;
             T value;
             return this.settingValues.TryGetValue(settingId, out rawValue)
@@ -182,8 +173,6 @@ namespace ClickerHeroesTrackerWebsite.Models.Settings
 
         private void SetValue(byte settingId, string value)
         {
-            this.EnsureNotDisposed();
-
             if (value == null)
             {
                 return;
