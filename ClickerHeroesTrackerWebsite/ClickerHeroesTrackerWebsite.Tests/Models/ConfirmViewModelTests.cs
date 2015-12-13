@@ -4,6 +4,7 @@
 
 namespace ClickerHeroesTrackerWebsite.Tests.Models
 {
+    using ClickerHeroesTrackerWebsite.Models;
     using ClickerHeroesTrackerWebsite.Models.Calculator;
     using ClickerHeroesTrackerWebsite.Models.Settings;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -20,6 +21,7 @@ namespace ClickerHeroesTrackerWebsite.Tests.Models
             var mockUserSettings = new Mock<IUserSettings>(MockBehavior.Strict);
             mockUserSettings.SetupGet(_ => _.AreUploadsPublic).Returns(false).Verifiable();
             mockUserSettings.SetupGet(_ => _.UseReducedSolomonFormula).Returns(false).Verifiable();
+            mockUserSettings.SetupGet(_ => _.PlayStyle).Returns(PlayStyle.Idle).Verifiable();
 
             var mockUserSettingsProvider = new Mock<IUserSettingsProvider>(MockBehavior.Strict);
             mockUserSettingsProvider.Setup(_ => _.Get(null)).Returns(mockUserSettings.Object).Verifiable();
