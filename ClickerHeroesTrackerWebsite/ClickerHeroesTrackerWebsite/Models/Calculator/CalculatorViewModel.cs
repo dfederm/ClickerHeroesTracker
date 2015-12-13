@@ -148,28 +148,28 @@ namespace ClickerHeroesTrackerWebsite.Models.Calculator
                 }
 
                 this.ComputedStatsViewModel = new ComputedStatsViewModel(reader, this.UserSettings);
-
-                this.IsOwn = string.Equals(userId, uploadUserId, StringComparison.OrdinalIgnoreCase);
-                if (this.IsOwn)
-                {
-                    this.IsPublic = this.UserSettings.AreUploadsPublic;
-                    this.IsPermitted = true;
-                }
-                else
-                {
-                    var uploadUserSettings = userSettingsProvider.Get(uploadUserId);
-
-                    this.IsPublic = uploadUserSettings.AreUploadsPublic;
-                    this.IsPermitted = this.IsPublic || user.IsInRole("Admin");
-                }
-
-                this.SuggestedAncientLevelsViewModel = new SuggestedAncientLevelsViewModel(
-                    this.AncientLevelSummaryViewModel.AncientLevels,
-                    this.ComputedStatsViewModel.OptimalLevel,
-                    this.UserSettings);
-
-                this.IsValid = true;
             }
+
+            this.IsOwn = string.Equals(userId, uploadUserId, StringComparison.OrdinalIgnoreCase);
+            if (this.IsOwn)
+            {
+                this.IsPublic = this.UserSettings.AreUploadsPublic;
+                this.IsPermitted = true;
+            }
+            else
+            {
+                var uploadUserSettings = userSettingsProvider.Get(uploadUserId);
+
+                this.IsPublic = uploadUserSettings.AreUploadsPublic;
+                this.IsPermitted = this.IsPublic || user.IsInRole("Admin");
+            }
+
+            this.SuggestedAncientLevelsViewModel = new SuggestedAncientLevelsViewModel(
+                this.AncientLevelSummaryViewModel.AncientLevels,
+                this.ComputedStatsViewModel.OptimalLevel,
+                this.UserSettings);
+
+            this.IsValid = true;
         }
 
         /// <summary>
