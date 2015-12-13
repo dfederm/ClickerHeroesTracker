@@ -46,6 +46,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Helpers\HtmlResponse.cs" />
+    <Compile Include="Helpers\HttpWebRequestExtensions.cs" />
     <Compile Include="HomepageTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

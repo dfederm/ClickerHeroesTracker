@@ -16,9 +16,16 @@ namespace ClickerHeroesTrackerWebsite.IntegrationTests.Helpers
 
         private string content;
 
-        public HtmlResponse(string url)
+        public HtmlResponse(
+            string url,
+            Action<HttpWebRequest> requestInitialization = null)
         {
             var request = (HttpWebRequest)WebRequest.Create(urlPrefix + url);
+            if (requestInitialization != null)
+            {
+                requestInitialization(request);
+            }
+
             try
             {
                 this.response = (HttpWebResponse)request.GetResponse();
@@ -41,7 +48,7 @@ namespace ClickerHeroesTrackerWebsite.IntegrationTests.Helpers
         {
             get
             {
-                return this.content = this.content = new StreamReader(this.response.GetResponseStream()).ReadToEnd();
+                return this.content ?? (this.content = new StreamReader(this.response.GetResponseStream()).ReadToEnd());
             }
         }
 

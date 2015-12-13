@@ -7,14 +7,14 @@ namespace ClickerHeroesTrackerWebsite
 {
     using System;
     using System.Configuration;
+    using Authentication;
     using ClickerHeroesTrackerWebsite.Models;
-
+    using Configuration;
     using Microsoft.AspNet.Identity;
     using Microsoft.AspNet.Identity.Owin;
     using Microsoft.Owin;
     using Microsoft.Owin.Security.Cookies;
     using Owin;
-
     using static ClickerHeroesTrackerWebsite.Configuration.Environment;
 
     /// <summary>
@@ -26,8 +26,7 @@ namespace ClickerHeroesTrackerWebsite
         /// Configures the authentication middleware.
         /// </summary>
         /// <remarks>For more information on configuring authentication, please visit http://go.microsoft.com/fwlink/?LinkId=301864</remarks>
-        /// <param name="app">The Owin app builder</param>
-        private static void ConfigureAuth(IAppBuilder app)
+        private static void ConfigureAuth(IAppBuilder app, IEnvironmentProvider environmentProvider)
         {
             // Configure the db context, user manager and signin manager to use a single instance per request
             app.CreatePerOwinContext(ApplicationDbContext.Create);
@@ -71,6 +70,12 @@ namespace ClickerHeroesTrackerWebsite
             ////    ClientId = "",
             ////    ClientSecret = ""
             ////});
+
+            // Allow auth mocking when not in prod
+            if (environmentProvider.Environment != Production)
+            {
+                app.Use<MockAuthenticationOwinMiddleware>();
+            }
         }
     }
 }

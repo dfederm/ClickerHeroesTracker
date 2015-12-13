@@ -13,6 +13,7 @@ namespace ClickerHeroesTrackerWebsite
     using Microsoft.Practices.Unity;
     using Models.Settings;
     using Owin;
+    using static ClickerHeroesTrackerWebsite.Configuration.Environment;
 
     /// <summary>
     /// Startup class used by Owin.
@@ -26,12 +27,13 @@ namespace ClickerHeroesTrackerWebsite
         public void Configuration(IAppBuilder app)
         {
             var container = ConfigureContainer();
+            var environmentProvider = container.Resolve<IEnvironmentProvider>();
 
             // We want to start measuring latency as soon as possible during a request.
             app.Use<UnityOwinMiddleware<MeasureLatencyMiddleware>>(container);
 
             // Auth middleware. Needs to be added before any middleware that uses the user.
-            ConfigureAuth(app);
+            ConfigureAuth(app, environmentProvider);
 
             // Instrument the user as soon as they're auth'd.
             app.Use<UnityOwinMiddleware<UserInstrumentationMiddleware>>(container);
@@ -46,8 +48,7 @@ namespace ClickerHeroesTrackerWebsite
             ConfigureMvc(container);
 
             // Only allow telemetry in production
-            var environmentProvider = container.Resolve<IEnvironmentProvider>();
-            if (environmentProvider.Environment != ClickerHeroesTrackerWebsite.Configuration.Environment.Production)
+            if (environmentProvider.Environment != Production)
             {
                 TelemetryConfiguration.Active.DisableTelemetry = true;
             }
