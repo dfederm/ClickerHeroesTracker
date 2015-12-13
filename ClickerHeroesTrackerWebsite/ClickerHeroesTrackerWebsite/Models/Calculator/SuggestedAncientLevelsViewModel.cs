@@ -14,17 +14,27 @@ namespace ClickerHeroesTrackerWebsite.Models.Calculator
     /// </summary>
     public class SuggestedAncientLevelsViewModel
     {
-        private static ISet<PlayStyle> allPlayStyles = new HashSet<PlayStyle>(new[]
+        private static readonly HashSet<PlayStyle> AllPlayStyles = new HashSet<PlayStyle>(new[]
         {
             PlayStyle.Idle,
             PlayStyle.Hybrid,
             PlayStyle.Active,
         });
 
-        private static ISet<PlayStyle> hybridPlayStyles = new HashSet<PlayStyle>(new[]
+        // Sources:
+        // Idle: https://www.reddit.com/r/ClickerHeroes/comments/3823wt/mathematical_analysis_of_lategame_for_most_idle/
+        // Active and Hybrid: https://www.reddit.com/r/ClickerHeroes/comments/3h5al8/extending_mathematical_analysis_to_hybrid_and/
+        private static readonly HashSet<PlayStyle> HybridPlayStyles = new HashSet<PlayStyle>(new[]
         {
             PlayStyle.Hybrid,
         });
+
+        private static readonly Dictionary<PlayStyle, double[]> SolomonFormulaMultipliers = new Dictionary<PlayStyle, double[]>
+        {
+            { PlayStyle.Idle, new[] { 1.15, 3.25 } },
+            { PlayStyle.Active, new[] { 1.21, 3.73 } },
+            { PlayStyle.Hybrid, new[] { 1.32, 4.65 } },
+        };
 
         /// <summary>
         /// Initializes a new instance of the <see cref="SuggestedAncientLevelsViewModel"/> class.
@@ -56,24 +66,27 @@ namespace ClickerHeroesTrackerWebsite.Models.Calculator
             var suggestedClickLevel = (long)Math.Round(suggestedSiyaLevel * 0.5);
             var suggestedJuggernautLevel = (long)Math.Round(Math.Pow(suggestedClickLevel, 0.8));
             var suggestedIrisLevel = optimalLevel - 1001;
-            var suggestedSolomonLevel = userSettings.UseReducedSolomonFormula
-                ? (long)Math.Round(1.15 * Math.Pow(Math.Log10(3.25 * Math.Pow(suggestedSiyaLevel, 2)), 0.4) * Math.Pow(suggestedSiyaLevel, 0.8))
-                : (long)Math.Round(1.15 * Math.Pow(Math.Log(3.25 * Math.Pow(suggestedSiyaLevel, 2)), 0.4) * Math.Pow(suggestedSiyaLevel, 0.8));
+
+            var solomonMultipliers = SolomonFormulaMultipliers[userSettings.PlayStyle];
+            var solomonLogFunction = userSettings.UseReducedSolomonFormula
+                ? (Func<double, double>)(d => Math.Log10(d))
+                : (d => Math.Log(d));
+            var suggestedSolomonLevel = (long)Math.Round(solomonMultipliers[0] * Math.Pow(solomonLogFunction(solomonMultipliers[1] * Math.Pow(suggestedSiyaLevel, 2)), 0.4) * Math.Pow(suggestedSiyaLevel, 0.8));
 
             this.SuggestedAncientLevels = new SuggestedAncientLevelData[]
             {
-                new SuggestedAncientLevelData(Ancient.Siyalatas, currentSiyaLevel, suggestedSiyaLevel, allPlayStyles),
-                new SuggestedAncientLevelData(Ancient.Argaiv, currentArgaivLevel, suggestedArgaivLevel, allPlayStyles),
-                new SuggestedAncientLevelData(Ancient.Morgulis, currentMorgLevel, suggestedMorgLevel, allPlayStyles),
-                new SuggestedAncientLevelData(Ancient.Libertas, currentLiberLevel, suggestedGoldLevel, allPlayStyles),
-                new SuggestedAncientLevelData(Ancient.Mammon, currentMammonLevel, suggestedGoldLevel, allPlayStyles),
-                new SuggestedAncientLevelData(Ancient.Mimzee, currentMimzeeLevel, suggestedGoldLevel, allPlayStyles),
-                new SuggestedAncientLevelData(Ancient.Fragsworth, currentFragsworthLevel, suggestedClickLevel, hybridPlayStyles),
-                new SuggestedAncientLevelData(Ancient.Bhaal, currentBhaalLevel, suggestedClickLevel, hybridPlayStyles),
-                new SuggestedAncientLevelData(Ancient.Pluto, currentPlutoLevel, suggestedClickLevel, hybridPlayStyles),
-                new SuggestedAncientLevelData(Ancient.Juggernaut, currentJuggernautLevel, suggestedJuggernautLevel, hybridPlayStyles),
-                new SuggestedAncientLevelData(Ancient.Iris, currentIrisLevel, suggestedIrisLevel, allPlayStyles),
-                new SuggestedAncientLevelData(Ancient.Solomon, currentSolomonLevel, suggestedSolomonLevel, allPlayStyles),
+                new SuggestedAncientLevelData(Ancient.Siyalatas, currentSiyaLevel, suggestedSiyaLevel, AllPlayStyles),
+                new SuggestedAncientLevelData(Ancient.Argaiv, currentArgaivLevel, suggestedArgaivLevel, AllPlayStyles),
+                new SuggestedAncientLevelData(Ancient.Morgulis, currentMorgLevel, suggestedMorgLevel, AllPlayStyles),
+                new SuggestedAncientLevelData(Ancient.Libertas, currentLiberLevel, suggestedGoldLevel, AllPlayStyles),
+                new SuggestedAncientLevelData(Ancient.Mammon, currentMammonLevel, suggestedGoldLevel, AllPlayStyles),
+                new SuggestedAncientLevelData(Ancient.Mimzee, currentMimzeeLevel, suggestedGoldLevel, AllPlayStyles),
+                new SuggestedAncientLevelData(Ancient.Fragsworth, currentFragsworthLevel, suggestedClickLevel, HybridPlayStyles),
+                new SuggestedAncientLevelData(Ancient.Bhaal, currentBhaalLevel, suggestedClickLevel, HybridPlayStyles),
+                new SuggestedAncientLevelData(Ancient.Pluto, currentPlutoLevel, suggestedClickLevel, HybridPlayStyles),
+                new SuggestedAncientLevelData(Ancient.Juggernaut, currentJuggernautLevel, suggestedJuggernautLevel, HybridPlayStyles),
+                new SuggestedAncientLevelData(Ancient.Iris, currentIrisLevel, suggestedIrisLevel, AllPlayStyles),
+                new SuggestedAncientLevelData(Ancient.Solomon, currentSolomonLevel, suggestedSolomonLevel, AllPlayStyles),
             };
         }
 
