@@ -30,5 +30,10 @@ namespace ClickerHeroesTrackerWebsite.Models.Settings
         /// Gets or sets the user's play style.
         /// </summary>
         PlayStyle PlayStyle { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether the user wants to see experimental stats
+        /// </summary>
+        bool UseExperimentalStats { get; set; }
     }
 }

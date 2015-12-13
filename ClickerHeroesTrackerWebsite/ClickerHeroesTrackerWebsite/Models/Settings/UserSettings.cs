@@ -88,6 +88,19 @@ namespace ClickerHeroesTrackerWebsite.Models.Settings
             }
         }
 
+        public bool UseExperimentalStats
+        {
+            get
+            {
+                return this.GetValue(5, bool.TryParse, false);
+            }
+
+            set
+            {
+                this.SetValue(5, value.ToString());
+            }
+        }
+
         internal void FlushChanges()
         {
             if (this.userId == null)

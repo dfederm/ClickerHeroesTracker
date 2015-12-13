@@ -129,6 +129,7 @@ namespace ClickerHeroesTrackerWebsite.Controllers
             userSettings.AreUploadsPublic = indexViewModel.AreUploadsPublic;
             userSettings.UseReducedSolomonFormula = indexViewModel.SolomonFormula.Equals("Log", StringComparison.OrdinalIgnoreCase);
             userSettings.PlayStyle = indexViewModel.PlayStyle.SafeParseEnum<PlayStyle>();
+            userSettings.UseExperimentalStats = indexViewModel.UseExperimentalStats;
 
             return await this.GetIndexResult(userId, userSettings);
         }
@@ -330,7 +331,8 @@ namespace ClickerHeroesTrackerWebsite.Controllers
                 TimeZoneId = userSettings.TimeZone.Id,
                 AreUploadsPublic = userSettings.AreUploadsPublic,
                 SolomonFormula = userSettings.UseReducedSolomonFormula ? "Log" : "Ln",
-                PlayStyle = userSettings.PlayStyle.ToString()
+                PlayStyle = userSettings.PlayStyle.ToString(),
+                UseExperimentalStats = userSettings.UseExperimentalStats,
             };
 
             return this.View(model);

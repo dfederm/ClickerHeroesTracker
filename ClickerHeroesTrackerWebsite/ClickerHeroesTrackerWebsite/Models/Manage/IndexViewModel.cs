@@ -57,6 +57,12 @@ namespace ClickerHeroesTrackerWebsite.Models
         public string PlayStyle { get; set; }
 
         /// <summary>
+        /// Gets or sets a value indicating whether the user wants to see experimental stats
+        /// </summary>
+        [Display(Name = "Experimental stats")]
+        public bool UseExperimentalStats { get; set; }
+
+        /// <summary>
         /// Model for an option for the time zone select control.
         /// </summary>
         public class TimeZoneSelectItem

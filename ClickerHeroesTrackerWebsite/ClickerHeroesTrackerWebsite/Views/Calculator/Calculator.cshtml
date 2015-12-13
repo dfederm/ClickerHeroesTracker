@@ -98,6 +98,11 @@
     </div>
     <div class="col-md-4">
         @Html.Partial("_ComputedStats", Model.ComputedStatsViewModel)
+
+        @if (Model.ExperimentalStatsViewModel != null)
+        {
+            @Html.Partial("_ExperimentalStats", Model.ExperimentalStatsViewModel)
+        }
     </div>
 </div>
 @* We don't store this data yet, so don't display it

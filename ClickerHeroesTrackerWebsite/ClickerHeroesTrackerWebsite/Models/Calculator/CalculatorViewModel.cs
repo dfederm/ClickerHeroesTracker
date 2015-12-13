@@ -52,6 +52,12 @@ namespace ClickerHeroesTrackerWebsite.Models.Calculator
                 this.AncientLevelSummaryViewModel.AncientLevels,
                 this.ComputedStatsViewModel.OptimalLevel,
                 this.UserSettings);
+            if (this.UserSettings.UseExperimentalStats)
+            {
+                this.ExperimentalStatsViewModel = new ExperimentalStatsViewModel(
+                    this.AncientLevelSummaryViewModel.AncientLevels,
+                    this.UserSettings);
+            }
 
             if (addToProgress && user.IsAuthenticated)
             {
@@ -170,6 +176,13 @@ namespace ClickerHeroesTrackerWebsite.Models.Calculator
                 this.ComputedStatsViewModel.OptimalLevel,
                 this.UserSettings);
 
+            if (this.UserSettings.UseExperimentalStats)
+            {
+                this.ExperimentalStatsViewModel = new ExperimentalStatsViewModel(
+                    this.AncientLevelSummaryViewModel.AncientLevels,
+                    this.UserSettings);
+            }
+
             this.IsValid = true;
         }
 
@@ -234,5 +247,10 @@ namespace ClickerHeroesTrackerWebsite.Models.Calculator
         /// Gets a model for the suggested ancient levels view.
         /// </summary>
         public SuggestedAncientLevelsViewModel SuggestedAncientLevelsViewModel { get; }
+
+        /// <summary>
+        /// Gets a model for the experimental stats view.
+        /// </summary>
+        public ExperimentalStatsViewModel ExperimentalStatsViewModel { get; }
     }
 }

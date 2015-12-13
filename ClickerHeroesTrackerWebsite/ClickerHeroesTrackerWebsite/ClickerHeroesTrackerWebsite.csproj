@@ -298,6 +298,7 @@
     <Compile Include="Models\Account\ResetPasswordViewModel.cs" />
     <Compile Include="Models\ApplicationDbContext.cs" />
     <Compile Include="Models\ApplicationUser.cs" />
+    <Compile Include="Models\Calculator\ExperimentalStatsViewModel.cs" />
     <Compile Include="Models\Manage\ChangePasswordViewModel.cs" />
     <Compile Include="Models\Manage\IndexViewModel.cs" />
     <Compile Include="Models\Manage\ManageLoginsViewModel.cs" />
@@ -447,6 +448,7 @@
     <Content Include="Views\Home\_ComingSoon.cshtml" />
     <Content Include="Views\Admin\Index.cshtml" />
     <Content Include="Views\Dashboard\Uploads.cshtml" />
+    <Content Include="Views\Calculator\_ExperimentalStats.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Analyzer Include="..\packages\Desktop.Analyzers.1.1.0\analyzers\dotnet\cs\Desktop.Analyzers.dll" />

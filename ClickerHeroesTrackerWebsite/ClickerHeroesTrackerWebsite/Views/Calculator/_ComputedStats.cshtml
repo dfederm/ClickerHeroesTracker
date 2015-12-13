@@ -3,7 +3,7 @@
 
 @model ComputedStatsViewModel
 
-<h4>Computed Stats:</h4>
+<h4>Simulation Data:</h4>
 <p class="text-muted">
     Based on the <a href="http://s3-us-west-2.amazonaws.com/clickerheroes/ancientssoul.html" target="_blank">calculator</a> by /u/rler.
 </p>
@@ -32,6 +32,11 @@
         <td>Optimal Ascension Time</td>
         <td>@Model.OptimalAscensionTime min</td>
     </tr>
+</table>
+
+<h4>Other stats:</h4>
+
+<table class="table">
     <tr>
         <td>Hero Souls Spent on Ancients</td>
         <td>@Model.SoulsSpent</td>
