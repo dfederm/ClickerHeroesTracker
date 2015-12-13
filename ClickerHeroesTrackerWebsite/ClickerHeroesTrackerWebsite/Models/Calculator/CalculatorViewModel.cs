@@ -43,6 +43,7 @@ namespace ClickerHeroesTrackerWebsite.Models.Calculator
 
             this.UploadUserName = user?.GetUserName();
             this.UploadTime = DateTime.UtcNow;
+            this.UploadContent = encodedSaveData;
 
             this.AncientLevelSummaryViewModel = new AncientLevelSummaryViewModel(savedGame.AncientsData);
             ////this.HeroLevelSummaryViewModel = new HeroLevelSummaryViewModel(savedGame.HeroesData);
