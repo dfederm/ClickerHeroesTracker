@@ -22,6 +22,7 @@ namespace ClickerHeroesTrackerWebsite.Tests.Models
             mockUserSettings.SetupGet(_ => _.AreUploadsPublic).Returns(false).Verifiable();
             mockUserSettings.SetupGet(_ => _.UseReducedSolomonFormula).Returns(false).Verifiable();
             mockUserSettings.SetupGet(_ => _.PlayStyle).Returns(PlayStyle.Idle).Verifiable();
+            mockUserSettings.SetupGet(_ => _.UseExperimentalStats).Returns(false).Verifiable();
 
             var mockUserSettingsProvider = new Mock<IUserSettingsProvider>(MockBehavior.Strict);
             mockUserSettingsProvider.Setup(_ => _.Get(null)).Returns(mockUserSettings.Object).Verifiable();
