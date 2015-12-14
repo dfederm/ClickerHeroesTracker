@@ -5,6 +5,9 @@
 namespace ClickerHeroesTrackerWebsite.Instrumentation
 {
     using System;
+    using System.Collections.Generic;
+    using System.IO;
+    using System.Text;
     using System.Web;
     using System.Web.Mvc;
     using Microsoft.ApplicationInsights;
@@ -53,8 +56,31 @@ namespace ClickerHeroesTrackerWebsite.Instrumentation
                 return;
             }
 
+            // Capture additional properties
+            var properties = new Dictionary<string, string>();
+            var request = filterContext.RequestContext.HttpContext.Request;
+            if (request.HttpMethod.Equals("POST", StringComparison.OrdinalIgnoreCase) && request.InputStream.CanRead)
+            {
+                if (request.InputStream.CanSeek)
+                {
+                    request.InputStream.Seek(0, SeekOrigin.Begin);
+                }
+
+                var reader = new StreamReader(request.InputStream);
+                var postContent = reader.ReadToEnd();
+                properties.Add("PostContent", postContent);
+            }
+
+            var headersString = new StringBuilder();
+            foreach (var key in request.Headers.AllKeys)
+            {
+                headersString.AppendFormat($"{key}: {request.Headers[key]}{Environment.NewLine}");
+            }
+
+            properties.Add("Headers", headersString.ToString());
+
             // Instrument
-            this.telemetryClientResolver().TrackException(exception);
+            this.telemetryClientResolver().TrackException(exception, properties);
 
             // Return the error view
             var model = new HandleErrorInfo(
