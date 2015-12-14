@@ -5,21 +5,26 @@
 <h2>What's New</h2>
 @if (Model.IsFull)
 {
-    <h3>Saturday, December 12, 2015</h3>
+    <h3>Sunday, December 13, 2015</h3>
 }
 <ul>
-    <li>Changed the formula for Solomon for Hybrid and Active play styles based on math from <a href="https://www.reddit.com/r/ClickerHeroes/comments/3h5al8/extending_mathematical_analysis_to_hybrid_and/" target="_blank">Reddit</a>.</li>
+    <li>Added a @Html.ActionLink("user setting", "Index", "Manage") to opt in to seeing experimental stats.</li>
 
     @* Dupe some recent stuff from the past couple days for the front page *@
     @if (!Model.IsFull)
     {
+        <li>Changed the formula for Solomon for Hybrid and Active play styles based on math from <a href="https://www.reddit.com/r/ClickerHeroes/comments/3h5al8/extending_mathematical_analysis_to_hybrid_and/" target="_blank">Reddit</a>.</li>
         <li>Changed the formula for Hybrid builds for Juggernaut from: Click*0.2 to Click<sup>0.8</sup> based math from Reddit.</li>
-        <li>Added a @Html.ActionLink("new page", "Uploads", "Dashboard") for a user to view all their uploads.</li>
     }
 </ul>
 
 @if (Model.IsFull)
 {
+    <h3>Saturday, December 12, 2015</h3>
+    <ul>
+        <li>Changed the formula for Solomon for Hybrid and Active play styles based on math from <a href="https://www.reddit.com/r/ClickerHeroes/comments/3h5al8/extending_mathematical_analysis_to_hybrid_and/" target="_blank">Reddit</a>.</li>
+    </ul>
+
     <h3>Sunday, October 4, 2015</h3>
     <ul>
         <li>Changed the formula for Hybrid builds for Juggernaut from: Click*0.2 to Click<sup>0.8</sup> based math from Reddit.</li>
