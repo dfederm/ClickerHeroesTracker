@@ -9,6 +9,8 @@ namespace ClickerHeroesTrackerWebsite.Models.Calculator
     using System.Data;
     using System.Security.Principal;
     using Database;
+    using Game;
+    using Microsoft.ApplicationInsights;
     using Microsoft.AspNet.Identity;
     using SaveData;
     using Settings;
@@ -24,6 +26,8 @@ namespace ClickerHeroesTrackerWebsite.Models.Calculator
         public CalculatorViewModel(
             IDatabaseCommandFactory databaseCommandFactory,
             IUserSettingsProvider userSettingsProvider,
+            GameData gameData,
+            TelemetryClient telemetryClient,
             string encodedSaveData,
             IIdentity user,
             bool addToProgress)
@@ -45,16 +49,24 @@ namespace ClickerHeroesTrackerWebsite.Models.Calculator
             this.UploadTime = DateTime.UtcNow;
             this.UploadContent = encodedSaveData;
 
-            this.AncientLevelSummaryViewModel = new AncientLevelSummaryViewModel(savedGame.AncientsData);
+            this.AncientLevelSummaryViewModel = new AncientLevelSummaryViewModel(
+                gameData,
+                savedGame.AncientsData,
+                telemetryClient);
             ////this.HeroLevelSummaryViewModel = new HeroLevelSummaryViewModel(savedGame.HeroesData);
-            this.ComputedStatsViewModel = new ComputedStatsViewModel(savedGame, this.UserSettings);
+            this.ComputedStatsViewModel = new ComputedStatsViewModel(
+                gameData,
+                savedGame,
+                this.UserSettings);
             this.SuggestedAncientLevelsViewModel = new SuggestedAncientLevelsViewModel(
+                gameData,
                 this.AncientLevelSummaryViewModel.AncientLevels,
                 this.ComputedStatsViewModel.OptimalLevel,
                 this.UserSettings);
             if (this.UserSettings.UseExperimentalStats)
             {
                 this.ExperimentalStatsViewModel = new ExperimentalStatsViewModel(
+                    gameData,
                     this.AncientLevelSummaryViewModel.AncientLevels,
                     this.UserSettings);
             }
@@ -108,6 +120,8 @@ namespace ClickerHeroesTrackerWebsite.Models.Calculator
         public CalculatorViewModel(
             IDatabaseCommandFactory databaseCommandFactory,
             IUserSettingsProvider userSettingsProvider,
+            GameData gameData,
+            TelemetryClient telemetryClient,
             int uploadId,
             IPrincipal user)
         {
@@ -147,7 +161,10 @@ namespace ClickerHeroesTrackerWebsite.Models.Calculator
                 }
 
                 // Get ancient levels
-                this.AncientLevelSummaryViewModel = new AncientLevelSummaryViewModel(reader);
+                this.AncientLevelSummaryViewModel = new AncientLevelSummaryViewModel(
+                    gameData,
+                    reader,
+                    telemetryClient);
 
                 if (!reader.NextResult())
                 {
@@ -172,6 +189,7 @@ namespace ClickerHeroesTrackerWebsite.Models.Calculator
             }
 
             this.SuggestedAncientLevelsViewModel = new SuggestedAncientLevelsViewModel(
+                gameData,
                 this.AncientLevelSummaryViewModel.AncientLevels,
                 this.ComputedStatsViewModel.OptimalLevel,
                 this.UserSettings);
@@ -179,6 +197,7 @@ namespace ClickerHeroesTrackerWebsite.Models.Calculator
             if (this.UserSettings.UseExperimentalStats)
             {
                 this.ExperimentalStatsViewModel = new ExperimentalStatsViewModel(
+                    gameData,
                     this.AncientLevelSummaryViewModel.AncientLevels,
                     this.UserSettings);
             }

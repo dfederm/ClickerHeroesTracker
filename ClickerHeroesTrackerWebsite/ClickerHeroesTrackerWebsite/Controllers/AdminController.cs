@@ -9,7 +9,9 @@ namespace ClickerHeroesTrackerWebsite.Controllers
     using System.Data;
     using System.Web.Mvc;
     using Database;
+    using Microsoft.ApplicationInsights;
     using Models.Calculator;
+    using Models.Game;
     using Models.SaveData;
 
     /// <summary>
@@ -18,15 +20,23 @@ namespace ClickerHeroesTrackerWebsite.Controllers
     [Authorize(Roles = "Admin")]
     public class AdminController : Controller
     {
+        private readonly GameData gameData;
+
         private readonly IDatabaseCommandFactory databaseCommandFactory;
+
+        private readonly TelemetryClient telemetryClient;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="AdminController"/> class.
         /// </summary>
-        /// <param name="databaseCommandFactory">The database command factory</param>
-        public AdminController(IDatabaseCommandFactory databaseCommandFactory)
+        public AdminController(
+            GameData gameData,
+            IDatabaseCommandFactory databaseCommandFactory,
+            TelemetryClient telemetryClient)
         {
+            this.gameData = gameData;
             this.databaseCommandFactory = databaseCommandFactory;
+            this.telemetryClient = telemetryClient;
         }
 
         /// <summary>
@@ -70,7 +80,7 @@ namespace ClickerHeroesTrackerWebsite.Controllers
                         {
                             var uploadId = Convert.ToInt32(reader["Id"]);
                             var uploadContent = reader["UploadContent"].ToString();
-                            AddRows(computedStatsTable, ancientLevelsTable, uploadId, uploadContent);
+                            this.AddRows(computedStatsTable, ancientLevelsTable, uploadId, uploadContent);
                         }
                     }
                 }
@@ -96,7 +106,7 @@ namespace ClickerHeroesTrackerWebsite.Controllers
                                 reader.Read();
                                 var uploadContent = reader["UploadContent"].ToString();
 
-                                AddRows(computedStatsTable, ancientLevelsTable, uploadId, uploadContent);
+                                this.AddRows(computedStatsTable, ancientLevelsTable, uploadId, uploadContent);
                             }
                         }
                     }
@@ -122,7 +132,7 @@ namespace ClickerHeroesTrackerWebsite.Controllers
             return this.View("Index");
         }
 
-        private static void AddRows(
+        private void AddRows(
             DataTable computedStatsTable,
             DataTable ancientLevelsTable,
             int uploadId,
@@ -134,7 +144,10 @@ namespace ClickerHeroesTrackerWebsite.Controllers
                 return;
             }
 
-            var computedStats = new ComputedStatsViewModel(savedGame, null);
+            var computedStats = new ComputedStatsViewModel(
+                this.gameData,
+                savedGame,
+                null);
             computedStatsTable.Rows.Add(
                 uploadId,
                 computedStats.OptimalLevel,
@@ -144,7 +157,10 @@ namespace ClickerHeroesTrackerWebsite.Controllers
                 computedStats.TitanDamage,
                 computedStats.SoulsSpent);
 
-            var ancientLevels = new AncientLevelSummaryViewModel(savedGame.AncientsData);
+            var ancientLevels = new AncientLevelSummaryViewModel(
+                this.gameData,
+                savedGame.AncientsData,
+                this.telemetryClient);
             foreach (var ancientLevel in ancientLevels.AncientLevels)
             {
                 ancientLevelsTable.Rows.Add(

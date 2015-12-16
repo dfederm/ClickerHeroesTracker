@@ -11,6 +11,7 @@ namespace ClickerHeroesTrackerWebsite
     using Configuration;
     using Microsoft.ApplicationInsights.Extensibility;
     using Microsoft.Practices.Unity;
+    using Models.Game;
     using Models.Settings;
     using Owin;
     using static ClickerHeroesTrackerWebsite.Configuration.Environment;
@@ -55,6 +56,9 @@ namespace ClickerHeroesTrackerWebsite
             {
                 TelemetryConfiguration.Active.DisableTelemetry = true;
             }
+
+            // Warm up the game data parsing
+            container.Resolve<GameData>();
         }
     }
 }

@@ -7,6 +7,7 @@ namespace ClickerHeroesTrackerWebsite.Models.Calculator
     using System.Collections.Generic;
     using ClickerHeroesTrackerWebsite.Models.SaveData;
     using Game;
+    using Microsoft.ApplicationInsights;
 
     /// <summary>
     /// The model for the hero level summary view.
@@ -16,20 +17,22 @@ namespace ClickerHeroesTrackerWebsite.Models.Calculator
         /// <summary>
         /// Initializes a new instance of the <see cref="HeroLevelSummaryViewModel"/> class.
         /// </summary>
-        public HeroLevelSummaryViewModel(HeroesData heroesData)
+        public HeroLevelSummaryViewModel(
+            GameData gameData,
+            HeroesData heroesData,
+            TelemetryClient telemetryClient)
         {
             var heroGilds = new List<KeyValuePair<string, string>>(heroesData.Heroes.Count);
             foreach (var heroData in heroesData.Heroes.Values)
             {
-                var hero = Hero.Get(heroData.Id);
-                if (hero == null)
+                Hero hero;
+                if (!gameData.Heroes.TryGetValue(heroData.Id, out hero))
                 {
-                    // A hero we didn't know about?
+                    telemetryClient.TrackEvent("Unknown hero", new Dictionary<string, string> { { "HeroId", heroData.Id.ToString() } });
                     continue;
                 }
 
                 // No need to show heroes with 0 gilds
-                // TODO enable inline expansion
                 if (heroData.Gilds > 0)
                 {
                     heroGilds.Add(new KeyValuePair<string, string>(hero.Name, heroData.Gilds.ToString()));

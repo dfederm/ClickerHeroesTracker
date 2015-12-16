@@ -9,6 +9,7 @@ namespace ClickerHeroesTrackerWebsite.Models.Dashboard
     using System.Data.SqlClient;
     using ClickerHeroesTrackerWebsite.Models;
     using ClickerHeroesTrackerWebsite.Models.Game;
+    using Microsoft.ApplicationInsights;
     using Settings;
 
     /// <summary>
@@ -19,7 +20,11 @@ namespace ClickerHeroesTrackerWebsite.Models.Dashboard
         /// <summary>
         /// Initializes a new instance of the <see cref="ProgressData"/> class.
         /// </summary>
-        public ProgressData(SqlDataReader reader, IUserSettings userSettings)
+        public ProgressData(
+            GameData gameData,
+            TelemetryClient telemetryClient,
+            SqlDataReader reader,
+            IUserSettings userSettings)
         {
             this.UserSettings = userSettings;
 
@@ -50,7 +55,12 @@ namespace ClickerHeroesTrackerWebsite.Models.Dashboard
                 var ancientId = Convert.ToInt32(reader["AncientId"]);
                 var level = Convert.ToInt64(reader["Level"]);
 
-                var ancient = Ancient.Get(ancientId);
+                Ancient ancient;
+                if (!gameData.Ancients.TryGetValue(ancientId, out ancient))
+                {
+                    telemetryClient.TrackEvent("Unknown Ancient", new Dictionary<string, string> { { "AncientId", ancientId.ToString() } });
+                    continue;
+                }
 
                 // Skip ancients with max levels for now
                 if (ancient.MaxLevel > 0)

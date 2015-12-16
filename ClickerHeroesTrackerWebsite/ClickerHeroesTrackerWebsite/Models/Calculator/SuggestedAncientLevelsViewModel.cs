@@ -40,24 +40,25 @@ namespace ClickerHeroesTrackerWebsite.Models.Calculator
         /// Initializes a new instance of the <see cref="SuggestedAncientLevelsViewModel"/> class.
         /// </summary>
         public SuggestedAncientLevelsViewModel(
+            GameData gameData,
             IDictionary<Ancient, long> ancientLevels,
             int optimalLevel,
             IUserSettings userSettings)
         {
             this.UserSettings = userSettings;
 
-            var currentSiyaLevel = GetCurrentAncientLevel(ancientLevels, Ancient.Siyalatas);
-            var currentArgaivLevel = GetCurrentAncientLevel(ancientLevels, Ancient.Argaiv);
-            var currentMorgLevel = GetCurrentAncientLevel(ancientLevels, Ancient.Morgulis);
-            var currentLiberLevel = GetCurrentAncientLevel(ancientLevels, Ancient.Libertas);
-            var currentMammonLevel = GetCurrentAncientLevel(ancientLevels, Ancient.Mammon);
-            var currentMimzeeLevel = GetCurrentAncientLevel(ancientLevels, Ancient.Mimzee);
-            var currentFragsworthLevel = GetCurrentAncientLevel(ancientLevels, Ancient.Fragsworth);
-            var currentBhaalLevel = GetCurrentAncientLevel(ancientLevels, Ancient.Bhaal);
-            var currentPlutoLevel = GetCurrentAncientLevel(ancientLevels, Ancient.Pluto);
-            var currentJuggernautLevel = GetCurrentAncientLevel(ancientLevels, Ancient.Juggernaut);
-            var currentIrisLevel = GetCurrentAncientLevel(ancientLevels, Ancient.Iris);
-            var currentSolomonLevel = GetCurrentAncientLevel(ancientLevels, Ancient.Solomon);
+            var currentSiyaLevel = GetCurrentAncientLevel(gameData, ancientLevels, AncientIds.Siyalatas);
+            var currentArgaivLevel = GetCurrentAncientLevel(gameData, ancientLevels, AncientIds.Argaiv);
+            var currentMorgLevel = GetCurrentAncientLevel(gameData, ancientLevels, AncientIds.Morgulis);
+            var currentLiberLevel = GetCurrentAncientLevel(gameData, ancientLevels, AncientIds.Libertas);
+            var currentMammonLevel = GetCurrentAncientLevel(gameData, ancientLevels, AncientIds.Mammon);
+            var currentMimzeeLevel = GetCurrentAncientLevel(gameData, ancientLevels, AncientIds.Mimzee);
+            var currentFragsworthLevel = GetCurrentAncientLevel(gameData, ancientLevels, AncientIds.Fragsworth);
+            var currentBhaalLevel = GetCurrentAncientLevel(gameData, ancientLevels, AncientIds.Bhaal);
+            var currentPlutoLevel = GetCurrentAncientLevel(gameData, ancientLevels, AncientIds.Pluto);
+            var currentJuggernautLevel = GetCurrentAncientLevel(gameData, ancientLevels, AncientIds.Juggernaut);
+            var currentIrisLevel = GetCurrentAncientLevel(gameData, ancientLevels, AncientIds.Iris);
+            var currentSolomonLevel = GetCurrentAncientLevel(gameData, ancientLevels, AncientIds.Solomon);
 
             var suggestedSiyaLevel = currentSiyaLevel;
             var suggestedArgaivLevel = suggestedSiyaLevel + 9;
@@ -75,18 +76,18 @@ namespace ClickerHeroesTrackerWebsite.Models.Calculator
 
             this.SuggestedAncientLevels = new SuggestedAncientLevelData[]
             {
-                new SuggestedAncientLevelData(Ancient.Siyalatas, currentSiyaLevel, suggestedSiyaLevel, AllPlayStyles),
-                new SuggestedAncientLevelData(Ancient.Argaiv, currentArgaivLevel, suggestedArgaivLevel, AllPlayStyles),
-                new SuggestedAncientLevelData(Ancient.Morgulis, currentMorgLevel, suggestedMorgLevel, AllPlayStyles),
-                new SuggestedAncientLevelData(Ancient.Libertas, currentLiberLevel, suggestedGoldLevel, AllPlayStyles),
-                new SuggestedAncientLevelData(Ancient.Mammon, currentMammonLevel, suggestedGoldLevel, AllPlayStyles),
-                new SuggestedAncientLevelData(Ancient.Mimzee, currentMimzeeLevel, suggestedGoldLevel, AllPlayStyles),
-                new SuggestedAncientLevelData(Ancient.Fragsworth, currentFragsworthLevel, suggestedClickLevel, HybridPlayStyles),
-                new SuggestedAncientLevelData(Ancient.Bhaal, currentBhaalLevel, suggestedClickLevel, HybridPlayStyles),
-                new SuggestedAncientLevelData(Ancient.Pluto, currentPlutoLevel, suggestedClickLevel, HybridPlayStyles),
-                new SuggestedAncientLevelData(Ancient.Juggernaut, currentJuggernautLevel, suggestedJuggernautLevel, HybridPlayStyles),
-                new SuggestedAncientLevelData(Ancient.Iris, currentIrisLevel, suggestedIrisLevel, AllPlayStyles),
-                new SuggestedAncientLevelData(Ancient.Solomon, currentSolomonLevel, suggestedSolomonLevel, AllPlayStyles),
+                new SuggestedAncientLevelData(gameData, AncientIds.Siyalatas, currentSiyaLevel, suggestedSiyaLevel, AllPlayStyles),
+                new SuggestedAncientLevelData(gameData, AncientIds.Argaiv, currentArgaivLevel, suggestedArgaivLevel, AllPlayStyles),
+                new SuggestedAncientLevelData(gameData, AncientIds.Morgulis, currentMorgLevel, suggestedMorgLevel, AllPlayStyles),
+                new SuggestedAncientLevelData(gameData, AncientIds.Libertas, currentLiberLevel, suggestedGoldLevel, AllPlayStyles),
+                new SuggestedAncientLevelData(gameData, AncientIds.Mammon, currentMammonLevel, suggestedGoldLevel, AllPlayStyles),
+                new SuggestedAncientLevelData(gameData, AncientIds.Mimzee, currentMimzeeLevel, suggestedGoldLevel, AllPlayStyles),
+                new SuggestedAncientLevelData(gameData, AncientIds.Fragsworth, currentFragsworthLevel, suggestedClickLevel, HybridPlayStyles),
+                new SuggestedAncientLevelData(gameData, AncientIds.Bhaal, currentBhaalLevel, suggestedClickLevel, HybridPlayStyles),
+                new SuggestedAncientLevelData(gameData, AncientIds.Pluto, currentPlutoLevel, suggestedClickLevel, HybridPlayStyles),
+                new SuggestedAncientLevelData(gameData, AncientIds.Juggernaut, currentJuggernautLevel, suggestedJuggernautLevel, HybridPlayStyles),
+                new SuggestedAncientLevelData(gameData, AncientIds.Iris, currentIrisLevel, suggestedIrisLevel, AllPlayStyles),
+                new SuggestedAncientLevelData(gameData, AncientIds.Solomon, currentSolomonLevel, suggestedSolomonLevel, AllPlayStyles),
             };
         }
 
@@ -100,11 +101,17 @@ namespace ClickerHeroesTrackerWebsite.Models.Calculator
         /// </summary>
         public SuggestedAncientLevelData[] SuggestedAncientLevels { get; }
 
-        private static long GetCurrentAncientLevel(IDictionary<Ancient, long> ancientLevels, Ancient ancient)
+        private static long GetCurrentAncientLevel(
+            GameData gameData,
+            IDictionary<Ancient, long> ancientLevels,
+            int ancientId)
         {
+            Ancient ancient;
             long level;
-            return ancientLevels.TryGetValue(ancient, out level)
-                ? level
+            return gameData.Ancients.TryGetValue(ancientId, out ancient)
+                ? ancientLevels.TryGetValue(ancient, out level)
+                    ? level
+                    : 0
                 : 0;
         }
 
@@ -117,19 +124,29 @@ namespace ClickerHeroesTrackerWebsite.Models.Calculator
             /// Initializes a new instance of the <see cref="SuggestedAncientLevelData"/> class.
             /// </summary>
             public SuggestedAncientLevelData(
-                Ancient ancient,
+                GameData gameData,
+                int ancientId,
                 long currentLevel,
                 long suggestedLevel,
                 ISet<PlayStyle> supportedPlayStyles)
             {
                 suggestedLevel = Math.Max(suggestedLevel, 0);
 
-                this.AncientName = ancient.Name;
+                Ancient ancient;
+                this.AncientId = ancientId;
+                this.AncientName = gameData.Ancients.TryGetValue(ancientId, out ancient)
+                    ? ancient.Name
+                    : "<Unknown>";
                 this.CurrentLevel = currentLevel.ToString();
                 this.SuggestedLevel = suggestedLevel.ToString();
                 this.LevelDifference = (suggestedLevel - currentLevel).ToString();
                 this.SupportedPlayStyles = supportedPlayStyles;
             }
+
+            /// <summary>
+            /// Gets the ancient id
+            /// </summary>
+            public int AncientId { get; }
 
             /// <summary>
             /// Gets the ancient name

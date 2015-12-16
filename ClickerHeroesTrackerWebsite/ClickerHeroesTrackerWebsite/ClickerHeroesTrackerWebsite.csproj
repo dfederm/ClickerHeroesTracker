@@ -299,6 +299,19 @@
     <Compile Include="Models\ApplicationDbContext.cs" />
     <Compile Include="Models\ApplicationUser.cs" />
     <Compile Include="Models\Calculator\ExperimentalStatsViewModel.cs" />
+    <Compile Include="Models\Game\AncientIds.cs" />
+    <Compile Include="Models\Game\GameData.cs" />
+    <Compile Include="Models\Game\HeroAttackFormula.cs" />
+    <Compile Include="Models\Game\HeroClickDamageFormula.cs" />
+    <Compile Include="Models\Game\HeroCostFormula.cs" />
+    <Compile Include="Models\Game\HeroGoldPerSecondFormula.cs" />
+    <Compile Include="Models\Game\CheckFunction.cs" />
+    <Compile Include="Models\Game\HeroIds.cs" />
+    <Compile Include="Models\Game\LevelCostFormula.cs" />
+    <Compile Include="Models\Game\LevelAmountFormula.cs" />
+    <Compile Include="Models\Game\Scaling.cs" />
+    <Compile Include="Models\Game\RewardFunction.cs" />
+    <Compile Include="Models\Game\UpgradeFunction.cs" />
     <Compile Include="Models\Manage\ChangePasswordViewModel.cs" />
     <Compile Include="Models\Manage\IndexViewModel.cs" />
     <Compile Include="Models\Manage\ManageLoginsViewModel.cs" />
@@ -329,11 +342,11 @@
     <Compile Include="Database\SqlDatabaseCommand.cs" />
     <Compile Include="Models\Extensions.cs" />
     <Compile Include="Models\Game\Achievement.cs" />
-    <Compile Include="Models\Game\ItemTypes.cs" />
+    <Compile Include="Models\Game\ItemBonusType.cs" />
     <Compile Include="Models\Home\ChangelogViewModel.cs" />
     <Compile Include="Models\SaveData\Extensions.cs" />
     <Compile Include="Models\Game\Hero.cs" />
-    <Compile Include="Models\Game\HeroUpgrade.cs" />
+    <Compile Include="Models\Game\Upgrade.cs" />
     <Compile Include="Models\SaveData\HeroData.cs" />
     <Compile Include="Models\SaveData\HeroesData.cs" />
     <Compile Include="Models\SaveData\ItemData.cs" />
@@ -357,6 +370,8 @@
     <Compile Include="Unity\UnityOwinMiddleware.cs" />
     <Compile Include="Unity\UnityPerRequestLifetimeDisposingMiddleware.cs" />
     <Compile Include="Utility\DisposableBase.cs" />
+    <Compile Include="Utility\ZeroOneBoolConverter.cs" />
+    <Compile Include="Utility\StringDoubleListConverter.cs" />
     <Compile Include="Views\HtmlHelpers.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -367,7 +382,6 @@
     <Content Include="favicon.ico" />
     <Content Include="fonts\glyphicons-halflings-regular.svg" />
     <Content Include="Content\Site.css" />
-    <Content Include="Models\Game\Population.txt" />
     <Content Include="ApplicationInsights.config">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <SubType>Designer</SubType>
@@ -381,6 +395,7 @@
     <Content Include="App_Data\BuildInfo.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Include="App_Data\GameData.json" />
     <None Include="Properties\PublishProfiles\ClickerHeroesTracker.pubxml" />
     <Content Include="Scripts\bootstrap.js" />
     <Content Include="Scripts\bootstrap.min.js" />

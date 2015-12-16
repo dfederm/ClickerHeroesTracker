@@ -10,7 +10,9 @@ namespace ClickerHeroesTrackerWebsite.Models.Dashboard
     using System.Linq;
     using System.Security.Principal;
     using Database;
+    using Game;
     using Graph;
+    using Microsoft.ApplicationInsights;
     using Microsoft.AspNet.Identity;
     using Settings;
 
@@ -23,6 +25,8 @@ namespace ClickerHeroesTrackerWebsite.Models.Dashboard
         /// Initializes a new instance of the <see cref="ProgressViewModel"/> class.
         /// </summary>
         public ProgressViewModel(
+            GameData gameData,
+            TelemetryClient telemetryClient,
             IDatabaseCommandFactory databaseCommandFactory,
             IUserSettingsProvider userSettingsProvider,
             IPrincipal user)
@@ -45,7 +49,11 @@ namespace ClickerHeroesTrackerWebsite.Models.Dashboard
                 commandParameters))
             using (var reader = command.ExecuteReader())
             {
-                data = new ProgressData(reader, userSettings);
+                data = new ProgressData(
+                    gameData,
+                    telemetryClient,
+                    reader,
+                    userSettings);
             }
 
             this.ProminentGraphs = new List<GraphViewModel>

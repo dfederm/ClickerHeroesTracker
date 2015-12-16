@@ -18,15 +18,20 @@ namespace ClickerHeroesTrackerWebsite.Models.Calculator
         /// Initializes a new instance of the <see cref="ExperimentalStatsViewModel"/> class.
         /// </summary>
         public ExperimentalStatsViewModel(
+            GameData gameData,
             IDictionary<Ancient, long> ancientLevels,
             IUserSettings userSettings)
         {
-            long siyaLevel;
-            if (userSettings.PlayStyle == PlayStyle.Idle
-                && ancientLevels.TryGetValue(Ancient.Siyalatas, out siyaLevel))
+            Ancient siyalatas;
+            if (gameData.Ancients.TryGetValue(AncientIds.Siyalatas, out siyalatas))
             {
-                // Source: https://www.reddit.com/r/ClickerHeroes/comments/3f3djb/late_game_iris_and_other_large_numbers/
-                this.OptimalLevel = Math.Max(0, (int)Math.Round(371 * Math.Log(siyaLevel)) - 1080);
+                long siyaLevel;
+                if (userSettings.PlayStyle == PlayStyle.Idle
+                    && ancientLevels.TryGetValue(siyalatas, out siyaLevel))
+                {
+                    // Source: https://www.reddit.com/r/ClickerHeroes/comments/3f3djb/late_game_iris_and_other_large_numbers/
+                    this.OptimalLevel = Math.Max(0, (int)Math.Round(371 * Math.Log(siyaLevel)) - 1080);
+                }
             }
         }
 

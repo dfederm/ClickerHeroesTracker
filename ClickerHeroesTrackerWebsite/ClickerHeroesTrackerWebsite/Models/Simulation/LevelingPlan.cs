@@ -6,6 +6,7 @@ namespace ClickerHeroesTrackerWebsite.Models.Simulation
 {
     using System;
     using System.Collections.Generic;
+    using System.Linq;
     using Game;
     using SaveData;
 
@@ -14,31 +15,59 @@ namespace ClickerHeroesTrackerWebsite.Models.Simulation
     /// </summary>
     public sealed class LevelingPlan
     {
-        private HeroesData heroesData;
+        private readonly HeroesData heroesData;
 
-        private double argaivFactor;
+        private readonly double argaivFactor;
 
-        private double dogcogFactor;
+        private readonly double dogcogFactor;
 
         // result plan steps
-        private List<PlanStep> plan;
+        private readonly List<PlanStep> plan;
+
+        private readonly double currentCost;
+
+        private readonly Dictionary<int, IList<Upgrade>> heroUpgrades;
 
         private int planPos;
 
         private double currentDamage;
 
-        private double currentCost;
-
         /// <summary>
         /// Initializes a new instance of the <see cref="LevelingPlan"/> class.
         /// </summary>
-        public LevelingPlan(HeroesData heroesData, double argaivFactor, double dogcogFactor)
+        public LevelingPlan(
+            GameData gameData,
+            HeroesData heroesData,
+            double argaivFactor,
+            double dogcogFactor)
         {
             this.heroesData = heroesData;
             this.argaivFactor = argaivFactor;
             this.dogcogFactor = dogcogFactor;
 
             this.plan = new List<PlanStep>();
+
+            // Ignore the heroes new to 0.24 due to numbers getting too large. BUGBUG 74: Move to BigInteger.
+            var heroes = gameData
+                .Heroes
+                .Values
+                .Where(_ => _.Id < 35)
+                .OrderBy(_ => _.Id)
+                .ToList();
+
+            // Get a map of heroes to their upgrades.
+            this.heroUpgrades = new Dictionary<int, IList<Upgrade>>(gameData.Heroes.Count);
+            foreach (var upgrade in gameData.Upgrades.Values)
+            {
+                IList<Upgrade> upgrades;
+                if (!this.heroUpgrades.TryGetValue(upgrade.HeroId, out upgrades))
+                {
+                    upgrades = new List<Upgrade>();
+                    this.heroUpgrades.Add(upgrade.HeroId, upgrades);
+                }
+
+                upgrades.Add(upgrade);
+            }
 
             // cache of next required hero level (per hero)
             var bestList = new Dictionary<Hero, LevelingPlanInfo>();
@@ -50,23 +79,25 @@ namespace ClickerHeroesTrackerWebsite.Models.Simulation
             var damageTargetRatio = 1.05;
 
             // Compute baseline damage and levels
-            foreach (var hero in Hero.All)
+            foreach (var hero in heroes)
             {
                 // Assume all upgrades can be bought until we hit the rangers. Also, just skip Cid since he doesn't do dps.
-                var numUpgrades = hero == Hero.CidtheHelpfulAdventurer || hero.IsRanger
-                    ? 0
-                    : hero.UpgradeCosts.Length;
-                var minimumHeroLevel = numUpgrades == 0
-                    ? 0
-                    : numUpgrades == 1
-                        ? 10
-                        : (numUpgrades - 1) * 25;
+                var minimumHeroLevel = 0;
+                if (hero.Id != HeroIds.CidtheHelpfulAdventurer && !hero.IsRanger)
+                {
+                    IList<Upgrade> upgrades;
+                    if (this.heroUpgrades.TryGetValue(hero.Id, out upgrades))
+                    {
+                        minimumHeroLevel = upgrades.Max(_ => _.HeroLevelRequired);
+                    }
+                }
+
                 currentDamage += this.Damage(hero, minimumHeroLevel);
                 baselineLevels.Add(hero, minimumHeroLevel);
             }
 
             // Compute baseline bestList
-            foreach (var hero in Hero.All)
+            foreach (var hero in heroes)
             {
                 var nextBest = this.NextBest(hero, baselineLevels[hero], currentDamage * damageTargetRatio);
                 if (nextBest != null)
@@ -105,8 +136,14 @@ namespace ClickerHeroesTrackerWebsite.Models.Simulation
                 // Update target
                 currentDamage += nextBestTarget.DamageIncrease;
 
+                if (double.IsInfinity(currentDamage))
+                {
+                    // Plan over, reached infinity. BUGBUG 74: Move to BigInteger.
+                    break;
+                }
+
                 // Recompute bestList
-                foreach (var hero in Hero.All)
+                foreach (var hero in heroes)
                 {
                     if (bestList.ContainsKey(hero))
                     {
@@ -129,7 +166,7 @@ namespace ClickerHeroesTrackerWebsite.Models.Simulation
             var heroCost = new Dictionary<Hero, double>();
             currentDamage = 0d;
             var currentCost = 0d;
-            foreach (var hero in Hero.All)
+            foreach (var hero in heroes)
             {
                 var damage = this.Damage(hero, baselineLevels[hero]);
                 currentDamage += damage;
@@ -163,9 +200,11 @@ namespace ClickerHeroesTrackerWebsite.Models.Simulation
         /// This just follows the plan until the gold is expended
         /// </summary>
         /// <returns>The number of souls attainable with this plan and the given gold</returns>
-        public double GetOptimalHeroSouls(double gold)
+        public double GetOptimalHeroSouls(GameData gameData, double gold)
         {
-            if (gold < Hero.Frostleaf.Cost)
+            Hero frostleaf;
+            if (!gameData.Heroes.TryGetValue(HeroIds.Frostleaf, out frostleaf)
+                || gold < frostleaf.BaseCost)
             {
                 return 0;
             }
@@ -174,18 +213,18 @@ namespace ClickerHeroesTrackerWebsite.Models.Simulation
             return Math.Log(gold) / Math.Log(10) * .25;
 
             /*
-            //The following, while accurate, is very slow!
+            // The following, while accurate, is very slow!
             var curLevels = [];
             var heroCopy = $.extend(true, { }, Heroes);
             // heroCopy[-1] = { name: "Cid, the Helpful Adventurer", cost: 5, damage: 0, level: 0, upgrades: []};
 
-            //Zero current levels
+            // Zero current levels
             for (var i in heroCopy)
             {
                 curLevels[i] = 0;
             }
 
-            //Increment cheapest hero by 25 till gold is exhausted
+            // Increment cheapest hero by 25 till gold is exhausted
             while (true)
             {
                 var cheapest = 0;
@@ -258,9 +297,30 @@ namespace ClickerHeroesTrackerWebsite.Models.Simulation
             var x10 = Math.Min(Math.Floor(level / 1000d), 3d);
             var x4 = Math.Min(Math.Max(Math.Floor((level - 175d) / 25d), 0d) - x10, 154d);
             var x5 = hero.IsRanger ? Math.Min(Math.Max(Math.Floor((level - 500d) / 25d), 0d), 9d) : 0d;
-            return hero.Damage
+
+            var upgradeMultiplier = 1d;
+            IList<Upgrade> upgrades;
+            if (this.heroUpgrades.TryGetValue(hero.Id, out upgrades))
+            {
+                for (var i = 0; i < upgrades.Count; i++)
+                {
+                    // Assume all possible upgrades are purchaded.
+                    // Also, we do not handle upgrades purchased on one hero that applies to another specific one.
+                    if (upgrades[i].HeroLevelRequired <= level
+                        && upgrades[i].UpgradeFunction == UpgradeFunction.UpgradeHeroPercent
+                        && upgrades[i].UpgradeFunctionParameters.Length == 2
+                        && upgrades[i].UpgradeFunctionParameters[0] == hero.Id)
+                    {
+                        // The param will be like 20 (to denote a 20% increase), so we need to convert that to a multiplier like 1.20
+                        upgradeMultiplier *= 1 + (upgrades[i].UpgradeFunctionParameters[1] / 100);
+                    }
+                }
+            }
+
+            return hero.BaseAttack
                 * (1 + ((0.5 + this.argaivFactor) * this.heroesData.GetHeroGilds(hero)))
                 * level
+                * upgradeMultiplier
                 * Math.Pow(4, x4)
                 * Math.Pow(10, x10)
                 * Math.Pow(1.25, x5);
@@ -274,13 +334,19 @@ namespace ClickerHeroesTrackerWebsite.Models.Simulation
                 return 0;
             }
 
-            var cost = hero.Cost * Math.Pow(1.07, level) / 0.07 * (1 - this.dogcogFactor);
+            var cost = hero.BaseCost * Math.Pow(1.07, level) / 0.07 * (1 - this.dogcogFactor);
 
             // Assume all upgrades are purchased to the current level
-            var numUpgrades = Math.Min(hero.UpgradeCosts.Length, (level >= 10 ? 1 : 0) + (level / 25));
-            for (int i = 0; i < numUpgrades; i++)
+            IList<Upgrade> upgrades;
+            if (this.heroUpgrades.TryGetValue(hero.Id, out upgrades))
             {
-                cost += hero.UpgradeCosts[i];
+                for (int i = 0; i < upgrades.Count; i++)
+                {
+                    if (level >= upgrades[i].HeroLevelRequired)
+                    {
+                        cost += upgrades[i].GetCost(hero);
+                    }
+                }
             }
 
             return cost;

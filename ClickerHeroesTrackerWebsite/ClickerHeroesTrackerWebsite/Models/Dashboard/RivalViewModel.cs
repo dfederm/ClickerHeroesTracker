@@ -10,7 +10,9 @@ namespace ClickerHeroesTrackerWebsite.Models.Dashboard
     using System.Linq;
     using System.Security.Principal;
     using Database;
+    using Game;
     using Graph;
+    using Microsoft.ApplicationInsights;
     using Microsoft.AspNet.Identity;
     using Settings;
 
@@ -23,6 +25,8 @@ namespace ClickerHeroesTrackerWebsite.Models.Dashboard
         /// Initializes a new instance of the <see cref="RivalViewModel"/> class.
         /// </summary>
         public RivalViewModel(
+            GameData gameData,
+            TelemetryClient telemetryClient,
             IDatabaseCommandFactory databaseCommandFactory,
             IUserSettingsProvider userSettingsProvider,
             IPrincipal user,
@@ -50,7 +54,11 @@ namespace ClickerHeroesTrackerWebsite.Models.Dashboard
                 parameters))
             using (var reader = command.ExecuteReader())
             {
-                userData = new ProgressData(reader, userSettings);
+                userData = new ProgressData(
+                    gameData,
+                    telemetryClient,
+                    reader,
+                    userSettings);
                 if (!reader.NextResult())
                 {
                     return;
@@ -70,7 +78,11 @@ namespace ClickerHeroesTrackerWebsite.Models.Dashboard
                     return;
                 }
 
-                rivalData = new ProgressData(reader, userSettings);
+                rivalData = new ProgressData(
+                    gameData,
+                    telemetryClient,
+                    reader,
+                    userSettings);
             }
 
             this.ProminentGraphs = new List<GraphViewModel>

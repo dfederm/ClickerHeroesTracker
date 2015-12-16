@@ -26,7 +26,7 @@
         <tr>
             <td>
                 @ancient.AncientName:
-                @if (ancient.AncientName == Ancient.Solomon.Name)
+                @if (ancient.AncientId == AncientIds.Solomon)
                 {
                     var solomonTooltip = this.Request.IsAuthenticated
                         ? "This is using your settings for the Solomon formula preference. You can change this on your settings page."
@@ -36,7 +36,7 @@
             </td>
             <td class="text-right">@ancient.CurrentLevel</td>
 
-            @if (ancient.AncientName == Ancient.Siyalatas.Name)
+            @if (ancient.AncientId == AncientIds.Siyalatas)
             {
                 <td class="text-right">
                     N/A

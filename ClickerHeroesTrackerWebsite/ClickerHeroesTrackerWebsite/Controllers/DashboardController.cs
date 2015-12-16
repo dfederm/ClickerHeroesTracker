@@ -6,7 +6,9 @@ namespace ClickerHeroesTrackerWebsite.Controllers
 {
     using System.Web.Mvc;
     using Database;
+    using Microsoft.ApplicationInsights;
     using Models.Dashboard;
+    using Models.Game;
     using Models.Settings;
 
     /// <summary>
@@ -15,6 +17,10 @@ namespace ClickerHeroesTrackerWebsite.Controllers
     [Authorize]
     public class DashboardController : Controller
     {
+        private readonly GameData gameData;
+
+        private readonly TelemetryClient telemetryClient;
+
         private readonly IDatabaseCommandFactory databaseCommandFactory;
 
         private readonly IUserSettingsProvider userSettingsProvider;
@@ -23,9 +29,13 @@ namespace ClickerHeroesTrackerWebsite.Controllers
         /// Initializes a new instance of the <see cref="DashboardController"/> class.
         /// </summary>
         public DashboardController(
+            GameData gameData,
+            TelemetryClient telemetryClient,
             IDatabaseCommandFactory databaseCommandFactory,
             IUserSettingsProvider userSettingsProvider)
         {
+            this.gameData = gameData;
+            this.telemetryClient = telemetryClient;
             this.databaseCommandFactory = databaseCommandFactory;
             this.userSettingsProvider = userSettingsProvider;
         }
@@ -37,6 +47,8 @@ namespace ClickerHeroesTrackerWebsite.Controllers
         public ActionResult Index()
         {
             var model = new DashboardViewModel(
+                this.gameData,
+                this.telemetryClient,
                 this.databaseCommandFactory,
                 this.userSettingsProvider,
                 this.User);
@@ -65,6 +77,8 @@ namespace ClickerHeroesTrackerWebsite.Controllers
         public ActionResult Progress()
         {
             var model = new ProgressViewModel(
+                this.gameData,
+                this.telemetryClient,
                 this.databaseCommandFactory,
                 this.userSettingsProvider,
                 this.User);
@@ -91,6 +105,8 @@ namespace ClickerHeroesTrackerWebsite.Controllers
             }
 
             var model = new RivalViewModel(
+                this.gameData,
+                this.telemetryClient,
                 this.databaseCommandFactory,
                 this.userSettingsProvider,
                 this.User,

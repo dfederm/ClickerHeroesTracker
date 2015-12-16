@@ -10,10 +10,10 @@ namespace ClickerHeroesTrackerWebsite.Models.SaveData
 
     internal static class Extensions
     {
-        public static long GetAncientLevel(this AncientsData ancientsData, Ancient ancient)
+        public static long GetAncientLevel(this AncientsData ancientsData, int ancientId)
         {
             AncientData ancientData;
-            return ancientsData.Ancients.TryGetValue(ancient.Id, out ancientData)
+            return ancientsData.Ancients.TryGetValue(ancientId, out ancientData)
                 ? ancientData.Level
                 : 0;
         }
@@ -26,17 +26,17 @@ namespace ClickerHeroesTrackerWebsite.Models.SaveData
                 : 0;
         }
 
-        public static int GetItemLevel(this IDictionary<Ancient, int> itemLevels, Ancient ancient)
+        public static int GetItemLevel(this IDictionary<int, int> itemLevels, int ancientId)
         {
             int itemLevel;
-            return itemLevels.TryGetValue(ancient, out itemLevel)
+            return itemLevels.TryGetValue(ancientId, out itemLevel)
                 ? itemLevel
                 : 0;
         }
 
-        public static IDictionary<Ancient, int> GetItemLevels(this ItemsData itemsData)
+        public static IDictionary<int, int> GetItemLevels(this ItemsData itemsData)
         {
-            var itemLevels = new Dictionary<Ancient, int>();
+            var itemLevels = new Dictionary<int, int>();
 
             if (itemsData != null)
             {
@@ -65,7 +65,10 @@ namespace ClickerHeroesTrackerWebsite.Models.SaveData
             return itemLevels;
         }
 
-        private static void AddItemLevels(Dictionary<Ancient, int> itemLevels, int? itemType, int? itemLevel)
+        private static void AddItemLevels(
+            Dictionary<int, int> itemLevels,
+            int? itemType,
+            int? itemLevel)
         {
             if (itemType == null
                 || itemLevel == null
@@ -74,20 +77,20 @@ namespace ClickerHeroesTrackerWebsite.Models.SaveData
                 return;
             }
 
-            var ancient = ItemTypes.GetAncient(itemType.Value);
-            if (ancient == null)
+            var ancientId = ItemBonusType.GetAncientId(itemType.Value);
+            if (ancientId == 0)
             {
                 return;
             }
 
             int currentLevel;
-            if (itemLevels.TryGetValue(ancient, out currentLevel))
+            if (itemLevels.TryGetValue(ancientId, out currentLevel))
             {
-                itemLevels[ancient] = currentLevel + itemLevel.Value;
+                itemLevels[ancientId] = currentLevel + itemLevel.Value;
             }
             else
             {
-                itemLevels.Add(ancient, itemLevel.Value);
+                itemLevels.Add(ancientId, itemLevel.Value);
             }
         }
     }

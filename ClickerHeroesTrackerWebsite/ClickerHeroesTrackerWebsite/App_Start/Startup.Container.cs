@@ -5,6 +5,7 @@
 namespace ClickerHeroesTrackerWebsite
 {
     using System.Linq;
+    using System.Web.Hosting;
     using System.Web.Http;
     using System.Web.Mvc;
     using Configuration;
@@ -13,6 +14,7 @@ namespace ClickerHeroesTrackerWebsite
     using Microsoft.ApplicationInsights;
     using Microsoft.Practices.Unity;
     using Microsoft.Practices.Unity.Mvc;
+    using Models.Game;
     using Models.Settings;
     using UnityLib = Microsoft.Practices.Unity;
 
@@ -48,6 +50,7 @@ namespace ClickerHeroesTrackerWebsite
         private static void RegisterTypes(UnityContainer container)
         {
             // Container controlled registrations
+            container.RegisterType<GameData>(new ContainerControlledLifetimeManager(), new InjectionFactory(_ => GameData.Parse(HostingEnvironment.MapPath("~\\App_Data\\GameData.json"))));
             container.RegisterType<HttpConfiguration>(new ContainerControlledLifetimeManager(), new InjectionFactory(_ => new HttpConfiguration()));
             container.RegisterType<IEnvironmentProvider, EnvironmentProvider>(new ContainerControlledLifetimeManager());
 

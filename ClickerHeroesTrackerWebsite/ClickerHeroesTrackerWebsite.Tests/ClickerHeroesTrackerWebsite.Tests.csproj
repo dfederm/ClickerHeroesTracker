@@ -37,6 +37,10 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Microsoft.ApplicationInsights, Version=2.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.ApplicationInsights.2.0.0-beta3\lib\net46\Microsoft.ApplicationInsights.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="Microsoft.Owin, Version=3.0.1.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\packages\Microsoft.Owin.3.0.1\lib\net45\Microsoft.Owin.dll</HintPath>
@@ -125,6 +129,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Mocks\MockGameData.cs" />
     <Compile Include="Models\ConfirmViewModelTests.cs" />
     <Compile Include="Models\SavedGameTests.cs" />
     <Compile Include="Models\SimulationTests.cs" />
@@ -133,6 +138,10 @@
     <Compile Include="Unity\UnityOwinMiddlewareTests.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\ClickerHeroesTrackerWebsite\App_Data\GameData.json">
+      <Link>GameData.json</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="app.config" />
     <None Include="packages.config" />
     <AdditionalFiles Include="..\Build\stylecop.json">

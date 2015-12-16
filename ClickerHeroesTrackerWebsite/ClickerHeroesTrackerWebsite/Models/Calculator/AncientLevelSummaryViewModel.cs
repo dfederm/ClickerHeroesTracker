@@ -8,6 +8,7 @@ namespace ClickerHeroesTrackerWebsite.Models.Calculator
     using System.Collections.Generic;
     using System.Data.SqlClient;
     using Game;
+    using Microsoft.ApplicationInsights;
     using SaveData;
 
     /// <summary>
@@ -18,15 +19,18 @@ namespace ClickerHeroesTrackerWebsite.Models.Calculator
         /// <summary>
         /// Initializes a new instance of the <see cref="AncientLevelSummaryViewModel"/> class.
         /// </summary>
-        public AncientLevelSummaryViewModel(AncientsData ancientsData)
+        public AncientLevelSummaryViewModel(
+            GameData gameData,
+            AncientsData ancientsData,
+            TelemetryClient telemetryClient)
         {
             var ancientLevels = new SortedDictionary<Ancient, long>(AncientComparer.Instance);
             foreach (var ancientData in ancientsData.Ancients.Values)
             {
-                var ancient = Ancient.Get(ancientData.Id);
-                if (ancient == null)
+                Ancient ancient;
+                if (!gameData.Ancients.TryGetValue(ancientData.Id, out ancient))
                 {
-                    // An ancient we didn't know about?
+                    telemetryClient.TrackEvent("Unknown ancient", new Dictionary<string, string> { { "AncientId", ancientData.Id.ToString() } });
                     continue;
                 }
 
@@ -39,7 +43,10 @@ namespace ClickerHeroesTrackerWebsite.Models.Calculator
         /// <summary>
         /// Initializes a new instance of the <see cref="AncientLevelSummaryViewModel"/> class.
         /// </summary>
-        public AncientLevelSummaryViewModel(SqlDataReader reader)
+        public AncientLevelSummaryViewModel(
+            GameData gameData,
+            SqlDataReader reader,
+            TelemetryClient telemetryClient)
         {
             var ancientLevels = new SortedDictionary<Ancient, long>(AncientComparer.Instance);
             while (reader.Read())
@@ -47,7 +54,12 @@ namespace ClickerHeroesTrackerWebsite.Models.Calculator
                 var ancientId = Convert.ToInt32(reader["AncientId"]);
                 var level = Convert.ToInt64(reader["Level"]);
 
-                var ancient = Ancient.Get(ancientId);
+                Ancient ancient;
+                if (!gameData.Ancients.TryGetValue(ancientId, out ancient))
+                {
+                    telemetryClient.TrackEvent("Unknown ancient", new Dictionary<string, string> { { "AncientId", ancientId.ToString() } });
+                    continue;
+                }
 
                 ancientLevels.Add(ancient, level);
             }

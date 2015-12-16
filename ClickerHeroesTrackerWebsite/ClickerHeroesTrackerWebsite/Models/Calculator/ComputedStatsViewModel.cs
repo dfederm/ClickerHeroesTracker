@@ -9,6 +9,7 @@ namespace ClickerHeroesTrackerWebsite.Models.Calculator
     using System.Linq;
     using ClickerHeroesTrackerWebsite.Models.SaveData;
     using ClickerHeroesTrackerWebsite.Models.Simulation;
+    using Game;
     using Settings;
 
     /// <summary>
@@ -19,12 +20,18 @@ namespace ClickerHeroesTrackerWebsite.Models.Calculator
         /// <summary>
         /// Initializes a new instance of the <see cref="ComputedStatsViewModel"/> class.
         /// </summary>
-        public ComputedStatsViewModel(SavedGame savedGame, IUserSettings userSettings)
+        public ComputedStatsViewModel(
+            GameData gameData,
+            SavedGame savedGame,
+            IUserSettings userSettings)
         {
             this.UserSettings = userSettings;
 
             // No activities for now; assume idle mode
-            var simulationResult = new Simulation(savedGame, null).Run();
+            var simulationResult = new Simulation(
+                gameData,
+                savedGame,
+                null).Run();
 
             this.SoulsPerHour = Convert.ToInt64(Math.Round(simulationResult.Ratio * 3600));
             this.OptimalLevel = simulationResult.Level;
