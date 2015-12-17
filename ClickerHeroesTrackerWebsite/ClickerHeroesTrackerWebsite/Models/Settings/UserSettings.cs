@@ -105,7 +105,7 @@ namespace ClickerHeroesTrackerWebsite.Models.Settings
         {
             get
             {
-                return this.GetValue(6, bool.TryParse, false);
+                return this.GetValue(6, bool.TryParse, true);
             }
 
             set

@@ -74,8 +74,9 @@ namespace ClickerHeroesTrackerWebsite.Models.Calculator
             }
             else
             {
-                // Always be between 201 and 300 below the optimal level, always at a multiple of 100, minus 1.
-                suggestedIrisLevel = optimalLevel - (optimalLevel % 100) - 201;
+                ////// Always be between 201 and 300 below the optimal level, always at a multiple of 100, minus 1.
+                ////suggestedIrisLevel = optimalLevel - (optimalLevel % 100) - 201;
+                suggestedIrisLevel = optimalLevel - 1001;
             }
 
             var solomonMultipliers = SolomonFormulaMultipliers[userSettings.PlayStyle];
