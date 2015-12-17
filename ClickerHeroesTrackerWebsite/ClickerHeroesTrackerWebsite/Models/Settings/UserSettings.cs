@@ -101,19 +101,6 @@ namespace ClickerHeroesTrackerWebsite.Models.Settings
             }
         }
 
-        public bool Prefer30MinuteRuns
-        {
-            get
-            {
-                return this.GetValue(6, bool.TryParse, true);
-            }
-
-            set
-            {
-                this.SetValue(6, value.ToString());
-            }
-        }
-
         internal void FlushChanges()
         {
             if (this.userId == null)

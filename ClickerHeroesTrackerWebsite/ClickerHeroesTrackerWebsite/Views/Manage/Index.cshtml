@@ -92,15 +92,6 @@
             </dd>
         </dl>
         <dl class="dl-horizontal">
-            <dt>
-                @Html.LabelFor(m => m.Prefer30MinuteRuns)
-                <a href="#" class="text-muted" data-toggle="tooltip" data-placement="bottom" title="This is less optimal mathematically, but some players prefer the &quot;30 minute rule&quot; for run length.">(?)</a>
-            </dt>
-            <dd>
-                @Html.CheckBoxFor(m => m.Prefer30MinuteRuns, Model.Prefer30MinuteRuns ? checkedAttribute : null)
-            </dd>
-        </dl>
-        <dl class="dl-horizontal">
             <dt></dt>
             <dd>
                 <input type="submit" class="btn btn-default" value="Save Changes" />

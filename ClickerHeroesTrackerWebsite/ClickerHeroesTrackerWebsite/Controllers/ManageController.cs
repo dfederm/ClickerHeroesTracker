@@ -130,7 +130,6 @@ namespace ClickerHeroesTrackerWebsite.Controllers
             userSettings.UseReducedSolomonFormula = indexViewModel.SolomonFormula.Equals("Log", StringComparison.OrdinalIgnoreCase);
             userSettings.PlayStyle = indexViewModel.PlayStyle.SafeParseEnum<PlayStyle>();
             userSettings.UseExperimentalStats = indexViewModel.UseExperimentalStats;
-            userSettings.Prefer30MinuteRuns = indexViewModel.Prefer30MinuteRuns;
 
             return await this.GetIndexResult(userId, userSettings);
         }
@@ -334,7 +333,6 @@ namespace ClickerHeroesTrackerWebsite.Controllers
                 SolomonFormula = userSettings.UseReducedSolomonFormula ? "Log" : "Ln",
                 PlayStyle = userSettings.PlayStyle.ToString(),
                 UseExperimentalStats = userSettings.UseExperimentalStats,
-                Prefer30MinuteRuns = userSettings.Prefer30MinuteRuns,
             };
 
             return this.View(model);

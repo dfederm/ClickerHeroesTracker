@@ -66,18 +66,7 @@ namespace ClickerHeroesTrackerWebsite.Models.Calculator
             var suggestedGoldLevel = (long)Math.Round(suggestedSiyaLevel * 0.93);
             var suggestedClickLevel = (long)Math.Round(suggestedSiyaLevel * 0.5);
             var suggestedJuggernautLevel = (long)Math.Round(Math.Pow(suggestedClickLevel, 0.8));
-
-            int suggestedIrisLevel;
-            if (userSettings.Prefer30MinuteRuns)
-            {
-                suggestedIrisLevel = optimalLevel - 1001;
-            }
-            else
-            {
-                ////// Always be between 201 and 300 below the optimal level, always at a multiple of 100, minus 1.
-                ////suggestedIrisLevel = optimalLevel - (optimalLevel % 100) - 201;
-                suggestedIrisLevel = optimalLevel - 1001;
-            }
+            var suggestedIrisLevel = optimalLevel - 1001;
 
             var solomonMultipliers = SolomonFormulaMultipliers[userSettings.PlayStyle];
             var solomonLogFunction = userSettings.UseReducedSolomonFormula

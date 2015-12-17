@@ -63,12 +63,6 @@ namespace ClickerHeroesTrackerWebsite.Models
         public bool UseExperimentalStats { get; set; }
 
         /// <summary>
-        /// Gets or sets a value indicating whether the user prefers 30 minute runs, which are less optimal.
-        /// </summary>
-        [Display(Name = "Prefer 30 minute runs")]
-        public bool Prefer30MinuteRuns { get; set; }
-
-        /// <summary>
         /// Model for an option for the time zone select control.
         /// </summary>
         public class TimeZoneSelectItem
