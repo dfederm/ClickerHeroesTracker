@@ -35,5 +35,10 @@ namespace ClickerHeroesTrackerWebsite.Models.Settings
         /// Gets or sets a value indicating whether the user wants to see experimental stats
         /// </summary>
         bool UseExperimentalStats { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether the user prefers 30 minute runs, which are less optimal.
+        /// </summary>
+        bool Prefer30MinuteRuns { get; set; }
     }
 }
