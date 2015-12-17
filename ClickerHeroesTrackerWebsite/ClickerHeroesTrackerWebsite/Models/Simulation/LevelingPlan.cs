@@ -51,7 +51,7 @@ namespace ClickerHeroesTrackerWebsite.Models.Simulation
             var heroes = gameData
                 .Heroes
                 .Values
-                .Where(_ => _.Id < 35)
+                .Where(_ => _.Id <= 35)
                 .OrderBy(_ => _.Id)
                 .ToList();
 
