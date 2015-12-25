@@ -1,17 +1,15 @@
-﻿@using ClickerHeroesTrackerWebsite.Models;
-@using ClickerHeroesTrackerWebsite.Models.Calculator;
+﻿@using ClickerHeroesTrackerWebsite.Models.Calculator;
 @using ClickerHeroesTrackerWebsite.Models.Game;
 
 @model SuggestedAncientLevelsViewModel
 
 <h4>Suggested Leveling Plan:</h4>
 <p class="text-muted">
-    Based on the <a href="http://redd.it/339m3j" target="_blank">Rules of Thumb</a>.
+    Based on the <a href="https://redd.it/3y57jd" target="_blank">Rules of Thumb</a>.
 </p>
 
-@{ var cssClass = Model.UserSettings.PlayStyle != PlayStyle.Active ? "text-muted" : "text-danger"; }
-<p class="@cssClass">
-    Currently these suggestions are not optimized for Active play style. You may change your play style in your @Html.ActionLink("settings", "Index", "Manage")
+<p class="text-muted">
+    These suggestions are based on your play style. You may change your play style in your @Html.ActionLink("settings", "Index", "Manage").
 </p>
 
 <table class="table">
@@ -21,7 +19,7 @@
         <th>Suggested</th>
         <th>Difference</th>
     </tr>
-    @foreach (var ancient in Model.SuggestedAncientLevels.Where(x => x.SupportedPlayStyles.Contains(Model.UserSettings.PlayStyle)))
+    @foreach (var ancient in Model.SuggestedAncientLevels)
     {
         <tr>
             <td>
@@ -36,7 +34,7 @@
             </td>
             <td class="text-right">@ancient.CurrentLevel</td>
 
-            @if (ancient.AncientId == AncientIds.Siyalatas)
+            @if (ancient.AncientId == Model.PrimaryAncientId)
             {
                 <td class="text-right">
                     N/A

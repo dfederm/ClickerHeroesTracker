@@ -69,7 +69,7 @@ namespace ClickerHeroesTrackerWebsite.Tests.Models
 
             Assert.IsNotNull(viewModel.SuggestedAncientLevelsViewModel);
             Assert.IsNotNull(viewModel.SuggestedAncientLevelsViewModel.SuggestedAncientLevels);
-            Assert.AreEqual(12, viewModel.SuggestedAncientLevelsViewModel.SuggestedAncientLevels.Length);
+            Assert.AreEqual(8, viewModel.SuggestedAncientLevelsViewModel.SuggestedAncientLevels.Length);
 
             foreach (var suggestedAncientLevel in viewModel.SuggestedAncientLevelsViewModel.SuggestedAncientLevels)
             {
