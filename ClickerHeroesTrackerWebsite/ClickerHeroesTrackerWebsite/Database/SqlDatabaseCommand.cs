@@ -17,11 +17,10 @@ namespace ClickerHeroesTrackerWebsite.Database
 
         private SqlCommand command;
 
+        private SqlTransaction transaction;
+
         public SqlDatabaseCommand(
             SqlConnection connection,
-            string commandText,
-            CommandType commandType,
-            IDictionary<string, object> parameters,
             ICounterProvider counterProvider)
         {
             if (connection == null)
@@ -29,31 +28,22 @@ namespace ClickerHeroesTrackerWebsite.Database
                 throw new ArgumentNullException("connection");
             }
 
-            if (string.IsNullOrEmpty(commandText))
-            {
-                throw new ArgumentException("value may not be empty", "commandText");
-            }
-
-            if (parameters == null)
-            {
-                throw new ArgumentNullException("parameters");
-            }
-
             if (counterProvider == null)
             {
                 throw new ArgumentNullException("counterProvider");
             }
 
-            this.command = new SqlCommand(commandText, connection);
-            this.command.CommandType = commandType;
-
-            foreach (var parameter in parameters)
-            {
-                this.command.Parameters.AddWithValue(parameter.Key, parameter.Value);
-            }
+            this.command = new SqlCommand();
+            this.command.Connection = connection;
 
             this.counterProvider = counterProvider;
         }
+
+        public string CommandText { get; set; }
+
+        public CommandType CommandType { get; set; }
+
+        public IDictionary<string, object> Parameters { get; set; }
 
         public void AddParameter(string parameterName, object value)
         {
@@ -80,20 +70,61 @@ namespace ClickerHeroesTrackerWebsite.Database
             return returnParameter;
         }
 
+        public void BeginTransaction()
+        {
+            if (this.transaction != null)
+            {
+                throw new InvalidOperationException("This command has already begun a transaction");
+            }
+
+            this.transaction = this.command.Connection.BeginTransaction();
+            this.command.Transaction = this.transaction;
+        }
+
+        public bool CommitTransaction()
+        {
+            if (this.transaction == null)
+            {
+                throw new InvalidOperationException("This command hasn't begun a transaction");
+            }
+
+            try
+            {
+                this.transaction.Commit();
+                return true;
+            }
+            catch (Exception)
+            {
+                this.transaction.Rollback();
+                return false;
+            }
+        }
+
         public void ExecuteNonQuery()
         {
-            this.EnsureNotDisposed();
+            this.PrepareForExecution();
 
             using (this.counterProvider.Suspend(Counter.Internal))
             using (this.counterProvider.Measure(Counter.Dependency))
             {
-                    this.command.ExecuteNonQuery();
+                this.command.ExecuteNonQuery();
+            }
+        }
+
+        public object ExecuteScalar()
+        {
+            this.PrepareForExecution();
+
+            using (this.counterProvider.Suspend(Counter.Internal))
+            using (this.counterProvider.Measure(Counter.Dependency))
+            {
+                return this.command.ExecuteScalar();
             }
         }
 
         public SqlDataReader ExecuteReader()
         {
-            this.EnsureNotDisposed();
+            this.PrepareForExecution();
 
             using (this.counterProvider.Suspend(Counter.Internal))
             using (this.counterProvider.Measure(Counter.Dependency))
@@ -104,10 +135,35 @@ namespace ClickerHeroesTrackerWebsite.Database
 
         protected override void Dispose(bool isDisposing)
         {
+            if (this.transaction != null)
+            {
+                this.transaction.Dispose();
+                this.transaction = null;
+            }
+
             if (this.command != null)
             {
                 this.command.Dispose();
                 this.command = null;
+            }
+        }
+
+        private void PrepareForExecution()
+        {
+            this.EnsureNotDisposed();
+
+            if (string.IsNullOrEmpty(this.CommandText))
+            {
+                throw new InvalidOperationException("CommandText may not be empty");
+            }
+
+            this.command.CommandText = this.CommandText;
+            this.command.CommandType = this.CommandType;
+
+            this.command.Parameters.Clear();
+            foreach (var parameter in this.Parameters)
+            {
+                this.command.Parameters.AddWithValue(parameter.Key, parameter.Value ?? DBNull.Value);
             }
         }
     }

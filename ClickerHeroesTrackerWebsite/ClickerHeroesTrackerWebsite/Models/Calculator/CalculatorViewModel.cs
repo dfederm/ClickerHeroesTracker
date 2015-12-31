@@ -28,100 +28,6 @@ namespace ClickerHeroesTrackerWebsite.Models.Calculator
             IUserSettingsProvider userSettingsProvider,
             GameData gameData,
             TelemetryClient telemetryClient,
-            string encodedSaveData,
-            IIdentity user,
-            bool addToProgress)
-        {
-            var savedGame = SavedGame.Parse(encodedSaveData);
-            if (savedGame == null)
-            {
-                return;
-            }
-
-            var userId = user?.GetUserId();
-            this.UserSettings = userSettingsProvider.Get(userId);
-
-            // Finally, populate the view models
-            this.IsPublic = this.UserSettings.AreUploadsPublic;
-            this.IsOwn = this.IsPermitted = this.IsValid = true;
-
-            this.UploadUserName = user?.GetUserName();
-            this.UploadTime = DateTime.UtcNow;
-            this.UploadContent = encodedSaveData;
-
-            this.AncientLevelSummaryViewModel = new AncientLevelSummaryViewModel(
-                gameData,
-                savedGame.AncientsData,
-                telemetryClient);
-            ////this.HeroLevelSummaryViewModel = new HeroLevelSummaryViewModel(savedGame.HeroesData);
-            this.ComputedStatsViewModel = new ComputedStatsViewModel(
-                gameData,
-                savedGame,
-                this.UserSettings);
-            this.SuggestedAncientLevelsViewModel = new SuggestedAncientLevelsViewModel(
-                gameData,
-                this.AncientLevelSummaryViewModel.AncientLevels,
-                this.ComputedStatsViewModel.OptimalLevel,
-                this.UserSettings);
-            if (this.UserSettings.UseExperimentalStats)
-            {
-                this.ExperimentalStatsViewModel = new ExperimentalStatsViewModel(
-                    gameData,
-                    this.AncientLevelSummaryViewModel.AncientLevels,
-                    this.UserSettings);
-            }
-
-            if (addToProgress && user.IsAuthenticated)
-            {
-                var parameters = new Dictionary<string, object>
-                {
-                    // Upload data
-                    { "@UserId", userId },
-                    { "@UploadContent", encodedSaveData },
-
-                    // Computed stats
-                    { "@OptimalLevel", this.ComputedStatsViewModel.OptimalLevel },
-                    { "@SoulsPerHour", this.ComputedStatsViewModel.SoulsPerHour },
-                    { "@SoulsPerAscension", this.ComputedStatsViewModel.OptimalSoulsPerAscension },
-                    { "@AscensionTime", this.ComputedStatsViewModel.OptimalAscensionTime },
-                    { "@TitanDamage", this.ComputedStatsViewModel.TitanDamage },
-                    { "@SoulsSpent", this.ComputedStatsViewModel.SoulsSpent },
-                };
-                using (var command = databaseCommandFactory.Create(
-                    "UploadSaveData",
-                    CommandType.StoredProcedure,
-                    parameters))
-                {
-                    // Ancient levels
-                    DataTable ancientLevelTable = new DataTable();
-                    ancientLevelTable.Columns.Add("AncientId", typeof(int));
-                    ancientLevelTable.Columns.Add("Level", typeof(long));
-                    foreach (var pair in this.AncientLevelSummaryViewModel.AncientLevels)
-                    {
-                        ancientLevelTable.Rows.Add(pair.Key.Id, pair.Value);
-                    }
-
-                    // BUGBUG 63 - Remove casts to SqlDatabaseCommand
-                    ((SqlDatabaseCommand)command).AddTableParameter("@AncientLevelUploads", "AncientLevelUpload", ancientLevelTable);
-
-                    // BUGBUG 63 - Remove casts to SqlDatabaseCommand
-                    var returnParameter = ((SqlDatabaseCommand)command).AddReturnParameter();
-
-                    command.ExecuteNonQuery();
-
-                    this.UploadId = Convert.ToInt32(returnParameter.Value);
-                }
-            }
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="CalculatorViewModel"/> class.
-        /// </summary>
-        public CalculatorViewModel(
-            IDatabaseCommandFactory databaseCommandFactory,
-            IUserSettingsProvider userSettingsProvider,
-            GameData gameData,
-            TelemetryClient telemetryClient,
             int uploadId,
             IPrincipal user)
         {
@@ -174,17 +80,18 @@ namespace ClickerHeroesTrackerWebsite.Models.Calculator
                 this.ComputedStatsViewModel = new ComputedStatsViewModel(reader, this.UserSettings);
             }
 
+            var isUploadAnonymous = string.IsNullOrEmpty(uploadUserId);
             this.IsOwn = string.Equals(userId, uploadUserId, StringComparison.OrdinalIgnoreCase);
             if (this.IsOwn)
             {
-                this.IsPublic = this.UserSettings.AreUploadsPublic;
+                this.IsPublic = isUploadAnonymous || this.UserSettings.AreUploadsPublic;
                 this.IsPermitted = true;
             }
             else
             {
                 var uploadUserSettings = userSettingsProvider.Get(uploadUserId);
 
-                this.IsPublic = uploadUserSettings.AreUploadsPublic;
+                this.IsPublic = isUploadAnonymous || uploadUserSettings.AreUploadsPublic;
                 this.IsPermitted = this.IsPublic || user.IsInRole("Admin");
             }
 

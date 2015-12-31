@@ -275,6 +275,7 @@
     <Compile Include="Controllers\ManageController.cs" />
     <Compile Include="Controllers\UploadController.cs" />
     <Compile Include="Controllers\VersionController.cs" />
+    <Compile Include="Database\DatabaseCommandFactoryExtensions.cs" />
     <Compile Include="Database\IDatabaseCommand.cs" />
     <Compile Include="Database\IDatabaseCommandFactory.cs" />
     <Compile Include="Database\DatabaseCommandFactory.cs" />
@@ -362,7 +363,6 @@
     <Compile Include="Models\SaveData\AncientsData.cs" />
     <Compile Include="Models\Calculator\HeroLevelSummaryViewModel.cs" />
     <Compile Include="Models\Calculator\SuggestedAncientLevelsViewModel.cs" />
-    <Compile Include="Models\Upload\UploadViewModel.cs" />
     <Compile Include="Models\Settings\UserSettings.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="App_Start\Startup.cs" />
@@ -498,6 +498,7 @@
     <TypeScriptCompile Include="Scripts\typings\Models\PaginationMetadata.d.ts" />
     <TypeScriptCompile Include="Scripts\typings\Models\Uploads\UploadSummary.d.ts" />
     <TypeScriptCompile Include="Scripts\typings\Models\Uploads\UploadSummaryListResponse.d.ts" />
+    <TypeScriptCompile Include="Scripts\AddUpload.ts" />
     <TypeScriptCompile Include="Scripts\UploadTable.ts" />
   </ItemGroup>
   <ItemGroup>

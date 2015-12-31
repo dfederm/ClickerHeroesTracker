@@ -10,7 +10,6 @@ namespace ClickerHeroesTrackerWebsite.Controllers
     using Models.Calculator;
     using Models.Game;
     using Models.Settings;
-    using Models.Upload;
 
     /// <summary>
     /// The calculator controller shows stats for a given upload.
@@ -41,31 +40,6 @@ namespace ClickerHeroesTrackerWebsite.Controllers
         }
 
         /// <summary>
-        /// Commit an upload to the database and show the calculator for that upload.
-        /// </summary>
-        /// <param name="uploadViewModel">The user-submitted upload data</param>
-        /// <returns>The calculator view</returns>
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public ActionResult Upload(UploadViewModel uploadViewModel)
-        {
-            if (!this.ModelState.IsValid)
-            {
-                return this.RedirectToAction("Index", "Upload");
-            }
-
-            var model = new CalculatorViewModel(
-                this.databaseCommandFactory,
-                this.userSettingsProvider,
-                this.gameData,
-                this.telemetryClient,
-                uploadViewModel.EncodedSaveData,
-                this.User.Identity,
-                uploadViewModel.AddToProgress);
-            return this.GetResult(model, true);
-        }
-
-        /// <summary>
         /// Show the calculator for an existing upload.
         /// </summary>
         /// <param name="uploadId">Id of the upload to view</param>
@@ -81,22 +55,11 @@ namespace ClickerHeroesTrackerWebsite.Controllers
                     uploadId.Value,
                     this.User)
                 : null;
-            return this.GetResult(model, false);
-        }
 
-        private ActionResult GetResult(CalculatorViewModel model, bool wasDataPosted)
-        {
             string errorMessage = null;
             if (model == null || !model.IsValid)
             {
-                if (wasDataPosted)
-                {
-                    errorMessage = "The uploaded save was not valid";
-                }
-                else
-                {
-                    errorMessage = "The upload does not exist";
-                }
+                errorMessage = "The upload does not exist";
             }
             else if (!model.IsPermitted)
             {

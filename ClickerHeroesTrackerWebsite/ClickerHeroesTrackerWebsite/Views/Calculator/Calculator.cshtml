@@ -11,7 +11,16 @@
     <ul class="list-inline pull-left">
         <li>
             <label>User:</label>
-            @Model.UploadUserName
+            @if (!string.IsNullOrEmpty(Model.UploadUserName))
+            {
+                @Model.UploadUserName
+            }
+            else
+            {
+                <span class="text-muted">
+                    (Anonymous)
+                </span>
+            }
         </li>
         <li>
             <label>Upload Time:</label>

@@ -12,6 +12,11 @@ namespace ClickerHeroesTrackerWebsite.Models.Api.Uploads
         /// <summary>
         /// Gets or sets the encoded saved game data.
         /// </summary>
-        public string EncodedData { get; set; }
+        public string EncodedSaveData { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether to add the upload to the user's progress.
+        /// </summary>
+        public bool AddToProgress { get; set; }
     }
 }

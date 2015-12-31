@@ -1,7 +1,4 @@
-﻿@using ClickerHeroesTrackerWebsite.Models.Upload
-@model UploadViewModel
-
-@{
+﻿@{
     ViewBag.Title = "Upload";
 }
 
@@ -9,48 +6,48 @@
 
 <div class="row">
     <div class="col-md-8">
-        <section id="uploadForm">
-            @using (Html.BeginForm("Upload", "Calculator", FormMethod.Post, new { @class = "form-horizontal", role = "form" }))
-            {
-                @Html.AntiForgeryToken()
-                <h4>Upload your save.</h4>
-                <hr />
-                @Html.ValidationSummary(true, "", new { @class = "text-danger" })
-                <div class="form-group">
-                    @Html.LabelFor(m => m.EncodedSaveData, new { @class = "col-md-2 control-label" })
-                    <div class="col-md-10">
-                        @Html.TextAreaFor(m => m.EncodedSaveData, new { @class = "form-control" })
-                        @Html.ValidationMessageFor(m => m.EncodedSaveData, "", new { @class = "text-danger" })
-                    </div>
+        <form class="form-horizontal" id="addUpload" action="/api/uploads" method="post" role="form">
+            <h4>Upload your save.</h4>
+            <hr />
+            <div class="form-group">
+                <label class="col-md-2 control-label" for="EncodedSaveData">
+                    Save Data
+                </label>
+                <div class="col-md-10">
+                    <textarea class="form-control" cols="20" data-val="true" data-val-required="The Save Data field is required." id="EncodedSaveData" name="EncodedSaveData" rows="2"></textarea>
+                    <span class="field-validation-valid text-danger" data-valmsg-for="EncodedSaveData" data-valmsg-replace="true"></span>
                 </div>
-                <div class="form-group">
-                    <div class="col-md-offset-2 col-md-10">
-                        @if (Request.IsAuthenticated)
-                        {
-                            <div class="checkbox">
-                                @Html.CheckBoxFor(m => m.AddToProgress, new { @checked = "1" })
-                                @Html.LabelFor(m => m.AddToProgress)
-                            </div>
+            </div>
+            <div class="form-group">
+                <div class="col-md-offset-2 col-md-10">
+                    @if (Request.IsAuthenticated)
+                    {
+                        <div class="checkbox">
+                            <label for="AddToProgress">
+                                <input checked="checked" id="AddToProgress" name="AddToProgress" type="checkbox" value="true">
+                                Add this upload to my progress
+                            </label>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-warning">
+                            Progress can only be tracked over time for logged in users.
+                            Please @Html.ActionLink("Log in", "Login", "Account") or @Html.ActionLink("Register", "Register", "Account").
+                        </div>
                         }
-                        else
-                        {
-                            <div class="text-warning">
-                                Progress can only be tracked over time for logged in users.
-                                Please @Html.ActionLink("Log in", "Login", "Account") or @Html.ActionLink("Register", "Register", "Account").
-                            </div>
-                        }
-                    </div>
                 </div>
-                <div class="form-group">
-                    <div class="col-md-offset-2 col-md-10">
-                        <input type="submit" value="Upload" class="btn btn-default" />
-                    </div>
+            </div>
+            <div class="form-group">
+                <div class="col-md-offset-2 col-md-10">
+                    <input id="addUploadSubmit" type="submit" value="Upload" class="btn btn-default" />
                 </div>
-            }
-        </section>
+            </div>
+        </form>
     </div>
 </div>
 
 @section Scripts {
     @Scripts.Render("~/bundles/jqueryval")
+    @Scripts.Render("~/Scripts/AddUpload.js")
 }

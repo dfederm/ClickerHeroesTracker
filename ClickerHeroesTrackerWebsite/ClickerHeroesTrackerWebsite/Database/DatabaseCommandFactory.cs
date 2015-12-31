@@ -19,8 +19,6 @@ namespace ClickerHeroesTrackerWebsite.Database
     {
         private static string connectionString = ConfigurationManager.ConnectionStrings["DefaultConnection"].ConnectionString;
 
-        private static Dictionary<string, object> emptyParameters = new Dictionary<string, object>(0);
-
         private readonly TelemetryClient telemetryClient;
 
         private readonly ICounterProvider counterProvider;
@@ -39,25 +37,7 @@ namespace ClickerHeroesTrackerWebsite.Database
         }
 
         /// <inheritdoc/>
-        public IDatabaseCommand Create(string commandText)
-        {
-            return this.Create(commandText, CommandType.Text, emptyParameters);
-        }
-
-        /// <inheritdoc/>
-        public IDatabaseCommand Create(string commandText, IDictionary<string, object> parameters)
-        {
-            return this.Create(commandText, CommandType.Text, parameters);
-        }
-
-        /// <inheritdoc/>
-        public IDatabaseCommand Create(string commandText, CommandType commandType)
-        {
-            return this.Create(commandText, commandType, emptyParameters);
-        }
-
-        /// <inheritdoc/>
-        public IDatabaseCommand Create(string commandText, CommandType commandType, IDictionary<string, object> parameters)
+        public IDatabaseCommand Create()
         {
             this.EnsureNotDisposed();
 
@@ -76,9 +56,6 @@ namespace ClickerHeroesTrackerWebsite.Database
 
             return new SqlDatabaseCommand(
                 this.connection,
-                commandText,
-                commandType,
-                parameters,
                 this.counterProvider);
         }
 

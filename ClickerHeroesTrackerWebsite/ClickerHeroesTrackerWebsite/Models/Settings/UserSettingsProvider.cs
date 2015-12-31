@@ -29,7 +29,7 @@ namespace ClickerHeroesTrackerWebsite.Models.Settings
         public IUserSettings Get(string userId)
         {
             // If the user isn't logged in, use the default settings
-            if (userId == null)
+            if (string.IsNullOrEmpty(userId))
             {
                 return new UserSettings();
             }

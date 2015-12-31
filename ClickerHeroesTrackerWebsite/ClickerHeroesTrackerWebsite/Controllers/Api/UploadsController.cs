@@ -10,9 +10,14 @@ namespace ClickerHeroesTrackerWebsite.Controllers.Api
     using System.Net.Http;
     using System.Web.Http;
     using Database;
+    using Microsoft.ApplicationInsights;
     using Microsoft.AspNet.Identity;
     using Models.Api;
     using Models.Api.Uploads;
+    using Models.Calculator;
+    using Models.Game;
+    using Models.SaveData;
+    using Models.Settings;
 
     /// <summary>
     /// This controller handles the set of APIs that manage uploads
@@ -22,12 +27,25 @@ namespace ClickerHeroesTrackerWebsite.Controllers.Api
     {
         private readonly IDatabaseCommandFactory databaseCommandFactory;
 
+        private readonly GameData gameData;
+
+        private readonly IUserSettingsProvider userSettingsProvider;
+
+        private readonly TelemetryClient telemetryClient;
+
         /// <summary>
         /// Initializes a new instance of the <see cref="UploadsController"/> class.
         /// </summary>
-        public UploadsController(IDatabaseCommandFactory databaseCommandFactory)
+        public UploadsController(
+            IDatabaseCommandFactory databaseCommandFactory,
+            GameData gameData,
+            IUserSettingsProvider userSettingsProvider,
+            TelemetryClient telemetryClient)
         {
             this.databaseCommandFactory = databaseCommandFactory;
+            this.gameData = gameData;
+            this.userSettingsProvider = userSettingsProvider;
+            this.telemetryClient = telemetryClient;
         }
 
         /// <summary>
@@ -81,14 +99,91 @@ namespace ClickerHeroesTrackerWebsite.Controllers.Api
         /// <summary>
         /// Add and an upload.
         /// </summary>
-        /// <remarks>BUGBUG 44 - Not implemented</remarks>
         /// <param name="rawUpload">The upload data</param>
         /// <returns>Empty 200, as this is not implemented yet</returns>
         [Route("")]
         [HttpPost]
-        public HttpResponseMessage Post(RawUpload rawUpload)
+        public HttpResponseMessage Add(RawUpload rawUpload)
         {
-            return this.Request.CreateResponse(HttpStatusCode.OK);
+            // Only associate it with the user if they requested that it be added to their progress.
+            var userId = rawUpload.AddToProgress && this.User.Identity.IsAuthenticated
+                ? this.User.Identity.GetUserId()
+                : null;
+
+            var savedGame = SavedGame.Parse(rawUpload.EncodedSaveData);
+            if (savedGame == null)
+            {
+                // Not a valid save
+                return this.Request.CreateResponse(HttpStatusCode.BadRequest);
+            }
+
+            var userSettings = this.userSettingsProvider.Get(userId);
+
+            var ancientLevels = new AncientLevelSummaryViewModel(
+                this.gameData,
+                savedGame.AncientsData,
+                this.telemetryClient);
+            var computedStats = new ComputedStatsViewModel(
+                this.gameData,
+                savedGame,
+                userSettings);
+
+            int uploadId;
+            using (var command = this.databaseCommandFactory.Create())
+            {
+                command.BeginTransaction();
+
+                // Insert Upload
+                command.CommandText = @"
+	                INSERT INTO Uploads(UserId, UploadContent)
+                    VALUES(@UserId, @UploadContent);
+                    SELECT SCOPE_IDENTITY();";
+                command.Parameters = new Dictionary<string, object>
+                {
+                    { "@UserId", userId },
+                    { "@UploadContent", rawUpload.EncodedSaveData },
+                };
+                uploadId = Convert.ToInt32(command.ExecuteScalar());
+
+                // Insert computed stats
+                command.CommandText = @"
+                    INSERT INTO ComputedStats(UploadId, OptimalLevel, SoulsPerHour, SoulsPerAscension, AscensionTime, TitanDamage, SoulsSpent)
+                    VALUES(@UploadId, @OptimalLevel, @SoulsPerHour, @SoulsPerAscension, @AscensionTime, @TitanDamage, @SoulsSpent);";
+                command.Parameters = new Dictionary<string, object>
+                {
+                    { "@UploadId", uploadId },
+                    { "@OptimalLevel", computedStats.OptimalLevel },
+                    { "@SoulsPerHour", computedStats.SoulsPerHour },
+                    { "@SoulsPerAscension", computedStats.OptimalSoulsPerAscension },
+                    { "@AscensionTime", computedStats.OptimalAscensionTime },
+                    { "@TitanDamage", computedStats.TitanDamage },
+                    { "@SoulsSpent", computedStats.SoulsSpent },
+                };
+                command.ExecuteNonQuery();
+
+                // Insert ancient levels
+                foreach (var pair in ancientLevels.AncientLevels)
+                {
+                    command.CommandText = @"
+                        INSERT INTO AncientLevels(UploadId, AncientId, Level)
+                        VALUES(@UploadId, @AncientId, @Level);";
+                    command.Parameters = new Dictionary<string, object>
+                    {
+                        { "@UploadId", uploadId },
+                        { "@AncientId", pair.Key.Id },
+                        { "@Level", pair.Value },
+                    };
+                    command.ExecuteNonQuery();
+                }
+
+                var commited = command.CommitTransaction();
+                if (!commited)
+                {
+                    return this.Request.CreateResponse(HttpStatusCode.InternalServerError);
+                }
+            }
+
+            return this.Request.CreateResponse(HttpStatusCode.OK, uploadId);
         }
 
         private List<UploadSummary> FetchUploads(string userId, int page, int count)
