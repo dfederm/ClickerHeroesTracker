@@ -5,7 +5,7 @@
 namespace ClickerHeroesTrackerWebsite.Models.Calculator
 {
     using System;
-    using System.Data.SqlClient;
+    using System.Data;
     using System.Linq;
     using ClickerHeroesTrackerWebsite.Models.SaveData;
     using ClickerHeroesTrackerWebsite.Models.Simulation;
@@ -46,7 +46,7 @@ namespace ClickerHeroesTrackerWebsite.Models.Calculator
         /// <summary>
         /// Initializes a new instance of the <see cref="ComputedStatsViewModel"/> class.
         /// </summary>
-        public ComputedStatsViewModel(SqlDataReader reader, IUserSettings userSettings)
+        public ComputedStatsViewModel(IDataReader reader, IUserSettings userSettings)
         {
             this.UserSettings = userSettings;
 

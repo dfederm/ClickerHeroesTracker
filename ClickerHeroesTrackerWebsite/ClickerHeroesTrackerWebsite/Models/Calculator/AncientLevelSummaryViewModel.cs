@@ -6,7 +6,7 @@ namespace ClickerHeroesTrackerWebsite.Models.Calculator
 {
     using System;
     using System.Collections.Generic;
-    using System.Data.SqlClient;
+    using System.Data;
     using Game;
     using Microsoft.ApplicationInsights;
     using SaveData;
@@ -45,7 +45,7 @@ namespace ClickerHeroesTrackerWebsite.Models.Calculator
         /// </summary>
         public AncientLevelSummaryViewModel(
             GameData gameData,
-            SqlDataReader reader,
+            IDataReader reader,
             TelemetryClient telemetryClient)
         {
             var ancientLevels = new SortedDictionary<Ancient, long>(AncientComparer.Instance);

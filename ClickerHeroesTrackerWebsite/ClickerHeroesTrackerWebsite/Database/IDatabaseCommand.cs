@@ -54,8 +54,7 @@ namespace ClickerHeroesTrackerWebsite.Database
         /// <summary>
         /// Execute the command returning a reader with which to read the response.
         /// </summary>
-        /// <remarks>BUGBUG 59 - Remove the raw SqlDataReader usage</remarks>
         /// <returns>A reader to read the response</returns>
-        SqlDataReader ExecuteReader();
+        IDataReader ExecuteReader();
     }
 }

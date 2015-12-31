@@ -6,7 +6,7 @@ namespace ClickerHeroesTrackerWebsite.Models.Dashboard
 {
     using System;
     using System.Collections.Generic;
-    using System.Data.SqlClient;
+    using System.Data;
     using ClickerHeroesTrackerWebsite.Models;
     using ClickerHeroesTrackerWebsite.Models.Game;
     using Microsoft.ApplicationInsights;
@@ -23,7 +23,7 @@ namespace ClickerHeroesTrackerWebsite.Models.Dashboard
         public ProgressData(
             GameData gameData,
             TelemetryClient telemetryClient,
-            SqlDataReader reader,
+            IDataReader reader,
             IUserSettings userSettings)
         {
             this.UserSettings = userSettings;

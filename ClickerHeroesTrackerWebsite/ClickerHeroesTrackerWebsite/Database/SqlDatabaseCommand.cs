@@ -122,7 +122,7 @@ namespace ClickerHeroesTrackerWebsite.Database
             }
         }
 
-        public SqlDataReader ExecuteReader()
+        public IDataReader ExecuteReader()
         {
             this.PrepareForExecution();
 
