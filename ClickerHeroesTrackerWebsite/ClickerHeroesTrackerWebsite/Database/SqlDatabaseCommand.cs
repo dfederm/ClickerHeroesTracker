@@ -160,7 +160,14 @@ namespace ClickerHeroesTrackerWebsite.Database
             this.command.CommandText = this.CommandText;
             this.command.CommandType = this.CommandType;
 
-            this.command.Parameters.Clear();
+            // Only clear the params when this is part of a transaction. This is required since
+            // some usages add params via direct casts and calls to AddTableParameter.
+            // BUGBUG 63 - Remove casts to SqlDatabaseCommand (and remove this conditional, always clear).
+            if (this.transaction != null)
+            {
+                this.command.Parameters.Clear();
+            }
+
             foreach (var parameter in this.Parameters)
             {
                 this.command.Parameters.AddWithValue(parameter.Key, parameter.Value ?? DBNull.Value);
