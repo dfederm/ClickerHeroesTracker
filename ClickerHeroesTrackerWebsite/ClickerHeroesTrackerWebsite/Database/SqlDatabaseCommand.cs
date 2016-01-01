@@ -45,13 +45,6 @@ namespace ClickerHeroesTrackerWebsite.Database
 
         public IDictionary<string, object> Parameters { get; set; }
 
-        public void AddParameter(string parameterName, object value)
-        {
-            this.EnsureNotDisposed();
-
-            this.command.Parameters.AddWithValue(parameterName, value);
-        }
-
         public void AddTableParameter(string parameterName, string tableTypeName, DataTable table)
         {
             this.EnsureNotDisposed();
@@ -59,15 +52,6 @@ namespace ClickerHeroesTrackerWebsite.Database
             var parameter = this.command.Parameters.AddWithValue(parameterName, table);
             parameter.SqlDbType = SqlDbType.Structured;
             parameter.TypeName = tableTypeName;
-        }
-
-        public SqlParameter AddReturnParameter()
-        {
-            this.EnsureNotDisposed();
-
-            var returnParameter = this.command.Parameters.Add("RetVal", SqlDbType.Int);
-            returnParameter.Direction = ParameterDirection.ReturnValue;
-            return returnParameter;
         }
 
         public void BeginTransaction()

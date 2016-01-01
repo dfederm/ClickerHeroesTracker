@@ -4,9 +4,6 @@
 @model ExternalLoginListViewModel
 
 <h4>Log in with one of your other accounts:</h4>
-<div class="text-warning">
-    This is only used for log in (<a href="https://www.bing.com/search?q=oauth" target="_blank">OAuth</a>) and Clicker Heroes Tracker gets no information from your account other than your email address.
-</div>
 <hr />
 @{
     var loginProviders = Context.GetOwinContext().Authentication.GetExternalAuthenticationTypes();

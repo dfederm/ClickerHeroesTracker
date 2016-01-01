@@ -1,4 +1,6 @@
-﻿@using ClickerHeroesTrackerWebsite.Views
+﻿@using Microsoft.AspNet.Identity
+@using ClickerHeroesTrackerWebsite.Authentication
+@using ClickerHeroesTrackerWebsite.Views
 
 <!DOCTYPE html>
 <html>
@@ -15,7 +17,7 @@
         }({
             instrumentationKey:"99fba640-790d-484f-83c4-3c97450d8698"
         });
-        
+
         window.appInsights=appInsights;
         appInsights.trackPageView();
     </script>
@@ -39,6 +41,9 @@
                     }
                     <li>@Html.ActionLink("Upload", "Index", "Upload")</li>
                     <li>@Html.ActionLink("What's New", "New", "Home")</li>
+                    <li>
+                        <a href="#" data-toggle="modal" data-target="#feedbackModal">Feedback</a>
+                    </li>
                     @if (User.IsInRole("Admin"))
                     {
                         <li>@Html.ActionLink("Admin", "Index", "Admin")</li>
@@ -56,8 +61,54 @@
         </footer>
     </div>
 
+    <div id="feedbackModal" class="modal fade">
+        <form id="feedbackForm" action="/feedback" method="post" role="form">
+            <div class="modal-dialog modal-md">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                        <h4 class="modal-title">Feedback</h4>
+                    </div>
+                    <div class="modal-body">
+                        <div class="form-group">
+                            <label for="feedbackComments">Please leave comments, questions, suggestions, or bug reports</label>
+                            <textarea id="feedbackComments" name="comments" class="form-control" data-val="true" data-val-required="You must enter some feedback."></textarea>
+                            <span class="field-validation-valid text-danger" data-valmsg-for="feedbackComments" data-valmsg-replace="true"></span>
+                        </div>
+                        @if (Request.IsAuthenticated)
+                        {
+                            <div class="checkbox">
+                                <label>
+                                    <input type="checkbox" name="allowContact" value="true" checked="checked" />
+                                    Allow Clicker Heroes Tracker to follow up with you using your email "@User.Identity.GetEmail(Context.GetOwinContext())" regarding this feedback.
+                                </label>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="form-group">
+                                <label for="feedbackEmail">Email (optional)</label>
+                                <p class="help-block">
+                                    To allow Clicker Heroes Tracker to follow up with you using regarding this feedback, either log in or provide your email address.
+                                </p>
+                                <input type="email" id="feedbackEmail" name="email" class="form-control" />
+                            </div>
+                        }
+                    </div>
+                    <div class="modal-footer">
+                        <input id="feedbackSubmit" type="submit" value="Submit" class="btn btn-default" />
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+
     @Scripts.Render("~/bundles/jquery")
+    @Scripts.Render("~/bundles/jqueryval")
     @Scripts.Render("~/bundles/bootstrap")
+    @Scripts.Render("~/Scripts/Feedback.js")
     @RenderSection("scripts", required: false)
     @Html.PageScripts()
 </body>

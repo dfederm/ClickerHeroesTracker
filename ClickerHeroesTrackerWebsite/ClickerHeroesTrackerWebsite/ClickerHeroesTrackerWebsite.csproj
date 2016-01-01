@@ -266,6 +266,7 @@
     <Compile Include="App_Start\Startup.Container.cs" />
     <Compile Include="App_Start\Startup.Mvc.cs" />
     <Compile Include="App_Start\Startup.WebApi.cs" />
+    <Compile Include="Authentication\IdentityExtensions.cs" />
     <Compile Include="Authentication\MockAuthenticationOwinMiddleware.cs" />
     <Compile Include="Configuration\Environment.cs" />
     <Compile Include="Configuration\EnvironmentProvider.cs" />
@@ -275,6 +276,7 @@
     <Compile Include="Controllers\Api\UploadsController.cs" />
     <Compile Include="Controllers\CalculatorController.cs" />
     <Compile Include="Controllers\DashboardController.cs" />
+    <Compile Include="Controllers\FeedbackController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\ManageController.cs" />
     <Compile Include="Controllers\UploadController.cs" />
@@ -304,6 +306,7 @@
     <Compile Include="Models\ApplicationDbContext.cs" />
     <Compile Include="Models\ApplicationUser.cs" />
     <Compile Include="Models\Calculator\ExperimentalStatsViewModel.cs" />
+    <Compile Include="Models\Feedback\FeedbackRequest.cs" />
     <Compile Include="Models\Game\AncientIds.cs" />
     <Compile Include="Models\Game\GameData.cs" />
     <Compile Include="Models\Game\HeroAttackFormula.cs" />
@@ -497,6 +500,7 @@
     <WCFMetadata Include="Service References\" />
   </ItemGroup>
   <ItemGroup>
+    <TypeScriptCompile Include="Scripts\Feedback.ts" />
     <TypeScriptCompile Include="Scripts\Helpers.ts" />
     <TypeScriptCompile Include="Scripts\typings\jquery\jquery.d.ts" />
     <TypeScriptCompile Include="Scripts\typings\Models\PaginationMetadata.d.ts" />

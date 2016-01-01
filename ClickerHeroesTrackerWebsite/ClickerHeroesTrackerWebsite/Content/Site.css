@@ -4,7 +4,8 @@
 }
 
 /* Set padding to keep content from hitting the edges */
-.body-content {
+.body-content
+{
     padding-left: 15px;
     padding-right: 15px;
 }
@@ -12,13 +13,21 @@
 /* Override the default bootstrap behavior where horizontal description lists 
    will truncate terms that are too long to fit in the left column 
 */
-.dl-horizontal dt {
+.dl-horizontal dt
+{
     white-space: normal;
 }
 
 /* Set width on the form input elements since they're 100% wide by default */
 input,
 select,
-textarea {
+textarea
+{
     max-width: 280px;
+}
+
+/* Override the text area in the feedback form to ensure it takes up the whole modal */
+#feedbackModal textarea
+{
+    max-width: none;
 }

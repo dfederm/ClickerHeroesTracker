@@ -85,6 +85,7 @@ namespace ClickerHeroesTrackerWebsite.Authentication
                         new Claim(IdentityProviderClaimType, this.Options.AuthenticationType, null, this.Options.AuthenticationType),
                         new Claim(ClaimTypes.NameIdentifier, parts[0], null, this.Options.AuthenticationType),
                         new Claim(ClaimTypes.Name, parts[1], null, this.Options.AuthenticationType),
+                        new Claim(ClaimTypes.Email, parts[1] + "@test.com", null, this.Options.AuthenticationType),
                     }
                     .Concat(parts[2].Split(RoleDelimeter, StringSplitOptions.RemoveEmptyEntries).Select(role => new Claim(ClaimTypes.Role, role, null, this.Options.AuthenticationType))),
                     this.Options.AuthenticationType);
