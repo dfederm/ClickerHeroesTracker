@@ -92,8 +92,48 @@ namespace ClickerHeroesTrackerWebsite.Models.SaveData
             return DeserializeSavedGame(jsonData);
         }
 
+        internal static SavedGame DeserializeSavedGame(TextReader reader)
+        {
+            return Serializer.Deserialize<SavedGame>(new JsonTextReader(reader));
+        }
+
+        internal static bool IsAndroid(string encodedSaveData)
+        {
+            return encodedSaveData.IndexOf("ClickerHeroesAccountSO", StringComparison.OrdinalIgnoreCase) >= 0;
+        }
+
+        internal static TextReader DecodeSaveData(string encodedSaveData)
+        {
+            return IsAndroid(encodedSaveData)
+                ? DecodeAndroidSaveData(encodedSaveData)
+                : DecodeWebSaveData(encodedSaveData);
+        }
+
+        private static TextReader DecodeAndroidSaveData(string encodedSaveData)
+        {
+            // Get the index of the first open brace
+            var reader = new StringReader(encodedSaveData);
+
+            // Skip to the first brace
+            const int BraceCharCode = (int)'{';
+            var currentChar = reader.Peek();
+            while (currentChar != BraceCharCode)
+            {
+                // If we hit the end without seeing a brace, this wasn't a valid save
+                if (currentChar == -1)
+                {
+                    return null;
+                }
+
+                reader.Read();
+                currentChar = reader.Peek();
+            }
+
+            return reader;
+        }
+
         [SuppressMessage("Microsoft.Security.Cryptography", "CA5351:Do not use insecure cryptographic algorithm MD5", Justification = "The encoding algorithm requires MD5. It's not used for security.")]
-        internal static byte[] DecodeSaveData(string encodedSaveData)
+        private static TextReader DecodeWebSaveData(string encodedSaveData)
         {
             const string AntiCheatCode = "Fe12NAfA3R6z4k0z";
             var antiCheatCodeIndex = encodedSaveData.IndexOf(AntiCheatCode);
@@ -133,19 +173,11 @@ namespace ClickerHeroesTrackerWebsite.Models.SaveData
                 }
             }
 
-            // Decode and return
-            return Convert.FromBase64CharArray(unsprinkledChars, 0, unsprinkledChars.Length);
-        }
+            // Decode
+            var bytes = Convert.FromBase64CharArray(unsprinkledChars, 0, unsprinkledChars.Length);
 
-        internal static SavedGame DeserializeSavedGame(byte[] saveData)
-        {
-            using (var stream = new MemoryStream(saveData))
-            {
-                using (var reader = new StreamReader(stream))
-                {
-                    return Serializer.Deserialize<SavedGame>(new JsonTextReader(reader));
-                }
-            }
+            // Wrap in a text reader
+            return new StreamReader(new MemoryStream(bytes));
         }
 
         private static JsonSerializer CreateSerializer()
