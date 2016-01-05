@@ -8,6 +8,7 @@ namespace ClickerHeroesTrackerWebsite.Models.Simulation
     using System.Collections.Generic;
     using ClickerHeroesTrackerWebsite.Models.Game;
     using ClickerHeroesTrackerWebsite.Models.SaveData;
+    using Utility;
 
     /// <summary>
     /// Simulates a run.
@@ -97,6 +98,9 @@ namespace ClickerHeroesTrackerWebsite.Models.Simulation
         /// <summary>
         /// Runs the simulation.
         /// </summary>
+        /// <remarks>
+        /// Based on http://philni.neocities.org/ancientsworker10.js?ver=8
+        /// </remarks>
         /// <returns>The simulation result</returns>
         public SimulateResult Run()
         {
@@ -105,16 +109,18 @@ namespace ClickerHeroesTrackerWebsite.Models.Simulation
             Hero hero;
             var khrysosLevel = this.savedGame.AncientsData.GetAncientLevel(AncientIds.Khrysos);
             var currentGold = khrysosLevel > 0 && this.gameData.Heroes.TryGetValue((int)khrysosLevel + 1, out hero)
-                ? hero.BaseCost
+                ? (BigDecimal)hero.BaseCost
                 : 0;
-            var startingZone = 2 + (int)this.GetFactor(AncientIds.Iris, 1, 1);
+            var startingZone = 1 + (int)this.GetFactor(AncientIds.Iris, 1, 1);
             currentGold += 10
                 * MonsterLife(startingZone)
                 * MonsterGoldFactor(startingZone)
                 * (this.activities == null ? (1 + this.GetFactor(AncientIds.Libertas, 0.01, 0.01)) : 1)
                 * (1 + this.GetFactor(AncientIds.Mammon, 0.05, 0.05));
 
-            var currentTime = 60d;
+            const double SetupTime = 60d;
+
+            var currentTime = SetupTime;
             var currentSouls = 0d;
             var solomon = 1 + this.GetFactor(AncientIds.Solomon, 0.01, 0.01);
             var clicks = 0d;
@@ -126,19 +132,25 @@ namespace ClickerHeroesTrackerWebsite.Models.Simulation
                 this.GetFactor(AncientIds.Dogcog, 0.02, 0.01));
 
             SimulateResult best = null;
-            for (short level = 5; level <= 4000; level += 5)
+            for (var level = startingZone + 4 - ((startingZone - 1) % 5); level <= 4500; level += 5)
             {
-                if (level < startingZone)
-                {
-                    continue;
-                }
-
-                var mobs = Math.Min(5, level - (int)this.GetFactor(AncientIds.Iris, 1, 1));
-                var numDelays = (9 - this.savedGame.AncientsData.GetAncientLevel(AncientIds.Kumawakamaru)) * (mobs - 1);
+                var waves = Math.Min(5, level + 1 - startingZone);
+                var kumawakamaruLevel = this.savedGame.AncientsData.GetAncientLevel(AncientIds.Kumawakamaru);
+                var numDelays = (9 - kumawakamaruLevel) * (waves - 1);
                 var levelInfo = this.GetLevelInfo(level, startingZone);
 
-                var addGold = levelInfo.Gold * factors.Gold;
-                var curDamage = Math.Max(levelingPlan.GetDamage(currentGold), 10);
+                var curDamage = levelingPlan.GetDamage(currentGold, (levelInfo.BossLife * 30) / factors.Damage);
+                if (curDamage < 10)
+                {
+                    curDamage = 10;
+                }
+
+                var bossTime = levelInfo.BossLife / (curDamage * factors.Damage);
+                if (bossTime > (30 + this.GetFactor(AncientIds.Chronos, 5, 5)))
+                {
+                    break;
+                }
+
                 curDamage *= factors.Damage;
                 if (this.activities != null)
                 {
@@ -146,9 +158,10 @@ namespace ClickerHeroesTrackerWebsite.Models.Simulation
                     curDamage *= Math.Pow(1.1, Math.Min((currentTime / 30) - 2, 0));
                 }
 
-                var time = levelInfo.Life / curDamage;
+                var time = (double)(levelInfo.Life / curDamage);
                 currentTime += time + (numDelays * 0.5);
                 currentSouls += this.HeroSoulRewards(level, solomon);
+                var addGold = levelInfo.Gold * factors.Gold;
                 currentGold += addGold + (levelInfo.AvgGold * factors.GoldenClicks * time / (time + (0.5 * numDelays)));
                 clicks += time * factors.ClickRate;
                 if (time * factors.ClickRate < numDelays)
@@ -156,10 +169,16 @@ namespace ClickerHeroesTrackerWebsite.Models.Simulation
                     clicks = 0;
                 }
 
-                var realSouls = currentSouls + levelingPlan.GetOptimalHeroSouls(this.gameData, currentGold);
-                if (best == null || realSouls / currentTime > best.Ratio)
+                var realSouls = currentSouls + levelingPlan.GetSoulsFromHeroLevels(this.gameData, currentGold);
+                var ratio = realSouls / currentTime;
+                if (best == null || ratio > best.Ratio)
                 {
-                    best = new SimulateResult(level, currentTime, realSouls, realSouls / currentTime);
+                    best = new SimulateResult(level, currentTime, realSouls, ratio);
+                }
+                else if (ratio < best.Ratio * .80)
+                {
+                    // ratio down to 80%, it won't get better, stop simulation
+                    break;
                 }
             }
 
@@ -327,11 +346,14 @@ namespace ClickerHeroesTrackerWebsite.Models.Simulation
             mobTime /= mobTime + bossTime;
             var goldFactor = 1 + (mobTime * 0.01 * (1 + this.GetFactor(AncientIds.Dora, 0.2, 0.1)) * ((10 * (1 + this.GetFactor(AncientIds.Mimzee, 0.5, 0.25))) - 1));
             goldFactor *= 1 + this.GetFactor(AncientIds.Mammon, 0.05, 0.05);
-            avgGold *= goldFactor;
             avgGoldenClicks *= goldFactor;
-            avgGold *= 1 + this.GetFactor(AncientIds.Fortuna, 0.0225, 0.0225);
 
-            return new Factors(avgDamage, avgGold / avgDamage, avgGoldenClicks, avgClickRate);
+            // Midas upgrades
+            goldFactor *= 1.25 * 1.25 * 1.25 * 1.5; // Midas
+            goldFactor *= 1 + this.GetFactor(AncientIds.Fortuna, 0.0225, 0.0225);
+            avgGold *= goldFactor;
+
+            return new Factors(avgDamage, avgGold / avgDamage, avgGoldenClicks / 100, avgClickRate);
         }
 
         private double HeroSoulRewards(int level, double solomon)
@@ -356,26 +378,28 @@ namespace ClickerHeroesTrackerWebsite.Models.Simulation
 
         private LevelInfo GetLevelInfo(int level, int from)
         {
-            var life = 0d;
-            var gold = 0d;
+            BigDecimal life = 0;
+            BigDecimal gold = 0;
             var numMobs = 0;
 
-            var kumawakamaruLevel = this.savedGame.AncientsData.GetAncientLevel(AncientIds.Kumawakamaru);
+            var numMobsPerLevel = 10 - (int)this.savedGame.AncientsData.GetAncientLevel(AncientIds.Kumawakamaru);
             var startLevel = Math.Max(level - 4, from);
             for (var i = startLevel; i < level; i++)
             {
-                var levelLife = MonsterLife(i) * (10 - kumawakamaruLevel);
+                var levelLife = MonsterLife(i) * numMobsPerLevel;
                 life += levelLife;
                 gold += levelLife * MonsterGoldFactor(i);
-                numMobs += 10 - (int)kumawakamaruLevel;
+                numMobs += numMobsPerLevel;
             }
 
-            var avgGold = gold / Math.Max(numMobs, 1);
             var bossLife = MonsterLife(level) * 10 * (1 - this.GetFactor(AncientIds.Bubos, 0.02, 0.01));
-            life += bossLife;
-            gold += bossLife * MonsterGoldFactor(level);
+            var bossGold = bossLife * MonsterGoldFactor(level);
+            var avgGold = (gold + (bossGold / 10)) / (numMobs + 1);
 
-            return new LevelInfo(life, gold, avgGold);
+            life += bossLife;
+            gold += bossGold;
+
+            return new LevelInfo(life, gold, avgGold, bossLife);
         }
 
         private ActivityInfo GetActivityInfo(
@@ -528,7 +552,7 @@ namespace ClickerHeroesTrackerWebsite.Models.Simulation
             /// <summary>
             /// Initializes a new instance of the <see cref="SimulateResult"/> class.
             /// </summary>
-            public SimulateResult(short level, double time, double souls, double ratio)
+            public SimulateResult(int level, double time, double souls, double ratio)
             {
                 this.Level = level;
                 this.Time = time;
@@ -539,7 +563,7 @@ namespace ClickerHeroesTrackerWebsite.Models.Simulation
             /// <summary>
             /// Gets the level the simulation made it to.
             /// </summary>
-            public short Level { get; }
+            public int Level { get; }
 
             /// <summary>
             /// Gets the time it will take to get to the simulated level.
@@ -600,18 +624,25 @@ namespace ClickerHeroesTrackerWebsite.Models.Simulation
 
         private sealed class LevelInfo
         {
-            public LevelInfo(double life, double gold, double avgGold)
+            public LevelInfo(
+                BigDecimal life,
+                BigDecimal gold,
+                BigDecimal avgGold,
+                BigDecimal bossLife)
             {
                 this.Life = life;
                 this.Gold = gold;
                 this.AvgGold = avgGold;
+                this.BossLife = bossLife;
             }
 
-            public double Life { get; }
+            public BigDecimal Life { get; }
 
-            public double Gold { get; }
+            public BigDecimal Gold { get; }
 
-            public double AvgGold { get; }
+            public BigDecimal AvgGold { get; }
+
+            public BigDecimal BossLife { get; }
         }
     }
 }

@@ -9,28 +9,37 @@ namespace ClickerHeroesTrackerWebsite.Models.Simulation
     using System.Linq;
     using Game;
     using SaveData;
+    using Utility;
 
     /// <summary>
     /// Computes simulation data for a specific set of hero gilds and Argaiv and Dogcog factors.
     /// </summary>
     public sealed class LevelingPlan
     {
+        private static double doubleMaxValueSoulsFromHeroLevels = Math.Log(double.MaxValue) / Math.Log(10) * .25;
+
         private readonly HeroesData heroesData;
 
         private readonly double argaivFactor;
 
         private readonly double dogcogFactor;
 
-        // result plan steps
-        private readonly List<PlanStep> plan;
-
-        private readonly double currentCost;
+        private readonly List<Hero> orderedHeroes;
 
         private readonly Dictionary<int, IList<Upgrade>> heroUpgrades;
 
-        private int planPos;
+        private readonly Dictionary<Hero, int> currentLevels = new Dictionary<Hero, int>();
 
-        private double currentDamage;
+        private readonly HashSet<Upgrade> purchasedUpgrades = new HashSet<Upgrade>();
+
+        // The cost for baseline leveling
+        private readonly BigDecimal startCost;
+
+        private BigDecimal currentDamage;
+
+        private BigDecimal currentCost;
+
+        private Hero lastHero;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="LevelingPlan"/> class.
@@ -45,13 +54,9 @@ namespace ClickerHeroesTrackerWebsite.Models.Simulation
             this.argaivFactor = argaivFactor;
             this.dogcogFactor = dogcogFactor;
 
-            this.plan = new List<PlanStep>();
-
-            // Ignore the heroes new to 0.24 due to numbers getting too large. BUGBUG 74: Move to BigInteger.
-            var heroes = gameData
+            this.orderedHeroes = gameData
                 .Heroes
                 .Values
-                .Where(_ => _.Id <= 35)
                 .OrderBy(_ => _.Id)
                 .ToList();
 
@@ -69,17 +74,8 @@ namespace ClickerHeroesTrackerWebsite.Models.Simulation
                 upgrades.Add(upgrade);
             }
 
-            // cache of next required hero level (per hero)
-            var bestList = new Dictionary<Hero, LevelingPlanInfo>();
-
-            var currentDamage = 0d;
-            var baselineLevels = new Dictionary<Hero, int>();
-
-            // At each plan step, we aim to increase the total dps to this multiplier
-            var damageTargetRatio = 1.05;
-
             // Compute baseline damage and levels
-            foreach (var hero in heroes)
+            foreach (var hero in this.orderedHeroes)
             {
                 // Assume all upgrades can be bought until we hit the rangers. Also, just skip Cid since he doesn't do dps.
                 var minimumHeroLevel = 0;
@@ -88,111 +84,24 @@ namespace ClickerHeroesTrackerWebsite.Models.Simulation
                     IList<Upgrade> upgrades;
                     if (this.heroUpgrades.TryGetValue(hero.Id, out upgrades))
                     {
-                        minimumHeroLevel = upgrades.Max(_ => _.HeroLevelRequired);
-                    }
-                }
-
-                currentDamage += this.Damage(hero, minimumHeroLevel);
-                baselineLevels.Add(hero, minimumHeroLevel);
-            }
-
-            // Compute baseline bestList
-            foreach (var hero in heroes)
-            {
-                var nextBest = this.NextBest(hero, baselineLevels[hero], currentDamage * damageTargetRatio);
-                if (nextBest != null)
-                {
-                    bestList.Add(hero, nextBest);
-                }
-            }
-
-            // Compute plan steps!
-            while (true)
-            {
-                Hero nextBestHero = null;
-                LevelingPlanInfo nextBestTarget = null;
-
-                // Find next target
-                foreach (var pair in bestList)
-                {
-                    var hero = pair.Key;
-                    var target = pair.Value;
-
-                    if (nextBestHero == null || target.CostIncrease < nextBestTarget.CostIncrease)
-                    {
-                        nextBestHero = hero;
-                        nextBestTarget = target;
-                    }
-                }
-
-                if (nextBestHero == null)
-                {
-                    // Plan over, implies highest hero is maxed
-                    break;
-                }
-
-                this.plan.Add(new PlanStep(nextBestHero, nextBestTarget.Level));
-
-                // Update target
-                currentDamage += nextBestTarget.DamageIncrease;
-
-                if (double.IsInfinity(currentDamage))
-                {
-                    // Plan over, reached infinity. BUGBUG 74: Move to BigInteger.
-                    break;
-                }
-
-                // Recompute bestList
-                foreach (var hero in heroes)
-                {
-                    if (bestList.ContainsKey(hero))
-                    {
-                        var nextBest = this.NextBest(hero, baselineLevels[hero], currentDamage * damageTargetRatio);
-                        if (nextBest == null)
+                        foreach (var upgrade in upgrades)
                         {
-                            bestList.Remove(hero);
-                        }
-                        else
-                        {
-                            bestList[hero] = nextBest;
+                            if (minimumHeroLevel < upgrade.HeroLevelRequired)
+                            {
+                                minimumHeroLevel = upgrade.HeroLevelRequired;
+                            }
+
+                            this.purchasedUpgrades.Add(upgrade);
                         }
                     }
                 }
+
+                this.currentDamage += this.Damage(hero, minimumHeroLevel);
+                this.currentCost += this.Cost(hero, minimumHeroLevel);
+                this.currentLevels.Add(hero, minimumHeroLevel);
             }
 
-            // Fill in real computed plan damage and costs for each step
-            this.planPos = 0;
-            var heroDamage = new Dictionary<Hero, double>();
-            var heroCost = new Dictionary<Hero, double>();
-            currentDamage = 0d;
-            var currentCost = 0d;
-            foreach (var hero in heroes)
-            {
-                var damage = this.Damage(hero, baselineLevels[hero]);
-                currentDamage += damage;
-                heroDamage.Add(hero, damage);
-
-                var cost = this.Cost(hero, baselineLevels[hero]);
-                currentCost += cost;
-                heroCost.Add(hero, cost);
-            }
-
-            this.currentDamage = currentDamage;
-            this.currentCost = currentCost;
-            for (var i = 0; i < this.plan.Count; i++)
-            {
-                var stepHero = this.plan[i].Hero;
-
-                var nextDamage = this.Damage(stepHero, this.plan[i].Level);
-                currentDamage += nextDamage - heroDamage[stepHero];
-                heroDamage[stepHero] = nextDamage;
-                this.plan[i].Damage = currentDamage;
-
-                var nextCost = this.Cost(stepHero, this.plan[i].Level);
-                currentCost += nextCost - heroCost[stepHero];
-                heroCost[stepHero] = nextCost;
-                this.plan[i].Cost = currentCost;
-            }
+            this.startCost = this.currentCost;
         }
 
         /// <summary>
@@ -200,7 +109,7 @@ namespace ClickerHeroesTrackerWebsite.Models.Simulation
         /// This just follows the plan until the gold is expended
         /// </summary>
         /// <returns>The number of souls attainable with this plan and the given gold</returns>
-        public double GetOptimalHeroSouls(GameData gameData, double gold)
+        public double GetSoulsFromHeroLevels(GameData gameData, BigDecimal gold)
         {
             Hero frostleaf;
             if (!gameData.Heroes.TryGetValue(HeroIds.Frostleaf, out frostleaf)
@@ -210,81 +119,111 @@ namespace ClickerHeroesTrackerWebsite.Models.Simulation
             }
 
             // Close enough for simulation
-            return Math.Log(gold) / Math.Log(10) * .25;
-
-            /*
-            // The following, while accurate, is very slow!
-            var curLevels = [];
-            var heroCopy = $.extend(true, { }, Heroes);
-            // heroCopy[-1] = { name: "Cid, the Helpful Adventurer", cost: 5, damage: 0, level: 0, upgrades: []};
-
-            // Zero current levels
-            for (var i in heroCopy)
-            {
-                curLevels[i] = 0;
-            }
-
-            // Increment cheapest hero by 25 till gold is exhausted
+            var souls = 0d;
             while (true)
             {
-                var cheapest = 0;
-                var cheapestCost = 0;
-                for (var i in heroCopy)
+                // Math.Log only takes doubles, so iterate double.MaxValue at a time.
+                if (gold > double.MaxValue)
                 {
-                    var newCost = this.Cost(heroCopy[i], curLevels[i] + 25);
-                    if (cheapestCost == 0 || newCost < cheapestCost)
-                    {
-                        cheapest = i;
-                        cheapestCost = newCost;
-                    }
+                    souls += doubleMaxValueSoulsFromHeroLevels;
+                    gold -= double.MaxValue;
                 }
-
-                if (cheapestCost > gold)
+                else
+                {
+                    souls += Math.Log((double)gold) / Math.Log(10) * .25;
                     break;
-
-                gold -= cheapestCost;
-                curLevels[cheapest] += 25;
+                }
             }
 
-            // Sum levels
-            var totalLevels = 0;
-            for (var i = 0; i < curLevels.length; i++)
-            {
-                totalLevels += curLevels[i];
-            }
-
-            return totalLevels;
-            */
+            return souls;
         }
 
         /// <summary>
         /// Get damage attainable with the given amount of gold.
-        /// This just follows the plan until the gold is expended
+        /// Note, this function will only buy 1 hero at a time and choose the one which CAN give the most damage.
         /// </summary>
         /// <returns>The damage attainable with this plan and the given gold</returns>
-        public double GetDamage(double gold)
+        public BigDecimal GetDamage(BigDecimal gold, BigDecimal requestedDamage)
         {
-            while (this.planPos < this.plan.Count && gold >= this.plan[this.planPos].Cost)
-            {
-                this.currentDamage = this.plan[this.planPos].Damage;
-                this.planPos++;
-            }
-
-            if (gold < this.currentCost)
+            if (gold < this.startCost)
             {
                 // Early game (pre-FrostLeaf unlocked)
-                return this.currentDamage * Math.Pow(gold / this.currentCost, 0.8);
-            }
-            else if (this.planPos < this.plan.Count)
-            {
-                // Mid game (during leveling plan)
-                var costRatio = (gold - this.currentCost) / (this.plan[this.planPos].Cost - this.currentCost);
-                return this.currentDamage + ((this.plan[this.planPos].Damage - this.currentDamage) * costRatio);
+                return this.startCost * BigDecimal.Pow((double)(gold / this.startCost), 0.8);
             }
             else
             {
-                // Late game (after final hero capped to 4100)
-                return this.currentDamage * (1 + (Math.Log(gold / this.currentCost) / (Math.Log(1.07) * 4100)));
+                Hero bestHero = null;
+                var bestHeroLevel = 0;
+                var bestDamageIncrease = (BigDecimal)0;
+
+                if (this.lastHero != null && this.currentDamage > requestedDamage)
+                {
+                    bestHero = this.lastHero;
+                    bestHeroLevel = this.HighestLevelFromHeroGold(bestHero, gold - this.currentCost + this.Cost(bestHero, this.currentLevels[bestHero]));
+                    bestDamageIncrease = this.Damage(bestHero, bestHeroLevel) - this.Damage(bestHero, this.currentLevels[bestHero]);
+                }
+                else
+                {
+                    foreach (var hero in this.orderedHeroes)
+                    {
+                        var currentHeroLevel = this.currentLevels[hero];
+                        var newHeroLevel = this.HighestLevelFromHeroGold(hero, gold - this.currentCost + this.Cost(hero, currentHeroLevel));
+                        if (newHeroLevel > currentHeroLevel)
+                        {
+                            var damageIncrease = this.Damage(hero, newHeroLevel) - this.Damage(hero, currentHeroLevel);
+                            if (damageIncrease > bestDamageIncrease)
+                            {
+                                bestHero = hero;
+                                bestHeroLevel = newHeroLevel;
+                                bestDamageIncrease = damageIncrease;
+                            }
+                        }
+                    }
+                }
+
+                this.lastHero = bestHero;
+                var damage = this.currentDamage + bestDamageIncrease;
+
+                // Here we cheat to improve the iterative optimizer.  First we give a little bit of extra damage based on unused gold.
+                // Note, while this extra damage is used, it's NOT recorded in the plan.
+                // 1.07 at the end is because the dmg/cost ratio drops by 1.07 each lvl.  We are using the next lvl ratio which is lower.
+                var newCost = this.Cost(bestHero, bestHeroLevel);
+                var extraGold = gold - this.currentCost - (newCost - this.Cost(bestHero, this.currentLevels[bestHero]));
+                damage += extraGold * (this.Damage(bestHero, bestHeroLevel) / newCost) / 1.07;
+
+                // Now, we reduce the level to be a multiple of 25 since the extra levels didn't give much DPS compared to cost.
+                // This reduces the amount of gold wasted on transitional heroes.
+                if (this.currentDamage + bestDamageIncrease > requestedDamage)
+                {
+                    // Gold spent above a multiple of 25 doesn't give much DPS compared to cost.
+                    // This reduces the amount of gold wasted on transitional heroes.
+                    var tmpLvl = bestHeroLevel - (bestHeroLevel % 25);
+                    var curLvl = this.currentLevels[bestHero];
+                    while (tmpLvl >= curLvl)
+                    {
+                        if (tmpLvl == 0)
+                        {
+                            // Can't buy 0 levels now...
+                            tmpLvl = 1;
+                        }
+
+                        var tmpDmg = this.Damage(bestHero, tmpLvl) - this.Damage(bestHero, curLvl);
+                        if (this.currentDamage + tmpDmg < requestedDamage)
+                        {
+                            break;
+                        }
+
+                        bestHeroLevel = tmpLvl;
+                        bestDamageIncrease = tmpDmg;
+                        tmpLvl -= 25;
+                    }
+                }
+
+                this.currentDamage += bestDamageIncrease;
+                this.currentCost += this.Cost(bestHero, bestHeroLevel) - this.Cost(bestHero, this.currentLevels[bestHero]);
+                this.currentLevels[bestHero] = bestHeroLevel;
+
+                return damage;
             }
         }
 
@@ -292,11 +231,20 @@ namespace ClickerHeroesTrackerWebsite.Models.Simulation
         /// Compute DPS component of the hero at the given level
         /// </summary>
         /// <returns>The dps of the hero at the given level.</returns>
-        private double Damage(Hero hero, int level)
+        private BigDecimal Damage(Hero hero, int level)
         {
-            var x10 = Math.Min(Math.Floor(level / 1000d), 3d);
-            var x4 = Math.Min(Math.Max(Math.Floor((level - 175d) / 25d), 0d) - x10, 154d);
-            var x5 = hero.IsRanger ? Math.Min(Math.Max(Math.Floor((level - 500d) / 25d), 0d), 9d) : 0d;
+            // Hero id 1 is hardcoded in the game code.
+            if (level == 0 || hero.Id == 1)
+            {
+                return 0;
+            }
+
+            var x10 = Math.Min(level / 1000, 8);
+            var x4 = Math.Max((level - 175) / 25, 0) - x10;
+            var x5 = hero.IsRanger ? Math.Min(Math.Max((level - 500) / 25, 0), 9) : 0;
+            var levelBonusMultiplier = BigDecimal.Pow(4, x4)
+                * BigDecimal.Pow(10, x10)
+                * BigDecimal.Pow(1.25, x5);
 
             var upgradeMultiplier = 1d;
             IList<Upgrade> upgrades;
@@ -317,24 +265,31 @@ namespace ClickerHeroesTrackerWebsite.Models.Simulation
                 }
             }
 
-            return hero.BaseAttack
-                * (1 + ((0.5 + this.argaivFactor) * this.heroesData.GetHeroGilds(hero)))
+            var gildMultiplier = 1 + ((0.5 + this.argaivFactor) * this.heroesData.GetHeroGilds(hero));
+
+            // BaseAttack is severly wrong for the new rangers, so recalculate base attack manually.
+            var baseAttack = (hero.BaseCost / 10) * Math.Pow(1 - (0.0188 * Math.Min(hero.Id, 14)), hero.Id);
+            if (hero.IsRanger)
+            {
+                baseAttack *= 5 * Math.Pow(10, (-2 * hero.Id) + 50);
+            }
+
+            return baseAttack
+                * gildMultiplier
                 * level
                 * upgradeMultiplier
-                * Math.Pow(4, x4)
-                * Math.Pow(10, x10)
-                * Math.Pow(1.25, x5);
+                * levelBonusMultiplier;
         }
 
         // Compute cost to level hero to the given level
-        private double Cost(Hero hero, int level)
+        private BigDecimal Cost(Hero hero, int level)
         {
             if (level == 0)
             {
                 return 0;
             }
 
-            var cost = hero.BaseCost * Math.Pow(1.07, level) / 0.07 * (1 - this.dogcogFactor);
+            var cost = hero.BaseCost * (BigDecimal.Pow(1.07, level) - 1) / 0.07 * (1 - this.dogcogFactor);
 
             // Assume all upgrades are purchased to the current level
             IList<Upgrade> upgrades;
@@ -352,8 +307,22 @@ namespace ClickerHeroesTrackerWebsite.Models.Simulation
             return cost;
         }
 
+        private int HighestLevelFromHeroGold(Hero hero, BigDecimal gold)
+        {
+            // Reverse of cost formula (faster and no max level)
+            var level = Math.Max((int)Math.Floor(BigDecimal.Log(1 + ((gold / hero.BaseCost) * 0.07 / (1 - this.dogcogFactor))) / Math.Log(1.07)), 0);
+
+            // Reduce lvl to account for upgrade costs.
+            while (this.Cost(hero, level) > gold)
+            {
+                level -= 1;
+            }
+
+            return level;
+        }
+
         // Find the next level of the hero that will attain the given target dps
-        private LevelingPlanInfo NextBest(Hero hero, int level, double target)
+        private LevelingPlanInfo NextBest(Hero hero, int level, BigDecimal target)
         {
             var currentDamage = this.Damage(hero, level);
             var currentCost = this.Cost(hero, level);
@@ -402,25 +371,25 @@ namespace ClickerHeroesTrackerWebsite.Models.Simulation
 
             public int Level { get; }
 
-            public double Damage { get; set; }
+            public BigDecimal Damage { get; set; }
 
-            public double Cost { get; set; }
+            public BigDecimal Cost { get; set; }
         }
 
         private sealed class LevelingPlanInfo
         {
-            public LevelingPlanInfo(int level, double damageIncrease, double costIncrese)
+            public LevelingPlanInfo(int level, BigDecimal damageIncrease, BigDecimal costIncrease)
             {
                 this.Level = level;
                 this.DamageIncrease = damageIncrease;
-                this.CostIncrease = costIncrese;
+                this.CostIncrease = costIncrease;
             }
 
             public int Level { get; }
 
-            public double DamageIncrease { get; }
+            public BigDecimal DamageIncrease { get; }
 
-            public double CostIncrease { get; }
+            public BigDecimal CostIncrease { get; }
         }
     }
 }

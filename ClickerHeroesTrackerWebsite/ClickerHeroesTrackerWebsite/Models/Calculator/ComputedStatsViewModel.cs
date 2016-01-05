@@ -74,7 +74,7 @@ namespace ClickerHeroesTrackerWebsite.Models.Calculator
         /// <summary>
         /// Gets the optimal level to ascend.
         /// </summary>
-        public short OptimalLevel { get; }
+        public int OptimalLevel { get; }
 
         /// <summary>
         /// Gets the expected souls earned per ascension if ascending at the optimal level.

@@ -147,6 +147,7 @@
       <HintPath>..\packages\Microsoft.AspNet.WebApi.Client.5.2.3\lib\net45\System.Net.Http.Formatting.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="System.Numerics" />
     <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.Web.DynamicData" />
     <Reference Include="System.Web.Entity" />
@@ -376,6 +377,7 @@
     <Compile Include="Models\Settings\UserSettingsFlushingMiddleware.cs" />
     <Compile Include="Unity\UnityOwinMiddleware.cs" />
     <Compile Include="Unity\UnityPerRequestLifetimeDisposingMiddleware.cs" />
+    <Compile Include="Utility\BigDecimal.cs" />
     <Compile Include="Utility\DisposableBase.cs" />
     <Compile Include="Utility\ZeroOneBoolConverter.cs" />
     <Compile Include="Utility\StringDoubleListConverter.cs" />
