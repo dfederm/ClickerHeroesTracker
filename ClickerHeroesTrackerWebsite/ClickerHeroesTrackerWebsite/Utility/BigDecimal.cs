@@ -5,6 +5,7 @@
 namespace ClickerHeroesTrackerWebsite.Utility
 {
     using System;
+    using System.Diagnostics;
     using System.Numerics;
 
     /// <summary>
@@ -14,16 +15,11 @@ namespace ClickerHeroesTrackerWebsite.Utility
     /// All operations are exact, except for division. Division never determines more digits than the given precision.
     /// Taken from http://stackoverflow.com/a/13813535
     /// </remarks>
-    public struct BigDecimal : IComparable, IComparable<BigDecimal>
+    [DebuggerDisplay("{ToString()}")]
+    public struct BigDecimal : IComparable, IComparable<BigDecimal>, IFormattable
     {
         /// <summary>
-        /// Specifies whether the significant digits should be truncated to the given precision after each operation.
-        /// </summary>
-        private const bool AlwaysTruncate = false;
-
-        /// <summary>
         /// Sets the maximum precision of division operations.
-        /// If AlwaysTruncate is set to true all operations are affected.
         /// </summary>
         private const int Precision = 50;
 
@@ -341,7 +337,65 @@ namespace ClickerHeroesTrackerWebsite.Utility
         /// <inheritdoc />
         public override string ToString()
         {
-            return string.Concat(this.significand.ToString(), "E", this.exponent);
+            return this.ToString("G", null);
+        }
+
+        /// <summary>
+        /// Converts the numeric value of this instance to its equivalent string representation, using the specified format.
+        /// </summary>
+        /// <returns>The string representation of the value of this instance as specified by format</returns>
+        public string ToString(string format)
+        {
+            return this.ToString(format, null);
+        }
+
+        /// <summary>
+        /// Converts the numeric value of this instance to its equivalent string representation, using the specified format provider.
+        /// </summary>
+        /// <returns>The string representation of the value of this instance as specified by format</returns>
+        public string ToString(IFormatProvider provider)
+        {
+            return this.ToString(null, provider);
+        }
+
+        /// <inheritdoc />
+        public string ToString(string format, IFormatProvider formatProvider)
+        {
+            // If exactly the number, just use the BigInteger formatting
+            if (this.exponent == 0)
+            {
+                return this.significand.ToString(format, formatProvider);
+            }
+
+            // If exponent > 0, just multiply it out and use the BigInteger formatting
+            if (this.exponent > 0)
+            {
+                return (this.significand * BigInteger.Pow(10, this.exponent)).ToString(format, formatProvider);
+            }
+
+            // If exponent < 0, we need to divide. This results in a loss of precision.
+            // If we're in the range of a double, just to string the significand, fiddle with the exponent, parse back as a double and use double's formatting.
+            if (this > double.MinValue && this < double.MaxValue)
+            {
+                var significandString = this.significand.ToString();
+                var exponent = this.exponent;
+
+                // Double only supports a max of 17 digits of precision.
+                // See https://msdn.microsoft.com/en-us/library/kfsatb94(v=vs.110).aspx
+                const int DoubleMaxPrecision = 17;
+                if (significandString.Length > DoubleMaxPrecision)
+                {
+                    exponent += significandString.Length - DoubleMaxPrecision;
+                    significandString = significandString.Substring(0, DoubleMaxPrecision);
+                }
+
+                var valueAsDouble = double.Parse(significandString + "E" + exponent);
+                return valueAsDouble.ToString(format, formatProvider);
+            }
+
+            // If we're outside the range of a double, just forget about stuff past the decimal point and use the BigInteger formatting
+            var truncatedNumber = this.significand / BigInteger.Pow(10, -this.exponent);
+            return truncatedNumber.ToString(format, formatProvider);
         }
 
         /// <summary>
@@ -435,35 +489,6 @@ namespace ClickerHeroesTrackerWebsite.Utility
                     }
                 }
             }
-        }
-
-        /// <summary>
-        /// Truncate the number to the given precision by removing the least significant digits.
-        /// </summary>
-        /// <returns>The truncated number</returns>
-        private BigDecimal Truncate(int precision)
-        {
-            // copy this instance (remember its a struct)
-            var shortened = this;
-
-            // save some time because the number of digits is not needed to remove trailing zeros
-            shortened.Normalize();
-
-            // remove the least significant digits, as long as the number of digits is higher than the given Precision
-            while (NumberOfDigits(shortened.significand) > precision)
-            {
-                shortened.significand /= 10;
-                shortened.exponent++;
-            }
-
-            // normalize again to make sure there are no trailing zeros left
-            shortened.Normalize();
-            return shortened;
-        }
-
-        private BigDecimal Truncate()
-        {
-            return this.Truncate(Precision);
         }
     }
 }
