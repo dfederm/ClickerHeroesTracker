@@ -308,14 +308,15 @@ namespace ClickerHeroesTrackerWebsite.Utility
                 throw new InvalidOperationException("Value must be > 0");
             }
 
-            // If it's less than int's max value, convert it to a double and take the log
-            if (x < int.MaxValue)
+            // Try to parse as a double and take the log from it.
+            double d;
+            if (double.TryParse(x.ToString("G17"), out d))
             {
-                return Math.Log((double)x);
+                return Math.Log(d);
             }
             else
             {
-                // If larger than int.MaxValue, the part after the decimal point really
+                // If it can't be parsed as a double, the part after the decimal point probably
                 // doesn't matter, so truncate (or pad) and use BigInteger's log.
                 BigInteger number;
                 if (x.exponent < 0)
