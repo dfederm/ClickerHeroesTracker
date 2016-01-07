@@ -79,6 +79,8 @@ namespace ClickerHeroesTrackerWebsite.Instrumentation
 
             properties.Add("Headers", headersString.ToString());
 
+            properties.Add("Logger", "HandleAndInstrumentErrorFilter");
+
             // Instrument
             this.telemetryClientResolver().TrackException(exception, properties);
 

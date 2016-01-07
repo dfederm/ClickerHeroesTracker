@@ -46,7 +46,7 @@ namespace ClickerHeroesTrackerWebsite
             app.Use<UnityOwinMiddleware<UserSettingsFlushingMiddleware>>(container);
 
             // Routing middleware
-            ConfigureWebApi(app, container.Resolve<HttpConfiguration>());
+            ConfigureWebApi(app, container.Resolve<HttpConfiguration>(), container);
 
             // Configure Mvc
             ConfigureMvc(container);

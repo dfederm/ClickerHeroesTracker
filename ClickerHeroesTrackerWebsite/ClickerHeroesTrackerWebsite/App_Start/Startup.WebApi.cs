@@ -8,6 +8,10 @@ namespace ClickerHeroesTrackerWebsite
     using System.Net.Http.Formatting;
     using System.Net.Http.Headers;
     using System.Web.Http;
+    using System.Web.Http.ExceptionHandling;
+    using Instrumentation;
+    using Microsoft.ApplicationInsights;
+    using Microsoft.Practices.Unity;
     using Newtonsoft.Json;
     using Newtonsoft.Json.Converters;
     using Newtonsoft.Json.Serialization;
@@ -23,7 +27,11 @@ namespace ClickerHeroesTrackerWebsite
         /// </summary>
         /// <param name="app">The Owin app builder</param>
         /// <param name="config">The WebAPI configuration object</param>
-        private static void ConfigureWebApi(IAppBuilder app, HttpConfiguration config)
+        /// <param name="container">The unity container</param>
+        private static void ConfigureWebApi(
+            IAppBuilder app,
+            HttpConfiguration config,
+            IUnityContainer container)
         {
             // Replace the Json formatter with out own.
             config.Formatters.Remove(config.Formatters.JsonFormatter);
@@ -46,6 +54,9 @@ namespace ClickerHeroesTrackerWebsite
 
             // Use attribute-based routing
             config.MapHttpAttributeRoutes();
+
+            // Exception logging
+            config.Services.Add(typeof(IExceptionLogger), new InstrumentationExceptionLogger(() => container.Resolve<TelemetryClient>()));
 
             // Owin wireup
             app.UseWebApi(config);
