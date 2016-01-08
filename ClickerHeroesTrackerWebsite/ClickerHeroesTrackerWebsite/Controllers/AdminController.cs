@@ -9,6 +9,7 @@ namespace ClickerHeroesTrackerWebsite.Controllers
     using System.Data;
     using System.Web.Mvc;
     using Database;
+    using Instrumentation;
     using Microsoft.ApplicationInsights;
     using Models.Calculator;
     using Models.Game;
@@ -26,17 +27,21 @@ namespace ClickerHeroesTrackerWebsite.Controllers
 
         private readonly TelemetryClient telemetryClient;
 
+        private readonly ICounterProvider counterProvider;
+
         /// <summary>
         /// Initializes a new instance of the <see cref="AdminController"/> class.
         /// </summary>
         public AdminController(
             GameData gameData,
             IDatabaseCommandFactory databaseCommandFactory,
-            TelemetryClient telemetryClient)
+            TelemetryClient telemetryClient,
+            ICounterProvider counterProvider)
         {
             this.gameData = gameData;
             this.databaseCommandFactory = databaseCommandFactory;
             this.telemetryClient = telemetryClient;
+            this.counterProvider = counterProvider;
         }
 
         /// <summary>
@@ -147,7 +152,8 @@ namespace ClickerHeroesTrackerWebsite.Controllers
             var computedStats = new ComputedStatsViewModel(
                 this.gameData,
                 savedGame,
-                null);
+                null,
+                this.counterProvider);
             computedStatsTable.Rows.Add(
                 uploadId,
                 computedStats.OptimalLevel,

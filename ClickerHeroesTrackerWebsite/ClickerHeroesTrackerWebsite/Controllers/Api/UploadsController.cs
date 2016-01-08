@@ -10,6 +10,7 @@ namespace ClickerHeroesTrackerWebsite.Controllers.Api
     using System.Net.Http;
     using System.Web.Http;
     using Database;
+    using Instrumentation;
     using Microsoft.ApplicationInsights;
     using Microsoft.AspNet.Identity;
     using Models.Api;
@@ -33,6 +34,8 @@ namespace ClickerHeroesTrackerWebsite.Controllers.Api
 
         private readonly TelemetryClient telemetryClient;
 
+        private readonly ICounterProvider counterProvider;
+
         /// <summary>
         /// Initializes a new instance of the <see cref="UploadsController"/> class.
         /// </summary>
@@ -40,12 +43,14 @@ namespace ClickerHeroesTrackerWebsite.Controllers.Api
             IDatabaseCommandFactory databaseCommandFactory,
             GameData gameData,
             IUserSettingsProvider userSettingsProvider,
-            TelemetryClient telemetryClient)
+            TelemetryClient telemetryClient,
+            ICounterProvider counterProvider)
         {
             this.databaseCommandFactory = databaseCommandFactory;
             this.gameData = gameData;
             this.userSettingsProvider = userSettingsProvider;
             this.telemetryClient = telemetryClient;
+            this.counterProvider = counterProvider;
         }
 
         /// <summary>
@@ -126,7 +131,8 @@ namespace ClickerHeroesTrackerWebsite.Controllers.Api
             var computedStats = new ComputedStatsViewModel(
                 this.gameData,
                 savedGame,
-                userSettings);
+                userSettings,
+                this.counterProvider);
 
             int uploadId;
             using (var command = this.databaseCommandFactory.Create())
