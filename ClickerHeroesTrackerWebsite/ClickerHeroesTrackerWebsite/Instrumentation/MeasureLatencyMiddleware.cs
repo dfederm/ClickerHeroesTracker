@@ -24,13 +24,16 @@ namespace ClickerHeroesTrackerWebsite.Instrumentation
         }
 
         /// <inheritdoc/>
-        public async override Task Invoke(IOwinContext context)
+        public override Task Invoke(IOwinContext context)
         {
             using (this.counterProvider.Measure(Counter.Total))
             using (this.counterProvider.Measure(Counter.Internal))
             {
-                await this.Next.Invoke(context);
+                // To ensure we measure the entire operation, we need to wait for it to complete.
+                this.Next.Invoke(context).Wait();
             }
+
+            return Task.CompletedTask;
         }
     }
 }
