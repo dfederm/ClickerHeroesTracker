@@ -10,6 +10,7 @@ namespace ClickerHeroesTrackerWebsite.Models.Calculator
     using ClickerHeroesTrackerWebsite.Models.SaveData;
     using ClickerHeroesTrackerWebsite.Models.Simulation;
     using Game;
+    using Instrumentation;
     using Settings;
 
     /// <summary>
@@ -23,15 +24,22 @@ namespace ClickerHeroesTrackerWebsite.Models.Calculator
         public ComputedStatsViewModel(
             GameData gameData,
             SavedGame savedGame,
-            IUserSettings userSettings)
+            IUserSettings userSettings,
+            ICounterProvider counterProvider)
         {
             this.UserSettings = userSettings;
 
             // No activities for now; assume idle mode
-            var simulationResult = new Simulation(
+            var simulation = new Simulation(
                 gameData,
                 savedGame,
-                null).Run();
+                null);
+
+            Simulation.SimulateResult simulationResult;
+            using (var scope = counterProvider.Measure(Counter.Simulation))
+            {
+                simulationResult = simulation.Run();
+            }
 
             this.SoulsPerHour = Convert.ToInt64(Math.Round(simulationResult.Ratio * 3600));
             this.OptimalLevel = simulationResult.Level;

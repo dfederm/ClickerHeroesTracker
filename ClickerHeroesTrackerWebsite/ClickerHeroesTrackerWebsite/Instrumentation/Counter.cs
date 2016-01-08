@@ -33,5 +33,10 @@ namespace ClickerHeroesTrackerWebsite.Instrumentation
         /// The Mvc result latency
         /// </summary>
         Result,
+
+        /// <summary>
+        /// The Simulation latency
+        /// </summary>
+        Simulation,
     }
 }
