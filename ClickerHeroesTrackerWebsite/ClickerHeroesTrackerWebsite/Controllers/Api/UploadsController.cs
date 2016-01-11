@@ -110,6 +110,9 @@ namespace ClickerHeroesTrackerWebsite.Controllers.Api
         [HttpPost]
         public HttpResponseMessage Add(RawUpload rawUpload)
         {
+            // Instrument the encoded save data in case something goes wrong.
+            this.telemetryClient.TrackEvent("Upload", new Dictionary<string, string> { { "EncodedSaveData", rawUpload.EncodedSaveData } });
+
             // Only associate it with the user if they requested that it be added to their progress.
             var userId = rawUpload.AddToProgress && this.User.Identity.IsAuthenticated
                 ? this.User.Identity.GetUserId()
