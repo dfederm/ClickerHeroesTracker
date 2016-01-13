@@ -146,7 +146,7 @@ namespace ClickerHeroesTrackerWebsite.Models.Simulation
                 }
 
                 var bossTime = levelInfo.BossLife / (curDamage * factors.Damage);
-                if (bossTime > (30 + this.GetFactor(AncientIds.Chronos, 5, 5)))
+                if (best != null && bossTime > (30 + this.GetFactor(AncientIds.Chronos, 5, 5)))
                 {
                     break;
                 }
