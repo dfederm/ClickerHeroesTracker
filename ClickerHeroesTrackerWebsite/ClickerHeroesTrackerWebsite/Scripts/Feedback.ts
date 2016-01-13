@@ -1,11 +1,4 @@
-﻿// jquery.d.ts doesn't have this definition.
-interface JQuery
-{
-    valid(): boolean;
-    modal(action: string): void;
-}
-
-// On hiding the modal, reset it.
+﻿// On hiding the modal, reset it.
 $('#feedbackModal').on('hidden.bs.modal', (e) =>
 {
     $('#feedbackComments').val('');

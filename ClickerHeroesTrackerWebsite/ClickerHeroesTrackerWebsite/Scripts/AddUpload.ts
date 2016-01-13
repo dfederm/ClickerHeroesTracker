@@ -1,10 +1,4 @@
-﻿// jquery.d.ts doesn't have this definition.
-interface JQuery
-{
-    valid(): boolean;
-}
-
-$('#addUpload').submit(function ()
+﻿$('#addUpload').submit(function ()
 {
     var form = <HTMLFormElement>this;
     if ($(form).valid())
