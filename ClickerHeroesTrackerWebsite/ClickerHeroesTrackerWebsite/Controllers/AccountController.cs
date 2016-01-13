@@ -91,9 +91,19 @@ namespace ClickerHeroesTrackerWebsite.Controllers
                 return this.View(model);
             }
 
+            var userName = model.UserName;
+
+            // Allow the user to log in with their email address too.
+            // We already check that usernames are only "word" chars (\w+), so this check is sufficient.
+            if (userName.Contains("@"))
+            {
+                var user = await this.UserManager.FindByEmailAsync(userName);
+                userName = user.UserName;
+            }
+
             // This doesn't count login failures towards account lockout
             // To enable password failures to trigger account lockout, change to shouldLockout: true
-            var result = await this.SignInManager.PasswordSignInAsync(model.UserName, model.Password, model.RememberMe, shouldLockout: false);
+            var result = await this.SignInManager.PasswordSignInAsync(userName, model.Password, model.RememberMe, shouldLockout: false);
             switch (result)
             {
                 case SignInStatus.Success:

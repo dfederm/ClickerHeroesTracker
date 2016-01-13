@@ -15,7 +15,7 @@ namespace ClickerHeroesTrackerWebsite.Models.Account
         /// Gets or sets the user's user name
         /// </summary>
         [Required]
-        [Display(Name = "Username")]
+        [Display(Name = "Username or Email")]
         public string UserName { get; set; }
 
         /// <summary>
