@@ -138,6 +138,7 @@
     <Compile Include="Controllers\HomeControllerTests.cs" />
     <Compile Include="Unity\UnityOwinMiddlewareTests.cs" />
     <Compile Include="Utility\BigDecimalTests.cs" />
+    <Compile Include="Utility\EnumerableExtensionsTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\ClickerHeroesTrackerWebsite\App_Data\GameData.json">

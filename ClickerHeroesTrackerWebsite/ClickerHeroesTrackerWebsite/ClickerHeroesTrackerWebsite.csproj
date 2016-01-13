@@ -380,6 +380,7 @@
     <Compile Include="Unity\UnityPerRequestLifetimeDisposingMiddleware.cs" />
     <Compile Include="Utility\BigDecimal.cs" />
     <Compile Include="Utility\DisposableBase.cs" />
+    <Compile Include="Utility\EnumerableExtensions.cs" />
     <Compile Include="Utility\ZeroOneBoolConverter.cs" />
     <Compile Include="Utility\StringDoubleListConverter.cs" />
     <Compile Include="Views\HtmlHelpers.cs" />

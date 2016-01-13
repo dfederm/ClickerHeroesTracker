@@ -19,6 +19,7 @@ namespace ClickerHeroesTrackerWebsite.Controllers.Api
     using Models.Game;
     using Models.SaveData;
     using Models.Settings;
+    using Utility;
 
     /// <summary>
     /// This controller handles the set of APIs that manage uploads
@@ -111,7 +112,16 @@ namespace ClickerHeroesTrackerWebsite.Controllers.Api
         public HttpResponseMessage Add(RawUpload rawUpload)
         {
             // Instrument the encoded save data in case something goes wrong.
-            this.telemetryClient.TrackEvent("Upload", new Dictionary<string, string> { { "EncodedSaveData", rawUpload.EncodedSaveData } });
+            // It needs to be spit into chunks as TelemetryClient has a max property value length.
+            // See: https://azure.microsoft.com/en-us/documentation/articles/app-insights-pricing/#limits-summary
+            var chunks = rawUpload.EncodedSaveData.SplitIntoChunks(10000);
+            var properties = new Dictionary<string, string>();
+            for (int i = 0; i < chunks.Length; i++)
+            {
+                properties.Add("EncodedSaveData_" + i, chunks[i]);
+            }
+
+            this.telemetryClient.TrackTrace("Upload", properties);
 
             // Only associate it with the user if they requested that it be added to their progress.
             var userId = rawUpload.AddToProgress && this.User.Identity.IsAuthenticated
