@@ -143,8 +143,9 @@ namespace ClickerHeroesTrackerWebsite.Models.SaveData
                 return null;
             }
 
-            // Remove every other character, AKA "unsprinkle"
-            var unsprinkledChars = new char[antiCheatCodeIndex / 2];
+            // Remove every other character, AKA "unsprinkle".
+            // Handle odd lengthed strings even though it shouldn't happen.
+            var unsprinkledChars = new char[(antiCheatCodeIndex / 2) + (antiCheatCodeIndex % 2)];
             for (var i = 0; i < antiCheatCodeIndex; i += 2)
             {
                 unsprinkledChars[i / 2] = encodedSaveData[i];
