@@ -308,6 +308,7 @@
     <Compile Include="Models\ApplicationDbContext.cs" />
     <Compile Include="Models\ApplicationUser.cs" />
     <Compile Include="Models\Calculator\ExperimentalStatsViewModel.cs" />
+    <Compile Include="Models\Dashboard\Graph\GraphRangeSelectorViewModel.cs" />
     <Compile Include="Models\Feedback\FeedbackRequest.cs" />
     <Compile Include="Models\Game\AncientIds.cs" />
     <Compile Include="Models\Game\GameData.cs" />
@@ -475,6 +476,7 @@
     <Content Include="Views\Admin\Index.cshtml" />
     <Content Include="Views\Dashboard\Uploads.cshtml" />
     <Content Include="Views\Calculator\_ExperimentalStats.cshtml" />
+    <Content Include="Views\Dashboard\_RangeSelector.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Analyzer Include="..\packages\Desktop.Analyzers.1.1.0\analyzers\dotnet\cs\Desktop.Analyzers.dll" />

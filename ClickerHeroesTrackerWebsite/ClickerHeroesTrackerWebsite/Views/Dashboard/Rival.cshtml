@@ -11,6 +11,8 @@
 
 @Html.Partial("_GraphScripts")
 
+@Html.Partial("_RangeSelector", Model.RangeSelector)
+
 <div class="row">
     @foreach (var graph in Model.ProminentGraphs)
     {

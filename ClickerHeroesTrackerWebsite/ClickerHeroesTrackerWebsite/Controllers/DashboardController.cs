@@ -76,12 +76,14 @@ namespace ClickerHeroesTrackerWebsite.Controllers
         /// <returns>The progress view</returns>
         public ActionResult Progress()
         {
+            var range = this.Request.QueryString["range"];
             var model = new ProgressViewModel(
                 this.gameData,
                 this.telemetryClient,
                 this.databaseCommandFactory,
                 this.userSettingsProvider,
-                this.User);
+                this.User,
+                range);
             if (!model.IsValid)
             {
                 this.ViewBag.ErrorMessage = "You have no uploaded data!";
@@ -104,13 +106,15 @@ namespace ClickerHeroesTrackerWebsite.Controllers
                 return this.RedirectToAction("Index");
             }
 
+            var range = this.Request.QueryString["range"];
             var model = new RivalViewModel(
                 this.gameData,
                 this.telemetryClient,
                 this.databaseCommandFactory,
                 this.userSettingsProvider,
                 this.User,
-                rivalId);
+                rivalId,
+                range);
             if (!model.IsValid)
             {
                 this.ViewBag.ErrorMessage = "There was a problem comparing your data to that rival. Man sure they're your rival and have upload data.";

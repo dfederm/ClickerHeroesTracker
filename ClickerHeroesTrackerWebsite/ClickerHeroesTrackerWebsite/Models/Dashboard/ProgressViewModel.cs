@@ -29,19 +29,22 @@ namespace ClickerHeroesTrackerWebsite.Models.Dashboard
             TelemetryClient telemetryClient,
             IDatabaseCommandFactory databaseCommandFactory,
             IUserSettingsProvider userSettingsProvider,
-            IPrincipal user)
+            IPrincipal user,
+            string range)
         {
             var userId = user.Identity.GetUserId();
 
             var userSettings = userSettingsProvider.Get(userId);
 
-            var startTime = DateTime.UtcNow.AddDays(-7);
+            this.RangeSelector = new GraphRangeSelectorViewModel(range);
+
             ProgressData data;
 
             var commandParameters = new Dictionary<string, object>
             {
                 { "@UserId", userId },
-                { "@StartTime", startTime },
+                { "@StartTime", this.RangeSelector.Start },
+                { "@EndTime", this.RangeSelector.End },
             };
             using (var command = databaseCommandFactory.Create(
                 "GetProgressData",
@@ -100,6 +103,11 @@ namespace ClickerHeroesTrackerWebsite.Models.Dashboard
         /// Gets the graph view models to display secondary
         /// </summary>
         public IList<GraphViewModel> SecondaryGraphs { get; }
+
+        /// <summary>
+        /// Gets the graph range selector for this page
+        /// </summary>
+        public GraphRangeSelectorViewModel RangeSelector { get; }
 
         /// <summary>
         /// Gets a value indicating whether the model is valid

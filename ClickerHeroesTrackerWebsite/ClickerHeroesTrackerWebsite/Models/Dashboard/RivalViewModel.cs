@@ -30,14 +30,15 @@ namespace ClickerHeroesTrackerWebsite.Models.Dashboard
             IDatabaseCommandFactory databaseCommandFactory,
             IUserSettingsProvider userSettingsProvider,
             IPrincipal user,
-            int rivalId)
+            int rivalId,
+            string range)
         {
             var userId = user.Identity.GetUserId();
             var userName = user.Identity.GetUserName();
 
             var userSettings = userSettingsProvider.Get(userId);
 
-            var startTime = DateTime.UtcNow.AddDays(-7);
+            this.RangeSelector = new GraphRangeSelectorViewModel(range);
 
             ProgressData userData;
             ProgressData rivalData;
@@ -46,7 +47,8 @@ namespace ClickerHeroesTrackerWebsite.Models.Dashboard
             {
                 { "@UserId", userId },
                 { "@RivalId", rivalId },
-                { "@StartTime", startTime },
+                { "@StartTime", this.RangeSelector.Start },
+                { "@EndTime", this.RangeSelector.End },
             };
             using (var command = databaseCommandFactory.Create(
                 "GetRivalData",
@@ -156,6 +158,11 @@ namespace ClickerHeroesTrackerWebsite.Models.Dashboard
         /// Gets a list of secondary graphs.
         /// </summary>
         public IList<GraphViewModel> SecondaryGraphs { get; }
+
+        /// <summary>
+        /// Gets the graph range selector for this page
+        /// </summary>
+        public GraphRangeSelectorViewModel RangeSelector { get; }
 
         private GraphViewModel CreateGraph(
             string id,
