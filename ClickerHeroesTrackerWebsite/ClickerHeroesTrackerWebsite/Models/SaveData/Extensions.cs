@@ -38,7 +38,9 @@ namespace ClickerHeroesTrackerWebsite.Models.SaveData
         {
             var itemLevels = new Dictionary<int, int>();
 
-            if (itemsData != null)
+            if (itemsData != null
+                && itemsData.Slots != null
+                && itemsData.Items != null)
             {
                 var numActiveItems = Math.Min(4, itemsData.Slots.Count);
                 for (var i = 0; i < numActiveItems; i++)

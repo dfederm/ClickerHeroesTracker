@@ -132,6 +132,7 @@
   <ItemGroup>
     <Compile Include="Mocks\MockGameData.cs" />
     <Compile Include="Models\ConfirmViewModelTests.cs" />
+    <Compile Include="Models\SavedGameExtensionsTests.cs" />
     <Compile Include="Models\SavedGameTests.cs" />
     <Compile Include="Models\SimulationTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
