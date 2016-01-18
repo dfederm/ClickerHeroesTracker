@@ -98,6 +98,12 @@ namespace ClickerHeroesTrackerWebsite.Controllers
             if (userName.Contains("@"))
             {
                 var user = await this.UserManager.FindByEmailAsync(userName);
+                if (user == null)
+                {
+                    this.ModelState.AddModelError(string.Empty, "Invalid login attempt.");
+                    return this.View(model);
+                }
+
                 userName = user.UserName;
             }
 
