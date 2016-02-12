@@ -5,34 +5,39 @@
 namespace ClickerHeroesTrackerWebsite.IntegrationTests
 {
     using System.Net;
+    using System.Net.Http;
+    using System.Threading.Tasks;
     using Helpers;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
 
     [TestClass]
     public class HomepageTests
     {
-        private const string Endpoint = "/";
+        private const string Path = "/";
 
         [TestMethod]
-        public void Homepage_Anonymous_BasicTest()
+        public async Task Homepage_Anonymous_BasicTest()
         {
-            using (var response = new HtmlResponse(Endpoint))
-            {
-                Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
+            var request = new HttpRequestMessage(HttpMethod.Get, Path);
 
-                Assert.IsTrue(response.Content.Contains("jumbotron"));
-            }
+            var response = await RequestManager.MakeRequest(request);
+            Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
+
+            var content = await response.Content.ReadAsStringAsync();
+            Assert.IsTrue(content.Contains("jumbotron"));
         }
 
         [TestMethod]
-        public void Homepage_User_BasicTest()
+        public async Task Homepage_User_BasicTest()
         {
-            using (var response = new HtmlResponse(Endpoint, request => request.AuthenticateUser()))
-            {
-                Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
+            var request = new HttpRequestMessage(HttpMethod.Get, Path);
+            request.AuthenticateUser();
 
-                Assert.IsTrue(response.Content.Contains("jumbotron"));
-            }
+            var response = await RequestManager.MakeRequest(request);
+            Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
+
+            var content = await response.Content.ReadAsStringAsync();
+            Assert.IsTrue(content.Contains("jumbotron"));
         }
     }
 }
