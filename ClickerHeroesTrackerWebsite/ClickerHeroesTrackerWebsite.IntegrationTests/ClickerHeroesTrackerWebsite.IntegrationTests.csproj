@@ -49,6 +49,8 @@
   <ItemGroup>
     <Compile Include="Helpers\HtmlResponse.cs" />
     <Compile Include="Helpers\HttpWebRequestExtensions.cs" />
+    <Compile Include="FeedbackTests.cs" />
+    <Compile Include="NavbarTests.cs" />
     <Compile Include="HomepageTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
