@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
-VisualStudioVersion = 14.0.23107.0
+VisualStudioVersion = 14.0.24720.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ClickerHeroesTrackerWebsite", "ClickerHeroesTrackerWebsite\ClickerHeroesTrackerWebsite.csproj", "{B389952B-0D84-4A4C-9EEA-1FC2E34FEE41}"
 EndProject
@@ -18,6 +18,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Build", "Build", "{B99EE4D7
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ClickerHeroesTrackerWebsite.IntegrationTests", "ClickerHeroesTrackerWebsite.IntegrationTests\ClickerHeroesTrackerWebsite.IntegrationTests.csproj", "{BABC2536-C712-4AE2-AA28-9A08A2EEA317}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{CF4ED4FD-148C-400D-80CC-0EC8DE114E02}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -41,18 +43,24 @@ Global
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{F82B0586-9E62-43FA-BEDF-1A162C2935FD} = {CF4ED4FD-148C-400D-80CC-0EC8DE114E02}
+		{BABC2536-C712-4AE2-AA28-9A08A2EEA317} = {CF4ED4FD-148C-400D-80CC-0EC8DE114E02}
+	EndGlobalSection
 	GlobalSection(TeamFoundationVersionControl) = preSolution
 		SccNumberOfProjects = 4
 		SccEnterpriseProvider = {4CA58AB2-18FA-4F8D-95D4-32DDF27D184C}
 		SccTeamFoundationServer = https://dfederm.visualstudio.com/defaultcollection
 		SccLocalPath0 = .
 		SccProjectUniqueName1 = ClickerHeroesTrackerWebsite.Tests\\ClickerHeroesTrackerWebsite.Tests.csproj
+		SccProjectTopLevelParentUniqueName1 = ClickerHeroesTrackerWebsite.sln
 		SccProjectName1 = ClickerHeroesTrackerWebsite.Tests
 		SccLocalPath1 = ClickerHeroesTrackerWebsite.Tests
 		SccProjectUniqueName2 = ClickerHeroesTrackerWebsite\\ClickerHeroesTrackerWebsite.csproj
 		SccProjectName2 = ClickerHeroesTrackerWebsite
 		SccLocalPath2 = ClickerHeroesTrackerWebsite
 		SccProjectUniqueName3 = ClickerHeroesTrackerWebsite.IntegrationTests\\ClickerHeroesTrackerWebsite.IntegrationTests.csproj
+		SccProjectTopLevelParentUniqueName3 = ClickerHeroesTrackerWebsite.sln
 		SccProjectName3 = ClickerHeroesTrackerWebsite.IntegrationTests
 		SccLocalPath3 = ClickerHeroesTrackerWebsite.IntegrationTests
 	EndGlobalSection
