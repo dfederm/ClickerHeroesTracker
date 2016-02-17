@@ -35,7 +35,7 @@ namespace ClickerHeroesTrackerWebsite.Configuration
             {
                 var buildInfo = JObject.Load(reader);
 
-                this.Changelist = (int)buildInfo["changelist"];
+                this.Changelist = (string)buildInfo["changelist"];
                 this.BuildId = (string)buildInfo["buildId"];
             }
         }
@@ -44,7 +44,7 @@ namespace ClickerHeroesTrackerWebsite.Configuration
         public Environment Environment { get; }
 
         /// <inheritdoc/>
-        public int Changelist { get; }
+        public string Changelist { get; }
 
         /// <inheritdoc/>
         public string BuildId { get; }

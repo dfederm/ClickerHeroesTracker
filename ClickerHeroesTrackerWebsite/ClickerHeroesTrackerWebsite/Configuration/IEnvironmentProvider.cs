@@ -17,7 +17,7 @@ namespace ClickerHeroesTrackerWebsite.Configuration
         /// <summary>
         /// Gets the changlist of the last change that is part of the running build.
         /// </summary>
-        int Changelist { get; }
+        string Changelist { get; }
 
         /// <summary>
         /// Gets the build id of the running service.

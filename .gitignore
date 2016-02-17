@@ -10,3 +10,16 @@
 
 # The packages folder can be ignored because of Package Restore
 **/packages/*
+
+# Ignore individual items specific to this repo. These are all generate at build time.
+/ClickerHeroesTrackerWebsite/ClickerHeroesTrackerWebsite/Scripts/UploadTable.js.map
+/ClickerHeroesTrackerWebsite/ClickerHeroesTrackerWebsite/Scripts/UploadTable.js
+/ClickerHeroesTrackerWebsite/ClickerHeroesTrackerWebsite/Scripts/Helpers.js.map
+/ClickerHeroesTrackerWebsite/ClickerHeroesTrackerWebsite/Scripts/Helpers.js
+/ClickerHeroesTrackerWebsite/ClickerHeroesTrackerWebsite/Scripts/Feedback.js.map
+/ClickerHeroesTrackerWebsite/ClickerHeroesTrackerWebsite/Scripts/Feedback.js
+/ClickerHeroesTrackerWebsite/ClickerHeroesTrackerWebsite/Scripts/AddUpload.js.map
+/ClickerHeroesTrackerWebsite/ClickerHeroesTrackerWebsite/Scripts/AddUpload.js
+/ClickerHeroesTrackerWebsite/ClickerHeroesTrackerWebsite.Tests/ClickerHeroesTrackerWebsite.Tests.xml
+/ClickerHeroesTrackerWebsite/ClickerHeroesTrackerWebsite.IntegrationTests/ClickerHeroesTrackerWebsite.IntegrationTests.xml
+/ClickerHeroesTrackerWebsite/ClickerHeroesTrackerWebsite/ClickerHeroesTrackerWebsite.xml
