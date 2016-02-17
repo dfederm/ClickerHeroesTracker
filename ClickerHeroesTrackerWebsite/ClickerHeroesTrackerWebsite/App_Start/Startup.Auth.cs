@@ -1,5 +1,4 @@
-﻿
-﻿// <copyright file="Startup.Auth.cs" company="Clicker Heroes Tracker">
+﻿﻿// <copyright file="Startup.Auth.cs" company="Clicker Heroes Tracker">
 // Copyright (c) Clicker Heroes Tracker. All rights reserved.
 // </copyright>
 

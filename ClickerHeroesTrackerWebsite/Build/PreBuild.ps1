@@ -32,16 +32,6 @@ try
 		throw "SourceVersion was not provided"
 	}
 
-	# The string is of the form C<changelist>, so cut off the "C" part
-	$versionPattern = "(\\d+)\\.(\\d+)\\.(\\d+)\\.(\\d+)"
-	if ($SourceVersion[0] -ine 'C')
-	{
-		throw "SourceVersion did not start with 'C': $SourceVersion"
-	}
-
-	$changelist = [int]$SourceVersion.Substring(1)
-	Write-Host "Parsed changelist $changelist"
-
 	# Find the build info
 	$buildInfoItem = Get-ChildItem -Path $SourceDirectory -Filter "BuildInfo.json" -Recurse
 	if (-not $buildInfoItem)
@@ -59,7 +49,7 @@ try
 	$buildInfo = $content | ConvertFrom-Json
 
 	# Replace the fields
-	$buildInfo.changelist = $changelist
+	$buildInfo.changelist = $SourceVersion
 	$buildInfo.buildId = $BuildNumber
 
 	# Serialize
