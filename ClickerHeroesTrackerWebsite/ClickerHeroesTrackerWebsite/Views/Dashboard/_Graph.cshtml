@@ -1,0 +1,15 @@
+﻿@using ClickerHeroesTrackerWebsite.Models.Dashboard.Graph
+@using ClickerHeroesTrackerWebsite.Views
+
+@model GraphViewModel
+
+<div id="@Model.Id" style="width:100%; height:400px;"></div>
+
+@using (Html.BeginScripts())
+{
+    <script type="text/javascript">
+        $(function () {
+            $('#@Model.Id').highcharts(@Html.Raw(Model.Data.ToJsonString()));
+        });
+    </script>
+}

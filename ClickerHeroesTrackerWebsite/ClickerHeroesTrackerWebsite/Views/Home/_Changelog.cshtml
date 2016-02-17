@@ -1,0 +1,124 @@
+﻿@using ClickerHeroesTrackerWebsite.Models.Home
+
+@model ChangelogViewModel
+
+<h2>What's New</h2>
+@if (Model.IsFull)
+{
+    <h3>Monday, January 18, 2016</h3>
+}
+<ul>
+    <li>Users can now zoom in and out on their graphs using the range selector with a few pre-defined ranges.</li>
+
+    @* Dupe some recent stuff from the past couple days for the front page *@
+    @if (!Model.IsFull)
+    {
+        <li>Users can now log in using their email address. Logging in with user name still works just fine, but now users have the option.</li>
+        <li>Updated the simulation code to support arbitrarily large numbers. The effect of this is that the new heroes are now supported during the simulation.</li>
+    }
+</ul>
+
+@if (Model.IsFull)
+{
+    <h3>Monday, January 12, 2016</h3>
+    <ul>
+        <li>Users can now log in using their email address. Logging in with user name still works just fine, but now users have the option.</li>
+    </ul>
+
+    <h3>Monday, January 4, 2016</h3>
+    <ul>
+        <li>Updated the simulation code to support arbitrarily large numbers. The effect of this is that the new heroes are now supported during the simulation.</li>
+        <li>Tweaked simulation logic to mirror the <a href="http://philni.neocities.org/ancientssoul.html" target="_blank">calculator</a> by /u/philni, which has updated logic from the aws one.</li>
+    </ul>
+
+    <h3>Friday, January 1, 2016</h3>
+    <ul>
+        <li>Added a feedback form at the top of all pages to easily give feedback, suggestions, make bug reports, etc. directly from the site.</li>
+        <li>Added support for the Android save game format, based on findings from <a href="https://redd.it/3z24sw" target="_blank">Reddit</a>.</li>
+    </ul>
+
+    <h3>Sunday, December 25, 2015</h3>
+    <ul>
+        <li>Updated suggested ancient levels based on the <a href="https://redd.it/3y57jd" target="_blank">updated rules of thumb</a>.</li>
+        <li>Ancient level suggestions now supported for the active play style.</li>
+    </ul>
+
+    <h3>Sunday, December 13, 2015</h3>
+    <ul>
+        <li>Added a @Html.ActionLink("user setting", "Index", "Manage") to opt in to seeing experimental stats.</li>
+    </ul>
+
+    <h3>Saturday, December 12, 2015</h3>
+    <ul>
+        <li>Changed the formula for Solomon for Hybrid and Active play styles based on math from <a href="https://redd.it/3h5al8" target="_blank">Reddit</a>.</li>
+    </ul>
+
+    <h3>Sunday, October 4, 2015</h3>
+    <ul>
+        <li>Changed the formula for Hybrid builds for Juggernaut from: Click*0.2 to Click<sup>0.8</sup> based math from Reddit.</li>
+    </ul>
+
+    <h3>Sunday, September 6, 2015</h3>
+    <ul>
+        <li>Added a @Html.ActionLink("new page", "Uploads", "Dashboard") for a user to view all their uploads.</li>
+    </ul>
+
+    <h3>Saturday, September 5, 2015</h3>
+    <ul>
+        <li>Added ability for a user to view the raw save data for their own uploads.</li>
+    </ul>
+
+    <h3>Friday, September 4, 2015</h3>
+    <ul>
+        <li>Added tracking for titan damage and souls spent.</li>
+    </ul>
+
+    <h3>Monday, August 24, 2015</h3>
+    <ul>
+        <li>Clarified the role of Siya in the suggested ancient leveling plan.</li>
+        <li>Added a @Html.ActionLink("user setting", "Index", "Manage") for play style.</li>
+        <li>Added Hybrid play style to the suggested ancient level plan.</li>
+        <li>Clarified on the calculator that both the suggested ancient leveling plan and computed stats are incomplete for certain play styles.</li>
+        <li>Added additional metadata on upload pages to show the user name, upload time, and the share link.</li>
+    </ul>
+
+    <h3>Sunday, August 16, 2015</h3>
+    <ul>
+        <li>Added ability for users to reset their passwords</li>
+    </ul>
+
+    <h3>Saturday, August 15, 2015</h3>
+    <ul>
+        <li>Added @Html.ActionLink("What's New", "New", "Home") to notify users of new features and bug fixes</li>
+        <li>Added a @Html.ActionLink("user setting", "Index", "Manage") to allow the user to choose between the "Ln" and "Log" Solomon formula</li>
+    </ul>
+
+    <h3>Friday, August 14, 2015</h3>
+    <ul>
+        <li>Fix upload issue related to large ascension times</li>
+        <li>
+            Loosened password requirements.<br />
+            Old Requirements:
+            <ul>
+                <li>Require at least 6 characters</li>
+                <li>Require special character</li>
+                <li>Require digit</li>
+                <li>Require lowercase character</li>
+                <li>Require uppercase character</li>
+            </ul>
+            New requirements:
+            <ul>
+                <li>Require at least 4 characters</li>
+            </ul>
+        </li>
+        <li>Changed the suggested level for Solomon to use the "Ln" formula instead of the "Log" formula.</li>
+        <li>Added a @Html.ActionLink("user setting", "Index", "Manage") to allow uploads to be public. You can now share the url for your upload so others may see it.</li>
+    </ul>
+
+    <h3>Thursday, August 13, 2015</h3>
+    <ul>
+        <li>Launch!</li>
+        <li>Fixed issue with negative suggested ancient levels</li>
+        <li>Fixed issue with certain uploads failing due unexpected relic values</li>
+    </ul>
+}

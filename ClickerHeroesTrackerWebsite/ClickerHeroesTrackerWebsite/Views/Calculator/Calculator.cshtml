@@ -1,0 +1,136 @@
+﻿@using ClickerHeroesTrackerWebsite.Models.Calculator
+@model CalculatorViewModel
+
+@{
+    ViewBag.Title = "Calculator";
+}
+
+<h2>@ViewBag.Title.</h2>
+
+<div class="clearfix">
+    <ul class="list-inline pull-left">
+        <li>
+            <label>User:</label>
+            @if (!string.IsNullOrEmpty(Model.UploadUserName))
+            {
+                @Model.UploadUserName
+            }
+            else
+            {
+                <span class="text-muted">
+                    (Anonymous)
+                </span>
+            }
+        </li>
+        <li>
+            <label>Upload Time:</label>
+            @TimeZoneInfo.ConvertTime(Model.UploadTime, TimeZoneInfo.Utc, Model.UserSettings.TimeZone).ToString("G")
+        </li>
+    </ul>
+    @if (Model.IsOwn || Model.IsPublic || User.IsInRole("Admin"))
+    {
+        <div class="pull-right">
+            @if (Model.IsOwn || User.IsInRole("Admin"))
+            {
+                <button class="btn btn-default" data-toggle="modal" data-target="#saveDataModal">
+                    View Save Data
+                </button>
+                <div id="saveDataModal" class="modal fade">
+                    <div class="modal-dialog modal-sm">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h4 class="modal-title">Save Data</h4>
+                            </div>
+                            <div class="modal-body">
+                                <p>This is the raw content previously uploaded.</p>
+                                <textarea class="input-lg" onclick="$(this).select()" readonly>@Model.UploadContent</textarea>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-default" data-dismiss="modal">Done</button>
+                            </div>
+                        </div>                    
+                    </div>
+                </div>
+            }
+
+            <button class="btn btn-default" data-toggle="modal" data-target="#shareModal">
+                Share
+            </button>
+            <div id="shareModal" class="modal fade">
+                <div class="modal-dialog modal-sm">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h4 class="modal-title">Share</h4>
+                        </div>
+                        <div class="modal-body">
+                            @if (Model.IsPublic)
+                            {
+                                <p>
+                                    You can share the url below to others to let them view this upload.
+                                </p>
+                                <input type="text"
+                                        id="shareUrl"
+                                        class="input-lg"
+                                        readonly="readonly"
+                                        onclick="$(this).select()"
+                                        value="http://clickerheroestracker.azurewebsites.net/Calculator/View?uploadId=@Model.UploadId" />
+                            }
+                            else if (User.IsInRole("Admin"))
+                            {
+                                <p class="text-danger">
+                                    This user's uploads are not public. Please keep their data private.
+                                </p>
+                            }
+                            else
+                            {
+                                <p>
+                                    Your uploads are not public. You can change this in your @Html.ActionLink("settings", "Index", "Manage")
+                                </p>
+                            }
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-default" data-dismiss="modal">Done</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+<div class="row">
+    <div class="col-md-4">
+        @Html.Partial("_AncientLevelSummary", Model.AncientLevelSummaryViewModel)
+    </div>
+    <div class="col-md-4">
+        @Html.Partial("_SuggestedAncientLevels", Model.SuggestedAncientLevelsViewModel)
+    </div>
+    <div class="col-md-4">
+        @Html.Partial("_ComputedStats", Model.ComputedStatsViewModel)
+
+        @if (Model.ExperimentalStatsViewModel != null)
+        {
+            @Html.Partial("_ExperimentalStats", Model.ExperimentalStatsViewModel)
+        }
+    </div>
+</div>
+@* We don't store this data yet, so don't display it
+    <div class="row">
+        <div class="col-md-4">
+            @Html.Partial("_HeroLevelSummary", Model.HeroLevelSummaryViewModel)
+        </div>
+        <div class="col-md-4">
+            <h4>Hero Gild Suggestions:</h4>
+            Coming Soon!
+        </div>
+    </div>
+*@
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+
+    @* Wire up tooltips *@
+    <script type="text/javascript">
+        $('[data-toggle="tooltip"]').tooltip();
+    </script>
+}

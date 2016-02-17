@@ -1,0 +1,55 @@
+﻿@using ClickerHeroesTrackerWebsite.Models.Dashboard
+@model DashboardViewModel
+
+@{
+            ViewBag.Title = "Dashboard";
+}
+
+<h2>Dashboard</h2>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="clearfix">
+            <h4 class="pull-left">Recent Uploads:</h4>
+            <h5 class="pull-right">@Html.ActionLink("See all", "Uploads")</h5>
+        </div>
+        <table id="uploads" class="table">
+            <thead>
+                <tr>
+                    <th>
+                        Upload Time
+                        <a href="/Manage" class="text-muted" data-toggle="tooltip" data-placement="right" title="Times not displayed in your time zone? You can adjust your time zone on the settings page.">(?)</a>
+                    </th>
+                    <th></th>
+                </tr>
+            </thead>
+        </table>
+    </div>
+    <div class="col-md-6">
+        @Html.Partial("_ProgressSummary", Model.ProgressSummaryGraph)
+    </div>
+</div>
+@if (Model.RivalDataList.IsValid)
+{
+    <div class="row">
+        <div class="col-md-6">
+            @Html.Partial("_RivalDataList", Model.RivalDataList)
+        </div>
+    </div>
+}
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+    @Scripts.Render("~/Scripts/Helpers.js")
+    @Scripts.Render("~/Scripts/UploadTable.js")
+
+    @* Wire up tooltips *@
+    <script type="text/javascript">
+        $('[data-toggle="tooltip"]').tooltip();
+    </script>
+
+    @* Create upload table *@
+    <script type="text/javascript">
+        UploadTable.create('uploads', 10, false);
+    </script>
+}

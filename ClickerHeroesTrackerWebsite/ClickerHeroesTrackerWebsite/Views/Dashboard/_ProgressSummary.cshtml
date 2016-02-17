@@ -1,0 +1,10 @@
+﻿@using ClickerHeroesTrackerWebsite.Models.Dashboard.Graph
+
+@model GraphData
+
+<div class="clearfix">
+    <h4 class="pull-left">Progress summary:</h4>
+    <h5 class="pull-right">@Html.ActionLink("See all", "Progress")</h5>
+</div>
+@Html.Partial("_GraphScripts")
+@Html.Partial("_Graph", new GraphViewModel { Id = "progressSumary", Data = Model })

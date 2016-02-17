@@ -1,0 +1,48 @@
+﻿@using ClickerHeroesTrackerWebsite.Models;
+@using ClickerHeroesTrackerWebsite.Models.Calculator;
+
+@model ComputedStatsViewModel
+
+<h4>Simulation Data:</h4>
+<p class="text-muted">
+    Based on the <a href="http://philni.neocities.org/ancientssoul.html" target="_blank">calculator</a> by /u/philni.
+</p>
+
+@if (Model.UserSettings.PlayStyle != PlayStyle.Idle)
+{
+    <p class="text-danger">
+        Currently these stats are computed for Idle play style. The numbers may be incorrect for other play styles.
+    </p>
+}
+
+<table class="table">
+    <tr>
+        <td>Souls/hr</td>
+        <td>@Model.SoulsPerHour</td>
+    </tr>
+    <tr>
+        <td>Optimal Level</td>
+        <td>@Model.OptimalLevel</td>
+    </tr>
+    <tr>
+        <td>Souls per Ascension (at Optimal Level)</td>
+        <td>@Model.OptimalSoulsPerAscension</td>
+    </tr>
+    <tr>
+        <td>Optimal Ascension Time</td>
+        <td>@Model.OptimalAscensionTime min</td>
+    </tr>
+</table>
+
+<h4>Other stats:</h4>
+
+<table class="table">
+    <tr>
+        <td>Hero Souls Spent on Ancients</td>
+        <td>@Model.SoulsSpent</td>
+    </tr>
+    <tr>
+        <td>Titan Damage</td>
+        <td>@Model.TitanDamage</td>
+    </tr>
+</table>

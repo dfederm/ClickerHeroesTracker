@@ -1,0 +1,52 @@
+﻿@using ClickerHeroesTrackerWebsite.Models.Calculator;
+@using ClickerHeroesTrackerWebsite.Models.Game;
+
+@model SuggestedAncientLevelsViewModel
+
+<h4>Suggested Leveling Plan:</h4>
+<p class="text-muted">
+    Based on the <a href="https://redd.it/3y57jd" target="_blank">Rules of Thumb</a>.
+</p>
+
+<p class="text-muted">
+    These suggestions are based on your play style. You may change your play style in your @Html.ActionLink("settings", "Index", "Manage").
+</p>
+
+<table class="table">
+    <tr>
+        <th>Ancient</th>
+        <th>Current</th>
+        <th>Suggested</th>
+        <th>Difference</th>
+    </tr>
+    @foreach (var ancient in Model.SuggestedAncientLevels)
+    {
+        <tr>
+            <td>
+                @ancient.AncientName:
+                @if (ancient.AncientId == AncientIds.Solomon)
+                {
+                    var solomonTooltip = this.Request.IsAuthenticated
+                        ? "This is using your settings for the Solomon formula preference. You can change this on your settings page."
+                        : "By default we use the \"Ln\" Solomon formula. You may change this by logging in and changing your settings.";
+                    <a href="/Manage" class="text-muted" data-toggle="tooltip" data-placement="right" title="@solomonTooltip">(?)</a>
+                }
+            </td>
+            <td class="text-right">@ancient.CurrentLevel</td>
+
+            @if (ancient.AncientId == Model.PrimaryAncientId)
+            {
+                <td class="text-right">
+                    N/A
+                    <a href="#" class="text-muted" data-toggle="tooltip" data-placement="bottom" title="The formulae are based on this ancient. If all suggestions below are negative or zero, level this ancient.">(?)</a>
+                </td>
+                <td></td>
+            }
+            else
+            {
+                <td class="text-right">@ancient.SuggestedLevel</td>
+                <td class="text-right">@ancient.LevelDifference</td>
+            }
+        </tr>
+    }
+</table>
