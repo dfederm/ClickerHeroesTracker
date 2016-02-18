@@ -15,6 +15,11 @@ namespace ClickerHeroesTrackerWebsite.Configuration
         Devmachine,
 
         /// <summary>
+        /// The environement used for buddy builds
+        /// </summary>
+        Buddy,
+
+        /// <summary>
         /// The staging (pre-prod) environment
         /// </summary>
         Staging,
