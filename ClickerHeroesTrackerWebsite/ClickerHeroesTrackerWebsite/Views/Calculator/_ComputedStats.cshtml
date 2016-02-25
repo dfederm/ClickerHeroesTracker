@@ -1,5 +1,4 @@
-﻿@using ClickerHeroesTrackerWebsite.Models;
-@using ClickerHeroesTrackerWebsite.Models.Calculator;
+﻿@using ClickerHeroesTrackerWebsite.Models.Calculator;
 
 @model ComputedStatsViewModel
 
@@ -7,13 +6,6 @@
 <p class="text-muted">
     Based on the <a href="http://philni.neocities.org/ancientssoul.html" target="_blank">calculator</a> by /u/philni.
 </p>
-
-@if (Model.UserSettings.PlayStyle != PlayStyle.Idle)
-{
-    <p class="text-danger">
-        Currently these stats are computed for Idle play style. The numbers may be incorrect for other play styles.
-    </p>
-}
 
 <table class="table">
     <tr>

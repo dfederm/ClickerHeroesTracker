@@ -16,7 +16,11 @@ namespace ClickerHeroesTrackerWebsite.Models.Simulation
     /// </summary>
     public sealed class LevelingPlan
     {
+        private const int BomberMaxGoldUpgradeLevel = 100;
+
         private static double doubleMaxValueSoulsFromHeroLevels = Math.Log(double.MaxValue) / Math.Log(10) * .25;
+
+        private readonly GameData gameData;
 
         private readonly HeroesData heroesData;
 
@@ -30,16 +34,15 @@ namespace ClickerHeroesTrackerWebsite.Models.Simulation
 
         private readonly Dictionary<Hero, int> currentLevels = new Dictionary<Hero, int>();
 
-        private readonly HashSet<Upgrade> purchasedUpgrades = new HashSet<Upgrade>();
-
-        // The cost for baseline leveling
-        private readonly BigDecimal startCost;
-
         private BigDecimal currentDamage;
 
         private BigDecimal currentCost;
 
-        private Hero lastHero;
+        private double goldMultiplier = 1;
+
+        private double damageMultiplier = 1;
+
+        private bool isAtRangers;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="LevelingPlan"/> class.
@@ -50,6 +53,7 @@ namespace ClickerHeroesTrackerWebsite.Models.Simulation
             double argaivFactor,
             double dogcogFactor)
         {
+            this.gameData = gameData;
             this.heroesData = heroesData;
             this.argaivFactor = argaivFactor;
             this.dogcogFactor = dogcogFactor;
@@ -74,35 +78,15 @@ namespace ClickerHeroesTrackerWebsite.Models.Simulation
                 upgrades.Add(upgrade);
             }
 
-            // Compute baseline damage and levels
+            // Start all Heroes at level 0
             foreach (var hero in this.orderedHeroes)
             {
-                // Assume all upgrades can be bought until we hit the rangers. Also, just skip Cid since he doesn't do dps.
-                var minimumHeroLevel = 0;
-                if (hero.Id != HeroIds.CidtheHelpfulAdventurer && !hero.IsRanger)
-                {
-                    IList<Upgrade> upgrades;
-                    if (this.heroUpgrades.TryGetValue(hero.Id, out upgrades))
-                    {
-                        foreach (var upgrade in upgrades)
-                        {
-                            if (minimumHeroLevel < upgrade.HeroLevelRequired)
-                            {
-                                minimumHeroLevel = upgrade.HeroLevelRequired;
-                            }
-
-                            this.purchasedUpgrades.Add(upgrade);
-                        }
-                    }
-                }
-
-                this.currentDamage += this.Damage(hero, minimumHeroLevel);
-                this.currentCost += this.Cost(hero, minimumHeroLevel);
-                this.currentLevels.Add(hero, minimumHeroLevel);
+                this.currentLevels.Add(hero, 0);
             }
-
-            this.startCost = this.currentCost;
         }
+
+        // Why *2? I dunno.
+        private BigDecimal BomberMaxThreshold => this.Cost(this.gameData.Heroes[HeroIds.BomberMax], BomberMaxGoldUpgradeLevel) * 2;
 
         /// <summary>
         /// Get the number of souls attainable with the given amount of gold.
@@ -139,92 +123,113 @@ namespace ClickerHeroesTrackerWebsite.Models.Simulation
         }
 
         /// <summary>
-        /// Get damage attainable with the given amount of gold.
-        /// Note, this function will only buy 1 hero at a time and choose the one which CAN give the most damage.
+        /// Get damage attainable with the given amount of gold after getting all the upgrades up to Frostleaf.
+        /// Note, this function will only buy 1 hero at a time and choose the one which can give the most damage.
         /// </summary>
         /// <returns>The damage attainable with this plan and the given gold</returns>
-        public BigDecimal GetDamage(BigDecimal gold, BigDecimal requestedDamage)
+        internal LevelingPlanStep NextStep(BigDecimal gold)
         {
-            if (gold < this.startCost)
-            {
-                // Early game (pre-FrostLeaf unlocked)
-                return this.startCost * BigDecimal.Pow((double)(gold / this.startCost), 0.8);
-            }
-            else
-            {
-                Hero bestHero = null;
-                var bestHeroLevel = 0;
-                var bestDamageIncrease = (BigDecimal)0;
+            var bestLevel = 0;
+            Hero bestHero = null;
 
-                if (this.lastHero != null && this.currentDamage > requestedDamage)
+            // Haven't gotten all the Upgrades up to the rangers?
+            if (!this.isAtRangers)
+            {
+                var isDone = true;
+                foreach (var hero in this.orderedHeroes)
                 {
-                    bestHero = this.lastHero;
-                    bestHeroLevel = this.HighestLevelFromHeroGold(bestHero, gold - this.currentCost + this.Cost(bestHero, this.currentLevels[bestHero]));
-                    bestDamageIncrease = this.Damage(bestHero, bestHeroLevel) - this.Damage(bestHero, this.currentLevels[bestHero]);
-                }
-                else
-                {
-                    foreach (var hero in this.orderedHeroes)
+                    if (hero.IsRanger)
                     {
-                        var currentHeroLevel = this.currentLevels[hero];
-                        var newHeroLevel = this.HighestLevelFromHeroGold(hero, gold - this.currentCost + this.Cost(hero, currentHeroLevel));
-                        if (newHeroLevel > currentHeroLevel)
+                        break;
+                    }
+
+                    int minimumHeroLevel = 0;
+                    IList<Upgrade> upgrades;
+                    if (this.heroUpgrades.TryGetValue(hero.Id, out upgrades))
+                    {
+                        foreach (var upgrade in upgrades)
                         {
-                            var damageIncrease = this.Damage(hero, newHeroLevel) - this.Damage(hero, currentHeroLevel);
-                            if (damageIncrease > bestDamageIncrease)
+                            if (minimumHeroLevel < upgrade.HeroLevelRequired)
                             {
-                                bestHero = hero;
-                                bestHeroLevel = newHeroLevel;
-                                bestDamageIncrease = damageIncrease;
+                                minimumHeroLevel = upgrade.HeroLevelRequired;
                             }
                         }
                     }
-                }
 
-                this.lastHero = bestHero;
-                var damage = this.currentDamage + bestDamageIncrease;
-
-                // Here we cheat to improve the iterative optimizer.  First we give a little bit of extra damage based on unused gold.
-                // Note, while this extra damage is used, it's NOT recorded in the plan.
-                // 1.07 at the end is because the dmg/cost ratio drops by 1.07 each lvl.  We are using the next lvl ratio which is lower.
-                var newCost = this.Cost(bestHero, bestHeroLevel);
-                var extraGold = gold - this.currentCost - (newCost - this.Cost(bestHero, this.currentLevels[bestHero]));
-                damage += extraGold * (this.Damage(bestHero, bestHeroLevel) / newCost) / 1.07;
-
-                // Now, we reduce the level to be a multiple of 25 since the extra levels didn't give much DPS compared to cost.
-                // This reduces the amount of gold wasted on transitional heroes.
-                if (this.currentDamage + bestDamageIncrease > requestedDamage)
-                {
-                    // Gold spent above a multiple of 25 doesn't give much DPS compared to cost.
-                    // This reduces the amount of gold wasted on transitional heroes.
-                    var tmpLvl = bestHeroLevel - (bestHeroLevel % 25);
-                    var curLvl = this.currentLevels[bestHero];
-                    while (tmpLvl >= curLvl)
+                    var currentLevel = this.currentLevels[hero];
+                    if (currentLevel < minimumHeroLevel)
                     {
-                        if (tmpLvl == 0)
+                        var level = this.HighestLevelFromHeroGold(hero, gold - this.currentCost + this.Cost(hero, currentLevel));
+                        if (level >= minimumHeroLevel)
                         {
-                            // Can't buy 0 levels now...
-                            tmpLvl = 1;
+                            level = minimumHeroLevel;
+                        }
+                        else
+                        {
+                            isDone = false;
                         }
 
-                        var tmpDmg = this.Damage(bestHero, tmpLvl) - this.Damage(bestHero, curLvl);
-                        if (this.currentDamage + tmpDmg < requestedDamage)
+                        if (level > currentLevel)
                         {
-                            break;
+                            this.Buy(hero, level);
                         }
-
-                        bestHeroLevel = tmpLvl;
-                        bestDamageIncrease = tmpDmg;
-                        tmpLvl -= 25;
                     }
                 }
 
-                this.currentDamage += bestDamageIncrease;
-                this.currentCost += this.Cost(bestHero, bestHeroLevel) - this.Cost(bestHero, this.currentLevels[bestHero]);
-                this.currentLevels[bestHero] = bestHeroLevel;
-
-                return damage;
+                this.isAtRangers = isDone;
             }
+
+            if (this.isAtRangers)
+            {
+                var bestNewDmg = this.currentDamage * this.damageMultiplier;
+                foreach (var hero in this.orderedHeroes)
+                {
+                    var level = this.HighestLevelFromHeroGold(hero, gold - this.currentCost + this.Cost(hero, this.currentLevels[hero]));
+                    if (level > 25)
+                    {
+                        // Reduce to multiple of 25 since the extra lvls don't give much DPS compared to cost.
+                        level -= level % 25;
+                    }
+
+                    var dmgNew = this.NewTotalDamage(hero, level);
+                    if (dmgNew > bestNewDmg)
+                    {
+                        bestLevel = level;
+                        bestNewDmg = dmgNew;
+                        bestHero = hero;
+                    }
+                }
+
+                if (bestHero != null)
+                {
+                    // If the new Hero doesn't contribute 25% damage, then don't buy anything.
+                    if ((bestNewDmg - (this.currentDamage * this.damageMultiplier)) / bestNewDmg < 0.25)
+                    {
+                        bestHero = null;
+                        bestLevel = 0;
+                    }
+                    else
+                    {
+                        this.Buy(bestHero, bestLevel);
+                    }
+                }
+
+                // If we didn't buy anything, let's try buying BomberMax's Gold Upgrade.
+                var bomberMax = this.gameData.Heroes[HeroIds.BomberMax];
+                if ((bestHero == null) && ((gold - this.currentCost) > this.BomberMaxThreshold) && (this.currentLevels[bomberMax] < BomberMaxGoldUpgradeLevel))
+                {
+                    bestHero = bomberMax;
+                    bestLevel = BomberMaxGoldUpgradeLevel;
+
+                    this.Buy(bestHero, bestLevel);
+                }
+            }
+
+            return new LevelingPlanStep
+            {
+                Damage = this.currentDamage * this.damageMultiplier,
+                GoldMultiplier = this.goldMultiplier,
+            };
         }
 
         /// <summary>
@@ -265,7 +270,7 @@ namespace ClickerHeroesTrackerWebsite.Models.Simulation
                 }
             }
 
-            var gildMultiplier = 1 + ((0.5 + this.argaivFactor) * this.heroesData.GetHeroGilds(hero));
+            var gildMultiplier = 1 + (this.argaivFactor * this.heroesData.GetHeroGilds(hero));
 
             // BaseAttack is severly wrong for the new rangers, so recalculate base attack manually.
             var baseAttack = (hero.BaseCost / 10) * Math.Pow(1 - (0.0188 * Math.Min(hero.Id, 14)), hero.Id);
@@ -321,75 +326,73 @@ namespace ClickerHeroesTrackerWebsite.Models.Simulation
             return level;
         }
 
-        // Find the next level of the hero that will attain the given target dps
-        private LevelingPlanInfo NextBest(Hero hero, int level, BigDecimal target)
+        // This function permanently buys a hero updating currentDamage, currentCost, currentLevels and multipliers.
+        private void Buy(Hero hero, int newLevel)
         {
-            var currentDamage = this.Damage(hero, level);
-            var currentCost = this.Cost(hero, level);
+            var oldLevel = this.currentLevels[hero];
 
-            // Allow single level increments up to level 25
-            for (var i = level + 1; i <= 25; i++)
+            this.currentCost += this.Cost(hero, newLevel) - this.Cost(hero, oldLevel);
+            this.currentDamage += this.Damage(hero, newLevel) - this.Damage(hero, oldLevel);
+
+            IList<Upgrade> upgrades;
+            if (this.heroUpgrades.TryGetValue(hero.Id, out upgrades))
             {
-                var newDamage = this.Damage(hero, i);
-                if (newDamage < target)
+                foreach (var upgrade in upgrades)
                 {
-                    continue;
+                    if (upgrade.HeroLevelRequired <= newLevel && upgrade.HeroLevelRequired > oldLevel)
+                    {
+                        if (upgrade.UpgradeFunction == UpgradeFunction.UpgradeGoldFoundPercent
+                            && upgrade.UpgradeFunctionParameters.Length == 1)
+                        {
+                            // The param will be like 20 (to denote a 20% increase), so we need to convert that to a multiplier like 1.20
+                            this.goldMultiplier *= 1 + (upgrade.UpgradeFunctionParameters[0] / 100);
+                        }
+                        else if (upgrade.UpgradeFunction == UpgradeFunction.UpgradeEveryonePercent
+                            && upgrade.UpgradeFunctionParameters.Length == 1)
+                        {
+                            // The param will be like 20 (to denote a 20% increase), so we need to convert that to a multiplier like 1.20
+                            this.damageMultiplier *= 1 + (upgrade.UpgradeFunctionParameters[0] / 100);
+                        }
+                    }
                 }
-
-                var newCost = this.Cost(hero, i) - currentCost;
-                var newRatio = (newDamage - currentDamage) / (newCost - currentCost);
-                return new LevelingPlanInfo(i, newDamage - currentDamage, newCost - currentCost);
             }
 
-            // Ignore leveling past 4100
-            for (var i = level + 25; i <= 4100; i += 25)
-            {
-                var newDamage = this.Damage(hero, i);
-                if (newDamage < target)
-                {
-                    continue;
-                }
-
-                var newCost = this.Cost(hero, i) - currentCost;
-                var newRatio = (newDamage - currentDamage) / (newCost - currentCost);
-                return new LevelingPlanInfo(i, newDamage - currentDamage, newCost - currentCost);
-            }
-
-            // unattainable before 4100
-            return null;
+            this.currentLevels[hero] = newLevel;
         }
 
-        private sealed class PlanStep
+        // Calculates the expected increase in overall damage including damage multipliers (but not gold)
+        private BigDecimal NewTotalDamage(Hero hero, int newLevel)
         {
-            public PlanStep(Hero hero, int level)
+            var oldLevel = this.currentLevels[hero];
+
+            var damageIncrease = this.Damage(hero, newLevel) - this.Damage(hero, oldLevel);
+            var newDamageMultiplier = this.damageMultiplier;
+
+            IList<Upgrade> upgrades;
+            if (this.heroUpgrades.TryGetValue(hero.Id, out upgrades))
             {
-                this.Hero = hero;
-                this.Level = level;
+                foreach (var upgrade in upgrades)
+                {
+                    if (upgrade.HeroLevelRequired <= newLevel && upgrade.HeroLevelRequired > oldLevel)
+                    {
+                        if (upgrade.UpgradeFunction == UpgradeFunction.UpgradeEveryonePercent
+                            && upgrade.UpgradeFunctionParameters.Length == 1)
+                        {
+                            // The param will be like 20 (to denote a 20% increase), so we need to convert that to a multiplier like 1.20
+                            newDamageMultiplier *= 1 + (upgrade.UpgradeFunctionParameters[0] / 100);
+                        }
+                    }
+                }
             }
 
-            public Hero Hero { get; }
+            return (this.currentDamage + damageIncrease) * newDamageMultiplier;
+        }
 
-            public int Level { get; }
-
+        internal sealed class LevelingPlanStep
+        {
             public BigDecimal Damage { get; set; }
 
-            public BigDecimal Cost { get; set; }
-        }
-
-        private sealed class LevelingPlanInfo
-        {
-            public LevelingPlanInfo(int level, BigDecimal damageIncrease, BigDecimal costIncrease)
-            {
-                this.Level = level;
-                this.DamageIncrease = damageIncrease;
-                this.CostIncrease = costIncrease;
-            }
-
-            public int Level { get; }
-
-            public BigDecimal DamageIncrease { get; }
-
-            public BigDecimal CostIncrease { get; }
+            public double GoldMultiplier { get; set; }
         }
     }
 }
