@@ -94,7 +94,11 @@ namespace ClickerHeroesTrackerWebsite.Utility
         /// </summary>
         public static explicit operator double(BigDecimal value)
         {
-            return (double)value.significand * Math.Pow(10, value.exponent);
+            // Try to get an exact value but if we can't convert to a string and re-parse it.
+            var exactValue = (double)value.significand * Math.Pow(10, value.exponent);
+            return double.IsInfinity(exactValue) || double.IsNaN(exactValue)
+                ? double.Parse(value.ToString("G17"))
+                : exactValue;
         }
 
         /// <summary>

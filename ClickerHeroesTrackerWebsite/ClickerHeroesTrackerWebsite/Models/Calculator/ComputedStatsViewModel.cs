@@ -29,11 +29,10 @@ namespace ClickerHeroesTrackerWebsite.Models.Calculator
         {
             this.UserSettings = userSettings;
 
-            // No activities for now; assume idle mode
             var simulation = new Simulation(
                 gameData,
                 savedGame,
-                null);
+                userSettings.PlayStyle);
 
             Simulation.SimulateResult simulationResult;
             using (var scope = counterProvider.Measure(Counter.Simulation))
