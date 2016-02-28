@@ -67,7 +67,7 @@ namespace ClickerHeroesTrackerWebsite.Controllers
                 {
                     parsedUploadIds = new List<int>();
 
-                    const string CommandText = "SELECT Id FROM Uploads";
+                    const string CommandText = "SELECT Id FROM Uploads ORDER BY UploadTime DESC";
                     using (var command = this.databaseCommandFactory.Create(CommandText))
                     using (var reader = command.ExecuteReader())
                     {
