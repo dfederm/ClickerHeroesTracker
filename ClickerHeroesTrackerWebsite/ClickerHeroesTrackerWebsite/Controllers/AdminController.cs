@@ -6,14 +6,20 @@ namespace ClickerHeroesTrackerWebsite.Controllers
 {
     using System;
     using System.Collections.Generic;
+    using System.Configuration;
     using System.Data;
+    using System.Linq;
+    using System.Threading.Tasks;
     using System.Web.Mvc;
     using Database;
     using Instrumentation;
     using Microsoft.ApplicationInsights;
+    using Microsoft.AspNet.Identity;
+    using Microsoft.ServiceBus.Messaging;
     using Models.Calculator;
     using Models.Game;
     using Models.SaveData;
+    using UploadProcessing;
 
     /// <summary>
     /// The Admin controller is where Admin users can manage the site.
@@ -21,27 +27,19 @@ namespace ClickerHeroesTrackerWebsite.Controllers
     [Authorize(Roles = "Admin")]
     public class AdminController : Controller
     {
-        private readonly GameData gameData;
-
         private readonly IDatabaseCommandFactory databaseCommandFactory;
 
-        private readonly TelemetryClient telemetryClient;
-
-        private readonly ICounterProvider counterProvider;
+        private readonly IUploadScheduler uploadScheduler;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="AdminController"/> class.
         /// </summary>
         public AdminController(
-            GameData gameData,
             IDatabaseCommandFactory databaseCommandFactory,
-            TelemetryClient telemetryClient,
-            ICounterProvider counterProvider)
+            IUploadScheduler uploadScheduler)
         {
-            this.gameData = gameData;
             this.databaseCommandFactory = databaseCommandFactory;
-            this.telemetryClient = telemetryClient;
-            this.counterProvider = counterProvider;
+            this.uploadScheduler = uploadScheduler;
         }
 
         /// <summary>
@@ -58,34 +56,25 @@ namespace ClickerHeroesTrackerWebsite.Controllers
         /// </summary>
         /// <param name="uploadIds">The upload ids to recomute stats for</param>
         /// <returns>The admin homepage view</returns>
-        public ActionResult UpdateComputedStats(string uploadIds)
+        public async Task<ActionResult> UpdateComputedStats(string uploadIds)
         {
-            DataTable computedStatsTable = new DataTable();
-            computedStatsTable.Columns.Add("UploadId", typeof(int));
-            computedStatsTable.Columns.Add("OptimalLevel", typeof(short));
-            computedStatsTable.Columns.Add("SoulsPerHour", typeof(long));
-            computedStatsTable.Columns.Add("SoulsPerAscension", typeof(long));
-            computedStatsTable.Columns.Add("AscensionTime", typeof(short));
-            computedStatsTable.Columns.Add("TitanDamange", typeof(long));
-            computedStatsTable.Columns.Add("SoulsSpent", typeof(long));
+            var userId = this.User.Identity.GetUserId();
 
-            DataTable ancientLevelsTable = new DataTable();
-            ancientLevelsTable.Columns.Add("UploadId", typeof(int));
-            ancientLevelsTable.Columns.Add("AncientId", typeof(byte));
-            ancientLevelsTable.Columns.Add("Level", typeof(long));
-
+            IList<int> parsedUploadIds = null;
             if (uploadIds != null)
             {
                 if (uploadIds.Equals("ALL", StringComparison.OrdinalIgnoreCase))
                 {
-                    using (var command = this.databaseCommandFactory.Create("GetAllUploadContent", CommandType.StoredProcedure))
+                    parsedUploadIds = new List<int>();
+
+                    const string CommandText = "SELECT Id FROM Uploads";
+                    using (var command = this.databaseCommandFactory.Create(CommandText))
                     using (var reader = command.ExecuteReader())
                     {
                         while (reader.Read())
                         {
                             var uploadId = Convert.ToInt32(reader["Id"]);
-                            var uploadContent = reader["UploadContent"].ToString();
-                            this.AddRows(computedStatsTable, ancientLevelsTable, uploadId, uploadContent);
+                            parsedUploadIds.Add(uploadId);
                         }
                     }
                 }
@@ -97,83 +86,59 @@ namespace ClickerHeroesTrackerWebsite.Controllers
                         int uploadId;
                         if (int.TryParse(uploadIdRaw.Trim(), out uploadId))
                         {
-                            var commandParameters = new Dictionary<string, object>
-                            {
-                                { "@UploadId", uploadId },
-                            };
-                            using (var command = this.databaseCommandFactory.Create(
-                                "GetUploadDetails",
-                                CommandType.StoredProcedure,
-                                commandParameters))
-                            using (var reader = command.ExecuteReader())
-                            {
-                                // General upload data
-                                reader.Read();
-                                var uploadContent = reader["UploadContent"].ToString();
-
-                                this.AddRows(computedStatsTable, ancientLevelsTable, uploadId, uploadContent);
-                            }
+                            parsedUploadIds.Add(uploadId);
                         }
                     }
                 }
             }
 
-            if (computedStatsTable.Rows.Count == 0 || ancientLevelsTable.Rows.Count == 0)
+            if (parsedUploadIds == null || parsedUploadIds.Count == 0)
             {
                 this.ViewBag.Error = "No valid upload ids";
                 return this.View("Index");
             }
 
-            using (var updateCommand = this.databaseCommandFactory.Create("UpdateUploadData", CommandType.StoredProcedure))
-            {
-                // BUGBUG 63 - Remove casts to SqlDatabaseCommand
-                ((SqlDatabaseCommand)updateCommand).AddTableParameter("@ComputedStatsUpdates", "ComputedStatsUpdate", computedStatsTable);
-                ((SqlDatabaseCommand)updateCommand).AddTableParameter("@AncientLevelsUpdates", "AncientLevelsUpdate", ancientLevelsTable);
+            var messages = parsedUploadIds.Select(uploadId => new UploadProcessingMessage { UploadId = uploadId, Requester = userId, Priority = UploadProcessingMessagePriority.Low });
+            await this.uploadScheduler.Schedule(messages);
 
-                updateCommand.ExecuteNonQuery();
-            }
-
-            this.ViewBag.Message = "Updated " + computedStatsTable.Rows.Count + " uploads";
+            this.ViewBag.Message = $"Scheduled {parsedUploadIds.Count} uploads";
             return this.View("Index");
         }
 
-        private void AddRows(
-            DataTable computedStatsTable,
-            DataTable ancientLevelsTable,
-            int uploadId,
-            string uploadContent)
+        /// <summary>
+        /// Clears a upload processing queue
+        /// </summary>
+        /// <param name="priority">The priority of the queue to clear</param>
+        /// <returns>The admin homepage view</returns>
+        public async Task<ActionResult> ClearQueue(UploadProcessingMessagePriority? priority)
         {
-            var savedGame = SavedGame.Parse(uploadContent);
-            if (savedGame == null)
+            if (!priority.HasValue)
             {
-                return;
+                this.ViewBag.Error = "Invalid Priority";
+                return this.View("Index");
             }
 
-            var computedStats = new ComputedStatsViewModel(
-                this.gameData,
-                savedGame,
-                null,
-                this.counterProvider);
-            computedStatsTable.Rows.Add(
-                uploadId,
-                computedStats.OptimalLevel,
-                computedStats.SoulsPerHour,
-                computedStats.OptimalSoulsPerAscension,
-                computedStats.OptimalAscensionTime,
-                computedStats.TitanDamage,
-                computedStats.SoulsSpent);
+            var connectionString = ConfigurationManager.AppSettings.Get("UploadProcessing_Listen");
+            var client = QueueClient.CreateFromConnectionString(connectionString, $"UploadProcessing-{priority.Value}Priority");
+            const int BatchSize = 1024;
 
-            var ancientLevels = new AncientLevelSummaryViewModel(
-                this.gameData,
-                savedGame.AncientsData,
-                this.telemetryClient);
-            foreach (var ancientLevel in ancientLevels.AncientLevels)
+            int messages = 0;
+            while (client.Peek() != null)
             {
-                ancientLevelsTable.Rows.Add(
-                    uploadId,
-                    ancientLevel.Key.Id,
-                    ancientLevel.Value);
+                // Batch the receive operation
+                var oldMessages = client.ReceiveBatch(BatchSize);
+
+                // Complete the messages
+                var completeTasks = oldMessages.Select(m => m.CompleteAsync()).ToArray();
+
+                messages += completeTasks.Length;
+
+                // Wait for the tasks to complete.
+                await Task.WhenAll(completeTasks);
             }
+
+            this.ViewBag.Message = $"Cleared the {priority.Value} priority queue ({messages} messages)";
+            return this.View("Index");
         }
     }
 }

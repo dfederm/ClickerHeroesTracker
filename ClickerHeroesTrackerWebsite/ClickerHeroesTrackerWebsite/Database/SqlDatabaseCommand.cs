@@ -152,9 +152,12 @@ namespace ClickerHeroesTrackerWebsite.Database
                 this.command.Parameters.Clear();
             }
 
-            foreach (var parameter in this.Parameters)
+            if (this.Parameters != null)
             {
-                this.command.Parameters.AddWithValue(parameter.Key, parameter.Value ?? DBNull.Value);
+                foreach (var parameter in this.Parameters)
+                {
+                    this.command.Parameters.AddWithValue(parameter.Key, parameter.Value ?? DBNull.Value);
+                }
             }
         }
     }
