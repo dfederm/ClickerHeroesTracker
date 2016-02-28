@@ -16,6 +16,7 @@ namespace ClickerHeroesTrackerWebsite
     using Microsoft.Practices.Unity.Mvc;
     using Models.Game;
     using Models.Settings;
+    using UploadProcessing;
     using UnityLib = Microsoft.Practices.Unity;
 
     /// <summary>
@@ -53,6 +54,8 @@ namespace ClickerHeroesTrackerWebsite
             container.RegisterType<GameData>(new ContainerControlledLifetimeManager(), new InjectionFactory(_ => GameData.Parse(HostingEnvironment.MapPath("~\\App_Data\\GameData.json"))));
             container.RegisterType<HttpConfiguration>(new ContainerControlledLifetimeManager(), new InjectionFactory(_ => new HttpConfiguration()));
             container.RegisterType<IEnvironmentProvider, EnvironmentProvider>(new ContainerControlledLifetimeManager());
+            container.RegisterType<IUploadProcessor, UploadProcessor>(new ContainerControlledLifetimeManager());
+            container.RegisterType<IUploadScheduler, UploadScheduler>(new ContainerControlledLifetimeManager());
 
             // Per request registrations
             container.RegisterType<ICounterProvider, CounterProvider>(new PerRequestLifetimeManager());

@@ -14,6 +14,7 @@ namespace ClickerHeroesTrackerWebsite
     using Models.Game;
     using Models.Settings;
     using Owin;
+    using UploadProcessing;
     using static ClickerHeroesTrackerWebsite.Configuration.Environment;
 
     /// <summary>
@@ -59,6 +60,12 @@ namespace ClickerHeroesTrackerWebsite
 
             // Warm up the game data parsing
             container.Resolve<GameData>();
+
+            // Only in production, start the background upload processing.
+            if (environmentProvider.Environment == Production)
+            {
+                container.Resolve<IUploadProcessor>().Start();
+            }
         }
     }
 }
