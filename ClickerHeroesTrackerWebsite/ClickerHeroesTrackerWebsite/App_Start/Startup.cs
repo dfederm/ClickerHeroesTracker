@@ -62,10 +62,12 @@ namespace ClickerHeroesTrackerWebsite
             container.Resolve<GameData>();
 
             // Only in production, start the background upload processing.
+            /* Disable until performance issues can be addressed.
             if (environmentProvider.Environment == Production)
             {
                 container.Resolve<IUploadProcessor>().Start();
             }
+            */
         }
     }
 }
