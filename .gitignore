@@ -1,7 +1,8 @@
 ﻿# Find common entries here: https://github.com/github/gitignore/blob/master/VisualStudio.gitignore
 
-# Visual Studio 2015 cache/options directory
+# Visual Studio cache and user-specific files
 .vs/
+*.csproj.user
 
 # Build results
 [Dd]ebug/
