@@ -111,6 +111,12 @@ namespace ClickerHeroesTrackerWebsite.Controllers.Api
         [HttpPost]
         public HttpResponseMessage Add(RawUpload rawUpload)
         {
+            if (rawUpload.EncodedSaveData == null)
+            {
+                // Not a valid save
+                return this.Request.CreateResponse(HttpStatusCode.BadRequest);
+            }
+
             // Instrument the encoded save data in case something goes wrong.
             // It needs to be spit into chunks as TelemetryClient has a max property value length.
             // See: https://azure.microsoft.com/en-us/documentation/articles/app-insights-pricing/#limits-summary
