@@ -105,6 +105,14 @@ namespace ClickerHeroesTrackerWebsite.UploadProcessing
 
         private async Task ProcessMessage(BrokeredMessage brokeredMessage)
         {
+            var properties = new Dictionary<string, string>();
+            properties.Add("BrokeredMessage-CorrelationId", brokeredMessage.CorrelationId);
+            properties.Add("BrokeredMessage-DeliveryCount", brokeredMessage.DeliveryCount.ToString());
+            properties.Add("BrokeredMessage-EnqueuedTimeUtc", brokeredMessage.EnqueuedTimeUtc.ToString());
+            properties.Add("BrokeredMessage-MessageId", brokeredMessage.MessageId);
+
+            this.telemetryClient.TrackEvent("UploadProcessor-Recieved", properties);
+
             using (this.counterProvider.Measure(Counter.ProcessUpload))
             {
                 try
@@ -112,16 +120,21 @@ namespace ClickerHeroesTrackerWebsite.UploadProcessing
                     var message = ParseMessage(brokeredMessage);
                     if (message == null)
                     {
+                        this.telemetryClient.TrackEvent("UploadProcessor-Abandoned-ParseMessage", properties);
                         await brokeredMessage.AbandonAsync();
                         return;
                     }
 
                     var uploadId = message.UploadId;
+                    properties.Add("UploadId", uploadId.ToString());
+
                     string uploadContent;
                     string userId;
                     this.GetUploadDetails(uploadId, out uploadContent, out userId);
-                    if (string.IsNullOrWhiteSpace(uploadContent) || string.IsNullOrWhiteSpace(userId))
+                    properties.Add("UserId", userId);
+                    if (string.IsNullOrWhiteSpace(uploadContent))
                     {
+                        this.telemetryClient.TrackEvent("UploadProcessor-Abandoned-FetchUpload", properties);
                         await brokeredMessage.AbandonAsync();
                         return;
                     }
@@ -129,6 +142,7 @@ namespace ClickerHeroesTrackerWebsite.UploadProcessing
                     var userSettings = this.userSettingsProvider.Get(userId);
                     if (userSettings == null)
                     {
+                        this.telemetryClient.TrackEvent("UploadProcessor-Abandoned-FetchUserSettings", properties);
                         await brokeredMessage.AbandonAsync();
                         return;
                     }
@@ -136,6 +150,7 @@ namespace ClickerHeroesTrackerWebsite.UploadProcessing
                     var savedGame = SavedGame.Parse(uploadContent);
                     if (savedGame == null)
                     {
+                        this.telemetryClient.TrackEvent("UploadProcessor-Abandoned-ParseUpload", properties);
                         await brokeredMessage.AbandonAsync();
                         return;
                     }
@@ -166,31 +181,33 @@ namespace ClickerHeroesTrackerWebsite.UploadProcessing
                             VALUES (Input.UploadId, Input.AncientId, Input.Level);
                     */
                     var ancientLevelsCommandText = new StringBuilder();
-                    ancientLevelsCommandText.Append(@"
+                    if (ancientLevels.AncientLevels.Count > 0)
+                    {
+                        ancientLevelsCommandText.Append(@"
                         MERGE INTO AncientLevels WITH (HOLDLOCK)
                         USING
                             ( VALUES ");
-                    var isFirst = true;
-                    foreach (var pair in ancientLevels.AncientLevels)
-                    {
-                        if (!isFirst)
+                        var isFirst = true;
+                        foreach (var pair in ancientLevels.AncientLevels)
                         {
+                            if (!isFirst)
+                            {
+                                ancientLevelsCommandText.Append(",");
+                            }
+
+                            // No need to sanitize, these are all just numbers
+                            ancientLevelsCommandText.Append("(");
+                            ancientLevelsCommandText.Append(uploadId);
                             ancientLevelsCommandText.Append(",");
+                            ancientLevelsCommandText.Append(pair.Key.Id);
+                            ancientLevelsCommandText.Append(",");
+                            ancientLevelsCommandText.Append(pair.Value);
+                            ancientLevelsCommandText.Append(")");
+
+                            isFirst = false;
                         }
 
-                        // No need to sanitize, these are all just numbers
-                        ancientLevelsCommandText.Append("(");
-                        ancientLevelsCommandText.Append(uploadId);
-                        ancientLevelsCommandText.Append(",");
-                        ancientLevelsCommandText.Append(pair.Key.Id);
-                        ancientLevelsCommandText.Append(",");
-                        ancientLevelsCommandText.Append(pair.Value);
-                        ancientLevelsCommandText.Append(")");
-
-                        isFirst = false;
-                    }
-
-                    ancientLevelsCommandText.Append(@"
+                        ancientLevelsCommandText.Append(@"
                             )
                                 AS Input(UploadId, AncientId, Level)
                             ON AncientLevels.UploadId = Input.UploadId
@@ -202,6 +219,7 @@ namespace ClickerHeroesTrackerWebsite.UploadProcessing
                         WHEN NOT MATCHED THEN
                             INSERT (UploadId, AncientId, Level)
                             VALUES (Input.UploadId, Input.AncientId, Input.Level);");
+                    }
 
                     const string ComputedStatsCommandText = @"
                         MERGE INTO ComputedStats WITH (HOLDLOCK)
@@ -236,8 +254,11 @@ namespace ClickerHeroesTrackerWebsite.UploadProcessing
                     {
                         command.BeginTransaction();
 
-                        command.CommandText = ancientLevelsCommandText.ToString();
-                        command.ExecuteNonQuery();
+                        if (ancientLevelsCommandText.Length > 0)
+                        {
+                            command.CommandText = ancientLevelsCommandText.ToString();
+                            command.ExecuteNonQuery();
+                        }
 
                         command.CommandText = ComputedStatsCommandText;
                         command.Parameters = computedStatsCommandParameters;
@@ -246,16 +267,18 @@ namespace ClickerHeroesTrackerWebsite.UploadProcessing
                         var commited = command.CommitTransaction();
                         if (!commited)
                         {
+                            this.telemetryClient.TrackEvent("UploadProcessor-Abandoned-CommitTransaction", properties);
                             await brokeredMessage.AbandonAsync();
                             return;
                         }
                     }
 
+                    this.telemetryClient.TrackEvent("UploadProcessor-Complete", properties);
                     await brokeredMessage.CompleteAsync();
                 }
                 catch (Exception e)
                 {
-                    this.telemetryClient.TrackException(e);
+                    this.telemetryClient.TrackException(e, properties);
                     await brokeredMessage.AbandonAsync();
                 }
             }
