@@ -139,6 +139,14 @@ namespace ClickerHeroesTrackerWebsite.UploadProcessing
                         return;
                     }
 
+                    // Handle legacy uplaods where the upload content was missing.
+                    if (uploadContent.Equals("LEGACY", StringComparison.OrdinalIgnoreCase))
+                    {
+                        this.telemetryClient.TrackEvent("UploadProcessor-Complete-Legacy", properties);
+                        await brokeredMessage.CompleteAsync();
+                        return;
+                    }
+
                     var userSettings = this.userSettingsProvider.Get(userId);
                     if (userSettings == null)
                     {
