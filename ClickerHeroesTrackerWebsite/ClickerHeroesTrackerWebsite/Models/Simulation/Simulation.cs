@@ -212,6 +212,14 @@ namespace ClickerHeroesTrackerWebsite.Models.Simulation
                         }
                         else
                         {
+                            // Short circuit if we're on the first mob of the first boss level and haven't killed it after an hour
+                            if (level == startingZone
+                                && numMobsLeft == numMobs
+                                && currentTime > 3600)
+                            {
+                                return new SimulateResult(level, currentTime, 0, 0);
+                            }
+
                             // Remove HP representing time before next click
                             currentLife -= timeUntilClick * dpsThisLevel;
                             currentTime = timeNextClick;
