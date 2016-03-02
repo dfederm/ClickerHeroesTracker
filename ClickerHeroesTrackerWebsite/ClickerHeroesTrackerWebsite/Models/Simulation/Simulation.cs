@@ -298,6 +298,12 @@ namespace ClickerHeroesTrackerWebsite.Models.Simulation
                         continue;
                     }
 
+                    // If we already have a best, then stop if we can't kill the boss.
+                    if (best != null && (currentTime - timeStart) > (30 + this.GetFactor(AncientIds.Chronos, 5, 5)))
+                    {
+                        break;
+                    }
+
                     var realSouls = currentSouls + levelingPlan.GetSoulsFromHeroLevels(this.gameData, currentGold);
 
                     var ratio = realSouls / currentTime;
