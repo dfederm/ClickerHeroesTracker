@@ -5,21 +5,26 @@
 <h2>What's New</h2>
 @if (Model.IsFull)
 {
-    <h3>Saturday, February 27, 2016</h3>
+    <h3>Sunday, March 27, 2016</h3>
 }
 <ul>
-    <li>The simulation (souls/hr, optimal level) now supports the active play style! You can set your play style on the @Html.ActionLink("settings", "Index", "Manage") page. Over the next few days I will be recomputing all previous uploads to adjust for this change. Users may see slight changes in their numbers while this happens, and users with Active play styles should start seeing souls/hr graphs which aren't just flat lines.</li>
+    <li>Tweaked the simulation logic. Relic bonuses were not being computed correctly (too low). Most users with relics should see a slight bump to their stats.</li>
 
     @* Dupe some recent stuff from the past couple days for the front page *@
     @if (!Model.IsFull)
     {
+        <li>The simulation (souls/hr, optimal level) now supports the active play style! You can set your play style on the @Html.ActionLink("settings", "Index", "Manage") page. Over the next few days I will be recomputing all previous uploads to adjust for this change. Users may see slight changes in their numbers while this happens, and users with Active play styles should start seeing souls/hr graphs which aren't just flat lines.</li>
         <li>Users can now zoom in and out on their graphs using the range selector with a few pre-defined ranges.</li>
-        <li>Users can now log in using their email address. Logging in with user name still works just fine, but now users have the option.</li>
     }
 </ul>
 
 @if (Model.IsFull)
 {
+    <h3>Saturday, February 27, 2016</h3>
+    <ul>
+        <li>The simulation (souls/hr, optimal level) now supports the active play style! You can set your play style on the @Html.ActionLink("settings", "Index", "Manage") page. Over the next few days I will be recomputing all previous uploads to adjust for this change. Users may see slight changes in their numbers while this happens, and users with Active play styles should start seeing souls/hr graphs which aren't just flat lines.</li>
+    </ul>
+
     <h3>Monday, January 18, 2016</h3>
     <ul>
         <li>Users can now zoom in and out on their graphs using the range selector with a few pre-defined ranges.</li>

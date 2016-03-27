@@ -44,7 +44,7 @@ namespace ClickerHeroesTrackerWebsite.Models.Simulation
         /// Runs the simulation.
         /// </summary>
         /// <remarks>
-        /// Based on http://philni.neocities.org/ancientsworker10.js?ver=16 and http://philni.neocities.org/shared.js?ver=17
+        /// Based on http://philni.neocities.org/ancientsworker10.js?ver=21 and http://philni.neocities.org/shared.js?ver=21.
         /// </remarks>
         /// <returns>The simulation result</returns>
         public SimulateResult Run()
@@ -53,7 +53,7 @@ namespace ClickerHeroesTrackerWebsite.Models.Simulation
             var clicks = 0;
             var accumulatorCrit = 0.50;
             var damageFactor = 1
-                + this.GetFactor(AncientIds.Morgulis, 0.11, 0.1)
+                + this.GetFactor(AncientIds.Morgulis, 0.11)
                 + (0.1 * this.savedGame.HeroSouls);
             damageFactor *= this.AchievementDamageMultiplier();
             if (this.savedGame.HasRubyMultiplier)
@@ -62,7 +62,7 @@ namespace ClickerHeroesTrackerWebsite.Models.Simulation
             }
 
             // Start Level
-            var startingZone = 1 + (int)this.GetFactor(AncientIds.Iris, 1, 1);
+            var startingZone = 1 + (int)this.GetFactor(AncientIds.Iris, 1);
 
             // Time
             const double SetupTime = 60d;
@@ -88,16 +88,16 @@ namespace ClickerHeroesTrackerWebsite.Models.Simulation
             currentGold += 10
                 * MonsterLife(startingZone)
                 * MonsterGoldFactor(startingZone)
-                * (currentTime >= timeUntilIdle ? (1 + this.GetFactor(AncientIds.Libertas, 0.01, 0.01)) : 1)
-                * (1 + this.GetFactor(AncientIds.Mammon, 0.05, 0.05));
+                * (currentTime >= timeUntilIdle ? (1 + this.GetFactor(AncientIds.Libertas, 0.01)) : 1)
+                * (1 + this.GetFactor(AncientIds.Mammon, 0.05));
 
             var currentSouls = 0d;
 
             var levelingPlan = new LevelingPlan(
                 this.gameData,
                 this.savedGame.HeroesData,
-                this.GetFactor(AncientIds.Argaiv, 0.02, 0.01),
-                this.GetFactor(AncientIds.Dogcog, 0.02, 0.01));
+                this.GetFactor(AncientIds.Argaiv, 0.02),
+                this.GetFactor(AncientIds.Dogcog, 0.02));
             SimulateResult best = null;
             var bestRatio = 0d;
 
@@ -113,7 +113,7 @@ namespace ClickerHeroesTrackerWebsite.Models.Simulation
                 var powersurgeMultiplier = skills.Value(1, currentTime) + 1;
                 var luckyStrikesMultiplier = Math.Min(1, skills.Value(2, currentTime) + 0.09);
                 var metalDetectorMultiplier = skills.Value(3, currentTime) + 1;
-                var goldenClicksMultiplier = skills.Value(4, currentTime) * (1 + this.GetFactor(AncientIds.Pluto, 0.3, 0.15)) / 100;
+                var goldenClicksMultiplier = skills.Value(4, currentTime) * (1 + this.GetFactor(AncientIds.Pluto, 0.3)) / 100;
                 var darkRitualMultiplier = skills.Value(5, currentTime);
                 var superClicksMultiplier = skills.Value(6, currentTime) + 1;
 
@@ -130,7 +130,7 @@ namespace ClickerHeroesTrackerWebsite.Models.Simulation
                 var monsterLife = MonsterLife(level);
                 if (isBoss)
                 {
-                    monsterLife *= 10 * (1 - this.GetFactor(AncientIds.Bubos, 0.02, 0.01));
+                    monsterLife *= 10 * (1 - this.GetFactor(AncientIds.Bubos, 0.02));
                 }
 
                 var planDamage = levelingPlan.NextStep(currentGold);
@@ -144,21 +144,21 @@ namespace ClickerHeroesTrackerWebsite.Models.Simulation
 
                 var goldMobThisLevel = monsterLife
                     * MonsterGoldFactor(level)
-                    * (1 + this.GetFactor(AncientIds.Mammon, 0.05, 0.05))
-                    * (1 + this.GetFactor(AncientIds.Fortuna, 0.0225, 0.0225))
+                    * (1 + this.GetFactor(AncientIds.Mammon, 0.05))
+                    * (1 + this.GetFactor(AncientIds.Fortuna, 0.0225))
                     * planDamage.GoldMultiplier
                     * metalDetectorMultiplier;
 
                 if (!isBoss)
                 {
-                    goldMobThisLevel *= 1 + (0.01 * (1 + this.GetFactor(AncientIds.Dora, 0.2, 0.1)) * ((10 * (1 + this.GetFactor(AncientIds.Mimzee, 0.5, 0.25))) - 1));
+                    goldMobThisLevel *= 1 + (0.01 * (1 + this.GetFactor(AncientIds.Dora, 0.2)) * ((10 * (1 + this.GetFactor(AncientIds.Mimzee, 0.5))) - 1));
                 }
 
                 // Currently Idling?
                 if ((clicksPerSecond == 0) && (currentTime >= timeUntilIdle))
                 {
-                    dpsThisLevel *= 1 + this.GetFactor(AncientIds.Siyalatas, 0.01, 0.1);
-                    goldMobThisLevel *= 1 + this.GetFactor(AncientIds.Libertas, 0.01, 0.01);
+                    dpsThisLevel *= 1 + this.GetFactor(AncientIds.Siyalatas, 0.01);
+                    goldMobThisLevel *= 1 + this.GetFactor(AncientIds.Libertas, 0.01);
 
                     // 5 minutes and clicking combo is gone.
                     if (currentTime > (timeUntilIdle + 240))
@@ -192,9 +192,9 @@ namespace ClickerHeroesTrackerWebsite.Models.Simulation
                 {
                     var currentLife = monsterLife;
                     var numMobsLeft = numMobs;
-                    var clickDamage = dpsThisLevel * 0.035 * (1 + this.GetFactor(AncientIds.Fragsworth, 0.2, 0.1)) * superClicksMultiplier;
+                    var clickDamage = dpsThisLevel * 0.035 * (1 + this.GetFactor(AncientIds.Fragsworth, 0.2)) * superClicksMultiplier;
                     var clickDamagePlusDps = clickDamage + (dpsThisLevel / clicksPerSecond);
-                    var criticalDamage = clickDamage * 18 * (1 + this.GetFactor(AncientIds.Bhaal, 0.15, 0.01));
+                    var criticalDamage = clickDamage * 18 * (1 + this.GetFactor(AncientIds.Bhaal, 0.15));
                     var clicksLast = clicks;
 
                     // Calculates the next click at currentTime or greater.
@@ -307,7 +307,7 @@ namespace ClickerHeroesTrackerWebsite.Models.Simulation
                     }
 
                     // If we already have a best, then stop if we can't kill the boss.
-                    if (best != null && (currentTime - timeStart) > (30 + this.GetFactor(AncientIds.Chronos, 5, 5)))
+                    if (best != null && (currentTime - timeStart) > (30 + this.GetFactor(AncientIds.Chronos, 5)))
                     {
                         break;
                     }
@@ -326,8 +326,8 @@ namespace ClickerHeroesTrackerWebsite.Models.Simulation
                     }
                     else
                     {
-                        // ratio down to 50% (minimum of 1000 levels), it won't get better, stop simulation
-                        if ((ratio < (best.Ratio * 0.5)) && (level > (startingZone + 1000)))
+                        // ratio down to 50% (minimum of 250 levels), it won't get better, stop simulation
+                        if ((ratio < (best.Ratio * 0.5)) && (level > (startingZone + 250)))
                         {
                             break;
                         }
@@ -402,11 +402,11 @@ namespace ClickerHeroesTrackerWebsite.Models.Simulation
             }
             else if (level > 100)
             {
-                var solomonMultiplier = 1 + this.GetFactor(AncientIds.Solomon, 0.01, 0.01);
+                var solomonMultiplier = 1 + this.GetFactor(AncientIds.Solomon, 0.01);
                 var souls = Math.Floor(Math.Pow((((level - 100) / 5d) + 4d) / 5d, 1.3d) * solomonMultiplier);
                 if (level % 100 != 0)
                 {
-                    souls *= 0.25 + this.GetFactor(AncientIds.Atman, 0.01, 0.01);
+                    souls *= 0.25 + this.GetFactor(AncientIds.Atman, 0.01);
                 }
 
                 return souls;
@@ -415,47 +415,27 @@ namespace ClickerHeroesTrackerWebsite.Models.Simulation
             return 0;
         }
 
-        private double GetFactor(int ancientId, double ancientMultiplier, double itemMultiplier)
+        private double GetFactor(int ancientId, double multiplier)
         {
             Ancient ancient;
             var ancientLevel = this.gameData.Ancients.TryGetValue(ancientId, out ancient)
                 ? this.savedGame.AncientsData.GetAncientLevel(ancientId)
                 : 0;
+            var itemLevel = this.itemLevels.GetItemLevel(ancientId);
+            var level = ancientLevel + itemLevel;
 
-            // Adjust ancient levels based on how they scale
-            long ancientValue;
+            // Adjust levels based on how they scale
             if (ancientId == AncientIds.Solomon)
             {
-                ancientValue = SolomonValue(ancientLevel);
+                level = SolomonValue(level);
             }
             else if (ancientId == AncientIds.Siyalatas
                 || ancientId == AncientIds.Libertas)
             {
-                ancientValue = IdleValue(ancientLevel);
-            }
-            else
-            {
-                ancientValue = ancientLevel;
+                level = IdleValue(level);
             }
 
-            var itemLevel = this.itemLevels.GetItemLevel(ancientId);
-
-            // Adjust item levels based on how they scale
-            long itemValue;
-            if (ancientId == AncientIds.Solomon)
-            {
-                itemValue = SolomonValue(itemLevel);
-            }
-            else if (ancientId == AncientIds.Libertas)
-            {
-                itemValue = IdleValue(itemLevel);
-            }
-            else
-            {
-                itemValue = itemLevel;
-            }
-
-            return (ancientMultiplier * ancientValue) + (itemMultiplier * itemValue);
+            return multiplier * level;
         }
 
         private double AchievementDamageMultiplier()
@@ -609,6 +589,8 @@ namespace ClickerHeroesTrackerWebsite.Models.Simulation
 
             private readonly SkillUse[] skills;
 
+            private int? lastLastSkillId;
+
             private int? lastSkillId;
 
             private int energize;
@@ -618,9 +600,9 @@ namespace ClickerHeroesTrackerWebsite.Models.Simulation
             public Skills(
                 object ancientLevels,
                 IDictionary<int, int> itemLevels,
-                Func<int, double, double, double> getFactor)
+                Func<int, double, double> getFactor)
             {
-                this.factorVaagur = 1 - getFactor(AncientIds.Vaagur, 0.05, 0);
+                this.factorVaagur = 1 - getFactor(AncientIds.Vaagur, 0.05);
                 this.skills = new SkillUse[baseSkills.Length];
                 this.energize = 1;
                 this.darkRitualMultiplier = 1;
@@ -631,7 +613,7 @@ namespace ClickerHeroesTrackerWebsite.Models.Simulation
                     var ancientId = baseSkills[i].AncientId;
                     if (ancientId.HasValue)
                     {
-                        duration += getFactor(ancientId.Value, 2, 1);
+                        duration += getFactor(ancientId.Value, 2);
                     }
 
                     this.skills[i] = new SkillUse
@@ -703,6 +685,11 @@ namespace ClickerHeroesTrackerWebsite.Models.Simulation
                         }
 
                         this.skills[this.lastSkillId.Value].Available -= 3600;
+                        if (this.energize == 2 && this.lastLastSkillId.HasValue)
+                        {
+                            this.skills[this.lastLastSkillId.Value].Available -= 3600;
+                        }
+
                         break;
                     }
 
@@ -717,6 +704,7 @@ namespace ClickerHeroesTrackerWebsite.Models.Simulation
 
                 skill.Available = time + (baseSkills[skillId].Cooldown * this.factorVaagur);
                 this.energize = 1;
+                this.lastLastSkillId = this.lastSkillId;
                 this.lastSkillId = skillId;
             }
 
