@@ -97,7 +97,7 @@
                     currentDateContainer.appendChild(currentList);
                 }
 
-                if (typeof SiteNewsAdmin != undefined)
+                if (typeof SiteNewsAdmin != "undefined")
                 {
                     SiteNewsAdmin.init(container);
                 }
