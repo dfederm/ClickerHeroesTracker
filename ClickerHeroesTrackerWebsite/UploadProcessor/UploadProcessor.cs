@@ -22,20 +22,14 @@ namespace ClickerHeroesTrackerWebsite.UploadProcessing
     using Newtonsoft.Json;
     using Newtonsoft.Json.Converters;
 
-    /// <inheritdoc />
-    public sealed class UploadProcessor : IUploadProcessor, IDisposable
+    internal sealed class UploadProcessor : IDisposable
     {
         private static readonly JsonSerializer Serializer = CreateSerializer();
 
+        private readonly HashSet<int> currentlyProcessingUploads = new HashSet<int>();
+
         private readonly GameData gameData;
-
-        private readonly IDatabaseCommandFactory databaseCommandFactory;
-
         private readonly TelemetryClient telemetryClient;
-
-        private readonly ICounterProvider counterProvider;
-
-        private readonly IUserSettingsProvider userSettingsProvider;
 
         private readonly Dictionary<UploadProcessingMessagePriority, QueueClient> clients;
 
@@ -44,16 +38,10 @@ namespace ClickerHeroesTrackerWebsite.UploadProcessing
         /// </summary>
         public UploadProcessor(
             GameData gameData,
-            IDatabaseCommandFactory databaseCommandFactory,
-            TelemetryClient telemetryClient,
-            ICounterProvider counterProvider,
-            IUserSettingsProvider userSettingsProvider)
+            TelemetryClient telemetryClient)
         {
             this.gameData = gameData;
-            this.databaseCommandFactory = databaseCommandFactory;
             this.telemetryClient = telemetryClient;
-            this.counterProvider = counterProvider;
-            this.userSettingsProvider = userSettingsProvider;
 
             var connectionString = ConfigurationManager.AppSettings.Get("UploadProcessing_Listen");
             this.clients = new Dictionary<UploadProcessingMessagePriority, QueueClient>
@@ -63,7 +51,6 @@ namespace ClickerHeroesTrackerWebsite.UploadProcessing
             };
         }
 
-        /// <inheritdoc />
         public void Start()
         {
             foreach (var client in this.clients.Values)
@@ -72,7 +59,6 @@ namespace ClickerHeroesTrackerWebsite.UploadProcessing
             }
         }
 
-        /// <inheritdoc />
         public void Stop()
         {
             foreach (var client in this.clients.Values)
@@ -84,6 +70,18 @@ namespace ClickerHeroesTrackerWebsite.UploadProcessing
         /// <inheritdoc />
         public void Dispose()
         {
+            lock (this.currentlyProcessingUploads)
+            {
+                foreach (var uploadId in this.currentlyProcessingUploads)
+                {
+                    var properties = new Dictionary<string, string>
+                    {
+                        { "UploadId", uploadId.ToString() }
+                    };
+                    this.telemetryClient.TrackEvent("UploadProcessor-Abandoned-Disposed", properties);
+                }
+            }
+
             this.Stop();
         }
 
@@ -113,8 +111,12 @@ namespace ClickerHeroesTrackerWebsite.UploadProcessing
 
             this.telemetryClient.TrackEvent("UploadProcessor-Recieved", properties);
 
-            using (this.counterProvider.Measure(Counter.ProcessUpload))
+            using (var counterProvider = new CounterProvider(this.telemetryClient))
+            using (var databaseCommandFactory = new DatabaseCommandFactory(this.telemetryClient, counterProvider))
+            using (counterProvider.Measure(Counter.ProcessUpload))
             {
+                int uploadId = -1;
+                var userSettingsProvider = new UserSettingsProvider(databaseCommandFactory);
                 try
                 {
                     var message = ParseMessage(brokeredMessage);
@@ -125,12 +127,17 @@ namespace ClickerHeroesTrackerWebsite.UploadProcessing
                         return;
                     }
 
-                    var uploadId = message.UploadId;
+                    uploadId = message.UploadId;
                     properties.Add("UploadId", uploadId.ToString());
+
+                    lock (this.currentlyProcessingUploads)
+                    {
+                        this.currentlyProcessingUploads.Add(uploadId);
+                    }
 
                     string uploadContent;
                     string userId;
-                    this.GetUploadDetails(uploadId, out uploadContent, out userId);
+                    this.GetUploadDetails(databaseCommandFactory, uploadId, out uploadContent, out userId);
                     properties.Add("UserId", userId);
                     if (string.IsNullOrWhiteSpace(uploadContent))
                     {
@@ -147,7 +154,7 @@ namespace ClickerHeroesTrackerWebsite.UploadProcessing
                         return;
                     }
 
-                    var userSettings = this.userSettingsProvider.Get(userId);
+                    var userSettings = userSettingsProvider.Get(userId);
                     if (userSettings == null)
                     {
                         this.telemetryClient.TrackEvent("UploadProcessor-Abandoned-FetchUserSettings", properties);
@@ -163,6 +170,7 @@ namespace ClickerHeroesTrackerWebsite.UploadProcessing
                         return;
                     }
 
+                    this.telemetryClient.TrackEvent("UploadProcessor-Simulation", properties);
                     var ancientLevels = new AncientLevelSummaryViewModel(
                         this.gameData,
                         savedGame.AncientsData,
@@ -171,7 +179,7 @@ namespace ClickerHeroesTrackerWebsite.UploadProcessing
                         this.gameData,
                         savedGame,
                         userSettings,
-                        this.counterProvider);
+                        counterProvider);
 
                     /* Build a query that looks like this:
                         MERGE INTO AncientLevels WITH (HOLDLOCK)
@@ -258,7 +266,7 @@ namespace ClickerHeroesTrackerWebsite.UploadProcessing
                         { "@SoulsSpent", computedStats.SoulsSpent },
                     };
 
-                    using (var command = this.databaseCommandFactory.Create())
+                    using (var command = databaseCommandFactory.Create())
                     {
                         command.BeginTransaction();
 
@@ -289,10 +297,17 @@ namespace ClickerHeroesTrackerWebsite.UploadProcessing
                     this.telemetryClient.TrackException(e, properties);
                     await brokeredMessage.AbandonAsync();
                 }
+                finally
+                {
+                    lock (this.currentlyProcessingUploads)
+                    {
+                        this.currentlyProcessingUploads.Remove(uploadId);
+                    }
+                }
             }
         }
 
-        private void GetUploadDetails(int uploadId, out string uploadContent, out string userId)
+        private void GetUploadDetails(IDatabaseCommandFactory databaseCommandFactory, int uploadId, out string uploadContent, out string userId)
         {
             const string CommandText = @"
 	            SELECT UploadContent, UserId
@@ -302,7 +317,7 @@ namespace ClickerHeroesTrackerWebsite.UploadProcessing
             {
                 { "@UploadId", uploadId },
             };
-            using (var command = this.databaseCommandFactory.Create(
+            using (var command = databaseCommandFactory.Create(
                 CommandText,
                 commandParameters))
             using (var reader = command.ExecuteReader())

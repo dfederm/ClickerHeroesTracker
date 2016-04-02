@@ -415,11 +415,9 @@
     <Compile Include="Models\Settings\UserSettingsFlushingMiddleware.cs" />
     <Compile Include="Unity\UnityOwinMiddleware.cs" />
     <Compile Include="Unity\UnityPerRequestLifetimeDisposingMiddleware.cs" />
-    <Compile Include="UploadProcessing\IUploadProcessor.cs" />
     <Compile Include="UploadProcessing\IUploadScheduler.cs" />
     <Compile Include="UploadProcessing\UploadProcessingMessage.cs" />
     <Compile Include="UploadProcessing\UploadProcessingMessagePriority.cs" />
-    <Compile Include="UploadProcessing\UploadProcessor.cs" />
     <Compile Include="UploadProcessing\UploadScheduler.cs" />
     <Compile Include="Utility\BigDecimal.cs" />
     <Compile Include="Utility\DisposableBase.cs" />
