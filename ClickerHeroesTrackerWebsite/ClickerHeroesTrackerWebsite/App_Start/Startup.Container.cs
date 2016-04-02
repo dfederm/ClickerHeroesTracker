@@ -4,6 +4,7 @@
 
 namespace ClickerHeroesTrackerWebsite
 {
+    using System.Configuration;
     using System.Linq;
     using System.Web.Hosting;
     using System.Web.Http;
@@ -14,6 +15,8 @@ namespace ClickerHeroesTrackerWebsite
     using Microsoft.ApplicationInsights;
     using Microsoft.Practices.Unity;
     using Microsoft.Practices.Unity.Mvc;
+    using Microsoft.WindowsAzure.Storage;
+    using Microsoft.WindowsAzure.Storage.Table;
     using Models.Game;
     using Models.Settings;
     using UploadProcessing;
@@ -51,6 +54,8 @@ namespace ClickerHeroesTrackerWebsite
         private static void RegisterTypes(UnityContainer container)
         {
             // Container controlled registrations
+            container.RegisterType<CloudStorageAccount>(new ContainerControlledLifetimeManager(), new InjectionFactory(_ => CloudStorageAccount.Parse(ConfigurationManager.AppSettings.Get("StorageConnectionString"))));
+            container.RegisterType<CloudTableClient>(new ContainerControlledLifetimeManager(), new InjectionFactory(_ => _.Resolve<CloudStorageAccount>().CreateCloudTableClient()));
             container.RegisterType<GameData>(new ContainerControlledLifetimeManager(), new InjectionFactory(_ => GameData.Parse(HostingEnvironment.MapPath("~\\App_Data\\GameData.json"))));
             container.RegisterType<HttpConfiguration>(new ContainerControlledLifetimeManager(), new InjectionFactory(_ => new HttpConfiguration()));
             container.RegisterType<IEnvironmentProvider, EnvironmentProvider>(new ContainerControlledLifetimeManager());
