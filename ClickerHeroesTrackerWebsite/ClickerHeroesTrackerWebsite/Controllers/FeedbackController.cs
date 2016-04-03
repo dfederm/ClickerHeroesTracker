@@ -5,6 +5,7 @@
 namespace ClickerHeroesTrackerWebsite.Controllers
 {
     using System.Collections.Generic;
+    using System.Configuration;
     using System.Net;
     using System.Net.Http;
     using System.Net.Mail;
@@ -41,9 +42,8 @@ namespace ClickerHeroesTrackerWebsite.Controllers
         [HttpPost]
         public async Task<HttpResponseMessage> Submit(FeedbackRequest feedback)
         {
-            bool allowContact;
-            string email;
-            string userName;
+            string email = null;
+            string userName = null;
             if (this.User.Identity.IsAuthenticated)
             {
                 email = this.Request
@@ -51,28 +51,16 @@ namespace ClickerHeroesTrackerWebsite.Controllers
                     .GetUserManager<ApplicationUserManager>()
                     .GetEmail(this.User.Identity.GetUserId());
                 userName = this.User.Identity.GetUserName();
-                allowContact = feedback.AllowContact;
             }
-            else
+            else if (!string.IsNullOrWhiteSpace(feedback.Email))
             {
-                userName = "<anonymous>";
-                if (string.IsNullOrWhiteSpace(feedback.Email))
-                {
-                    email = feedback.Email;
-                    allowContact = false;
-                }
-                else
-                {
-                    email = "<anonymous>";
-                    allowContact = true;
-                }
+                email = feedback.Email;
             }
 
             var feedbackData = new Dictionary<string, string>
             {
-                { "Email", email },
-                { "UserName", userName },
-                { "AllowContact", allowContact.ToString() },
+                { "Email", email ?? "<anonymous>" },
+                { "UserName", userName ?? "<anonymous>" },
                 { "Page", this.Request.Headers.Referrer.AbsoluteUri },
                 { "Comments", feedback.Comments },
             };
@@ -81,13 +69,14 @@ namespace ClickerHeroesTrackerWebsite.Controllers
 
             var sendGridMessage = new SendGridMessage();
             sendGridMessage.AddTo("david.federman@outlook.com");
-            sendGridMessage.From = new MailAddress("do-not-reply@clickerheroestracker.azurewebsites.net", "Clicker Heroes Tracker");
-            sendGridMessage.Subject = "Clicker Heroes Tracker Feedback";
+            sendGridMessage.AddTo("ender336@gmail.com");
+            sendGridMessage.From = new MailAddress(email ?? "do-not-reply@clickerheroestracker.azurewebsites.net", userName ?? "Clicker Heroes Tracker");
+            sendGridMessage.Subject = $"Clicker Heroes Tracker Feedback from {userName ?? "<anonymous>"}";
             sendGridMessage.Text = JsonConvert.SerializeObject(feedbackData, Formatting.Indented);
 
             var credentials = new NetworkCredential(
-                "azure_ed04592bb544747ba8a51736dd5b474c@azure.com",
-                "ClickerHeroesTrackerSendGrid1");
+                ConfigurationManager.AppSettings.Get("SendGrid_UserName"),
+                ConfigurationManager.AppSettings.Get("SendGrid_Password"));
 
             // Create a Web transport for sending email.
             var transportWeb = new Web(credentials);

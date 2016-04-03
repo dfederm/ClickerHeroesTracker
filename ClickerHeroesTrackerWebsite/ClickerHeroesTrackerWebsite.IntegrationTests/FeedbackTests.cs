@@ -16,6 +16,12 @@ namespace ClickerHeroesTrackerWebsite.IntegrationTests
         // Using the homepage as the feedback modal appears on every page.
         private const string Path = "/";
 
+        private const string EmailInputLoggedIn = "<input type=\"email\" id=\"feedbackEmail\" name=\"email\" class=\"form-control\" value=\"Test User@test.com\" readonly=\"readonly\" />";
+
+        private const string EmailInputAnonymous = "<input type=\"email\" id=\"feedbackEmail\" name=\"email\" class=\"form-control\" data-val=\"The email address was not valid.\" />";
+
+        private const string EmailHelpTextAnonymous = "To allow Clicker Heroes Tracker to follow up with you using regarding this feedback, either log in or provide your email address.";
+
         [TestMethod]
         public async Task Feedback_Anonymous_BasicTest()
         {
@@ -25,8 +31,9 @@ namespace ClickerHeroesTrackerWebsite.IntegrationTests
             Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
 
             var content = await response.Content.ReadAsStringAsync();
-            Assert.IsFalse(content.Contains("Allow Clicker Heroes Tracker to follow up with you using your email \"Test User@test.com\" regarding this feedback."));
-            Assert.IsTrue(content.Contains("To allow Clicker Heroes Tracker to follow up with you using regarding this feedback, either log in or provide your email address."));
+            Assert.IsFalse(content.Contains(EmailInputLoggedIn));
+            Assert.IsTrue(content.Contains(EmailInputAnonymous));
+            Assert.IsTrue(content.Contains(EmailHelpTextAnonymous));
         }
 
         [TestMethod]
@@ -39,8 +46,9 @@ namespace ClickerHeroesTrackerWebsite.IntegrationTests
             Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
 
             var content = await response.Content.ReadAsStringAsync();
-            Assert.IsTrue(content.Contains("Allow Clicker Heroes Tracker to follow up with you using your email \"Test User@test.com\" regarding this feedback."));
-            Assert.IsFalse(content.Contains("To allow Clicker Heroes Tracker to follow up with you using regarding this feedback, either log in or provide your email address."));
+            Assert.IsTrue(content.Contains(EmailInputLoggedIn));
+            Assert.IsFalse(content.Contains(EmailInputAnonymous));
+            Assert.IsFalse(content.Contains(EmailHelpTextAnonymous));
         }
     }
 }

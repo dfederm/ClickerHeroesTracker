@@ -75,27 +75,23 @@
                         <div class="form-group">
                             <label for="feedbackComments">Please leave comments, questions, suggestions, or bug reports</label>
                             <textarea id="feedbackComments" name="comments" class="form-control" data-val="true" data-val-required="You must enter some feedback."></textarea>
-                            <span class="field-validation-valid text-danger" data-valmsg-for="feedbackComments" data-valmsg-replace="true"></span>
+                            <span class="field-validation-valid text-danger" data-valmsg-for="comments" data-valmsg-replace="true"></span>
                         </div>
-                        @if (Request.IsAuthenticated)
-                        {
-                            <div class="checkbox">
-                                <label>
-                                    <input type="checkbox" name="allowContact" value="true" checked="checked" />
-                                    Allow Clicker Heroes Tracker to follow up with you using your email "@User.Identity.GetEmail(Context.GetOwinContext())" regarding this feedback.
-                                </label>
-                            </div>
-                        }
-                        else
-                        {
-                            <div class="form-group">
-                                <label for="feedbackEmail">Email (optional)</label>
+                        <div class="form-group">
+                            <label for="feedbackEmail">Email</label>
+                            @if (Request.IsAuthenticated)
+                            {
+                                <input type="email" id="feedbackEmail" name="email" class="form-control" value="@User.Identity.GetEmail(Context.GetOwinContext())" readonly="readonly" />
+                            }
+                            else
+                            {
                                 <p class="help-block">
                                     To allow Clicker Heroes Tracker to follow up with you using regarding this feedback, either log in or provide your email address.
                                 </p>
-                                <input type="email" id="feedbackEmail" name="email" class="form-control" />
-                            </div>
-                        }
+                                <input type="email" id="feedbackEmail" name="email" class="form-control" data-val="The email address was not valid." />
+                                <span class="field-validation-valid text-danger" data-valmsg-for="email" data-valmsg-replace="true"></span>
+                            }
+                        </div>
                     </div>
                     <div class="modal-footer">
                         <input id="feedbackSubmit" type="submit" value="Submit" class="btn btn-default" />

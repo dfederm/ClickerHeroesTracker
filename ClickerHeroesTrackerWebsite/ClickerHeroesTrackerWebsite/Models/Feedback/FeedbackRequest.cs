@@ -15,14 +15,6 @@ namespace ClickerHeroesTrackerWebsite.Models.Feedback
         public string Comments { get; set; }
 
         /// <summary>
-        /// Gets or sets a value indicating whether the user has allowed us to follow up with them through email regarding this feedback.
-        /// </summary>
-        /// <remarks>
-        /// This will only be considered for logged in users. We will infer this for non-authenticated users by whether the <see cref="Email"/> is populated.
-        /// </remarks>
-        public bool AllowContact { get; set; }
-
-        /// <summary>
         /// Gets or sets the user's email address.
         /// </summary>
         /// <remarks>
