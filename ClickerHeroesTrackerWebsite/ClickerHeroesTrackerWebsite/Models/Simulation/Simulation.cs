@@ -175,9 +175,10 @@ namespace ClickerHeroesTrackerWebsite.Models.Simulation
                 if (clicksPerSecond == 0)
                 {
                     var numMobsLeft = numMobs;
+                    var timeToKill = (double)(monsterLife / dpsThisLevel);
                     while (numMobsLeft > 0)
                     {
-                        currentTime += (double)(monsterLife / dpsThisLevel);
+                        currentTime += timeToKill;
                         numMobsLeft -= 1;
                         if (numMobsLeft > 0)
                         {

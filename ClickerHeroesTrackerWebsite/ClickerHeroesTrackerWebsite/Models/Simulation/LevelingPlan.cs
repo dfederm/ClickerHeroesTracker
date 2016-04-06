@@ -5,6 +5,7 @@
 namespace ClickerHeroesTrackerWebsite.Models.Simulation
 {
     using System;
+    using System.Collections.Concurrent;
     using System.Collections.Generic;
     using System.Linq;
     using Game;
@@ -17,6 +18,10 @@ namespace ClickerHeroesTrackerWebsite.Models.Simulation
     public sealed class LevelingPlan
     {
         private const int BomberMaxGoldUpgradeLevel = 100;
+
+        private static ConcurrentDictionary<int, BigDecimal> costLevelScaleCache = new ConcurrentDictionary<int, BigDecimal>();
+
+        private static ConcurrentDictionary<int, BigDecimal> levelBonusMultiplierCache = new ConcurrentDictionary<int, BigDecimal>();
 
         private static double doubleMaxValueSoulsFromHeroLevels = Math.Log(double.MaxValue) / Math.Log(10) * .25;
 
@@ -182,9 +187,11 @@ namespace ClickerHeroesTrackerWebsite.Models.Simulation
             if (this.isAtRangers)
             {
                 var bestNewDmg = this.currentDamage * this.damageMultiplier;
+                var remainingGold = gold - this.currentCost;
+
                 foreach (var hero in this.orderedHeroes)
                 {
-                    var level = this.HighestLevelFromHeroGold(hero, gold - this.currentCost + this.Cost(hero, this.currentLevels[hero]));
+                    var level = this.HighestLevelFromHeroGold(hero, remainingGold + this.Cost(hero, this.currentLevels[hero]));
                     if (level > 25)
                     {
                         // Reduce to multiple of 25 since the extra lvls don't give much DPS compared to cost.
@@ -216,7 +223,7 @@ namespace ClickerHeroesTrackerWebsite.Models.Simulation
 
                 // If we didn't buy anything, let's try buying BomberMax's Gold Upgrade.
                 var bomberMax = this.gameData.Heroes[HeroIds.BomberMax];
-                if ((bestHero == null) && ((gold - this.currentCost) > this.BomberMaxThreshold) && (this.currentLevels[bomberMax] < BomberMaxGoldUpgradeLevel))
+                if ((bestHero == null) && (remainingGold > this.BomberMaxThreshold) && (this.currentLevels[bomberMax] < BomberMaxGoldUpgradeLevel))
                 {
                     bestHero = bomberMax;
                     bestLevel = BomberMaxGoldUpgradeLevel;
@@ -244,12 +251,21 @@ namespace ClickerHeroesTrackerWebsite.Models.Simulation
                 return 0;
             }
 
-            var x10 = Math.Min(level / 1000, 8);
-            var x4 = Math.Max((level - 175) / 25, 0) - x10;
-            var x5 = hero.IsRanger ? Math.Min(Math.Max((level - 500) / 25, 0), 9) : 0;
-            var levelBonusMultiplier = BigDecimal.Pow(4, x4)
-                * BigDecimal.Pow(10, x10)
-                * BigDecimal.Pow(1.25, x5);
+            var levelBonusMultiplier = levelBonusMultiplierCache.GetOrAdd(
+                level * (hero.IsRanger ? -1 : 1),
+                key =>
+                {
+                    var isRanger = key < 0;
+                    var lvl = Math.Abs(key);
+
+                    var x10 = Math.Min(lvl / 1000, 8);
+                    var x4 = Math.Max((lvl - 175) / 25, 0) - x10;
+                    var x5 = isRanger ? Math.Min(Math.Max((lvl - 500) / 25, 0), 9) : 0;
+
+                    return BigDecimal.Pow(4, x4)
+                        * BigDecimal.Pow(10, x10)
+                        * BigDecimal.Pow(1.25, x5);
+                });
 
             var upgradeMultiplier = 1d;
             IList<Upgrade> upgrades;
@@ -294,19 +310,25 @@ namespace ClickerHeroesTrackerWebsite.Models.Simulation
                 return 0;
             }
 
-            var cost = hero.BaseCost * (BigDecimal.Pow(1.07, level) - 1) / 0.07 * (1 - this.dogcogFactor);
+            // Perf optimization for hot path. Original code:
+            // var cost = hero.BaseCost * (BigDecimal.Pow(1.07, level) - 1) / 0.07 * (1 - this.dogcogFactor);
+            var levelScale = costLevelScaleCache.GetOrAdd(level, key => (BigDecimal.Pow(1.07, key) - 1) / 0.07);
+            var cost = hero.BaseCost * levelScale * (1 - this.dogcogFactor);
 
             // Assume all upgrades are purchased to the current level
             IList<Upgrade> upgrades;
             if (this.heroUpgrades.TryGetValue(hero.Id, out upgrades))
             {
+                var upgradeCost = 0d;
                 for (int i = 0; i < upgrades.Count; i++)
                 {
                     if (level >= upgrades[i].HeroLevelRequired)
                     {
-                        cost += upgrades[i].GetCost(hero);
+                        upgradeCost += upgrades[i].GetCost(hero);
                     }
                 }
+
+                cost += upgradeCost;
             }
 
             return cost;
@@ -315,7 +337,10 @@ namespace ClickerHeroesTrackerWebsite.Models.Simulation
         private int HighestLevelFromHeroGold(Hero hero, BigDecimal gold)
         {
             // Reverse of cost formula (faster and no max level)
-            var level = Math.Max((int)Math.Floor(BigDecimal.Log(1 + ((gold / hero.BaseCost) * 0.07 / (1 - this.dogcogFactor))) / Math.Log(1.07)), 0);
+            // This is a perf optimization to ensure the mathmatical operations are done in an order that defers the conversion to BigDecimal as long as possible.
+            // Original code:
+            // var level = Math.Max((int)Math.Floor(BigDecimal.Log(1 + ((gold / hero.BaseCost) * 0.07 / (1 - this.dogcogFactor))) / Math.Log(1.07)), 0);
+            var level = Math.Max((int)Math.Floor(BigDecimal.Log(1 + (gold * (0.07 / (hero.BaseCost * (1 - this.dogcogFactor))))) / Math.Log(1.07)), 0);
 
             // Reduce lvl to account for upgrade costs.
             while (this.Cost(hero, level) > gold)
