@@ -67,11 +67,14 @@ namespace ClickerHeroesTrackerWebsite.Models.Calculator
                 }
 
                 // Get ancient levels
+                var savedGame = SavedGame.Parse(this.UploadContent);
                 this.AncientLevelSummaryViewModel = new AncientLevelSummaryViewModel(
                     gameData,
-                    reader,
+                    savedGame,
                     telemetryClient);
 
+                // Skip passed the ancient levels. They're not used anymore.
+                // BUGBUG 43 - Move off stored procedures
                 if (!reader.NextResult())
                 {
                     return;

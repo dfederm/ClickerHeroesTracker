@@ -173,7 +173,7 @@ namespace ClickerHeroesTrackerWebsite.UploadProcessing
                     this.telemetryClient.TrackEvent("UploadProcessor-Simulation", properties);
                     var ancientLevels = new AncientLevelSummaryViewModel(
                         this.gameData,
-                        savedGame.AncientsData,
+                        savedGame,
                         this.telemetryClient);
                     var computedStats = new ComputedStatsViewModel(
                         this.gameData,

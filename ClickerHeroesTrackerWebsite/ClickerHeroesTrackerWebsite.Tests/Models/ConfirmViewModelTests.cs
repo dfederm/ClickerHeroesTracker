@@ -49,7 +49,7 @@ namespace ClickerHeroesTrackerWebsite.Tests.Models
             {
                 Assert.IsNotNull(pair);
                 Assert.IsNotNull(pair.Key);
-                Assert.IsTrue(pair.Value >= 0);
+                Assert.IsTrue(pair.Value.EffectiveLevel >= 0);
             }
 
             /*
@@ -73,7 +73,9 @@ namespace ClickerHeroesTrackerWebsite.Tests.Models
             {
                 Assert.IsNotNull(suggestedAncientLevel);
                 Assert.IsFalse(string.IsNullOrWhiteSpace(suggestedAncientLevel.AncientName));
-                Assert.AreNotEqual(0, suggestedAncientLevel.CurrentLevel);
+                Assert.AreNotEqual(0, suggestedAncientLevel.LevelInfo.AncientLevel);
+                Assert.AreNotEqual(0, suggestedAncientLevel.LevelInfo.ItemLevel);
+                Assert.AreNotEqual(0, suggestedAncientLevel.LevelInfo.EffectiveLevel);
                 Assert.AreNotEqual(0, suggestedAncientLevel.SuggestedLevel);
             }
 

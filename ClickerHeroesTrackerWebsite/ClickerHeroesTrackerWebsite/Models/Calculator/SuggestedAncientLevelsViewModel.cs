@@ -33,7 +33,7 @@ namespace ClickerHeroesTrackerWebsite.Models.Calculator
         /// </summary>
         public SuggestedAncientLevelsViewModel(
             GameData gameData,
-            IDictionary<Ancient, long> ancientLevels,
+            IDictionary<Ancient, AncientLevelInfo> ancientLevels,
             int optimalLevel,
             IUserSettings userSettings)
         {
@@ -60,9 +60,9 @@ namespace ClickerHeroesTrackerWebsite.Models.Calculator
             var solomonLogFunction = userSettings.UseReducedSolomonFormula
                 ? (Func<double, double>)(d => Math.Log10(d))
                 : (d => Math.Log(d));
-            var suggestedSolomonLevel = currentPrimaryAncientLevel < 100
-                ? currentPrimaryAncientLevel
-                : (long)Math.Round(solomonMultipliers[0] * Math.Pow(solomonLogFunction(solomonMultipliers[1] * Math.Pow(currentPrimaryAncientLevel, 2)), 0.4) * Math.Pow(currentPrimaryAncientLevel, 0.8));
+            var suggestedSolomonLevel = currentPrimaryAncientLevel.EffectiveLevel < 100
+                ? currentPrimaryAncientLevel.EffectiveLevel
+                : (long)Math.Round(solomonMultipliers[0] * Math.Pow(solomonLogFunction(solomonMultipliers[1] * Math.Pow(currentPrimaryAncientLevel.EffectiveLevel, 2)), 0.4) * Math.Pow(currentPrimaryAncientLevel.EffectiveLevel, 0.8));
             var suggestedIrisLevel = optimalLevel - 1001;
 
             // Math per play style
@@ -70,17 +70,17 @@ namespace ClickerHeroesTrackerWebsite.Models.Calculator
             {
                 case PlayStyle.Idle:
                 {
-                    var suggestedArgaivLevel = currentSiyaLevel < 100
-                        ? currentSiyaLevel
-                        : (currentSiyaLevel + 9);
-                    var suggestedGoldLevel = (long)Math.Round(currentSiyaLevel * 0.927);
-                    var suggestedMorgLevel = currentSiyaLevel < 100
-                        ? (long)Math.Round(Math.Pow(currentSiyaLevel + 1, 2))
-                        : (long)Math.Round(Math.Pow(currentSiyaLevel, 2) + (43.67 * currentSiyaLevel) + 33.58);
+                    var suggestedArgaivLevel = currentSiyaLevel.EffectiveLevel < 100
+                        ? currentSiyaLevel.EffectiveLevel
+                        : (currentSiyaLevel.EffectiveLevel + 9);
+                    var suggestedGoldLevel = (long)Math.Round(currentSiyaLevel.EffectiveLevel * 0.927);
+                    var suggestedMorgLevel = currentSiyaLevel.EffectiveLevel < 100
+                        ? (long)Math.Round(Math.Pow(currentSiyaLevel.EffectiveLevel + 1, 2))
+                        : (long)Math.Round(Math.Pow(currentSiyaLevel.EffectiveLevel, 2) + (43.67 * currentSiyaLevel.EffectiveLevel) + 33.58);
 
                     this.SuggestedAncientLevels = new SuggestedAncientLevelData[]
                     {
-                        new SuggestedAncientLevelData(gameData, AncientIds.Siyalatas, currentSiyaLevel, currentSiyaLevel),
+                        new SuggestedAncientLevelData(gameData, AncientIds.Siyalatas, currentSiyaLevel, currentSiyaLevel.EffectiveLevel),
                         new SuggestedAncientLevelData(gameData, AncientIds.Argaiv, currentArgaivLevel, suggestedArgaivLevel),
                         new SuggestedAncientLevelData(gameData, AncientIds.Libertas, currentLiberLevel, suggestedGoldLevel),
                         new SuggestedAncientLevelData(gameData, AncientIds.Mammon, currentMammonLevel, suggestedGoldLevel),
@@ -95,19 +95,19 @@ namespace ClickerHeroesTrackerWebsite.Models.Calculator
 
                 case PlayStyle.Hybrid:
                 {
-                    var suggestedArgaivLevel = currentSiyaLevel < 100
-                        ? currentSiyaLevel
-                        : (currentSiyaLevel + 9);
-                    var suggestedGoldLevel = (long)Math.Round(currentSiyaLevel * 0.927);
-                    var suggestedClickLevel = (long)Math.Round(currentSiyaLevel * 0.5);
+                    var suggestedArgaivLevel = currentSiyaLevel.EffectiveLevel < 100
+                        ? currentSiyaLevel.EffectiveLevel
+                        : (currentSiyaLevel.EffectiveLevel + 9);
+                    var suggestedGoldLevel = (long)Math.Round(currentSiyaLevel.EffectiveLevel * 0.927);
+                    var suggestedClickLevel = (long)Math.Round(currentSiyaLevel.EffectiveLevel * 0.5);
                     var suggestedJuggernautLevel = (long)Math.Round(Math.Pow(suggestedClickLevel, 0.8));
-                    var suggestedMorgLevel = currentSiyaLevel < 100
-                        ? (long)Math.Round(Math.Pow(currentSiyaLevel + 1, 2))
-                        : (long)Math.Round(Math.Pow(currentSiyaLevel, 2) + (43.67 * currentSiyaLevel) + 33.58);
+                    var suggestedMorgLevel = currentSiyaLevel.EffectiveLevel < 100
+                        ? (long)Math.Round(Math.Pow(currentSiyaLevel.EffectiveLevel + 1, 2))
+                        : (long)Math.Round(Math.Pow(currentSiyaLevel.EffectiveLevel, 2) + (43.67 * currentSiyaLevel.EffectiveLevel) + 33.58);
 
                     this.SuggestedAncientLevels = new SuggestedAncientLevelData[]
                     {
-                        new SuggestedAncientLevelData(gameData, AncientIds.Siyalatas, currentSiyaLevel, currentSiyaLevel),
+                        new SuggestedAncientLevelData(gameData, AncientIds.Siyalatas, currentSiyaLevel, currentSiyaLevel.EffectiveLevel),
                         new SuggestedAncientLevelData(gameData, AncientIds.Argaiv, currentArgaivLevel, suggestedArgaivLevel),
                         new SuggestedAncientLevelData(gameData, AncientIds.Libertas, currentLiberLevel, suggestedGoldLevel),
                         new SuggestedAncientLevelData(gameData, AncientIds.Mammon, currentMammonLevel, suggestedGoldLevel),
@@ -126,19 +126,19 @@ namespace ClickerHeroesTrackerWebsite.Models.Calculator
 
                 case PlayStyle.Active:
                 {
-                    var suggestedArgaivLevel = currentFragsworthLevel;
-                    var suggestedBhaalLevel = currentFragsworthLevel < 1000
-                        ? currentFragsworthLevel
-                        : (currentFragsworthLevel - 90);
-                    var suggestedJuggernautLevel = (long)Math.Round(Math.Pow(currentFragsworthLevel, 0.8));
-                    var suggestedPlutoLevel = (long)Math.Round(currentFragsworthLevel * 0.927);
-                    var suggestedMorgLevel = currentFragsworthLevel < 100
-                        ? (long)Math.Round(Math.Pow(currentFragsworthLevel + 1, 2))
-                        : (long)Math.Round(Math.Pow(currentFragsworthLevel + 13, 2));
+                    var suggestedArgaivLevel = currentFragsworthLevel.EffectiveLevel;
+                    var suggestedBhaalLevel = currentFragsworthLevel.EffectiveLevel < 1000
+                        ? currentFragsworthLevel.EffectiveLevel
+                        : (currentFragsworthLevel.EffectiveLevel - 90);
+                    var suggestedJuggernautLevel = (long)Math.Round(Math.Pow(currentFragsworthLevel.EffectiveLevel, 0.8));
+                    var suggestedPlutoLevel = (long)Math.Round(currentFragsworthLevel.EffectiveLevel * 0.927);
+                    var suggestedMorgLevel = currentFragsworthLevel.EffectiveLevel < 100
+                        ? (long)Math.Round(Math.Pow(currentFragsworthLevel.EffectiveLevel + 1, 2))
+                        : (long)Math.Round(Math.Pow(currentFragsworthLevel.EffectiveLevel + 13, 2));
 
                     this.SuggestedAncientLevels = new SuggestedAncientLevelData[]
                     {
-                        new SuggestedAncientLevelData(gameData, AncientIds.Fragsworth, currentFragsworthLevel, currentFragsworthLevel),
+                        new SuggestedAncientLevelData(gameData, AncientIds.Fragsworth, currentFragsworthLevel, currentFragsworthLevel.EffectiveLevel),
                         new SuggestedAncientLevelData(gameData, AncientIds.Argaiv, currentArgaivLevel, suggestedArgaivLevel),
                         new SuggestedAncientLevelData(gameData, AncientIds.Bhaal, currentBhaalLevel, suggestedBhaalLevel),
                         new SuggestedAncientLevelData(gameData, AncientIds.Pluto, currentPlutoLevel, suggestedPlutoLevel),
@@ -168,18 +168,18 @@ namespace ClickerHeroesTrackerWebsite.Models.Calculator
         /// </summary>
         public SuggestedAncientLevelData[] SuggestedAncientLevels { get; }
 
-        private static long GetCurrentAncientLevel(
+        private static AncientLevelInfo GetCurrentAncientLevel(
             GameData gameData,
-            IDictionary<Ancient, long> ancientLevels,
+            IDictionary<Ancient, AncientLevelInfo> ancientLevels,
             int ancientId)
         {
             Ancient ancient;
-            long level;
+            AncientLevelInfo levelInfo;
             return gameData.Ancients.TryGetValue(ancientId, out ancient)
-                ? ancientLevels.TryGetValue(ancient, out level)
-                    ? level
-                    : 0
-                : 0;
+                ? ancientLevels.TryGetValue(ancient, out levelInfo)
+                    ? levelInfo
+                    : new AncientLevelInfo(0, 0)
+                : new AncientLevelInfo(0, 0);
         }
 
         /// <summary>
@@ -193,7 +193,7 @@ namespace ClickerHeroesTrackerWebsite.Models.Calculator
             public SuggestedAncientLevelData(
                 GameData gameData,
                 int ancientId,
-                long currentLevel,
+                AncientLevelInfo levelInfo,
                 long suggestedLevel)
             {
                 suggestedLevel = Math.Max(suggestedLevel, 0);
@@ -203,9 +203,9 @@ namespace ClickerHeroesTrackerWebsite.Models.Calculator
                 this.AncientName = gameData.Ancients.TryGetValue(ancientId, out ancient)
                     ? ancient.Name
                     : "<Unknown>";
-                this.CurrentLevel = currentLevel.ToString();
-                this.SuggestedLevel = suggestedLevel.ToString();
-                this.LevelDifference = (suggestedLevel - currentLevel).ToString();
+                this.LevelInfo = levelInfo;
+                this.SuggestedLevel = suggestedLevel;
+                this.LevelDifference = (suggestedLevel - levelInfo.EffectiveLevel).ToString();
             }
 
             /// <summary>
@@ -221,12 +221,12 @@ namespace ClickerHeroesTrackerWebsite.Models.Calculator
             /// <summary>
             /// Gets the current ancient level
             /// </summary>
-            public string CurrentLevel { get; }
+            public AncientLevelInfo LevelInfo { get; }
 
             /// <summary>
             /// Gets the suggested ancient level
             /// </summary>
-            public string SuggestedLevel { get; }
+            public long SuggestedLevel { get; }
 
             /// <summary>
             /// Gets the difference in the suggested and current levels

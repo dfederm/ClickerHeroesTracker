@@ -21,11 +21,12 @@ namespace ClickerHeroesTrackerWebsite.Models.Calculator
         /// </summary>
         public AncientLevelSummaryViewModel(
             GameData gameData,
-            AncientsData ancientsData,
+            SavedGame savedGame,
             TelemetryClient telemetryClient)
         {
-            var ancientLevels = new SortedDictionary<Ancient, long>(AncientComparer.Instance);
-            foreach (var ancientData in ancientsData.Ancients.Values)
+            var ancientLevels = new SortedDictionary<Ancient, AncientLevelInfo>(AncientComparer.Instance);
+            var itemLevelsById = savedGame.ItemsData.GetItemLevels();
+            foreach (var ancientData in savedGame.AncientsData.Ancients.Values)
             {
                 Ancient ancient;
                 if (!gameData.Ancients.TryGetValue(ancientData.Id, out ancient))
@@ -34,34 +35,8 @@ namespace ClickerHeroesTrackerWebsite.Models.Calculator
                     continue;
                 }
 
-                ancientLevels.Add(ancient, ancientData.Level);
-            }
-
-            this.AncientLevels = ancientLevels;
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="AncientLevelSummaryViewModel"/> class.
-        /// </summary>
-        public AncientLevelSummaryViewModel(
-            GameData gameData,
-            IDataReader reader,
-            TelemetryClient telemetryClient)
-        {
-            var ancientLevels = new SortedDictionary<Ancient, long>(AncientComparer.Instance);
-            while (reader.Read())
-            {
-                var ancientId = Convert.ToInt32(reader["AncientId"]);
-                var level = Convert.ToInt64(reader["Level"]);
-
-                Ancient ancient;
-                if (!gameData.Ancients.TryGetValue(ancientId, out ancient))
-                {
-                    telemetryClient.TrackEvent("Unknown ancient", new Dictionary<string, string> { { "AncientId", ancientId.ToString() } });
-                    continue;
-                }
-
-                ancientLevels.Add(ancient, level);
+                var ancientLevelInfo = new AncientLevelInfo(ancientData.Level, itemLevelsById.GetItemLevel(ancient.Id));
+                ancientLevels.Add(ancient, ancientLevelInfo);
             }
 
             this.AncientLevels = ancientLevels;
@@ -70,7 +45,7 @@ namespace ClickerHeroesTrackerWebsite.Models.Calculator
         /// <summary>
         /// Gets the levels for each ancient.
         /// </summary>
-        public IDictionary<Ancient, long> AncientLevels { get; }
+        public IDictionary<Ancient, AncientLevelInfo> AncientLevels { get; }
 
         private class AncientComparer : IComparer<Ancient>
         {

@@ -7,12 +7,19 @@
     <tr>
         <th>Ancient</th>
         <th>Level</th>
+        <th></th>
     </tr>
     @foreach (var ancient in Model.AncientLevels)
     {
         <tr>
             <td>@ancient.Key.Name:</td>
-            <td class="text-right">@ancient.Value</td>
+            <td class="text-right">@ancient.Value.AncientLevel</td>
+            <td>
+                @if (ancient.Value.ItemLevel > 0)
+                {
+                    @: (+@ancient.Value.ItemLevel)
+                }
+            </td>
         </tr>
     }
 </table>

@@ -32,7 +32,13 @@
                     <a href="/Manage" class="text-muted" data-toggle="tooltip" data-placement="right" title="@solomonTooltip">(?)</a>
                 }
             </td>
-            <td class="text-right">@ancient.CurrentLevel</td>
+            <td class="text-right">
+                @ancient.LevelInfo.AncientLevel
+                @if (ancient.LevelInfo.ItemLevel > 0)
+                {
+                    @: (+@ancient.LevelInfo.ItemLevel)
+                }
+            </td>
 
             @if (ancient.AncientId == Model.PrimaryAncientId)
             {

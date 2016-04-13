@@ -342,6 +342,7 @@
     <Compile Include="Models\Account\ResetPasswordViewModel.cs" />
     <Compile Include="Models\ApplicationDbContext.cs" />
     <Compile Include="Models\ApplicationUser.cs" />
+    <Compile Include="Models\Calculator\AncientLevelInfo.cs" />
     <Compile Include="Models\Calculator\ExperimentalStatsViewModel.cs" />
     <Compile Include="Models\Dashboard\Graph\GraphRangeSelectorViewModel.cs" />
     <Compile Include="Models\Feedback\FeedbackRequest.cs" />

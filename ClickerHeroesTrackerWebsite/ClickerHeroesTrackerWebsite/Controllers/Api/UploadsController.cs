@@ -145,7 +145,7 @@ namespace ClickerHeroesTrackerWebsite.Controllers.Api
 
             var ancientLevels = new AncientLevelSummaryViewModel(
                 this.gameData,
-                savedGame.AncientsData,
+                savedGame,
                 this.telemetryClient);
             var computedStats = new ComputedStatsViewModel(
                 this.gameData,
