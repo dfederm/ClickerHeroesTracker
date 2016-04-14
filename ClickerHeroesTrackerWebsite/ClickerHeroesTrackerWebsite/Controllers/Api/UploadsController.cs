@@ -196,7 +196,7 @@ namespace ClickerHeroesTrackerWebsite.Controllers.Api
                     {
                         { "@UploadId", uploadId },
                         { "@AncientId", pair.Key.Id },
-                        { "@Level", pair.Value },
+                        { "@Level", pair.Value.AncientLevel },
                     };
                     command.ExecuteNonQuery();
                 }

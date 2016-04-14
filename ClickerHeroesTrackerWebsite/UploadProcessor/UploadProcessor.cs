@@ -217,7 +217,7 @@ namespace ClickerHeroesTrackerWebsite.UploadProcessing
                             ancientLevelsCommandText.Append(",");
                             ancientLevelsCommandText.Append(pair.Key.Id);
                             ancientLevelsCommandText.Append(",");
-                            ancientLevelsCommandText.Append(pair.Value);
+                            ancientLevelsCommandText.Append(pair.Value.AncientLevel);
                             ancientLevelsCommandText.Append(")");
 
                             isFirst = false;
