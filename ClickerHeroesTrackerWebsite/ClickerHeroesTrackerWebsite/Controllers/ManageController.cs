@@ -4,16 +4,17 @@
 
 namespace ClickerHeroesTrackerWebsite.Controllers
 {
-    using System;
     using System.Linq;
     using System.Threading.Tasks;
-    using System.Web;
-    using System.Web.Mvc;
-    using ClickerHeroesTrackerWebsite.Models;
-    using ClickerHeroesTrackerWebsite.Models.Settings;
+    using System.Security.Claims;
+    using Microsoft.AspNet.Authorization;
     using Microsoft.AspNet.Identity;
-    using Microsoft.AspNet.Identity.Owin;
-    using Microsoft.Owin.Security;
+    using Microsoft.AspNet.Mvc;
+    using ClickerHeroesTrackerWebsite.Models;
+    using ClickerHeroesTrackerWebsite.Services;
+    using ClickerHeroesTrackerWebsite.ViewModels.Manage;
+    using ClickerHeroesTrackerWebsite.Models.Settings;
+    using System;
 
     /// <summary>
     /// The manage controller allows users to manage their settings.
@@ -21,20 +22,24 @@ namespace ClickerHeroesTrackerWebsite.Controllers
     [Authorize]
     public class ManageController : Controller
     {
-        // Used for XSRF protection when adding external logins
-        private const string XsrfKey = "XsrfId";
-
         private readonly IUserSettingsProvider userSettingsProvider;
-
-        private ApplicationSignInManager signInManager;
-        private ApplicationUserManager userManager;
+        private readonly SignInManager<ApplicationUser> signInManager;
+        private readonly UserManager<ApplicationUser> userManager;
+        private readonly IEmailSender emailSender;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ManageController"/> class.
         /// </summary>
-        public ManageController(IUserSettingsProvider userSettingsProvider)
+        public ManageController(
+            IUserSettingsProvider userSettingsProvider,
+            SignInManager<ApplicationUser> signInManager,
+            UserManager<ApplicationUser> userManager,
+            IEmailSender emailSender)
         {
             this.userSettingsProvider = userSettingsProvider;
+            this.signInManager = signInManager;
+            this.userManager = userManager;
+            this.emailSender = emailSender;
         }
 
         /// <summary>
@@ -45,6 +50,11 @@ namespace ClickerHeroesTrackerWebsite.Controllers
         /// </remarks>
         public enum ManageMessageId
         {
+            /// <summary>
+            /// The user's external login was successfully added.
+            /// </summary>
+            AddLoginSuccess,
+
             /// <summary>
             /// The user's password was successfully changed.
             /// </summary>
@@ -66,36 +76,13 @@ namespace ClickerHeroesTrackerWebsite.Controllers
             Error
         }
 
-        private ApplicationSignInManager SignInManager
-        {
-            get
-            {
-                return this.signInManager ?? (this.signInManager = this.HttpContext.GetOwinContext().Get<ApplicationSignInManager>());
-            }
-        }
-
-        private ApplicationUserManager UserManager
-        {
-            get
-            {
-                return this.userManager ?? (this.userManager = this.HttpContext.GetOwinContext().GetUserManager<ApplicationUserManager>());
-            }
-        }
-
-        private IAuthenticationManager AuthenticationManager
-        {
-            get
-            {
-                return this.HttpContext.GetOwinContext().Authentication;
-            }
-        }
-
         /// <summary>
         /// GET: /Manage/Index
         /// </summary>
         /// <param name="message">The status of the user's last operation</param>
         /// <returns>The user's settings view</returns>
-        public async Task<ActionResult> Index(ManageMessageId? message)
+        [HttpGet]
+        public async Task<IActionResult> Index(ManageMessageId? message = null)
         {
             this.ViewBag.StatusMessage =
                 message == ManageMessageId.ChangePasswordSuccess ? "Your password has been changed."
@@ -103,10 +90,8 @@ namespace ClickerHeroesTrackerWebsite.Controllers
                 : message == ManageMessageId.Error ? "An error has occurred."
                 : string.Empty;
 
-            var userId = this.User.Identity.GetUserId();
-
+            var userId = this.User.GetUserId();
             var userSettings = this.userSettingsProvider.Get(userId);
-
             return await this.GetIndexResult(userId, userSettings);
         }
 
@@ -121,8 +106,7 @@ namespace ClickerHeroesTrackerWebsite.Controllers
         {
             this.ViewBag.StatusMessage = "Changes Saved";
 
-            var userId = this.User.Identity.GetUserId();
-
+            var userId = this.User.GetUserId();
             var userSettings = this.userSettingsProvider.Get(userId);
 
             userSettings.TimeZone = TimeZoneInfo.FindSystemTimeZoneById(indexViewModel.TimeZoneId);
@@ -142,35 +126,31 @@ namespace ClickerHeroesTrackerWebsite.Controllers
         /// <returns>A redirection to the manage logins page</returns>
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<ActionResult> RemoveLogin(string loginProvider, string providerKey)
+        public async Task<IActionResult> RemoveLogin(RemoveLoginViewModel account)
         {
-            ManageMessageId? message;
-            var result = await this.UserManager.RemoveLoginAsync(this.User.Identity.GetUserId(), new UserLoginInfo(loginProvider, providerKey));
-            if (result.Succeeded)
+            ManageMessageId? message = ManageMessageId.Error;
+            var user = await this.GetCurrentUserAsync();
+            if (user != null)
             {
-                var user = await this.UserManager.FindByIdAsync(this.User.Identity.GetUserId());
-                if (user != null)
+                var result = await this.userManager.RemoveLoginAsync(user, account.LoginProvider, account.ProviderKey);
+                if (result.Succeeded)
                 {
-                    await this.SignInManager.SignInAsync(user, isPersistent: false, rememberBrowser: false);
+                    await this.signInManager.SignInAsync(user, isPersistent: false);
+                    message = ManageMessageId.RemoveLoginSuccess;
                 }
-
-                message = ManageMessageId.RemoveLoginSuccess;
-            }
-            else
-            {
-                message = ManageMessageId.Error;
             }
 
-            return this.RedirectToAction("ManageLogins", new { Message = message });
+            return this.RedirectToAction(nameof(ManageLogins), new { Message = message });
         }
 
         /// <summary>
         /// GET: /Manage/ChangePassword
         /// </summary>
         /// <returns>The change password view</returns>
-        public ActionResult ChangePassword()
+        [HttpGet]
+        public IActionResult ChangePassword()
         {
-            return this.View();
+            return View();
         }
 
         /// <summary>
@@ -180,34 +160,35 @@ namespace ClickerHeroesTrackerWebsite.Controllers
         /// <returns>A redirect to the settings page or an error view</returns>
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<ActionResult> ChangePassword(ChangePasswordViewModel model)
+        public async Task<IActionResult> ChangePassword(ChangePasswordViewModel model)
         {
-            if (!this.ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
+                return View(model);
+            }
+            var user = await GetCurrentUserAsync();
+            if (user != null)
+            {
+                var result = await this.userManager.ChangePasswordAsync(user, model.OldPassword, model.NewPassword);
+                if (result.Succeeded)
+                {
+                    await this.signInManager.SignInAsync(user, isPersistent: false);
+                    return this.RedirectToAction(nameof(Index), new { Message = ManageMessageId.ChangePasswordSuccess });
+                }
+
+                this.AddErrors(result);
                 return this.View(model);
             }
 
-            var result = await this.UserManager.ChangePasswordAsync(this.User.Identity.GetUserId(), model.OldPassword, model.NewPassword);
-            if (result.Succeeded)
-            {
-                var user = await this.UserManager.FindByIdAsync(this.User.Identity.GetUserId());
-                if (user != null)
-                {
-                    await this.SignInManager.SignInAsync(user, isPersistent: false, rememberBrowser: false);
-                }
-
-                return this.RedirectToAction("Index", new { Message = ManageMessageId.ChangePasswordSuccess });
-            }
-
-            this.AddErrors(result);
-            return this.View(model);
+            return this.RedirectToAction(nameof(Index), new { Message = ManageMessageId.Error });
         }
 
         /// <summary>
         /// GET: /Manage/SetPassword
         /// </summary>
         /// <returns>The set password view</returns>
-        public ActionResult SetPassword()
+        [HttpGet]
+        public IActionResult SetPassword()
         {
             return this.View();
         }
@@ -219,27 +200,28 @@ namespace ClickerHeroesTrackerWebsite.Controllers
         /// <returns>A redirect to the settings page or an error view</returns>
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<ActionResult> SetPassword(SetPasswordViewModel model)
+        public async Task<IActionResult> SetPassword(SetPasswordViewModel model)
         {
-            if (this.ModelState.IsValid)
+            if (!this.ModelState.IsValid)
             {
-                var result = await this.UserManager.AddPasswordAsync(this.User.Identity.GetUserId(), model.NewPassword);
+                return this.View(model);
+            }
+
+            var user = await this.GetCurrentUserAsync();
+            if (user != null)
+            {
+                var result = await this.userManager.AddPasswordAsync(user, model.NewPassword);
                 if (result.Succeeded)
                 {
-                    var user = await this.UserManager.FindByIdAsync(this.User.Identity.GetUserId());
-                    if (user != null)
-                    {
-                        await this.SignInManager.SignInAsync(user, isPersistent: false, rememberBrowser: false);
-                    }
-
-                    return this.RedirectToAction("Index", new { Message = ManageMessageId.SetPasswordSuccess });
+                    await this.signInManager.SignInAsync(user, isPersistent: false);
+                    return RedirectToAction(nameof(Index), new { Message = ManageMessageId.SetPasswordSuccess });
                 }
 
                 this.AddErrors(result);
+                return this.View(model);
             }
 
-            // If we got this far, something failed, redisplay form
-            return this.View(model);
+            return RedirectToAction(nameof(Index), new { Message = ManageMessageId.Error });
         }
 
         /// <summary>
@@ -247,22 +229,24 @@ namespace ClickerHeroesTrackerWebsite.Controllers
         /// </summary>
         /// <param name="message">The status of the user's last operation</param>
         /// <returns>The user's settings view</returns>
-        public async Task<ActionResult> ManageLogins(ManageMessageId? message)
+        [HttpGet]
+        public async Task<IActionResult> ManageLogins(ManageMessageId? message = null)
         {
             this.ViewBag.StatusMessage =
                 message == ManageMessageId.RemoveLoginSuccess ? "The external login was removed."
+                : message == ManageMessageId.AddLoginSuccess ? "The external login was added."
                 : message == ManageMessageId.Error ? "An error has occurred."
                 : string.Empty;
-            var user = await this.UserManager.FindByIdAsync(this.User.Identity.GetUserId());
+            var user = await this.GetCurrentUserAsync();
             if (user == null)
             {
-                return this.View("Error");
+                return View("Error");
             }
 
-            var userLogins = await this.UserManager.GetLoginsAsync(this.User.Identity.GetUserId());
-            var otherLogins = this.AuthenticationManager
-                .GetExternalAuthenticationTypes()
-                .Where(auth => userLogins.All(ul => !string.Equals(auth.AuthenticationType, ul.LoginProvider, StringComparison.OrdinalIgnoreCase)))
+            var userLogins = await this.userManager.GetLoginsAsync(user);
+            var otherLogins = this.signInManager
+                .GetExternalAuthenticationSchemes()
+                .Where(auth => userLogins.All(ul => auth.AuthenticationScheme != ul.LoginProvider))
                 .ToList();
             this.ViewBag.ShowRemoveButton = user.PasswordHash != null || userLogins.Count > 1;
             return this.View(new ManageLoginsViewModel
@@ -279,55 +263,45 @@ namespace ClickerHeroesTrackerWebsite.Controllers
         /// <returns>A challenge result for the link</returns>
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult LinkLogin(string provider)
+        public IActionResult LinkLogin(string provider)
         {
             // Request a redirect to the external login provider to link a login for the current user
-            return new AccountController.ChallengeResult(provider, this.Url.Action("LinkLoginCallback", "Manage"), this.User.Identity.GetUserId());
+            var redirectUrl = this.Url.Action("LinkLoginCallback", "Manage");
+            var properties = this.signInManager.ConfigureExternalAuthenticationProperties(provider, redirectUrl, this.User.GetUserId());
+            return new ChallengeResult(provider, properties);
         }
 
         /// <summary>
         /// GET: /Manage/LinkLoginCallback
         /// </summary>
         /// <returns>A redirect to the external login manage page</returns>
+        [HttpGet]
         public async Task<ActionResult> LinkLoginCallback()
         {
-            var loginInfo = await this.AuthenticationManager.GetExternalLoginInfoAsync(XsrfKey, this.User.Identity.GetUserId());
-            if (loginInfo == null)
+            var user = await this.GetCurrentUserAsync();
+            if (user == null)
             {
-                return this.RedirectToAction("ManageLogins", new { Message = ManageMessageId.Error });
+                return this.View("Error");
             }
 
-            var result = await this.UserManager.AddLoginAsync(this.User.Identity.GetUserId(), loginInfo.Login);
-            return result.Succeeded ? this.RedirectToAction("ManageLogins") : this.RedirectToAction("ManageLogins", new { Message = ManageMessageId.Error });
-        }
-
-        /// <inheritdoc/>
-        protected override void Dispose(bool disposing)
-        {
-            if (disposing)
+            var info = await this.signInManager.GetExternalLoginInfoAsync(this.User.GetUserId());
+            if (info == null)
             {
-                if (this.userManager != null)
-                {
-                    this.userManager.Dispose();
-                    this.userManager = null;
-                }
-
-                if (this.signInManager != null)
-                {
-                    this.signInManager.Dispose();
-                    this.signInManager = null;
-                }
+                return this.RedirectToAction(nameof(ManageLogins), new { Message = ManageMessageId.Error });
             }
 
-            base.Dispose(disposing);
+            var result = await this.userManager.AddLoginAsync(user, info);
+            var message = result.Succeeded ? ManageMessageId.AddLoginSuccess : ManageMessageId.Error;
+            return this.RedirectToAction(nameof(ManageLogins), new { Message = message });
         }
 
         private async Task<ActionResult> GetIndexResult(string userId, IUserSettings userSettings)
         {
+            var user = await this.GetCurrentUserAsync(userId);
             var model = new IndexViewModel
             {
-                HasPassword = this.HasPassword(),
-                Logins = await this.UserManager.GetLoginsAsync(userId),
+                HasPassword = await this.userManager.HasPasswordAsync(user),
+                Logins = await this.userManager.GetLoginsAsync(user),
                 TimeZoneId = userSettings.TimeZone.Id,
                 AreUploadsPublic = userSettings.AreUploadsPublic,
                 SolomonFormula = userSettings.UseReducedSolomonFormula ? "Log" : "Ln",
@@ -342,19 +316,13 @@ namespace ClickerHeroesTrackerWebsite.Controllers
         {
             foreach (var error in result.Errors)
             {
-                this.ModelState.AddModelError(string.Empty, error);
+                ModelState.AddModelError(string.Empty, error.Description);
             }
         }
 
-        private bool HasPassword()
+        private async Task<ApplicationUser> GetCurrentUserAsync(string userId = null)
         {
-            var user = this.UserManager.FindById(this.User.Identity.GetUserId());
-            if (user != null)
-            {
-                return user.PasswordHash != null;
-            }
-
-            return false;
+            return await userManager.FindByIdAsync(userId ?? this.User.GetUserId());
         }
     }
 }

@@ -1,32 +1,36 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
-VisualStudioVersion = 14.0.24720.0
+VisualStudioVersion = 14.0.25123.0
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ClickerHeroesTrackerWebsite", "ClickerHeroesTrackerWebsite\ClickerHeroesTrackerWebsite.csproj", "{B389952B-0D84-4A4C-9EEA-1FC2E34FEE41}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{D77FD0C8-CA68-4572-998D-F9475577CB7E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ClickerHeroesTrackerWebsite.Tests", "ClickerHeroesTrackerWebsite.Tests\ClickerHeroesTrackerWebsite.Tests.csproj", "{F82B0586-9E62-43FA-BEDF-1A162C2935FD}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Build", "Build", "{B99EE4D7-6FCF-4181-99B0-D5ACABDFFB2A}"
-	ProjectSection(SolutionItems) = preProject
-		Build\CodeAnalysis.ruleset = Build\CodeAnalysis.ruleset
-		Build\CodeAnalysis.Test.ruleset = Build\CodeAnalysis.Test.ruleset
-		Build\PostDeploy.ps1 = Build\PostDeploy.ps1
-		Build\PreBuild.ps1 = Build\PreBuild.ps1
-		Build\SetEnvironment.bat = Build\SetEnvironment.bat
-		Build\stylecop.json = Build\stylecop.json
-	EndProjectSection
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ClickerHeroesTrackerWebsite.IntegrationTests", "ClickerHeroesTrackerWebsite.IntegrationTests\ClickerHeroesTrackerWebsite.IntegrationTests.csproj", "{BABC2536-C712-4AE2-AA28-9A08A2EEA317}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{CF4ED4FD-148C-400D-80CC-0EC8DE114E02}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{B172B6C9-3C44-4306-A0DA-5C827F9478EC}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{6ADD8E67-6F76-4AC3-A1A6-F92F3AA664CE}"
 	ProjectSection(SolutionItems) = preProject
 		..\.gitignore = ..\.gitignore
+		global.json = global.json
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UploadProcessor", "UploadProcessor\UploadProcessor.csproj", "{DC21085A-565C-474F-A70A-3307287CC1FE}"
+Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "ClickerHeroesTrackerWebsite", "ClickerHeroesTrackerWebsite\ClickerHeroesTrackerWebsite.xproj", "{DECD0F75-D8E0-41D4-B39B-A439E8022C74}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build", "build", "{3D49839D-F575-4B78-917D-05495AA9B946}"
+	ProjectSection(SolutionItems) = preProject
+		build\CodeAnalysis.ruleset = build\CodeAnalysis.ruleset
+		build\CodeAnalysis.Test.ruleset = build\CodeAnalysis.Test.ruleset
+		Build\Deploy.ps1 = Build\Deploy.ps1
+		build\PostDeploy.ps1 = build\PostDeploy.ps1
+		build\PreBuild.ps1 = build\PreBuild.ps1
+		build\SetEnvironment.bat = build\SetEnvironment.bat
+		build\stylecop.json = build\stylecop.json
+	EndProjectSection
+EndProject
+Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "UploadProcessor", "UploadProcessor\UploadProcessor.xproj", "{EF2FDDD0-E4E0-4AEF-8CF9-3A5030FDF027}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{320B80A0-2CE5-4F03-92AF-611FA650C435}"
+EndProject
+Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "ClickerHeroesTrackerWebsite.Tests", "ClickerHeroesTrackerWebsite.Tests\ClickerHeroesTrackerWebsite.Tests.xproj", "{6CB42835-1C1F-46F3-B92F-C4EEF165595A}"
+EndProject
+Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "ClickerHeroesTrackerWebsite.IntegrationTests", "ClickerHeroesTrackerWebsite.IntegrationTests\ClickerHeroesTrackerWebsite.IntegrationTests.xproj", "{E75BB73D-8A4A-4027-9010-06FFACD44C49}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -34,28 +38,30 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{B389952B-0D84-4A4C-9EEA-1FC2E34FEE41}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{B389952B-0D84-4A4C-9EEA-1FC2E34FEE41}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{B389952B-0D84-4A4C-9EEA-1FC2E34FEE41}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{B389952B-0D84-4A4C-9EEA-1FC2E34FEE41}.Release|Any CPU.Build.0 = Release|Any CPU
-		{F82B0586-9E62-43FA-BEDF-1A162C2935FD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{F82B0586-9E62-43FA-BEDF-1A162C2935FD}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{F82B0586-9E62-43FA-BEDF-1A162C2935FD}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{F82B0586-9E62-43FA-BEDF-1A162C2935FD}.Release|Any CPU.Build.0 = Release|Any CPU
-		{BABC2536-C712-4AE2-AA28-9A08A2EEA317}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{BABC2536-C712-4AE2-AA28-9A08A2EEA317}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{BABC2536-C712-4AE2-AA28-9A08A2EEA317}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{BABC2536-C712-4AE2-AA28-9A08A2EEA317}.Release|Any CPU.Build.0 = Release|Any CPU
-		{DC21085A-565C-474F-A70A-3307287CC1FE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{DC21085A-565C-474F-A70A-3307287CC1FE}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{DC21085A-565C-474F-A70A-3307287CC1FE}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{DC21085A-565C-474F-A70A-3307287CC1FE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DECD0F75-D8E0-41D4-B39B-A439E8022C74}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DECD0F75-D8E0-41D4-B39B-A439E8022C74}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DECD0F75-D8E0-41D4-B39B-A439E8022C74}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DECD0F75-D8E0-41D4-B39B-A439E8022C74}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EF2FDDD0-E4E0-4AEF-8CF9-3A5030FDF027}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EF2FDDD0-E4E0-4AEF-8CF9-3A5030FDF027}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EF2FDDD0-E4E0-4AEF-8CF9-3A5030FDF027}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EF2FDDD0-E4E0-4AEF-8CF9-3A5030FDF027}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6CB42835-1C1F-46F3-B92F-C4EEF165595A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6CB42835-1C1F-46F3-B92F-C4EEF165595A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6CB42835-1C1F-46F3-B92F-C4EEF165595A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6CB42835-1C1F-46F3-B92F-C4EEF165595A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E75BB73D-8A4A-4027-9010-06FFACD44C49}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E75BB73D-8A4A-4027-9010-06FFACD44C49}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E75BB73D-8A4A-4027-9010-06FFACD44C49}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E75BB73D-8A4A-4027-9010-06FFACD44C49}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
-		{F82B0586-9E62-43FA-BEDF-1A162C2935FD} = {CF4ED4FD-148C-400D-80CC-0EC8DE114E02}
-		{BABC2536-C712-4AE2-AA28-9A08A2EEA317} = {CF4ED4FD-148C-400D-80CC-0EC8DE114E02}
+		{DECD0F75-D8E0-41D4-B39B-A439E8022C74} = {D77FD0C8-CA68-4572-998D-F9475577CB7E}
+		{EF2FDDD0-E4E0-4AEF-8CF9-3A5030FDF027} = {D77FD0C8-CA68-4572-998D-F9475577CB7E}
+		{6CB42835-1C1F-46F3-B92F-C4EEF165595A} = {320B80A0-2CE5-4F03-92AF-611FA650C435}
+		{E75BB73D-8A4A-4027-9010-06FFACD44C49} = {320B80A0-2CE5-4F03-92AF-611FA650C435}
 	EndGlobalSection
 EndGlobal

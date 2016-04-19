@@ -1,15 +1,6 @@
-﻿@using ClickerHeroesTrackerWebsite.Views
+﻿@inject IContentManager ContentManager
 
-@using (Html.BeginScripts())
-{
-    <script src="http://code.highcharts.com/highcharts.js"></script>
-    <script type="text/javascript">
-        Highcharts.setOptions(
-		{
-		    lang:
-			{
-			    thousandsSep: ','
-			}
-		});
-    </script>
+@{
+    ContentManager.RegisterScript("http://code.highcharts.com/highcharts.js");
+    ContentManager.RegisterRawScript("Highcharts.setOptions({lang:{thousandsSep: ','}});");
 }

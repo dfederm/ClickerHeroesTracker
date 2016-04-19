@@ -6,8 +6,6 @@ namespace ClickerHeroesTrackerWebsite.IntegrationTests.Helpers
 {
     using System;
     using System.Diagnostics.CodeAnalysis;
-    using System.IO;
-    using System.Net;
     using System.Net.Http;
     using System.Threading.Tasks;
 
@@ -33,7 +31,7 @@ namespace ClickerHeroesTrackerWebsite.IntegrationTests.Helpers
 
             if (Environment.GetEnvironmentVariable("IsInCloud") == null)
             {
-                host = "localhost:51083";
+                host = "localhost:13161";
             }
             else
             {

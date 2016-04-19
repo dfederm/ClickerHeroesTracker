@@ -6,20 +6,15 @@ namespace ClickerHeroesTracker.UploadProcessor
 {
     using System;
     using System.Collections.Concurrent;
-    using System.Collections.Generic;
-    using System.Text;
     using System.Threading;
     using System.Threading.Tasks;
-    using ClickerHeroesTrackerWebsite.Database;
-    using ClickerHeroesTrackerWebsite.Instrumentation;
     using ClickerHeroesTrackerWebsite.Models.Game;
-    using ClickerHeroesTrackerWebsite.Models.Settings;
     using ClickerHeroesTrackerWebsite.UploadProcessing;
     using Microsoft.ApplicationInsights;
-    using Microsoft.ApplicationInsights.Channel;
-    using Microsoft.ApplicationInsights.DataContracts;
     using Microsoft.ApplicationInsights.Extensibility;
-
+    using Microsoft.Extensions.Configuration;
+    using Microsoft.Extensions.DependencyInjection;
+    
     /// <summary>
     /// The entrypoint class to the program.
     /// </summary>
@@ -27,9 +22,11 @@ namespace ClickerHeroesTracker.UploadProcessor
     {
         private static ConcurrentBag<UploadProcessor> processors = new ConcurrentBag<UploadProcessor>();
 
-        private static GameData gameData = GameData.Parse(@"GameData.json");
+        private static GameData gameData;
 
-        private static TelemetryClient telemetryClient = new TelemetryClient();
+        private static TelemetryClient telemetryClient;
+
+        private static IConfiguration configuration;
 
         /// <summary>
         /// The entrypoint method to the program.
@@ -44,6 +41,21 @@ namespace ClickerHeroesTracker.UploadProcessor
                 eventArgs.Cancel = true;
                 exitEvent.Set();
             };
+
+            gameData = GameData.Parse(@"GameData.json");
+
+            // Set up configuration.
+            var builder = new ConfigurationBuilder()
+                .AddJsonFile("appsettings.json")
+                .AddUserSecrets()
+                .AddApplicationInsightsSettings(developerMode: true);
+            configuration = builder.Build();
+
+            // Set up telemetry
+            var telemetryConfiguration = TelemetryConfiguration.CreateDefault();
+            telemetryConfiguration.InstrumentationKey = configuration["ApplicationInsights:InstrumentationKey"];
+            telemetryConfiguration.TelemetryProcessorChainBuilder.Use(next => new ConsoleLoggingProcessor(next)).Build();
+            telemetryClient = new TelemetryClient(telemetryConfiguration);
 
             // Spin up one per logical core
             Console.WriteLine($"Number of processors: {Environment.ProcessorCount}");
@@ -70,7 +82,7 @@ namespace ClickerHeroesTracker.UploadProcessor
 
         private static void StartUploadProcessor()
         {
-            var processor = new UploadProcessor(gameData, telemetryClient);
+            var processor = new UploadProcessor(configuration, gameData, telemetryClient);
             processor.Start();
             processors.Add(processor);
         }

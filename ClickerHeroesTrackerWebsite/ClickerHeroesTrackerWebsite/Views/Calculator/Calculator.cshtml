@@ -1,8 +1,14 @@
-﻿@using ClickerHeroesTrackerWebsite.Models.Calculator
+﻿@using ClickerHeroesTrackerWebsite.Models.Calculator;
+
+@inject IContentManager ContentManager
+
 @model CalculatorViewModel
 
 @{
     ViewBag.Title = "Calculator";
+
+    @* Wire up tooltips *@
+    ContentManager.RegisterRawScript("$('[data-toggle=\"tooltip\"]').tooltip();");
 }
 
 <h2>@ViewBag.Title.</h2>
@@ -14,7 +20,7 @@
             @if (!string.IsNullOrEmpty(Model.UploadUserName))
             {
                 @Model.UploadUserName
-            }
+        }
             else
             {
                 <span class="text-muted">
@@ -64,7 +70,7 @@
                         </div>
                         <div class="modal-body">
                             @if (Model.IsPublic)
-                            {
+    {
                                 <p>
                                     You can share the url below to others to let them view this upload.
                                 </p>
@@ -109,8 +115,8 @@
         @Html.Partial("_ComputedStats", Model.ComputedStatsViewModel)
 
         @if (Model.ExperimentalStatsViewModel != null)
-        {
-            @Html.Partial("_ExperimentalStats", Model.ExperimentalStatsViewModel)
+    {
+        @Html.Partial("_ExperimentalStats", Model.ExperimentalStatsViewModel)
         }
     </div>
 </div>
@@ -125,12 +131,3 @@
         </div>
     </div>
 *@
-
-@section Scripts {
-    @Scripts.Render("~/bundles/jqueryval")
-
-    @* Wire up tooltips *@
-    <script type="text/javascript">
-        $('[data-toggle="tooltip"]').tooltip();
-    </script>
-}

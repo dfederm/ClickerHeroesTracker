@@ -6,17 +6,14 @@ namespace ClickerHeroesTrackerWebsite.Tests.Models
 {
     using ClickerHeroesTrackerWebsite.Models;
     using ClickerHeroesTrackerWebsite.Models.Calculator;
-    using ClickerHeroesTrackerWebsite.Models.Game;
     using ClickerHeroesTrackerWebsite.Models.Settings;
-    using Microsoft.VisualStudio.TestTools.UnitTesting;
     using Mocks;
     using Moq;
+    using Xunit;
 
-    [TestClass]
     public class ConfirmViewModelTests
     {
-        [Ignore]
-        [TestMethod]
+        [Fact(Skip = "Ignoring until we can properly mock the database for unit tests")]
         public void ConfirmViewModel_BasicFunctionalityTest()
         {
             var mockUserSettings = new Mock<IUserSettings>(MockBehavior.Strict);
@@ -36,50 +33,50 @@ namespace ClickerHeroesTrackerWebsite.Tests.Models
                 1234,
                 null);
 
-            Assert.IsTrue(viewModel.IsValid);
-            Assert.IsFalse(viewModel.IsPublic);
-            Assert.IsTrue(viewModel.IsOwn);
-            Assert.IsTrue(viewModel.IsPermitted);
+            Assert.True(viewModel.IsValid);
+            Assert.False(viewModel.IsPublic);
+            Assert.True(viewModel.IsOwn);
+            Assert.True(viewModel.IsPermitted);
 
-            Assert.IsNotNull(viewModel.AncientLevelSummaryViewModel);
-            Assert.IsNotNull(viewModel.AncientLevelSummaryViewModel.AncientLevels);
-            Assert.AreEqual(29, viewModel.AncientLevelSummaryViewModel.AncientLevels.Count);
+            Assert.NotNull(viewModel.AncientLevelSummaryViewModel);
+            Assert.NotNull(viewModel.AncientLevelSummaryViewModel.AncientLevels);
+            Assert.Equal(29, viewModel.AncientLevelSummaryViewModel.AncientLevels.Count);
 
             foreach (var pair in viewModel.AncientLevelSummaryViewModel.AncientLevels)
             {
-                Assert.IsNotNull(pair);
-                Assert.IsNotNull(pair.Key);
-                Assert.IsTrue(pair.Value.EffectiveLevel >= 0);
+                Assert.NotNull(pair);
+                Assert.NotNull(pair.Key);
+                Assert.True(pair.Value.EffectiveLevel >= 0);
             }
 
             /*
-            Assert.IsNotNull(viewModel.HeroLevelSummaryViewModel);
-            Assert.IsNotNull(viewModel.HeroLevelSummaryViewModel.HeroGilds);
-            Assert.AreEqual(2, viewModel.HeroLevelSummaryViewModel.HeroGilds.Count);
+            Assert.NotNull(viewModel.HeroLevelSummaryViewModel);
+            Assert.NotNull(viewModel.HeroLevelSummaryViewModel.HeroGilds);
+            Assert.Equal(2, viewModel.HeroLevelSummaryViewModel.HeroGilds.Count);
 
             foreach (var pair in viewModel.HeroLevelSummaryViewModel.HeroGilds)
             {
-                Assert.IsNotNull(pair);
-                Assert.IsFalse(string.IsNullOrWhiteSpace(pair.Key));
-                Assert.IsFalse(string.IsNullOrWhiteSpace(pair.Value));
+                Assert.NotNull(pair);
+                Assert.False(string.IsNullOrWhiteSpace(pair.Key));
+                Assert.False(string.IsNullOrWhiteSpace(pair.Value));
             }
             */
 
-            Assert.IsNotNull(viewModel.SuggestedAncientLevelsViewModel);
-            Assert.IsNotNull(viewModel.SuggestedAncientLevelsViewModel.SuggestedAncientLevels);
-            Assert.AreEqual(8, viewModel.SuggestedAncientLevelsViewModel.SuggestedAncientLevels.Length);
+            Assert.NotNull(viewModel.SuggestedAncientLevelsViewModel);
+            Assert.NotNull(viewModel.SuggestedAncientLevelsViewModel.SuggestedAncientLevels);
+            Assert.Equal(8, viewModel.SuggestedAncientLevelsViewModel.SuggestedAncientLevels.Length);
 
             foreach (var suggestedAncientLevel in viewModel.SuggestedAncientLevelsViewModel.SuggestedAncientLevels)
             {
-                Assert.IsNotNull(suggestedAncientLevel);
-                Assert.IsFalse(string.IsNullOrWhiteSpace(suggestedAncientLevel.AncientName));
-                Assert.AreNotEqual(0, suggestedAncientLevel.LevelInfo.AncientLevel);
-                Assert.AreNotEqual(0, suggestedAncientLevel.LevelInfo.ItemLevel);
-                Assert.AreNotEqual(0, suggestedAncientLevel.LevelInfo.EffectiveLevel);
-                Assert.AreNotEqual(0, suggestedAncientLevel.SuggestedLevel);
+                Assert.NotNull(suggestedAncientLevel);
+                Assert.False(string.IsNullOrWhiteSpace(suggestedAncientLevel.AncientName));
+                Assert.NotEqual(0, suggestedAncientLevel.LevelInfo.AncientLevel);
+                Assert.NotEqual(0, suggestedAncientLevel.LevelInfo.ItemLevel);
+                Assert.NotEqual(0, suggestedAncientLevel.LevelInfo.EffectiveLevel);
+                Assert.NotEqual(0, suggestedAncientLevel.SuggestedLevel);
             }
 
-            Assert.IsNotNull(viewModel.ComputedStatsViewModel);
+            Assert.NotNull(viewModel.ComputedStatsViewModel);
 
             mockUserSettings.Verify();
             mockUserSettingsProvider.Verify();

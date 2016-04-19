@@ -4,9 +4,10 @@
 
 namespace ClickerHeroesTrackerWebsite.Controllers
 {
-    using System.Web.Mvc;
     using Database;
     using Microsoft.ApplicationInsights;
+    using Microsoft.AspNet.Authorization;
+    using Microsoft.AspNet.Mvc;
     using Models.Dashboard;
     using Models.Game;
     using Models.Settings;
@@ -76,7 +77,7 @@ namespace ClickerHeroesTrackerWebsite.Controllers
         /// <returns>The progress view</returns>
         public ActionResult Progress()
         {
-            var range = this.Request.QueryString["range"];
+            var range = this.Request.Query["range"];
             var model = new ProgressViewModel(
                 this.gameData,
                 this.telemetryClient,
@@ -99,14 +100,14 @@ namespace ClickerHeroesTrackerWebsite.Controllers
         /// <returns>The rival view</returns>
         public ActionResult Rival()
         {
-            var rivalIdRaw = this.Request.QueryString["rivalId"];
+            var rivalIdRaw = this.Request.Query["rivalId"];
             int rivalId;
-            if (rivalIdRaw == null || !int.TryParse(rivalIdRaw, out rivalId))
+            if (!int.TryParse(rivalIdRaw, out rivalId))
             {
                 return this.RedirectToAction("Index");
             }
 
-            var range = this.Request.QueryString["range"];
+            var range = this.Request.Query["range"];
             var model = new RivalViewModel(
                 this.gameData,
                 this.telemetryClient,

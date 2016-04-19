@@ -6,15 +6,15 @@ namespace ClickerHeroesTrackerWebsite.Controllers
 {
     using System;
     using System.Linq;
+    using System.Security.Claims;
     using System.Threading.Tasks;
-    using System.Web;
-    using System.Web.Mvc;
-    using ClickerHeroesTrackerWebsite.Models;
+    using Microsoft.AspNet.Authorization;
     using Microsoft.AspNet.Identity;
-    using Microsoft.AspNet.Identity.Owin;
-    using Microsoft.Owin.Security;
-    using Models.Account;
-    using Models.Settings;
+    using Microsoft.AspNet.Mvc;
+    using ClickerHeroesTrackerWebsite.Models;
+    using ClickerHeroesTrackerWebsite.Services;
+    using ClickerHeroesTrackerWebsite.Models.Settings;
+    using ClickerHeroesTrackerWebsite.ViewModels.Account;
 
     /// <summary>
     /// The Account controller is where users register and log in.
@@ -22,45 +22,25 @@ namespace ClickerHeroesTrackerWebsite.Controllers
     [Authorize]
     public class AccountController : Controller
     {
-        // Used for XSRF protection when adding external logins
-        private const string XsrfKey = "XsrfId";
-
         private readonly IUserSettingsProvider userSettingsProvider;
-
-        private ApplicationSignInManager signInManager;
-        private ApplicationUserManager userManager;
+        private readonly SignInManager<ApplicationUser> signInManager;
+        private readonly UserManager<ApplicationUser> userManager;
+        private readonly IEmailSender emailSender;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="AccountController"/> class.
         /// </summary>
         /// <param name="userSettingsProvider">The user settings provider</param>
-        public AccountController(IUserSettingsProvider userSettingsProvider)
+        public AccountController(
+            IUserSettingsProvider userSettingsProvider,
+            SignInManager<ApplicationUser> signInManager,
+            UserManager<ApplicationUser> userManager,
+            IEmailSender emailSender)
         {
             this.userSettingsProvider = userSettingsProvider;
-        }
-
-        private ApplicationSignInManager SignInManager
-        {
-            get
-            {
-                return this.signInManager ?? this.HttpContext.GetOwinContext().Get<ApplicationSignInManager>();
-            }
-        }
-
-        private ApplicationUserManager UserManager
-        {
-            get
-            {
-                return this.userManager ?? this.HttpContext.GetOwinContext().GetUserManager<ApplicationUserManager>();
-            }
-        }
-
-        private IAuthenticationManager AuthenticationManager
-        {
-            get
-            {
-                return this.HttpContext.GetOwinContext().Authentication;
-            }
+            this.signInManager = signInManager;
+            this.userManager = userManager;
+            this.emailSender = emailSender;
         }
 
         /// <summary>
@@ -68,8 +48,9 @@ namespace ClickerHeroesTrackerWebsite.Controllers
         /// </summary>
         /// <param name="returnUrl">The url to redirect back to after login</param>
         /// <returns>The login view</returns>
+        [HttpGet]
         [AllowAnonymous]
-        public ActionResult Login(string returnUrl)
+        public IActionResult Login(string returnUrl = null)
         {
             this.ViewBag.ReturnUrl = returnUrl;
             return this.View();
@@ -84,12 +65,14 @@ namespace ClickerHeroesTrackerWebsite.Controllers
         [HttpPost]
         [AllowAnonymous]
         [ValidateAntiForgeryToken]
-        public async Task<ActionResult> Login(LoginViewModel model, string returnUrl)
+        public async Task<IActionResult> Login(LoginViewModel model, string returnUrl = null)
         {
             if (!this.ModelState.IsValid)
             {
                 return this.View(model);
             }
+
+            this.ViewBag.ReturnUrl = returnUrl;
 
             var userName = model.UserName;
 
@@ -97,7 +80,7 @@ namespace ClickerHeroesTrackerWebsite.Controllers
             // We already check that usernames are only "word" chars (\w+), so this check is sufficient.
             if (userName.Contains("@"))
             {
-                var user = await this.UserManager.FindByEmailAsync(userName);
+                var user = await this.userManager.FindByEmailAsync(userName);
                 if (user == null)
                 {
                     this.ModelState.AddModelError(string.Empty, "Invalid login attempt.");
@@ -108,27 +91,23 @@ namespace ClickerHeroesTrackerWebsite.Controllers
             }
 
             // This doesn't count login failures towards account lockout
-            // To enable password failures to trigger account lockout, change to shouldLockout: true
-            var result = await this.SignInManager.PasswordSignInAsync(userName, model.Password, model.RememberMe, shouldLockout: false);
-            switch (result)
+            var result = await this.signInManager.PasswordSignInAsync(userName, model.Password, model.RememberMe, lockoutOnFailure: false);
+            if (result.Succeeded)
             {
-                case SignInStatus.Success:
-                    return this.RedirectToLocal(returnUrl);
-                case SignInStatus.LockedOut:
-                    return this.View("Lockout");
-                case SignInStatus.Failure:
-                default:
-                    this.ModelState.AddModelError(string.Empty, "Invalid login attempt.");
-                    return this.View(model);
+                return this.RedirectToLocal(returnUrl);
             }
+
+            this.ModelState.AddModelError(string.Empty, "Invalid login attempt.");
+            return this.View(model);
         }
 
         /// <summary>
         /// GET: /Account/Register
         /// </summary>
         /// <returns>The register view</returns>
+        [HttpGet]
         [AllowAnonymous]
-        public ActionResult Register()
+        public IActionResult Register()
         {
             return this.View();
         }
@@ -141,21 +120,20 @@ namespace ClickerHeroesTrackerWebsite.Controllers
         [HttpPost]
         [AllowAnonymous]
         [ValidateAntiForgeryToken]
-        public async Task<ActionResult> Register(RegisterViewModel model)
+        public async Task<IActionResult> Register(RegisterViewModel model)
         {
-            if (this.ModelState.IsValid)
+            if (ModelState.IsValid)
             {
                 var user = new ApplicationUser { UserName = model.UserName, Email = model.Email };
-                var result = await this.UserManager.CreateAsync(user, model.Password);
+                var result = await this.userManager.CreateAsync(user, model.Password);
                 if (result.Succeeded)
                 {
                     // Save the user's initial settings
                     var userSettings = this.userSettingsProvider.Get(user.Id);
                     userSettings.TimeZone = TimeZoneInfo.GetSystemTimeZones().FirstOrDefault(tz => tz.GetUtcOffset(DateTime.UtcNow).TotalMinutes == -model.TimezoneOffset);
 
-                    await this.SignInManager.SignInAsync(user, isPersistent: false, rememberBrowser: false);
-
-                    return this.RedirectToAction("Index", "Home");
+                    await this.signInManager.SignInAsync(user, isPersistent: false);
+                    return this.RedirectToAction(nameof(HomeController.Index), "Home");
                 }
 
                 this.AddErrors(result);
@@ -171,15 +149,22 @@ namespace ClickerHeroesTrackerWebsite.Controllers
         /// <param name="userId">The user id</param>
         /// <param name="code">The confirmation code sent to the user</param>
         /// <returns>A view with the status</returns>
+        [HttpGet]
         [AllowAnonymous]
-        public async Task<ActionResult> ConfirmEmail(string userId, string code)
+        public async Task<IActionResult> ConfirmEmail(string userId, string code)
         {
             if (userId == null || code == null)
             {
                 return this.View("Error");
             }
 
-            var result = await this.UserManager.ConfirmEmailAsync(userId, code);
+            var user = await this.userManager.FindByIdAsync(userId);
+            if (user == null)
+            {
+                return this.View("Error");
+            }
+
+            var result = await this.userManager.ConfirmEmailAsync(user, code);
             return this.View(result.Succeeded ? "ConfirmEmail" : "Error");
         }
 
@@ -187,8 +172,9 @@ namespace ClickerHeroesTrackerWebsite.Controllers
         /// GET: /Account/ForgotPassword
         /// </summary>
         /// <returns>The forgot password view</returns>
+        [HttpGet]
         [AllowAnonymous]
-        public ActionResult ForgotPassword()
+        public IActionResult ForgotPassword()
         {
             return this.View();
         }
@@ -201,25 +187,23 @@ namespace ClickerHeroesTrackerWebsite.Controllers
         [HttpPost]
         [AllowAnonymous]
         [ValidateAntiForgeryToken]
-        public async Task<ActionResult> ForgotPassword(ForgotPasswordViewModel model)
+        public async Task<IActionResult> ForgotPassword(ForgotPasswordViewModel model)
         {
             if (this.ModelState.IsValid)
             {
-                // If we ever use email confirmation, change to this
-                // if (user == null || !(await UserManager.IsEmailConfirmedAsync(user.Id)))
-                var user = await this.UserManager.FindByEmailAsync(model.Email);
+                var user = await this.userManager.FindByEmailAsync(model.Email);
                 if (user == null)
                 {
                     // Don't reveal that the user does not exist or is not confirmed
                     return this.View("ForgotPasswordConfirmation");
                 }
 
-                // For more information on how to enable account confirmation and password reset please visit http://go.microsoft.com/fwlink/?LinkID=320771
+                // For more information on how to enable account confirmation and password reset please visit http://go.microsoft.com/fwlink/?LinkID=532713
                 // Send an email with this link
-                string code = await this.UserManager.GeneratePasswordResetTokenAsync(user.Id);
-                var callbackUrl = this.Url.Action("ResetPassword", "Account", new { userId = user.Id, code = code }, protocol: this.Request.Url.Scheme);
-                await this.UserManager.SendEmailAsync(user.Id, "Reset Password", "Please reset your password by clicking <a href=\"" + callbackUrl + "\">here</a>");
-                return this.RedirectToAction("ForgotPasswordConfirmation", "Account");
+                var code = await this.userManager.GeneratePasswordResetTokenAsync(user);
+                var callbackUrl = this.Url.Action("ResetPassword", "Account", new { userId = user.Id, code = code }, protocol: this.Request.Scheme);
+                await this.emailSender.SendEmailAsync(model.Email, "Reset Password", "Please reset your password by clicking here: <a href=\"" + callbackUrl + "\">link</a>");
+                return this.View("ForgotPasswordConfirmation");
             }
 
             // If we got this far, something failed, redisplay form
@@ -227,22 +211,13 @@ namespace ClickerHeroesTrackerWebsite.Controllers
         }
 
         /// <summary>
-        /// GET: /Account/ForgotPasswordConfirmation
-        /// </summary>
-        /// <returns>The forgot password confirmation view</returns>
-        [AllowAnonymous]
-        public ActionResult ForgotPasswordConfirmation()
-        {
-            return this.View();
-        }
-
-        /// <summary>
         /// GET: /Account/ResetPassword
         /// </summary>
         /// <param name="code">The confirmation code</param>
         /// <returns>The reset password view</returns>
+        [HttpGet]
         [AllowAnonymous]
-        public ActionResult ResetPassword(string code)
+        public IActionResult ResetPassword(string code = null)
         {
             return code == null ? this.View("Error") : this.View();
         }
@@ -255,24 +230,22 @@ namespace ClickerHeroesTrackerWebsite.Controllers
         [HttpPost]
         [AllowAnonymous]
         [ValidateAntiForgeryToken]
-        public async Task<ActionResult> ResetPassword(ResetPasswordViewModel model)
+        public async Task<IActionResult> ResetPassword(ResetPasswordViewModel model)
         {
             if (!this.ModelState.IsValid)
             {
                 return this.View(model);
             }
-
-            var user = await this.UserManager.FindByNameAsync(model.UserName);
+            var user = await this.userManager.FindByNameAsync(model.UserName);
             if (user == null)
             {
                 // Don't reveal that the user does not exist
-                return this.RedirectToAction("ResetPasswordConfirmation", "Account");
+                return this.RedirectToAction(nameof(AccountController.ResetPasswordConfirmation), "Account");
             }
-
-            var result = await this.UserManager.ResetPasswordAsync(user.Id, model.Code, model.Password);
+            var result = await this.userManager.ResetPasswordAsync(user, model.Code, model.Password);
             if (result.Succeeded)
             {
-                return this.RedirectToAction("ResetPasswordConfirmation", "Account");
+                return this.RedirectToAction(nameof(AccountController.ResetPasswordConfirmation), "Account");
             }
 
             this.AddErrors(result);
@@ -283,8 +256,9 @@ namespace ClickerHeroesTrackerWebsite.Controllers
         /// GET: /Account/ResetPasswordConfirmation
         /// </summary>
         /// <returns>The reset password confirmation view</returns>
+        [HttpGet]
         [AllowAnonymous]
-        public ActionResult ResetPasswordConfirmation()
+        public IActionResult ResetPasswordConfirmation()
         {
             return this.View();
         }
@@ -298,10 +272,12 @@ namespace ClickerHeroesTrackerWebsite.Controllers
         [HttpPost]
         [AllowAnonymous]
         [ValidateAntiForgeryToken]
-        public ActionResult ExternalLogin(string provider, string returnUrl)
+        public IActionResult ExternalLogin(string provider, string returnUrl = null)
         {
-            // Request a redirect to the external login provider
-            return new ChallengeResult(provider, this.Url.Action("ExternalLoginCallback", "Account", new { ReturnUrl = returnUrl }));
+            // Request a redirect to the external login provider.
+            var redirectUrl = Url.Action("ExternalLoginCallback", "Account", new { ReturnUrl = returnUrl });
+            var properties = this.signInManager.ConfigureExternalAuthenticationProperties(provider, redirectUrl);
+            return new ChallengeResult(provider, properties);
         }
 
         /// <summary>
@@ -309,32 +285,27 @@ namespace ClickerHeroesTrackerWebsite.Controllers
         /// </summary>
         /// <param name="returnUrl">The url to redirect back to</param>
         /// <returns>A redirection result if the challenge succeeded, an error view otherwise</returns>
+        [HttpGet]
         [AllowAnonymous]
-        public async Task<ActionResult> ExternalLoginCallback(string returnUrl)
+        public async Task<IActionResult> ExternalLoginCallback(string returnUrl = null)
         {
-            var loginInfo = await this.AuthenticationManager.GetExternalLoginInfoAsync();
-            if (loginInfo == null)
+            var info = await this.signInManager.GetExternalLoginInfoAsync();
+            if (info == null)
             {
-                return this.RedirectToAction("Login");
+                return this.RedirectToAction(nameof(Login));
             }
 
-            // Sign in the user with this external login provider if the user already has a login
-            var result = await this.SignInManager.ExternalSignInAsync(loginInfo, isPersistent: false);
-            switch (result)
+            // Sign in the user with this external login provider if the user already has a login.
+            var result = await this.signInManager.ExternalLoginSignInAsync(info.LoginProvider, info.ProviderKey, isPersistent: false);
+            if (result.Succeeded)
             {
-                case SignInStatus.Success:
-                    return this.RedirectToLocal(returnUrl);
-                case SignInStatus.LockedOut:
-                    return this.View("Lockout");
-                case SignInStatus.RequiresVerification:
-                    return this.RedirectToAction("SendCode", new { ReturnUrl = returnUrl, RememberMe = false });
-                case SignInStatus.Failure:
-                default:
-                    // If the user does not have an account, then prompt the user to create an account
-                    this.ViewBag.ReturnUrl = returnUrl;
-                    this.ViewBag.LoginProvider = loginInfo.Login.LoginProvider;
-                    return this.View("ExternalLoginConfirmation", new ExternalLoginConfirmationViewModel { UserName = loginInfo.DefaultUserName });
+                return this.RedirectToLocal(returnUrl);
             }
+
+            // If the user does not have an account, then ask the user to create an account.
+            this.ViewBag.ReturnUrl = returnUrl;
+            this.ViewBag.LoginProvider = info.LoginProvider;
+            return this.View("ExternalLoginConfirmation", new ExternalLoginConfirmationViewModel());
         }
 
         /// <summary>
@@ -346,30 +317,31 @@ namespace ClickerHeroesTrackerWebsite.Controllers
         [HttpPost]
         [AllowAnonymous]
         [ValidateAntiForgeryToken]
-        public async Task<ActionResult> ExternalLoginConfirmation(ExternalLoginConfirmationViewModel model, string returnUrl)
+        public async Task<IActionResult> ExternalLoginConfirmation(ExternalLoginConfirmationViewModel model, string returnUrl = null)
         {
-            if (this.User.Identity.IsAuthenticated)
+            if (this.User.IsSignedIn())
             {
-                return this.RedirectToAction("Index", "Manage");
+                return this.RedirectToAction(nameof(ManageController.Index), "Manage");
             }
 
             if (this.ModelState.IsValid)
             {
                 // Get the information about the user from the external login provider
-                var info = await this.AuthenticationManager.GetExternalLoginInfoAsync();
+                var info = await this.signInManager.GetExternalLoginInfoAsync();
                 if (info == null)
                 {
                     return this.View("ExternalLoginFailure");
                 }
 
-                var user = new ApplicationUser { UserName = model.UserName, Email = info.Email };
-                var result = await this.UserManager.CreateAsync(user);
+                var email = info.ExternalPrincipal.FindFirstValue(ClaimTypes.Email);
+                var user = new ApplicationUser { UserName = model.UserName, Email = email };
+                var result = await this.userManager.CreateAsync(user);
                 if (result.Succeeded)
                 {
-                    result = await this.UserManager.AddLoginAsync(user.Id, info.Login);
+                    result = await this.userManager.AddLoginAsync(user, info);
                     if (result.Succeeded)
                     {
-                        await this.SignInManager.SignInAsync(user, isPersistent: false, rememberBrowser: false);
+                        await this.signInManager.SignInAsync(user, isPersistent: false);
                         return this.RedirectToLocal(returnUrl);
                     }
                 }
@@ -387,91 +359,41 @@ namespace ClickerHeroesTrackerWebsite.Controllers
         /// <returns>A redirection to the homepage</returns>
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult LogOff()
+        public async Task<IActionResult> LogOff()
         {
-            this.AuthenticationManager.SignOut(DefaultAuthenticationTypes.ApplicationCookie);
-            return this.RedirectToAction("Index", "Home");
+            await this.signInManager.SignOutAsync();
+            return this.RedirectToAction(nameof(HomeController.Index), "Home");
         }
 
         /// <summary>
         /// GET: /Account/ExternalLoginFailure
         /// </summary>
         /// <returns>An external login failure view</returns>
+        [HttpGet]
         [AllowAnonymous]
-        public ActionResult ExternalLoginFailure()
+        public IActionResult ExternalLoginFailure()
         {
             return this.View();
-        }
-
-        /// <inheritdoc/>
-        protected override void Dispose(bool disposing)
-        {
-            if (disposing)
-            {
-                if (this.userManager != null)
-                {
-                    this.userManager.Dispose();
-                    this.userManager = null;
-                }
-
-                if (this.signInManager != null)
-                {
-                    this.signInManager.Dispose();
-                    this.signInManager = null;
-                }
-            }
-
-            base.Dispose(disposing);
         }
 
         private void AddErrors(IdentityResult result)
         {
             foreach (var error in result.Errors)
             {
-                this.ModelState.AddModelError(string.Empty, error);
+                this.ModelState.AddModelError(string.Empty, error.Description);
             }
         }
 
-        private ActionResult RedirectToLocal(string returnUrl)
+        private IActionResult RedirectToLocal(string returnUrl)
         {
             if (this.Url.IsLocalUrl(returnUrl))
             {
                 return this.Redirect(returnUrl);
             }
 
-            return this.RedirectToAction("Index", "Home");
-        }
 
-        internal class ChallengeResult : HttpUnauthorizedResult
-        {
-            public ChallengeResult(string provider, string redirectUri)
-                : this(provider, redirectUri, null)
-            {
-            }
+            return this.RedirectToAction(nameof(HomeController.Index), "Home");
 
-            public ChallengeResult(string provider, string redirectUri, string userId)
-            {
-                this.LoginProvider = provider;
-                this.RedirectUri = redirectUri;
-                this.UserId = userId;
-            }
-
-            public string LoginProvider { get; set; }
-
-            public string RedirectUri { get; set; }
-
-            public string UserId { get; set; }
-
-            public override void ExecuteResult(ControllerContext context)
-            {
-                var properties = new AuthenticationProperties { RedirectUri = this.RedirectUri };
-                if (this.UserId != null)
-                {
-                    properties.Dictionary[XsrfKey] = this.UserId;
-                }
-
-                context.HttpContext.GetOwinContext().Authentication.Challenge(properties, this.LoginProvider);
-            }
         }
     }
 }

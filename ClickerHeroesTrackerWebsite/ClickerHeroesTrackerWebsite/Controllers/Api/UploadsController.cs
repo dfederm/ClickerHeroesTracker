@@ -7,12 +7,12 @@ namespace ClickerHeroesTrackerWebsite.Controllers.Api
     using System;
     using System.Collections.Generic;
     using System.Net;
-    using System.Net.Http;
-    using System.Web.Http;
+    using System.Security.Claims;
     using Database;
     using Instrumentation;
     using Microsoft.ApplicationInsights;
-    using Microsoft.AspNet.Identity;
+    using Microsoft.AspNet.Mvc;
+    using Microsoft.AspNet.Authorization;
     using Models.Api;
     using Models.Api.Uploads;
     using Models.Calculator;
@@ -24,8 +24,8 @@ namespace ClickerHeroesTrackerWebsite.Controllers.Api
     /// <summary>
     /// This controller handles the set of APIs that manage uploads
     /// </summary>
-    [RoutePrefix("api/uploads")]
-    public sealed class UploadsController : ApiController
+    [Route("api/uploads")]
+    public sealed class UploadsController : Controller
     {
         private readonly IDatabaseCommandFactory databaseCommandFactory;
 
@@ -63,30 +63,30 @@ namespace ClickerHeroesTrackerWebsite.Controllers.Api
         [Route("")]
         [HttpGet]
         [Authorize]
-        public HttpResponseMessage List(
+        public IActionResult List(
             int page = ParameterConstants.UploadSummaryList.Page.Default,
             int count = ParameterConstants.UploadSummaryList.Count.Default)
         {
             // Validate parameters
             if (page < ParameterConstants.UploadSummaryList.Page.Min)
             {
-                return this.Request.CreateResponse(HttpStatusCode.BadRequest, "Invalid parameter: page");
+                return this.HttpBadRequest("Invalid parameter: page");
             }
 
             if (count < ParameterConstants.UploadSummaryList.Count.Min
                 || count > ParameterConstants.UploadSummaryList.Count.Max)
             {
-                return this.Request.CreateResponse(HttpStatusCode.BadRequest, "Invalid parameter: count");
+                return this.HttpBadRequest("Invalid parameter: count");
             }
 
-            var userId = this.User.Identity.GetUserId();
+            var userId = this.User.GetUserId();
             var model = new UploadSummaryListResponse()
             {
                 Uploads = this.FetchUploads(userId, page, count),
                 Pagination = this.FetchPagination(userId, page, count),
             };
 
-            return this.Request.CreateResponse(model);
+            return this.Ok(model);
         }
 
         /// <summary>
@@ -97,9 +97,9 @@ namespace ClickerHeroesTrackerWebsite.Controllers.Api
         /// <returns>Empty 200, as this is not implemented yet</returns>
         [Route("{id:int}")]
         [HttpGet]
-        public HttpResponseMessage Details(int id)
+        public IActionResult Details(int id)
         {
-            return this.Request.CreateResponse(HttpStatusCode.OK);
+            return this.Ok();
         }
 
         /// <summary>
@@ -109,12 +109,12 @@ namespace ClickerHeroesTrackerWebsite.Controllers.Api
         /// <returns>Empty 200, as this is not implemented yet</returns>
         [Route("")]
         [HttpPost]
-        public HttpResponseMessage Add(RawUpload rawUpload)
+        public IActionResult Add(RawUpload rawUpload)
         {
             if (rawUpload.EncodedSaveData == null)
             {
                 // Not a valid save
-                return this.Request.CreateResponse(HttpStatusCode.BadRequest);
+                return this.HttpBadRequest();
             }
 
             // Instrument the encoded save data in case something goes wrong.
@@ -131,14 +131,14 @@ namespace ClickerHeroesTrackerWebsite.Controllers.Api
 
             // Only associate it with the user if they requested that it be added to their progress.
             var userId = rawUpload.AddToProgress && this.User.Identity.IsAuthenticated
-                ? this.User.Identity.GetUserId()
+                ? this.User.GetUserId()
                 : null;
 
             var savedGame = SavedGame.Parse(rawUpload.EncodedSaveData);
             if (savedGame == null)
             {
                 // Not a valid save
-                return this.Request.CreateResponse(HttpStatusCode.BadRequest);
+                return this.HttpBadRequest();
             }
 
             var userSettings = this.userSettingsProvider.Get(userId);
@@ -204,11 +204,11 @@ namespace ClickerHeroesTrackerWebsite.Controllers.Api
                 var commited = command.CommitTransaction();
                 if (!commited)
                 {
-                    return this.Request.CreateResponse(HttpStatusCode.InternalServerError);
+                    return new HttpStatusCodeResult((int)HttpStatusCode.InternalServerError);
                 }
             }
 
-            return this.Request.CreateResponse(HttpStatusCode.OK, uploadId);
+            return this.Ok(uploadId);
         }
 
         private List<UploadSummary> FetchUploads(string userId, int page, int count)
@@ -268,7 +268,7 @@ namespace ClickerHeroesTrackerWebsite.Controllers.Api
                     Count = Convert.ToInt32(reader["TotalUploads"])
                 };
 
-                var currentPath = this.Request.RequestUri.LocalPath;
+                var currentPath = this.Request.Path;
                 if (page > 1)
                 {
                     pagination.Previous = string.Format(

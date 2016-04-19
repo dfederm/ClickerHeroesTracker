@@ -1,8 +1,20 @@
 ﻿@using ClickerHeroesTrackerWebsite.Models.Dashboard
+
+@inject IContentManager ContentManager
+
 @model DashboardViewModel
 
 @{
-            ViewBag.Title = "Dashboard";
+    ViewBag.Title = "Dashboard";
+
+    ContentManager.RegisterScript("Helpers");
+    ContentManager.RegisterScript("UploadTable");
+
+    @* Wire up tooltips *@
+    ContentManager.RegisterRawScript("$('[data-toggle=\"tooltip\"]').tooltip();");
+
+    @* Create upload table *@
+    ContentManager.RegisterRawScript("UploadTable.create('uploads', 10, false);");
 }
 
 <h2>Dashboard</h2>
@@ -36,20 +48,4 @@
             @Html.Partial("_RivalDataList", Model.RivalDataList)
         </div>
     </div>
-}
-
-@section Scripts {
-    @Scripts.Render("~/bundles/jqueryval")
-    @Scripts.Render("~/Scripts/Helpers.js")
-    @Scripts.Render("~/Scripts/UploadTable.js")
-
-    @* Wire up tooltips *@
-    <script type="text/javascript">
-        $('[data-toggle="tooltip"]').tooltip();
-    </script>
-
-    @* Create upload table *@
-    <script type="text/javascript">
-        UploadTable.create('uploads', 10, false);
-    </script>
 }

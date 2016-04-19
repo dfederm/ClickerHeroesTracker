@@ -1,0 +1,69 @@
+{
+  "userSecretsId": "aspnet5-ClickerHeroesTrackerWebsite-bfbbf4fe-ba85-4015-8344-5d64479999c3",
+  "version": "1.0.0-*",
+  "compilationOptions": {
+    "emitEntryPoint": true
+  },
+
+  "dependencies": {
+    "Desktop.Analyzers": "1.2.0-beta1",
+    "EntityFramework.Commands": "7.0.0-rc1-final",
+    "EntityFramework.MicrosoftSqlServer": "7.0.0-rc1-final",
+    "EntityFramework.MicrosoftSqlServer.Design": "7.0.0-rc1-final",
+    "EntityFramework.Sqlite": "7.0.0-rc1-final",
+    "Microsoft.AnalyzerPowerPack": "1.1.0",
+    "Microsoft.ApplicationInsights.AspNet": "1.0.0-rc1-update3",
+    "Microsoft.AspNet.Authentication.Cookies": "1.0.0-rc1-final",
+    "Microsoft.AspNet.Authentication.MicrosoftAccount": "1.0.0-rc1-final",
+    "Microsoft.AspNet.Diagnostics.Entity": "7.0.0-rc1-final",
+    "Microsoft.AspNet.Identity.EntityFramework": "3.0.0-rc1-final",
+    "Microsoft.AspNet.IISPlatformHandler": "1.0.0-rc1-final",
+    "Microsoft.AspNet.Mvc": "6.0.0-rc1-final",
+    "Microsoft.AspNet.Mvc.TagHelpers": "6.0.0-rc1-final",
+    "Microsoft.AspNet.Server.Kestrel": "1.0.0-rc1-final",
+    "Microsoft.AspNet.StaticFiles": "1.0.0-rc1-final",
+    "Microsoft.AspNet.Tooling.Razor": "1.0.0-rc1-final",
+    "Microsoft.CodeAnalysis.FxCopAnalyzers": "1.2.0-beta1",
+    "Microsoft.Extensions.CodeGenerators.Mvc": "1.0.0-rc1-final",
+    "Microsoft.Extensions.Configuration.FileProviderExtensions": "1.0.0-rc1-final",
+    "Microsoft.Extensions.Configuration.Json": "1.0.0-rc1-final",
+    "Microsoft.Extensions.Configuration.UserSecrets": "1.0.0-rc1-final",
+    "Microsoft.Extensions.Logging": "1.0.0-rc1-final",
+    "Microsoft.Extensions.Logging.Console": "1.0.0-rc1-final",
+    "Microsoft.Extensions.Logging.Debug": "1.0.0-rc1-final",
+    "Microsoft.VisualStudio.Web.BrowserLink.Loader": "14.0.0-rc1-final",
+    "Sendgrid": "6.3.4",
+    "StyleCop.Analyzers": "1.0.0",
+    "System.Runtime.Analyzers": "1.2.0-beta1",
+    "System.Runtime.InteropServices.Analyzers": "1.2.0-beta1",
+    "System.Runtime.Numerics": "4.0.1-beta-23516",
+    "System.Security.Cryptography.Hashing.Algorithms.Analyzers": "1.2.0-beta1",
+    "WindowsAzure.ServiceBus": "3.1.7",
+    "WindowsAzure.Storage": "7.0.1-preview"
+  },
+
+  "commands": {
+    "web": "Microsoft.AspNet.Server.Kestrel server.urls=http://localhost:13161",
+    "ef": "EntityFramework.Commands"
+  },
+
+  "frameworks": {
+    "dnx451": {
+      "frameworkAssemblies": {
+        "System.Numerics": "4.0.0.0"
+      }
+    }
+  },
+
+  "exclude": [
+    "wwwroot",
+    "node_modules"
+  ],
+  "publishExclude": [
+    "**.user",
+    "**.vspscc"
+  ],
+  "scripts": {
+    "prepublish": [ "npm install", "bower install", "gulp clean", "gulp build" ]
+  }
+}

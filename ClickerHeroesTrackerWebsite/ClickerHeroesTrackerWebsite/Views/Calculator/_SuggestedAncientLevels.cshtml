@@ -1,5 +1,6 @@
 ﻿@using ClickerHeroesTrackerWebsite.Models.Calculator;
 @using ClickerHeroesTrackerWebsite.Models.Game;
+@using System.Security.Claims
 
 @model SuggestedAncientLevelsViewModel
 
@@ -26,7 +27,7 @@
                 @ancient.AncientName:
                 @if (ancient.AncientId == AncientIds.Solomon)
                 {
-                    var solomonTooltip = this.Request.IsAuthenticated
+                    var solomonTooltip = this.User.IsSignedIn()
                         ? "This is using your settings for the Solomon formula preference. You can change this on your settings page."
                         : "By default we use the \"Ln\" Solomon formula. You may change this by logging in and changing your settings.";
                     <a href="/Manage" class="text-muted" data-toggle="tooltip" data-placement="right" title="@solomonTooltip">(?)</a>

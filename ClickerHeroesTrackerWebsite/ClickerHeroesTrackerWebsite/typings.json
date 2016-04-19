@@ -1,0 +1,8 @@
+﻿{
+  "ambientDependencies": {
+    "bootstrap": "github:DefinitelyTyped/DefinitelyTyped/bootstrap/bootstrap.d.ts#94d8775a947f626269b06ccadd6f5e61839389d0",
+    "jquery": "github:DefinitelyTyped/DefinitelyTyped/jquery/jquery.d.ts#94d8775a947f626269b06ccadd6f5e61839389d0",
+    "jquery.validation": "github:DefinitelyTyped/DefinitelyTyped/jquery.validation/jquery.validation.d.ts#94d8775a947f626269b06ccadd6f5e61839389d0",
+    "jquery-validation-unobtrusive": "github:DefinitelyTyped/DefinitelyTyped/jquery-validation-unobtrusive/jquery-validation-unobtrusive.d.ts#94d8775a947f626269b06ccadd6f5e61839389d0"
+  }
+}

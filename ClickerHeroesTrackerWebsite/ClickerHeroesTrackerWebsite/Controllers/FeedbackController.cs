@@ -5,15 +5,15 @@
 namespace ClickerHeroesTrackerWebsite.Controllers
 {
     using System.Collections.Generic;
-    using System.Configuration;
     using System.Net;
-    using System.Net.Http;
     using System.Net.Mail;
+    using System.Security.Claims;
     using System.Threading.Tasks;
-    using System.Web.Http;
     using Microsoft.ApplicationInsights;
     using Microsoft.AspNet.Identity;
-    using Microsoft.AspNet.Identity.Owin;
+    using Microsoft.AspNet.Mvc;
+    using Microsoft.Extensions.Configuration;
+    using Models;
     using Models.Feedback;
     using Newtonsoft.Json;
     using SendGrid;
@@ -21,17 +21,26 @@ namespace ClickerHeroesTrackerWebsite.Controllers
     /// <summary>
     /// This controller handles processing feedback.
     /// </summary>
-    [RoutePrefix("feedback")]
-    public class FeedbackController : ApiController
+    [Route("feedback")]
+    public class FeedbackController : Controller
     {
+        private readonly UserManager<ApplicationUser> userManager;
+
         private readonly TelemetryClient telemetryClient;
+
+        private readonly IConfiguration configuration;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="FeedbackController"/> class.
         /// </summary>
-        public FeedbackController(TelemetryClient telemetryClient)
+        public FeedbackController(
+            UserManager<ApplicationUser> userManager,
+            TelemetryClient telemetryClient,
+            IConfiguration configuration)
         {
+            this.userManager = userManager;
             this.telemetryClient = telemetryClient;
+            this.configuration = configuration;
         }
 
         /// <summary>
@@ -40,17 +49,14 @@ namespace ClickerHeroesTrackerWebsite.Controllers
         /// <returns>An empty response with a status code representing the result</returns>
         [Route("")]
         [HttpPost]
-        public async Task<HttpResponseMessage> Submit(FeedbackRequest feedback)
+        public async Task<IActionResult> Submit(FeedbackRequest feedback)
         {
             string email = null;
             string userName = null;
             if (this.User.Identity.IsAuthenticated)
             {
-                email = this.Request
-                    .GetOwinContext()
-                    .GetUserManager<ApplicationUserManager>()
-                    .GetEmail(this.User.Identity.GetUserId());
-                userName = this.User.Identity.GetUserName();
+                email = await this.userManager.GetEmailAsync(await userManager.FindByIdAsync(this.User.GetUserId()));
+                userName = this.User.GetUserName();
             }
             else if (!string.IsNullOrWhiteSpace(feedback.Email))
             {
@@ -61,7 +67,7 @@ namespace ClickerHeroesTrackerWebsite.Controllers
             {
                 { "Email", email ?? "<anonymous>" },
                 { "UserName", userName ?? "<anonymous>" },
-                { "Page", this.Request.Headers.Referrer.AbsoluteUri },
+                { "Page", this.Request.Headers["Referer"] },
                 { "Comments", feedback.Comments },
             };
 
@@ -75,8 +81,8 @@ namespace ClickerHeroesTrackerWebsite.Controllers
             sendGridMessage.Text = JsonConvert.SerializeObject(feedbackData, Formatting.Indented);
 
             var credentials = new NetworkCredential(
-                ConfigurationManager.AppSettings.Get("SendGrid_UserName"),
-                ConfigurationManager.AppSettings.Get("SendGrid_Password"));
+                this.configuration["EmailSender:UserName"],
+                this.configuration["EmailSender:Password"]);
 
             // Create a Web transport for sending email.
             var transportWeb = new Web(credentials);
@@ -84,7 +90,7 @@ namespace ClickerHeroesTrackerWebsite.Controllers
             // Send the email.
             await transportWeb.DeliverAsync(sendGridMessage);
 
-            return this.Request.CreateResponse(HttpStatusCode.OK);
+            return this.Ok();
         }
     }
 }

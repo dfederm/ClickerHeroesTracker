@@ -6,19 +6,14 @@ namespace ClickerHeroesTrackerWebsite.Controllers
 {
     using System;
     using System.Collections.Generic;
-    using System.Configuration;
-    using System.Data;
     using System.Linq;
+    using System.Security.Claims;
     using System.Threading.Tasks;
-    using System.Web.Mvc;
     using Database;
-    using Instrumentation;
-    using Microsoft.ApplicationInsights;
-    using Microsoft.AspNet.Identity;
+    using Microsoft.AspNet.Mvc;
+    using Microsoft.AspNet.Authorization;
+    using Microsoft.Extensions.Configuration;
     using Microsoft.ServiceBus.Messaging;
-    using Models.Calculator;
-    using Models.Game;
-    using Models.SaveData;
     using UploadProcessing;
 
     /// <summary>
@@ -31,15 +26,19 @@ namespace ClickerHeroesTrackerWebsite.Controllers
 
         private readonly IUploadScheduler uploadScheduler;
 
+        private readonly IConfiguration configuration;
+
         /// <summary>
         /// Initializes a new instance of the <see cref="AdminController"/> class.
         /// </summary>
         public AdminController(
             IDatabaseCommandFactory databaseCommandFactory,
-            IUploadScheduler uploadScheduler)
+            IUploadScheduler uploadScheduler,
+            IConfiguration configuration)
         {
             this.databaseCommandFactory = databaseCommandFactory;
             this.uploadScheduler = uploadScheduler;
+            this.configuration = configuration;
         }
 
         /// <summary>
@@ -58,7 +57,7 @@ namespace ClickerHeroesTrackerWebsite.Controllers
         /// <returns>The admin homepage view</returns>
         public async Task<ActionResult> UpdateComputedStats(string uploadIds)
         {
-            var userId = this.User.Identity.GetUserId();
+            var userId = this.User.GetUserId();
 
             IList<int> parsedUploadIds = null;
             if (uploadIds != null)
@@ -118,7 +117,7 @@ namespace ClickerHeroesTrackerWebsite.Controllers
                 return this.View("Index");
             }
 
-            var connectionString = ConfigurationManager.AppSettings.Get("UploadProcessing_Listen");
+            var connectionString = this.configuration["UploadProcessing:ConnectionString"];
             var client = QueueClient.CreateFromConnectionString(connectionString, $"UploadProcessing-{priority.Value}Priority");
             const int BatchSize = 1024;
 

@@ -4,7 +4,6 @@
 
 namespace ClickerHeroesTrackerWebsite.Models.Game
 {
-    using System.Collections.Generic;
     using Newtonsoft.Json;
     using Utility;
 

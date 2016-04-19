@@ -8,36 +8,35 @@ namespace ClickerHeroesTrackerWebsite.IntegrationTests
     using System.Net.Http;
     using System.Threading.Tasks;
     using Helpers;
-    using Microsoft.VisualStudio.TestTools.UnitTesting;
+    using Xunit;
 
-    [TestClass]
     public class HomepageTests
     {
         private const string Path = "/";
 
-        [TestMethod]
+        [Fact]
         public async Task Homepage_Anonymous_BasicTest()
         {
             var request = new HttpRequestMessage(HttpMethod.Get, Path);
 
             var response = await RequestManager.MakeRequest(request);
-            Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 
             var content = await response.Content.ReadAsStringAsync();
-            Assert.IsTrue(content.Contains("jumbotron"));
+            Assert.True(content.Contains("jumbotron"));
         }
 
-        [TestMethod]
+        [Fact]
         public async Task Homepage_User_BasicTest()
         {
             var request = new HttpRequestMessage(HttpMethod.Get, Path);
             request.AuthenticateUser();
 
             var response = await RequestManager.MakeRequest(request);
-            Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 
             var content = await response.Content.ReadAsStringAsync();
-            Assert.IsTrue(content.Contains("jumbotron"));
+            Assert.True(content.Contains("jumbotron"));
         }
     }
 }

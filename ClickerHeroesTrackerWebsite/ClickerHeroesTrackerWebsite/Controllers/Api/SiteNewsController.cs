@@ -6,30 +6,19 @@ namespace ClickerHeroesTrackerWebsite.Controllers.Api
 {
     using System;
     using System.Collections.Generic;
-    using System.Linq;
     using System.Net;
-    using System.Net.Http;
-    using System.Web.Http;
-    using Database;
-    using Instrumentation;
     using Microsoft.ApplicationInsights;
-    using Microsoft.AspNet.Identity;
+    using Microsoft.AspNet.Mvc;
+    using Microsoft.AspNet.Authorization;
     using Microsoft.WindowsAzure.Storage.Table;
-    using Models.Api;
     using Models.Api.SiteNews;
-    using Models.Api.Uploads;
-    using Models.Calculator;
-    using Models.Game;
-    using Models.Home;
-    using Models.SaveData;
-    using Models.Settings;
     using Utility;
 
     /// <summary>
     /// This controller handles the set of APIs that manage site news
     /// </summary>
-    [RoutePrefix("api/news")]
-    public sealed class SiteNewsController : ApiController
+    [Route("api/news")]
+    public sealed class SiteNewsController : Controller
     {
         private readonly TelemetryClient telemetryClient;
 
@@ -52,7 +41,7 @@ namespace ClickerHeroesTrackerWebsite.Controllers.Api
         /// <returns>A response with the schema <see cref="SiteNewsEntryListResponse"/></returns>
         [Route("")]
         [HttpGet]
-        public HttpResponseMessage List()
+        public IActionResult List()
         {
             var table = this.tableClient.GetTableReference("SiteNews");
             table.CreateIfNotExists();
@@ -99,7 +88,7 @@ namespace ClickerHeroesTrackerWebsite.Controllers.Api
                 Entries = entries
             };
 
-            return this.Request.CreateResponse(model);
+            return this.Ok(model);
         }
 
         /// <summary>
@@ -110,13 +99,13 @@ namespace ClickerHeroesTrackerWebsite.Controllers.Api
         [Route("")]
         [HttpPost]
         [Authorize(Roles = "Admin")]
-        public HttpResponseMessage Post(SiteNewsEntry entry)
+        public IActionResult Post(SiteNewsEntry entry)
         {
             if (entry == null
                 || entry.Messages == null
                 || entry.Messages.Count == 0)
             {
-                return this.Request.CreateResponse(HttpStatusCode.BadRequest);
+                return this.HttpBadRequest();
             }
 
             var table = this.tableClient.GetTableReference("SiteNews");
@@ -160,7 +149,7 @@ namespace ClickerHeroesTrackerWebsite.Controllers.Api
                 }
             }
 
-            return this.Request.CreateResponse(returnStatusCode);
+            return new HttpStatusCodeResult((int)returnStatusCode);
         }
 
         /// <summary>
@@ -171,7 +160,7 @@ namespace ClickerHeroesTrackerWebsite.Controllers.Api
         [Route("{date}")]
         [HttpDelete]
         [Authorize(Roles = "Admin")]
-        public HttpResponseMessage Delete(DateTime date)
+        public IActionResult Delete(DateTime date)
         {
             var table = this.tableClient.GetTableReference("SiteNews");
             table.CreateIfNotExists();
@@ -200,7 +189,7 @@ namespace ClickerHeroesTrackerWebsite.Controllers.Api
                 }
             }
 
-            return this.Request.CreateResponse(returnStatusCode);
+            return new HttpStatusCodeResult((int)returnStatusCode);
         }
     }
 }

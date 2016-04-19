@@ -1,21 +1,17 @@
 ﻿@using ClickerHeroesTrackerWebsite.Models.Home
-@using ClickerHeroesTrackerWebsite.Views
+
+@inject IContentManager ContentManager
 
 @model ChangelogViewModel
 
 <h2>What's New</h2>
-
 <div id="siteNews"></div>
 
-@using (Html.BeginScripts())
-{
-    @Scripts.Render("~/Scripts/SiteNews.js")
-    <script type="text/javascript">
-        SiteNews.create('siteNews', @Model.IsFull.ToString().ToLower());
-    </script>
-
+@{
+    ContentManager.RegisterScript("SiteNews");
+    ContentManager.RegisterRawScript("SiteNews.create('siteNews', " + Model.IsFull.ToString().ToLower() + ");");
     if (Model.IsFull && User.IsInRole("Admin"))
     {
-        @Scripts.Render("~/Scripts/SiteNewsAdmin.js")
+        ContentManager.RegisterScript("SiteNewsAdmin");
     }
 }

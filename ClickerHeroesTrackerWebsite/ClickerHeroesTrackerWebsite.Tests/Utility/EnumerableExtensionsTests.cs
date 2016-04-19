@@ -6,12 +6,11 @@ namespace ClickerHeroesTrackerWebsite.Tests.Utility
 {
     using System;
     using ClickerHeroesTrackerWebsite.Utility;
-    using Microsoft.VisualStudio.TestTools.UnitTesting;
+    using Xunit;
 
-    [TestClass]
     public class EnumerableExtensionsTests
     {
-        [TestMethod]
+        [Fact]
         public void EnumerableExtensions_BasicTests()
         {
             AssertChunks("123", 1, "1", "2", "3");
@@ -20,57 +19,41 @@ namespace ClickerHeroesTrackerWebsite.Tests.Utility
             AssertChunks("11223344556677889900", 2, "11", "22", "33", "44", "55", "66", "77", "88", "99", "00");
         }
 
-        [TestMethod]
+        [Fact]
         public void EnumerableExtensions_NullString()
         {
-            try
+            Assert.Throws<ArgumentNullException>("str", () =>
             {
                 string str = null;
                 str.SplitIntoChunks(1);
-
-                Assert.Fail();
-            }
-            catch (ArgumentNullException e)
-            {
-                Assert.AreEqual("str", e.ParamName);
-            }
+            });
         }
 
-        [TestMethod]
+        [Fact]
         public void EnumerableExtensions_ZeroChunks()
         {
-            try
+            Assert.Throws<ArgumentException>("chunkLength", () =>
             {
                 "123".SplitIntoChunks(0);
-                Assert.Fail();
-            }
-            catch (ArgumentException e)
-            {
-                Assert.AreEqual("chunkLength", e.ParamName);
-            }
+            });
         }
 
-        [TestMethod]
+        [Fact]
         public void EnumerableExtensions_NegativeChunks()
         {
-            try
+            Assert.Throws<ArgumentException>("chunkLength", () =>
             {
                 "123".SplitIntoChunks(-1);
-                Assert.Fail();
-            }
-            catch (ArgumentException e)
-            {
-                Assert.AreEqual("chunkLength", e.ParamName);
-            }
+            });
         }
 
         private static void AssertChunks(string str, int chunkLength, params string[] expectedChunks)
         {
             var actualChunks = str.SplitIntoChunks(chunkLength);
-            Assert.AreEqual(expectedChunks.Length, actualChunks.Length);
+            Assert.Equal(expectedChunks.Length, actualChunks.Length);
             for (var i = 0; i < expectedChunks.Length; i++)
             {
-                Assert.AreEqual(expectedChunks[i], actualChunks[i]);
+                Assert.Equal(expectedChunks[i], actualChunks[i]);
             }
         }
     }

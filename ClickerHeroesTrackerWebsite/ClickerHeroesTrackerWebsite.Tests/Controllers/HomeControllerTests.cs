@@ -4,14 +4,13 @@
 
 namespace ClickerHeroesTrackerWebsite.Tests.Controllers
 {
-    using System.Web.Mvc;
     using ClickerHeroesTrackerWebsite.Controllers;
-    using Microsoft.VisualStudio.TestTools.UnitTesting;
+    using Microsoft.AspNet.Mvc;
+    using Xunit;
 
-    [TestClass]
     public class HomeControllerTests
     {
-        [TestMethod]
+        [Fact]
         public void Index()
         {
             // Arrange
@@ -21,7 +20,7 @@ namespace ClickerHeroesTrackerWebsite.Tests.Controllers
             ViewResult result = controller.Index() as ViewResult;
 
             // Assert
-            Assert.IsNotNull(result);
+            Assert.NotNull(result);
         }
     }
 }

@@ -7,13 +7,13 @@
 <div class="jumbotron">
     <h1>Clicker Heroes Tracker</h1>
     <p class="lead">Try uploading your save to get started</p>
-    
-    <p>@Html.ActionLink("Upload »", "Index", "Upload", null, new { @class = "btn btn-primary btn-lg" })</p>
+
+    <p><a asp-controller="Upload" asp-action="Index" class="btn btn-primary btn-lg">Upload »</a></p>
 </div>
 <div class="row">
     <div class="col-md-4">
-        @Html.Partial("_Changelog", new ChangelogViewModel(false))
+        @await Html.PartialAsync("_Changelog", new ChangelogViewModel(false))
 
-        <p>@Html.ActionLink("See all »", "New", "Home", null, new { @class = "btn btn-default" })</p>
-    </div>
+        <p><a asp-controller="Home" asp-action="New" class="btn btn-default">See all »</a></p>
+</div>
 </div>

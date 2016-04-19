@@ -6,9 +6,9 @@
 
 <div class="row">
     <div class="col-md-6">
-        @Html.Partial("_Changelog", new ChangelogViewModel(true))
+        @await Html.PartialAsync("_Changelog", new ChangelogViewModel(true))
     </div>
     <div class="col-md-6">
-        @Html.Partial("_ComingSoon")
+        @await Html.PartialAsync("_ComingSoon")
     </div>
 </div>

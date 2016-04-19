@@ -6,14 +6,13 @@ namespace ClickerHeroesTrackerWebsite.UploadProcessing
 {
     using System;
     using System.Collections.Generic;
-    using System.Configuration;
-    using System.Data;
     using System.IO;
     using System.Text;
     using System.Threading.Tasks;
     using Database;
     using Instrumentation;
     using Microsoft.ApplicationInsights;
+    using Microsoft.Extensions.Configuration;
     using Microsoft.ServiceBus.Messaging;
     using Models.Calculator;
     using Models.Game;
@@ -30,6 +29,7 @@ namespace ClickerHeroesTrackerWebsite.UploadProcessing
 
         private readonly GameData gameData;
         private readonly TelemetryClient telemetryClient;
+        private readonly IConfiguration configuration;
 
         private readonly Dictionary<UploadProcessingMessagePriority, QueueClient> clients;
 
@@ -37,13 +37,15 @@ namespace ClickerHeroesTrackerWebsite.UploadProcessing
         /// Initializes a new instance of the <see cref="UploadProcessor"/> class.
         /// </summary>
         public UploadProcessor(
+            IConfiguration configuration,
             GameData gameData,
             TelemetryClient telemetryClient)
         {
+            this.configuration = configuration;
             this.gameData = gameData;
             this.telemetryClient = telemetryClient;
 
-            var connectionString = ConfigurationManager.AppSettings.Get("UploadProcessing_Listen");
+            var connectionString = configuration["UploadProcessing:ConnectionString"];
             this.clients = new Dictionary<UploadProcessingMessagePriority, QueueClient>
             {
                 { UploadProcessingMessagePriority.Low, QueueClient.CreateFromConnectionString(connectionString, "UploadProcessing-LowPriority") },
@@ -112,7 +114,10 @@ namespace ClickerHeroesTrackerWebsite.UploadProcessing
             this.telemetryClient.TrackEvent("UploadProcessor-Recieved", properties);
 
             using (var counterProvider = new CounterProvider(this.telemetryClient))
-            using (var databaseCommandFactory = new DatabaseCommandFactory(this.telemetryClient, counterProvider))
+            using (var databaseCommandFactory = new DatabaseCommandFactory(
+                this.configuration,
+                this.telemetryClient,
+                counterProvider))
             using (counterProvider.Measure(Counter.ProcessUpload))
             {
                 int uploadId = -1;

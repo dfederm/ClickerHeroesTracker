@@ -8,9 +8,8 @@ namespace ClickerHeroesTrackerWebsite.IntegrationTests
     using System.Net.Http;
     using System.Threading.Tasks;
     using Helpers;
-    using Microsoft.VisualStudio.TestTools.UnitTesting;
+    using Xunit;
 
-    [TestClass]
     public class FeedbackTests
     {
         // Using the homepage as the feedback modal appears on every page.
@@ -22,33 +21,33 @@ namespace ClickerHeroesTrackerWebsite.IntegrationTests
 
         private const string EmailHelpTextAnonymous = "To allow Clicker Heroes Tracker to follow up with you using regarding this feedback, either log in or provide your email address.";
 
-        [TestMethod]
+        [Fact]
         public async Task Feedback_Anonymous_BasicTest()
         {
             var request = new HttpRequestMessage(HttpMethod.Get, Path);
 
             var response = await RequestManager.MakeRequest(request);
-            Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 
             var content = await response.Content.ReadAsStringAsync();
-            Assert.IsFalse(content.Contains(EmailInputLoggedIn));
-            Assert.IsTrue(content.Contains(EmailInputAnonymous));
-            Assert.IsTrue(content.Contains(EmailHelpTextAnonymous));
+            Assert.DoesNotContain(EmailInputLoggedIn, content);
+            Assert.Contains(EmailInputAnonymous, content);
+            Assert.Contains(EmailHelpTextAnonymous, content);
         }
 
-        [TestMethod]
+        [Fact]
         public async Task Feedback_User_BasicTest()
         {
             var request = new HttpRequestMessage(HttpMethod.Get, Path);
             request.AuthenticateUser();
 
             var response = await RequestManager.MakeRequest(request);
-            Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 
             var content = await response.Content.ReadAsStringAsync();
-            Assert.IsTrue(content.Contains(EmailInputLoggedIn));
-            Assert.IsFalse(content.Contains(EmailInputAnonymous));
-            Assert.IsFalse(content.Contains(EmailHelpTextAnonymous));
+            Assert.Contains(EmailInputLoggedIn, content);
+            Assert.DoesNotContain(EmailInputAnonymous, content);
+            Assert.DoesNotContain(EmailHelpTextAnonymous, content);
         }
     }
 }

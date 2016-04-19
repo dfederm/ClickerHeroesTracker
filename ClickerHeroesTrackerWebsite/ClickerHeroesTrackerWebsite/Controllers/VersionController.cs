@@ -4,25 +4,29 @@
 
 namespace ClickerHeroesTrackerWebsite.Controllers
 {
-    using System.Net.Http;
-    using System.Web.Http;
     using Configuration;
+    using Microsoft.AspNet.Hosting;
+    using Microsoft.AspNet.Mvc;
 
     /// <summary>
     /// A diagnostic controller for the service version
     /// </summary>
-    [RoutePrefix("version")]
-    [Authorize(Roles = "Admin")]
-    public class VersionController : ApiController
+    [Route("version")]
+    public class VersionController : Controller
     {
-        private readonly IEnvironmentProvider environmentProvider;
+        private readonly IBuildInfoProvider buildInfoProvider;
+
+        private readonly IHostingEnvironment hostingEnvironment;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="VersionController"/> class.
         /// </summary>
-        public VersionController(IEnvironmentProvider environmentProvider)
+        public VersionController(
+            IBuildInfoProvider buildInfoProvider,
+            IHostingEnvironment hostingEnvironment)
         {
-            this.environmentProvider = environmentProvider;
+            this.buildInfoProvider = buildInfoProvider;
+            this.hostingEnvironment = hostingEnvironment;
         }
 
         /// <summary>
@@ -31,16 +35,16 @@ namespace ClickerHeroesTrackerWebsite.Controllers
         /// <returns>An object with the version information</returns>
         [Route("")]
         [HttpGet]
-        public HttpResponseMessage Version()
+        public IActionResult Version()
         {
             var model = new
             {
-                Environment = this.environmentProvider.Environment,
-                Changelist = this.environmentProvider.Changelist,
-                BuildId = this.environmentProvider.BuildId,
+                Environment = this.hostingEnvironment.EnvironmentName,
+                Changelist = this.buildInfoProvider.Changelist,
+                BuildId = this.buildInfoProvider.BuildId,
             };
 
-            return this.Request.CreateResponse(model);
+            return this.Ok(model);
         }
     }
 }

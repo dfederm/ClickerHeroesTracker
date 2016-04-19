@@ -4,9 +4,9 @@
 
 namespace ClickerHeroesTrackerWebsite.Controllers
 {
-    using System.Web.Mvc;
     using Database;
     using Microsoft.ApplicationInsights;
+    using Microsoft.AspNet.Mvc;
     using Models.Calculator;
     using Models.Game;
     using Models.Settings;

@@ -7,9 +7,8 @@ namespace ClickerHeroesTrackerWebsite.Tests.Models
     using System.Collections.Generic;
     using ClickerHeroesTrackerWebsite.Models.Game;
     using ClickerHeroesTrackerWebsite.Models.SaveData;
-    using Microsoft.VisualStudio.TestTools.UnitTesting;
+    using Xunit;
 
-    [TestClass]
     public class SavedGameExtensionsTests
     {
         private static ItemData item1 = new ItemData
@@ -82,18 +81,18 @@ namespace ClickerHeroesTrackerWebsite.Tests.Models
             { 4, 400 },
         };
 
-        [TestMethod]
+        [Fact]
         public void SavedGameExtensionsTests_GetItemLevels_NullItemsData()
         {
             ItemsData itemsData = null;
 
             var itemsLevels = itemsData.GetItemLevels();
 
-            Assert.IsNotNull(itemsLevels);
-            Assert.AreEqual(0, itemsLevels.Count);
+            Assert.NotNull(itemsLevels);
+            Assert.Equal(0, itemsLevels.Count);
         }
 
-        [TestMethod]
+        [Fact]
         public void SavedGameExtensionsTests_GetItemLevels_NullSlots()
         {
             ItemsData itemsData = new ItemsData
@@ -104,11 +103,11 @@ namespace ClickerHeroesTrackerWebsite.Tests.Models
 
             var itemsLevels = itemsData.GetItemLevels();
 
-            Assert.IsNotNull(itemsLevels);
-            Assert.AreEqual(0, itemsLevels.Count);
+            Assert.NotNull(itemsLevels);
+            Assert.Equal(0, itemsLevels.Count);
         }
 
-        [TestMethod]
+        [Fact]
         public void SavedGameExtensionsTests_GetItemLevels_NullItems()
         {
             ItemsData itemsData = new ItemsData
@@ -119,11 +118,11 @@ namespace ClickerHeroesTrackerWebsite.Tests.Models
 
             var itemsLevels = itemsData.GetItemLevels();
 
-            Assert.IsNotNull(itemsLevels);
-            Assert.AreEqual(0, itemsLevels.Count);
+            Assert.NotNull(itemsLevels);
+            Assert.Equal(0, itemsLevels.Count);
         }
 
-        [TestMethod]
+        [Fact]
         public void SavedGameExtensionsTests_GetItemLevels_EmptyData()
         {
             ItemsData itemsData = new ItemsData
@@ -134,11 +133,11 @@ namespace ClickerHeroesTrackerWebsite.Tests.Models
 
             var itemsLevels = itemsData.GetItemLevels();
 
-            Assert.IsNotNull(itemsLevels);
-            Assert.AreEqual(0, itemsLevels.Count);
+            Assert.NotNull(itemsLevels);
+            Assert.Equal(0, itemsLevels.Count);
         }
 
-        [TestMethod]
+        [Fact]
         public void SavedGameExtensionsTests_GetItemLevels_UnknownSlots()
         {
             ItemsData itemsData = new ItemsData
@@ -156,11 +155,11 @@ namespace ClickerHeroesTrackerWebsite.Tests.Models
 
             var itemsLevels = itemsData.GetItemLevels();
 
-            Assert.IsNotNull(itemsLevels);
-            Assert.AreEqual(0, itemsLevels.Count);
+            Assert.NotNull(itemsLevels);
+            Assert.Equal(0, itemsLevels.Count);
         }
 
-        [TestMethod]
+        [Fact]
         public void SavedGameExtensionsTests_GetItemLevels_UnknownItems()
         {
             ItemsData itemsData = new ItemsData
@@ -178,11 +177,11 @@ namespace ClickerHeroesTrackerWebsite.Tests.Models
 
             var itemsLevels = itemsData.GetItemLevels();
 
-            Assert.IsNotNull(itemsLevels);
-            Assert.AreEqual(0, itemsLevels.Count);
+            Assert.NotNull(itemsLevels);
+            Assert.Equal(0, itemsLevels.Count);
         }
 
-        [TestMethod]
+        [Fact]
         public void SavedGameExtensionsTests_GetItemLevels_Valid()
         {
             ItemsData itemsData = new ItemsData
@@ -193,15 +192,15 @@ namespace ClickerHeroesTrackerWebsite.Tests.Models
 
             var itemsLevels = itemsData.GetItemLevels();
 
-            Assert.IsNotNull(itemsLevels);
-            Assert.AreEqual(4, itemsLevels.Count);
-            Assert.AreEqual(40, itemsLevels[ItemBonusType.GetAncientId(1)]);
-            Assert.AreEqual(60, itemsLevels[ItemBonusType.GetAncientId(2)]);
-            Assert.AreEqual(60, itemsLevels[ItemBonusType.GetAncientId(3)]);
-            Assert.AreEqual(40, itemsLevels[ItemBonusType.GetAncientId(4)]);
+            Assert.NotNull(itemsLevels);
+            Assert.Equal(4, itemsLevels.Count);
+            Assert.Equal(40, itemsLevels[ItemBonusType.GetAncientId(1)]);
+            Assert.Equal(60, itemsLevels[ItemBonusType.GetAncientId(2)]);
+            Assert.Equal(60, itemsLevels[ItemBonusType.GetAncientId(3)]);
+            Assert.Equal(40, itemsLevels[ItemBonusType.GetAncientId(4)]);
         }
 
-        [TestMethod]
+        [Fact]
         public void SavedGameExtensionsTests_GetItemLevels_ExtraSlots()
         {
             var extraSlots = new Dictionary<int, int>(validSlots);
@@ -218,12 +217,12 @@ namespace ClickerHeroesTrackerWebsite.Tests.Models
 
             var itemsLevels = itemsData.GetItemLevels();
 
-            Assert.IsNotNull(itemsLevels);
-            Assert.AreEqual(4, itemsLevels.Count);
-            Assert.AreEqual(40, itemsLevels[ItemBonusType.GetAncientId(1)]);
-            Assert.AreEqual(60, itemsLevels[ItemBonusType.GetAncientId(2)]);
-            Assert.AreEqual(60, itemsLevels[ItemBonusType.GetAncientId(3)]);
-            Assert.AreEqual(40, itemsLevels[ItemBonusType.GetAncientId(4)]);
+            Assert.NotNull(itemsLevels);
+            Assert.Equal(4, itemsLevels.Count);
+            Assert.Equal(40, itemsLevels[ItemBonusType.GetAncientId(1)]);
+            Assert.Equal(60, itemsLevels[ItemBonusType.GetAncientId(2)]);
+            Assert.Equal(60, itemsLevels[ItemBonusType.GetAncientId(3)]);
+            Assert.Equal(40, itemsLevels[ItemBonusType.GetAncientId(4)]);
         }
     }
 }

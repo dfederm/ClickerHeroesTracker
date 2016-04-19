@@ -2,30 +2,34 @@
 
 # Visual Studio cache and user-specific files
 .vs/
-*.csproj.user
+*.*proj.user
 
 # Build results
 [Dd]ebug/
 [Rr]elease/
 [Bb]in/
 
-# The packages folder can be ignored because of Package Restore
-**/packages/*
+# DNX expanded dependencies
+project.lock.json
 
-# Ignore individual items specific to this repo. These are all generate at build time.
-/ClickerHeroesTrackerWebsite/ClickerHeroesTrackerWebsite/Scripts/UploadTable.js.map
-/ClickerHeroesTrackerWebsite/ClickerHeroesTrackerWebsite/Scripts/UploadTable.js
-/ClickerHeroesTrackerWebsite/ClickerHeroesTrackerWebsite/Scripts/Helpers.js.map
-/ClickerHeroesTrackerWebsite/ClickerHeroesTrackerWebsite/Scripts/Helpers.js
-/ClickerHeroesTrackerWebsite/ClickerHeroesTrackerWebsite/Scripts/Feedback.js.map
-/ClickerHeroesTrackerWebsite/ClickerHeroesTrackerWebsite/Scripts/Feedback.js
-/ClickerHeroesTrackerWebsite/ClickerHeroesTrackerWebsite/Scripts/AddUpload.js.map
-/ClickerHeroesTrackerWebsite/ClickerHeroesTrackerWebsite/Scripts/AddUpload.js
-/ClickerHeroesTrackerWebsite/ClickerHeroesTrackerWebsite/Scripts/SiteNews.js.map
-/ClickerHeroesTrackerWebsite/ClickerHeroesTrackerWebsite/Scripts/SiteNews.js
-/ClickerHeroesTrackerWebsite/ClickerHeroesTrackerWebsite/Scripts/SiteNewsAdmin.js.map
-/ClickerHeroesTrackerWebsite/ClickerHeroesTrackerWebsite/Scripts/SiteNewsAdmin.js
-/ClickerHeroesTrackerWebsite/ClickerHeroesTrackerWebsite.Tests/ClickerHeroesTrackerWebsite.Tests.xml
-/ClickerHeroesTrackerWebsite/ClickerHeroesTrackerWebsite.IntegrationTests/ClickerHeroesTrackerWebsite.IntegrationTests.xml
-/ClickerHeroesTrackerWebsite/ClickerHeroesTrackerWebsite/ClickerHeroesTrackerWebsite.xml
-/ClickerHeroesTrackerWebsite/UploadProcessor/ClickerHeroesTracker.UploadProcessor.xml
+# Visual Studio Publish settings
+PublishProfiles/
+
+# npm package dir too
+node_modules/
+
+# bower package dir
+**/wwwroot/lib/*
+
+# typings downloaded by gulp
+typings/
+
+# generated js
+**/wwwroot/js/*.js
+**/wwwroot/js/*.js.map
+
+# generated css
+**/wwwroot/css/*.min.css
+
+# in-memory database used on dev machines
+cht.db
