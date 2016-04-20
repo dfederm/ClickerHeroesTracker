@@ -166,6 +166,7 @@ namespace ClickerHeroesTrackerWebsite.Controllers
             {
                 return View(model);
             }
+
             var user = await GetCurrentUserAsync();
             if (user != null)
             {
@@ -322,7 +323,7 @@ namespace ClickerHeroesTrackerWebsite.Controllers
 
         private async Task<ApplicationUser> GetCurrentUserAsync(string userId = null)
         {
-            return await userManager.FindByIdAsync(userId ?? this.User.GetUserId());
+            return await this.userManager.FindByIdAsync(userId ?? this.User.GetUserId());
         }
     }
 }
