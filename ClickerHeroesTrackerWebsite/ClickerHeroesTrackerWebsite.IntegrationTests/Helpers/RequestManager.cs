@@ -31,7 +31,7 @@ namespace ClickerHeroesTrackerWebsite.IntegrationTests.Helpers
 
             if (Environment.GetEnvironmentVariable("IsInCloud") == null)
             {
-                host = "localhost:13161";
+                host = "localhost:5000";
             }
             else
             {

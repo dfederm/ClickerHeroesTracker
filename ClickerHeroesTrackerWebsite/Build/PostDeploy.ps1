@@ -1,34 +1,65 @@
 Param(
-	[string]$WebsiteName,
-	[string]$Slot
+    [string]$WebsiteName,
+    [string]$Slot
 )
 
 try
 {
-	# Log params
-	Write-Host "WebsiteName=$WebsiteName"
-	Write-Host "Slot=$Slot"
+    # Log params
+    Write-Host "WebsiteName=$WebsiteName"
+    Write-Host "Slot=$Slot"
 
-	$siteUrl = "http://" + $WebsiteName
+    $siteUrl = "http://" + $WebsiteName
 
-	if (![string]::IsNullOrEmpty($Slot))
-	{
-		$siteUrl += "-" + $Slot
-	}
+    if (![string]::IsNullOrEmpty($Slot))
+    {
+        $siteUrl += "-" + $Slot
+    }
 
-	$siteUrl += ".azurewebsites.net/"
-	Write-Host "Querying the web site: $siteUrl"
+    $siteUrl += ".azurewebsites.net/"
+    Write-Host "Querying the web site: $siteUrl"
 
-	$time = [System.Diagnostics.Stopwatch]::StartNew()
-	$response = Invoke-WebRequest -Method Get -Uri $siteUrl -TimeoutSec 120 -UseBasicParsing
+    $done = $false
+    $attempt = 0
+    $timeout = 60
+    $retryDelay = 5
+    $maxRetries = 10
+ 
+    do
+    {
+        try
+        {
+            $time = [System.Diagnostics.Stopwatch]::StartNew()
+            $response = Invoke-WebRequest -Method Get -Uri $siteUrl -TimeoutSec $timeout -UseBasicParsing
 
-	$elapsedTime = $time.Elapsed.TotalMilliseconds
-	$statusCode = $response.StatusCode
-	$contentLength = $response.RawContentLength
-	Write-Host "Received status code $statusCode with $contentLength bytes in $elapsedTime ms"
+            $elapsedTime = $time.Elapsed.TotalMilliseconds
+            $statusCode = $response.StatusCode
+            $contentLength = $response.RawContentLength
+            Write-Host "Received status code $statusCode with $contentLength bytes in $elapsedTime ms"
+
+            $done = $true
+        }
+        catch
+        {
+            Write-Host $_
+            if ($attempt -gt $maxRetries)
+            {
+                Write-Host "Failed after $maxRetries retries."
+                $done = $true
+                throw
+            }
+            else
+            {
+                Write-Host "Failed. Retrying in $retryDelay seconds..."
+                Start-Sleep -Seconds $retryDelay
+                $attempt++
+            }
+        }
+    }
+    while (-not $done)
 }
 catch
 {
-	Write-Host $_
-	exit 1
+    Write-Host $_
+    exit 1
 }
