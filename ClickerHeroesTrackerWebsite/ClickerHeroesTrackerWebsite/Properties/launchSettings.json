@@ -8,12 +8,18 @@
     }
   },
   "profiles": {
-    "web": {
-      "commandName": "web"
-    },
     "IIS Express": {
       "commandName": "IISExpress",
-      "launchBrowser": true
+      "launchBrowser": true,
+      "environmentVariables": {
+        "Hosting:Environment": "Development"
+      }
+    },
+    "web": {
+      "commandName": "web",
+      "environmentVariables": {
+        "Hosting:Environment": "Development"
+      }
     }
   }
 }
