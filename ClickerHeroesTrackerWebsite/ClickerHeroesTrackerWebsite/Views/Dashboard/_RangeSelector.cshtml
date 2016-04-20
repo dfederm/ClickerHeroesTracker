@@ -12,20 +12,20 @@
 
             var sb = new StringBuilder();
             var sawRange = false;
-            foreach (string name in this.Request.QueryString)
+            foreach (var pair in this.Context.Request.Query)
             {
                 sb.Append(sb.Length > 0 ? "&" : "?");
-                sb.Append(name);
+                sb.Append(pair.Key);
                 sb.Append("=");
 
-                if (name.Equals("range", StringComparison.OrdinalIgnoreCase))
+                if (pair.Key.Equals("range", StringComparison.OrdinalIgnoreCase))
                 {
                     sb.Append(range);
                     sawRange = true;
                 }
                 else
                 {
-                    sb.Append(this.Request.QueryString[name]);
+                    sb.Append(pair.Value);
                 }
             }
 
