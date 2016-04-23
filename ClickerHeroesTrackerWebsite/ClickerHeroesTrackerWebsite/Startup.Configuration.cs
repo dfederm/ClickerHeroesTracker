@@ -4,10 +4,9 @@
 
 namespace ClickerHeroesTrackerWebsite
 {
+    using AzureAppService.Configuration;
     using Microsoft.AspNet.Hosting;
     using Microsoft.Extensions.Configuration;
-    using System.Collections.Generic;
-    using System.Configuration;
 
     /// <summary>
     /// Configure the Unity container
@@ -24,8 +23,8 @@ namespace ClickerHeroesTrackerWebsite
 
             // Set up configuration sources.
             var builder = new ConfigurationBuilder()
-                .AddInMemoryCollection(GetAppConfig())
-                .AddJsonFile("appsettings.json");
+                .AddJsonFile("appsettings.json")
+                .AddAzureAppServiceSettings();
 
             if (env.IsDevelopment())
             {
@@ -35,25 +34,6 @@ namespace ClickerHeroesTrackerWebsite
 
             builder.AddEnvironmentVariables();
             this.Configuration = builder.Build();
-        }
-
-        private static Dictionary<string, string> GetAppConfig()
-        {
-            var data = new Dictionary<string, string>();
-
-            var appSettings = ConfigurationManager.AppSettings;
-            foreach (string appSetting in appSettings.Keys)
-            {
-                data[appSetting] = appSettings[appSetting];
-            }
-
-            var connectionStrings = ConfigurationManager.ConnectionStrings;
-            foreach (ConnectionStringSettings connectionString in connectionStrings)
-            {
-                data[connectionString.Name] = connectionString.ConnectionString;
-            }
-
-            return data;
         }
     }
 }
