@@ -3,8 +3,7 @@
 
 var gulp = require("gulp"),
     rimraf = require("rimraf"),
-    concat = require("gulp-concat"),
-    cssmin = require("gulp-cssmin"),
+    cleanCSS = require("gulp-clean-css"),
     uglify = require("gulp-uglify"),
     typescript = require("gulp-typescript"),
     typings = require("gulp-typings"),
@@ -14,16 +13,23 @@ var paths = {
     webroot: "./wwwroot/"
 };
 
-paths.typingsFile = "./typings/browser.d.ts";
-paths.tsFiles = paths.webroot + "ts/**/*.ts";
-
 paths.jsDir = paths.webroot + "js/";
 paths.jsFiles = paths.jsDir + "**/*.js";
-paths.jsMinFiles = paths.jsDir + "**/*.min.js";
+
+paths.typingsConfig = "./typings.json";
+paths.typingsFiles = "./typings/**/*.d.ts";
+paths.typingsFile = "./typings/browser.d.ts";
+
+paths.tsFiles = paths.jsDir + "**/*.ts";
 
 paths.cssDir = paths.webroot + "css/";
 paths.cssFiles = paths.cssDir + "**/*.css";
 paths.cssMinFiles = paths.cssDir + "**/*.min.css";
+
+gulp.task("clean:typings", function (cb)
+{
+    rimraf(paths.typingsFiles, cb);
+});
 
 gulp.task("clean:js", function (cb)
 {
@@ -35,33 +41,15 @@ gulp.task("clean:css", function (cb)
     rimraf(paths.cssMinFiles, cb);
 });
 
-gulp.task("clean", ["clean:js", "clean:css"]);
-
-gulp.task("min:js", ["ts"], function ()
-{
-    return gulp.src([paths.jsFiles, "!" + paths.jsMinFiles])
-        .pipe(uglify())
-        .pipe(rename({ suffix: '.min' }))
-        .pipe(gulp.dest(paths.jsDir));
-});
-
-gulp.task("min:css", function ()
-{
-    return gulp.src([paths.cssFiles, "!" + paths.cssMinFiles])
-        .pipe(cssmin())
-        .pipe(rename({ suffix: '.min' }))
-        .pipe(gulp.dest(paths.cssDir));
-});
-
-gulp.task("min", ["min:js", "min:css"]);
+gulp.task("clean", ["clean:typings", "clean:js", "clean:css"]);
 
 gulp.task("typings", function ()
 {
-    return gulp.src("./typings.json")
+    return gulp.src(paths.typingsConfig)
         .pipe(typings());
 });
 
-gulp.task("ts", ["typings"], function ()
+gulp.task("js", ["typings"], function ()
 {
     return gulp.src([paths.tsFiles, paths.typingsFile])
         .pipe(typescript({
@@ -69,24 +57,24 @@ gulp.task("ts", ["typings"], function ()
             noImplicitAny: true,
             noImplicitReturns: true
         }))
+        .pipe(gulp.dest(paths.jsDir))
+        .pipe(uglify())
+        .pipe(rename({ suffix: '.min' }))
         .pipe(gulp.dest(paths.jsDir));
 });
 
-gulp.task("build", ["ts", "min"]);
-
-gulp.task("watch:ts", function ()
+gulp.task("css", function ()
 {
-    gulp.watch(paths.tsFiles, ["ts"]);
+    return gulp.src([paths.cssFiles, "!" + paths.cssMinFiles])
+        .pipe(cleanCSS())
+        .pipe(rename({ suffix: '.min' }))
+        .pipe(gulp.dest(paths.cssDir));
 });
 
-gulp.task("watch:js", function ()
-{
-    gulp.watch([paths.jsFiles, "!" + paths.jsMinFiles], ["min:js"]);
-});
+gulp.task("build", ["js", "css"]);
 
-gulp.task("watch:css", function ()
+gulp.task("watch", function ()
 {
-    gulp.watch([paths.cssFiles, "!" + paths.cssMinFiles], ["min:css"]);
+    gulp.watch([paths.tsFiles, paths.typingsConfig], ["js"]);
+    gulp.watch([paths.cssFiles, "!" + paths.cssMinFiles], ["css"]);
 });
-
-gulp.task("watch", ["watch:ts", "watch:js", "watch:css"]);
