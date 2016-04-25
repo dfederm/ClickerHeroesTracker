@@ -33,7 +33,6 @@
     "no-bitwise": true,
     "no-conditional-assignment": true,
     "no-consecutive-blank-lines": true,
-    "no-duplicate-variable": true,
     "no-console": [
       true,
       "debug",
@@ -46,10 +45,13 @@
     "no-constructor-vars": true,
     "no-debugger": true,
     "no-duplicate-key": true,
+    "no-duplicate-variable": true,
     "no-empty": true,
     "no-eval": true,
     "no-inferrable-types": true,
     "no-internal-module": true,
+    "no-invalid-this": true,
+    "no-reference": true,
     "no-require-imports": true,
     "no-shadowed-variable": true,
     "no-string-literal": false,
@@ -109,6 +111,7 @@
         "variable-declaration": "onespace"
       }
     ],
+    "use-isnan": true,
     "use-strict": [
       true,
       "check-module",
