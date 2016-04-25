@@ -48,25 +48,7 @@ namespace ClickerHeroesTrackerWebsite
 
             app.UseStaticFiles();
 
-            app.UseIdentity();
-
-            // To configure external authentication please see http://go.microsoft.com/fwlink/?LinkID=532715
-            var microsoftClientId = Configuration["Authentication:Microsoft:ClientId"];
-            var microsoftClientSecret = Configuration["Authentication:Microsoft:ClientSecret"];
-            if (!string.IsNullOrEmpty(microsoftClientId) && !string.IsNullOrEmpty(microsoftClientSecret))
-            {
-                app.UseMicrosoftAccountAuthentication(options =>
-                {
-                    options.ClientId = microsoftClientId;
-                    options.ClientSecret = microsoftClientSecret;
-                });
-            }
-
-            // Allow auth mocking when not in prod
-            if (!env.IsProduction())
-            {
-                app.UseMiddleware<MockAuthenticationOwinMiddleware>();
-            }
+            this.ConfigureAuthentication(app, env);
 
             // Instrument the user as soon as they're auth'd.
             app.UseMiddleware<UserInstrumentationMiddleware>();
