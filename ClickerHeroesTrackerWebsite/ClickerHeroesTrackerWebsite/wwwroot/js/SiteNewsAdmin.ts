@@ -1,5 +1,7 @@
-﻿module SiteNewsAdmin
+﻿namespace SiteNewsAdmin
 {
+    "use strict";
+
     export function init(container: HTMLElement): void
     {
         if (!container)
@@ -7,33 +9,33 @@
             throw new Error("Element not found: " + container);
         }
 
-        var entries = container.children;
-        for (var i = 0; i < entries.length; i++)
+        const entries = container.children;
+        for (let i = 0; i < entries.length; i++)
         {
-            var entry = entries[i];
-            var dateHeading = <HTMLElement>entry.querySelector("h3");
+            const entry = entries[i];
+            const dateHeading = entry.querySelector("h3") as HTMLElement;
 
-            var buttonContainer = document.createElement("div");
+            const buttonContainer = document.createElement("div");
             buttonContainer.classList.add("pull-right");
 
-            var editButton = document.createElement("button");
+            const editButton = document.createElement("button");
             editButton.appendChild(document.createTextNode("Edit"));
             editButton.addEventListener("click", editButtonClicked);
             buttonContainer.appendChild(editButton);
 
-            var saveButton = document.createElement("button");
+            const saveButton = document.createElement("button");
             saveButton.classList.add("hide");
             saveButton.appendChild(document.createTextNode("Save"));
             saveButton.addEventListener("click", saveButtonClicked);
             buttonContainer.appendChild(saveButton);
 
-            var cancelButton = document.createElement("button");
+            const cancelButton = document.createElement("button");
             cancelButton.classList.add("hide");
             cancelButton.appendChild(document.createTextNode("Cancel"));
             cancelButton.addEventListener("click", cancelButtonClicked);
             buttonContainer.appendChild(cancelButton);
 
-            var deleteButton = document.createElement("button");
+            const deleteButton = document.createElement("button");
             deleteButton.appendChild(document.createTextNode("Delete"));
             deleteButton.classList.add("pull-right");
             deleteButton.addEventListener("click", deleteButtonClicked);
@@ -42,7 +44,7 @@
             dateHeading.appendChild(buttonContainer);
         }
 
-        var addButton = document.createElement("button");
+        const addButton = document.createElement("button");
         addButton.appendChild(document.createTextNode("Add"));
         addButton.addEventListener("click", addButtonClicked);
         container.insertBefore(addButton, container.firstChild);
@@ -50,26 +52,26 @@
 
     function addButtonClicked(ev: MouseEvent): void
     {
-        var addButton = <HTMLElement>ev.target;
+        const addButton = ev.target as HTMLElement;
 
-        var dateContainer = document.createElement("div");
+        const dateContainer = document.createElement("div");
         dateContainer.setAttribute("data-date", "");
 
-        var dateHeading = <HTMLElement>document.createElement("h3");
-        var headingInput = document.createElement("input");
+        const dateHeading = document.createElement("h3") as HTMLElement;
+        const headingInput = document.createElement("input");
         headingInput.classList.add("input-md");
         headingInput.value = new Date().toLocaleDateString();
         dateHeading.appendChild(headingInput);
 
-        var buttonContainer = document.createElement("div");
+        const buttonContainer = document.createElement("div");
         buttonContainer.classList.add("pull-right");
 
-        var saveButton = document.createElement("button");
+        const saveButton = document.createElement("button");
         saveButton.appendChild(document.createTextNode("Save"));
         saveButton.addEventListener("click", saveButtonClicked);
         buttonContainer.appendChild(saveButton);
 
-        var cancelButton = document.createElement("button");
+        const cancelButton = document.createElement("button");
         cancelButton.appendChild(document.createTextNode("Cancel"));
         cancelButton.addEventListener("click", cancelButtonClicked);
         buttonContainer.appendChild(cancelButton);
@@ -77,9 +79,9 @@
         dateHeading.appendChild(buttonContainer);
         dateContainer.appendChild(dateHeading);
 
-        var list = document.createElement("ul");
-        var listItem = document.createElement("li");
-        var input = document.createElement("textarea");
+        const list = document.createElement("ul");
+        const listItem = document.createElement("li");
+        const input = document.createElement("textarea");
         input.classList.add("form-control");
         input.style.maxWidth = "none";
         input.addEventListener("blur", inputBlurred);
@@ -92,27 +94,27 @@
 
     function editButtonClicked(ev: MouseEvent): void
     {
-        var container = getNewsEntityContainer(<HTMLElement>ev.target);
+        const container = getNewsEntityContainer(ev.target as HTMLElement);
         if (!container)
         {
             return;
         }
 
-        var heading = container.querySelector("h3");
+        const heading = container.querySelector("h3");
         heading.setAttribute("data-original", heading.firstChild.nodeValue);
-        var headingInput = document.createElement("input");
+        const headingInput = document.createElement("input");
         headingInput.classList.add("input-md");
         headingInput.value = heading.firstChild.nodeValue;
         heading.replaceChild(headingInput, heading.firstChild);
 
-        var list = container.querySelector("ul");
-        var listItems = list.querySelectorAll("li");
-        for (var i = 0; i < listItems.length; i++)
+        const list = container.querySelector("ul");
+        const listItems = list.querySelectorAll("li");
+        for (let i = 0; i < listItems.length; i++)
         {
-            var listItem = <HTMLLIElement>listItems[i];
+            const listItem = listItems[i] as HTMLLIElement;
             listItem.setAttribute("data-original", listItem.innerHTML);
 
-            var input = document.createElement("textarea");
+            const input = document.createElement("textarea");
             input.classList.add("form-control");
             input.style.maxWidth = "none";
             input.innerHTML = listItem.innerHTML;
@@ -122,16 +124,16 @@
             listItem.appendChild(input);
         }
 
-        var listItem = document.createElement("li");
-        var input = document.createElement("textarea");
+        const listItem = document.createElement("li");
+        const input = document.createElement("textarea");
         input.classList.add("form-control");
         input.style.maxWidth = "none";
         input.addEventListener("blur", inputBlurred);
         listItem.appendChild(input);
         list.appendChild(listItem);
 
-        var buttons = container.querySelectorAll("button");
-        for (var i = 0; i < buttons.length; i++)
+        const buttons = container.querySelectorAll("button");
+        for (let i = 0; i < buttons.length; i++)
         {
             buttons[i].classList.toggle("hide");
         }
@@ -139,17 +141,18 @@
 
     function saveButtonClicked(ev: MouseEvent): void
     {
-        var container = getNewsEntityContainer(<HTMLElement>ev.target);
+        const container = getNewsEntityContainer(ev.target as HTMLElement);
         if (!container)
         {
             return;
         }
 
-        var originalDateStr = container.getAttribute("data-date");
+        const buttons = container.querySelectorAll("button");
+        const originalDateStr = container.getAttribute("data-date");
 
-        var heading = container.querySelector("h3");
-        var headingInput = <HTMLInputElement>heading.firstChild;
-        var milliseconds = Date.parse(headingInput.value);
+        const heading = container.querySelector("h3");
+        const headingInput = heading.firstChild as HTMLInputElement;
+        const milliseconds = Date.parse(headingInput.value);
         if (isNaN(milliseconds))
         {
             alert("Couldn't parse the date");
@@ -157,19 +160,19 @@
         }
 
         // The date will be parsed as local time, so we need to convert to UTC by subtracting out the timezone offset used on that day.
-        var date = new Date(milliseconds);
-        var dateUtcStr = new Date(date.getTime() - (date.getTimezoneOffset() * 60 * 1000)).toJSON();
+        const date = new Date(milliseconds);
+        const dateUtcStr = new Date(date.getTime() - (date.getTimezoneOffset() * 60 * 1000)).toJSON();
 
-        var headingText = document.createTextNode(date.toLocaleDateString());
+        const headingText = document.createTextNode(date.toLocaleDateString());
         heading.replaceChild(headingText, headingInput);
 
-        var messages: string[] = [];
-        var listItems = container.querySelectorAll("li");
-        for (var i = 0; i < listItems.length; i++)
+        const messages: string[] = [];
+        const listItems = container.querySelectorAll("li");
+        for (let i = 0; i < listItems.length; i++)
         {
-            var listItem = listItems[i];
-            var input = <HTMLInputElement>listItem.firstChild;
-            var message = input.value.trim();
+            const listItem = listItems[i];
+            const input = listItem.firstChild as HTMLInputElement;
+            const message = input.value.trim();
             if (message)
             {
                 messages.push(message);
@@ -183,49 +186,46 @@
         }
 
         // If the date changed, we need to delete first
-        if (originalDateStr && dateUtcStr != originalDateStr)
+        if (originalDateStr && dateUtcStr !== originalDateStr)
         {
-            var buttons = container.querySelectorAll("button");
-            for (var i = 0; i < buttons.length; i++)
+            for (let i = 0; i < buttons.length; i++)
             {
                 buttons[i].setAttribute("disabled", "disabled");
             }
 
             $.ajax({
-                url: '/api/news/' + originalDateStr.substring(0, 10),
-                type: 'delete'
+                type: "delete",
+                url: "/api/news/" + originalDateStr.substring(0, 10),
             })
                 .done((response: ISiteNewsEntryListResponse) =>
                 {
+                    // TODO. Need to wait for this before doing the below
                 })
                 .fail(() =>
                 {
                     alert("Something bad happened when deleting the old entry");
-                    debugger;
                 });
         }
 
-        var buttons = container.querySelectorAll("button");
-        for (var i = 0; i < buttons.length; i++)
+        for (let i = 0; i < buttons.length; i++)
         {
             buttons[i].setAttribute("disabled", "disabled");
         }
 
-        var data =
-            {
-                date: dateUtcStr.substring(0, 10),
-                messages: messages
-            };
+        const data =
+        {
+            date: dateUtcStr.substring(0, 10),
+            messages: messages,
+        };
 
         $.ajax({
-            url: '/api/news',
-            type: 'post',
-            data: data
+            data: data,
+            type: "post",
+            url: "/api/news",
         })
             .done((response: ISiteNewsEntryListResponse) =>
             {
-                var buttons = container.querySelectorAll("button");
-                for (var i = 0; i < buttons.length; i++)
+                for (let i = 0; i < buttons.length; i++)
                 {
                     buttons[i].removeAttribute("disabled");
                     buttons[i].classList.toggle("hide");
@@ -234,19 +234,18 @@
             .fail(() =>
             {
                 alert("Something bad happened inserting the new entry");
-                debugger;
             });
     }
 
     function cancelButtonClicked(ev: MouseEvent): void
     {
-        var container = getNewsEntityContainer(<HTMLElement>ev.target);
+        const container = getNewsEntityContainer(ev.target as HTMLElement);
         if (!container)
         {
             return;
         }
 
-        var heading = container.querySelector("h3");
+        const heading = container.querySelector("h3");
 
         if (!heading.hasAttribute("data-original"))
         {
@@ -254,13 +253,13 @@
             return;
         }
 
-        var headingText = document.createTextNode(heading.getAttribute("data-original"));
+        const headingText = document.createTextNode(heading.getAttribute("data-original"));
         heading.replaceChild(headingText, heading.firstChild);
 
-        var listItems = container.querySelectorAll("li");
-        for (var i = 0; i < listItems.length; i++)
+        const listItems = container.querySelectorAll("li");
+        for (let i = 0; i < listItems.length; i++)
         {
-            var listItem = listItems[i];
+            const listItem = listItems[i];
             if (!listItem.hasAttribute("data-original"))
             {
                 listItem.remove();
@@ -271,8 +270,8 @@
             listItem.removeAttribute("data-original");
         }
 
-        var buttons = container.querySelectorAll("button");
-        for (var i = 0; i < buttons.length; i++)
+        const buttons = container.querySelectorAll("button");
+        for (let i = 0; i < buttons.length; i++)
         {
             buttons[i].classList.toggle("hide");
         }
@@ -280,23 +279,23 @@
 
     function deleteButtonClicked(ev: MouseEvent): void
     {
-        var container = getNewsEntityContainer(<HTMLElement>ev.target);
+        const container = getNewsEntityContainer(ev.target as HTMLElement);
         if (!container)
         {
             return;
         }
 
-        var dateStr = container.getAttribute("data-date");
+        const dateStr = container.getAttribute("data-date");
 
-        var buttons = container.querySelectorAll("button");
-        for (var i = 0; i < buttons.length; i++)
+        const buttons = container.querySelectorAll("button");
+        for (let i = 0; i < buttons.length; i++)
         {
             buttons[i].setAttribute("disabled", "disabled");
         }
 
         $.ajax({
-            url: '/api/news/' + dateStr.substring(0, 10),
-            type: 'delete'
+            type: "delete",
+            url: "/api/news/" + dateStr.substring(0, 10),
         })
             .done((response: ISiteNewsEntryListResponse) =>
             {
@@ -305,20 +304,19 @@
             .fail(() =>
             {
                 alert("Something bad happened");
-                debugger;
             });
     }
 
     function inputBlurred(ev: FocusEvent): void
     {
-        var blurredInput = <HTMLTextAreaElement>ev.target;
-        var isLast = blurredInput.parentElement.nextSibling == null;
-        var isEmpty = blurredInput.value.trim().length == 0;
+        const blurredInput = ev.target as HTMLTextAreaElement;
+        const isLast = blurredInput.parentElement.nextSibling == null;
+        const isEmpty = blurredInput.value.trim().length === 0;
 
         if (isLast && !isEmpty)
         {
-            var listItem = document.createElement("li");
-            var input = document.createElement("textarea");
+            const listItem = document.createElement("li");
+            const input = document.createElement("textarea");
             input.classList.add("form-control");
             input.style.maxWidth = "none";
             input.addEventListener("blur", inputBlurred);
@@ -331,9 +329,9 @@
         }
     }
 
-    function getNewsEntityContainer(element: HTMLElement)
+    function getNewsEntityContainer(element: HTMLElement): HTMLElement
     {
-        var container = element;
+        let container = element;
         while (container && !container.hasAttribute("data-date"))
         {
             container = container.parentElement;

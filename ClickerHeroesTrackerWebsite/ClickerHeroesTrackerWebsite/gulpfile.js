@@ -7,7 +7,8 @@ var gulp = require("gulp"),
     uglify = require("gulp-uglify"),
     typescript = require("gulp-typescript"),
     typings = require("gulp-typings"),
-    rename = require('gulp-rename');
+    rename = require('gulp-rename'),
+    tslint = require("gulp-tslint");
 
 var paths = {
     webroot: "./wwwroot/"
@@ -18,7 +19,7 @@ paths.jsFiles = paths.jsDir + "**/*.js";
 
 paths.typingsConfig = "./typings.json";
 paths.typingsFiles = "./typings/**/*.d.ts";
-paths.typingsFile = "./typings/browser.d.ts";
+paths.ambientTypingsFiles = "./typings/browser/ambient/**/*.d.ts";
 
 paths.tsFiles = paths.jsDir + "**/*.ts";
 
@@ -49,14 +50,24 @@ gulp.task("typings", function ()
         .pipe(typings());
 });
 
-gulp.task("js", ["typings"], function ()
+gulp.task("tslint", function ()
 {
-    return gulp.src([paths.tsFiles, paths.typingsFile])
-        .pipe(typescript({
-            noEmitOnError: true,
-            noImplicitAny: true,
-            noImplicitReturns: true
+    return gulp.src(paths.tsFiles)
+        .pipe(tslint({
+            configuration: "tslint.json",
+            tslint: require("tslint")
         }))
+        .pipe(tslint.report("verbose"));
+});
+
+var tsProject = typescript.createProject('tsconfig.json', {
+    typescript: require('typescript')
+});
+
+gulp.task("js", ["typings", "tslint"], function ()
+{
+    return tsProject.src()
+        .pipe(typescript(tsProject))
         .pipe(gulp.dest(paths.jsDir))
         .pipe(uglify())
         .pipe(rename({ suffix: '.min' }))

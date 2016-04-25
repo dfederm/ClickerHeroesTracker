@@ -1,15 +1,17 @@
-﻿module SiteNews
+﻿namespace SiteNews
 {
+    "use strict";
+
     export function create(containerId: string, isFull: boolean): void
     {
-        var container = document.getElementById(containerId);
+        const container = document.getElementById(containerId);
         if (!container)
         {
             throw new Error("Element not found: " + container);
         }
 
         $.ajax({
-            url: '/api/news'
+            url: "/api/news",
         })
             .done((response: ISiteNewsEntryListResponse) =>
             {
@@ -18,29 +20,28 @@
                     displayFailure(container);
                 }
 
-                var entries = response.entries;
+                const entries = response.entries;
                 if (entries)
                 {
-                    var maxEntries = 3;
-                    var numEntries = 0;
+                    const maxEntries = 3;
+                    let numEntries = 0;
 
-                    // put the dates in an array so we can enumerate backwards
-                    var dates: string[] = [];
-                    for (var dateStr in entries)
+                    // Put the dates in an array so we can enumerate backwards
+                    const dates: string[] = [];
+                    for (let dateStr in entries)
                     {
                         dates.push(dateStr);
                     }
 
-                    var currentDateContainer: HTMLDivElement = null;
-                    var currentList: HTMLUListElement = null;
-                    for (var i = dates.length - 1; i >= 0; i--)
+                    let currentDateContainer: HTMLDivElement = null;
+                    let currentList: HTMLUListElement = null;
+                    for (let i = dates.length - 1; i >= 0; i--)
                     {
-                        var dateStr = dates[i];
+                        const dateStr = dates[i];
 
-                        // The date comes back as a UTC time at midnight of the date. We need to adjust for the user's local
-                        // timezone offset or the date may move back by a day.
-                        var dateUtc = new Date(dateStr);
-                        var date = new Date(dateUtc.getUTCFullYear(), dateUtc.getUTCMonth(), dateUtc.getUTCDate()).toLocaleDateString();
+                        // The date comes back as a UTC time at midnight of the date. We need to adjust for the user's local timezone offset or the date may move back by a day.
+                        const dateUtc = new Date(dateStr);
+                        const date = new Date(dateUtc.getUTCFullYear(), dateUtc.getUTCMonth(), dateUtc.getUTCDate()).toLocaleDateString();
 
                         if (isFull || !currentList)
                         {
@@ -68,26 +69,26 @@
 
                         if (isFull)
                         {
-                            var dateHeading = document.createElement("h3");
+                            const dateHeading = document.createElement("h3");
                             dateHeading.appendChild(document.createTextNode(date));
                             currentDateContainer.appendChild(dateHeading);
                         }
 
-                        var messages = entries[dateStr];
-                        for (var j = 0; j < messages.length; j++)
+                        const messages = entries[dateStr];
+                        for (let j = 0; j < messages.length; j++)
                         {
-                            var listItem = document.createElement("li");
+                            const listItem = document.createElement("li");
                             listItem.innerHTML = messages[j];
                             currentList.appendChild(listItem);
 
                             numEntries++;
-                            if (!isFull && numEntries == maxEntries)
+                            if (!isFull && numEntries === maxEntries)
                             {
                                 break;
                             }
                         }
 
-                        if (!isFull && numEntries == maxEntries)
+                        if (!isFull && numEntries === maxEntries)
                         {
                             break;
                         }
@@ -97,12 +98,12 @@
                     currentDateContainer.appendChild(currentList);
                 }
 
-                if (typeof SiteNewsAdmin != "undefined")
+                if (typeof SiteNewsAdmin !== "undefined")
                 {
                     SiteNewsAdmin.init(container);
                 }
             })
-            .fail(() =>
+            .fail((): void =>
             {
                 displayFailure(container);
             });
@@ -110,5 +111,6 @@
 
     function displayFailure(container: HTMLElement): void
     {
+        // BUGBUG 51: Create Loading and Failure states for ajax loading
     }
 }

@@ -1,47 +1,47 @@
-﻿interface IMap<TValue>
+﻿namespace Helpers
 {
-    [key: string]: TValue;
-}
+    "use strict";
 
-function getQueryParameters(): IMap<string>
-{
-    var ret: IMap<string> = {};
-
-    var rawParameters = '';
-
-    // Process query string
-    var queryString = location.search;
-    if (queryString && queryString.length > 0)
+    export function getQueryParameters(): IMap<string>
     {
-        // Remove the '?'
-        rawParameters += queryString.substring(1);
-    }
+        const ret: IMap<string> = {};
 
-    // Process hash
-    var hash = location.hash;
-    if (hash && hash.length > 0)
-    {
-        // Remove the '#'
-        rawParameters += '&' + hash.substring(1);
-    }
+        let rawParameters = "";
 
-    rawParameters
-        .split('&')
-        .forEach((entry: string) =>
+        // Process query string
+        const queryString = location.search;
+        if (queryString && queryString.length > 0)
         {
-            var parts = entry.split("=");
-            var key = decodeURIComponent(parts[0]);
-            var value = decodeURIComponent(parts[1]);
+            // Remove the '?'
+            rawParameters += queryString.substring(1);
+        }
 
-            if (key in ret)
-            {
-                ret[key] += ',' + value;
-            }
-            else
-            {
-                ret[key] = value;
-            }
-        });
+        // Process hash
+        const hash = location.hash;
+        if (hash && hash.length > 0)
+        {
+            // Remove the '#'
+            rawParameters += "&" + hash.substring(1);
+        }
 
-    return ret;
+        rawParameters
+            .split("&")
+            .forEach((entry: string): void =>
+            {
+                const parts = entry.split("=");
+                const key = decodeURIComponent(parts[0]);
+                const value = decodeURIComponent(parts[1]);
+
+                if (key in ret)
+                {
+                    ret[key] += "," + value;
+                }
+                else
+                {
+                    ret[key] = value;
+                }
+            });
+
+        return ret;
+    }
 }

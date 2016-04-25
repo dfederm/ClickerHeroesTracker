@@ -1,8 +1,10 @@
-﻿module UploadTable
+﻿namespace UploadTable
 {
+    "use strict";
+
     export function create(tableId: string, count: number, usePagination: boolean): void
     {
-        var table = document.getElementById(tableId);
+        const table = document.getElementById(tableId);
         if (!table)
         {
             throw new Error("Element not found: " + tableId);
@@ -11,7 +13,7 @@
         updateTable(table, count, usePagination);
 
         // Upon a hash change, re-create the table
-        window.addEventListener('hashchange', () =>
+        window.addEventListener("hashchange", () =>
         {
             window.scrollTo(0, 0);
             clearTable(table);
@@ -19,27 +21,27 @@
         });
     }
 
-    function clearTable(table: HTMLElement)
+    function clearTable(table: HTMLElement): void
     {
-        var tableBody = table.querySelector('tbody');
+        const tableBody = table.querySelector("tbody");
         if (tableBody)
         {
             tableBody.remove();
         }
 
-        var tableFoot = table.querySelector('tfoot');
+        const tableFoot = table.querySelector("tfoot");
         if (tableFoot)
         {
             tableFoot.remove();
         }
     }
 
-    function updateTable(table: HTMLElement, count: number, usePagination: boolean)
+    function updateTable(table: HTMLElement, count: number, usePagination: boolean): void
     {
-        var queryParameters = getQueryParameters();
-        var currentPage = parseInt(queryParameters['page']) || 1;
+        const queryParameters = Helpers.getQueryParameters();
+        const currentPage = parseInt(queryParameters["page"]) || 1;
         $.ajax({
-            url: '/api/uploads?page=' + currentPage + '&count=' + count
+            url: "/api/uploads?page=" + currentPage + "&count=" + count,
         })
             .done((response: IUploadSummaryListResponse) =>
             {
@@ -48,27 +50,27 @@
                     displayFailure(table);
                 }
 
-                var uploads = response.uploads;
+                const uploads = response.uploads;
                 if (uploads)
                 {
-                    var tableBody = document.createElement('tbody');
+                    const tableBody = document.createElement("tbody");
 
-                    for (var i = 0; i < uploads.length; i++)
+                    for (let i = 0; i < uploads.length; i++)
                     {
-                        var upload = uploads[i];
-                        var row = document.createElement('tr');
+                        const upload = uploads[i];
+                        const row = document.createElement("tr");
 
-                        var uploadTimeCell = document.createElement('td');
-                        var uploadTime = new Date(upload.timeSubmitted).toLocaleString();
+                        const uploadTimeCell = document.createElement("td");
+                        const uploadTime = new Date(upload.timeSubmitted).toLocaleString();
                         uploadTimeCell.appendChild(document.createTextNode(uploadTime));
                         row.appendChild(uploadTimeCell);
 
-                        var viewCell = document.createElement('td');
+                        const viewCell = document.createElement("td");
                         viewCell.classList.add("text-right");
 
-                        var viewLink = document.createElement('a');
-                        viewLink.setAttribute('href', '/Calculator/View?uploadId=' + upload.id);
-                        viewLink.appendChild(document.createTextNode('View'));
+                        const viewLink = document.createElement("a");
+                        viewLink.setAttribute("href", "/Calculator/View?uploadId=" + upload.id);
+                        viewLink.appendChild(document.createTextNode("View"));
 
                         viewCell.appendChild(viewLink);
                         row.appendChild(viewCell);
@@ -77,64 +79,64 @@
 
                     table.appendChild(tableBody);
 
-                    var pagination = response.pagination;
+                    const pagination = response.pagination;
                     if (usePagination && pagination)
                     {
-                        var tableFoot = document.createElement('tfoot');
-                        var row = document.createElement('tr');
-                        var paginationCell = document.createElement('td');
+                        const tableFoot = document.createElement("tfoot");
+                        const row = document.createElement("tr");
+                        const paginationCell = document.createElement("td");
                         paginationCell.colSpan = 2;
-                        var paginationList = document.createElement('ul');
-                        paginationList.classList.add('pagination');
+                        const paginationList = document.createElement("ul");
+                        paginationList.classList.add("pagination");
 
-                        var minPage = 1;
-                        var maxPage = Math.ceil(pagination.count / count);
+                        const minPage = 1;
+                        const maxPage = Math.ceil(pagination.count / count);
 
-                        var previousListItem = document.createElement('li');
-                        var previousLink = document.createElement('a');
-                        var previousPage = currentPage - 1;
-                        previousLink.appendChild(document.createTextNode('«'));
+                        const previousListItem = document.createElement("li");
+                        const previousLink = document.createElement("a");
+                        const previousPage = currentPage - 1;
+                        previousLink.appendChild(document.createTextNode("«"));
                         if (previousPage < minPage)
                         {
-                            previousListItem.classList.add('disabled');
+                            previousListItem.classList.add("disabled");
                         }
                         else
                         {
-                            previousLink.href = '#page=' + previousPage;
+                            previousLink.href = "#page=" + previousPage;
                         }
 
                         previousListItem.appendChild(previousLink);
                         paginationList.appendChild(previousListItem);
 
-                        var startPage = Math.max(minPage, Math.min(maxPage - 4, currentPage - 2));
-                        var numPages = Math.min(5, maxPage - minPage);
-                        for (var i = 0; i < numPages; i++)
+                        const startPage = Math.max(minPage, Math.min(maxPage - 4, currentPage - 2));
+                        const numPages = Math.min(5, maxPage - minPage);
+                        for (let i = 0; i < numPages; i++)
                         {
-                            var page = startPage + i;
-                            var pageListItem = document.createElement('li');
-                            if (currentPage == page)
+                            const page = startPage + i;
+                            const pageListItem = document.createElement("li");
+                            if (currentPage === page)
                             {
-                                pageListItem.classList.add('active');
+                                pageListItem.classList.add("active");
                             }
 
-                            var pageLink = document.createElement('a');
-                            pageLink.href = '#page=' + page;
+                            const pageLink = document.createElement("a");
+                            pageLink.href = "#page=" + page;
                             pageLink.appendChild(document.createTextNode(page.toString()));
                             pageListItem.appendChild(pageLink);
                             paginationList.appendChild(pageListItem);
                         }
 
-                        var nextListItem = document.createElement('li');
-                        var nextLink = document.createElement('a');
-                        var nextPage = currentPage + 1;
-                        nextLink.appendChild(document.createTextNode('»'));
+                        const nextListItem = document.createElement("li");
+                        const nextLink = document.createElement("a");
+                        const nextPage = currentPage + 1;
+                        nextLink.appendChild(document.createTextNode("»"));
                         if (nextPage > maxPage)
                         {
-                            nextListItem.classList.add('disabled');
+                            nextListItem.classList.add("disabled");
                         }
                         else
                         {
-                            nextLink.href = '#page=' + nextPage;
+                            nextLink.href = "#page=" + nextPage;
                         }
 
                         nextListItem.appendChild(nextLink);
@@ -155,5 +157,6 @@
 
     function displayFailure(table: HTMLElement): void
     {
+        // BUGBUG 51: Create Loading and Failure states for ajax loading
     }
 }
