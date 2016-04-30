@@ -13,7 +13,7 @@
     "EntityFramework.MicrosoftSqlServer.Design": "7.0.0-rc1-final",
     "EntityFramework.Sqlite": "7.0.0-rc1-final",
     "Microsoft.AnalyzerPowerPack": "1.1.0",
-    "Microsoft.ApplicationInsights.AspNet": "1.0.0-rc1-update3",
+    "Microsoft.ApplicationInsights.AspNet": "1.0.0-rc1-update4",
     "Microsoft.AspNet.Authentication.Cookies": "1.0.0-rc1-final",
     "Microsoft.AspNet.Authentication.Facebook": "1.0.0-rc1-final",
     "Microsoft.AspNet.Authentication.Google": "1.0.0-rc1-final",
