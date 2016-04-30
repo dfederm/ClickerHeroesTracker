@@ -145,7 +145,7 @@ namespace ClickerHeroesTrackerWebsite.Models.Calculator
                         new SuggestedAncientLevelData(gameData, AncientIds.Juggernaut, currentJuggernautLevel, suggestedJuggernautLevel),
                         new SuggestedAncientLevelData(gameData, AncientIds.Morgulis, currentMorgLevel, suggestedMorgLevel),
                         new SuggestedAncientLevelData(gameData, AncientIds.Solomon, currentSolomonLevel, suggestedSolomonLevel),
-                        ////new SuggestedAncientLevelData(gameData, AncientIds.Iris, currentIrisLevel, suggestedIrisLevel),
+                        new SuggestedAncientLevelData(gameData, AncientIds.Iris, currentIrisLevel, suggestedIrisLevel),
                     };
 
                     break;

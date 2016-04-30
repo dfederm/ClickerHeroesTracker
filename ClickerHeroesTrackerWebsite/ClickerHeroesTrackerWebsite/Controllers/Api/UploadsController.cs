@@ -8,18 +8,20 @@ namespace ClickerHeroesTrackerWebsite.Controllers.Api
     using System.Collections.Generic;
     using System.Net;
     using System.Security.Claims;
-    using Database;
-    using Instrumentation;
+    using ClickerHeroesTrackerWebsite.Database;
+    using ClickerHeroesTrackerWebsite.Instrumentation;
+    using ClickerHeroesTrackerWebsite.Models;
+    using ClickerHeroesTrackerWebsite.Models.Api;
+    using ClickerHeroesTrackerWebsite.Models.Api.Stats;
+    using ClickerHeroesTrackerWebsite.Models.Api.Uploads;
+    using ClickerHeroesTrackerWebsite.Models.Calculator;
+    using ClickerHeroesTrackerWebsite.Models.Game;
+    using ClickerHeroesTrackerWebsite.Models.SaveData;
+    using ClickerHeroesTrackerWebsite.Models.Settings;
+    using ClickerHeroesTrackerWebsite.Utility;
     using Microsoft.ApplicationInsights;
     using Microsoft.AspNet.Mvc;
     using Microsoft.AspNet.Authorization;
-    using Models.Api;
-    using Models.Api.Uploads;
-    using Models.Calculator;
-    using Models.Game;
-    using Models.SaveData;
-    using Models.Settings;
-    using Utility;
 
     /// <summary>
     /// This controller handles the set of APIs that manage uploads
@@ -95,11 +97,150 @@ namespace ClickerHeroesTrackerWebsite.Controllers.Api
         /// <remarks>BUGBUG 43 - Not implemented</remarks>
         /// <param name="id">The upload id</param>
         /// <returns>Empty 200, as this is not implemented yet</returns>
-        [Route("{id:int}")]
+        [Route("{uploadId:int}")]
         [HttpGet]
-        public IActionResult Details(int id)
+        public IActionResult Details(int uploadId)
         {
-            return this.Ok();
+            if (uploadId < 0)
+            {
+                return this.HttpBadRequest();
+            }
+
+            var userId = this.User.GetUserId();
+            var userSettings = this.userSettingsProvider.Get(userId);
+
+            var uploadIdParameters = new Dictionary<string, object>
+            {
+                { "@UploadId", uploadId },
+            };
+
+            string uploadContent;
+            var upload = new Upload { Id = uploadId };
+            const string GetUploadDataCommandText = @"
+	            SELECT UserId, UserName, UploadTime, UploadContent
+                FROM Uploads
+                LEFT JOIN AspNetUsers
+                ON Uploads.UserId = AspNetUsers.Id
+                WHERE Uploads.Id = @UploadId";
+            using (var command = this.databaseCommandFactory.Create(
+                GetUploadDataCommandText,
+                uploadIdParameters))
+            using (var reader = command.ExecuteReader())
+            {
+                if (reader.Read())
+                {
+                    var uploadUserId = reader["UserId"].ToString();
+                    var uploadUserName = reader["UserName"].ToString();
+
+                    if (!string.IsNullOrEmpty(uploadUserId))
+                    {
+                        upload.User = new User()
+                        {
+                            Id = uploadUserId,
+                            Name = uploadUserName,
+                        };
+                    }
+
+                    upload.TimeSubmitted = Convert.ToDateTime(reader["UploadTime"]);
+
+                    uploadContent = reader["UploadContent"].ToString();
+                }
+                else
+                {
+                    // If we didn't get data, it's an upload that doesn't exist
+                    return this.HttpNotFound();
+                }
+            }
+
+            var isAdmin = this.User.IsInRole("Admin");
+            var isUploadAnonymous = upload.User == null;
+            var isOwn = !isUploadAnonymous && string.Equals(userId, upload.User.Id, StringComparison.OrdinalIgnoreCase);
+            var uploadUserSettings = isOwn ? userSettings : this.userSettingsProvider.Get(upload.User?.Id);
+            var isPublic = isUploadAnonymous || uploadUserSettings.AreUploadsPublic;
+            var isPermitted = isOwn || isPublic || isAdmin;
+
+            if (!isPermitted)
+            {
+                return this.HttpUnauthorized();
+            }
+
+            // Only return the raw upload content if it's the requesting user's or an admin requested it.
+            if (isOwn || isAdmin)
+            {
+                upload.UploadContent = uploadContent;
+            }
+
+            var savedGame = SavedGame.Parse(uploadContent);
+            upload.Stats = new Dictionary<StatType, long>();
+
+            // Get ancient level stats
+            var ancientLevelSummaryViewModel = new AncientLevelSummaryViewModel(
+                gameData,
+                savedGame,
+                telemetryClient);
+            foreach (var ancientLevelInfo in ancientLevelSummaryViewModel.AncientLevels)
+            {
+                var ancientLevel = ancientLevelInfo.Value.AncientLevel;
+                if (ancientLevel > 0)
+                {
+                    upload.Stats.Add(AncientIds.GetAncientStatType(ancientLevelInfo.Key.Id), ancientLevel);
+                }
+
+                var itemLevel = ancientLevelInfo.Value.ItemLevel;
+                if (itemLevel > 0)
+                {
+                    upload.Stats.Add(AncientIds.GetItemStatType(ancientLevelInfo.Key.Id), itemLevel);
+                }
+            }
+
+            // Get computed stats
+            var optimalLevel = 0;
+            const string GetComputedStatsCommandText = @"
+                SELECT OptimalLevel, SoulsPerHour, SoulsPerAscension, AscensionTime, TitanDamage, SoulsSpent
+                FROM ComputedStats
+                WHERE UploadId = @UploadId";
+            using (var command = this.databaseCommandFactory.Create(
+                GetComputedStatsCommandText,
+                uploadIdParameters))
+            using (var reader = command.ExecuteReader())
+            {
+                if (reader.Read())
+                {
+                    optimalLevel = Convert.ToInt32(reader["OptimalLevel"]);
+                    upload.Stats.Add(StatType.OptimalLevel, optimalLevel);
+                    upload.Stats.Add(StatType.SoulsPerHour, Convert.ToInt64(reader["SoulsPerHour"]));
+                    upload.Stats.Add(StatType.SoulsPerAscension, Convert.ToInt64(reader["SoulsPerAscension"]));
+                    upload.Stats.Add(StatType.OptimalAscensionTime, Convert.ToInt64(reader["AscensionTime"]));
+                    upload.Stats.Add(StatType.TitanDamage, Convert.ToInt64(reader["TitanDamage"]));
+                    upload.Stats.Add(StatType.SoulsSpent, Convert.ToInt64(reader["SoulsSpent"]));
+                }
+            }
+
+            // Get suggested level stats
+            var suggestedAncientLevelsViewModel = new SuggestedAncientLevelsViewModel(
+                gameData,
+                ancientLevelSummaryViewModel.AncientLevels,
+                optimalLevel,
+                uploadUserSettings);
+            foreach (var suggestedAncientLevel in suggestedAncientLevelsViewModel.SuggestedAncientLevels)
+            {
+                upload.Stats.Add(AncientIds.GetSuggestedStatType(suggestedAncientLevel.AncientId), suggestedAncientLevel.SuggestedLevel);
+            }
+
+            // Get experimental stats
+            if (userSettings.UseExperimentalStats)
+            {
+                var experimentalStatsViewModel = new ExperimentalStatsViewModel(
+                    gameData,
+                    ancientLevelSummaryViewModel.AncientLevels,
+                    uploadUserSettings);
+                if (experimentalStatsViewModel.OptimalLevel.HasValue)
+                {
+                    upload.Stats.Add(StatType.ExperimentalOptimalLevel, experimentalStatsViewModel.OptimalLevel.Value);
+                }
+            }
+
+            return this.Ok(upload);
         }
 
         /// <summary>
@@ -211,7 +352,7 @@ namespace ClickerHeroesTrackerWebsite.Controllers.Api
             return this.Ok(uploadId);
         }
 
-        private List<UploadSummary> FetchUploads(string userId, int page, int count)
+        private List<Upload> FetchUploads(string userId, int page, int count)
         {
             const string CommandText = @"
 	            SELECT Id, UploadTime
@@ -230,10 +371,10 @@ namespace ClickerHeroesTrackerWebsite.Controllers.Api
             using (var command = this.databaseCommandFactory.Create(CommandText, parameters))
             using (var reader = command.ExecuteReader())
             {
-                var uploads = new List<UploadSummary>(count);
+                var uploads = new List<Upload>(count);
                 while (reader.Read())
                 {
-                    uploads.Add(new UploadSummary
+                    uploads.Add(new Upload
                     {
                         Id = Convert.ToInt32(reader["Id"]),
                         TimeSubmitted = Convert.ToDateTime(reader["UploadTime"])
