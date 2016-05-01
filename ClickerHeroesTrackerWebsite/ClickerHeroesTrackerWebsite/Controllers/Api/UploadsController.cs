@@ -10,14 +10,13 @@ namespace ClickerHeroesTrackerWebsite.Controllers.Api
     using System.Security.Claims;
     using ClickerHeroesTrackerWebsite.Database;
     using ClickerHeroesTrackerWebsite.Instrumentation;
-    using ClickerHeroesTrackerWebsite.Models;
     using ClickerHeroesTrackerWebsite.Models.Api;
     using ClickerHeroesTrackerWebsite.Models.Api.Stats;
     using ClickerHeroesTrackerWebsite.Models.Api.Uploads;
-    using ClickerHeroesTrackerWebsite.Models.Calculator;
     using ClickerHeroesTrackerWebsite.Models.Game;
     using ClickerHeroesTrackerWebsite.Models.SaveData;
     using ClickerHeroesTrackerWebsite.Models.Settings;
+    using ClickerHeroesTrackerWebsite.Models.Stats;
     using ClickerHeroesTrackerWebsite.Utility;
     using Microsoft.ApplicationInsights;
     using Microsoft.AspNet.Mvc;
@@ -174,11 +173,11 @@ namespace ClickerHeroesTrackerWebsite.Controllers.Api
             upload.Stats = new Dictionary<StatType, long>();
 
             // Get ancient level stats
-            var ancientLevelSummaryViewModel = new AncientLevelSummaryViewModel(
+            var ancientLevelsModel = new AncientLevelsModel(
                 gameData,
                 savedGame,
                 telemetryClient);
-            foreach (var ancientLevelInfo in ancientLevelSummaryViewModel.AncientLevels)
+            foreach (var ancientLevelInfo in ancientLevelsModel.AncientLevels)
             {
                 var ancientLevel = ancientLevelInfo.Value.AncientLevel;
                 if (ancientLevel > 0)
@@ -217,27 +216,14 @@ namespace ClickerHeroesTrackerWebsite.Controllers.Api
             }
 
             // Get suggested level stats
-            var suggestedAncientLevelsViewModel = new SuggestedAncientLevelsViewModel(
+            var suggestedAncientLevelsModel = new SuggestedAncientLevelsModel(
                 gameData,
-                ancientLevelSummaryViewModel.AncientLevels,
+                ancientLevelsModel.AncientLevels,
                 optimalLevel,
                 uploadUserSettings);
-            foreach (var suggestedAncientLevel in suggestedAncientLevelsViewModel.SuggestedAncientLevels)
+            foreach (var suggestedAncientLevel in suggestedAncientLevelsModel.SuggestedAncientLevels)
             {
-                upload.Stats.Add(AncientIds.GetSuggestedStatType(suggestedAncientLevel.AncientId), suggestedAncientLevel.SuggestedLevel);
-            }
-
-            // Get experimental stats
-            if (userSettings.UseExperimentalStats)
-            {
-                var experimentalStatsViewModel = new ExperimentalStatsViewModel(
-                    gameData,
-                    ancientLevelSummaryViewModel.AncientLevels,
-                    uploadUserSettings);
-                if (experimentalStatsViewModel.OptimalLevel.HasValue)
-                {
-                    upload.Stats.Add(StatType.ExperimentalOptimalLevel, experimentalStatsViewModel.OptimalLevel.Value);
-                }
+                upload.Stats.Add(AncientIds.GetSuggestedStatType(suggestedAncientLevel.Key), suggestedAncientLevel.Value);
             }
 
             return this.Ok(upload);
@@ -284,11 +270,11 @@ namespace ClickerHeroesTrackerWebsite.Controllers.Api
 
             var userSettings = this.userSettingsProvider.Get(userId);
 
-            var ancientLevels = new AncientLevelSummaryViewModel(
+            var ancientLevels = new AncientLevelsModel(
                 this.gameData,
                 savedGame,
                 this.telemetryClient);
-            var computedStats = new ComputedStatsViewModel(
+            var computedStats = new ComputedStatsModel(
                 this.gameData,
                 savedGame,
                 userSettings,

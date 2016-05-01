@@ -9,28 +9,24 @@
 
     @* Wire up tooltips *@
     ContentManager.RegisterRawScript("$('[data-toggle=\"tooltip\"]').tooltip();");
+
+    ContentManager.RegisterScript("Helpers");
+    ContentManager.RegisterScript("Calculator");
 }
 
 <h2>@ViewBag.Title.</h2>
+
+<span data-type="uploadId" class="hidden">@Model.UploadId</span>
 
 <div class="clearfix">
     <ul class="list-inline pull-left">
         <li>
             <label>User:</label>
-            @if (!string.IsNullOrEmpty(Model.UploadUserName))
-            {
-                @Model.UploadUserName
-        }
-            else
-            {
-                <span class="text-muted">
-                    (Anonymous)
-                </span>
-            }
+            <span data-type="uploadUserName"></span>
         </li>
         <li>
             <label>Upload Time:</label>
-            @TimeZoneInfo.ConvertTime(Model.UploadTime, TimeZoneInfo.Utc, Model.UserSettings.TimeZone).ToString("G")
+            <span data-type="uploadSubmitTime"></span>
         </li>
     </ul>
     @if (Model.IsOwn || Model.IsPublic || User.IsInRole("Admin"))
@@ -49,7 +45,7 @@
                             </div>
                             <div class="modal-body">
                                 <p>This is the raw content previously uploaded.</p>
-                                <textarea class="input-lg" onclick="$(this).select()" readonly>@Model.UploadContent</textarea>
+                                <textarea data-type="uploadContent" class="input-lg" onclick="$(this).select()" readonly></textarea>
                             </div>
                             <div class="modal-footer">
                                 <button type="button" class="btn btn-default" data-dismiss="modal">Done</button>
@@ -70,7 +66,7 @@
                         </div>
                         <div class="modal-body">
                             @if (Model.IsPublic)
-    {
+                            {
                                 <p>
                                     You can share the url below to others to let them view this upload.
                                 </p>
@@ -90,7 +86,7 @@
                             else
                             {
                                 <p>
-                                    Your uploads are not public. You can change this in your @Html.ActionLink("settings", "Index", "Manage")
+                                    Your uploads are not public. You can change this in your <a asp-controller="Manage" asp-action="Index">settings</a>
                                 </p>
                             }
                         </div>
@@ -106,28 +102,12 @@
 
 <div class="row">
     <div class="col-md-4">
-        @Html.Partial("_AncientLevelSummary", Model.AncientLevelSummaryViewModel)
+        @Html.Partial("_AncientLevelSummary")
     </div>
     <div class="col-md-4">
-        @Html.Partial("_SuggestedAncientLevels", Model.SuggestedAncientLevelsViewModel)
+        @Html.Partial("_SuggestedAncientLevels", Model.SuggestedAncientIds)
     </div>
     <div class="col-md-4">
-        @Html.Partial("_ComputedStats", Model.ComputedStatsViewModel)
-
-        @if (Model.ExperimentalStatsViewModel != null)
-    {
-        @Html.Partial("_ExperimentalStats", Model.ExperimentalStatsViewModel)
-        }
+        @Html.Partial("_ComputedStats")
     </div>
 </div>
-@* We don't store this data yet, so don't display it
-    <div class="row">
-        <div class="col-md-4">
-            @Html.Partial("_HeroLevelSummary", Model.HeroLevelSummaryViewModel)
-        </div>
-        <div class="col-md-4">
-            <h4>Hero Gild Suggestions:</h4>
-            Coming Soon!
-        </div>
-    </div>
-*@

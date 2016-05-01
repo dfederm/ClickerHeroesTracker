@@ -28,8 +28,6 @@ namespace ClickerHeroesTrackerWebsite.Tests.Models
             var viewModel = new CalculatorViewModel(
                 null,
                 mockUserSettingsProvider.Object,
-                MockGameData.RealData,
-                null,
                 1234,
                 null);
 
@@ -37,46 +35,6 @@ namespace ClickerHeroesTrackerWebsite.Tests.Models
             Assert.False(viewModel.IsPublic);
             Assert.True(viewModel.IsOwn);
             Assert.True(viewModel.IsPermitted);
-
-            Assert.NotNull(viewModel.AncientLevelSummaryViewModel);
-            Assert.NotNull(viewModel.AncientLevelSummaryViewModel.AncientLevels);
-            Assert.Equal(29, viewModel.AncientLevelSummaryViewModel.AncientLevels.Count);
-
-            foreach (var pair in viewModel.AncientLevelSummaryViewModel.AncientLevels)
-            {
-                Assert.NotNull(pair);
-                Assert.NotNull(pair.Key);
-                Assert.True(pair.Value.EffectiveLevel >= 0);
-            }
-
-            /*
-            Assert.NotNull(viewModel.HeroLevelSummaryViewModel);
-            Assert.NotNull(viewModel.HeroLevelSummaryViewModel.HeroGilds);
-            Assert.Equal(2, viewModel.HeroLevelSummaryViewModel.HeroGilds.Count);
-
-            foreach (var pair in viewModel.HeroLevelSummaryViewModel.HeroGilds)
-            {
-                Assert.NotNull(pair);
-                Assert.False(string.IsNullOrWhiteSpace(pair.Key));
-                Assert.False(string.IsNullOrWhiteSpace(pair.Value));
-            }
-            */
-
-            Assert.NotNull(viewModel.SuggestedAncientLevelsViewModel);
-            Assert.NotNull(viewModel.SuggestedAncientLevelsViewModel.SuggestedAncientLevels);
-            Assert.Equal(8, viewModel.SuggestedAncientLevelsViewModel.SuggestedAncientLevels.Length);
-
-            foreach (var suggestedAncientLevel in viewModel.SuggestedAncientLevelsViewModel.SuggestedAncientLevels)
-            {
-                Assert.NotNull(suggestedAncientLevel);
-                Assert.False(string.IsNullOrWhiteSpace(suggestedAncientLevel.AncientName));
-                Assert.NotEqual(0, suggestedAncientLevel.LevelInfo.AncientLevel);
-                Assert.NotEqual(0, suggestedAncientLevel.LevelInfo.ItemLevel);
-                Assert.NotEqual(0, suggestedAncientLevel.LevelInfo.EffectiveLevel);
-                Assert.NotEqual(0, suggestedAncientLevel.SuggestedLevel);
-            }
-
-            Assert.NotNull(viewModel.ComputedStatsViewModel);
 
             mockUserSettings.Verify();
             mockUserSettingsProvider.Verify();

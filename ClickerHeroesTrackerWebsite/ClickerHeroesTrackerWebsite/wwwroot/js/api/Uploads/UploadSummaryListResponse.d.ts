@@ -2,5 +2,5 @@
 {
     pagination: IPaginationMetadata;
 
-    uploads: IUploadSummary[];
+    uploads: IUpload[];
 }

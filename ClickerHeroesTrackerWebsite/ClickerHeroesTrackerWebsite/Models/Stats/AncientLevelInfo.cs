@@ -2,7 +2,7 @@
 // Copyright (c) Clicker Heroes Tracker. All rights reserved.
 // </copyright>
 
-namespace ClickerHeroesTrackerWebsite.Models.Calculator
+namespace ClickerHeroesTrackerWebsite.Models.Stats
 {
     /// <summary>
     /// A class that represents the effective level for an ancient.

@@ -1,34 +1,31 @@
-﻿// <copyright file="ComputedStatsViewModel.cs" company="Clicker Heroes Tracker">
+﻿// <copyright file="ComputedStatsModel.cs" company="Clicker Heroes Tracker">
 // Copyright (c) Clicker Heroes Tracker. All rights reserved.
 // </copyright>
 
-namespace ClickerHeroesTrackerWebsite.Models.Calculator
+namespace ClickerHeroesTrackerWebsite.Models.Stats
 {
     using System;
-    using System.Data;
     using System.Linq;
+    using ClickerHeroesTrackerWebsite.Instrumentation;
+    using ClickerHeroesTrackerWebsite.Models.Game;
     using ClickerHeroesTrackerWebsite.Models.SaveData;
+    using ClickerHeroesTrackerWebsite.Models.Settings;
     using ClickerHeroesTrackerWebsite.Models.Simulation;
-    using Game;
-    using Instrumentation;
-    using Settings;
 
     /// <summary>
     /// The model for the computed stats view.
     /// </summary>
-    public class ComputedStatsViewModel
+    public class ComputedStatsModel
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="ComputedStatsViewModel"/> class.
+        /// Initializes a new instance of the <see cref="ComputedStatsModel"/> class.
         /// </summary>
-        public ComputedStatsViewModel(
+        public ComputedStatsModel(
             GameData gameData,
             SavedGame savedGame,
             IUserSettings userSettings,
             ICounterProvider counterProvider)
         {
-            this.UserSettings = userSettings;
-
             var simulation = new Simulation(
                 gameData,
                 savedGame,
@@ -49,29 +46,6 @@ namespace ClickerHeroesTrackerWebsite.Models.Calculator
             this.TitanDamage = savedGame.TitanDamage;
             this.SoulsSpent = savedGame.AncientsData.Ancients.Values.Aggregate(0L, (count, ancientData) => count + ancientData.SpentHeroSouls);
         }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="ComputedStatsViewModel"/> class.
-        /// </summary>
-        public ComputedStatsViewModel(IDataReader reader, IUserSettings userSettings)
-        {
-            this.UserSettings = userSettings;
-
-            if (reader.Read())
-            {
-                this.OptimalLevel = Convert.ToInt16(reader["OptimalLevel"]);
-                this.SoulsPerHour = Convert.ToInt64(reader["SoulsPerHour"]);
-                this.OptimalSoulsPerAscension = Convert.ToInt64(reader["SoulsPerAscension"]);
-                this.OptimalAscensionTime = Convert.ToInt16(reader["AscensionTime"]);
-                this.TitanDamage = Convert.ToInt64(reader["TitanDamage"]);
-                this.SoulsSpent = Convert.ToInt64(reader["SoulsSpent"]);
-            }
-        }
-
-        /// <summary>
-        /// Gets the current user settings.
-        /// </summary>
-        public IUserSettings UserSettings { get; }
 
         /// <summary>
         /// Gets the optimal souls earned per hour

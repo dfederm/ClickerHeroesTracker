@@ -1,23 +1,23 @@
-﻿// <copyright file="AncientLevelSummaryViewModel.cs" company="Clicker Heroes Tracker">
+﻿// <copyright file="AncientLevelsModel.cs" company="Clicker Heroes Tracker">
 // Copyright (c) Clicker Heroes Tracker. All rights reserved.
 // </copyright>
 
-namespace ClickerHeroesTrackerWebsite.Models.Calculator
+namespace ClickerHeroesTrackerWebsite.Models.Stats
 {
     using System.Collections.Generic;
-    using Game;
+    using ClickerHeroesTrackerWebsite.Models.Game;
+    using ClickerHeroesTrackerWebsite.Models.SaveData;
     using Microsoft.ApplicationInsights;
-    using SaveData;
 
     /// <summary>
     /// The model for the ancient level summary view.
     /// </summary>
-    public class AncientLevelSummaryViewModel
+    public class AncientLevelsModel
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="AncientLevelSummaryViewModel"/> class.
+        /// Initializes a new instance of the <see cref="AncientLevelsModel"/> class.
         /// </summary>
-        public AncientLevelSummaryViewModel(
+        public AncientLevelsModel(
             GameData gameData,
             SavedGame savedGame,
             TelemetryClient telemetryClient)

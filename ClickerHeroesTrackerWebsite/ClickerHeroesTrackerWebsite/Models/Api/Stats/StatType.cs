@@ -111,6 +111,5 @@ namespace ClickerHeroesTrackerWebsite.Models.Api.Stats
         OptimalAscensionTime,
         SoulsSpent,
         TitanDamage,
-        ExperimentalOptimalLevel,
     }
 }

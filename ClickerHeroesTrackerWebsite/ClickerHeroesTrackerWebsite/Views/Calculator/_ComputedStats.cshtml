@@ -1,6 +1,4 @@
-﻿@using ClickerHeroesTrackerWebsite.Models.Calculator;
-
-@model ComputedStatsViewModel
+﻿@using ClickerHeroesTrackerWebsite.Models.Api.Stats;
 
 <h4>Simulation Data:</h4>
 <p class="text-muted">
@@ -10,19 +8,21 @@
 <table class="table">
     <tr>
         <td>Souls/hr</td>
-        <td>@Model.SoulsPerHour</td>
+        <td data-type="@StatType.SoulsPerHour.ToString().ToCamelCase()">0</td>
     </tr>
     <tr>
         <td>Optimal Level</td>
-        <td>@Model.OptimalLevel</td>
+        <td data-type="@StatType.OptimalLevel.ToString().ToCamelCase()">0</td>
     </tr>
     <tr>
         <td>Souls per Ascension (at Optimal Level)</td>
-        <td>@Model.OptimalSoulsPerAscension</td>
+        <td data-type="@StatType.SoulsPerAscension.ToString().ToCamelCase()">0</td>
     </tr>
     <tr>
         <td>Optimal Ascension Time</td>
-        <td>@Model.OptimalAscensionTime min</td>
+        <td>
+            <span data-type="@StatType.OptimalAscensionTime.ToString().ToCamelCase()">0</span> min
+        </td>
     </tr>
 </table>
 
@@ -31,10 +31,10 @@
 <table class="table">
     <tr>
         <td>Hero Souls Spent on Ancients</td>
-        <td>@Model.SoulsSpent</td>
+        <td data-type="@StatType.SoulsSpent.ToString().ToCamelCase()">0</td>
     </tr>
     <tr>
         <td>Titan Damage</td>
-        <td>@Model.TitanDamage</td>
+        <td data-type="@StatType.TitanDamage.ToString().ToCamelCase()">0</td>
     </tr>
 </table>

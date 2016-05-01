@@ -44,4 +44,16 @@
 
         return ret;
     }
+
+    export function getElementsByDataType(dataType: string): HTMLElement[]
+    {
+        const nodes = document.querySelectorAll("[data-type='" + dataType + "']");
+        let elements: HTMLElement[] = [];
+        for (let i = 0; i < nodes.length; i++)
+        {
+            elements.push(nodes[i] as HTMLElement);
+        }
+
+        return elements;
+    }
 }

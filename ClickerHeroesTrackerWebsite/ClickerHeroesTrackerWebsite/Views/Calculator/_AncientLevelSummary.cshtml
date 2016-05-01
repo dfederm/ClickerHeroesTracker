@@ -1,6 +1,6 @@
-﻿@using ClickerHeroesTrackerWebsite.Models.Calculator;
+﻿@using ClickerHeroesTrackerWebsite.Models.Game
 
-@model AncientLevelSummaryViewModel
+@inject GameData GameData
 
 <h4>Ancient Summary:</h4>
 <table class="table">
@@ -9,17 +9,12 @@
         <th>Level</th>
         <th></th>
     </tr>
-    @foreach (var ancient in Model.AncientLevels)
+    @foreach (var ancient in GameData.Ancients.Values.OrderBy(a => a.Name, StringComparer.OrdinalIgnoreCase))
     {
         <tr>
-            <td>@ancient.Key.Name:</td>
-            <td class="text-right">@ancient.Value.AncientLevel</td>
-            <td>
-                @if (ancient.Value.ItemLevel > 0)
-                {
-                    @: (+@ancient.Value.ItemLevel)
-                }
-            </td>
+            <td>@ancient.Name:</td>
+            <td data-type="@AncientIds.GetAncientStatType(ancient.Id).ToString().ToCamelCase()" class="text-right">0</td>
+            <td data-type="@AncientIds.GetItemStatType(ancient.Id).ToString().ToCamelCase()"></td>
         </tr>
     }
 </table>

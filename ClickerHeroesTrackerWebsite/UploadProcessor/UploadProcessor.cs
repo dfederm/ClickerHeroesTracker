@@ -9,15 +9,15 @@ namespace ClickerHeroesTrackerWebsite.UploadProcessing
     using System.IO;
     using System.Text;
     using System.Threading.Tasks;
-    using Database;
-    using Instrumentation;
+    using ClickerHeroesTrackerWebsite.Database;
+    using ClickerHeroesTrackerWebsite.Instrumentation;
+    using ClickerHeroesTrackerWebsite.Models.Game;
+    using ClickerHeroesTrackerWebsite.Models.SaveData;
+    using ClickerHeroesTrackerWebsite.Models.Settings;
+    using ClickerHeroesTrackerWebsite.Models.Stats;
     using Microsoft.ApplicationInsights;
     using Microsoft.Extensions.Configuration;
     using Microsoft.ServiceBus.Messaging;
-    using Models.Calculator;
-    using Models.Game;
-    using Models.SaveData;
-    using Models.Settings;
     using Newtonsoft.Json;
     using Newtonsoft.Json.Converters;
 
@@ -176,11 +176,11 @@ namespace ClickerHeroesTrackerWebsite.UploadProcessing
                     }
 
                     this.telemetryClient.TrackEvent("UploadProcessor-Simulation", properties);
-                    var ancientLevels = new AncientLevelSummaryViewModel(
+                    var ancientLevels = new AncientLevelsModel(
                         this.gameData,
                         savedGame,
                         this.telemetryClient);
-                    var computedStats = new ComputedStatsViewModel(
+                    var computedStats = new ComputedStatsModel(
                         this.gameData,
                         savedGame,
                         userSettings,

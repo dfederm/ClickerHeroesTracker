@@ -1,8 +1,9 @@
-﻿@using ClickerHeroesTrackerWebsite.Models.Calculator;
-@using ClickerHeroesTrackerWebsite.Models.Game;
+﻿@using ClickerHeroesTrackerWebsite.Models.Game;
 @using System.Security.Claims
 
-@model SuggestedAncientLevelsViewModel
+@inject GameData GameData
+
+@model IList<int>
 
 <h4>Suggested Leveling Plan:</h4>
 <p class="text-muted">
@@ -20,12 +21,14 @@
         <th>Suggested</th>
         <th>Difference</th>
     </tr>
-    @foreach (var ancient in Model.SuggestedAncientLevels)
+    @for (var i = 0; i < Model.Count; i++)
     {
+        var ancient = GameData.Ancients[Model[i]];
+
         <tr>
             <td>
-                @ancient.AncientName:
-                @if (ancient.AncientId == AncientIds.Solomon)
+                @ancient.Name:
+                @if (ancient.Id == AncientIds.Solomon)
                 {
                     var solomonTooltip = this.User.IsSignedIn()
                         ? "This is using your settings for the Solomon formula preference. You can change this on your settings page."
@@ -33,15 +36,13 @@
                     <a href="/Manage" class="text-muted" data-toggle="tooltip" data-placement="right" title="@solomonTooltip">(?)</a>
                 }
             </td>
+
             <td class="text-right">
-                @ancient.LevelInfo.AncientLevel
-                @if (ancient.LevelInfo.ItemLevel > 0)
-                {
-                    @: (+@ancient.LevelInfo.ItemLevel)
-                }
+                <span data-type="@AncientIds.GetAncientStatType(ancient.Id).ToString().ToCamelCase()" class="text-right">0</span>
+                <span data-type="@AncientIds.GetItemStatType(ancient.Id).ToString().ToCamelCase()"></span>
             </td>
 
-            @if (ancient.AncientId == Model.PrimaryAncientId)
+            @if (i == 0)
             {
                 <td class="text-right">
                     N/A
@@ -51,8 +52,8 @@
             }
             else
             {
-                <td class="text-right">@ancient.SuggestedLevel</td>
-                <td class="text-right">@ancient.LevelDifference</td>
+                <td data-type="@AncientIds.GetSuggestedStatType(ancient.Id).ToString().ToCamelCase()" class="text-right">0</td>
+                <td data-type="diff@(ancient.Name)" class="text-right">0</td>
             }
         </tr>
     }

@@ -4,12 +4,10 @@
 
 namespace ClickerHeroesTrackerWebsite.Controllers
 {
-    using Database;
-    using Microsoft.ApplicationInsights;
+    using ClickerHeroesTrackerWebsite.Database;
+    using ClickerHeroesTrackerWebsite.Models.Calculator;
+    using ClickerHeroesTrackerWebsite.Models.Settings;
     using Microsoft.AspNet.Mvc;
-    using Models.Calculator;
-    using Models.Game;
-    using Models.Settings;
 
     /// <summary>
     /// The calculator controller shows stats for a given upload.
@@ -20,23 +18,15 @@ namespace ClickerHeroesTrackerWebsite.Controllers
 
         private readonly IUserSettingsProvider userSettingsProvider;
 
-        private readonly GameData gameData;
-
-        private readonly TelemetryClient telemetryClient;
-
         /// <summary>
         /// Initializes a new instance of the <see cref="CalculatorController"/> class.
         /// </summary>
         public CalculatorController(
             IDatabaseCommandFactory databaseCommandFactory,
-            IUserSettingsProvider userSettingsProvider,
-            GameData gameData,
-            TelemetryClient telemetryClient)
+            IUserSettingsProvider userSettingsProvider)
         {
             this.databaseCommandFactory = databaseCommandFactory;
             this.userSettingsProvider = userSettingsProvider;
-            this.gameData = gameData;
-            this.telemetryClient = telemetryClient;
         }
 
         /// <summary>
@@ -50,8 +40,6 @@ namespace ClickerHeroesTrackerWebsite.Controllers
                 ? new CalculatorViewModel(
                     this.databaseCommandFactory,
                     this.userSettingsProvider,
-                    this.gameData,
-                    this.telemetryClient,
                     uploadId.Value,
                     this.User)
                 : null;
