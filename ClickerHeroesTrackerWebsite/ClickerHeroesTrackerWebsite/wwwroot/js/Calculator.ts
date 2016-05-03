@@ -51,7 +51,7 @@
         const statElements = Helpers.getElementsByDataType(statType);
         if (statElements)
         {
-            const isAbbreviated = statValue > 1e6;
+            const isAbbreviated = Math.abs(statValue) > 1e6;
 
             let fullText = statValue.toLocaleString();
             let displayText = isAbbreviated ? statValue.toExponential(3) : fullText;
@@ -65,9 +65,11 @@
             {
                 const diffStatType = statType.replace("suggested", "diff");
                 const ancientStatType = statType.replace("suggested", "ancient");
-                const ancientStatValue = stats[ancientStatType];
+                const itemStatType = statType.replace("suggested", "item");
+                const ancientStatValue = stats[ancientStatType] || 0;
+                const itemStatValue = stats[itemStatType] || 0;
 
-                hydrateStat(stats, diffStatType, statValue - ancientStatValue);
+                hydrateStat(stats, diffStatType, statValue - ancientStatValue - itemStatValue);
             }
 
             for (let i = 0; i < statElements.length; i++)
