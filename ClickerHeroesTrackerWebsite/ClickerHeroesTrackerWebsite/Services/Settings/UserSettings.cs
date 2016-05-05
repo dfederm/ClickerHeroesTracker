@@ -7,7 +7,8 @@ namespace ClickerHeroesTrackerWebsite.Models.Settings
     using System;
     using System.Collections.Generic;
     using System.Data;
-    using Database;
+    using ClickerHeroesTrackerWebsite.Database;
+    using Newtonsoft.Json;
 
     internal sealed class UserSettings : IUserSettings
     {
@@ -35,6 +36,7 @@ namespace ClickerHeroesTrackerWebsite.Models.Settings
 
         private delegate bool TryParse<T>(string rawValue, out T value);
 
+        [JsonIgnore] // Don't send down to the client since we can get the value from their browser and TimeZoneInfo doesn't serialize well.
         public TimeZoneInfo TimeZone
         {
             get
@@ -97,6 +99,32 @@ namespace ClickerHeroesTrackerWebsite.Models.Settings
             set
             {
                 this.SetValue(5, value.ToString());
+            }
+        }
+
+        public bool UseScientificNotation
+        {
+            get
+            {
+                return this.GetValue(6, bool.TryParse, true);
+            }
+
+            set
+            {
+                this.SetValue(6, value.ToString());
+            }
+        }
+
+        public int ScientificNotationThreshold
+        {
+            get
+            {
+                return this.GetValue(7, int.TryParse, 1000000);
+            }
+
+            set
+            {
+                this.SetValue(7, value.ToString());
             }
         }
 

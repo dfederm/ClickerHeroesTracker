@@ -1,8 +1,10 @@
-﻿@using System.Security.Claims;
-@using Microsoft.ApplicationInsights.Extensibility;
+﻿@using System.Security.Claims
+@using Microsoft.ApplicationInsights.Extensibility
+@using ClickerHeroesTrackerWebsite.Models.Settings
 
 @inject TelemetryConfiguration TelemetryConfiguration
 @inject IContentManager ContentManager
+@inject IUserSettingsProvider UserSettingsProvider
 
 <!DOCTYPE html>
 <html>
@@ -88,6 +90,10 @@
                 asp-fallback-test="window.jQuery && window.jQuery.fn && window.jQuery.fn.modal">
         </script>
     </environment>
+
+    <script type="text/javascript">
+        var userSettings = @Json.Serialize(UserSettingsProvider.Get(User.GetUserId()));
+    </script>
 
     @await RenderSectionAsync("scripts", required: false)
 

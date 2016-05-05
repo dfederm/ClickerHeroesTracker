@@ -51,10 +51,10 @@
         const statElements = Helpers.getElementsByDataType(statType);
         if (statElements)
         {
-            const isAbbreviated = Math.abs(statValue) > 1e6;
+            const useScientificNotation = userSettings.useScientificNotation && Math.abs(statValue) > userSettings.scientificNotationThreshold;
 
             let fullText = statValue.toLocaleString();
-            let displayText = isAbbreviated ? statValue.toExponential(3) : fullText;
+            let displayText = useScientificNotation ? statValue.toExponential(3) : fullText;
 
             if (statType.indexOf("item") === 0)
             {
@@ -74,7 +74,7 @@
 
             for (let i = 0; i < statElements.length; i++)
             {
-                if (isAbbreviated)
+                if (useScientificNotation)
                 {
                     statElements[i].title = fullText;
                 }

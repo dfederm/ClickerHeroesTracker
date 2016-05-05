@@ -63,6 +63,19 @@ namespace ClickerHeroesTrackerWebsite.Models
         public bool UseExperimentalStats { get; set; }
 
         /// <summary>
+        /// Gets or sets a value indicating whether the user wants to see numbers in scientific notation
+        /// </summary>
+        [Display(Name = "Use scientific notation")]
+        public bool UseScientificNotation { get; set; }
+
+        /// <summary>
+        /// Gets or sets the threshold at which to use scientific notation
+        /// </summary>
+        [Display(Name = "Scientific notation threshold")]
+        [Range(0, int.MaxValue, ErrorMessage = "Please enter valid integer number")]
+        public int? ScientificNotationThreshold { get; set; }
+
+        /// <summary>
         /// Model for an option for the time zone select control.
         /// </summary>
         public class TimeZoneSelectItem

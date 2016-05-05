@@ -35,5 +35,15 @@ namespace ClickerHeroesTrackerWebsite.Models.Settings
         /// Gets or sets a value indicating whether the user wants to see experimental stats
         /// </summary>
         bool UseExperimentalStats { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether the user wants to see numbers in scientific notation
+        /// </summary>
+        bool UseScientificNotation { get; set; }
+
+        /// <summary>
+        /// Gets or sets the threshold at which to use scientific notation
+        /// </summary>
+        int ScientificNotationThreshold { get; set; }
     }
 }

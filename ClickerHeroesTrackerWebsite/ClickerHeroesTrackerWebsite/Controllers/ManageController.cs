@@ -114,6 +114,17 @@ namespace ClickerHeroesTrackerWebsite.Controllers
             userSettings.UseReducedSolomonFormula = indexViewModel.SolomonFormula.Equals("Log", StringComparison.OrdinalIgnoreCase);
             userSettings.PlayStyle = indexViewModel.PlayStyle.SafeParseEnum<PlayStyle>();
             userSettings.UseExperimentalStats = indexViewModel.UseExperimentalStats;
+            userSettings.UseScientificNotation = indexViewModel.UseScientificNotation;
+
+            if (indexViewModel.ScientificNotationThreshold.HasValue)
+            {
+                userSettings.ScientificNotationThreshold = indexViewModel.ScientificNotationThreshold.Value;
+            }
+            else if (userSettings.UseScientificNotation)
+            {
+                // If they cleared the value, reset to the default.
+                userSettings.ScientificNotationThreshold = 1000000;
+            }
 
             return await this.GetIndexResult(userId, userSettings);
         }
@@ -308,6 +319,8 @@ namespace ClickerHeroesTrackerWebsite.Controllers
                 SolomonFormula = userSettings.UseReducedSolomonFormula ? "Log" : "Ln",
                 PlayStyle = userSettings.PlayStyle.ToString(),
                 UseExperimentalStats = userSettings.UseExperimentalStats,
+                UseScientificNotation = userSettings.UseScientificNotation,
+                ScientificNotationThreshold = userSettings.ScientificNotationThreshold,
             };
 
             return this.View(model);

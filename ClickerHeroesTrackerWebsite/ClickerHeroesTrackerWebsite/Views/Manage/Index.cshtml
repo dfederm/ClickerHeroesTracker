@@ -105,6 +105,24 @@
             </dd>
         </dl>
         <dl class="dl-horizontal">
+            <dt>
+                <label asp-for="UseScientificNotation" class="control-label"></label>
+            </dt>
+            <dd>
+                <input type="checkbox" asp-for="UseScientificNotation" checked="@Model.UseScientificNotation" onchange="$('#scientificNotationThresholdContainer').toggle()" />
+            </dd>
+        </dl>
+        <dl class="dl-horizontal" id="scientificNotationThresholdContainer" style="@(Model.UseScientificNotation ? string.Empty : "display:none")">
+            <dt>
+                <label asp-for="ScientificNotationThreshold" class="control-label"></label>
+                <a href="#" class="text-muted" data-toggle="tooltip" data-placement="bottom" title="This is the value at which to start showing numbers in scientific notation. Use &quot;0&quot; to always use it or clear the value to reset it to the default.">(?)</a>
+            </dt>
+            <dd>
+                <input type="number" asp-for="ScientificNotationThreshold" value="@Model.ScientificNotationThreshold" />
+                <span asp-validation-for="ScientificNotationThreshold" class="text-danger"></span>
+            </dd>
+        </dl>
+        <dl class="dl-horizontal">
             <dt></dt>
             <dd>
                 <input type="submit" class="btn btn-default" value="Save Changes" />
