@@ -28,9 +28,10 @@ namespace ClickerHeroesTrackerWebsite
     using Services.ContentManagement;
     using Microsoft.Extensions.Configuration;
     using Services.Authentication;
+    using Microsoft.AspNet.DataProtection;
     using Microsoft.AspNet.Identity;
     using Microsoft.Extensions.OptionsModel;
-
+    
     /// <summary>
     /// Configure the Unity container
     /// </summary>
@@ -39,6 +40,35 @@ namespace ClickerHeroesTrackerWebsite
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            // The DevelopmentStorageAccount will only work if you have the Storage emulator v4.3 installed: https://go.microsoft.com/fwlink/?linkid=717179&clcid=0x409
+            var storageConnectionString = this.Configuration["Storage:ConnectionString"];
+            var storageAccount = string.IsNullOrEmpty(storageConnectionString)
+                ? this.Environment.IsDevelopment()
+                    ? CloudStorageAccount.DevelopmentStorageAccount
+                    : null
+                : CloudStorageAccount.Parse(storageConnectionString);
+
+            // Nesessary to persist keys (like the ones used to generate auth cookies)
+            // By default Azure Websites can persist keys across instances within a slot, but not across slots.
+            // This means a slot swap will require users to re-log in.
+            // See https://github.com/aspnet/Home/issues/466 and https://github.com/aspnet/DataProtection/issues/92 for details.
+            services.AddDataProtection();
+            services.ConfigureDataProtection(options =>
+            {
+                if (storageAccount != null)
+                {
+                    var client = storageAccount.CreateCloudBlobClient();
+                    var container = client.GetContainerReference("key-container");
+
+                    // The container must exist before calling the DataProtection APIs.
+                    // The specific file within the container does not have to exist,
+                    // as it will be created on-demand.
+                    container.CreateIfNotExists();
+
+                    options.PersistKeysToAzureBlobStorage(container, "keys.xml");
+                }
+            });
+
             // Add Entity framework services.
             var entityFramework = services.AddEntityFramework();
             var connectionString = this.Configuration["Database:ConnectionString"];
@@ -108,7 +138,7 @@ namespace ClickerHeroesTrackerWebsite
             services.AddInstance<IConfiguration>(this.Configuration);
 
             // Container controlled registrations
-            services.AddSingleton<CloudStorageAccount>(_ => CloudStorageAccount.Parse(this.Configuration["Storage:ConnectionString"]));
+            services.AddSingleton<CloudStorageAccount>(_ => storageAccount);
             services.AddSingleton<CloudTableClient>(_ => _.GetService<CloudStorageAccount>().CreateCloudTableClient());
             services.AddSingleton<GameData>(_ => GameData.Parse(this.Environment.MapPath(@"data\GameData.json")));
             services.AddSingleton<IBuildInfoProvider, BuildInfoProvider>();
