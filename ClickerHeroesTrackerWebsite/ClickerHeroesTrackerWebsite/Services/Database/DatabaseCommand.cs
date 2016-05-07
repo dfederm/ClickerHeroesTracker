@@ -1,4 +1,4 @@
-﻿// <copyright file="SqlDatabaseCommand.cs" company="Clicker Heroes Tracker">
+﻿// <copyright file="DatabaseCommand.cs" company="Clicker Heroes Tracker">
 // Copyright (c) Clicker Heroes Tracker. All rights reserved.
 // </copyright>
 
@@ -7,20 +7,22 @@ namespace ClickerHeroesTrackerWebsite.Database
     using System;
     using System.Collections.Generic;
     using System.Data;
+    using System.Data.Common;
     using System.Data.SqlClient;
-    using Instrumentation;
-    using Utility;
+    using ClickerHeroesTrackerWebsite.Instrumentation;
+    using ClickerHeroesTrackerWebsite.Utility;
+    using Microsoft.Data.Sqlite;
 
-    internal sealed class SqlDatabaseCommand : DisposableBase, IDatabaseCommand
+    internal sealed class DatabaseCommand : DisposableBase, IDatabaseCommand
     {
         private readonly ICounterProvider counterProvider;
 
-        private SqlCommand command;
+        private DbCommand command;
 
-        private SqlTransaction transaction;
+        private DbTransaction transaction;
 
-        public SqlDatabaseCommand(
-            SqlConnection connection,
+        public DatabaseCommand(
+            DbConnection connection,
             ICounterProvider counterProvider)
         {
             if (connection == null)
@@ -33,8 +35,7 @@ namespace ClickerHeroesTrackerWebsite.Database
                 throw new ArgumentNullException("counterProvider");
             }
 
-            this.command = new SqlCommand();
-            this.command.Connection = connection;
+            this.command = connection.CreateCommand();
 
             this.counterProvider = counterProvider;
         }
@@ -49,9 +50,24 @@ namespace ClickerHeroesTrackerWebsite.Database
         {
             this.EnsureNotDisposed();
 
-            var parameter = this.command.Parameters.AddWithValue(parameterName, table);
-            parameter.SqlDbType = SqlDbType.Structured;
-            parameter.TypeName = tableTypeName;
+            var parameter = this.command.CreateParameter();
+            parameter.ParameterName = parameterName;
+            parameter.Value = table;
+
+            var sqlParameter = parameter as SqlParameter;
+            if (sqlParameter != null)
+            {
+                sqlParameter.SqlDbType = SqlDbType.Structured;
+                sqlParameter.TypeName = tableTypeName;
+            }
+
+            var sqliteParameter = parameter as SqliteParameter;
+            if (sqliteParameter != null)
+            {
+                sqliteParameter.SqliteType = SqliteType.Blob;
+            }
+
+            this.command.Parameters.Add(parameter);
         }
 
         public void BeginTransaction()
@@ -156,7 +172,10 @@ namespace ClickerHeroesTrackerWebsite.Database
             {
                 foreach (var parameter in this.Parameters)
                 {
-                    this.command.Parameters.AddWithValue(parameter.Key, parameter.Value ?? DBNull.Value);
+                    var dbParameter = this.command.CreateParameter();
+                    dbParameter.ParameterName = parameter.Key;
+                    dbParameter.Value = parameter.Value ?? DBNull.Value;
+                    this.command.Parameters.Add(dbParameter);
                 }
             }
         }

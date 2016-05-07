@@ -158,7 +158,7 @@ namespace ClickerHeroesTrackerWebsite.Models.Settings
                 }
 
                 // BUGBUG 63 - Remove casts to SqlDatabaseCommand
-                ((SqlDatabaseCommand)command).AddTableParameter("@UserSettings", "UserSetting", settingsTable);
+                ((DatabaseCommand)command).AddTableParameter("@UserSettings", "UserSetting", settingsTable);
 
                 command.ExecuteNonQuery();
             }
@@ -186,9 +186,12 @@ namespace ClickerHeroesTrackerWebsite.Models.Settings
             {
                 { "@UserId", this.userId },
             };
+            const string GetUserSettingsCommandText = @"
+	            SELECT SettingId, SettingValue
+	            FROM UserSettings
+	            WHERE UserId = @UserId";
             using (var command = this.databaseCommandFactory.Create(
-                "GetUserSettings",
-                CommandType.StoredProcedure,
+                GetUserSettingsCommandText,
                 parameters))
             using (var reader = command.ExecuteReader())
             {

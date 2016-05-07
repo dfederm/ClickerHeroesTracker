@@ -35,7 +35,7 @@ namespace ClickerHeroesTrackerWebsite.IntegrationTests
             Assert.Contains(EmailHelpTextAnonymous, content);
         }
 
-        [Fact(Skip = "BUGBUG 45: Ignoring until we can properly mock the database")]
+        [Fact]
         public async Task Feedback_User_BasicTest()
         {
             var request = new HttpRequestMessage(HttpMethod.Get, Path);

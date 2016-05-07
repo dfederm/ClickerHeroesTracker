@@ -4,9 +4,13 @@
 
 namespace ClickerHeroesTrackerWebsite.Database
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Data.Common;
     using System.Data.SqlClient;
     using Instrumentation;
     using Microsoft.ApplicationInsights;
+    using Microsoft.Data.Sqlite;
     using Microsoft.Extensions.Configuration;
     using Utility;
 
@@ -15,13 +19,21 @@ namespace ClickerHeroesTrackerWebsite.Database
     /// </summary>
     public sealed class DatabaseCommandFactory : DisposableBase, IDatabaseCommandFactory
     {
+        private static Dictionary<string, Func<string, DbConnection>> connectionFactories = new Dictionary<string, Func<string, DbConnection>>(StringComparer.OrdinalIgnoreCase)
+        {
+            { "SqlServer", str => new SqlConnection(str) },
+            { "Sqlite", str => new SqliteConnection(str) },
+        };
+
+        private readonly string databaseKind;
+
         private readonly string connectionString;
 
         private readonly TelemetryClient telemetryClient;
 
         private readonly ICounterProvider counterProvider;
 
-        private SqlConnection connection;
+        private DbConnection connection;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="DatabaseCommandFactory"/> class.
@@ -32,6 +44,7 @@ namespace ClickerHeroesTrackerWebsite.Database
             ICounterProvider counterProvider)
         {
             this.connectionString = configuration["Database:ConnectionString"];
+            this.databaseKind = configuration["Database:Kind"];
             this.telemetryClient = telemetryClient;
             this.counterProvider = counterProvider;
         }
@@ -49,12 +62,12 @@ namespace ClickerHeroesTrackerWebsite.Database
                 using (this.counterProvider.Suspend(Counter.Internal))
                 using (this.counterProvider.Measure(Counter.Dependency))
                 {
-                    this.connection = new SqlConnection(connectionString);
+                    this.connection = connectionFactories[this.databaseKind](this.connectionString);
                     this.connection.Open();
                 }
             }
 
-            return new SqlDatabaseCommand(
+            return new DatabaseCommand(
                 this.connection,
                 this.counterProvider);
         }
@@ -74,6 +87,11 @@ namespace ClickerHeroesTrackerWebsite.Database
 
                 this.connection = null;
             }
+        }
+
+        private static DbConnection CreateSqlConnection(string connectionString)
+        {
+            return new SqlConnection(connectionString);
         }
     }
 }

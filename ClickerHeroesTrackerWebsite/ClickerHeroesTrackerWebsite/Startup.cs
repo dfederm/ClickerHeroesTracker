@@ -4,17 +4,15 @@
 
 namespace ClickerHeroesTrackerWebsite
 {
-    using ClickerHeroesTrackerWebsite.Authentication;
     using ClickerHeroesTrackerWebsite.Instrumentation;
     using ClickerHeroesTrackerWebsite.Models.Game;
     using ClickerHeroesTrackerWebsite.Models.Settings;
+    using ClickerHeroesTrackerWebsite.Utility;
     using Microsoft.AspNet.Builder;
     using Microsoft.AspNet.Hosting;
     using Microsoft.ApplicationInsights.Extensibility;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Logging;
-    using Models;
-    using Utility;
 
     public partial class Startup
     {
@@ -63,11 +61,7 @@ namespace ClickerHeroesTrackerWebsite
                     template: "{controller=Home}/{action=Index}");
             });
 
-            // Ensure the database is created. This is mostly for the in-memory database used in dev mode, but could be useful for new databases too.
-            using (var serviceScope = app.ApplicationServices.GetRequiredService<IServiceScopeFactory>().CreateScope())
-            {
-                serviceScope.ServiceProvider.GetService<ApplicationDbContext>().Database.EnsureCreated();
-            }
+            this.EnsureDatabaseCreated(app);
 
             // Warm up the game data parsing
             app.ApplicationServices.GetService<GameData>();
