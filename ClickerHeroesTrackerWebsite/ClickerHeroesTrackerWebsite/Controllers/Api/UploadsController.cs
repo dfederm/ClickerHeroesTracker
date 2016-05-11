@@ -8,7 +8,6 @@ namespace ClickerHeroesTrackerWebsite.Controllers.Api
     using System.Collections.Generic;
     using System.Net;
     using System.Security.Claims;
-    using ClickerHeroesTrackerWebsite.Database;
     using ClickerHeroesTrackerWebsite.Instrumentation;
     using ClickerHeroesTrackerWebsite.Models.Api;
     using ClickerHeroesTrackerWebsite.Models.Api.Stats;
@@ -17,6 +16,7 @@ namespace ClickerHeroesTrackerWebsite.Controllers.Api
     using ClickerHeroesTrackerWebsite.Models.SaveData;
     using ClickerHeroesTrackerWebsite.Models.Settings;
     using ClickerHeroesTrackerWebsite.Models.Stats;
+    using ClickerHeroesTrackerWebsite.Services.Database;
     using ClickerHeroesTrackerWebsite.Utility;
     using Microsoft.ApplicationInsights;
     using Microsoft.AspNet.Mvc;

@@ -9,12 +9,15 @@ namespace ClickerHeroesTracker.UploadProcessor
     using System.Threading;
     using System.Threading.Tasks;
     using ClickerHeroesTrackerWebsite.Models.Game;
+    using ClickerHeroesTrackerWebsite.Services.Database;
+    using ClickerHeroesTrackerWebsite.Services.UploadProcessing;
     using ClickerHeroesTrackerWebsite.UploadProcessing;
     using Microsoft.ApplicationInsights;
     using Microsoft.ApplicationInsights.Extensibility;
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
-    
+    using Microsoft.Extensions.OptionsModel;
+
     /// <summary>
     /// The entrypoint class to the program.
     /// </summary>
@@ -26,7 +29,9 @@ namespace ClickerHeroesTracker.UploadProcessor
 
         private static TelemetryClient telemetryClient;
 
-        private static IConfiguration configuration;
+        private static IOptions<DatabaseSettings> databaseSettingsOptions;
+
+        private static IOptions<UploadProcessingSettings> uploadProcessingSettingsOptions;
 
         /// <summary>
         /// The entrypoint method to the program.
@@ -49,7 +54,10 @@ namespace ClickerHeroesTracker.UploadProcessor
                 .AddJsonFile("appsettings.json")
                 .AddUserSecrets()
                 .AddApplicationInsightsSettings(developerMode: true);
-            configuration = builder.Build();
+            var configuration = builder.Build();
+
+            databaseSettingsOptions = new OptionsWrapper<DatabaseSettings>(configuration.GetSection("Database").Get<DatabaseSettings>());
+            uploadProcessingSettingsOptions = new OptionsWrapper<UploadProcessingSettings>(configuration.GetSection("UploadProcessing").Get<UploadProcessingSettings>());
 
             // Set up telemetry
             var telemetryConfiguration = TelemetryConfiguration.CreateDefault();
@@ -82,9 +90,21 @@ namespace ClickerHeroesTracker.UploadProcessor
 
         private static void StartUploadProcessor()
         {
-            var processor = new UploadProcessor(configuration, gameData, telemetryClient);
+            var processor = new UploadProcessor(databaseSettingsOptions, uploadProcessingSettingsOptions, gameData, telemetryClient);
             processor.Start();
             processors.Add(processor);
+        }
+
+        // Taken from https://github.com/aspnet/Options/blob/dev/src/Microsoft.Extensions.Options/OptionsWrapper.cs
+        // Remove after upgrading to RC2 and use Options.Create<TOptions>(TOptions options) instead.
+        private sealed class OptionsWrapper<TOptions> : IOptions<TOptions> where TOptions : class, new()
+        {
+            public OptionsWrapper(TOptions options)
+            {
+                Value = options;
+            }
+
+            public TOptions Value { get; }
         }
     }
 }

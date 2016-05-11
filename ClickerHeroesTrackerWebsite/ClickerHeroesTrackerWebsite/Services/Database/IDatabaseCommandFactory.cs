@@ -2,7 +2,7 @@
 // Copyright (c) Clicker Heroes Tracker. All rights reserved.
 // </copyright>
 
-namespace ClickerHeroesTrackerWebsite.Database
+namespace ClickerHeroesTrackerWebsite.Services.Database
 {
     /// <summary>
     /// A factory for creating <see cref="IDatabaseCommand"/>s.

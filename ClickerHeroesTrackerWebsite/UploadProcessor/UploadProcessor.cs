@@ -9,14 +9,15 @@ namespace ClickerHeroesTrackerWebsite.UploadProcessing
     using System.IO;
     using System.Text;
     using System.Threading.Tasks;
-    using ClickerHeroesTrackerWebsite.Database;
     using ClickerHeroesTrackerWebsite.Instrumentation;
     using ClickerHeroesTrackerWebsite.Models.Game;
     using ClickerHeroesTrackerWebsite.Models.SaveData;
     using ClickerHeroesTrackerWebsite.Models.Settings;
     using ClickerHeroesTrackerWebsite.Models.Stats;
+    using ClickerHeroesTrackerWebsite.Services.Database;
+    using ClickerHeroesTrackerWebsite.Services.UploadProcessing;
     using Microsoft.ApplicationInsights;
-    using Microsoft.Extensions.Configuration;
+    using Microsoft.Extensions.OptionsModel;
     using Microsoft.ServiceBus.Messaging;
     using Newtonsoft.Json;
     using Newtonsoft.Json.Converters;
@@ -27,9 +28,9 @@ namespace ClickerHeroesTrackerWebsite.UploadProcessing
 
         private readonly HashSet<int> currentlyProcessingUploads = new HashSet<int>();
 
+        private readonly IOptions<DatabaseSettings> databaseSettingsOptions;
         private readonly GameData gameData;
         private readonly TelemetryClient telemetryClient;
-        private readonly IConfiguration configuration;
 
         private readonly Dictionary<UploadProcessingMessagePriority, QueueClient> clients;
 
@@ -37,15 +38,16 @@ namespace ClickerHeroesTrackerWebsite.UploadProcessing
         /// Initializes a new instance of the <see cref="UploadProcessor"/> class.
         /// </summary>
         public UploadProcessor(
-            IConfiguration configuration,
+            IOptions<DatabaseSettings> databaseSettingsOptions,
+            IOptions<UploadProcessingSettings> uploadProcessingSettings,
             GameData gameData,
             TelemetryClient telemetryClient)
         {
-            this.configuration = configuration;
+            this.databaseSettingsOptions = databaseSettingsOptions;
             this.gameData = gameData;
             this.telemetryClient = telemetryClient;
 
-            var connectionString = configuration["UploadProcessing:ConnectionString"];
+            var connectionString = uploadProcessingSettings.Value?.ConnectionString;
             this.clients = new Dictionary<UploadProcessingMessagePriority, QueueClient>
             {
                 { UploadProcessingMessagePriority.Low, QueueClient.CreateFromConnectionString(connectionString, "UploadProcessing-LowPriority") },
@@ -115,7 +117,7 @@ namespace ClickerHeroesTrackerWebsite.UploadProcessing
 
             using (var counterProvider = new CounterProvider(this.telemetryClient))
             using (var databaseCommandFactory = new DatabaseCommandFactory(
-                this.configuration,
+                this.databaseSettingsOptions,
                 this.telemetryClient,
                 counterProvider))
             using (counterProvider.Measure(Counter.ProcessUpload))

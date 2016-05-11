@@ -2,7 +2,7 @@
 // Copyright (c) Clicker Heroes Tracker. All rights reserved.
 // </copyright>
 
-namespace ClickerHeroesTrackerWebsite.Authentication
+namespace ClickerHeroesTrackerWebsite.Services.Authentication
 {
     using System;
     using System.Linq;

@@ -2,25 +2,24 @@
 // Copyright (c) Clicker Heroes Tracker. All rights reserved.
 // </copyright>
 
-namespace ClickerHeroesTrackerWebsite
+namespace ClickerHeroesTrackerWebsite.Services.Email
 {
     using System.Net;
     using System.Net.Mail;
     using System.Threading.Tasks;
-    using Microsoft.Extensions.Configuration;
+    using Microsoft.Extensions.OptionsModel;
     using SendGrid;
-    using Services;
 
     /// <summary>
     /// Service that sends emails
     /// </summary>
     public class EmailSender : IEmailSender
     {
-        private readonly IConfiguration configuration;
+        private readonly EmailSenderSettings emailSenderSettings;
 
-        public EmailSender(IConfiguration configuration)
+        public EmailSender(IOptions<EmailSenderSettings> emailSenderSettingsOptions)
         {
-            this.configuration = configuration;
+            this.emailSenderSettings = emailSenderSettingsOptions.Value;
         }
 
         /// <inheritdoc />
@@ -33,8 +32,8 @@ namespace ClickerHeroesTrackerWebsite
             sendGridMessage.Text = message;
             sendGridMessage.Html = message;
 
-            var userName = this.configuration["EmailSender:UserName"];
-            var password = this.configuration["EmailSender:Password"];
+            var userName = this.emailSenderSettings.UserName;
+            var password = this.emailSenderSettings.Password;
             var credentials = new NetworkCredential(
                 userName,
                 password);

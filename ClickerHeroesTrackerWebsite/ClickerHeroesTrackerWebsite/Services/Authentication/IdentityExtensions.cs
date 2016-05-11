@@ -2,12 +2,12 @@
 // Copyright (c) Clicker Heroes Tracker. All rights reserved.
 // </copyright>
 
-namespace ClickerHeroesTrackerWebsite.Authentication
+namespace ClickerHeroesTrackerWebsite.Services.Authentication
 {
     using System.Security.Claims;
     using System.Threading.Tasks;
+    using ClickerHeroesTrackerWebsite.Models;
     using Microsoft.AspNet.Identity;
-    using Models;
 
     /// <summary>
     /// Identity-based extensions.

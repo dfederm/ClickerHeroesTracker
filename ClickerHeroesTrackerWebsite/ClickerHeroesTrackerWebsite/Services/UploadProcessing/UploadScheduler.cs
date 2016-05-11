@@ -2,14 +2,14 @@
 // Copyright (c) Clicker Heroes Tracker. All rights reserved.
 // </copyright>
 
-namespace ClickerHeroesTrackerWebsite.UploadProcessing
+namespace ClickerHeroesTrackerWebsite.Services.UploadProcessing
 {
     using System.Collections.Generic;
     using System.IO;
     using System.Linq;
     using System.Threading.Tasks;
-    using Instrumentation;
-    using Microsoft.Extensions.Configuration;
+    using ClickerHeroesTrackerWebsite.Instrumentation;
+    using Microsoft.Extensions.OptionsModel;
     using Microsoft.ServiceBus.Messaging;
     using Newtonsoft.Json;
     using Newtonsoft.Json.Converters;
@@ -28,11 +28,11 @@ namespace ClickerHeroesTrackerWebsite.UploadProcessing
         /// </summary>
         public UploadScheduler(
             ICounterProvider counterProvider,
-            IConfiguration configuration)
+            IOptions<UploadProcessingSettings> uploadProcessingSettings)
         {
             this.counterProvider = counterProvider;
 
-            var connectionString = configuration["UploadProcessing:ConnectionString"];
+            var connectionString = uploadProcessingSettings.Value?.ConnectionString;
             this.clients = new Dictionary<UploadProcessingMessagePriority, QueueClient>
             {
                 { UploadProcessingMessagePriority.Low, QueueClient.CreateFromConnectionString(connectionString, "UploadProcessing-LowPriority") },

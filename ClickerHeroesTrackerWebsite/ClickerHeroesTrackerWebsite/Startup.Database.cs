@@ -8,9 +8,10 @@ namespace ClickerHeroesTrackerWebsite
     using System.Collections.Generic;
     using System.IO;
     using ClickerHeroesTrackerWebsite.Models;
-    using ClickerHeroesTrackerWebsite.Database;
+    using ClickerHeroesTrackerWebsite.Services.Database;
     using Microsoft.AspNet.Builder;
     using Microsoft.Extensions.DependencyInjection;
+    using Microsoft.Extensions.OptionsModel;
     using Microsoft.Extensions.PlatformAbstractions;
 
     /// <summary>
@@ -35,10 +36,11 @@ namespace ClickerHeroesTrackerWebsite
                 serviceProvider.GetService<ApplicationDbContext>().Database.EnsureCreated();
 
                 var databaseCommandFactory = serviceProvider.GetService<IDatabaseCommandFactory>();
+                var databaseSettingsOptions = serviceProvider.GetService<IOptions<DatabaseSettings>>();
 
                 // Get all existing tables so we know what already exists
                 string tableNamesCommand;
-                switch (this.Configuration["Database:Kind"])
+                switch (databaseSettingsOptions.Value?.Kind)
                 {
                     case "SqlServer":
                     {
@@ -52,7 +54,7 @@ namespace ClickerHeroesTrackerWebsite
                     }
                     default:
                     {
-                        throw new InvalidOperationException($"Invalid configuration for \"Database:Kind\": {this.Configuration["Database:Kind"]}");
+                        throw new InvalidOperationException($"Invalid configuration for \"Database:Kind\": {databaseSettingsOptions.Value?.Kind}");
                     }
                 }
 

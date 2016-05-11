@@ -4,9 +4,11 @@
 
 namespace ClickerHeroesTrackerWebsite
 {
-    using ClickerHeroesTrackerWebsite.Authentication;
+    using ClickerHeroesTrackerWebsite.Services.Authentication;
     using Microsoft.AspNet.Builder;
     using Microsoft.AspNet.Hosting;
+    using Microsoft.Extensions.DependencyInjection;
+    using Microsoft.Extensions.OptionsModel;
 
     /// <summary>
     /// Configure authentication
@@ -17,48 +19,56 @@ namespace ClickerHeroesTrackerWebsite
         {
             app.UseIdentity();
 
-            var microsoftClientId = Configuration["Authentication:Microsoft:ClientId"];
-            var microsoftClientSecret = Configuration["Authentication:Microsoft:ClientSecret"];
-            if (!string.IsNullOrEmpty(microsoftClientId) && !string.IsNullOrEmpty(microsoftClientSecret))
+            var authenticationSettingsOptions = app.ApplicationServices.GetService<IOptions<AuthenticationSettings>>();
+            if (authenticationSettingsOptions.Value != null)
             {
-                app.UseMicrosoftAccountAuthentication(options =>
+                var microsoftAuthenticationSettings = authenticationSettingsOptions.Value.Microsoft;
+                if (microsoftAuthenticationSettings != null
+                    && !string.IsNullOrEmpty(microsoftAuthenticationSettings.ClientId)
+                    && !string.IsNullOrEmpty(microsoftAuthenticationSettings.ClientSecret))
                 {
-                    options.ClientId = microsoftClientId;
-                    options.ClientSecret = microsoftClientSecret;
-                });
-            }
+                    app.UseMicrosoftAccountAuthentication(options =>
+                    {
+                        options.ClientId = microsoftAuthenticationSettings.ClientId;
+                        options.ClientSecret = microsoftAuthenticationSettings.ClientSecret;
+                    });
+                }
 
-            var facebookAppId = Configuration["Authentication:Facebook:AppId"];
-            var facebookAppSecret = Configuration["Authentication:Facebook:AppSecret"];
-            if (!string.IsNullOrEmpty(facebookAppId) && !string.IsNullOrEmpty(facebookAppSecret))
-            {
-                app.UseFacebookAuthentication(options =>
+                var facebookAuthenticationSettings = authenticationSettingsOptions.Value.Facebook;
+                if (facebookAuthenticationSettings != null
+                    && !string.IsNullOrEmpty(facebookAuthenticationSettings.AppId)
+                    && !string.IsNullOrEmpty(facebookAuthenticationSettings.AppSecret))
                 {
-                    options.AppId = facebookAppId;
-                    options.AppSecret = facebookAppSecret;
-                });
-            }
+                    app.UseFacebookAuthentication(options =>
+                    {
+                        options.AppId = facebookAuthenticationSettings.AppId;
+                        options.AppSecret = facebookAuthenticationSettings.AppSecret;
+                    });
+                }
 
-            var googleClientId = Configuration["Authentication:Google:ClientId"];
-            var googleClientSecret = Configuration["Authentication:Google:ClientSecret"];
-            if (!string.IsNullOrEmpty(googleClientId) && !string.IsNullOrEmpty(googleClientSecret))
-            {
-                app.UseGoogleAuthentication(options =>
+                var googleAuthenticationSettings = authenticationSettingsOptions.Value.Google;
+                if (googleAuthenticationSettings != null
+                    && !string.IsNullOrEmpty(googleAuthenticationSettings.ClientId)
+                    && !string.IsNullOrEmpty(googleAuthenticationSettings.ClientSecret))
                 {
-                    options.ClientId = googleClientId;
-                    options.ClientSecret = googleClientSecret;
-                });
-            }
+                    app.UseGoogleAuthentication(options =>
+                    {
+                        options.ClientId = googleAuthenticationSettings.ClientId;
+                        options.ClientSecret = googleAuthenticationSettings.ClientSecret;
+                    });
+                }
 
-            var twitterConsumerKey = Configuration["Authentication:Twitter:ConsumerKey"];
-            var twitterConsumerSecret = Configuration["Authentication:Twitter:ConsumerSecret"];
-            if (!string.IsNullOrEmpty(twitterConsumerKey) && !string.IsNullOrEmpty(twitterConsumerSecret))
-            {
-                app.UseTwitterAuthentication(options =>
+                var twitterAuthenticationSettings = authenticationSettingsOptions.Value.Twitter;
+                if (twitterAuthenticationSettings != null
+                    && !string.IsNullOrEmpty(twitterAuthenticationSettings.ConsumerKey)
+                    && !string.IsNullOrEmpty(twitterAuthenticationSettings.ConsumerSecret))
                 {
-                    options.ConsumerKey = twitterConsumerKey;
-                    options.ConsumerSecret = twitterConsumerSecret;
-                });
+                    app.UseTwitterAuthentication(options =>
+                    {
+                        options.ConsumerKey = twitterAuthenticationSettings.ConsumerKey;
+                        options.ConsumerSecret = twitterAuthenticationSettings.ConsumerSecret;
+                    });
+                }
             }
 
             // Allow auth mocking when not in prod

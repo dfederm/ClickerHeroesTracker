@@ -7,7 +7,7 @@ namespace ClickerHeroesTrackerWebsite.Models.Dashboard
     using System;
     using System.Collections.Generic;
     using System.Data;
-    using Database;
+    using ClickerHeroesTrackerWebsite.Services.Database;
 
     /// <summary>
     /// A model for the rival data list.

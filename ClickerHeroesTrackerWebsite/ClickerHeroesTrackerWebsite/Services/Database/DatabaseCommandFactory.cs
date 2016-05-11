@@ -2,17 +2,17 @@
 // Copyright (c) Clicker Heroes Tracker. All rights reserved.
 // </copyright>
 
-namespace ClickerHeroesTrackerWebsite.Database
+namespace ClickerHeroesTrackerWebsite.Services.Database
 {
     using System;
     using System.Collections.Generic;
     using System.Data.Common;
     using System.Data.SqlClient;
-    using Instrumentation;
+    using ClickerHeroesTrackerWebsite.Instrumentation;
+    using ClickerHeroesTrackerWebsite.Utility;
     using Microsoft.ApplicationInsights;
     using Microsoft.Data.Sqlite;
-    using Microsoft.Extensions.Configuration;
-    using Utility;
+    using Microsoft.Extensions.OptionsModel;
 
     /// <summary>
     /// A SQL command provider for the default connection string
@@ -25,9 +25,7 @@ namespace ClickerHeroesTrackerWebsite.Database
             { "Sqlite", str => new SqliteConnection(str) },
         };
 
-        private readonly string databaseKind;
-
-        private readonly string connectionString;
+        private readonly DatabaseSettings databaseSettings;
 
         private readonly TelemetryClient telemetryClient;
 
@@ -39,12 +37,11 @@ namespace ClickerHeroesTrackerWebsite.Database
         /// Initializes a new instance of the <see cref="DatabaseCommandFactory"/> class.
         /// </summary>
         public DatabaseCommandFactory(
-            IConfiguration configuration,
+            IOptions<DatabaseSettings> databaseSettingsOptions,
             TelemetryClient telemetryClient,
             ICounterProvider counterProvider)
         {
-            this.connectionString = configuration["Database:ConnectionString"];
-            this.databaseKind = configuration["Database:Kind"];
+            this.databaseSettings = databaseSettingsOptions.Value;
             this.telemetryClient = telemetryClient;
             this.counterProvider = counterProvider;
         }
@@ -62,7 +59,7 @@ namespace ClickerHeroesTrackerWebsite.Database
                 using (this.counterProvider.Suspend(Counter.Internal))
                 using (this.counterProvider.Measure(Counter.Dependency))
                 {
-                    this.connection = connectionFactories[this.databaseKind](this.connectionString);
+                    this.connection = connectionFactories[this.databaseSettings.Kind](this.databaseSettings.ConnectionString);
                     this.connection.Open();
                 }
             }

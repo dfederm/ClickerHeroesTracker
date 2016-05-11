@@ -4,7 +4,7 @@
 
 namespace ClickerHeroesTrackerWebsite.Controllers
 {
-    using Database;
+    using ClickerHeroesTrackerWebsite.Services.Database;
     using Microsoft.ApplicationInsights;
     using Microsoft.AspNet.Authorization;
     using Microsoft.AspNet.Mvc;

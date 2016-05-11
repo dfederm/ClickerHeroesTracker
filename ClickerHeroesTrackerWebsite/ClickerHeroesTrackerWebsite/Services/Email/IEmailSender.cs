@@ -2,7 +2,7 @@
 // Copyright (c) Clicker Heroes Tracker. All rights reserved.
 // </copyright>
 
-namespace ClickerHeroesTrackerWebsite.Services
+namespace ClickerHeroesTrackerWebsite.Services.Email
 {
     using System.Threading.Tasks;
 

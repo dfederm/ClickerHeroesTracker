@@ -12,8 +12,8 @@ namespace ClickerHeroesTrackerWebsite.Controllers
     using Microsoft.AspNet.Identity;
     using Microsoft.AspNet.Mvc;
     using ClickerHeroesTrackerWebsite.Models;
-    using ClickerHeroesTrackerWebsite.Services;
     using ClickerHeroesTrackerWebsite.Models.Settings;
+    using ClickerHeroesTrackerWebsite.Services.Email;
     using ClickerHeroesTrackerWebsite.ViewModels.Account;
 
     /// <summary>

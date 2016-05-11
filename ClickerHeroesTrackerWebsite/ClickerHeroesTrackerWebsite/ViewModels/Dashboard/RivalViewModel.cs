@@ -9,11 +9,11 @@ namespace ClickerHeroesTrackerWebsite.Models.Dashboard
     using System.Data;
     using System.Linq;
     using System.Security.Claims;
-    using Database;
-    using Game;
-    using Graph;
+    using ClickerHeroesTrackerWebsite.Models.Dashboard.Graph;
+    using ClickerHeroesTrackerWebsite.Models.Game;
+    using ClickerHeroesTrackerWebsite.Models.Settings;
+    using ClickerHeroesTrackerWebsite.Services.Database;
     using Microsoft.ApplicationInsights;
-    using Settings;
 
     /// <summary>
     /// A model for the rival view.

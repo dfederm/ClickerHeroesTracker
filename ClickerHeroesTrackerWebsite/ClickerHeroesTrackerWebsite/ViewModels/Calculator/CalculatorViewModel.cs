@@ -7,9 +7,9 @@ namespace ClickerHeroesTrackerWebsite.Models.Calculator
     using System;
     using System.Collections.Generic;
     using System.Security.Claims;
-    using ClickerHeroesTrackerWebsite.Database;
     using ClickerHeroesTrackerWebsite.Models.Game;
     using ClickerHeroesTrackerWebsite.Models.Settings;
+    using ClickerHeroesTrackerWebsite.Services.Database;
 
     /// <summary>
     /// The model for the calculator view.

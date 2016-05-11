@@ -4,17 +4,17 @@
 
 namespace ClickerHeroesTrackerWebsite.Controllers
 {
+    using System;
     using System.Linq;
-    using System.Threading.Tasks;
     using System.Security.Claims;
+    using System.Threading.Tasks;
     using Microsoft.AspNet.Authorization;
     using Microsoft.AspNet.Identity;
     using Microsoft.AspNet.Mvc;
     using ClickerHeroesTrackerWebsite.Models;
-    using ClickerHeroesTrackerWebsite.Services;
-    using ClickerHeroesTrackerWebsite.ViewModels.Manage;
     using ClickerHeroesTrackerWebsite.Models.Settings;
-    using System;
+    using ClickerHeroesTrackerWebsite.Services.Email;
+    using ClickerHeroesTrackerWebsite.ViewModels.Manage;
 
     /// <summary>
     /// The manage controller allows users to manage their settings.

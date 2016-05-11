@@ -7,7 +7,7 @@ namespace ClickerHeroesTrackerWebsite.Models.Settings
     using System;
     using System.Collections.Generic;
     using System.Data;
-    using ClickerHeroesTrackerWebsite.Database;
+    using ClickerHeroesTrackerWebsite.Services.Database;
     using Newtonsoft.Json;
 
     internal sealed class UserSettings : IUserSettings

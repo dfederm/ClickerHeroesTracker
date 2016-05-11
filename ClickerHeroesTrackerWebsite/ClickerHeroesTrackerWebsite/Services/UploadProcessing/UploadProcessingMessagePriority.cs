@@ -2,7 +2,7 @@
 // Copyright (c) Clicker Heroes Tracker. All rights reserved.
 // </copyright>
 
-namespace ClickerHeroesTrackerWebsite.UploadProcessing
+namespace ClickerHeroesTrackerWebsite.Services.UploadProcessing
 {
     /// <summary>
     /// Represents the priority of an <see cref="UploadProcessingMessage"/>

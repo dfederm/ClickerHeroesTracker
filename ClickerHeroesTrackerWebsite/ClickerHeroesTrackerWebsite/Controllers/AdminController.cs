@@ -9,12 +9,12 @@ namespace ClickerHeroesTrackerWebsite.Controllers
     using System.Linq;
     using System.Security.Claims;
     using System.Threading.Tasks;
-    using Database;
+    using ClickerHeroesTrackerWebsite.Services.Database;
+    using ClickerHeroesTrackerWebsite.Services.UploadProcessing;
     using Microsoft.AspNet.Mvc;
     using Microsoft.AspNet.Authorization;
-    using Microsoft.Extensions.Configuration;
+    using Microsoft.Extensions.OptionsModel;
     using Microsoft.ServiceBus.Messaging;
-    using UploadProcessing;
 
     /// <summary>
     /// The Admin controller is where Admin users can manage the site.
@@ -26,7 +26,7 @@ namespace ClickerHeroesTrackerWebsite.Controllers
 
         private readonly IUploadScheduler uploadScheduler;
 
-        private readonly IConfiguration configuration;
+        private readonly UploadProcessingSettings uploadProcessingSettings;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="AdminController"/> class.
@@ -34,11 +34,11 @@ namespace ClickerHeroesTrackerWebsite.Controllers
         public AdminController(
             IDatabaseCommandFactory databaseCommandFactory,
             IUploadScheduler uploadScheduler,
-            IConfiguration configuration)
+            IOptions<UploadProcessingSettings> uploadProcessingSettingsOptions)
         {
             this.databaseCommandFactory = databaseCommandFactory;
             this.uploadScheduler = uploadScheduler;
-            this.configuration = configuration;
+            this.uploadProcessingSettings = uploadProcessingSettingsOptions.Value;
         }
 
         /// <summary>
@@ -117,7 +117,7 @@ namespace ClickerHeroesTrackerWebsite.Controllers
                 return this.View("Index");
             }
 
-            var connectionString = this.configuration["UploadProcessing:ConnectionString"];
+            var connectionString = this.uploadProcessingSettings.ConnectionString;
             var client = QueueClient.CreateFromConnectionString(connectionString, $"UploadProcessing-{priority.Value}Priority");
             const int BatchSize = 1024;
 

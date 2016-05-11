@@ -9,12 +9,13 @@ namespace ClickerHeroesTrackerWebsite.Controllers
     using System.Net.Mail;
     using System.Security.Claims;
     using System.Threading.Tasks;
+    using ClickerHeroesTrackerWebsite.Models;
+    using ClickerHeroesTrackerWebsite.Models.Feedback;
+    using ClickerHeroesTrackerWebsite.Services.Email;
     using Microsoft.ApplicationInsights;
     using Microsoft.AspNet.Identity;
     using Microsoft.AspNet.Mvc;
-    using Microsoft.Extensions.Configuration;
-    using Models;
-    using Models.Feedback;
+    using Microsoft.Extensions.OptionsModel;
     using Newtonsoft.Json;
     using SendGrid;
 
@@ -28,7 +29,7 @@ namespace ClickerHeroesTrackerWebsite.Controllers
 
         private readonly TelemetryClient telemetryClient;
 
-        private readonly IConfiguration configuration;
+        private readonly EmailSenderSettings emailSenderSettings;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="FeedbackController"/> class.
@@ -36,11 +37,11 @@ namespace ClickerHeroesTrackerWebsite.Controllers
         public FeedbackController(
             UserManager<ApplicationUser> userManager,
             TelemetryClient telemetryClient,
-            IConfiguration configuration)
+            IOptions<EmailSenderSettings> emailSenderSettingsOptions)
         {
             this.userManager = userManager;
             this.telemetryClient = telemetryClient;
-            this.configuration = configuration;
+            this.emailSenderSettings = emailSenderSettingsOptions.Value;
         }
 
         /// <summary>
@@ -81,8 +82,8 @@ namespace ClickerHeroesTrackerWebsite.Controllers
             sendGridMessage.Text = JsonConvert.SerializeObject(feedbackData, Formatting.Indented);
 
             var credentials = new NetworkCredential(
-                this.configuration["EmailSender:UserName"],
-                this.configuration["EmailSender:Password"]);
+                this.emailSenderSettings.UserName,
+                this.emailSenderSettings.Password);
 
             // Create a Web transport for sending email.
             var transportWeb = new Web(credentials);

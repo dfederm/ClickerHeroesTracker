@@ -4,33 +4,32 @@
 
 namespace ClickerHeroesTrackerWebsite
 {
-    using Configuration;
-    using Database;
-    using Instrumentation;
-    using Microsoft.WindowsAzure.Storage;
-    using Microsoft.WindowsAzure.Storage.Table;
-    using Models.Game;
-    using Models.Settings;
-    using UploadProcessing;
-    using Microsoft.AspNet.Hosting;
-    using Microsoft.AspNet.Identity.EntityFramework;
-    using Microsoft.Data.Entity;
-    using Microsoft.Extensions.DependencyInjection;
-    using ClickerHeroesTrackerWebsite.Models;
-    using ClickerHeroesTrackerWebsite.Services;
     using System;
     using System.Linq;
-    using Microsoft.AspNet.Mvc.Formatters;
-    using Microsoft.Net.Http.Headers;
-    using Newtonsoft.Json;
-    using Newtonsoft.Json.Serialization;
-    using Newtonsoft.Json.Converters;
-    using Services.ContentManagement;
-    using Microsoft.Extensions.Configuration;
-    using Services.Authentication;
+    using ClickerHeroesTrackerWebsite.Configuration;
+    using ClickerHeroesTrackerWebsite.Instrumentation;
+    using ClickerHeroesTrackerWebsite.Models;
+    using ClickerHeroesTrackerWebsite.Models.Game;
+    using ClickerHeroesTrackerWebsite.Models.Settings;
+    using ClickerHeroesTrackerWebsite.Services.Authentication;
+    using ClickerHeroesTrackerWebsite.Services.ContentManagement;
+    using ClickerHeroesTrackerWebsite.Services.Database;
+    using ClickerHeroesTrackerWebsite.Services.Email;
+    using ClickerHeroesTrackerWebsite.Services.UploadProcessing;
     using Microsoft.AspNet.DataProtection;
+    using Microsoft.AspNet.Hosting;
     using Microsoft.AspNet.Identity;
+    using Microsoft.AspNet.Identity.EntityFramework;
+    using Microsoft.AspNet.Mvc.Formatters;
+    using Microsoft.Data.Entity;
+    using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.OptionsModel;
+    using Microsoft.Net.Http.Headers;
+    using Microsoft.WindowsAzure.Storage;
+    using Microsoft.WindowsAzure.Storage.Table;
+    using Newtonsoft.Json;
+    using Newtonsoft.Json.Converters;
+    using Newtonsoft.Json.Serialization;
     
     /// <summary>
     /// Configure the Unity container
@@ -135,7 +134,8 @@ namespace ClickerHeroesTrackerWebsite
 
             });
 
-            services.AddInstance<IConfiguration>(this.Configuration);
+            // Allow IOptions<T> to be available through DI
+            services.AddOptions();
 
             // Container controlled registrations
             services.AddSingleton<CloudStorageAccount>(_ => storageAccount);
@@ -151,6 +151,12 @@ namespace ClickerHeroesTrackerWebsite
             services.AddScoped<ICounterProvider, CounterProvider>();
             services.AddScoped<IDatabaseCommandFactory, DatabaseCommandFactory>();
             services.AddScoped<IUserSettingsProvider, UserSettingsProvider>();
+
+            // Configuration
+            services.Configure<AuthenticationSettings>(this.Configuration.GetSection("Authentication"));
+            services.Configure<DatabaseSettings>(this.Configuration.GetSection("Database"));
+            services.Configure<EmailSenderSettings>(this.Configuration.GetSection("EmailSender"));
+            services.Configure<UploadProcessingSettings>(this.Configuration.GetSection("UploadProcessing"));
         }
     }
 }
