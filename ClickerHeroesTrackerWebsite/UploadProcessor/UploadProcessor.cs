@@ -6,8 +6,8 @@ namespace ClickerHeroesTrackerWebsite.UploadProcessing
 {
     using System;
     using System.Collections.Generic;
-    using System.IO;
     using System.Text;
+    using System.Threading;
     using System.Threading.Tasks;
     using ClickerHeroesTrackerWebsite.Instrumentation;
     using ClickerHeroesTrackerWebsite.Models.Game;
@@ -18,100 +18,83 @@ namespace ClickerHeroesTrackerWebsite.UploadProcessing
     using ClickerHeroesTrackerWebsite.Services.UploadProcessing;
     using Microsoft.ApplicationInsights;
     using Microsoft.Extensions.OptionsModel;
-    using Microsoft.ServiceBus.Messaging;
+    using Microsoft.WindowsAzure.Storage.Queue;
     using Newtonsoft.Json;
-    using Newtonsoft.Json.Converters;
 
-    internal sealed class UploadProcessor : IDisposable
+    internal sealed class UploadProcessor
     {
-        private static readonly JsonSerializer Serializer = CreateSerializer();
-
-        private readonly HashSet<int> currentlyProcessingUploads = new HashSet<int>();
-
         private readonly IOptions<DatabaseSettings> databaseSettingsOptions;
         private readonly GameData gameData;
         private readonly TelemetryClient telemetryClient;
 
-        private readonly Dictionary<UploadProcessingMessagePriority, QueueClient> clients;
+        private readonly Dictionary<UploadProcessingMessagePriority, CloudQueue> queues;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="UploadProcessor"/> class.
         /// </summary>
         public UploadProcessor(
             IOptions<DatabaseSettings> databaseSettingsOptions,
-            IOptions<UploadProcessingSettings> uploadProcessingSettings,
             GameData gameData,
-            TelemetryClient telemetryClient)
+            TelemetryClient telemetryClient,
+            CloudQueueClient queueClient)
         {
             this.databaseSettingsOptions = databaseSettingsOptions;
             this.gameData = gameData;
             this.telemetryClient = telemetryClient;
-
-            var connectionString = uploadProcessingSettings.Value?.ConnectionString;
-            this.clients = new Dictionary<UploadProcessingMessagePriority, QueueClient>
+            this.queues = new Dictionary<UploadProcessingMessagePriority, CloudQueue>
             {
-                { UploadProcessingMessagePriority.Low, QueueClient.CreateFromConnectionString(connectionString, "UploadProcessing-LowPriority") },
-                { UploadProcessingMessagePriority.High, QueueClient.CreateFromConnectionString(connectionString, "UploadProcessing-HighPriority") },
+                { UploadProcessingMessagePriority.Low, GetQueue(queueClient, UploadProcessingMessagePriority.Low) },
+                { UploadProcessingMessagePriority.High, GetQueue(queueClient, UploadProcessingMessagePriority.High) },
             };
         }
 
-        public void Start()
-        {
-            foreach (var client in this.clients.Values)
-            {
-                client.OnMessageAsync(this.ProcessMessage, new OnMessageOptions { AutoComplete = false });
-            }
-        }
+        public int? CurrentUploadId { get; private set; }
 
-        public void Stop()
+        public async Task ProcessAsync(CancellationToken cancellationToken)
         {
-            foreach (var client in this.clients.Values)
-            {
-                client.Close();
-            }
-        }
+            const int MaxProcessAttempts = 10;
+            var visibilityTimeout = TimeSpan.FromMinutes(10);
 
-        /// <inheritdoc />
-        public void Dispose()
-        {
-            lock (this.currentlyProcessingUploads)
+            while (!cancellationToken.IsCancellationRequested)
             {
-                foreach (var uploadId in this.currentlyProcessingUploads)
+                foreach (var queue in this.queues.Values)
                 {
-                    var properties = new Dictionary<string, string>
+                    if (cancellationToken.IsCancellationRequested)
                     {
-                        { "UploadId", uploadId.ToString() }
-                    };
-                    this.telemetryClient.TrackEvent("UploadProcessor-Abandoned-Disposed", properties);
+                        return;
+                    }
+
+                    var message = await queue.GetMessageAsync(visibilityTimeout, null, null, cancellationToken);
+                    if (message == null)
+                    {
+                        // if there was no work to do, wait for a bit to avoid spamming the empty queue with requests
+                        await Task.Delay(10000);
+                    }
+                    else
+                    {
+                        var processed = this.ProcessMessage(message);
+                        if (processed || message.DequeueCount > MaxProcessAttempts)
+                        {
+                            await queue.DeleteMessageAsync(message);
+                        }
+                    }
                 }
             }
-
-            this.Stop();
         }
 
-        private static JsonSerializer CreateSerializer()
+        private static CloudQueue GetQueue(CloudQueueClient queueClient, UploadProcessingMessagePriority priority)
         {
-            var settings = new JsonSerializerSettings();
-            settings.NullValueHandling = NullValueHandling.Ignore;
-            settings.Converters.Add(new StringEnumConverter { CamelCaseText = true });
-
-            return JsonSerializer.CreateDefault(settings);
+            var queue = queueClient.GetQueueReference($"upload-processing-{priority.ToString().ToLower()}-priority");
+            queue.CreateIfNotExists();
+            return queue;
         }
 
-        private static UploadProcessingMessage ParseMessage(BrokeredMessage brokeredMessage)
-        {
-            var stream = brokeredMessage.GetBody<Stream>();
-            var jsonReader = new JsonTextReader(new StreamReader(stream));
-            return Serializer.Deserialize<UploadProcessingMessage>(jsonReader);
-        }
-
-        private async Task ProcessMessage(BrokeredMessage brokeredMessage)
+        private bool ProcessMessage(CloudQueueMessage queueMessage)
         {
             var properties = new Dictionary<string, string>();
-            properties.Add("BrokeredMessage-CorrelationId", brokeredMessage.CorrelationId);
-            properties.Add("BrokeredMessage-DeliveryCount", brokeredMessage.DeliveryCount.ToString());
-            properties.Add("BrokeredMessage-EnqueuedTimeUtc", brokeredMessage.EnqueuedTimeUtc.ToString());
-            properties.Add("BrokeredMessage-MessageId", brokeredMessage.MessageId);
+            properties.Add("CloudQueueMessage-DequeueCount", queueMessage.DequeueCount.ToString());
+            properties.Add("CloudQueueMessage-InsertionTime", queueMessage.InsertionTime.ToString());
+            properties.Add("CloudQueueMessage-Id", queueMessage.Id);
 
             this.telemetryClient.TrackEvent("UploadProcessor-Recieved", properties);
 
@@ -126,21 +109,17 @@ namespace ClickerHeroesTrackerWebsite.UploadProcessing
                 var userSettingsProvider = new UserSettingsProvider(databaseCommandFactory);
                 try
                 {
-                    var message = ParseMessage(brokeredMessage);
+                    var message = JsonConvert.DeserializeObject<UploadProcessingMessage>(queueMessage.AsString);
                     if (message == null)
                     {
                         this.telemetryClient.TrackEvent("UploadProcessor-Abandoned-ParseMessage", properties);
-                        await brokeredMessage.AbandonAsync();
-                        return;
+                        return false;
                     }
 
                     uploadId = message.UploadId;
                     properties.Add("UploadId", uploadId.ToString());
 
-                    lock (this.currentlyProcessingUploads)
-                    {
-                        this.currentlyProcessingUploads.Add(uploadId);
-                    }
+                    this.CurrentUploadId = uploadId;
 
                     string uploadContent;
                     string userId;
@@ -149,32 +128,28 @@ namespace ClickerHeroesTrackerWebsite.UploadProcessing
                     if (string.IsNullOrWhiteSpace(uploadContent))
                     {
                         this.telemetryClient.TrackEvent("UploadProcessor-Abandoned-FetchUpload", properties);
-                        await brokeredMessage.AbandonAsync();
-                        return;
+                        return false;
                     }
 
                     // Handle legacy uplaods where the upload content was missing.
                     if (uploadContent.Equals("LEGACY", StringComparison.OrdinalIgnoreCase))
                     {
                         this.telemetryClient.TrackEvent("UploadProcessor-Complete-Legacy", properties);
-                        await brokeredMessage.CompleteAsync();
-                        return;
+                        return true;
                     }
 
                     var userSettings = userSettingsProvider.Get(userId);
                     if (userSettings == null)
                     {
                         this.telemetryClient.TrackEvent("UploadProcessor-Abandoned-FetchUserSettings", properties);
-                        await brokeredMessage.AbandonAsync();
-                        return;
+                        return false;
                     }
 
                     var savedGame = SavedGame.Parse(uploadContent);
                     if (savedGame == null)
                     {
                         this.telemetryClient.TrackEvent("UploadProcessor-Abandoned-ParseUpload", properties);
-                        await brokeredMessage.AbandonAsync();
-                        return;
+                        return false;
                     }
 
                     this.telemetryClient.TrackEvent("UploadProcessor-Simulation", properties);
@@ -291,25 +266,21 @@ namespace ClickerHeroesTrackerWebsite.UploadProcessing
                         if (!commited)
                         {
                             this.telemetryClient.TrackEvent("UploadProcessor-Abandoned-CommitTransaction", properties);
-                            await brokeredMessage.AbandonAsync();
-                            return;
+                            return false;
                         }
                     }
 
                     this.telemetryClient.TrackEvent("UploadProcessor-Complete", properties);
-                    await brokeredMessage.CompleteAsync();
+                    return true;
                 }
                 catch (Exception e)
                 {
                     this.telemetryClient.TrackException(e, properties);
-                    await brokeredMessage.AbandonAsync();
+                    return false;
                 }
                 finally
                 {
-                    lock (this.currentlyProcessingUploads)
-                    {
-                        this.currentlyProcessingUploads.Remove(uploadId);
-                    }
+                    this.CurrentUploadId = null;
                 }
             }
         }

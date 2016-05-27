@@ -26,11 +26,12 @@ namespace ClickerHeroesTrackerWebsite
     using Microsoft.Extensions.OptionsModel;
     using Microsoft.Net.Http.Headers;
     using Microsoft.WindowsAzure.Storage;
+    using Microsoft.WindowsAzure.Storage.Queue;
     using Microsoft.WindowsAzure.Storage.Table;
     using Newtonsoft.Json;
     using Newtonsoft.Json.Converters;
     using Newtonsoft.Json.Serialization;
-    
+
     /// <summary>
     /// Configure the Unity container
     /// </summary>
@@ -140,6 +141,7 @@ namespace ClickerHeroesTrackerWebsite
             // Container controlled registrations
             services.AddSingleton<CloudStorageAccount>(_ => storageAccount);
             services.AddSingleton<CloudTableClient>(_ => _.GetService<CloudStorageAccount>().CreateCloudTableClient());
+            services.AddSingleton<CloudQueueClient>(_ => _.GetService<CloudStorageAccount>().CreateCloudQueueClient());
             services.AddSingleton<GameData>(_ => GameData.Parse(this.Environment.MapPath(@"data\GameData.json")));
             services.AddSingleton<IBuildInfoProvider, BuildInfoProvider>();
             services.AddSingleton<IEmailSender, EmailSender>();
@@ -156,7 +158,6 @@ namespace ClickerHeroesTrackerWebsite
             services.Configure<AuthenticationSettings>(this.Configuration.GetSection("Authentication"));
             services.Configure<DatabaseSettings>(this.Configuration.GetSection("Database"));
             services.Configure<EmailSenderSettings>(this.Configuration.GetSection("EmailSender"));
-            services.Configure<UploadProcessingSettings>(this.Configuration.GetSection("UploadProcessing"));
         }
     }
 }

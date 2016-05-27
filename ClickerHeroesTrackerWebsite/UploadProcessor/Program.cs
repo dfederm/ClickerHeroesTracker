@@ -6,17 +6,19 @@ namespace ClickerHeroesTracker.UploadProcessor
 {
     using System;
     using System.Collections.Concurrent;
+    using System.Collections.Generic;
     using System.Threading;
     using System.Threading.Tasks;
     using ClickerHeroesTrackerWebsite.Models.Game;
     using ClickerHeroesTrackerWebsite.Services.Database;
-    using ClickerHeroesTrackerWebsite.Services.UploadProcessing;
     using ClickerHeroesTrackerWebsite.UploadProcessing;
     using Microsoft.ApplicationInsights;
     using Microsoft.ApplicationInsights.Extensibility;
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.OptionsModel;
+    using Microsoft.WindowsAzure.Storage;
+    using Microsoft.WindowsAzure.Storage.Queue;
 
     /// <summary>
     /// The entrypoint class to the program.
@@ -31,7 +33,7 @@ namespace ClickerHeroesTracker.UploadProcessor
 
         private static IOptions<DatabaseSettings> databaseSettingsOptions;
 
-        private static IOptions<UploadProcessingSettings> uploadProcessingSettingsOptions;
+        private static CloudQueueClient queueClient;
 
         /// <summary>
         /// The entrypoint method to the program.
@@ -57,7 +59,8 @@ namespace ClickerHeroesTracker.UploadProcessor
             var configuration = builder.Build();
 
             databaseSettingsOptions = new OptionsWrapper<DatabaseSettings>(configuration.GetSection("Database").Get<DatabaseSettings>());
-            uploadProcessingSettingsOptions = new OptionsWrapper<UploadProcessingSettings>(configuration.GetSection("UploadProcessing").Get<UploadProcessingSettings>());
+
+            queueClient = CloudStorageAccount.Parse(configuration["Storage:ConnectionString"]).CreateCloudQueueClient();
 
             // Set up telemetry
             var telemetryConfiguration = TelemetryConfiguration.CreateDefault();
@@ -67,32 +70,42 @@ namespace ClickerHeroesTracker.UploadProcessor
 
             // Spin up one per logical core
             Console.WriteLine($"Number of processors: {Environment.ProcessorCount}");
-            for (var i = 0; i < Environment.ProcessorCount; i++)
+            var tasks = new Task[Environment.ProcessorCount];
+            var cancelSource = new CancellationTokenSource();
+            for (var i = 0; i < tasks.Length; i++)
             {
-                Task.Run(() => StartUploadProcessor());
+                var processor = new UploadProcessor(databaseSettingsOptions, gameData, telemetryClient, queueClient);
+                processors.Add(processor);
+                tasks[i] = processor.ProcessAsync(cancelSource.Token);
             }
 
             // Let it run until Ctrl+C
             exitEvent.WaitOne();
 
-            // Dispose of everything
-            foreach (var processor in processors)
+            const int DrainTimeMs = 60000;
+            Console.WriteLine($"Waiting for up to {DrainTimeMs}ms for processing to drain...");
+            if (Task.WaitAll(tasks, DrainTimeMs))
             {
-                processor.Dispose();
+                Console.WriteLine($"Processing drained successfully");
+            }
+            else
+            {
+                Console.WriteLine($"Some processing was stuck");
+                foreach (var processor in processors)
+                {
+                    var currentUploadId = processor.CurrentUploadId;
+                    if (currentUploadId != null)
+                    {
+                        var properties = new Dictionary<string, string>
+                        {
+                            { "UploadId", currentUploadId.Value.ToString() }
+                        };
+                        telemetryClient.TrackEvent("UploadProcessor-Abandoned-Stuck", properties);
+                    }
+                }
             }
 
-            const int DrainTimeMs = 60000;
-            Console.WriteLine($"Waiting for {DrainTimeMs}ms for processing to drain...");
-            Thread.Sleep(DrainTimeMs);
-
             telemetryClient.Flush();
-        }
-
-        private static void StartUploadProcessor()
-        {
-            var processor = new UploadProcessor(databaseSettingsOptions, uploadProcessingSettingsOptions, gameData, telemetryClient);
-            processor.Start();
-            processors.Add(processor);
         }
 
         // Taken from https://github.com/aspnet/Options/blob/dev/src/Microsoft.Extensions.Options/OptionsWrapper.cs

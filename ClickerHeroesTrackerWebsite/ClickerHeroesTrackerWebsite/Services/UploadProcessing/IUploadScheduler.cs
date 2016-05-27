@@ -17,13 +17,13 @@ namespace ClickerHeroesTrackerWebsite.Services.UploadProcessing
         /// </summary>
         /// <param name="message">The messages to send</param>
         /// <returns>The asynchronous operation</returns>
-        Task Schedule(UploadProcessingMessage message);
+        Task ScheduleAsync(UploadProcessingMessage message);
 
         /// <summary>
         /// Schedules multiple uploads for processing
         /// </summary>
         /// <param name="messages">The upload ids to schedule processing for</param>
         /// <returns>The asynchronous operation</returns>
-        Task Schedule(IEnumerable<UploadProcessingMessage> messages);
+        Task ScheduleAsync(IEnumerable<UploadProcessingMessage> messages);
     }
 }

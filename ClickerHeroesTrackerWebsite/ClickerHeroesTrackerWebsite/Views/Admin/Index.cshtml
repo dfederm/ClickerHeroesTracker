@@ -51,9 +51,9 @@
                     <dt>Queue Priority</dt>
                     <dd>
                         <select name="priority" class="input-sm">
-                            @foreach (var priority in Enum.GetNames(typeof(UploadProcessingMessagePriority)))
+                            @foreach (var queue in this.ViewBag.Queues)
                             {
-                                <option>@priority</option>
+                                <option value="@queue.Key">@queue.Key (~@queue.Value messages)</option>
                             }
                         </select>
                     </dd>

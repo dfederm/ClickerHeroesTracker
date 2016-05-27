@@ -13,8 +13,7 @@ namespace ClickerHeroesTrackerWebsite.Controllers
     using ClickerHeroesTrackerWebsite.Services.UploadProcessing;
     using Microsoft.AspNet.Mvc;
     using Microsoft.AspNet.Authorization;
-    using Microsoft.Extensions.OptionsModel;
-    using Microsoft.ServiceBus.Messaging;
+    using Microsoft.WindowsAzure.Storage.Queue;
 
     /// <summary>
     /// The Admin controller is where Admin users can manage the site.
@@ -22,11 +21,13 @@ namespace ClickerHeroesTrackerWebsite.Controllers
     [Authorize(Roles = "Admin")]
     public class AdminController : Controller
     {
+        private static string[] priorities = Enum.GetNames(typeof(UploadProcessingMessagePriority));
+
         private readonly IDatabaseCommandFactory databaseCommandFactory;
 
         private readonly IUploadScheduler uploadScheduler;
 
-        private readonly UploadProcessingSettings uploadProcessingSettings;
+        private readonly CloudQueueClient queueClient;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="AdminController"/> class.
@@ -34,20 +35,32 @@ namespace ClickerHeroesTrackerWebsite.Controllers
         public AdminController(
             IDatabaseCommandFactory databaseCommandFactory,
             IUploadScheduler uploadScheduler,
-            IOptions<UploadProcessingSettings> uploadProcessingSettingsOptions)
+            CloudQueueClient queueClient)
         {
             this.databaseCommandFactory = databaseCommandFactory;
             this.uploadScheduler = uploadScheduler;
-            this.uploadProcessingSettings = uploadProcessingSettingsOptions.Value;
+            this.queueClient = queueClient;
         }
 
         /// <summary>
         /// GET: Admin
         /// </summary>
         /// <returns>The admin homepage view</returns>
-        public ActionResult Index()
+        public async Task<IActionResult> Index()
         {
-            return this.View();
+            var queues = new Dictionary<string, int>();
+            foreach (var priority in priorities)
+            {
+                var queue = queueClient.GetQueueReference($"upload-processing-{priority.ToLower()}-priority");
+                await queue.FetchAttributesAsync();
+                var numMessages = queue.ApproximateMessageCount.GetValueOrDefault();
+                queues.Add(priority, numMessages);
+            }
+
+            this.ViewBag.Queues = queues;
+
+            // Be explicit about the view name since other actions directly call this action
+            return this.View("Index");
         }
 
         /// <summary>
@@ -55,17 +68,15 @@ namespace ClickerHeroesTrackerWebsite.Controllers
         /// </summary>
         /// <param name="uploadIds">The upload ids to recomute stats for</param>
         /// <returns>The admin homepage view</returns>
-        public async Task<ActionResult> UpdateComputedStats(string uploadIds)
+        public async Task<IActionResult> UpdateComputedStats(string uploadIds)
         {
             var userId = this.User.GetUserId();
 
-            IList<int> parsedUploadIds = null;
+            var parsedUploadIds = new List<int>();
             if (uploadIds != null)
             {
                 if (uploadIds.Equals("ALL", StringComparison.OrdinalIgnoreCase))
                 {
-                    parsedUploadIds = new List<int>();
-
                     const string CommandText = "SELECT Id FROM Uploads ORDER BY UploadTime DESC";
                     using (var command = this.databaseCommandFactory.Create(CommandText))
                     using (var reader = command.ExecuteReader())
@@ -94,14 +105,14 @@ namespace ClickerHeroesTrackerWebsite.Controllers
             if (parsedUploadIds == null || parsedUploadIds.Count == 0)
             {
                 this.ViewBag.Error = "No valid upload ids";
-                return this.View("Index");
+                return await this.Index();
             }
 
             var messages = parsedUploadIds.Select(uploadId => new UploadProcessingMessage { UploadId = uploadId, Requester = userId, Priority = UploadProcessingMessagePriority.Low });
-            await this.uploadScheduler.Schedule(messages);
+            await this.uploadScheduler.ScheduleAsync(messages);
 
             this.ViewBag.Message = $"Scheduled {parsedUploadIds.Count} uploads";
-            return this.View("Index");
+            return await this.Index();
         }
 
         /// <summary>
@@ -109,35 +120,22 @@ namespace ClickerHeroesTrackerWebsite.Controllers
         /// </summary>
         /// <param name="priority">The priority of the queue to clear</param>
         /// <returns>The admin homepage view</returns>
-        public async Task<ActionResult> ClearQueue(UploadProcessingMessagePriority? priority)
+        public async Task<IActionResult> ClearQueue(UploadProcessingMessagePriority? priority)
         {
             if (!priority.HasValue)
             {
                 this.ViewBag.Error = "Invalid Priority";
-                return this.View("Index");
+                return await this.Index();
             }
 
-            var connectionString = this.uploadProcessingSettings.ConnectionString;
-            var client = QueueClient.CreateFromConnectionString(connectionString, $"UploadProcessing-{priority.Value}Priority");
-            const int BatchSize = 1024;
+            var queue = queueClient.GetQueueReference($"upload-processing-{priority.Value.ToString().ToLower()}-priority");
 
-            int messages = 0;
-            while (client.Peek() != null)
-            {
-                // Batch the receive operation
-                var oldMessages = client.ReceiveBatch(BatchSize);
+            var numMessages = queue.ApproximateMessageCount;
 
-                // Complete the messages
-                var completeTasks = oldMessages.Select(m => m.CompleteAsync()).ToArray();
+            await queue.ClearAsync();
 
-                messages += completeTasks.Length;
-
-                // Wait for the tasks to complete.
-                await Task.WhenAll(completeTasks);
-            }
-
-            this.ViewBag.Message = $"Cleared the {priority.Value} priority queue ({messages} messages)";
-            return this.View("Index");
+            this.ViewBag.Message = $"Cleared the {priority.Value} priority queue ({numMessages} messages)";
+            return await this.Index();
         }
     }
 }

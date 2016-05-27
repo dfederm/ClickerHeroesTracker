@@ -42,7 +42,6 @@
     "System.Runtime.InteropServices.Analyzers": "1.2.0-beta1",
     "System.Runtime.Numerics": "4.0.1-beta-23516",
     "System.Security.Cryptography.Hashing.Algorithms.Analyzers": "1.2.0-beta1",
-    "WindowsAzure.ServiceBus": "3.1.7",
     "WindowsAzure.Storage": "7.0.1-preview"
   },
 
