@@ -36,6 +36,6 @@ namespace ClickerHeroesTrackerWebsite.Models.Api.Uploads
         /// <summary>
         /// Gets or sets the upload stats.
         /// </summary>
-        public IDictionary<StatType, long> Stats { get; set; }
+        public IDictionary<StatType, double> Stats { get; set; }
     }
 }

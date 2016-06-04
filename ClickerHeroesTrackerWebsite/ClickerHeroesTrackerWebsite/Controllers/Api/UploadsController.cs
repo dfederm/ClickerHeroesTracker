@@ -170,7 +170,7 @@ namespace ClickerHeroesTrackerWebsite.Controllers.Api
             }
 
             var savedGame = SavedGame.Parse(uploadContent);
-            upload.Stats = new Dictionary<StatType, long>();
+            upload.Stats = new Dictionary<StatType, double>();
 
             // Get ancient level stats
             var ancientLevelsModel = new AncientLevelsModel(

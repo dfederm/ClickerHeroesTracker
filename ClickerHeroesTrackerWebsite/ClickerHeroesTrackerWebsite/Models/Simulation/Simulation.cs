@@ -23,7 +23,7 @@ namespace ClickerHeroesTrackerWebsite.Models.Simulation
 
         private readonly PlayStyle playStyle;
 
-        private readonly IDictionary<int, int> itemLevels;
+        private readonly IDictionary<int, double> itemLevels;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Simulation"/> class.
@@ -101,7 +101,7 @@ namespace ClickerHeroesTrackerWebsite.Models.Simulation
             SimulateResult best = null;
             var bestRatio = 0d;
 
-            var skills = new Skills(this.savedGame.AncientsData, this.itemLevels, this.GetFactor);
+            var skills = new Skills(this.savedGame.AncientsData, this.GetFactor);
             for (var level = startingZone; level <= 4400; level++)
             {
                 if (this.playStyle == PlayStyle.Active)
@@ -339,7 +339,7 @@ namespace ClickerHeroesTrackerWebsite.Models.Simulation
             return best;
         }
 
-        private static long IdleValue(long level)
+        private static double IdleValue(double level)
         {
             var value = 0;
             var add = 25;
@@ -363,7 +363,7 @@ namespace ClickerHeroesTrackerWebsite.Models.Simulation
             return value + (add * level);
         }
 
-        private static long SolomonValue(long level)
+        private static double SolomonValue(double level)
         {
             var value = 0;
             var add = 5;
@@ -600,7 +600,6 @@ namespace ClickerHeroesTrackerWebsite.Models.Simulation
 
             public Skills(
                 object ancientLevels,
-                IDictionary<int, int> itemLevels,
                 Func<int, double, double> getFactor)
             {
                 this.factorVaagur = 1 - getFactor(AncientIds.Vaagur, 0.05);

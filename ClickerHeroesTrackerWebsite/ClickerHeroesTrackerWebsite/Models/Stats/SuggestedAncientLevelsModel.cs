@@ -76,16 +76,16 @@ namespace ClickerHeroesTrackerWebsite.Models.Stats
                         ? (long)Math.Round(Math.Pow(currentSiyaLevel.EffectiveLevel + 1, 2))
                         : (long)Math.Round(Math.Pow(currentSiyaLevel.EffectiveLevel, 2) + (43.67 * currentSiyaLevel.EffectiveLevel) + 33.58);
 
-                    this.SuggestedAncientLevels = new KeyValuePair<int, long>[]
+                    this.SuggestedAncientLevels = new KeyValuePair<int, double>[]
                     {
-                        new KeyValuePair<int, long>(AncientIds.Siyalatas, currentSiyaLevel.EffectiveLevel),
-                        new KeyValuePair<int, long>(AncientIds.Argaiv, suggestedArgaivLevel),
-                        new KeyValuePair<int, long>(AncientIds.Libertas, suggestedGoldLevel),
-                        new KeyValuePair<int, long>(AncientIds.Mammon, suggestedGoldLevel),
-                        new KeyValuePair<int, long>(AncientIds.Mimzee, suggestedGoldLevel),
-                        new KeyValuePair<int, long>(AncientIds.Morgulis, suggestedMorgLevel),
-                        new KeyValuePair<int, long>(AncientIds.Solomon, suggestedSolomonLevel),
-                        new KeyValuePair<int, long>(AncientIds.Iris, suggestedIrisLevel),
+                        new KeyValuePair<int, double>(AncientIds.Siyalatas, currentSiyaLevel.EffectiveLevel),
+                        new KeyValuePair<int, double>(AncientIds.Argaiv, suggestedArgaivLevel),
+                        new KeyValuePair<int, double>(AncientIds.Libertas, suggestedGoldLevel),
+                        new KeyValuePair<int, double>(AncientIds.Mammon, suggestedGoldLevel),
+                        new KeyValuePair<int, double>(AncientIds.Mimzee, suggestedGoldLevel),
+                        new KeyValuePair<int, double>(AncientIds.Morgulis, suggestedMorgLevel),
+                        new KeyValuePair<int, double>(AncientIds.Solomon, suggestedSolomonLevel),
+                        new KeyValuePair<int, double>(AncientIds.Iris, suggestedIrisLevel),
                     };
 
                     break;
@@ -103,20 +103,20 @@ namespace ClickerHeroesTrackerWebsite.Models.Stats
                         ? (long)Math.Round(Math.Pow(currentSiyaLevel.EffectiveLevel + 1, 2))
                         : (long)Math.Round(Math.Pow(currentSiyaLevel.EffectiveLevel, 2) + (43.67 * currentSiyaLevel.EffectiveLevel) + 33.58);
 
-                    this.SuggestedAncientLevels = new KeyValuePair<int, long>[]
+                    this.SuggestedAncientLevels = new KeyValuePair<int, double>[]
                     {
-                        new KeyValuePair<int, long>(AncientIds.Siyalatas, currentSiyaLevel.EffectiveLevel),
-                        new KeyValuePair<int, long>(AncientIds.Argaiv, suggestedArgaivLevel),
-                        new KeyValuePair<int, long>(AncientIds.Libertas, suggestedGoldLevel),
-                        new KeyValuePair<int, long>(AncientIds.Mammon, suggestedGoldLevel),
-                        new KeyValuePair<int, long>(AncientIds.Mimzee, suggestedGoldLevel),
-                        new KeyValuePair<int, long>(AncientIds.Bhaal, suggestedClickLevel),
-                        new KeyValuePair<int, long>(AncientIds.Fragsworth, suggestedClickLevel),
-                        new KeyValuePair<int, long>(AncientIds.Pluto, suggestedClickLevel),
-                        new KeyValuePair<int, long>(AncientIds.Juggernaut, suggestedJuggernautLevel),
-                        new KeyValuePair<int, long>(AncientIds.Morgulis, suggestedMorgLevel),
-                        new KeyValuePair<int, long>(AncientIds.Solomon, suggestedSolomonLevel),
-                        new KeyValuePair<int, long>(AncientIds.Iris, suggestedIrisLevel),
+                        new KeyValuePair<int, double>(AncientIds.Siyalatas, currentSiyaLevel.EffectiveLevel),
+                        new KeyValuePair<int, double>(AncientIds.Argaiv, suggestedArgaivLevel),
+                        new KeyValuePair<int, double>(AncientIds.Libertas, suggestedGoldLevel),
+                        new KeyValuePair<int, double>(AncientIds.Mammon, suggestedGoldLevel),
+                        new KeyValuePair<int, double>(AncientIds.Mimzee, suggestedGoldLevel),
+                        new KeyValuePair<int, double>(AncientIds.Bhaal, suggestedClickLevel),
+                        new KeyValuePair<int, double>(AncientIds.Fragsworth, suggestedClickLevel),
+                        new KeyValuePair<int, double>(AncientIds.Pluto, suggestedClickLevel),
+                        new KeyValuePair<int, double>(AncientIds.Juggernaut, suggestedJuggernautLevel),
+                        new KeyValuePair<int, double>(AncientIds.Morgulis, suggestedMorgLevel),
+                        new KeyValuePair<int, double>(AncientIds.Solomon, suggestedSolomonLevel),
+                        new KeyValuePair<int, double>(AncientIds.Iris, suggestedIrisLevel),
                     };
 
                     break;
@@ -134,16 +134,16 @@ namespace ClickerHeroesTrackerWebsite.Models.Stats
                         ? (long)Math.Round(Math.Pow(currentFragsworthLevel.EffectiveLevel + 1, 2))
                         : (long)Math.Round(Math.Pow(currentFragsworthLevel.EffectiveLevel + 13, 2));
 
-                    this.SuggestedAncientLevels = new KeyValuePair<int, long>[]
+                    this.SuggestedAncientLevels = new KeyValuePair<int, double>[]
                     {
-                        new KeyValuePair<int, long>(AncientIds.Fragsworth, currentFragsworthLevel.EffectiveLevel),
-                        new KeyValuePair<int, long>(AncientIds.Argaiv, suggestedArgaivLevel),
-                        new KeyValuePair<int, long>(AncientIds.Bhaal, suggestedBhaalLevel),
-                        new KeyValuePair<int, long>(AncientIds.Pluto, suggestedPlutoLevel),
-                        new KeyValuePair<int, long>(AncientIds.Juggernaut, suggestedJuggernautLevel),
-                        new KeyValuePair<int, long>(AncientIds.Morgulis, suggestedMorgLevel),
-                        new KeyValuePair<int, long>(AncientIds.Solomon, suggestedSolomonLevel),
-                        new KeyValuePair<int, long>(AncientIds.Iris, suggestedIrisLevel),
+                        new KeyValuePair<int, double>(AncientIds.Fragsworth, currentFragsworthLevel.EffectiveLevel),
+                        new KeyValuePair<int, double>(AncientIds.Argaiv, suggestedArgaivLevel),
+                        new KeyValuePair<int, double>(AncientIds.Bhaal, suggestedBhaalLevel),
+                        new KeyValuePair<int, double>(AncientIds.Pluto, suggestedPlutoLevel),
+                        new KeyValuePair<int, double>(AncientIds.Juggernaut, suggestedJuggernautLevel),
+                        new KeyValuePair<int, double>(AncientIds.Morgulis, suggestedMorgLevel),
+                        new KeyValuePair<int, double>(AncientIds.Solomon, suggestedSolomonLevel),
+                        new KeyValuePair<int, double>(AncientIds.Iris, suggestedIrisLevel),
                     };
 
                     break;
@@ -154,7 +154,7 @@ namespace ClickerHeroesTrackerWebsite.Models.Stats
         /// <summary>
         /// Gets a collection of suggested ancient levels
         /// </summary>
-        public KeyValuePair<int, long>[] SuggestedAncientLevels { get; }
+        public KeyValuePair<int, double>[] SuggestedAncientLevels { get; }
 
         private static AncientLevelInfo GetCurrentAncientLevel(
             GameData gameData,

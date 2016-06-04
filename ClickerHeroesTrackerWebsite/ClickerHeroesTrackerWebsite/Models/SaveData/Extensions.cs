@@ -26,17 +26,17 @@ namespace ClickerHeroesTrackerWebsite.Models.SaveData
                 : 0;
         }
 
-        public static int GetItemLevel(this IDictionary<int, int> itemLevels, int ancientId)
+        public static double GetItemLevel(this IDictionary<int, double> itemLevels, int ancientId)
         {
-            int itemLevel;
+            double itemLevel;
             return itemLevels.TryGetValue(ancientId, out itemLevel)
                 ? itemLevel
                 : 0;
         }
 
-        public static IDictionary<int, int> GetItemLevels(this ItemsData itemsData)
+        public static IDictionary<int, double> GetItemLevels(this ItemsData itemsData)
         {
-            var itemLevels = new Dictionary<int, int>();
+            var itemLevels = new Dictionary<int, double>();
 
             if (itemsData != null
                 && itemsData.Slots != null
@@ -68,9 +68,9 @@ namespace ClickerHeroesTrackerWebsite.Models.SaveData
         }
 
         private static void AddItemLevels(
-            Dictionary<int, int> itemLevels,
+            Dictionary<int, double> itemLevels,
             int? itemType,
-            int? itemLevel)
+            double? itemLevel)
         {
             if (itemType == null
                 || itemLevel == null
@@ -85,7 +85,7 @@ namespace ClickerHeroesTrackerWebsite.Models.SaveData
                 return;
             }
 
-            int currentLevel;
+            double currentLevel;
             if (itemLevels.TryGetValue(ancientId, out currentLevel))
             {
                 itemLevels[ancientId] = currentLevel + itemLevel.Value;
