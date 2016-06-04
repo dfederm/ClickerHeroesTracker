@@ -22,8 +22,8 @@ namespace ClickerHeroesTrackerWebsite
             loggerFactory.AddConsole();
             loggerFactory.AddDebug();
 
+            // Request tracking middleware should be added as the very first middleware in pipeline
             app.UseApplicationInsightsRequestTelemetry();
-            app.UseApplicationInsightsExceptionTelemetry();
 
             if (env.IsDevelopment() || this.Environment.IsBuddy())
             {
@@ -38,6 +38,9 @@ namespace ClickerHeroesTrackerWebsite
             {
                 app.UseExceptionHandler("/Home/Error");
             }
+
+            // Exception middleware should be added after error page and any other error handling middleware.
+            app.UseApplicationInsightsExceptionTelemetry();
 
             // We want to start measuring latency as soon as possible during a request.
             app.UseMiddleware<MeasureLatencyMiddleware>();
