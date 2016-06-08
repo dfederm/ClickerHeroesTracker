@@ -116,7 +116,7 @@ namespace ClickerHeroesTrackerWebsite.Models.Dashboard
         private GraphViewModel CreateGraph(
             string id,
             string title,
-            IDictionary<DateTime, long> data,
+            IDictionary<DateTime, double> data,
             TimeZoneInfo timeZone)
         {
             return new GraphViewModel

@@ -47,7 +47,7 @@ namespace ClickerHeroesTrackerWebsite.Tests.Models
 
         [Theory]
         [InlineData("ValidDecoded-0.19", true)]
-        [InlineData("ValidDecoded-0.99-beta", true)]
+        [InlineData("ValidDecoded-1.0-beta", true)]
         [InlineData("InvalidDecodedNotJson", false)]
         [InlineData("InvalidDecodedEmptyObject", true)]
         public void SavedGame_DeserializeSavedGame(string testDataName, bool expectedValid)

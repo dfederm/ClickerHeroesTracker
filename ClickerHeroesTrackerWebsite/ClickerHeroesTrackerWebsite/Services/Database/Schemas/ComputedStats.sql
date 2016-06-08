@@ -5,6 +5,6 @@
     [SoulsPerHour]      BIGINT   NOT NULL,
     [SoulsPerAscension] BIGINT   NOT NULL,
     [AscensionTime]     SMALLINT NOT NULL,
-    [TitanDamage]       BIGINT   NOT NULL,
-    [SoulsSpent]        BIGINT   NOT NULL
+    [TitanDamage]       REAL     NOT NULL,
+    [SoulsSpent]        REAL     NOT NULL
 );

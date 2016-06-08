@@ -44,7 +44,7 @@ namespace ClickerHeroesTrackerWebsite.Models.Stats
                 Math.Round(simulationResult.Time / 60),
                 short.MaxValue);
             this.TitanDamage = savedGame.TitanDamage;
-            this.SoulsSpent = savedGame.AncientsData.Ancients.Values.Aggregate(0L, (count, ancientData) => count + ancientData.SpentHeroSouls);
+            this.SoulsSpent = savedGame.AncientsData.Ancients.Values.Aggregate(0d, (count, ancientData) => count + ancientData.SpentHeroSouls);
         }
 
         /// <summary>
@@ -70,11 +70,11 @@ namespace ClickerHeroesTrackerWebsite.Models.Stats
         /// <summary>
         /// Gets the user's titan damage
         /// </summary>
-        public long TitanDamage { get; }
+        public double TitanDamage { get; }
 
         /// <summary>
         /// Gets the number of souls the user has spent.
         /// </summary>
-        public long SoulsSpent { get; }
+        public double SoulsSpent { get; }
     }
 }

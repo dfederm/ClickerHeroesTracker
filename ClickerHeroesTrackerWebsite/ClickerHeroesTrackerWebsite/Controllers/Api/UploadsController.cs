@@ -210,8 +210,8 @@ namespace ClickerHeroesTrackerWebsite.Controllers.Api
                     upload.Stats.Add(StatType.SoulsPerHour, Convert.ToInt64(reader["SoulsPerHour"]));
                     upload.Stats.Add(StatType.SoulsPerAscension, Convert.ToInt64(reader["SoulsPerAscension"]));
                     upload.Stats.Add(StatType.OptimalAscensionTime, Convert.ToInt64(reader["AscensionTime"]));
-                    upload.Stats.Add(StatType.TitanDamage, Convert.ToInt64(reader["TitanDamage"]));
-                    upload.Stats.Add(StatType.SoulsSpent, Convert.ToInt64(reader["SoulsSpent"]));
+                    upload.Stats.Add(StatType.TitanDamage, Convert.ToDouble(reader["TitanDamage"]));
+                    upload.Stats.Add(StatType.SoulsSpent, Convert.ToDouble(reader["SoulsSpent"]));
                 }
             }
 

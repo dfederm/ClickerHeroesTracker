@@ -10,7 +10,7 @@ namespace ClickerHeroesTrackerWebsite.Models.SaveData
 
     internal static class Extensions
     {
-        public static long GetAncientLevel(this AncientsData ancientsData, int ancientId)
+        public static double GetAncientLevel(this AncientsData ancientsData, int ancientId)
         {
             AncientData ancientData;
             return ancientsData.Ancients.TryGetValue(ancientId, out ancientData)

@@ -22,12 +22,12 @@ namespace ClickerHeroesTrackerWebsite.Models.SaveData
         /// Gets or sets the ancient level.
         /// </summary>
         [JsonProperty(PropertyName = "level", Required = Required.Always)]
-        public long Level { get; set; }
+        public double Level { get; set; }
 
         /// <summary>
         /// Gets or sets the souls spent on this ancient.
         /// </summary>
         [JsonProperty(PropertyName = "spentHeroSouls", Required = Required.Always)]
-        public long SpentHeroSouls { get; set; }
+        public double SpentHeroSouls { get; set; }
     }
 }

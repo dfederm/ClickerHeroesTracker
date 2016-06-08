@@ -72,7 +72,7 @@ namespace ClickerHeroesTrackerWebsite.Models.SaveData
         /// Gets or sets the user's titan damage.
         /// </summary>
         [JsonProperty(PropertyName = "titanDamage", Required = Required.Always)]
-        public long TitanDamage { get; set; }
+        public double TitanDamage { get; set; }
 
         /// <summary>
         /// Parsed the encoded save game data to a structured object.

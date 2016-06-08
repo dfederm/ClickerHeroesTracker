@@ -167,9 +167,9 @@ namespace ClickerHeroesTrackerWebsite.Models.Dashboard
             string id,
             string title,
             string userName,
-            IDictionary<DateTime, long> userData,
+            IDictionary<DateTime, double> userData,
             string rivalName,
-            IDictionary<DateTime, long> rivalData,
+            IDictionary<DateTime, double> rivalData,
             TimeZoneInfo timeZone)
         {
             var series = new List<Series>();
@@ -227,7 +227,7 @@ namespace ClickerHeroesTrackerWebsite.Models.Dashboard
             List<Series> series,
             TimeZoneInfo timeZone,
             string name,
-            IDictionary<DateTime, long> data)
+            IDictionary<DateTime, double> data)
         {
             if (data != null && data.Count > 0)
             {
