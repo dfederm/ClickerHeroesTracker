@@ -15,7 +15,7 @@ namespace ClickerHeroesTrackerWebsite.Models.SaveData
         /// <summary>
         /// Gets or sets the item name
         /// </summary>
-        [JsonProperty(PropertyName = "name", Required = Required.Always)]
+        [JsonProperty(PropertyName = "name")]
         public string Name { get; set; }
 
         /// <summary>

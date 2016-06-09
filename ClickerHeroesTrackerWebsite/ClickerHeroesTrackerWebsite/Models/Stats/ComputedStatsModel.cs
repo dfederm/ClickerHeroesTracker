@@ -26,26 +26,38 @@ namespace ClickerHeroesTrackerWebsite.Models.Stats
             IUserSettings userSettings,
             ICounterProvider counterProvider)
         {
-            var simulation = new Simulation(
-                gameData,
-                savedGame,
-                userSettings.PlayStyle);
+            // Simulation is only enabled for legacy saves, before outsiders were a thing.
+            this.SimulationEnabled = savedGame.OutsidersData == null;
 
-            Simulation.SimulateResult simulationResult;
-            using (var scope = counterProvider.Measure(Counter.Simulation))
+            if (this.SimulationEnabled)
             {
-                simulationResult = simulation.Run();
+                var simulation = new Simulation(
+                    gameData,
+                    savedGame,
+                    userSettings.PlayStyle);
+
+                Simulation.SimulateResult simulationResult;
+                using (var scope = counterProvider.Measure(Counter.Simulation))
+                {
+                    simulationResult = simulation.Run();
+                }
+
+                this.SoulsPerHour = Convert.ToInt64(Math.Round(simulationResult.Ratio * 3600));
+                this.OptimalLevel = simulationResult.Level;
+                this.OptimalSoulsPerAscension = (int)Math.Round(simulationResult.Souls);
+                this.OptimalAscensionTime = (short)Math.Min(
+                    Math.Round(simulationResult.Time / 60),
+                    short.MaxValue);
             }
 
-            this.SoulsPerHour = Convert.ToInt64(Math.Round(simulationResult.Ratio * 3600));
-            this.OptimalLevel = simulationResult.Level;
-            this.OptimalSoulsPerAscension = (int)Math.Round(simulationResult.Souls);
-            this.OptimalAscensionTime = (short)Math.Min(
-                Math.Round(simulationResult.Time / 60),
-                short.MaxValue);
             this.TitanDamage = savedGame.TitanDamage;
             this.SoulsSpent = savedGame.AncientsData.Ancients.Values.Aggregate(0d, (count, ancientData) => count + ancientData.SpentHeroSouls);
         }
+
+        /// <summary>
+        /// Gets a value indication whether the simulation is enabled.
+        /// </summary>
+        public bool SimulationEnabled { get; }
 
         /// <summary>
         /// Gets the optimal souls earned per hour

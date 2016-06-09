@@ -1,4 +1,4 @@
-﻿// <copyright file="AncientData.cs" company="Clicker Heroes Tracker">
+﻿// <copyright file="OutsiderData.cs" company="Clicker Heroes Tracker">
 // Copyright (c) Clicker Heroes Tracker. All rights reserved.
 // </copyright>
 
@@ -7,27 +7,27 @@ namespace ClickerHeroesTrackerWebsite.Models.SaveData
     using Newtonsoft.Json;
 
     /// <summary>
-    /// Save data for an ancient.
+    /// Save data for an outsider.
     /// </summary>
     [JsonObject]
-    public class AncientData
+    public class OutsiderData
     {
         /// <summary>
-        /// Gets or sets the ancient id.
+        /// Gets or sets the outsider id.
         /// </summary>
         [JsonProperty(PropertyName = "id")]
         public int Id { get; set; }
 
         /// <summary>
-        /// Gets or sets the ancient level.
+        /// Gets or sets the outsider level.
         /// </summary>
         [JsonProperty(PropertyName = "level")]
         public double Level { get; set; }
 
         /// <summary>
-        /// Gets or sets the souls spent on this ancient.
+        /// Gets or sets the ancient souls spent on this outsider.
         /// </summary>
-        [JsonProperty(PropertyName = "spentHeroSouls")]
-        public double SpentHeroSouls { get; set; }
+        [JsonProperty(PropertyName = "spentAncientSouls")]
+        public double SpentAncientSouls { get; set; }
     }
 }

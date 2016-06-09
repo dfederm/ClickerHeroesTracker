@@ -16,7 +16,7 @@ namespace ClickerHeroesTrackerWebsite.Models.SaveData
         /// <summary>
         /// Gets or sets a collection of <see cref="AncientData"/>, keyed on ancient id.
         /// </summary>
-        [JsonProperty(PropertyName = "ancients", Required = Required.Always)]
+        [JsonProperty(PropertyName = "ancients")]
         public IDictionary<int, AncientData> Ancients { get; set; }
     }
 }

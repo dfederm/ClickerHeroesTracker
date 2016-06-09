@@ -16,13 +16,13 @@ namespace ClickerHeroesTrackerWebsite.Models.SaveData
         /// <summary>
         /// Gets or sets a mapping of slot number to item number.
         /// </summary>
-        [JsonProperty(PropertyName = "slots", Required = Required.Always)]
+        [JsonProperty(PropertyName = "slots")]
         public IDictionary<int, int> Slots { get; set; }
 
         /// <summary>
         /// Gets or sets a mapping of item number to the item data.
         /// </summary>
-        [JsonProperty(PropertyName = "items", Required = Required.Always)]
+        [JsonProperty(PropertyName = "items")]
         public IDictionary<int, ItemData> Items { get; set; }
     }
 }

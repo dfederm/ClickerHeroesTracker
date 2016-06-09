@@ -15,19 +15,19 @@ namespace ClickerHeroesTrackerWebsite.Models.SaveData
         /// <summary>
         /// Gets or sets the hero id
         /// </summary>
-        [JsonProperty(PropertyName = "id", Required = Required.Always)]
+        [JsonProperty(PropertyName = "id")]
         public int Id { get; set; }
 
         /// <summary>
         /// Gets or sets the hero level
         /// </summary>
-        [JsonProperty(PropertyName = "level", Required = Required.Always)]
+        [JsonProperty(PropertyName = "level")]
         public int Level { get; set; }
 
         /// <summary>
         /// Gets or sets the hero gilds
         /// </summary>
-        [JsonProperty(PropertyName = "epicLevel", Required = Required.Always)]
+        [JsonProperty(PropertyName = "epicLevel")]
         public int Gilds { get; set; }
     }
 }
