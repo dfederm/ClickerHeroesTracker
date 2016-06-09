@@ -1,5 +1,5 @@
-﻿CREATE TABLE [AncientLevels] (
-    [AncientId] TINYINT NOT NULL,
+﻿CREATE TABLE [OutsiderLevels] (
+    [OutsiderId] TINYINT NOT NULL,
     [UploadId]  INT     NOT NULL,
     [Level]     REAL    NOT NULL
 );

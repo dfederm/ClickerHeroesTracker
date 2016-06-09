@@ -17,6 +17,6 @@ namespace ClickerHeroesTrackerWebsite.Models.SaveData
         /// Gets or sets a collection of <see cref="OutsiderData"/>, keyed on outsider id.
         /// </summary>
         [JsonProperty(PropertyName = "outsiders")]
-        public IDictionary<int, OutsiderData> Ancients { get; set; }
+        public IDictionary<int, OutsiderData> Outsiders { get; set; }
     }
 }

@@ -157,6 +157,9 @@ namespace ClickerHeroesTrackerWebsite.UploadProcessing
                         this.gameData,
                         savedGame,
                         this.telemetryClient);
+                    var outsiderLevels = new OutsiderLevelsModel(
+                        savedGame,
+                        this.telemetryClient);
                     var computedStats = new ComputedStatsModel(
                         this.gameData,
                         savedGame,
@@ -219,6 +222,62 @@ namespace ClickerHeroesTrackerWebsite.UploadProcessing
                             VALUES (Input.UploadId, Input.AncientId, Input.Level);");
                     }
 
+                    /* Build a query that looks like this:
+                        MERGE INTO OutsiderLevels WITH (HOLDLOCK)
+                        USING
+                            (VALUES (123, 1, 100), (123, 2, 100), ... )
+                                AS Input(UploadId, OutsiderId, Level)
+                            ON OutsiderLevels.UploadId = Input.UploadId
+                            AND OutsiderLevels.OutsiderId = Input.OutsiderId
+                        WHEN MATCHED THEN
+                            UPDATE
+                            SET
+                                Level = Input.Level
+                        WHEN NOT MATCHED THEN
+                            INSERT (UploadId, OutsiderId, Level)
+                            VALUES (Input.UploadId, Input.OutsiderId, Input.Level);
+                    */
+                    var outsiderLevelsCommandText = new StringBuilder();
+                    if (outsiderLevels.OutsiderLevels.Count > 0)
+                    {
+                        outsiderLevelsCommandText.Append(@"
+                        MERGE INTO OutsiderLevels WITH (HOLDLOCK)
+                        USING
+                            ( VALUES ");
+                        var isFirst = true;
+                        foreach (var pair in outsiderLevels.OutsiderLevels)
+                        {
+                            if (!isFirst)
+                            {
+                                outsiderLevelsCommandText.Append(",");
+                            }
+
+                            // No need to sanitize, these are all just numbers
+                            outsiderLevelsCommandText.Append("(");
+                            outsiderLevelsCommandText.Append(uploadId);
+                            outsiderLevelsCommandText.Append(",");
+                            outsiderLevelsCommandText.Append(pair.Key);
+                            outsiderLevelsCommandText.Append(",");
+                            outsiderLevelsCommandText.Append(pair.Value.Level);
+                            outsiderLevelsCommandText.Append(")");
+
+                            isFirst = false;
+                        }
+
+                        outsiderLevelsCommandText.Append(@"
+                            )
+                                AS Input(UploadId, OutsiderId, Level)
+                            ON OutsiderLevels.UploadId = Input.UploadId
+                            AND OutsiderLevels.OutsiderId = Input.OutsiderId
+                        WHEN MATCHED THEN
+                            UPDATE
+                            SET
+                                Level = Input.Level
+                        WHEN NOT MATCHED THEN
+                            INSERT (UploadId, OutsiderId, Level)
+                            VALUES (Input.UploadId, Input.OutsiderId, Input.Level);");
+                    }
+
                     const string ComputedStatsCommandText = @"
                         MERGE INTO ComputedStats WITH (HOLDLOCK)
                         USING
@@ -255,6 +314,12 @@ namespace ClickerHeroesTrackerWebsite.UploadProcessing
                         if (ancientLevelsCommandText.Length > 0)
                         {
                             command.CommandText = ancientLevelsCommandText.ToString();
+                            command.ExecuteNonQuery();
+                        }
+
+                        if (outsiderLevelsCommandText.Length > 0)
+                        {
+                            command.CommandText = outsiderLevelsCommandText.ToString();
                             command.ExecuteNonQuery();
                         }
 

@@ -274,6 +274,9 @@ namespace ClickerHeroesTrackerWebsite.Controllers.Api
                 this.gameData,
                 savedGame,
                 this.telemetryClient);
+            var outsiderLevels = new OutsiderLevelsModel(
+                savedGame,
+                this.telemetryClient);
             var computedStats = new ComputedStatsModel(
                 this.gameData,
                 savedGame,
@@ -324,6 +327,21 @@ namespace ClickerHeroesTrackerWebsite.Controllers.Api
                         { "@UploadId", uploadId },
                         { "@AncientId", pair.Key.Id },
                         { "@Level", pair.Value.AncientLevel },
+                    };
+                    command.ExecuteNonQuery();
+                }
+
+                // Insert outsider levels
+                foreach (var pair in outsiderLevels.OutsiderLevels)
+                {
+                    command.CommandText = @"
+                        INSERT INTO OutsiderLevels(UploadId, OutsiderId, Level)
+                        VALUES(@UploadId, @OutsiderId, @Level);";
+                    command.Parameters = new Dictionary<string, object>
+                    {
+                        { "@UploadId", uploadId },
+                        { "@OutsiderId", pair.Key },
+                        { "@Level", pair.Value.Level },
                     };
                     command.ExecuteNonQuery();
                 }

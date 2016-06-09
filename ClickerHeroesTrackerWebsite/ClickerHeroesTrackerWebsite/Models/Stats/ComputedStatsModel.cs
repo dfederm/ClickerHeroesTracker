@@ -27,9 +27,8 @@ namespace ClickerHeroesTrackerWebsite.Models.Stats
             ICounterProvider counterProvider)
         {
             // Simulation is only enabled for legacy saves, before outsiders were a thing.
-            this.SimulationEnabled = savedGame.OutsidersData == null;
-
-            if (this.SimulationEnabled)
+            var simulationEnabled = savedGame.OutsidersData == null;
+            if (simulationEnabled)
             {
                 var simulation = new Simulation(
                     gameData,
@@ -53,11 +52,6 @@ namespace ClickerHeroesTrackerWebsite.Models.Stats
             this.TitanDamage = savedGame.TitanDamage;
             this.SoulsSpent = savedGame.AncientsData.Ancients.Values.Aggregate(0d, (count, ancientData) => count + ancientData.SpentHeroSouls);
         }
-
-        /// <summary>
-        /// Gets a value indication whether the simulation is enabled.
-        /// </summary>
-        public bool SimulationEnabled { get; }
 
         /// <summary>
         /// Gets the optimal souls earned per hour
