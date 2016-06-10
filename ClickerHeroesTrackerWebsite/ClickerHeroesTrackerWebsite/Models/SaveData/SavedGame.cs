@@ -81,6 +81,18 @@ namespace ClickerHeroesTrackerWebsite.Models.SaveData
         public double TitanDamage { get; set; }
 
         /// <summary>
+        /// Gets or sets the total ancient souls earned
+        /// </summary>
+        [JsonProperty(PropertyName = "ancientSoulsTotal")]
+        public double AncientSoulsTotal { get; set; }
+
+        /// <summary>
+        /// Gets or sets the highest finished zone in this transcendence
+        /// </summary>
+        [JsonProperty(PropertyName = "highestFinishedZonePersist")]
+        public double HighestFinishedZonePersist { get; set; }
+
+        /// <summary>
         /// Parsed the encoded save game data to a structured object.
         /// </summary>
         /// <param name="encodedSaveData">The encoded saved game</param>

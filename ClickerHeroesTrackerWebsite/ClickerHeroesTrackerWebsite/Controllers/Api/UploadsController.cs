@@ -218,6 +218,7 @@ namespace ClickerHeroesTrackerWebsite.Controllers.Api
             // Get suggested level stats
             var suggestedAncientLevelsModel = new SuggestedAncientLevelsModel(
                 gameData,
+                savedGame,
                 ancientLevelsModel.AncientLevels,
                 optimalLevel,
                 uploadUserSettings);

@@ -16,54 +16,27 @@ namespace ClickerHeroesTrackerWebsite.Models.Calculator
     /// </summary>
     public class CalculatorViewModel
     {
-        private static Dictionary<PlayStyle, int[]> suggestedAncientIds = new Dictionary<PlayStyle, int[]>
+        private static int[] suggestedAncientIds = new int[]
         {
-            {
-                PlayStyle.Idle,
-                new int[]
-                {
-                    AncientIds.Siyalatas,
-                    AncientIds.Argaiv,
-                    AncientIds.Libertas,
-                    AncientIds.Mammon,
-                    AncientIds.Mimzee,
-                    AncientIds.Morgulis,
-                    AncientIds.Solomon,
-                    AncientIds.Iris,
-                }
-            },
-            {
-                PlayStyle.Hybrid,
-                new int[]
-                {
-                    AncientIds.Siyalatas,
-                    AncientIds.Argaiv,
-                    AncientIds.Libertas,
-                    AncientIds.Mammon,
-                    AncientIds.Mimzee,
-                    AncientIds.Bhaal,
-                    AncientIds.Fragsworth,
-                    AncientIds.Pluto,
-                    AncientIds.Juggernaut,
-                    AncientIds.Morgulis,
-                    AncientIds.Solomon,
-                    AncientIds.Iris,
-                }
-            },
-            {
-                PlayStyle.Active,
-                new int[]
-                {
-                    AncientIds.Fragsworth,
-                    AncientIds.Argaiv,
-                    AncientIds.Bhaal,
-                    AncientIds.Pluto,
-                    AncientIds.Juggernaut,
-                    AncientIds.Morgulis,
-                    AncientIds.Solomon,
-                    AncientIds.Iris,
-                }
-            },
+            AncientIds.Siyalatas,
+            AncientIds.Argaiv,
+            AncientIds.Morgulis,
+            AncientIds.Bubos,
+            AncientIds.Chronos,
+            AncientIds.Libertas,
+            AncientIds.Mammon,
+            AncientIds.Mimzee,
+            AncientIds.Bhaal,
+            AncientIds.Fragsworth,
+            AncientIds.Pluto,
+            AncientIds.Juggernaut,
+            AncientIds.Dora,
+            AncientIds.Dogcog,
+            AncientIds.Fortuna,
+            AncientIds.Solomon,
+            AncientIds.Iris,
+            AncientIds.Atman,
+            AncientIds.Kumawakamaru,
         };
 
         /// <summary>
@@ -111,7 +84,7 @@ namespace ClickerHeroesTrackerWebsite.Models.Calculator
             this.IsPublic = isUploadAnonymous || uploadUserSettings.AreUploadsPublic;
             this.IsPermitted = this.IsOwn || this.IsPublic || user.IsInRole("Admin");
 
-            this.SuggestedAncientIds = suggestedAncientIds[uploadUserSettings.PlayStyle];
+            this.SuggestedAncientIds = suggestedAncientIds;
 
             this.IsValid = true;
         }

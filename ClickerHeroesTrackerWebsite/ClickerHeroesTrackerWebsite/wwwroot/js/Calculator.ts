@@ -43,6 +43,29 @@
             {
                 hydrateStat(upload.stats, statType, upload.stats[statType]);
             }
+
+            // Remove the stats that didn't have values
+            const suggestedLevelsTables = Helpers.getElementsByDataType("suggestedLevels");
+            if (suggestedLevelsTables)
+            {
+                for (let i = 0; i < suggestedLevelsTables.length; i++)
+                {
+                    const table = suggestedLevelsTables[i] as HTMLTableElement;
+                    const rows = table.rows;
+
+                    // Skip the first row since it's the header.
+                    for (let j = 1; j < rows.length; j++)
+                    {
+                        const row = rows[j] as HTMLTableRowElement;
+                        const cell = row.cells[2] as HTMLTableCellElement;
+                        const dataType = cell.getAttribute("data-type");
+                        if (!upload.stats.hasOwnProperty(dataType) && cell.innerText === "0")
+                        {
+                            row.style.display = "none";
+                        }
+                    }
+                }
+            }
         }
     }
 

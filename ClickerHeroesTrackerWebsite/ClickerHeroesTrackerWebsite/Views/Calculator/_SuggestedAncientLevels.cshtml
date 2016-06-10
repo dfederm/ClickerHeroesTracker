@@ -6,6 +6,8 @@
 @model IList<int>
 
 <h4>Suggested Leveling Plan:</h4>
+
+<!--
 <p class="text-muted">
     Based on the <a href="https://redd.it/3y57jd" target="_blank">Rules of Thumb</a>.
 </p>
@@ -13,8 +15,13 @@
 <p class="text-muted">
     These suggestions are based on your play style. You may change your play style in your @Html.ActionLink("settings", "Index", "Manage").
 </p>
+-->
 
-<table class="table">
+<p class="text-muted">
+    Based on the <a href="https://redd.it/4naohc" target="_blank">Math by /u/sugima</a>.
+</p>
+
+<table class="table" data-type="suggestedLevels">
     <tr>
         <th>Ancient</th>
         <th>Current</th>
