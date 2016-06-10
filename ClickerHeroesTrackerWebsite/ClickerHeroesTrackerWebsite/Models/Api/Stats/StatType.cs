@@ -104,6 +104,13 @@ namespace ClickerHeroesTrackerWebsite.Models.Api.Stats
         SuggestedThusia,
         SuggestedVaagur,
 
+        /* Outsiders */
+        OutsiderXyliqil,
+        OutsiderChorgorloth,
+        OutsiderPhandoryss,
+        OutsiderBorb,
+        OutsiderPonyboy,
+
         /* Computed stats */
         SoulsPerHour,
         OptimalLevel,

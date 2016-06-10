@@ -8,7 +8,7 @@ namespace ClickerHeroesTrackerWebsite.Models.Game
     using ClickerHeroesTrackerWebsite.Models.Api.Stats;
 
     /// <summary>
-    /// Constants that represent various ancients ids to help with clean code. Be use to keep this in sync with the game data.
+    /// Constants that represent various ancients ids to help with clean code. Be sure to keep this in sync with the game data.
     /// </summary>
     public static class AncientIds
     {

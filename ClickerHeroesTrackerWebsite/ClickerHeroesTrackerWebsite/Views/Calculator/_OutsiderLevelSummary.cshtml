@@ -1,0 +1,32 @@
+﻿@using ClickerHeroesTrackerWebsite.Models.Game
+
+<div data-type="outsiderLevels">
+    <h4>Outsider Summary:</h4>
+    <table class="table">
+        <tr>
+            <th>Outsider</th>
+            <th>Level</th>
+        </tr>
+        <!-- BUGBUG 119 - Get real game data -->
+        <tr>
+            <td>Xyliqil:</td>
+            <td data-type="@OutsiderIds.GetOusiderStatType(1).ToString().ToCamelCase()" class="text-right">0</td>
+        </tr>
+        <tr>
+            <td>Chor'gorloth:</td>
+            <td data-type="@OutsiderIds.GetOusiderStatType(2).ToString().ToCamelCase()" class="text-right">0</td>
+        </tr>
+        <tr>
+            <td>Phandoryss:</td>
+            <td data-type="@OutsiderIds.GetOusiderStatType(3).ToString().ToCamelCase()" class="text-right">0</td>
+        </tr>
+        <tr>
+            <td>Borb:</td>
+            <td data-type="@OutsiderIds.GetOusiderStatType(4).ToString().ToCamelCase()" class="text-right">0</td>
+        </tr>
+        <tr>
+            <td>Ponyboy:</td>
+            <td data-type="@OutsiderIds.GetOusiderStatType(5).ToString().ToCamelCase()" class="text-right">0</td>
+        </tr>
+    </table>
+</div>

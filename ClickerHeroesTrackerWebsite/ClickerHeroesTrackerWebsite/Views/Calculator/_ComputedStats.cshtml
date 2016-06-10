@@ -1,34 +1,32 @@
 ﻿@using ClickerHeroesTrackerWebsite.Models.Api.Stats;
 
-<h4>Simulation Data:</h4>
-<p class="text-muted">
-    Based on the <a href="http://philni.neocities.org/ancientssoul.html" target="_blank">calculator</a> by /u/philni.
-</p>
+<div data-type="simulationData">
+    <h4>Simulation Data:</h4>
+    <p class="text-muted">
+        Based on the <a href="http://philni.neocities.org/ancientssoul.html" target="_blank">calculator</a> by /u/philni.
+    </p>
 
-<p class="text-warning">
-    These stats are not properly calculated for patch 1.0 yet.
-</p>
-
-<table class="table">
-    <tr>
-        <td>Souls/hr</td>
-        <td data-type="@StatType.SoulsPerHour.ToString().ToCamelCase()">0</td>
-    </tr>
-    <tr>
-        <td>Optimal Level</td>
-        <td data-type="@StatType.OptimalLevel.ToString().ToCamelCase()">0</td>
-    </tr>
-    <tr>
-        <td>Souls per Ascension (at Optimal Level)</td>
-        <td data-type="@StatType.SoulsPerAscension.ToString().ToCamelCase()">0</td>
-    </tr>
-    <tr>
-        <td>Optimal Ascension Time</td>
-        <td>
-            <span data-type="@StatType.OptimalAscensionTime.ToString().ToCamelCase()">0</span> min
-        </td>
-    </tr>
-</table>
+    <table class="table">
+        <tr>
+            <td>Souls/hr</td>
+            <td data-type="@StatType.SoulsPerHour.ToString().ToCamelCase()">0</td>
+        </tr>
+        <tr>
+            <td>Optimal Level</td>
+            <td data-type="@StatType.OptimalLevel.ToString().ToCamelCase()">0</td>
+        </tr>
+        <tr>
+            <td>Souls per Ascension (at Optimal Level)</td>
+            <td data-type="@StatType.SoulsPerAscension.ToString().ToCamelCase()">0</td>
+        </tr>
+        <tr>
+            <td>Optimal Ascension Time</td>
+            <td>
+                <span data-type="@StatType.OptimalAscensionTime.ToString().ToCamelCase()">0</span> min
+            </td>
+        </tr>
+    </table>
+</div>
 
 <h4>Other stats:</h4>
 

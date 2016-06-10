@@ -192,6 +192,19 @@ namespace ClickerHeroesTrackerWebsite.Controllers.Api
                 }
             }
 
+            // Get outsider level stats
+            var outsiderLevelsModel = new OutsiderLevelsModel(
+                savedGame,
+                this.telemetryClient);
+            foreach (var pair in outsiderLevelsModel.OutsiderLevels)
+            {
+                var outsiderLevel = pair.Value.Level;
+                if (outsiderLevel > 0)
+                {
+                    upload.Stats.Add(OutsiderIds.GetOusiderStatType(pair.Key), outsiderLevel);
+                }
+            }
+
             // Get computed stats
             var optimalLevel = 0;
             const string GetComputedStatsCommandText = @"

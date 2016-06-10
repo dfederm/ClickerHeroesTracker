@@ -61,9 +61,46 @@
                         const dataType = cell.getAttribute("data-type");
                         if (!upload.stats.hasOwnProperty(dataType) && cell.innerText === "0")
                         {
-                            row.style.display = "none";
+                            row.classList.add("hidden");
                         }
                     }
+                }
+            }
+
+            const hasOutsiderData = upload.stats.hasOwnProperty("outsiderXyliqil");
+
+            // Show the correct suggested ancient level text
+            if (!hasOutsiderData)
+            {
+                const textElements = Helpers.getElementsByDataType("suggestedLevelsText");
+                for (let i = 0; i < textElements.length; i++)
+                {
+                    textElements[i].classList.add("hidden");
+                }
+
+                const legacyTextElements = Helpers.getElementsByDataType("suggestedLevelsTextLegacy");
+                for (let i = 0; i < legacyTextElements.length; i++)
+                {
+                    legacyTextElements[i].classList.remove("hidden");
+                }
+
+                const solomonTooltipElements = Helpers.getElementsByDataType("solomonTooltip");
+                for (let i = 0; i < solomonTooltipElements.length; i++)
+                {
+                    solomonTooltipElements[i].classList.remove("hidden");
+                }
+            }
+
+            // If there is data for outsiders, hide computed stats. Else hide outsiders.
+            const dataTypeToHide = hasOutsiderData
+                ? "simulationData"
+                : "outsiderLevels";
+            const elementsToHide = Helpers.getElementsByDataType(dataTypeToHide);
+            if (elementsToHide)
+            {
+                for (let i = 0; i < elementsToHide.length; i++)
+                {
+                    elementsToHide[i].classList.add("hidden");
                 }
             }
         }

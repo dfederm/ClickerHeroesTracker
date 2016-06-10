@@ -7,19 +7,21 @@
 
 <h4>Suggested Leveling Plan:</h4>
 
-<!--
-<p class="text-muted">
-    Based on the <a href="https://redd.it/3y57jd" target="_blank">Rules of Thumb</a>.
-</p>
+<div data-type="suggestedLevelsText">
+    <p class="text-muted">
+        Based on the <a href="https://redd.it/4naohc" target="_blank">Math by /u/sugima</a>.
+    </p>
+</div>
 
-<p class="text-muted">
-    These suggestions are based on your play style. You may change your play style in your @Html.ActionLink("settings", "Index", "Manage").
-</p>
--->
+<div data-type="suggestedLevelsTextLegacy" class="hidden">
+    <p class="text-muted">
+        Based on the <a href="https://redd.it/3y57jd" target="_blank">Rules of Thumb</a>.
+    </p>
 
-<p class="text-muted">
-    Based on the <a href="https://redd.it/4naohc" target="_blank">Math by /u/sugima</a>.
-</p>
+    <p class="text-muted">
+        These suggestions are based on your play style. You may change your play style in your @Html.ActionLink("settings", "Index", "Manage").
+    </p>
+</div>
 
 <table class="table" data-type="suggestedLevels">
     <tr>
@@ -40,7 +42,7 @@
                     var solomonTooltip = this.User.IsSignedIn()
                         ? "This is using your settings for the Solomon formula preference. You can change this on your settings page."
                         : "By default we use the \"Ln\" Solomon formula. You may change this by logging in and changing your settings.";
-                    <a href="/Manage" class="text-muted" data-toggle="tooltip" data-placement="right" title="@solomonTooltip">(?)</a>
+                    <a href="/Manage" class="text-muted hidden" data-toggle="tooltip" data-placement="right" data-type="solomonTooltip" title="@solomonTooltip">(?)</a>
                 }
             </td>
 
