@@ -34,6 +34,14 @@ namespace ClickerHeroesTrackerWebsite.Models.SaveData
                 : 0;
         }
 
+        public static double GetOutsiderLevel(this IDictionary<int, OutsiderData> outsiderLevels, int outsiderId)
+        {
+            OutsiderData outsiderData;
+            return outsiderLevels.TryGetValue(outsiderId, out outsiderData)
+                ? outsiderData.Level
+                : 0;
+        }
+
         public static IDictionary<int, double> GetItemLevels(this ItemsData itemsData)
         {
             var itemLevels = new Dictionary<int, double>();
