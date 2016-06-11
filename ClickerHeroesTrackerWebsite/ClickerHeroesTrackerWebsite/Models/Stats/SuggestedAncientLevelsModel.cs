@@ -92,15 +92,15 @@ namespace ClickerHeroesTrackerWebsite.Models.Stats
 
             var suggestedArgaivLevel = currentSiyaLevel;
             var suggestedMorgLevel = currentSiyaLevel * currentSiyaLevel;
-            var suggestedBubosLevel = (long)Math.Round((2.8 * lnSiya) - (1.4 * Math.Log(1 + Math.Pow(Math.E, -0.02 * currentBubosLevel))) - 5.94);
-            var suggestedChronosLevel = (long)Math.Round((2.75 * lnSiya) - (1.375 * Math.Log(2 - Math.Pow(Math.E, -0.034 * currenChronosLevel))) - 5.1);
+            var suggestedBubosLevel = Math.Max((long)Math.Round((2.8 * lnSiya) - (1.4 * Math.Log(1 + Math.Pow(Math.E, -0.02 * currentBubosLevel))) - 5.94), 0);
+            var suggestedChronosLevel = Math.Max((long)Math.Round((2.75 * lnSiya) - (1.375 * Math.Log(2 - Math.Pow(Math.E, -0.034 * currenChronosLevel))) - 5.1), 0);
             var suggestedGoldLevel = (long)Math.Round(currentSiyaLevel * 0.926);
-            var suggestedDoraLevel = (long)Math.Round((2.877 * lnSiya) - (1.4365 * Math.Log((100d / 99d) - Math.Pow(Math.E, -0.002 * currenDoraLevel))) - 9.63);
-            var suggestedDogcogLevel = (long)Math.Round((2.844 * lnSiya) - ((1d / 99d) + Math.Pow(Math.E, -0.01 * currenDogcogLevel)) - 7.232);
-            var suggestedFortunaLevel = (long)Math.Round((2.875 * lnSiya) - (1.4375 * Math.Log((10d / 9d) - Math.Pow(Math.E, -0.0025 * currenFortunaLevel))) - 9.3);
+            var suggestedDoraLevel = Math.Max((long)Math.Round((2.877 * lnSiya) - (1.4365 * Math.Log((100d / 99d) - Math.Pow(Math.E, -0.002 * currenDoraLevel))) - 9.63), 0);
+            var suggestedDogcogLevel = Math.Max((long)Math.Round((2.844 * lnSiya) - ((1d / 99d) + Math.Pow(Math.E, -0.01 * currenDogcogLevel)) - 7.232), 0);
+            var suggestedFortunaLevel = Math.Max((long)Math.Round((2.875 * lnSiya) - (1.4375 * Math.Log((10d / 9d) - Math.Pow(Math.E, -0.0025 * currenFortunaLevel))) - 9.3), 0);
             var suggestedSolomonLevel = (long)Math.Round(Math.Pow(currentSiyaLevel, 0.8) / Math.Pow(alpha, 0.4));
-            var suggestedAtmanLevel = (long)Math.Round((2.832 * lnSiya) - (1.416 * lnAlpha) - (1.416 * Math.Log((4d / 3d) - Math.Pow(Math.E, -0.013 * currentAtmanLevel))) - 6.613);
-            var suggestedKumaLevel = (long)Math.Round((2.88 * lnSiya) - (1.44 * lnAlpha) - (1.44 * Math.Log(0.25 + Math.Pow(Math.E, -0.001 * currentKumaLevel))) - 10.42);
+            var suggestedAtmanLevel = Math.Max((long)Math.Round((2.832 * lnSiya) - (1.416 * lnAlpha) - (1.416 * Math.Log((4d / 3d) - Math.Pow(Math.E, -0.013 * currentAtmanLevel))) - 6.613), 0);
+            var suggestedKumaLevel = Math.Max((long)Math.Round((2.88 * lnSiya) - (1.44 * lnAlpha) - (1.44 * Math.Log(0.25 + Math.Pow(Math.E, -0.001 * currentKumaLevel))) - 10.42), 0);
 
             return new KeyValuePair<int, long>[]
             {
