@@ -9,12 +9,12 @@
         {
             if (upload.user && upload.user.name)
             {
-                userNameElements[i].innerText = upload.user.name;
+                userNameElements[i].textContent = upload.user.name;
             }
             else
             {
                 userNameElements[i].classList.add("text-muted");
-                userNameElements[i].innerText = "(Anonymous)";
+                userNameElements[i].textContent = "(Anonymous)";
             }
         }
 
@@ -24,7 +24,7 @@
             const timeSubmitted = new Date(upload.timeSubmitted);
             for (let i = 0; i < submitTimeElements.length; i++)
             {
-                submitTimeElements[i].innerText = timeSubmitted.toLocaleString();
+                submitTimeElements[i].textContent = timeSubmitted.toLocaleString();
             }
         }
 
@@ -33,7 +33,7 @@
         {
             for (let i = 0; i < uploadContentElements.length; i++)
             {
-                uploadContentElements[i].innerText = upload.uploadContent;
+                uploadContentElements[i].textContent = upload.uploadContent;
             }
         }
 
@@ -59,7 +59,7 @@
                         const row = rows[j] as HTMLTableRowElement;
                         const cell = row.cells[2] as HTMLTableCellElement;
                         const dataType = cell.getAttribute("data-type");
-                        if (!upload.stats.hasOwnProperty(dataType) && cell.innerText === "0")
+                        if (!upload.stats.hasOwnProperty(dataType) && cell.textContent === "0")
                         {
                             row.classList.add("hidden");
                         }
@@ -186,7 +186,7 @@
                     statElements[i].title = fullText;
                 }
 
-                statElements[i].innerText = displayText;
+                statElements[i].textContent = displayText;
             }
         }
     }
@@ -196,7 +196,7 @@
         // BUGBUG 51: Create Loading and Failure states for ajax loading
     }
 
-    const uploadId = Helpers.getElementsByDataType("uploadId")[0].innerHTML;
+    const uploadId = Helpers.getElementsByDataType("uploadId")[0].textContent;
 
     $.ajax({
         url: "/api/uploads/" + uploadId,
