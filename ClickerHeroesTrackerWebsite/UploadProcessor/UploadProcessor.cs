@@ -165,6 +165,9 @@ namespace ClickerHeroesTrackerWebsite.UploadProcessing
                         savedGame,
                         userSettings,
                         counterProvider);
+                    var miscellaneousStatsModel = new MiscellaneousStatsModel(
+                        gameData,
+                        savedGame);
 
                     /* Build a query that looks like this:
                         MERGE INTO AncientLevels WITH (HOLDLOCK)
@@ -281,8 +284,38 @@ namespace ClickerHeroesTrackerWebsite.UploadProcessing
                     const string ComputedStatsCommandText = @"
                         MERGE INTO ComputedStats WITH (HOLDLOCK)
                         USING
-                            (VALUES (@UploadId, @OptimalLevel, @SoulsPerHour, @SoulsPerAscension, @AscensionTime, @TitanDamage, @SoulsSpent) )
-                                AS Input(UploadId, OptimalLevel, SoulsPerHour, SoulsPerAscension, AscensionTime, TitanDamage, SoulsSpent)
+                            (VALUES (
+                                    @UploadId,
+                                    @OptimalLevel,
+                                    @SoulsPerHour,
+                                    @SoulsPerAscension,
+                                    @AscensionTime,
+                                    @TitanDamage,
+                                    @SoulsSpent,
+                                    @HeroSoulsSacrificed,
+                                    @TotalAncientSouls,
+                                    @TranscendentPower,
+                                    @Rubies,
+                                    @HighestZoneThisTranscension,
+                                    @HighestZoneLifetime,
+                                    @AscensionsThisTranscension,
+                                    @AscensionsLifetime) )
+                                AS Input(
+                                    UploadId,
+                                    OptimalLevel,
+                                    SoulsPerHour,
+                                    SoulsPerAscension,
+                                    AscensionTime,
+                                    TitanDamage,
+                                    SoulsSpent,
+                                    HeroSoulsSacrificed,
+                                    TotalAncientSouls,
+                                    TranscendentPower,
+                                    Rubies,
+                                    HighestZoneThisTranscension,
+                                    HighestZoneLifetime,
+                                    AscensionsThisTranscension,
+                                    AscensionsLifetime)
                             ON ComputedStats.UploadId = Input.UploadId
                         WHEN MATCHED THEN
                             UPDATE
@@ -292,10 +325,48 @@ namespace ClickerHeroesTrackerWebsite.UploadProcessing
                                 SoulsPerAscension = Input.SoulsPerAscension,
                                 AscensionTime = Input.AscensionTime,
                                 TitanDamage = Input.TitanDamage,
-                                SoulsSpent = Input.SoulsSpent
+                                SoulsSpent = Input.SoulsSpent,
+                                HeroSoulsSacrificed = Input.HeroSoulsSacrificed,
+                                TotalAncientSouls = Input.TotalAncientSouls,
+                                TranscendentPower = Input.TranscendentPower,
+                                Rubies = Input.Rubies,
+                                HighestZoneThisTranscension = Input.HighestZoneThisTranscension,
+                                HighestZoneLifetime = Input.HighestZoneLifetime,
+                                AscensionsThisTranscension = Input.AscensionsThisTranscension,
+                                AscensionsLifetime = Input.AscensionsLifetime
                         WHEN NOT MATCHED THEN
-                            INSERT (UploadId, OptimalLevel, SoulsPerHour, SoulsPerAscension, AscensionTime, TitanDamage, SoulsSpent)
-                            VALUES (Input.UploadId, Input.OptimalLevel, Input.SoulsPerHour, Input.SoulsPerAscension, Input.AscensionTime, Input.TitanDamage, Input.SoulsSpent);";
+                            INSERT (
+                                UploadId,
+                                OptimalLevel,
+                                SoulsPerHour,
+                                SoulsPerAscension,
+                                AscensionTime,
+                                TitanDamage,
+                                SoulsSpent,
+                                HeroSoulsSacrificed,
+                                TotalAncientSouls,
+                                TranscendentPower,
+                                Rubies,
+                                HighestZoneThisTranscension,
+                                HighestZoneLifetime,
+                                AscensionsThisTranscension,
+                                AscensionsLifetime)
+                            VALUES (
+                                Input.UploadId,
+                                Input.OptimalLevel,
+                                Input.SoulsPerHour,
+                                Input.SoulsPerAscension,
+                                Input.AscensionTime,
+                                Input.TitanDamage,
+                                Input.SoulsSpent,
+                                Input.HeroSoulsSacrificed,
+                                Input.TotalAncientSouls,
+                                Input.TranscendentPower,
+                                Input.Rubies,
+                                Input.HighestZoneThisTranscension,
+                                Input.HighestZoneLifetime,
+                                Input.AscensionsThisTranscension,
+                                Input.AscensionsLifetime);";
                     var computedStatsCommandParameters = new Dictionary<string, object>
                     {
                         { "@UploadId", uploadId },
@@ -303,8 +374,16 @@ namespace ClickerHeroesTrackerWebsite.UploadProcessing
                         { "@SoulsPerHour", computedStats.SoulsPerHour },
                         { "@SoulsPerAscension", computedStats.OptimalSoulsPerAscension },
                         { "@AscensionTime", computedStats.OptimalAscensionTime },
-                        { "@TitanDamage", computedStats.TitanDamage },
-                        { "@SoulsSpent", computedStats.SoulsSpent },
+                        { "@TitanDamage", miscellaneousStatsModel.TitanDamage },
+                        { "@SoulsSpent", miscellaneousStatsModel.HeroSoulsSpent },
+                        { "@HeroSoulsSacrificed", miscellaneousStatsModel.HeroSoulsSacrificed },
+                        { "@TotalAncientSouls", miscellaneousStatsModel.TotalAncientSouls },
+                        { "@TranscendentPower", miscellaneousStatsModel.TranscendentPower },
+                        { "@Rubies", miscellaneousStatsModel.Rubies },
+                        { "@HighestZoneThisTranscension", miscellaneousStatsModel.HighestZoneThisTranscension },
+                        { "@HighestZoneLifetime", miscellaneousStatsModel.HighestZoneLifetime },
+                        { "@AscensionsThisTranscension", miscellaneousStatsModel.AscensionsThisTranscension },
+                        { "@AscensionsLifetime", miscellaneousStatsModel.AscensionsLifetime },
                     };
 
                     using (var command = databaseCommandFactory.Create())

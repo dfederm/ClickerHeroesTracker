@@ -174,6 +174,11 @@
                 hydrateStat(stats, diffStatType, statValue - ancientStatValue - itemStatValue);
             }
 
+            if (statType.indexOf("transcendentPower") === 0)
+            {
+                displayText = (statValue * 100).toFixed(2) + "%";
+            }
+
             for (let i = 0; i < statElements.length; i++)
             {
                 if (useScientificNotation)

@@ -208,7 +208,7 @@ namespace ClickerHeroesTrackerWebsite.Controllers.Api
             // Get computed stats
             var optimalLevel = 0;
             const string GetComputedStatsCommandText = @"
-                SELECT OptimalLevel, SoulsPerHour, SoulsPerAscension, AscensionTime, TitanDamage, SoulsSpent
+                SELECT OptimalLevel, SoulsPerHour, SoulsPerAscension, AscensionTime
                 FROM ComputedStats
                 WHERE UploadId = @UploadId";
             using (var command = this.databaseCommandFactory.Create(
@@ -223,10 +223,23 @@ namespace ClickerHeroesTrackerWebsite.Controllers.Api
                     upload.Stats.Add(StatType.SoulsPerHour, Convert.ToInt64(reader["SoulsPerHour"]));
                     upload.Stats.Add(StatType.SoulsPerAscension, Convert.ToInt64(reader["SoulsPerAscension"]));
                     upload.Stats.Add(StatType.OptimalAscensionTime, Convert.ToInt64(reader["AscensionTime"]));
-                    upload.Stats.Add(StatType.TitanDamage, Convert.ToDouble(reader["TitanDamage"]));
-                    upload.Stats.Add(StatType.SoulsSpent, Convert.ToDouble(reader["SoulsSpent"]));
                 }
             }
+
+            // Get misc stats
+            var miscellaneousStatsModel = new MiscellaneousStatsModel(
+                gameData,
+                savedGame);
+            upload.Stats.Add(StatType.AscensionsLifetime, miscellaneousStatsModel.AscensionsLifetime);
+            upload.Stats.Add(StatType.AscensionsThisTranscension, miscellaneousStatsModel.AscensionsThisTranscension);
+            upload.Stats.Add(StatType.HeroSoulsSacrificed, miscellaneousStatsModel.HeroSoulsSacrificed);
+            upload.Stats.Add(StatType.HeroSoulsSpent, miscellaneousStatsModel.HeroSoulsSpent);
+            upload.Stats.Add(StatType.HighestZoneLifetime, miscellaneousStatsModel.HighestZoneLifetime);
+            upload.Stats.Add(StatType.HighestZoneThisTranscension, miscellaneousStatsModel.HighestZoneThisTranscension);
+            upload.Stats.Add(StatType.Rubies, miscellaneousStatsModel.Rubies);
+            upload.Stats.Add(StatType.TitanDamage, miscellaneousStatsModel.TitanDamage);
+            upload.Stats.Add(StatType.TotalAncientSouls, miscellaneousStatsModel.TotalAncientSouls);
+            upload.Stats.Add(StatType.TranscendentPower, miscellaneousStatsModel.TranscendentPower);
 
             // Get suggested level stats
             var suggestedAncientLevelsModel = new SuggestedAncientLevelsModel(
@@ -234,7 +247,8 @@ namespace ClickerHeroesTrackerWebsite.Controllers.Api
                 savedGame,
                 ancientLevelsModel.AncientLevels,
                 optimalLevel,
-                uploadUserSettings);
+                uploadUserSettings,
+                miscellaneousStatsModel);
             foreach (var suggestedAncientLevel in suggestedAncientLevelsModel.SuggestedAncientLevels)
             {
                 upload.Stats.Add(AncientIds.GetSuggestedStatType(suggestedAncientLevel.Key), suggestedAncientLevel.Value);
@@ -296,6 +310,9 @@ namespace ClickerHeroesTrackerWebsite.Controllers.Api
                 savedGame,
                 userSettings,
                 this.counterProvider);
+            var miscellaneousStatsModel = new MiscellaneousStatsModel(
+                gameData,
+                savedGame);
 
             int uploadId;
             using (var command = this.databaseCommandFactory.Create())
@@ -316,8 +333,38 @@ namespace ClickerHeroesTrackerWebsite.Controllers.Api
 
                 // Insert computed stats
                 command.CommandText = @"
-                    INSERT INTO ComputedStats(UploadId, OptimalLevel, SoulsPerHour, SoulsPerAscension, AscensionTime, TitanDamage, SoulsSpent)
-                    VALUES(@UploadId, @OptimalLevel, @SoulsPerHour, @SoulsPerAscension, @AscensionTime, @TitanDamage, @SoulsSpent);";
+                    INSERT INTO ComputedStats(
+                        UploadId,
+                        OptimalLevel,
+                        SoulsPerHour,
+                        SoulsPerAscension,
+                        AscensionTime,
+                        TitanDamage,
+                        SoulsSpent,
+                        HeroSoulsSacrificed,
+                        TotalAncientSouls,
+                        TranscendentPower,
+                        Rubies,
+                        HighestZoneThisTranscension,
+                        HighestZoneLifetime,
+                        AscensionsThisTranscension,
+                        AscensionsLifetime)
+                    VALUES(
+                        @UploadId,
+                        @OptimalLevel,
+                        @SoulsPerHour,
+                        @SoulsPerAscension,
+                        @AscensionTime,
+                        @TitanDamage,
+                        @SoulsSpent,
+                        @HeroSoulsSacrificed,
+                        @TotalAncientSouls,
+                        @TranscendentPower,
+                        @Rubies,
+                        @HighestZoneThisTranscension,
+                        @HighestZoneLifetime,
+                        @AscensionsThisTranscension,
+                        @AscensionsLifetime);";
                 command.Parameters = new Dictionary<string, object>
                 {
                     { "@UploadId", uploadId },
@@ -325,8 +372,16 @@ namespace ClickerHeroesTrackerWebsite.Controllers.Api
                     { "@SoulsPerHour", computedStats.SoulsPerHour },
                     { "@SoulsPerAscension", computedStats.OptimalSoulsPerAscension },
                     { "@AscensionTime", computedStats.OptimalAscensionTime },
-                    { "@TitanDamage", computedStats.TitanDamage },
-                    { "@SoulsSpent", computedStats.SoulsSpent },
+                    { "@TitanDamage", miscellaneousStatsModel.TitanDamage },
+                    { "@SoulsSpent", miscellaneousStatsModel.HeroSoulsSpent },
+                    { "@HeroSoulsSacrificed", miscellaneousStatsModel.HeroSoulsSacrificed },
+                    { "@TotalAncientSouls", miscellaneousStatsModel.TotalAncientSouls },
+                    { "@TranscendentPower", miscellaneousStatsModel.TranscendentPower },
+                    { "@Rubies", miscellaneousStatsModel.Rubies },
+                    { "@HighestZoneThisTranscension", miscellaneousStatsModel.HighestZoneThisTranscension },
+                    { "@HighestZoneLifetime", miscellaneousStatsModel.HighestZoneLifetime },
+                    { "@AscensionsThisTranscension", miscellaneousStatsModel.AscensionsThisTranscension },
+                    { "@AscensionsLifetime", miscellaneousStatsModel.AscensionsLifetime },
                 };
                 command.ExecuteNonQuery();
 

@@ -116,7 +116,17 @@ namespace ClickerHeroesTrackerWebsite.Models.Api.Stats
         OptimalLevel,
         SoulsPerAscension,
         OptimalAscensionTime,
-        SoulsSpent,
+
+        /* Miscelaneous stats */
+        HeroSoulsSpent,
+        HeroSoulsSacrificed,
         TitanDamage,
+        TotalAncientSouls,
+        TranscendentPower,
+        Rubies,
+        HighestZoneThisTranscension,
+        HighestZoneLifetime,
+        AscensionsThisTranscension,
+        AscensionsLifetime,
     }
 }

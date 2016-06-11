@@ -87,10 +87,40 @@ namespace ClickerHeroesTrackerWebsite.Models.SaveData
         public double AncientSoulsTotal { get; set; }
 
         /// <summary>
+        /// Gets or sets the highest finished zone ever
+        /// </summary>
+        [JsonProperty(PropertyName = "transcendentHighestFinishedZone")]
+        public double TranscendentHighestFinishedZone { get; set; }
+
+        /// <summary>
         /// Gets or sets the highest finished zone in this transcendence
         /// </summary>
         [JsonProperty(PropertyName = "highestFinishedZonePersist")]
         public double HighestFinishedZonePersist { get; set; }
+
+        /// <summary>
+        /// Gets or sets the hero souls sacrificed in transcendence
+        /// </summary>
+        [JsonProperty(PropertyName = "heroSoulsSacrificed")]
+        public double HeroSoulsSacrificed { get; set; }
+
+        /// <summary>
+        /// Gets or sets the number of rubies
+        /// </summary>
+        [JsonProperty(PropertyName = "rubies")]
+        public double Rubies { get; set; }
+
+        /// <summary>
+        /// Gets or sets the number of ascensions this transcension
+        /// </summary>
+        [JsonProperty(PropertyName = "numAscensionsThisTranscension")]
+        public double NumAscensionsThisTranscension { get; set; }
+
+        /// <summary>
+        /// Gets or sets the number of ascensions ever
+        /// </summary>
+        [JsonProperty(PropertyName = "numWorldResets")]
+        public double NumWorldResets { get; set; }
 
         /// <summary>
         /// Parsed the encoded save game data to a structured object.

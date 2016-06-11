@@ -37,11 +37,12 @@ namespace ClickerHeroesTrackerWebsite.Models.Stats
             SavedGame savedGame,
             IDictionary<Ancient, AncientLevelInfo> ancientLevels,
             int optimalLevel,
-            IUserSettings userSettings)
+            IUserSettings userSettings,
+            MiscellaneousStatsModel miscellaneousStatsModel)
         {
             this.SuggestedAncientLevels = savedGame.OutsidersData == null
                 ? GetLegacySuggestions(gameData, ancientLevels, optimalLevel, userSettings)
-                : GetSuggestions(gameData, savedGame, ancientLevels);
+                : GetSuggestions(gameData, savedGame, ancientLevels, miscellaneousStatsModel);
         }
 
         /// <summary>
@@ -66,7 +67,8 @@ namespace ClickerHeroesTrackerWebsite.Models.Stats
         private static KeyValuePair<int, long>[] GetSuggestions(
             GameData gameData,
             SavedGame savedGame,
-            IDictionary<Ancient, AncientLevelInfo> ancientLevels)
+            IDictionary<Ancient, AncientLevelInfo> ancientLevels,
+            MiscellaneousStatsModel miscellaneousStatsModel)
         {
             var currentSiyaLevel = GetCurrentAncientLevel(gameData, ancientLevels, AncientIds.Siyalatas);
             var currentArgaivLevel = GetCurrentAncientLevel(gameData, ancientLevels, AncientIds.Argaiv);
@@ -81,8 +83,8 @@ namespace ClickerHeroesTrackerWebsite.Models.Stats
             var currentPhandoryssLevel = savedGame.OutsidersData.Outsiders.GetOutsiderLevel(3); // BUGBUG 119 - Get real game data
             var ancientSoulsTotal = savedGame.AncientSoulsTotal;
             var highestFinishedZonePersist = savedGame.HighestFinishedZonePersist;
+            var currentTp = miscellaneousStatsModel.TranscendentPower;
 
-            var currentTp = (50 - (49 * Math.Pow(Math.E, -ancientSoulsTotal / 10000)) + (currentPhandoryssLevel * 0.05)) / 100;
             var lnSiya = Math.Log(currentSiyaLevel);
             var hpScale = 1.145 + (0.005 * Math.Floor(highestFinishedZonePersist / 500));
             var alpha = 1.4067 * Math.Log(1 + currentTp) / Math.Log(hpScale);

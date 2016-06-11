@@ -5,7 +5,6 @@
 namespace ClickerHeroesTrackerWebsite.Models.Stats
 {
     using System;
-    using System.Linq;
     using ClickerHeroesTrackerWebsite.Instrumentation;
     using ClickerHeroesTrackerWebsite.Models.Game;
     using ClickerHeroesTrackerWebsite.Models.SaveData;
@@ -48,9 +47,6 @@ namespace ClickerHeroesTrackerWebsite.Models.Stats
                     Math.Round(simulationResult.Time / 60),
                     short.MaxValue);
             }
-
-            this.TitanDamage = savedGame.TitanDamage;
-            this.SoulsSpent = savedGame.AncientsData.Ancients.Values.Aggregate(0d, (count, ancientData) => count + ancientData.SpentHeroSouls);
         }
 
         /// <summary>
@@ -72,15 +68,5 @@ namespace ClickerHeroesTrackerWebsite.Models.Stats
         /// Gets the optimal time it takes to reach the optimal level.
         /// </summary>
         public short OptimalAscensionTime { get; }
-
-        /// <summary>
-        /// Gets the user's titan damage
-        /// </summary>
-        public double TitanDamage { get; }
-
-        /// <summary>
-        /// Gets the number of souls the user has spent.
-        /// </summary>
-        public double SoulsSpent { get; }
     }
 }
