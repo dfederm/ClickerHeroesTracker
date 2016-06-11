@@ -14,7 +14,12 @@
         <tr>
             <td>@ancient.Name:</td>
             <td data-type="@AncientIds.GetAncientStatType(ancient.Id).ToString().ToCamelCase()" class="text-right">0</td>
-            <td data-type="@AncientIds.GetItemStatType(ancient.Id).ToString().ToCamelCase()"></td>
+            <td data-type="@AncientIds.GetAncientStatType(ancient.Id).ToString().ToCamelCase()Tooltip"
+                class="hidden"
+                data-toggle="tooltip"
+                data-placement="bottom"
+                data-html="true"
+                title="">(*)</td>
         </tr>
     }
 </table>

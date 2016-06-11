@@ -116,9 +116,51 @@
             let fullText = statValue.toLocaleString();
             let displayText = useScientificNotation ? statValue.toExponential(3) : fullText;
 
-            if (statType.indexOf("item") === 0)
+            if (statType.indexOf("ancient") === 0)
             {
-                displayText = "(+" + displayText + ")";
+                const itemStatType = statType.replace("ancient", "item");
+                const tooltipType = statType + "Tooltip";
+
+                const itemStatValue = stats[itemStatType] || 0;
+
+                if (itemStatValue > 0)
+                {
+                    const tooltipElements = Helpers.getElementsByDataType(tooltipType);
+                    if (itemStatValue > 0)
+                    {
+                        const useScientificNotationItem = userSettings.useScientificNotation && Math.abs(itemStatValue) > userSettings.scientificNotationThreshold;
+                        const itemDisplayText = useScientificNotationItem
+                            ? itemStatValue.toExponential(3)
+                            : itemStatValue.toLocaleString();
+
+                        const effectiveLevelValue = Math.floor(statValue + itemStatValue);
+                        const useScientificNotationEffectiveLevel = userSettings.useScientificNotation && Math.abs(effectiveLevelValue) > userSettings.scientificNotationThreshold;
+                        const effectiveLevelDisplayText = useScientificNotationEffectiveLevel
+                            ? effectiveLevelValue.toExponential(3)
+                            : effectiveLevelValue.toLocaleString();
+
+                        const ancientLevelElement = document.createElement("div");
+                        ancientLevelElement.appendChild(document.createTextNode("Ancient Level: "));
+                        ancientLevelElement.appendChild(document.createTextNode(displayText));
+
+                        const itemLevelElement = document.createElement("div");
+                        itemLevelElement.appendChild(document.createTextNode("Relic Level: "));
+                        itemLevelElement.appendChild(document.createTextNode(itemDisplayText));
+
+                        const effectiveLevelElement = document.createElement("div");
+                        effectiveLevelElement.appendChild(document.createTextNode("Effective Level: "));
+                        effectiveLevelElement.appendChild(document.createTextNode(effectiveLevelDisplayText));
+
+                        displayText = effectiveLevelDisplayText;
+
+                        for (let i = 0; i < tooltipElements.length; i++)
+                        {
+                            const tooltipElement = tooltipElements[i];
+                            tooltipElement.setAttribute("data-original-title", ancientLevelElement.outerHTML + itemLevelElement.outerHTML + effectiveLevelElement.outerHTML);
+                            tooltipElement.classList.remove("hidden");
+                        }
+                    }
+                }
             }
 
             if (statType.indexOf("suggested") === 0)
@@ -127,7 +169,7 @@
                 const ancientStatType = statType.replace("suggested", "ancient");
                 const itemStatType = statType.replace("suggested", "item");
                 const ancientStatValue = stats[ancientStatType] || 0;
-                const itemStatValue = stats[itemStatType] || 0;
+                const itemStatValue = Math.floor(stats[itemStatType]) || 0;
 
                 hydrateStat(stats, diffStatType, statValue - ancientStatValue - itemStatValue);
             }
