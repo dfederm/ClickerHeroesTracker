@@ -196,7 +196,7 @@
         // BUGBUG 51: Create Loading and Failure states for ajax loading
     }
 
-    const uploadId = Helpers.getElementsByDataType("uploadId")[0].innerText;
+    const uploadId = Helpers.getElementsByDataType("uploadId")[0].innerHTML;
 
     $.ajax({
         url: "/api/uploads/" + uploadId,
