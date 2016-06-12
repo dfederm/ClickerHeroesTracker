@@ -84,41 +84,54 @@ namespace ClickerHeroesTrackerWebsite.Models.Dashboard
                     reader);
             }
 
-            this.ProminentGraphs = new List<GraphViewModel>
+            this.ProminentGraphs = new List<GraphViewModel>();
+
+            // Suppress if it's all 0's since 1.0 doesn't support this stat yet.
+            if (userData.SoulsPerHourData.Any(datum => datum.Value > 0)
+                && rivalData.SoulsPerHourData.Any(datum => datum.Value > 0))
             {
-                this.CreateGraph(
+
+                this.ProminentGraphs.Add(this.CreateGraph(
                     "soulsPerHourGraph",
                     "Souls/hr",
                     userName,
                     userData.SoulsPerHourData,
                     this.RivalUserName,
                     rivalData.SoulsPerHourData,
-                    userSettings.TimeZone),
-                this.CreateGraph(
+                    userSettings.TimeZone));
+            }
+
+            // Suppress if it's all 0's since 1.0 doesn't support this stat yet.
+            if (userData.OptimalLevelData.Any(datum => datum.Value > 0)
+                && rivalData.OptimalLevelData.Any(datum => datum.Value > 0))
+            {
+                this.ProminentGraphs.Add(this.CreateGraph(
                     "optimalLevelGraph",
                     "Optimal Level",
                     userName,
                     userData.OptimalLevelData,
                     this.RivalUserName,
                     rivalData.OptimalLevelData,
-                    userSettings.TimeZone),
-                this.CreateGraph(
-                    "soulsSpentGraph",
-                    "Souls Spent",
-                    userName,
-                    userData.SoulsSpentData,
-                    this.RivalUserName,
-                    rivalData.SoulsSpentData,
-                    userSettings.TimeZone),
-                this.CreateGraph(
-                    "titanDamageGraph",
-                    "Titan Damage",
-                    userName,
-                    userData.TitanDamageData,
-                    this.RivalUserName,
-                    rivalData.TitanDamageData,
-                    userSettings.TimeZone),
-            };
+                    userSettings.TimeZone));
+            }
+
+            this.ProminentGraphs.Add(this.CreateGraph(
+                "soulsSpentGraph",
+                "Souls Spent",
+                userName,
+                userData.SoulsSpentData,
+                this.RivalUserName,
+                rivalData.SoulsSpentData,
+                userSettings.TimeZone));
+            this.ProminentGraphs.Add(this.CreateGraph(
+                "titanDamageGraph",
+                "Titan Damage",
+                userName,
+                userData.TitanDamageData,
+                this.RivalUserName,
+                rivalData.TitanDamageData,
+                userSettings.TimeZone));
+
             this.SecondaryGraphs = userData
                 .AncientLevelData
                 .Select(x => this.CreateGraph(

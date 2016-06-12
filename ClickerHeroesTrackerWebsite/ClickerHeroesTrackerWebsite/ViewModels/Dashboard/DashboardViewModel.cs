@@ -59,6 +59,19 @@ namespace ClickerHeroesTrackerWebsite.Models.Dashboard
                 return;
             }
 
+            IDictionary<DateTime, double> dataSeries;
+            string graphTitle;
+            if (data.SoulsPerHourData.Any(datum => datum.Value > 0))
+            {
+                dataSeries = data.SoulsPerHourData;
+                graphTitle = "Souls/hr";
+            }
+            else
+            {
+                dataSeries = data.SoulsSpentData;
+                graphTitle = "Souls Spent";
+            }
+
             this.ProgressSummaryGraph = new GraphData
             {
                 Chart = new Chart
@@ -67,7 +80,7 @@ namespace ClickerHeroesTrackerWebsite.Models.Dashboard
                 },
                 Title = new Title
                 {
-                    Text = "Souls/hr"
+                    Text = graphTitle
                 },
                 XAxis = new Axis
                 {
@@ -102,8 +115,7 @@ namespace ClickerHeroesTrackerWebsite.Models.Dashboard
                 {
                     new Series
                     {
-                        Data = data
-                            .SoulsPerHourData
+                        Data = dataSeries
                             .Select(datum => new Point
                             {
                                 X = datum.Key.ToJavascriptTime(userSettings.TimeZone),
