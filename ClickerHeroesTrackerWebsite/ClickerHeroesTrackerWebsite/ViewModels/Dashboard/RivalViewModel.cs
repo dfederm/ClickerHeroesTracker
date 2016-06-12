@@ -58,8 +58,7 @@ namespace ClickerHeroesTrackerWebsite.Models.Dashboard
                 userData = new ProgressData(
                     gameData,
                     telemetryClient,
-                    reader,
-                    userSettings);
+                    reader);
                 if (!reader.NextResult())
                 {
                     return;
@@ -82,8 +81,7 @@ namespace ClickerHeroesTrackerWebsite.Models.Dashboard
                 rivalData = new ProgressData(
                     gameData,
                     telemetryClient,
-                    reader,
-                    userSettings);
+                    reader);
             }
 
             this.ProminentGraphs = new List<GraphViewModel>

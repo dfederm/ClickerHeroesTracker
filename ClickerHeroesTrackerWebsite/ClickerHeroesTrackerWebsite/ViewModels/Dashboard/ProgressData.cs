@@ -23,11 +23,8 @@ namespace ClickerHeroesTrackerWebsite.Models.Dashboard
         public ProgressData(
             GameData gameData,
             TelemetryClient telemetryClient,
-            IDataReader reader,
-            IUserSettings userSettings)
+            IDataReader reader)
         {
-            this.UserSettings = userSettings;
-
             this.OptimalLevelData = new SortedDictionary<DateTime, double>();
             this.SoulsPerHourData = new SortedDictionary<DateTime, double>();
             this.TitanDamageData = new SortedDictionary<DateTime, double>();
@@ -85,11 +82,6 @@ namespace ClickerHeroesTrackerWebsite.Models.Dashboard
         /// Gets a value indicating whether the model is valid.
         /// </summary>
         public bool IsValid { get; }
-
-        /// <summary>
-        /// Gets the curent user's settings.
-        /// </summary>
-        public IUserSettings UserSettings { get; }
 
         /// <summary>
         /// Gets the optimal level data, keyed on upload time.

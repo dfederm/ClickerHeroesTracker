@@ -75,8 +75,10 @@ namespace ClickerHeroesTrackerWebsite.Controllers
         /// View the user's progress details
         /// </summary>
         /// <returns>The progress view</returns>
+        [AllowAnonymous]
         public ActionResult Progress()
         {
+            var userName = this.Request.Query["userName"];
             var range = this.Request.Query["range"];
             var model = new ProgressViewModel(
                 this.gameData,
@@ -84,10 +86,13 @@ namespace ClickerHeroesTrackerWebsite.Controllers
                 this.databaseCommandFactory,
                 this.userSettingsProvider,
                 this.User,
+                userName,
                 range);
             if (!model.IsValid)
             {
-                this.ViewBag.ErrorMessage = "You have no uploaded data!";
+                this.ViewBag.ErrorMessage = string.IsNullOrEmpty(userName)
+                    ? "You have no uploaded data!"
+                    : "That user does not exist or does not have public uploads";
                 return this.View("Error");
             }
 

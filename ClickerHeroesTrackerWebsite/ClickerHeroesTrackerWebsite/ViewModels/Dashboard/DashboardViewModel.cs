@@ -51,8 +51,7 @@ namespace ClickerHeroesTrackerWebsite.Models.Dashboard
                 data = new ProgressData(
                     gameData,
                     telemetryClient,
-                    reader,
-                    userSettings);
+                    reader);
             }
 
             if (!data.IsValid || data.SoulsPerHourData.Count == 0)

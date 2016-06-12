@@ -29,9 +29,54 @@ namespace ClickerHeroesTrackerWebsite.Models.Dashboard
             IDatabaseCommandFactory databaseCommandFactory,
             IUserSettingsProvider userSettingsProvider,
             ClaimsPrincipal user,
+            string progressUserName,
             string range)
         {
+            this.ProgressUserName = progressUserName;
+
             var userId = user.GetUserId();
+            string progressUserId = null;
+            if (string.IsNullOrEmpty(progressUserName))
+            {
+                progressUserId = user.GetUserId();
+            }
+            else
+            {
+                var getUserIdParameters = new Dictionary<string, object>
+                {
+                    { "@UserName", progressUserName },
+                };
+                const string GetUserIdCommandText = @"
+	                SELECT Id
+                    FROM AspNetUsers
+                    WHERE UserName = @UserName";
+                using (var command = databaseCommandFactory.Create(
+                    GetUserIdCommandText,
+                    getUserIdParameters))
+                using (var reader = command.ExecuteReader())
+                {
+                    if (reader.Read())
+                    {
+                        progressUserId = reader["Id"].ToString();
+                    }
+                }
+            }
+
+            if (string.IsNullOrEmpty(progressUserId))
+            {
+                // If we didn't get data, it's a user that doesn't exist
+                return;
+            }
+
+            var progressUserSettings = userSettingsProvider.Get(progressUserId);
+
+            if (!progressUserId.Equals(userId, StringComparison.OrdinalIgnoreCase)
+                && !progressUserSettings.AreUploadsPublic
+                && !user.IsInRole("Admin"))
+            {
+                // Not permitted
+                return;
+            }
 
             var userSettings = userSettingsProvider.Get(userId);
 
@@ -41,7 +86,7 @@ namespace ClickerHeroesTrackerWebsite.Models.Dashboard
 
             var commandParameters = new Dictionary<string, object>
             {
-                { "@UserId", userId },
+                { "@UserId", progressUserId },
                 { "@StartTime", this.RangeSelector.Start },
                 { "@EndTime", this.RangeSelector.End },
             };
@@ -54,8 +99,12 @@ namespace ClickerHeroesTrackerWebsite.Models.Dashboard
                 data = new ProgressData(
                     gameData,
                     telemetryClient,
-                    reader,
-                    userSettings);
+                    reader);
+            }
+
+            if (!data.IsValid)
+            {
+                return;
             }
 
             this.ProminentGraphs = new List<GraphViewModel>
@@ -90,8 +139,13 @@ namespace ClickerHeroesTrackerWebsite.Models.Dashboard
                     userSettings.TimeZone))
                 .ToList();
 
-            this.IsValid = data.IsValid;
+            this.IsValid = true;
         }
+
+        /// <summary>
+        /// Gets the user name for the user whose progress this is.
+        /// </summary>
+        public string ProgressUserName { get; }
 
         /// <summary>
         /// Gets the graph view models to display prominently
