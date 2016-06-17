@@ -42,7 +42,7 @@ namespace ClickerHeroesTrackerWebsite.Models.Stats
         {
             this.SuggestedAncientLevels = savedGame.OutsidersData == null
                 ? GetLegacySuggestions(gameData, ancientLevels, optimalLevel, userSettings)
-                : GetSuggestions(gameData, savedGame, ancientLevels, miscellaneousStatsModel);
+                : GetSuggestions(gameData, savedGame, ancientLevels, miscellaneousStatsModel, userSettings);
         }
 
         /// <summary>
@@ -53,13 +53,16 @@ namespace ClickerHeroesTrackerWebsite.Models.Stats
         private static long GetCurrentAncientLevel(
             GameData gameData,
             IDictionary<Ancient, AncientLevelInfo> ancientLevels,
+            bool useEffectiveLevel,
             int ancientId)
         {
             Ancient ancient;
             AncientLevelInfo levelInfo;
             return gameData.Ancients.TryGetValue(ancientId, out ancient)
                 ? ancientLevels.TryGetValue(ancient, out levelInfo)
-                    ? levelInfo.EffectiveLevel
+                    ? useEffectiveLevel
+                        ? levelInfo.EffectiveLevel
+                        : levelInfo.AncientLevel
                     : 0
                 : 0;
         }
@@ -68,18 +71,21 @@ namespace ClickerHeroesTrackerWebsite.Models.Stats
             GameData gameData,
             SavedGame savedGame,
             IDictionary<Ancient, AncientLevelInfo> ancientLevels,
-            MiscellaneousStatsModel miscellaneousStatsModel)
+            MiscellaneousStatsModel miscellaneousStatsModel,
+            IUserSettings userSettings)
         {
-            var currentSiyaLevel = GetCurrentAncientLevel(gameData, ancientLevels, AncientIds.Siyalatas);
-            var currentArgaivLevel = GetCurrentAncientLevel(gameData, ancientLevels, AncientIds.Argaiv);
-            var currentMorgLevel = GetCurrentAncientLevel(gameData, ancientLevels, AncientIds.Morgulis);
-            var currentBubosLevel = GetCurrentAncientLevel(gameData, ancientLevels, AncientIds.Bubos);
-            var currenChronosLevel = GetCurrentAncientLevel(gameData, ancientLevels, AncientIds.Chronos);
-            var currenDoraLevel = GetCurrentAncientLevel(gameData, ancientLevels, AncientIds.Dora);
-            var currenDogcogLevel = GetCurrentAncientLevel(gameData, ancientLevels, AncientIds.Dogcog);
-            var currenFortunaLevel = GetCurrentAncientLevel(gameData, ancientLevels, AncientIds.Fortuna);
-            var currentAtmanLevel = GetCurrentAncientLevel(gameData, ancientLevels, AncientIds.Atman);
-            var currentKumaLevel = GetCurrentAncientLevel(gameData, ancientLevels, AncientIds.Kumawakamaru);
+            var useEffectiveLevel = userSettings.UseEffectiveLevelForSuggestions;
+
+            var currentSiyaLevel = GetCurrentAncientLevel(gameData, ancientLevels, useEffectiveLevel, AncientIds.Siyalatas);
+            var currentArgaivLevel = GetCurrentAncientLevel(gameData, ancientLevels, useEffectiveLevel, AncientIds.Argaiv);
+            var currentMorgLevel = GetCurrentAncientLevel(gameData, ancientLevels, useEffectiveLevel, AncientIds.Morgulis);
+            var currentBubosLevel = GetCurrentAncientLevel(gameData, ancientLevels, useEffectiveLevel, AncientIds.Bubos);
+            var currenChronosLevel = GetCurrentAncientLevel(gameData, ancientLevels, useEffectiveLevel, AncientIds.Chronos);
+            var currenDoraLevel = GetCurrentAncientLevel(gameData, ancientLevels, useEffectiveLevel, AncientIds.Dora);
+            var currenDogcogLevel = GetCurrentAncientLevel(gameData, ancientLevels, useEffectiveLevel, AncientIds.Dogcog);
+            var currenFortunaLevel = GetCurrentAncientLevel(gameData, ancientLevels, useEffectiveLevel, AncientIds.Fortuna);
+            var currentAtmanLevel = GetCurrentAncientLevel(gameData, ancientLevels, useEffectiveLevel, AncientIds.Atman);
+            var currentKumaLevel = GetCurrentAncientLevel(gameData, ancientLevels, useEffectiveLevel, AncientIds.Kumawakamaru);
             var currentPhandoryssLevel = savedGame.OutsidersData.Outsiders.GetOutsiderLevel(3); // BUGBUG 119 - Get real game data
             var ancientSoulsTotal = savedGame.AncientSoulsTotal;
             var highestFinishedZonePersist = savedGame.HighestFinishedZonePersist;
@@ -127,11 +133,13 @@ namespace ClickerHeroesTrackerWebsite.Models.Stats
             int optimalLevel,
             IUserSettings userSettings)
         {
-            var currentSiyaLevel = GetCurrentAncientLevel(gameData, ancientLevels, AncientIds.Siyalatas);
-            var currentFragsworthLevel = GetCurrentAncientLevel(gameData, ancientLevels, AncientIds.Fragsworth);
+            var useEffectiveLevel = userSettings.UseEffectiveLevelForSuggestions;
+
+            var currentSiyaLevel = GetCurrentAncientLevel(gameData, ancientLevels, useEffectiveLevel, AncientIds.Siyalatas);
+            var currentFragsworthLevel = GetCurrentAncientLevel(gameData, ancientLevels, useEffectiveLevel, AncientIds.Fragsworth);
 
             var primaryAncientId = PrimaryAncients[userSettings.PlayStyle];
-            var currentPrimaryAncientLevel = GetCurrentAncientLevel(gameData, ancientLevels, primaryAncientId);
+            var currentPrimaryAncientLevel = GetCurrentAncientLevel(gameData, ancientLevels, useEffectiveLevel, primaryAncientId);
 
             // Common math
             var solomonMultipliers = SolomonFormulaMultipliers[userSettings.PlayStyle];

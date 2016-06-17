@@ -76,6 +76,12 @@ namespace ClickerHeroesTrackerWebsite.Models
         public int? ScientificNotationThreshold { get; set; }
 
         /// <summary>
+        /// Gets or sets a value indicating whether the effective level is used for suggestions vs the actual ancient levels.
+        /// </summary>
+        [Display(Name = "Use effective levels for suggestions")]
+        public bool UseEffectiveLevelForSuggestions { get; set; }
+
+        /// <summary>
         /// Model for an option for the time zone select control.
         /// </summary>
         public class TimeZoneSelectItem

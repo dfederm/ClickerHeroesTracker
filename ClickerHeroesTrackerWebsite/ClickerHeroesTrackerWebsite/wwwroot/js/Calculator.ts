@@ -181,7 +181,10 @@
                         effectiveLevelElement.appendChild(document.createTextNode("Effective Level: "));
                         effectiveLevelElement.appendChild(document.createTextNode(effectiveLevelDisplayText));
 
-                        displayText = effectiveLevelDisplayText;
+                        if (userSettings.useEffectiveLevelForSuggestions)
+                        {
+                            displayText = effectiveLevelDisplayText;
+                        }
 
                         for (let i = 0; i < tooltipElements.length; i++)
                         {
@@ -201,7 +204,13 @@
                 const ancientStatValue = stats[ancientStatType] || 0;
                 const itemStatValue = Math.floor(stats[itemStatType]) || 0;
 
-                hydrateStat(stats, diffStatType, statValue - ancientStatValue - itemStatValue);
+                let diffStatValue = statValue - ancientStatValue;
+                if (userSettings.useEffectiveLevelForSuggestions)
+                {
+                    diffStatValue -= itemStatValue;
+                }
+
+                hydrateStat(stats, diffStatType, diffStatValue);
             }
 
             if (statType.indexOf("transcendentPower") === 0)

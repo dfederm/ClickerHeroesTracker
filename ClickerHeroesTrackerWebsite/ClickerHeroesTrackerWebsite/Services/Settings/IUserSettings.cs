@@ -45,5 +45,10 @@ namespace ClickerHeroesTrackerWebsite.Models.Settings
         /// Gets or sets the threshold at which to use scientific notation
         /// </summary>
         int ScientificNotationThreshold { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether the effective level is used for suggestions vs the actual ancient levels.
+        /// </summary>
+        bool UseEffectiveLevelForSuggestions { get; set; }
     }
 }

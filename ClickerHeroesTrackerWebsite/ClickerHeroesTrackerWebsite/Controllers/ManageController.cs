@@ -115,6 +115,7 @@ namespace ClickerHeroesTrackerWebsite.Controllers
             userSettings.PlayStyle = indexViewModel.PlayStyle.SafeParseEnum<PlayStyle>();
             userSettings.UseExperimentalStats = indexViewModel.UseExperimentalStats;
             userSettings.UseScientificNotation = indexViewModel.UseScientificNotation;
+            userSettings.UseEffectiveLevelForSuggestions = indexViewModel.UseEffectiveLevelForSuggestions;
 
             if (indexViewModel.ScientificNotationThreshold.HasValue)
             {
@@ -321,6 +322,7 @@ namespace ClickerHeroesTrackerWebsite.Controllers
                 UseExperimentalStats = userSettings.UseExperimentalStats,
                 UseScientificNotation = userSettings.UseScientificNotation,
                 ScientificNotationThreshold = userSettings.ScientificNotationThreshold,
+                UseEffectiveLevelForSuggestions = userSettings.UseEffectiveLevelForSuggestions,
             };
 
             return this.View(model);

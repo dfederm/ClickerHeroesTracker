@@ -11,6 +11,8 @@
     useScientificNotation: boolean;
 
     scientificNotationThreshold: number;
+
+    useEffectiveLevelForSuggestions: boolean;
 }
 
 // Serialized singleton for every request

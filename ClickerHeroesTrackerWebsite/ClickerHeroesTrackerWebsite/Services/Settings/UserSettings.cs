@@ -128,6 +128,20 @@ namespace ClickerHeroesTrackerWebsite.Models.Settings
             }
         }
 
+        public bool UseEffectiveLevelForSuggestions
+        {
+            get
+            {
+                return this.GetValue(8, bool.TryParse, false);
+            }
+
+            set
+            {
+                this.SetValue(8, value.ToString());
+            }
+        }
+
+
         internal void FlushChanges()
         {
             if (this.userId == null)
