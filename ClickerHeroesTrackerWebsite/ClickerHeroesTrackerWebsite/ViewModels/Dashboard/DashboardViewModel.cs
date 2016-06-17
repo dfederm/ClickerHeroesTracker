@@ -126,7 +126,7 @@ namespace ClickerHeroesTrackerWebsite.Models.Dashboard
                                 new Point
                                 {
                                     X = DateTime.UtcNow.ToJavascriptTime(userSettings.TimeZone),
-                                    Y = data.SoulsPerHourData.Last().Value
+                                    Y = dataSeries.Last().Value
                                 }
                             })
                             .ToList()
