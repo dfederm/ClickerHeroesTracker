@@ -37,6 +37,8 @@
             }
         }
 
+        const hasOutsiderData = upload.stats && upload.stats.hasOwnProperty("outsiderXyliqil");
+
         if (upload.stats)
         {
             for (let statType in upload.stats)
@@ -66,8 +68,6 @@
                     }
                 }
             }
-
-            const hasOutsiderData = upload.stats.hasOwnProperty("outsiderXyliqil");
 
             // Show the correct suggested ancient level text
             if (!hasOutsiderData)
@@ -103,6 +103,36 @@
                     elementsToHide[i].classList.add("hidden");
                 }
             }
+        }
+
+        // Handle play style
+        const primaryAncient = upload.playStyle === "active" && !hasOutsiderData
+            ? "Fragsworth"
+            : "Siyalatas";
+
+        const suggestedPrimaryAncientElements = Helpers.getElementsByDataType("suggested" + primaryAncient);
+        for (let i = 0; i < suggestedPrimaryAncientElements.length; i++)
+        {
+            const suggestedPrimaryAncientElement = suggestedPrimaryAncientElements[i];
+            suggestedPrimaryAncientElement.textContent = "N/A ";
+
+            const suggestedPrimaryAncientTooltip = document.createElement("span");
+            suggestedPrimaryAncientTooltip.classList.add("text-muted");
+            suggestedPrimaryAncientTooltip.setAttribute("data-toggle", "tooltip");
+            suggestedPrimaryAncientTooltip.setAttribute("data-placement", "bottom");
+            suggestedPrimaryAncientTooltip.title = "The formulae are based on this ancient. If all suggestions below are negative or zero, level this ancient.";
+            suggestedPrimaryAncientTooltip.textContent = "(?)";
+
+            suggestedPrimaryAncientElement.appendChild(suggestedPrimaryAncientTooltip);
+
+            // Wire up tooltip
+            $(suggestedPrimaryAncientTooltip).tooltip();
+        }
+
+        const diffPrimaryAncientElements = Helpers.getElementsByDataType("diff" + primaryAncient);
+        for (let i = 0; i < diffPrimaryAncientElements.length; i++)
+        {
+            diffPrimaryAncientElements[i].textContent = "";
         }
     }
 

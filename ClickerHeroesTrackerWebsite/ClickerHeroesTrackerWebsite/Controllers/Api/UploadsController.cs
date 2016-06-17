@@ -169,6 +169,9 @@ namespace ClickerHeroesTrackerWebsite.Controllers.Api
                 upload.UploadContent = uploadContent;
             }
 
+            // Set the play style.
+            upload.PlayStyle = uploadUserSettings.PlayStyle;
+
             var savedGame = SavedGame.Parse(uploadContent);
             upload.Stats = new Dictionary<StatType, double>();
 

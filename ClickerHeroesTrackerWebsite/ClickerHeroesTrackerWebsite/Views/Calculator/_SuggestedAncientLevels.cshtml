@@ -56,19 +56,8 @@
                       title="">(*)</span>
             </td>
 
-            @if (i == 0)
-            {
-                <td class="text-right">
-                    N/A
-                    <a href="#" class="text-muted" data-toggle="tooltip" data-placement="bottom" title="The formulae are based on this ancient. If all suggestions below are negative or zero, level this ancient.">(?)</a>
-                </td>
-                <td></td>
-            }
-            else
-            {
-                <td data-type="@AncientIds.GetSuggestedStatType(ancient.Id).ToString().ToCamelCase()" class="text-right">0</td>
-                <td data-type="diff@(ancient.Name)" class="text-right">0</td>
-            }
+            <td data-type="@AncientIds.GetSuggestedStatType(ancient.Id).ToString().ToCamelCase()" class="text-right">0</td>
+            <td data-type="diff@(ancient.Name)" class="text-right">0</td>
         </tr>
     }
 </table>

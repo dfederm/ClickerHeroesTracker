@@ -34,6 +34,11 @@ namespace ClickerHeroesTrackerWebsite.Models.Api.Uploads
         public string UploadContent { get; set; }
 
         /// <summary>
+        /// Gets or sets the play style for this upload
+        /// </summary>
+        public PlayStyle PlayStyle { get; set; }
+
+        /// <summary>
         /// Gets or sets the upload stats.
         /// </summary>
         public IDictionary<StatType, double> Stats { get; set; }

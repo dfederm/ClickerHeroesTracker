@@ -18,25 +18,25 @@ namespace ClickerHeroesTrackerWebsite.Models.Calculator
     {
         private static int[] suggestedAncientIds = new int[]
         {
-            AncientIds.Siyalatas,
             AncientIds.Argaiv,
-            AncientIds.Morgulis,
+            AncientIds.Atman,
+            AncientIds.Bhaal,
             AncientIds.Bubos,
             AncientIds.Chronos,
+            AncientIds.Dogcog,
+            AncientIds.Dora,
+            AncientIds.Fortuna,
+            AncientIds.Fragsworth,
+            AncientIds.Iris,
+            AncientIds.Juggernaut,
+            AncientIds.Kumawakamaru,
             AncientIds.Libertas,
             AncientIds.Mammon,
             AncientIds.Mimzee,
-            AncientIds.Bhaal,
-            AncientIds.Fragsworth,
+            AncientIds.Morgulis,
             AncientIds.Pluto,
-            AncientIds.Juggernaut,
-            AncientIds.Dora,
-            AncientIds.Dogcog,
-            AncientIds.Fortuna,
+            AncientIds.Siyalatas,
             AncientIds.Solomon,
-            AncientIds.Iris,
-            AncientIds.Atman,
-            AncientIds.Kumawakamaru,
         };
 
         /// <summary>

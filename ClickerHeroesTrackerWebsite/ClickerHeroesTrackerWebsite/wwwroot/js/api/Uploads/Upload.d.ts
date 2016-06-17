@@ -8,5 +8,7 @@
 
     uploadContent: string;
 
+    playStyle: string;
+
     stats: IMap<number>;
 }
