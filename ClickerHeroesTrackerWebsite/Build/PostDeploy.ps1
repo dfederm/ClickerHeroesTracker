@@ -21,9 +21,11 @@ try
 
     $done = $false
     $attempt = 0
+    $successes = 0
     $timeout = 60
     $retryDelay = 5
     $maxRetries = 10
+    $numSuccesses = 10
  
     do
     {
@@ -37,7 +39,11 @@ try
             $contentLength = $response.RawContentLength
             Write-Host "Received status code $statusCode with $contentLength bytes in $elapsedTime ms"
 
-            $done = $true
+            $successes++
+            if ($successes -gt $numSuccesses)
+            {
+                $done = $true
+            }
         }
         catch
         {
