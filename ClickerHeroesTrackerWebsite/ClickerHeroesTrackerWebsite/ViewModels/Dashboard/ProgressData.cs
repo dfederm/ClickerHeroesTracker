@@ -59,12 +59,6 @@ namespace ClickerHeroesTrackerWebsite.Models.Dashboard
                     continue;
                 }
 
-                // Skip ancients with max levels for now
-                if (ancient.MaxLevel > 0)
-                {
-                    continue;
-                }
-
                 IDictionary<DateTime, double> levelData;
                 if (!this.AncientLevelData.TryGetValue(ancient, out levelData))
                 {
