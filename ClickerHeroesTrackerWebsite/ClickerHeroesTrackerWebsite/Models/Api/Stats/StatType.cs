@@ -128,5 +128,7 @@ namespace ClickerHeroesTrackerWebsite.Models.Api.Stats
         HighestZoneLifetime,
         AscensionsThisTranscension,
         AscensionsLifetime,
+        MaxTranscendentPrimalReward,
+        BossLevelToTranscendentPrimalCap,
     }
 }

@@ -243,6 +243,8 @@ namespace ClickerHeroesTrackerWebsite.Controllers.Api
             upload.Stats.Add(StatType.TitanDamage, miscellaneousStatsModel.TitanDamage);
             upload.Stats.Add(StatType.TotalAncientSouls, miscellaneousStatsModel.TotalAncientSouls);
             upload.Stats.Add(StatType.TranscendentPower, miscellaneousStatsModel.TranscendentPower);
+            upload.Stats.Add(StatType.MaxTranscendentPrimalReward, miscellaneousStatsModel.MaxTranscendentPrimalReward);
+            upload.Stats.Add(StatType.BossLevelToTranscendentPrimalCap, miscellaneousStatsModel.BossLevelToTranscendentPrimalCap);
 
             // Get suggested level stats
             var suggestedAncientLevelsModel = new SuggestedAncientLevelsModel(
@@ -351,7 +353,9 @@ namespace ClickerHeroesTrackerWebsite.Controllers.Api
                         HighestZoneThisTranscension,
                         HighestZoneLifetime,
                         AscensionsThisTranscension,
-                        AscensionsLifetime)
+                        AscensionsLifetime,
+                        MaxTranscendentPrimalReward,
+                        BossLevelToTranscendentPrimalCap)
                     VALUES(
                         @UploadId,
                         @OptimalLevel,
@@ -367,7 +371,9 @@ namespace ClickerHeroesTrackerWebsite.Controllers.Api
                         @HighestZoneThisTranscension,
                         @HighestZoneLifetime,
                         @AscensionsThisTranscension,
-                        @AscensionsLifetime);";
+                        @AscensionsLifetime,
+                        @MaxTranscendentPrimalReward,
+                        @BossLevelToTranscendentPrimalCap);";
                 command.Parameters = new Dictionary<string, object>
                 {
                     { "@UploadId", uploadId },
@@ -385,6 +391,8 @@ namespace ClickerHeroesTrackerWebsite.Controllers.Api
                     { "@HighestZoneLifetime", miscellaneousStatsModel.HighestZoneLifetime },
                     { "@AscensionsThisTranscension", miscellaneousStatsModel.AscensionsThisTranscension },
                     { "@AscensionsLifetime", miscellaneousStatsModel.AscensionsLifetime },
+                    { "@MaxTranscendentPrimalReward", miscellaneousStatsModel.MaxTranscendentPrimalReward },
+                    { "@BossLevelToTranscendentPrimalCap", miscellaneousStatsModel.BossLevelToTranscendentPrimalCap },
                 };
                 command.ExecuteNonQuery();
 

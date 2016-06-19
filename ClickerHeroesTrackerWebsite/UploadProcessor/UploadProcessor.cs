@@ -299,7 +299,9 @@ namespace ClickerHeroesTrackerWebsite.UploadProcessing
                                     @HighestZoneThisTranscension,
                                     @HighestZoneLifetime,
                                     @AscensionsThisTranscension,
-                                    @AscensionsLifetime) )
+                                    @AscensionsLifetime,
+                                    @MaxTranscendentPrimalReward,
+                                    @BossLevelToTranscendentPrimalCap) )
                                 AS Input(
                                     UploadId,
                                     OptimalLevel,
@@ -315,7 +317,9 @@ namespace ClickerHeroesTrackerWebsite.UploadProcessing
                                     HighestZoneThisTranscension,
                                     HighestZoneLifetime,
                                     AscensionsThisTranscension,
-                                    AscensionsLifetime)
+                                    AscensionsLifetime,
+                                    MaxTranscendentPrimalReward,
+                                    BossLevelToTranscendentPrimalCap)
                             ON ComputedStats.UploadId = Input.UploadId
                         WHEN MATCHED THEN
                             UPDATE
@@ -333,7 +337,9 @@ namespace ClickerHeroesTrackerWebsite.UploadProcessing
                                 HighestZoneThisTranscension = Input.HighestZoneThisTranscension,
                                 HighestZoneLifetime = Input.HighestZoneLifetime,
                                 AscensionsThisTranscension = Input.AscensionsThisTranscension,
-                                AscensionsLifetime = Input.AscensionsLifetime
+                                AscensionsLifetime = Input.AscensionsLifetime,
+                                MaxTranscendentPrimalReward = Input.MaxTranscendentPrimalReward,
+                                BossLevelToTranscendentPrimalCap = Input.BossLevelToTranscendentPrimalCap
                         WHEN NOT MATCHED THEN
                             INSERT (
                                 UploadId,
@@ -350,7 +356,9 @@ namespace ClickerHeroesTrackerWebsite.UploadProcessing
                                 HighestZoneThisTranscension,
                                 HighestZoneLifetime,
                                 AscensionsThisTranscension,
-                                AscensionsLifetime)
+                                AscensionsLifetime,
+                                MaxTranscendentPrimalReward,
+                                BossLevelToTranscendentPrimalCap)
                             VALUES (
                                 Input.UploadId,
                                 Input.OptimalLevel,
@@ -366,7 +374,9 @@ namespace ClickerHeroesTrackerWebsite.UploadProcessing
                                 Input.HighestZoneThisTranscension,
                                 Input.HighestZoneLifetime,
                                 Input.AscensionsThisTranscension,
-                                Input.AscensionsLifetime);";
+                                Input.AscensionsLifetime,
+                                Input.MaxTranscendentPrimalReward,
+                                Input.BossLevelToTranscendentPrimalCap);";
                     var computedStatsCommandParameters = new Dictionary<string, object>
                     {
                         { "@UploadId", uploadId },
@@ -384,6 +394,8 @@ namespace ClickerHeroesTrackerWebsite.UploadProcessing
                         { "@HighestZoneLifetime", miscellaneousStatsModel.HighestZoneLifetime },
                         { "@AscensionsThisTranscension", miscellaneousStatsModel.AscensionsThisTranscension },
                         { "@AscensionsLifetime", miscellaneousStatsModel.AscensionsLifetime },
+                        { "@MaxTranscendentPrimalReward", miscellaneousStatsModel.MaxTranscendentPrimalReward },
+                        { "@BossLevelToTranscendentPrimalCap", miscellaneousStatsModel.BossLevelToTranscendentPrimalCap },
                     };
 
                     using (var command = databaseCommandFactory.Create())
