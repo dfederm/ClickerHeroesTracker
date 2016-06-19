@@ -123,6 +123,12 @@ namespace ClickerHeroesTrackerWebsite.Models.SaveData
         public double NumWorldResets { get; set; }
 
         /// <summary>
+        /// Gets or sets a value indicating whether the user has transcended yet.
+        /// </summary>
+        [JsonProperty(PropertyName = "transcendent")]
+        public bool Transcendent { get; set; }
+
+        /// <summary>
         /// Parsed the encoded save game data to a structured object.
         /// </summary>
         /// <param name="encodedSaveData">The encoded saved game</param>

@@ -28,7 +28,9 @@ namespace ClickerHeroesTrackerWebsite.Models.Stats
             var currentPhandoryssLevel = savedGame.OutsidersData != null && savedGame.OutsidersData.Outsiders != null
                 ? savedGame.OutsidersData.Outsiders.GetOutsiderLevel(3) // BUGBUG 119 - Get real game data
                 : 0;
-            this.TranscendentPower = (50 - (49 * Math.Pow(Math.E, -this.TotalAncientSouls / 10000)) + (currentPhandoryssLevel * 0.05)) / 100;
+            this.TranscendentPower = savedGame.Transcendent
+                ? (50 - (49 * Math.Pow(Math.E, -this.TotalAncientSouls / 10000)) + (currentPhandoryssLevel * 0.05)) / 100
+                : 0;
             this.Rubies = savedGame.Rubies;
             this.HighestZoneThisTranscension = savedGame.HighestFinishedZonePersist;
             this.HighestZoneLifetime = Math.Max(savedGame.TranscendentHighestFinishedZone, this.HighestZoneThisTranscension);
