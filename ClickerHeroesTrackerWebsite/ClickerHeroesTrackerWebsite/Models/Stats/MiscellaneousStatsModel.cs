@@ -70,8 +70,11 @@ namespace ClickerHeroesTrackerWebsite.Models.Stats
                 solomonMultiplier = 1 + (1 + currentPonyboyLevel) * (2.8 + (0.01 * (currentSolomonLevel - 80)));
             }
 
-            var bossNumber = Math.Ceiling(Math.Log(this.MaxTranscendentPrimalReward / (20 * solomonMultiplier)) / Math.Log(1 + this.TranscendentPower));
-            this.BossLevelToTranscendentPrimalCap = (bossNumber * 5) + 100;
+            if (savedGame.Transcendent)
+            {
+                var bossNumber = Math.Ceiling(Math.Log(this.MaxTranscendentPrimalReward / (20 * solomonMultiplier)) / Math.Log(1 + this.TranscendentPower));
+                this.BossLevelToTranscendentPrimalCap = (bossNumber * 5) + 100;
+            }
         }
 
         /// <summary>
