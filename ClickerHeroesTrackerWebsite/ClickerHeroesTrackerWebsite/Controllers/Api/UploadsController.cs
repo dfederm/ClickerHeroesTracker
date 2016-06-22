@@ -222,10 +222,13 @@ namespace ClickerHeroesTrackerWebsite.Controllers.Api
                 if (reader.Read())
                 {
                     optimalLevel = Convert.ToInt32(reader["OptimalLevel"]);
-                    upload.Stats.Add(StatType.OptimalLevel, optimalLevel);
-                    upload.Stats.Add(StatType.SoulsPerHour, Convert.ToInt64(reader["SoulsPerHour"]));
-                    upload.Stats.Add(StatType.SoulsPerAscension, Convert.ToInt64(reader["SoulsPerAscension"]));
-                    upload.Stats.Add(StatType.OptimalAscensionTime, Convert.ToInt64(reader["AscensionTime"]));
+                    if (optimalLevel > 0)
+                    {
+                        upload.Stats.Add(StatType.OptimalLevel, optimalLevel);
+                        upload.Stats.Add(StatType.SoulsPerHour, Convert.ToInt64(reader["SoulsPerHour"]));
+                        upload.Stats.Add(StatType.SoulsPerAscension, Convert.ToInt64(reader["SoulsPerAscension"]));
+                        upload.Stats.Add(StatType.OptimalAscensionTime, Convert.ToInt64(reader["AscensionTime"]));
+                    }
                 }
             }
 

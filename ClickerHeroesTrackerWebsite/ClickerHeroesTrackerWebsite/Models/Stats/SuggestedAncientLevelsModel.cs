@@ -104,7 +104,9 @@ namespace ClickerHeroesTrackerWebsite.Models.Stats
             var suggestedDoraLevel = Math.Max((long)Math.Round((2.877 * lnSiya) - (1.4365 * Math.Log((100d / 99d) - Math.Pow(Math.E, -0.002 * currentDoraLevel))) - 9.63), 0);
             var suggestedDogcogLevel = Math.Max((long)Math.Round((2.844 * lnSiya) - (1.422 * Math.Log((1d / 99d) + Math.Pow(Math.E, -0.01 * currentDogcogLevel))) - 7.232), 0);
             var suggestedFortunaLevel = Math.Max((long)Math.Round((2.875 * lnSiya) - (1.4375 * Math.Log((10d / 9d) - Math.Pow(Math.E, -0.0025 * currentFortunaLevel))) - 9.3), 0);
-            var suggestedSolomonLevel = (long)Math.Round(Math.Pow(currentSiyaLevel, 0.8) / Math.Pow(alpha, 0.4));
+            var suggestedSolomonLevel = savedGame.Transcendent
+                ? (long)Math.Round(Math.Pow(currentSiyaLevel, 0.8) / Math.Pow(alpha, 0.4))
+                : GetPreTranscendentSuggestedSolomonLevel(gameData, ancientLevels, userSettings);
             var suggestedAtmanLevel = Math.Max((long)Math.Round((2.832 * lnSiya) - (1.416 * lnAlpha) - (1.416 * Math.Log((4d / 3d) - Math.Pow(Math.E, -0.013 * currentAtmanLevel))) - 6.613), 0);
             var suggestedKumaLevel = Math.Max((long)Math.Round((2.844 * lnSiya) - (1.422 * lnAlpha) - (1.422 * Math.Log(0.25 + Math.Pow(Math.E, -0.001 * currentKumaLevel))) - 7.014), 0);
 
@@ -138,17 +140,8 @@ namespace ClickerHeroesTrackerWebsite.Models.Stats
             var currentSiyaLevel = GetCurrentAncientLevel(gameData, ancientLevels, useEffectiveLevel, AncientIds.Siyalatas);
             var currentFragsworthLevel = GetCurrentAncientLevel(gameData, ancientLevels, useEffectiveLevel, AncientIds.Fragsworth);
 
-            var primaryAncientId = PrimaryAncients[userSettings.PlayStyle];
-            var currentPrimaryAncientLevel = GetCurrentAncientLevel(gameData, ancientLevels, useEffectiveLevel, primaryAncientId);
-
             // Common math
-            var solomonMultipliers = SolomonFormulaMultipliers[userSettings.PlayStyle];
-            var solomonLogFunction = userSettings.UseReducedSolomonFormula
-                ? (Func<double, double>)(d => Math.Log10(d))
-                : (d => Math.Log(d));
-            var suggestedSolomonLevel = currentPrimaryAncientLevel < 100
-                ? currentPrimaryAncientLevel
-                : (long)Math.Round(solomonMultipliers[0] * Math.Pow(solomonLogFunction(solomonMultipliers[1] * Math.Pow(currentPrimaryAncientLevel, 2)), 0.4) * Math.Pow(currentPrimaryAncientLevel, 0.8));
+            var suggestedSolomonLevel = GetPreTranscendentSuggestedSolomonLevel(gameData, ancientLevels, userSettings);
             var suggestedIrisLevel = optimalLevel - 1001;
 
             // Math per play style
@@ -236,6 +229,23 @@ namespace ClickerHeroesTrackerWebsite.Models.Stats
                     throw new InvalidOperationException($"Unexpected Playstyle: {userSettings.PlayStyle}");
                 }
             }
+        }
+
+        private static long GetPreTranscendentSuggestedSolomonLevel(
+            GameData gameData,
+            IDictionary<Ancient, AncientLevelInfo> ancientLevels,
+            IUserSettings userSettings)
+        {
+            var useEffectiveLevel = userSettings.UseEffectiveLevelForSuggestions;
+            var primaryAncientId = PrimaryAncients[userSettings.PlayStyle];
+            var currentPrimaryAncientLevel = GetCurrentAncientLevel(gameData, ancientLevels, useEffectiveLevel, primaryAncientId);
+            var solomonMultipliers = SolomonFormulaMultipliers[userSettings.PlayStyle];
+            var solomonLogFunction = userSettings.UseReducedSolomonFormula
+                ? (Func<double, double>)(d => Math.Log10(d))
+                : (d => Math.Log(d));
+            return currentPrimaryAncientLevel < 100
+                ? currentPrimaryAncientLevel
+                : (long)Math.Round(solomonMultipliers[0] * Math.Pow(solomonLogFunction(solomonMultipliers[1] * Math.Pow(currentPrimaryAncientLevel, 2)), 0.4) * Math.Pow(currentPrimaryAncientLevel, 0.8));
         }
     }
 }

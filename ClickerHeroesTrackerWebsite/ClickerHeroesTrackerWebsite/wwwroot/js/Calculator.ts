@@ -38,6 +38,7 @@
         }
 
         const hasOutsiderData = upload.stats && upload.stats.hasOwnProperty("outsiderXyliqil");
+        const hasSimulationData = upload.stats && upload.stats.hasOwnProperty("optimalLevel");
 
         if (upload.stats)
         {
@@ -91,16 +92,29 @@
                 }
             }
 
-            // If there is data for outsiders, hide computed stats. Else hide outsiders.
-            const dataTypeToHide = hasOutsiderData
-                ? "simulationData"
-                : "outsiderLevels";
-            const elementsToHide = Helpers.getElementsByDataType(dataTypeToHide);
-            if (elementsToHide)
+            // Hide computed stats if there is no simulation data
+            if (!hasSimulationData)
             {
-                for (let i = 0; i < elementsToHide.length; i++)
+                const elementsToHide = Helpers.getElementsByDataType("simulationData");
+                if (elementsToHide)
                 {
-                    elementsToHide[i].classList.add("hidden");
+                    for (let i = 0; i < elementsToHide.length; i++)
+                    {
+                        elementsToHide[i].classList.add("hidden");
+                    }
+                }
+            }
+
+            // Hide outsider stats if there is no data
+            if (!hasOutsiderData)
+            {
+                const elementsToHide = Helpers.getElementsByDataType("outsiderLevels");
+                if (elementsToHide)
+                {
+                    for (let i = 0; i < elementsToHide.length; i++)
+                    {
+                        elementsToHide[i].classList.add("hidden");
+                    }
                 }
             }
         }
