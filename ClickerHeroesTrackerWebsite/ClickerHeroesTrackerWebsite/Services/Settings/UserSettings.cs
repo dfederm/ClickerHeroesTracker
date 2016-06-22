@@ -141,6 +141,31 @@ namespace ClickerHeroesTrackerWebsite.Models.Settings
             }
         }
 
+        public bool UseLogarithmicGraphScale
+        {
+            get
+            {
+                return this.GetValue(9, bool.TryParse, false);
+            }
+
+            set
+            {
+                this.SetValue(9, value.ToString());
+            }
+        }
+
+        public int LogarithmicGraphScaleThreshold
+        {
+            get
+            {
+                return this.GetValue(10, int.TryParse, 1000000);
+            }
+
+            set
+            {
+                this.SetValue(10, value.ToString());
+            }
+        }
 
         internal void FlushChanges()
         {

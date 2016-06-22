@@ -116,6 +116,7 @@ namespace ClickerHeroesTrackerWebsite.Controllers
             userSettings.UseExperimentalStats = indexViewModel.UseExperimentalStats;
             userSettings.UseScientificNotation = indexViewModel.UseScientificNotation;
             userSettings.UseEffectiveLevelForSuggestions = indexViewModel.UseEffectiveLevelForSuggestions;
+            userSettings.UseLogarithmicGraphScale = indexViewModel.UseLogarithmicGraphScale;
 
             if (indexViewModel.ScientificNotationThreshold.HasValue)
             {
@@ -125,6 +126,16 @@ namespace ClickerHeroesTrackerWebsite.Controllers
             {
                 // If they cleared the value, reset to the default.
                 userSettings.ScientificNotationThreshold = 1000000;
+            }
+
+            if (indexViewModel.LogarithmicGraphScaleThreshold.HasValue)
+            {
+                userSettings.LogarithmicGraphScaleThreshold = indexViewModel.LogarithmicGraphScaleThreshold.Value;
+            }
+            else if (userSettings.UseLogarithmicGraphScale)
+            {
+                // If they cleared the value, reset to the default.
+                userSettings.LogarithmicGraphScaleThreshold = 1000000;
             }
 
             return await this.GetIndexResult(userId, userSettings);
@@ -323,6 +334,8 @@ namespace ClickerHeroesTrackerWebsite.Controllers
                 UseScientificNotation = userSettings.UseScientificNotation,
                 ScientificNotationThreshold = userSettings.ScientificNotationThreshold,
                 UseEffectiveLevelForSuggestions = userSettings.UseEffectiveLevelForSuggestions,
+                UseLogarithmicGraphScale = userSettings.UseLogarithmicGraphScale,
+                LogarithmicGraphScaleThreshold = userSettings.LogarithmicGraphScaleThreshold,
             };
 
             return this.View(model);

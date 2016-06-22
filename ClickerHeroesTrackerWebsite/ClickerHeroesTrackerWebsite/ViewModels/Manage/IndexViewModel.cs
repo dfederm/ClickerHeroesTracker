@@ -82,6 +82,18 @@ namespace ClickerHeroesTrackerWebsite.Models
         public bool UseEffectiveLevelForSuggestions { get; set; }
 
         /// <summary>
+        /// Gets or sets a value indicating whether the user wants to see graphs with logarithmic scale
+        /// </summary>
+        [Display(Name = "Use logarithmic scale for graphs")]
+        public bool UseLogarithmicGraphScale { get; set; }
+
+        /// <summary>
+        /// Gets or sets the range a graph must cover to use logarithmic scale
+        /// </summary>
+        [Display(Name = "Graph logarithmic scale threshold")]
+        public int? LogarithmicGraphScaleThreshold { get; set; }
+
+        /// <summary>
         /// Model for an option for the time zone select control.
         /// </summary>
         public class TimeZoneSelectItem

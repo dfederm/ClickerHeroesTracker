@@ -50,5 +50,15 @@ namespace ClickerHeroesTrackerWebsite.Models.Settings
         /// Gets or sets a value indicating whether the effective level is used for suggestions vs the actual ancient levels.
         /// </summary>
         bool UseEffectiveLevelForSuggestions { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether the user wants to see graphs with logarithmic scale
+        /// </summary>
+        bool UseLogarithmicGraphScale { get; set; }
+
+        /// <summary>
+        /// Gets or sets the range a graph must cover to use logarithmic scale
+        /// </summary>
+        int LogarithmicGraphScaleThreshold { get; set; }
     }
 }

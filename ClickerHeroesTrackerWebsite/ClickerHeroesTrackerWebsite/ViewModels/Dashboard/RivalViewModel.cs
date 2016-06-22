@@ -98,7 +98,7 @@ namespace ClickerHeroesTrackerWebsite.Models.Dashboard
                     userData.SoulsPerHourData,
                     this.RivalUserName,
                     rivalData.SoulsPerHourData,
-                    userSettings.TimeZone));
+                    userSettings));
             }
 
             // Suppress if it's all 0's since 1.0 doesn't support this stat yet.
@@ -112,7 +112,7 @@ namespace ClickerHeroesTrackerWebsite.Models.Dashboard
                     userData.OptimalLevelData,
                     this.RivalUserName,
                     rivalData.OptimalLevelData,
-                    userSettings.TimeZone));
+                    userSettings));
             }
 
             this.ProminentGraphs.Add(this.CreateGraph(
@@ -122,7 +122,7 @@ namespace ClickerHeroesTrackerWebsite.Models.Dashboard
                 userData.SoulsSpentData,
                 this.RivalUserName,
                 rivalData.SoulsSpentData,
-                userSettings.TimeZone));
+                userSettings));
             this.ProminentGraphs.Add(this.CreateGraph(
                 "titanDamageGraph",
                 "Titan Damage",
@@ -130,7 +130,7 @@ namespace ClickerHeroesTrackerWebsite.Models.Dashboard
                 userData.TitanDamageData,
                 this.RivalUserName,
                 rivalData.TitanDamageData,
-                userSettings.TimeZone));
+                userSettings));
 
             this.SecondaryGraphs = userData
                 .AncientLevelData
@@ -141,7 +141,7 @@ namespace ClickerHeroesTrackerWebsite.Models.Dashboard
                     x.Value,
                     this.RivalUserName,
                     rivalData.AncientLevelData.SafeGet(x.Key),
-                    userSettings.TimeZone))
+                    userSettings))
                 .ToList();
 
             this.IsValid = !string.IsNullOrEmpty(this.RivalUserName)
@@ -181,11 +181,13 @@ namespace ClickerHeroesTrackerWebsite.Models.Dashboard
             IDictionary<DateTime, double> userData,
             string rivalName,
             IDictionary<DateTime, double> rivalData,
-            TimeZoneInfo timeZone)
+            IUserSettings userSettings)
         {
+            var timeZone = userSettings.TimeZone;
+
             var series = new List<Series>();
-            this.TryAddSeries(series, timeZone, userName, userData);
-            this.TryAddSeries(series, timeZone, rivalName, rivalData);
+            TryAddSeries(series, timeZone, userName, userData);
+            TryAddSeries(series, timeZone, rivalName, rivalData);
 
             return new GraphViewModel
             {
@@ -223,7 +225,8 @@ namespace ClickerHeroesTrackerWebsite.Models.Dashboard
                             Y = 16,
                             Format = "{value:.,0f}"
                         },
-                        ShowFirstLabel = false
+                        ShowFirstLabel = false,
+                        Type = GetYAxisType(userData, rivalData, userSettings),
                     },
                     Legend = new Legend
                     {
@@ -234,7 +237,7 @@ namespace ClickerHeroesTrackerWebsite.Models.Dashboard
             };
         }
 
-        private List<Series> TryAddSeries(
+        private static List<Series> TryAddSeries(
             List<Series> series,
             TimeZoneInfo timeZone,
             string name,
@@ -264,6 +267,28 @@ namespace ClickerHeroesTrackerWebsite.Models.Dashboard
             }
 
             return series;
+        }
+
+        private static AxisType GetYAxisType(
+            IDictionary<DateTime, double> userData,
+            IDictionary<DateTime, double> rivalData,
+            IUserSettings userSettings)
+        {
+            if (userSettings.UseLogarithmicGraphScale)
+            {
+                var minUserData = userData != null ? userData.Values.Min() : 0;
+                var minRivalData = rivalData != null ? rivalData.Values.Min() : 0;
+
+                var maxUserData = userData != null ? userData.Values.Max() : 0;
+                var maxRivalData = rivalData != null ? rivalData.Values.Max() : 0;
+
+                if (Math.Max(maxUserData, maxRivalData) - Math.Min(minUserData, minRivalData) > userSettings.LogarithmicGraphScaleThreshold)
+                {
+                    return AxisType.Logarithmic;
+                }
+            }
+
+            return AxisType.Linear;
         }
     }
 }

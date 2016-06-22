@@ -116,7 +116,7 @@ namespace ClickerHeroesTrackerWebsite.Models.Dashboard
                         "soulsPerHourGraph",
                         "Souls/hr",
                         data.SoulsPerHourData,
-                        userSettings.TimeZone));
+                        userSettings));
             }
 
             // Suppress if it's all 0's since 1.0 doesn't support this stat yet.
@@ -126,26 +126,26 @@ namespace ClickerHeroesTrackerWebsite.Models.Dashboard
                     "optimalLevelGraph",
                     "Optimal Level",
                     data.OptimalLevelData,
-                    userSettings.TimeZone));
+                    userSettings));
             }
 
             this.ProminentGraphs.Add(this.CreateGraph(
                 "soulsSpentGraph",
                 "Souls Spent",
                 data.SoulsSpentData,
-                userSettings.TimeZone));
+                userSettings));
             this.ProminentGraphs.Add(this.CreateGraph(
                 "titanDamageGraph",
                 "Titan Damage",
                 data.TitanDamageData,
-                userSettings.TimeZone));
+                userSettings));
             this.SecondaryGraphs = data
                 .AncientLevelData
                 .Select(x => this.CreateGraph(
                     x.Key.Name + "Graph",
                     x.Key.Name,
                     x.Value,
-                    userSettings.TimeZone))
+                    userSettings))
                 .ToList();
 
             this.IsValid = true;
@@ -180,8 +180,10 @@ namespace ClickerHeroesTrackerWebsite.Models.Dashboard
             string id,
             string title,
             IDictionary<DateTime, double> data,
-            TimeZoneInfo timeZone)
+            IUserSettings userSettings)
         {
+            var timeZone = userSettings.TimeZone;
+
             return new GraphViewModel
             {
                 Id = id,
@@ -218,7 +220,8 @@ namespace ClickerHeroesTrackerWebsite.Models.Dashboard
                             Y = 16,
                             Format = "{value:.,0f}"
                         },
-                        ShowFirstLabel = false
+                        ShowFirstLabel = false,
+                        Type = GetYAxisType(data, userSettings),
                     },
                     Legend = new Legend
                     {
@@ -247,6 +250,15 @@ namespace ClickerHeroesTrackerWebsite.Models.Dashboard
                     }
                 }
             };
+        }
+
+        private static AxisType GetYAxisType(
+            IDictionary<DateTime, double> data,
+            IUserSettings userSettings)
+        {
+            return userSettings.UseLogarithmicGraphScale && data.Values.Max() - data.Values.Min() > userSettings.LogarithmicGraphScaleThreshold
+                ? AxisType.Logarithmic
+                : AxisType.Linear;
         }
     }
 }
