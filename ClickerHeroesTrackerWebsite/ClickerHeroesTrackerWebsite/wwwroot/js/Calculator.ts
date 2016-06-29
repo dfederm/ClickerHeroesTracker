@@ -120,7 +120,7 @@
         }
 
         // Handle play style
-        const primaryAncient = upload.playStyle === "active" && !hasOutsiderData
+        const primaryAncient = upload.playStyle === "active"
             ? "Fragsworth"
             : "Siyalatas";
 
