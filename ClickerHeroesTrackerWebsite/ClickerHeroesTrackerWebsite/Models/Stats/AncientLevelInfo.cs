@@ -18,14 +18,14 @@ namespace ClickerHeroesTrackerWebsite.Models.Stats
         /// <param name="itemLevel">The ancient levels added by items</param>
         public AncientLevelInfo(double ancientLevel, double itemLevel)
         {
-            this.AncientLevel = (long)Math.Floor(ancientLevel);
+            this.AncientLevel = Math.Floor(ancientLevel);
             this.ItemLevel = itemLevel;
         }
 
         /// <summary>
         /// Gets the base ancient level
         /// </summary>
-        public long AncientLevel { get; }
+        public double AncientLevel { get; }
 
         /// <summary>
         /// Gets the ancient levels added by items
@@ -35,6 +35,6 @@ namespace ClickerHeroesTrackerWebsite.Models.Stats
         /// <summary>
         /// Gets the effective level of the ancient. The game always rounds down so we will too.
         /// </summary>
-        public long EffectiveLevel => (long)Math.Floor(this.AncientLevel + this.ItemLevel);
+        public double EffectiveLevel => Math.Floor(this.AncientLevel + this.ItemLevel);
     }
 }

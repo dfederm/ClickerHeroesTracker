@@ -48,9 +48,9 @@ namespace ClickerHeroesTrackerWebsite.Models.Stats
         /// <summary>
         /// Gets a collection of suggested ancient levels
         /// </summary>
-        public KeyValuePair<int, long>[] SuggestedAncientLevels { get; }
+        public KeyValuePair<int, double>[] SuggestedAncientLevels { get; }
 
-        private static long GetCurrentAncientLevel(
+        private static double GetCurrentAncientLevel(
             GameData gameData,
             IDictionary<Ancient, AncientLevelInfo> ancientLevels,
             bool useEffectiveLevel,
@@ -67,7 +67,7 @@ namespace ClickerHeroesTrackerWebsite.Models.Stats
                 : 0;
         }
 
-        private static KeyValuePair<int, long>[] GetSuggestions(
+        private static KeyValuePair<int, double>[] GetSuggestions(
             GameData gameData,
             SavedGame savedGame,
             IDictionary<Ancient, AncientLevelInfo> ancientLevels,
@@ -100,89 +100,89 @@ namespace ClickerHeroesTrackerWebsite.Models.Stats
             // Common formulas across play styles
             var suggestedArgaivLevel = currentPrimaryAncientLevel;
             var suggestedMorgLevel = currentPrimaryAncientLevel * currentPrimaryAncientLevel;
-            var suggestedBubosLevel = Math.Max((long)Math.Round((2.8 * lnPrimary) - (1.4 * Math.Log(1 + Math.Pow(Math.E, -0.02 * currentBubosLevel))) - 5.94), 0);
-            var suggestedChronosLevel = Math.Max((long)Math.Round((2.75 * lnPrimary) - (1.375 * Math.Log(2 - Math.Pow(Math.E, -0.034 * currentChronosLevel))) - 5.1), 0);
-            var suggestedGoldLevel = (long)Math.Round(currentPrimaryAncientLevel * 0.926);
-            var suggestedDoraLevel = Math.Max((long)Math.Round((2.877 * lnPrimary) - (1.4365 * Math.Log((100d / 99d) - Math.Pow(Math.E, -0.002 * currentDoraLevel))) - 9.63), 0);
-            var suggestedDogcogLevel = Math.Max((long)Math.Round((2.844 * lnPrimary) - (1.422 * Math.Log((1d / 99d) + Math.Pow(Math.E, -0.01 * currentDogcogLevel))) - 7.232), 0);
-            var suggestedFortunaLevel = Math.Max((long)Math.Round((2.875 * lnPrimary) - (1.4375 * Math.Log((10d / 9d) - Math.Pow(Math.E, -0.0025 * currentFortunaLevel))) - 9.3), 0);
+            var suggestedBubosLevel = Math.Max(Math.Round((2.8 * lnPrimary) - (1.4 * Math.Log(1 + Math.Pow(Math.E, -0.02 * currentBubosLevel))) - 5.94), 0);
+            var suggestedChronosLevel = Math.Max(Math.Round((2.75 * lnPrimary) - (1.375 * Math.Log(2 - Math.Pow(Math.E, -0.034 * currentChronosLevel))) - 5.1), 0);
+            var suggestedGoldLevel = Math.Round(currentPrimaryAncientLevel * 0.926);
+            var suggestedDoraLevel = Math.Max(Math.Round((2.877 * lnPrimary) - (1.4365 * Math.Log((100d / 99d) - Math.Pow(Math.E, -0.002 * currentDoraLevel))) - 9.63), 0);
+            var suggestedDogcogLevel = Math.Max(Math.Round((2.844 * lnPrimary) - (1.422 * Math.Log((1d / 99d) + Math.Pow(Math.E, -0.01 * currentDogcogLevel))) - 7.232), 0);
+            var suggestedFortunaLevel = Math.Max(Math.Round((2.875 * lnPrimary) - (1.4375 * Math.Log((10d / 9d) - Math.Pow(Math.E, -0.0025 * currentFortunaLevel))) - 9.3), 0);
             var suggestedSolomonLevel = savedGame.Transcendent
-                ? (long)Math.Round(Math.Pow(currentPrimaryAncientLevel, 0.8) / Math.Pow(alpha, 0.4))
+                ? Math.Round(Math.Pow(currentPrimaryAncientLevel, 0.8) / Math.Pow(alpha, 0.4))
                 : GetPreTranscendentSuggestedSolomonLevel(gameData, ancientLevels, currentPrimaryAncientLevel, userSettings);
-            var suggestedAtmanLevel = Math.Max((long)Math.Round((2.832 * lnPrimary) - (1.416 * lnAlpha) - (1.416 * Math.Log((4d / 3d) - Math.Pow(Math.E, -0.013 * currentAtmanLevel))) - 6.613), 0);
-            var suggestedKumaLevel = Math.Max((long)Math.Round((2.844 * lnPrimary) - (1.422 * lnAlpha) - (1.422 * Math.Log(0.25 + Math.Pow(Math.E, -0.001 * currentKumaLevel))) - 7.014), 0);
+            var suggestedAtmanLevel = Math.Max(Math.Round((2.832 * lnPrimary) - (1.416 * lnAlpha) - (1.416 * Math.Log((4d / 3d) - Math.Pow(Math.E, -0.013 * currentAtmanLevel))) - 6.613), 0);
+            var suggestedKumaLevel = Math.Max(Math.Round((2.844 * lnPrimary) - (1.422 * lnAlpha) - (1.422 * Math.Log(0.25 + Math.Pow(Math.E, -0.001 * currentKumaLevel))) - 7.014), 0);
 
             // Math per play style
             switch (userSettings.PlayStyle)
             {
                 case PlayStyle.Idle:
                 {
-                    return new KeyValuePair<int, long>[]
+                    return new KeyValuePair<int, double>[]
                     {
-                        new KeyValuePair<int, long>(AncientIds.Siyalatas, currentPrimaryAncientLevel),
-                        new KeyValuePair<int, long>(AncientIds.Argaiv, suggestedArgaivLevel),
-                        new KeyValuePair<int, long>(AncientIds.Morgulis, suggestedMorgLevel),
-                        new KeyValuePair<int, long>(AncientIds.Bubos, suggestedBubosLevel),
-                        new KeyValuePair<int, long>(AncientIds.Chronos, suggestedChronosLevel),
-                        new KeyValuePair<int, long>(AncientIds.Libertas, suggestedGoldLevel),
-                        new KeyValuePair<int, long>(AncientIds.Mammon, suggestedGoldLevel),
-                        new KeyValuePair<int, long>(AncientIds.Mimzee, suggestedGoldLevel),
-                        new KeyValuePair<int, long>(AncientIds.Dora, suggestedDoraLevel),
-                        new KeyValuePair<int, long>(AncientIds.Dogcog, suggestedDogcogLevel),
-                        new KeyValuePair<int, long>(AncientIds.Fortuna, suggestedFortunaLevel),
-                        new KeyValuePair<int, long>(AncientIds.Solomon, suggestedSolomonLevel),
-                        new KeyValuePair<int, long>(AncientIds.Atman, suggestedAtmanLevel),
-                        new KeyValuePair<int, long>(AncientIds.Kumawakamaru, suggestedKumaLevel),
+                        new KeyValuePair<int, double>(AncientIds.Siyalatas, currentPrimaryAncientLevel),
+                        new KeyValuePair<int, double>(AncientIds.Argaiv, suggestedArgaivLevel),
+                        new KeyValuePair<int, double>(AncientIds.Morgulis, suggestedMorgLevel),
+                        new KeyValuePair<int, double>(AncientIds.Bubos, suggestedBubosLevel),
+                        new KeyValuePair<int, double>(AncientIds.Chronos, suggestedChronosLevel),
+                        new KeyValuePair<int, double>(AncientIds.Libertas, suggestedGoldLevel),
+                        new KeyValuePair<int, double>(AncientIds.Mammon, suggestedGoldLevel),
+                        new KeyValuePair<int, double>(AncientIds.Mimzee, suggestedGoldLevel),
+                        new KeyValuePair<int, double>(AncientIds.Dora, suggestedDoraLevel),
+                        new KeyValuePair<int, double>(AncientIds.Dogcog, suggestedDogcogLevel),
+                        new KeyValuePair<int, double>(AncientIds.Fortuna, suggestedFortunaLevel),
+                        new KeyValuePair<int, double>(AncientIds.Solomon, suggestedSolomonLevel),
+                        new KeyValuePair<int, double>(AncientIds.Atman, suggestedAtmanLevel),
+                        new KeyValuePair<int, double>(AncientIds.Kumawakamaru, suggestedKumaLevel),
                     };
                 }
 
                 case PlayStyle.Hybrid:
                 {
-                    var suggestedActiveLevel = (long)Math.Round(0.1 * currentPrimaryAncientLevel);
-                    var suggestedJuggernautLevel = (long)Math.Round(Math.Pow(0.1 * currentPrimaryAncientLevel, 0.8));
-                    return new KeyValuePair<int, long>[]
+                    var suggestedActiveLevel = Math.Round(0.1 * currentPrimaryAncientLevel);
+                    var suggestedJuggernautLevel = Math.Round(Math.Pow(0.1 * currentPrimaryAncientLevel, 0.8));
+                    return new KeyValuePair<int, double>[]
                     {
-                        new KeyValuePair<int, long>(AncientIds.Siyalatas, currentPrimaryAncientLevel),
-                        new KeyValuePair<int, long>(AncientIds.Argaiv, suggestedArgaivLevel),
-                        new KeyValuePair<int, long>(AncientIds.Morgulis, suggestedMorgLevel),
-                        new KeyValuePair<int, long>(AncientIds.Bubos, suggestedBubosLevel),
-                        new KeyValuePair<int, long>(AncientIds.Chronos, suggestedChronosLevel),
-                        new KeyValuePair<int, long>(AncientIds.Libertas, suggestedGoldLevel),
-                        new KeyValuePair<int, long>(AncientIds.Mammon, suggestedGoldLevel),
-                        new KeyValuePair<int, long>(AncientIds.Mimzee, suggestedGoldLevel),
-                        new KeyValuePair<int, long>(AncientIds.Dora, suggestedDoraLevel),
-                        new KeyValuePair<int, long>(AncientIds.Dogcog, suggestedDogcogLevel),
-                        new KeyValuePair<int, long>(AncientIds.Fortuna, suggestedFortunaLevel),
-                        new KeyValuePair<int, long>(AncientIds.Solomon, suggestedSolomonLevel),
-                        new KeyValuePair<int, long>(AncientIds.Atman, suggestedAtmanLevel),
-                        new KeyValuePair<int, long>(AncientIds.Kumawakamaru, suggestedKumaLevel),
-                        new KeyValuePair<int, long>(AncientIds.Fragsworth, suggestedActiveLevel),
-                        new KeyValuePair<int, long>(AncientIds.Bhaal, suggestedActiveLevel),
-                        new KeyValuePair<int, long>(AncientIds.Juggernaut, suggestedJuggernautLevel),
+                        new KeyValuePair<int, double>(AncientIds.Siyalatas, currentPrimaryAncientLevel),
+                        new KeyValuePair<int, double>(AncientIds.Argaiv, suggestedArgaivLevel),
+                        new KeyValuePair<int, double>(AncientIds.Morgulis, suggestedMorgLevel),
+                        new KeyValuePair<int, double>(AncientIds.Bubos, suggestedBubosLevel),
+                        new KeyValuePair<int, double>(AncientIds.Chronos, suggestedChronosLevel),
+                        new KeyValuePair<int, double>(AncientIds.Libertas, suggestedGoldLevel),
+                        new KeyValuePair<int, double>(AncientIds.Mammon, suggestedGoldLevel),
+                        new KeyValuePair<int, double>(AncientIds.Mimzee, suggestedGoldLevel),
+                        new KeyValuePair<int, double>(AncientIds.Dora, suggestedDoraLevel),
+                        new KeyValuePair<int, double>(AncientIds.Dogcog, suggestedDogcogLevel),
+                        new KeyValuePair<int, double>(AncientIds.Fortuna, suggestedFortunaLevel),
+                        new KeyValuePair<int, double>(AncientIds.Solomon, suggestedSolomonLevel),
+                        new KeyValuePair<int, double>(AncientIds.Atman, suggestedAtmanLevel),
+                        new KeyValuePair<int, double>(AncientIds.Kumawakamaru, suggestedKumaLevel),
+                        new KeyValuePair<int, double>(AncientIds.Fragsworth, suggestedActiveLevel),
+                        new KeyValuePair<int, double>(AncientIds.Bhaal, suggestedActiveLevel),
+                        new KeyValuePair<int, double>(AncientIds.Juggernaut, suggestedJuggernautLevel),
                     };
                 }
 
                 case PlayStyle.Active:
                 {
                     var suggestedBhaalLevel = currentPrimaryAncientLevel;
-                    var suggestedJuggernautLevel = (long)Math.Round(Math.Pow(currentPrimaryAncientLevel, 0.8));
-                    return new KeyValuePair<int, long>[]
+                    var suggestedJuggernautLevel = Math.Round(Math.Pow(currentPrimaryAncientLevel, 0.8));
+                    return new KeyValuePair<int, double>[]
                     {
-                        new KeyValuePair<int, long>(AncientIds.Fragsworth, currentPrimaryAncientLevel),
-                        new KeyValuePair<int, long>(AncientIds.Argaiv, suggestedArgaivLevel),
-                        new KeyValuePair<int, long>(AncientIds.Morgulis, suggestedMorgLevel),
-                        new KeyValuePair<int, long>(AncientIds.Bubos, suggestedBubosLevel),
-                        new KeyValuePair<int, long>(AncientIds.Chronos, suggestedChronosLevel),
-                        new KeyValuePair<int, long>(AncientIds.Bhaal, suggestedBhaalLevel),
-                        new KeyValuePair<int, long>(AncientIds.Mammon, suggestedGoldLevel),
-                        new KeyValuePair<int, long>(AncientIds.Mimzee, suggestedGoldLevel),
-                        new KeyValuePair<int, long>(AncientIds.Dora, suggestedDoraLevel),
-                        new KeyValuePair<int, long>(AncientIds.Dogcog, suggestedDogcogLevel),
-                        new KeyValuePair<int, long>(AncientIds.Fortuna, suggestedFortunaLevel),
-                        new KeyValuePair<int, long>(AncientIds.Solomon, suggestedSolomonLevel),
-                        new KeyValuePair<int, long>(AncientIds.Atman, suggestedAtmanLevel),
-                        new KeyValuePair<int, long>(AncientIds.Kumawakamaru, suggestedKumaLevel),
-                        new KeyValuePair<int, long>(AncientIds.Juggernaut, suggestedJuggernautLevel),
+                        new KeyValuePair<int, double>(AncientIds.Fragsworth, currentPrimaryAncientLevel),
+                        new KeyValuePair<int, double>(AncientIds.Argaiv, suggestedArgaivLevel),
+                        new KeyValuePair<int, double>(AncientIds.Morgulis, suggestedMorgLevel),
+                        new KeyValuePair<int, double>(AncientIds.Bubos, suggestedBubosLevel),
+                        new KeyValuePair<int, double>(AncientIds.Chronos, suggestedChronosLevel),
+                        new KeyValuePair<int, double>(AncientIds.Bhaal, suggestedBhaalLevel),
+                        new KeyValuePair<int, double>(AncientIds.Mammon, suggestedGoldLevel),
+                        new KeyValuePair<int, double>(AncientIds.Mimzee, suggestedGoldLevel),
+                        new KeyValuePair<int, double>(AncientIds.Dora, suggestedDoraLevel),
+                        new KeyValuePair<int, double>(AncientIds.Dogcog, suggestedDogcogLevel),
+                        new KeyValuePair<int, double>(AncientIds.Fortuna, suggestedFortunaLevel),
+                        new KeyValuePair<int, double>(AncientIds.Solomon, suggestedSolomonLevel),
+                        new KeyValuePair<int, double>(AncientIds.Atman, suggestedAtmanLevel),
+                        new KeyValuePair<int, double>(AncientIds.Kumawakamaru, suggestedKumaLevel),
+                        new KeyValuePair<int, double>(AncientIds.Juggernaut, suggestedJuggernautLevel),
                     };
                 }
 
@@ -193,7 +193,7 @@ namespace ClickerHeroesTrackerWebsite.Models.Stats
             }
         }
 
-        private static KeyValuePair<int, long>[] GetLegacySuggestions(
+        private static KeyValuePair<int, double>[] GetLegacySuggestions(
             GameData gameData,
             IDictionary<Ancient, AncientLevelInfo> ancientLevels,
             int optimalLevel,
@@ -216,21 +216,21 @@ namespace ClickerHeroesTrackerWebsite.Models.Stats
                     var suggestedArgaivLevel = currentPrimaryAncientLevel < 100
                         ? currentPrimaryAncientLevel
                         : (currentPrimaryAncientLevel + 9);
-                    var suggestedGoldLevel = (long)Math.Round(currentPrimaryAncientLevel * 0.927);
+                    var suggestedGoldLevel = Math.Round(currentPrimaryAncientLevel * 0.927);
                     var suggestedMorgLevel = currentPrimaryAncientLevel < 100
-                        ? (long)Math.Round(Math.Pow(currentPrimaryAncientLevel + 1, 2))
-                        : (long)Math.Round(Math.Pow(currentPrimaryAncientLevel, 2) + (43.67 * currentPrimaryAncientLevel) + 33.58);
+                        ? Math.Round(Math.Pow(currentPrimaryAncientLevel + 1, 2))
+                        : Math.Round(Math.Pow(currentPrimaryAncientLevel, 2) + (43.67 * currentPrimaryAncientLevel) + 33.58);
 
-                    return new KeyValuePair<int, long>[]
+                    return new KeyValuePair<int, double>[]
                     {
-                        new KeyValuePair<int, long>(AncientIds.Siyalatas, currentPrimaryAncientLevel),
-                        new KeyValuePair<int, long>(AncientIds.Argaiv, suggestedArgaivLevel),
-                        new KeyValuePair<int, long>(AncientIds.Libertas, suggestedGoldLevel),
-                        new KeyValuePair<int, long>(AncientIds.Mammon, suggestedGoldLevel),
-                        new KeyValuePair<int, long>(AncientIds.Mimzee, suggestedGoldLevel),
-                        new KeyValuePair<int, long>(AncientIds.Morgulis, suggestedMorgLevel),
-                        new KeyValuePair<int, long>(AncientIds.Solomon, suggestedSolomonLevel),
-                        new KeyValuePair<int, long>(AncientIds.Iris, suggestedIrisLevel),
+                        new KeyValuePair<int, double>(AncientIds.Siyalatas, currentPrimaryAncientLevel),
+                        new KeyValuePair<int, double>(AncientIds.Argaiv, suggestedArgaivLevel),
+                        new KeyValuePair<int, double>(AncientIds.Libertas, suggestedGoldLevel),
+                        new KeyValuePair<int, double>(AncientIds.Mammon, suggestedGoldLevel),
+                        new KeyValuePair<int, double>(AncientIds.Mimzee, suggestedGoldLevel),
+                        new KeyValuePair<int, double>(AncientIds.Morgulis, suggestedMorgLevel),
+                        new KeyValuePair<int, double>(AncientIds.Solomon, suggestedSolomonLevel),
+                        new KeyValuePair<int, double>(AncientIds.Iris, suggestedIrisLevel),
                     };
                 }
 
@@ -239,27 +239,27 @@ namespace ClickerHeroesTrackerWebsite.Models.Stats
                     var suggestedArgaivLevel = currentPrimaryAncientLevel < 100
                         ? currentPrimaryAncientLevel
                         : (currentPrimaryAncientLevel + 9);
-                    var suggestedGoldLevel = (long)Math.Round(currentPrimaryAncientLevel * 0.927);
-                    var suggestedClickLevel = (long)Math.Round(currentPrimaryAncientLevel * 0.5);
-                    var suggestedJuggernautLevel = (long)Math.Round(Math.Pow(suggestedClickLevel, 0.8));
+                    var suggestedGoldLevel = Math.Round(currentPrimaryAncientLevel * 0.927);
+                    var suggestedClickLevel = Math.Round(currentPrimaryAncientLevel * 0.5);
+                    var suggestedJuggernautLevel = Math.Round(Math.Pow(suggestedClickLevel, 0.8));
                     var suggestedMorgLevel = currentPrimaryAncientLevel < 100
-                        ? (long)Math.Round(Math.Pow(currentPrimaryAncientLevel + 1, 2))
-                        : (long)Math.Round(Math.Pow(currentPrimaryAncientLevel, 2) + (43.67 * currentPrimaryAncientLevel) + 33.58);
+                        ? Math.Round(Math.Pow(currentPrimaryAncientLevel + 1, 2))
+                        : Math.Round(Math.Pow(currentPrimaryAncientLevel, 2) + (43.67 * currentPrimaryAncientLevel) + 33.58);
 
-                    return new KeyValuePair<int, long>[]
+                    return new KeyValuePair<int, double>[]
                     {
-                        new KeyValuePair<int, long>(AncientIds.Siyalatas, currentPrimaryAncientLevel),
-                        new KeyValuePair<int, long>(AncientIds.Argaiv, suggestedArgaivLevel),
-                        new KeyValuePair<int, long>(AncientIds.Libertas, suggestedGoldLevel),
-                        new KeyValuePair<int, long>(AncientIds.Mammon, suggestedGoldLevel),
-                        new KeyValuePair<int, long>(AncientIds.Mimzee, suggestedGoldLevel),
-                        new KeyValuePair<int, long>(AncientIds.Bhaal, suggestedClickLevel),
-                        new KeyValuePair<int, long>(AncientIds.Fragsworth, suggestedClickLevel),
-                        new KeyValuePair<int, long>(AncientIds.Pluto, suggestedClickLevel),
-                        new KeyValuePair<int, long>(AncientIds.Juggernaut, suggestedJuggernautLevel),
-                        new KeyValuePair<int, long>(AncientIds.Morgulis, suggestedMorgLevel),
-                        new KeyValuePair<int, long>(AncientIds.Solomon, suggestedSolomonLevel),
-                        new KeyValuePair<int, long>(AncientIds.Iris, suggestedIrisLevel),
+                        new KeyValuePair<int, double>(AncientIds.Siyalatas, currentPrimaryAncientLevel),
+                        new KeyValuePair<int, double>(AncientIds.Argaiv, suggestedArgaivLevel),
+                        new KeyValuePair<int, double>(AncientIds.Libertas, suggestedGoldLevel),
+                        new KeyValuePair<int, double>(AncientIds.Mammon, suggestedGoldLevel),
+                        new KeyValuePair<int, double>(AncientIds.Mimzee, suggestedGoldLevel),
+                        new KeyValuePair<int, double>(AncientIds.Bhaal, suggestedClickLevel),
+                        new KeyValuePair<int, double>(AncientIds.Fragsworth, suggestedClickLevel),
+                        new KeyValuePair<int, double>(AncientIds.Pluto, suggestedClickLevel),
+                        new KeyValuePair<int, double>(AncientIds.Juggernaut, suggestedJuggernautLevel),
+                        new KeyValuePair<int, double>(AncientIds.Morgulis, suggestedMorgLevel),
+                        new KeyValuePair<int, double>(AncientIds.Solomon, suggestedSolomonLevel),
+                        new KeyValuePair<int, double>(AncientIds.Iris, suggestedIrisLevel),
                     };
                 }
 
@@ -269,22 +269,22 @@ namespace ClickerHeroesTrackerWebsite.Models.Stats
                     var suggestedBhaalLevel = currentPrimaryAncientLevel < 1000
                         ? currentPrimaryAncientLevel
                         : (currentPrimaryAncientLevel - 90);
-                    var suggestedJuggernautLevel = (long)Math.Round(Math.Pow(currentPrimaryAncientLevel, 0.8));
-                    var suggestedPlutoLevel = (long)Math.Round(currentPrimaryAncientLevel * 0.927);
+                    var suggestedJuggernautLevel = Math.Round(Math.Pow(currentPrimaryAncientLevel, 0.8));
+                    var suggestedPlutoLevel = Math.Round(currentPrimaryAncientLevel * 0.927);
                     var suggestedMorgLevel = currentPrimaryAncientLevel < 100
-                        ? (long)Math.Round(Math.Pow(currentPrimaryAncientLevel + 1, 2))
-                        : (long)Math.Round(Math.Pow(currentPrimaryAncientLevel + 13, 2));
+                        ? Math.Round(Math.Pow(currentPrimaryAncientLevel + 1, 2))
+                        : Math.Round(Math.Pow(currentPrimaryAncientLevel + 13, 2));
 
-                    return new KeyValuePair<int, long>[]
+                    return new KeyValuePair<int, double>[]
                     {
-                        new KeyValuePair<int, long>(AncientIds.Fragsworth, currentPrimaryAncientLevel),
-                        new KeyValuePair<int, long>(AncientIds.Argaiv, suggestedArgaivLevel),
-                        new KeyValuePair<int, long>(AncientIds.Bhaal, suggestedBhaalLevel),
-                        new KeyValuePair<int, long>(AncientIds.Pluto, suggestedPlutoLevel),
-                        new KeyValuePair<int, long>(AncientIds.Juggernaut, suggestedJuggernautLevel),
-                        new KeyValuePair<int, long>(AncientIds.Morgulis, suggestedMorgLevel),
-                        new KeyValuePair<int, long>(AncientIds.Solomon, suggestedSolomonLevel),
-                        new KeyValuePair<int, long>(AncientIds.Iris, suggestedIrisLevel),
+                        new KeyValuePair<int, double>(AncientIds.Fragsworth, currentPrimaryAncientLevel),
+                        new KeyValuePair<int, double>(AncientIds.Argaiv, suggestedArgaivLevel),
+                        new KeyValuePair<int, double>(AncientIds.Bhaal, suggestedBhaalLevel),
+                        new KeyValuePair<int, double>(AncientIds.Pluto, suggestedPlutoLevel),
+                        new KeyValuePair<int, double>(AncientIds.Juggernaut, suggestedJuggernautLevel),
+                        new KeyValuePair<int, double>(AncientIds.Morgulis, suggestedMorgLevel),
+                        new KeyValuePair<int, double>(AncientIds.Solomon, suggestedSolomonLevel),
+                        new KeyValuePair<int, double>(AncientIds.Iris, suggestedIrisLevel),
                     };
                 }
 
@@ -295,10 +295,10 @@ namespace ClickerHeroesTrackerWebsite.Models.Stats
             }
         }
 
-        private static long GetPreTranscendentSuggestedSolomonLevel(
+        private static double GetPreTranscendentSuggestedSolomonLevel(
             GameData gameData,
             IDictionary<Ancient, AncientLevelInfo> ancientLevels,
-            long currentPrimaryAncientLevel,
+            double currentPrimaryAncientLevel,
             IUserSettings userSettings)
         {
             var useEffectiveLevel = userSettings.UseEffectiveLevelForSuggestions;
@@ -308,7 +308,7 @@ namespace ClickerHeroesTrackerWebsite.Models.Stats
                 : (d => Math.Log(d));
             return currentPrimaryAncientLevel < 100
                 ? currentPrimaryAncientLevel
-                : (long)Math.Round(solomonMultipliers[0] * Math.Pow(solomonLogFunction(solomonMultipliers[1] * Math.Pow(currentPrimaryAncientLevel, 2)), 0.4) * Math.Pow(currentPrimaryAncientLevel, 0.8));
+                : Math.Round(solomonMultipliers[0] * Math.Pow(solomonLogFunction(solomonMultipliers[1] * Math.Pow(currentPrimaryAncientLevel, 2)), 0.4) * Math.Pow(currentPrimaryAncientLevel, 0.8));
         }
     }
 }
