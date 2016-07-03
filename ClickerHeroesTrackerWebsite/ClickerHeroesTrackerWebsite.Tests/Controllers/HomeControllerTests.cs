@@ -5,7 +5,7 @@
 namespace ClickerHeroesTrackerWebsite.Tests.Controllers
 {
     using ClickerHeroesTrackerWebsite.Controllers;
-    using Microsoft.AspNet.Mvc;
+    using Microsoft.AspNetCore.Mvc;
     using Xunit;
 
     public class HomeControllerTests

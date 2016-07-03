@@ -4,7 +4,7 @@
 
 namespace ClickerHeroesTrackerWebsite.Instrumentation
 {
-    using Microsoft.AspNet.Mvc.Filters;
+    using Microsoft.AspNetCore.Mvc.Filters;
 
     /// <summary>
     /// Measures the latency of actions and result executions.

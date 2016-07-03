@@ -5,6 +5,8 @@
 @inject TelemetryConfiguration TelemetryConfiguration
 @inject IContentManager ContentManager
 @inject IUserSettingsProvider UserSettingsProvider
+@inject SignInManager<ApplicationUser> SignInManager
+@inject UserManager<ApplicationUser> UserManager
 
 <!DOCTYPE html>
 <html>
@@ -40,7 +42,7 @@
             </div>
             <div class="navbar-collapse collapse">
                 <ul class="nav navbar-nav">
-                    @if (User.IsSignedIn())
+                    @if (SignInManager.IsSignedIn(User))
                     {
                         <li><a asp-controller="Dashboard" asp-action="Index">Dashboard</a></li>
                     }
@@ -92,7 +94,7 @@
     </environment>
 
     <script type="text/javascript">
-        var userSettings = @Json.Serialize(UserSettingsProvider.Get(User.GetUserId()));
+        var userSettings = @Json.Serialize(UserSettingsProvider.Get(UserManager.GetUserId(User)));
     </script>
 
     @await RenderSectionAsync("scripts", required: false)

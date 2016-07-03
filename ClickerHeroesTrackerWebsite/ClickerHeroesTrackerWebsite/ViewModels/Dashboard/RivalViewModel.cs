@@ -14,6 +14,7 @@ namespace ClickerHeroesTrackerWebsite.Models.Dashboard
     using ClickerHeroesTrackerWebsite.Models.Settings;
     using ClickerHeroesTrackerWebsite.Services.Database;
     using Microsoft.ApplicationInsights;
+    using Microsoft.AspNetCore.Identity;
 
     /// <summary>
     /// A model for the rival view.
@@ -28,12 +29,14 @@ namespace ClickerHeroesTrackerWebsite.Models.Dashboard
             TelemetryClient telemetryClient,
             IDatabaseCommandFactory databaseCommandFactory,
             IUserSettingsProvider userSettingsProvider,
-            ClaimsPrincipal user,
+            ClaimsPrincipal principal,
+            UserManager<ApplicationUser> userManager,
             int rivalId,
             string range)
         {
-            var userId = user.GetUserId();
-            var userName = user.GetUserName();
+            var user = userManager.GetUserAsync(principal).Result;
+            var userId = user.Id;
+            var userName = user.UserName;
 
             var userSettings = userSettingsProvider.Get(userId);
 

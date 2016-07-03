@@ -4,7 +4,7 @@
 
 namespace ClickerHeroesTrackerWebsite.Models
 {
-    using Microsoft.AspNet.Identity.EntityFramework;
+    using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 
     /// <summary>
     /// A user for the application

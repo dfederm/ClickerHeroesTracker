@@ -2,12 +2,13 @@
 @using ClickerHeroesTrackerWebsite.Models.Dashboard
 
 @model RivalViewModel
+@inject UserManager<ApplicationUser> UserManager
 
 @{
     ViewBag.Title = "Rival";
 }
 
-<h2>@User.GetUserName() vs @Model.RivalUserName</h2>
+<h2>@UserManager.GetUserName(User) vs @Model.RivalUserName</h2>
 
 @Html.Partial("_GraphScripts")
 

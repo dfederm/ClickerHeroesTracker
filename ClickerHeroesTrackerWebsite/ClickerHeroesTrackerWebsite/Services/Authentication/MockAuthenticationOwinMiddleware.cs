@@ -8,12 +8,13 @@ namespace ClickerHeroesTrackerWebsite.Services.Authentication
     using System.Linq;
     using System.Net.Http.Headers;
     using System.Security.Claims;
+    using System.Text.Encodings.Web;
     using System.Threading.Tasks;
-    using Microsoft.AspNet.Authentication;
-    using Microsoft.AspNet.Builder;
-    using Microsoft.AspNet.Identity;
+    using Microsoft.AspNetCore.Authentication;
+    using Microsoft.AspNetCore.Builder;
+    using Microsoft.AspNetCore.Http;
     using Microsoft.Extensions.Logging;
-    using Microsoft.Extensions.WebEncoders;
+    using Microsoft.Extensions.Options;
     using static MockAuthenticationOwinMiddleware;
 
     /// <summary>
@@ -27,8 +28,8 @@ namespace ClickerHeroesTrackerWebsite.Services.Authentication
         /// <summary>
         /// Initializes a new instance of the <see cref="MockAuthenticationOwinMiddleware"/> class.
         /// </summary>
-        public MockAuthenticationOwinMiddleware(RequestDelegate next, ILoggerFactory loggerFactory, IUrlEncoder encoder)
-            : base(next, new MockAuthenticationOptions(), loggerFactory, encoder)
+        public MockAuthenticationOwinMiddleware(RequestDelegate next, ILoggerFactory loggerFactory, UrlEncoder encoder)
+            : base(next, new OptionsWrapper<MockAuthenticationOptions>(new MockAuthenticationOptions()), loggerFactory, encoder)
         {
         }
 
@@ -66,14 +67,14 @@ namespace ClickerHeroesTrackerWebsite.Services.Authentication
                     || !authorization.Scheme.Equals(this.Options.AuthenticationScheme, StringComparison.OrdinalIgnoreCase)
                     || string.IsNullOrWhiteSpace(authorization.Parameter))
                 {
-                    return Task.FromResult(AuthenticateResult.Failed("Unexpected AuthenticationScheme"));
+                    return Task.FromResult(AuthenticateResult.Fail("Unexpected AuthenticationScheme"));
                 }
 
                 // Supportered parameter format: "<UserId>:<UserName>:[<Role1>,<Role2>,...]"
                 var parts = authorization.Parameter.Split(AuthorizationTokenDelimeter);
                 if (parts.Length != 3)
                 {
-                    return Task.FromResult(AuthenticateResult.Failed("Unexpected Format"));
+                    return Task.FromResult(AuthenticateResult.Fail("Unexpected Format"));
                 }
 
                 // Create the mock identity

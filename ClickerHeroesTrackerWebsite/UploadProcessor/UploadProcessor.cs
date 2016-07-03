@@ -17,7 +17,7 @@ namespace ClickerHeroesTrackerWebsite.UploadProcessing
     using ClickerHeroesTrackerWebsite.Services.Database;
     using ClickerHeroesTrackerWebsite.Services.UploadProcessing;
     using Microsoft.ApplicationInsights;
-    using Microsoft.Extensions.OptionsModel;
+    using Microsoft.Extensions.Options;
     using Microsoft.WindowsAzure.Storage.Queue;
     using Newtonsoft.Json;
 
@@ -85,7 +85,7 @@ namespace ClickerHeroesTrackerWebsite.UploadProcessing
         private static CloudQueue GetQueue(CloudQueueClient queueClient, UploadProcessingMessagePriority priority)
         {
             var queue = queueClient.GetQueueReference($"upload-processing-{priority.ToString().ToLower()}-priority");
-            queue.CreateIfNotExists();
+            queue.CreateIfNotExistsAsync().Wait();
             return queue;
         }
 

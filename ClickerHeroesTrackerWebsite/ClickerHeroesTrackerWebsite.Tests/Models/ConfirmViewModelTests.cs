@@ -29,6 +29,7 @@ namespace ClickerHeroesTrackerWebsite.Tests.Models
                 null,
                 mockUserSettingsProvider.Object,
                 1234,
+                null,
                 null);
 
             Assert.True(viewModel.IsValid);

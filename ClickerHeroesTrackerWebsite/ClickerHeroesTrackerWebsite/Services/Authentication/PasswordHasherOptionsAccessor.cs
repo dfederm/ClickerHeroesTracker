@@ -4,8 +4,8 @@
 
 namespace ClickerHeroesTrackerWebsite.Services.Authentication
 {
-    using Microsoft.AspNet.Identity;
-    using Microsoft.Extensions.OptionsModel;
+    using Microsoft.AspNetCore.Identity;
+    using Microsoft.Extensions.Options;
 
     /// <summary>
     /// Represents the password hashing options

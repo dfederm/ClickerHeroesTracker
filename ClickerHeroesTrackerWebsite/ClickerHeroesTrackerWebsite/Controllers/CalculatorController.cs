@@ -4,10 +4,12 @@
 
 namespace ClickerHeroesTrackerWebsite.Controllers
 {
+    using ClickerHeroesTrackerWebsite.Models;
     using ClickerHeroesTrackerWebsite.Models.Calculator;
     using ClickerHeroesTrackerWebsite.Models.Settings;
     using ClickerHeroesTrackerWebsite.Services.Database;
-    using Microsoft.AspNet.Mvc;
+    using Microsoft.AspNetCore.Identity;
+    using Microsoft.AspNetCore.Mvc;
 
     /// <summary>
     /// The calculator controller shows stats for a given upload.
@@ -18,15 +20,19 @@ namespace ClickerHeroesTrackerWebsite.Controllers
 
         private readonly IUserSettingsProvider userSettingsProvider;
 
+        private readonly UserManager<ApplicationUser> userManager;
+
         /// <summary>
         /// Initializes a new instance of the <see cref="CalculatorController"/> class.
         /// </summary>
         public CalculatorController(
             IDatabaseCommandFactory databaseCommandFactory,
-            IUserSettingsProvider userSettingsProvider)
+            IUserSettingsProvider userSettingsProvider,
+            UserManager<ApplicationUser> userManager)
         {
             this.databaseCommandFactory = databaseCommandFactory;
             this.userSettingsProvider = userSettingsProvider;
+            this.userManager = userManager;
         }
 
         /// <summary>
@@ -41,7 +47,8 @@ namespace ClickerHeroesTrackerWebsite.Controllers
                     this.databaseCommandFactory,
                     this.userSettingsProvider,
                     uploadId.Value,
-                    this.User)
+                    this.User,
+                    this.userManager)
                 : null;
 
             string errorMessage = null;

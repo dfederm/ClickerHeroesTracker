@@ -4,10 +4,12 @@
 
 namespace ClickerHeroesTrackerWebsite.Controllers
 {
+    using ClickerHeroesTrackerWebsite.Models;
     using ClickerHeroesTrackerWebsite.Services.Database;
     using Microsoft.ApplicationInsights;
-    using Microsoft.AspNet.Authorization;
-    using Microsoft.AspNet.Mvc;
+    using Microsoft.AspNetCore.Authorization;
+    using Microsoft.AspNetCore.Identity;
+    using Microsoft.AspNetCore.Mvc;
     using Models.Dashboard;
     using Models.Game;
     using Models.Settings;
@@ -26,6 +28,8 @@ namespace ClickerHeroesTrackerWebsite.Controllers
 
         private readonly IUserSettingsProvider userSettingsProvider;
 
+        private readonly UserManager<ApplicationUser> userManager;
+
         /// <summary>
         /// Initializes a new instance of the <see cref="DashboardController"/> class.
         /// </summary>
@@ -33,12 +37,14 @@ namespace ClickerHeroesTrackerWebsite.Controllers
             GameData gameData,
             TelemetryClient telemetryClient,
             IDatabaseCommandFactory databaseCommandFactory,
-            IUserSettingsProvider userSettingsProvider)
+            IUserSettingsProvider userSettingsProvider,
+            UserManager<ApplicationUser> userManager)
         {
             this.gameData = gameData;
             this.telemetryClient = telemetryClient;
             this.databaseCommandFactory = databaseCommandFactory;
             this.userSettingsProvider = userSettingsProvider;
+            this.userManager = userManager;
         }
 
         /// <summary>
@@ -52,7 +58,8 @@ namespace ClickerHeroesTrackerWebsite.Controllers
                 this.telemetryClient,
                 this.databaseCommandFactory,
                 this.userSettingsProvider,
-                this.User);
+                this.User,
+                this.userManager);
             if (!model.IsValid)
             {
                 this.ViewBag.ErrorMessage = "You have no uploaded data!";
@@ -86,6 +93,7 @@ namespace ClickerHeroesTrackerWebsite.Controllers
                 this.databaseCommandFactory,
                 this.userSettingsProvider,
                 this.User,
+                this.userManager,
                 userName,
                 range);
             if (!model.IsValid)
@@ -119,6 +127,7 @@ namespace ClickerHeroesTrackerWebsite.Controllers
                 this.databaseCommandFactory,
                 this.userSettingsProvider,
                 this.User,
+                this.userManager,
                 rivalId,
                 range);
             if (!model.IsValid)

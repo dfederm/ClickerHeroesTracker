@@ -8,9 +8,9 @@ namespace ClickerHeroesTrackerWebsite.Controllers
     using System.Linq;
     using System.Security.Claims;
     using System.Threading.Tasks;
-    using Microsoft.AspNet.Authorization;
-    using Microsoft.AspNet.Identity;
-    using Microsoft.AspNet.Mvc;
+    using Microsoft.AspNetCore.Authorization;
+    using Microsoft.AspNetCore.Identity;
+    using Microsoft.AspNetCore.Mvc;
     using ClickerHeroesTrackerWebsite.Models;
     using ClickerHeroesTrackerWebsite.Models.Settings;
     using ClickerHeroesTrackerWebsite.Services.Email;
@@ -90,9 +90,9 @@ namespace ClickerHeroesTrackerWebsite.Controllers
                 : message == ManageMessageId.Error ? "An error has occurred."
                 : string.Empty;
 
-            var userId = this.User.GetUserId();
-            var userSettings = this.userSettingsProvider.Get(userId);
-            return await this.GetIndexResult(userId, userSettings);
+            var user = await this.userManager.GetUserAsync(this.User);
+            var userSettings = this.userSettingsProvider.Get(user.Id);
+            return await this.GetIndexResult(user, userSettings);
         }
 
         /// <summary>
@@ -106,8 +106,8 @@ namespace ClickerHeroesTrackerWebsite.Controllers
         {
             this.ViewBag.StatusMessage = "Changes Saved";
 
-            var userId = this.User.GetUserId();
-            var userSettings = this.userSettingsProvider.Get(userId);
+            var user = await this.userManager.GetUserAsync(this.User);
+            var userSettings = this.userSettingsProvider.Get(user.Id);
 
             userSettings.TimeZone = TimeZoneInfo.FindSystemTimeZoneById(indexViewModel.TimeZoneId);
             userSettings.AreUploadsPublic = indexViewModel.AreUploadsPublic;
@@ -138,7 +138,7 @@ namespace ClickerHeroesTrackerWebsite.Controllers
                 userSettings.LogarithmicGraphScaleThreshold = 1000000;
             }
 
-            return await this.GetIndexResult(userId, userSettings);
+            return await this.GetIndexResult(user, userSettings);
         }
 
         /// <summary>
@@ -152,7 +152,7 @@ namespace ClickerHeroesTrackerWebsite.Controllers
         public async Task<IActionResult> RemoveLogin(RemoveLoginViewModel account)
         {
             ManageMessageId? message = ManageMessageId.Error;
-            var user = await this.GetCurrentUserAsync();
+            var user = await this.userManager.GetUserAsync(this.User);
             if (user != null)
             {
                 var result = await this.userManager.RemoveLoginAsync(user, account.LoginProvider, account.ProviderKey);
@@ -190,7 +190,7 @@ namespace ClickerHeroesTrackerWebsite.Controllers
                 return View(model);
             }
 
-            var user = await GetCurrentUserAsync();
+            var user = await this.userManager.GetUserAsync(this.User);
             if (user != null)
             {
                 var result = await this.userManager.ChangePasswordAsync(user, model.OldPassword, model.NewPassword);
@@ -231,7 +231,7 @@ namespace ClickerHeroesTrackerWebsite.Controllers
                 return this.View(model);
             }
 
-            var user = await this.GetCurrentUserAsync();
+            var user = await this.userManager.GetUserAsync(this.User);
             if (user != null)
             {
                 var result = await this.userManager.AddPasswordAsync(user, model.NewPassword);
@@ -261,7 +261,7 @@ namespace ClickerHeroesTrackerWebsite.Controllers
                 : message == ManageMessageId.AddLoginSuccess ? "The external login was added."
                 : message == ManageMessageId.Error ? "An error has occurred."
                 : string.Empty;
-            var user = await this.GetCurrentUserAsync();
+            var user = await this.userManager.GetUserAsync(this.User);
             if (user == null)
             {
                 return View("Error");
@@ -291,7 +291,8 @@ namespace ClickerHeroesTrackerWebsite.Controllers
         {
             // Request a redirect to the external login provider to link a login for the current user
             var redirectUrl = this.Url.Action("LinkLoginCallback", "Manage");
-            var properties = this.signInManager.ConfigureExternalAuthenticationProperties(provider, redirectUrl, this.User.GetUserId());
+            var userId = this.userManager.GetUserId(this.User);
+            var properties = this.signInManager.ConfigureExternalAuthenticationProperties(provider, redirectUrl, userId);
             return new ChallengeResult(provider, properties);
         }
 
@@ -302,13 +303,13 @@ namespace ClickerHeroesTrackerWebsite.Controllers
         [HttpGet]
         public async Task<ActionResult> LinkLoginCallback()
         {
-            var user = await this.GetCurrentUserAsync();
+            var user = await this.userManager.GetUserAsync(this.User);
             if (user == null)
             {
                 return this.View("Error");
             }
 
-            var info = await this.signInManager.GetExternalLoginInfoAsync(this.User.GetUserId());
+            var info = await this.signInManager.GetExternalLoginInfoAsync(user.Id);
             if (info == null)
             {
                 return this.RedirectToAction(nameof(ManageLogins), new { Message = ManageMessageId.Error });
@@ -319,9 +320,8 @@ namespace ClickerHeroesTrackerWebsite.Controllers
             return this.RedirectToAction(nameof(ManageLogins), new { Message = message });
         }
 
-        private async Task<ActionResult> GetIndexResult(string userId, IUserSettings userSettings)
+        private async Task<ActionResult> GetIndexResult(ApplicationUser user, IUserSettings userSettings)
         {
-            var user = await this.GetCurrentUserAsync(userId);
             var model = new IndexViewModel
             {
                 HasPassword = await this.userManager.HasPasswordAsync(user),
@@ -347,11 +347,6 @@ namespace ClickerHeroesTrackerWebsite.Controllers
             {
                 ModelState.AddModelError(string.Empty, error.Description);
             }
-        }
-
-        private async Task<ApplicationUser> GetCurrentUserAsync(string userId = null)
-        {
-            return await this.userManager.FindByIdAsync(userId ?? this.User.GetUserId());
         }
     }
 }

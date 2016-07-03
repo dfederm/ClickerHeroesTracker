@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
-VisualStudioVersion = 14.0.25123.0
+VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{D77FD0C8-CA68-4572-998D-F9475577CB7E}"
 EndProject
@@ -17,7 +17,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build", "build", "{3D49839D
 	ProjectSection(SolutionItems) = preProject
 		build\CodeAnalysis.ruleset = build\CodeAnalysis.ruleset
 		build\CodeAnalysis.Test.ruleset = build\CodeAnalysis.Test.ruleset
-		Build\InstallDNVM.ps1 = Build\InstallDNVM.ps1
 		build\PostDeploy.ps1 = build\PostDeploy.ps1
 		build\SetEnvironment.bat = build\SetEnvironment.bat
 		build\stylecop.json = build\stylecop.json

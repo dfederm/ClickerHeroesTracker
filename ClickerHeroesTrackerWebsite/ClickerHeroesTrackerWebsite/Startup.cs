@@ -8,9 +8,8 @@ namespace ClickerHeroesTrackerWebsite
     using ClickerHeroesTrackerWebsite.Models.Game;
     using ClickerHeroesTrackerWebsite.Models.Settings;
     using ClickerHeroesTrackerWebsite.Utility;
-    using Microsoft.AspNet.Builder;
-    using Microsoft.AspNet.Hosting;
-    using Microsoft.ApplicationInsights.Extensibility;
+    using Microsoft.AspNetCore.Builder;
+    using Microsoft.AspNetCore.Hosting;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Logging;
 
@@ -19,7 +18,7 @@ namespace ClickerHeroesTrackerWebsite
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
         {
-            loggerFactory.AddConsole();
+            loggerFactory.AddConsole(Configuration.GetSection("Logging"));
             loggerFactory.AddDebug();
 
             // Request tracking middleware should be added as the very first middleware in pipeline
@@ -27,12 +26,8 @@ namespace ClickerHeroesTrackerWebsite
 
             if (env.IsDevelopment() || this.Environment.IsBuddy())
             {
-                app.UseBrowserLink();
                 app.UseDeveloperExceptionPage();
                 app.UseDatabaseErrorPage();
-
-                // Only allow telemetry in production
-                app.ApplicationServices.GetService<TelemetryConfiguration>().DisableTelemetry = true;
             }
             else
             {
@@ -44,8 +39,6 @@ namespace ClickerHeroesTrackerWebsite
 
             // We want to start measuring latency as soon as possible during a request.
             app.UseMiddleware<MeasureLatencyMiddleware>();
-
-            app.UseIISPlatformHandler(options => options.AuthenticationDescriptions.Clear());
 
             app.UseStaticFiles();
 
@@ -69,8 +62,5 @@ namespace ClickerHeroesTrackerWebsite
             // Warm up the game data parsing
             app.ApplicationServices.GetService<GameData>();
         }
-
-        // Entry point for the application.
-        public static void Main(string[] args) => WebApplication.Run<Startup>(args);
     }
 }

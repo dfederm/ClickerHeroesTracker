@@ -7,8 +7,8 @@ namespace ClickerHeroesTrackerWebsite.Controllers.Api
     using System;
     using System.Collections.Generic;
     using System.Net;
-    using System.Security.Claims;
     using ClickerHeroesTrackerWebsite.Instrumentation;
+    using ClickerHeroesTrackerWebsite.Models;
     using ClickerHeroesTrackerWebsite.Models.Api;
     using ClickerHeroesTrackerWebsite.Models.Api.Stats;
     using ClickerHeroesTrackerWebsite.Models.Api.Uploads;
@@ -19,8 +19,9 @@ namespace ClickerHeroesTrackerWebsite.Controllers.Api
     using ClickerHeroesTrackerWebsite.Services.Database;
     using ClickerHeroesTrackerWebsite.Utility;
     using Microsoft.ApplicationInsights;
-    using Microsoft.AspNet.Mvc;
-    using Microsoft.AspNet.Authorization;
+    using Microsoft.AspNetCore.Identity;
+    using Microsoft.AspNetCore.Mvc;
+    using Microsoft.AspNetCore.Authorization;
 
     /// <summary>
     /// This controller handles the set of APIs that manage uploads
@@ -38,6 +39,8 @@ namespace ClickerHeroesTrackerWebsite.Controllers.Api
 
         private readonly ICounterProvider counterProvider;
 
+        private readonly UserManager<ApplicationUser> userManager;
+
         /// <summary>
         /// Initializes a new instance of the <see cref="UploadsController"/> class.
         /// </summary>
@@ -46,13 +49,15 @@ namespace ClickerHeroesTrackerWebsite.Controllers.Api
             GameData gameData,
             IUserSettingsProvider userSettingsProvider,
             TelemetryClient telemetryClient,
-            ICounterProvider counterProvider)
+            ICounterProvider counterProvider,
+            UserManager<ApplicationUser> userManager)
         {
             this.databaseCommandFactory = databaseCommandFactory;
             this.gameData = gameData;
             this.userSettingsProvider = userSettingsProvider;
             this.telemetryClient = telemetryClient;
             this.counterProvider = counterProvider;
+            this.userManager = userManager;
         }
 
         /// <summary>
@@ -71,16 +76,16 @@ namespace ClickerHeroesTrackerWebsite.Controllers.Api
             // Validate parameters
             if (page < ParameterConstants.UploadSummaryList.Page.Min)
             {
-                return this.HttpBadRequest("Invalid parameter: page");
+                return this.BadRequest("Invalid parameter: page");
             }
 
             if (count < ParameterConstants.UploadSummaryList.Count.Min
                 || count > ParameterConstants.UploadSummaryList.Count.Max)
             {
-                return this.HttpBadRequest("Invalid parameter: count");
+                return this.BadRequest("Invalid parameter: count");
             }
 
-            var userId = this.User.GetUserId();
+            var userId = this.userManager.GetUserId(this.User);
             var model = new UploadSummaryListResponse()
             {
                 Uploads = this.FetchUploads(userId, page, count),
@@ -102,10 +107,10 @@ namespace ClickerHeroesTrackerWebsite.Controllers.Api
         {
             if (uploadId < 0)
             {
-                return this.HttpBadRequest();
+                return this.BadRequest();
             }
 
-            var userId = this.User.GetUserId();
+            var userId = this.userManager.GetUserId(this.User);
             var userSettings = this.userSettingsProvider.Get(userId);
 
             var uploadIdParameters = new Dictionary<string, object>
@@ -147,7 +152,7 @@ namespace ClickerHeroesTrackerWebsite.Controllers.Api
                 else
                 {
                     // If we didn't get data, it's an upload that doesn't exist
-                    return this.HttpNotFound();
+                    return this.NotFound();
                 }
             }
 
@@ -160,7 +165,7 @@ namespace ClickerHeroesTrackerWebsite.Controllers.Api
 
             if (!isPermitted)
             {
-                return this.HttpUnauthorized();
+                return this.Unauthorized();
             }
 
             // Only return the raw upload content if it's the requesting user's or an admin requested it.
@@ -277,7 +282,7 @@ namespace ClickerHeroesTrackerWebsite.Controllers.Api
             if (rawUpload.EncodedSaveData == null)
             {
                 // Not a valid save
-                return this.HttpBadRequest();
+                return this.BadRequest();
             }
 
             // Instrument the encoded save data in case something goes wrong.
@@ -294,14 +299,14 @@ namespace ClickerHeroesTrackerWebsite.Controllers.Api
 
             // Only associate it with the user if they requested that it be added to their progress.
             var userId = rawUpload.AddToProgress && this.User.Identity.IsAuthenticated
-                ? this.User.GetUserId()
+                ? this.userManager.GetUserId(this.User)
                 : null;
 
             var savedGame = SavedGame.Parse(rawUpload.EncodedSaveData);
             if (savedGame == null)
             {
                 // Not a valid save
-                return this.HttpBadRequest();
+                return this.BadRequest();
             }
 
             var userSettings = this.userSettingsProvider.Get(userId);
@@ -432,7 +437,7 @@ namespace ClickerHeroesTrackerWebsite.Controllers.Api
                 var commited = command.CommitTransaction();
                 if (!commited)
                 {
-                    return new HttpStatusCodeResult((int)HttpStatusCode.InternalServerError);
+                    return this.StatusCode((int)HttpStatusCode.InternalServerError);
                 }
             }
 

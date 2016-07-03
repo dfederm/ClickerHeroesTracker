@@ -4,7 +4,7 @@
 
 namespace ClickerHeroesTrackerWebsite.Controllers
 {
-    using Microsoft.AspNet.Mvc;
+    using Microsoft.AspNetCore.Mvc;
 
     /// <summary>
     /// The upload controller allows users to upload their saved games

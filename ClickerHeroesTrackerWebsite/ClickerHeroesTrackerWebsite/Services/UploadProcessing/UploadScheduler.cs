@@ -63,7 +63,7 @@ namespace ClickerHeroesTrackerWebsite.Services.UploadProcessing
         private static CloudQueue GetQueue(CloudQueueClient queueClient, UploadProcessingMessagePriority priority)
         {
             var queue = queueClient.GetQueueReference($"upload-processing-{priority.ToString().ToLower()}-priority");
-            queue.CreateIfNotExists();
+            queue.CreateIfNotExistsAsync().Wait();
             return queue;
         }
     }

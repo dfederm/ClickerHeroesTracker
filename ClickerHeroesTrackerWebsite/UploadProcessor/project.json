@@ -1,19 +1,15 @@
 {
-  "version": "1.0.0-*",
-  "compilationOptions": {
-    "emitEntryPoint": true
+  "buildOptions": {
+    "emitEntryPoint": true,
+    "warningsAsErrors": true
   },
 
   "dependencies": {
     "ClickerHeroesTrackerWebsite": "1.0.0-*"
   },
 
-  "commands": {
-    "UploadProcessor": "UploadProcessor"
-  },
-
   "frameworks": {
-    "dnx451": { }
+    "net461": {}
   },
   "userSecretsId": "aspnet5-UploadProcessor-20160417084905"
 }

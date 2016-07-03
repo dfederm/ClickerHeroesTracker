@@ -14,6 +14,7 @@ namespace ClickerHeroesTrackerWebsite.Models.Dashboard
     using ClickerHeroesTrackerWebsite.Models.Settings;
     using ClickerHeroesTrackerWebsite.Services.Database;
     using Microsoft.ApplicationInsights;
+    using Microsoft.AspNetCore.Identity;
 
     /// <summary>
     /// Represents a user's progress data
@@ -29,36 +30,24 @@ namespace ClickerHeroesTrackerWebsite.Models.Dashboard
             IDatabaseCommandFactory databaseCommandFactory,
             IUserSettingsProvider userSettingsProvider,
             ClaimsPrincipal user,
+            UserManager<ApplicationUser> userManager,
             string progressUserName,
             string range)
         {
             this.ProgressUserName = progressUserName;
 
-            var userId = user.GetUserId();
+            var userId = userManager.GetUserId(user);
             string progressUserId = null;
             if (string.IsNullOrEmpty(progressUserName))
             {
-                progressUserId = user.GetUserId();
+                progressUserId = userId;
             }
             else
             {
-                var getUserIdParameters = new Dictionary<string, object>
+                var progressUser = userManager.FindByNameAsync(progressUserName).Result;
+                if (progressUser != null)
                 {
-                    { "@UserName", progressUserName },
-                };
-                const string GetUserIdCommandText = @"
-	                SELECT Id
-                    FROM AspNetUsers
-                    WHERE UserName = @UserName";
-                using (var command = databaseCommandFactory.Create(
-                    GetUserIdCommandText,
-                    getUserIdParameters))
-                using (var reader = command.ExecuteReader())
-                {
-                    if (reader.Read())
-                    {
-                        progressUserId = reader["Id"].ToString();
-                    }
+                    progressUserId = userManager.GetUserIdAsync(progressUser).Result;
                 }
             }
 

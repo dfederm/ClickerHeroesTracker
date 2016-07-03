@@ -5,8 +5,7 @@
 namespace ClickerHeroesTrackerWebsite.Models.Settings
 {
     using System.Threading.Tasks;
-    using Microsoft.AspNet.Builder;
-    using Microsoft.AspNet.Http;
+    using Microsoft.AspNetCore.Http;
 
     /// <summary>
     /// A middleware which flushes the current user's settings at the end of the request.

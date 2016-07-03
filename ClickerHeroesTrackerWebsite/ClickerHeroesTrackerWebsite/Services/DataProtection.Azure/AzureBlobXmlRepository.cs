@@ -8,7 +8,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Xml;
 using System.Xml.Linq;
-using Microsoft.AspNet.DataProtection.Repositories;
+using Microsoft.AspNetCore.DataProtection.Repositories;
 using Microsoft.Extensions.Logging;
 using Microsoft.WindowsAzure.Storage;
 using Microsoft.WindowsAzure.Storage.Blob;
@@ -56,8 +56,7 @@ namespace DataProtection.Azure
             return XDocument.Load(XmlReader.Create(new MemoryStream(blob), new XmlReaderSettings()
             {
                 DtdProcessing = DtdProcessing.Prohibit,
-                IgnoreProcessingInstructions = true,
-                XmlResolver = null
+                IgnoreProcessingInstructions = true
             }));
         }
 

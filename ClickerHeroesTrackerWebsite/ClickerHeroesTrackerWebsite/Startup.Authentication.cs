@@ -5,10 +5,10 @@
 namespace ClickerHeroesTrackerWebsite
 {
     using ClickerHeroesTrackerWebsite.Services.Authentication;
-    using Microsoft.AspNet.Builder;
-    using Microsoft.AspNet.Hosting;
+    using Microsoft.AspNetCore.Builder;
+    using Microsoft.AspNetCore.Hosting;
     using Microsoft.Extensions.DependencyInjection;
-    using Microsoft.Extensions.OptionsModel;
+    using Microsoft.Extensions.Options;
 
     /// <summary>
     /// Configure authentication
@@ -27,10 +27,10 @@ namespace ClickerHeroesTrackerWebsite
                     && !string.IsNullOrEmpty(microsoftAuthenticationSettings.ClientId)
                     && !string.IsNullOrEmpty(microsoftAuthenticationSettings.ClientSecret))
                 {
-                    app.UseMicrosoftAccountAuthentication(options =>
+                    app.UseMicrosoftAccountAuthentication(new MicrosoftAccountOptions
                     {
-                        options.ClientId = microsoftAuthenticationSettings.ClientId;
-                        options.ClientSecret = microsoftAuthenticationSettings.ClientSecret;
+                        ClientId = microsoftAuthenticationSettings.ClientId,
+                        ClientSecret = microsoftAuthenticationSettings.ClientSecret,
                     });
                 }
 
@@ -39,10 +39,10 @@ namespace ClickerHeroesTrackerWebsite
                     && !string.IsNullOrEmpty(facebookAuthenticationSettings.AppId)
                     && !string.IsNullOrEmpty(facebookAuthenticationSettings.AppSecret))
                 {
-                    app.UseFacebookAuthentication(options =>
+                    app.UseFacebookAuthentication(new FacebookOptions
                     {
-                        options.AppId = facebookAuthenticationSettings.AppId;
-                        options.AppSecret = facebookAuthenticationSettings.AppSecret;
+                        AppId = facebookAuthenticationSettings.AppId,
+                        AppSecret = facebookAuthenticationSettings.AppSecret,
                     });
                 }
 
@@ -51,10 +51,10 @@ namespace ClickerHeroesTrackerWebsite
                     && !string.IsNullOrEmpty(googleAuthenticationSettings.ClientId)
                     && !string.IsNullOrEmpty(googleAuthenticationSettings.ClientSecret))
                 {
-                    app.UseGoogleAuthentication(options =>
+                    app.UseGoogleAuthentication(new GoogleOptions
                     {
-                        options.ClientId = googleAuthenticationSettings.ClientId;
-                        options.ClientSecret = googleAuthenticationSettings.ClientSecret;
+                        ClientId = googleAuthenticationSettings.ClientId,
+                        ClientSecret = googleAuthenticationSettings.ClientSecret,
                     });
                 }
 
@@ -63,10 +63,10 @@ namespace ClickerHeroesTrackerWebsite
                     && !string.IsNullOrEmpty(twitterAuthenticationSettings.ConsumerKey)
                     && !string.IsNullOrEmpty(twitterAuthenticationSettings.ConsumerSecret))
                 {
-                    app.UseTwitterAuthentication(options =>
+                    app.UseTwitterAuthentication(new TwitterOptions
                     {
-                        options.ConsumerKey = twitterAuthenticationSettings.ConsumerKey;
-                        options.ConsumerSecret = twitterAuthenticationSettings.ConsumerSecret;
+                        ConsumerKey = twitterAuthenticationSettings.ConsumerKey,
+                        ConsumerSecret = twitterAuthenticationSettings.ConsumerSecret,
                     });
                 }
             }

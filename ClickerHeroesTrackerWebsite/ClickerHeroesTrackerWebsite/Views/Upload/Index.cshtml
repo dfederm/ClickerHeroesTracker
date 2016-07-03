@@ -1,6 +1,7 @@
 ﻿@using System.Security.Claims;
 
 @inject IContentManager ContentManager
+@inject SignInManager<ApplicationUser> SignInManager
 
 @{
     ViewBag.Title = "Upload";
@@ -26,7 +27,7 @@
             </div>
             <div class="form-group">
                 <div class="col-md-offset-2 col-md-10">
-                    @if (User.IsSignedIn())
+                    @if (SignInManager.IsSignedIn(User))
                     {
                         <div class="checkbox">
                             <label for="AddToProgress">

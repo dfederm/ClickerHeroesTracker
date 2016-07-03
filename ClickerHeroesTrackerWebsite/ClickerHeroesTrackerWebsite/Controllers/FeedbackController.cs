@@ -13,11 +13,12 @@ namespace ClickerHeroesTrackerWebsite.Controllers
     using ClickerHeroesTrackerWebsite.Models.Feedback;
     using ClickerHeroesTrackerWebsite.Services.Email;
     using Microsoft.ApplicationInsights;
-    using Microsoft.AspNet.Identity;
-    using Microsoft.AspNet.Mvc;
-    using Microsoft.Extensions.OptionsModel;
+    using Microsoft.AspNetCore.Identity;
+    using Microsoft.AspNetCore.Mvc;
+    using Microsoft.Extensions.Options;
     using Newtonsoft.Json;
     using SendGrid;
+    using SendGrid.Helpers.Mail;
 
     /// <summary>
     /// This controller handles processing feedback.
@@ -56,8 +57,9 @@ namespace ClickerHeroesTrackerWebsite.Controllers
             string userName = null;
             if (this.User.Identity.IsAuthenticated)
             {
-                email = await this.userManager.GetEmailAsync(await userManager.FindByIdAsync(this.User.GetUserId()));
-                userName = this.User.GetUserName();
+                var user = await this.userManager.GetUserAsync(this.User);
+                email = await this.userManager.GetEmailAsync(user);
+                userName = user.UserName;
             }
             else if (!string.IsNullOrWhiteSpace(feedback.Email))
             {
@@ -74,22 +76,21 @@ namespace ClickerHeroesTrackerWebsite.Controllers
 
             this.telemetryClient.TrackEvent("FeedbackSubmit", feedbackData);
 
-            var sendGridMessage = new SendGridMessage();
-            sendGridMessage.AddTo("david.federman@outlook.com");
-            sendGridMessage.AddTo("ender336@gmail.com");
-            sendGridMessage.From = new MailAddress(email ?? "do-not-reply@clickerheroestracker.azurewebsites.net", userName ?? "Clicker Heroes Tracker");
-            sendGridMessage.Subject = $"Clicker Heroes Tracker Feedback from {userName ?? "<anonymous>"}";
-            sendGridMessage.Text = JsonConvert.SerializeObject(feedbackData, Formatting.Indented);
+            var client = new SendGridAPIClient(this.emailSenderSettings.ApiKey);
 
-            var credentials = new NetworkCredential(
-                this.emailSenderSettings.UserName,
-                this.emailSenderSettings.Password);
+            var mail = new Mail();
+            mail.From = new Email(email ?? "do-not-reply@clickerheroestracker.azurewebsites.net", userName ?? "Clicker Heroes Tracker");
+            mail.Subject = $"Clicker Heroes Tracker Feedback from {userName ?? "<anonymous>"}";
+            mail.AddContent(new Content("text/plain", JsonConvert.SerializeObject(feedbackData, Formatting.Indented)));
+            var personalization = new Personalization();
+            foreach (var feedbackReciever in this.emailSenderSettings.FeedbackRecievers)
+            {
+                personalization.AddTo(new Email(feedbackReciever));
+            }
 
-            // Create a Web transport for sending email.
-            var transportWeb = new Web(credentials);
+            mail.AddPersonalization(personalization);
 
-            // Send the email.
-            await transportWeb.DeliverAsync(sendGridMessage);
+            client.client.mail.send.post(requestBody: mail.Get());
 
             return this.Ok();
         }

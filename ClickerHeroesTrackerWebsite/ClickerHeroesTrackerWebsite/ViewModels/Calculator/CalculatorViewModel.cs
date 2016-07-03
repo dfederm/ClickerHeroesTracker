@@ -10,6 +10,7 @@ namespace ClickerHeroesTrackerWebsite.Models.Calculator
     using ClickerHeroesTrackerWebsite.Models.Game;
     using ClickerHeroesTrackerWebsite.Models.Settings;
     using ClickerHeroesTrackerWebsite.Services.Database;
+    using Microsoft.AspNetCore.Identity;
 
     /// <summary>
     /// The model for the calculator view.
@@ -46,9 +47,10 @@ namespace ClickerHeroesTrackerWebsite.Models.Calculator
             IDatabaseCommandFactory databaseCommandFactory,
             IUserSettingsProvider userSettingsProvider,
             int uploadId,
-            ClaimsPrincipal user)
+            ClaimsPrincipal user,
+            UserManager<ApplicationUser> userManager)
         {
-            var userId = user.GetUserId();
+            var userId = userManager.GetUserId(user);
 
             this.UploadId = uploadId;
 

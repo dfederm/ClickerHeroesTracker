@@ -7,12 +7,13 @@ namespace ClickerHeroesTrackerWebsite.Controllers.Api
     using System;
     using System.Collections.Generic;
     using System.Net;
+    using System.Threading.Tasks;
+    using ClickerHeroesTrackerWebsite.Models.Api.SiteNews;
+    using ClickerHeroesTrackerWebsite.Utility;
     using Microsoft.ApplicationInsights;
-    using Microsoft.AspNet.Mvc;
-    using Microsoft.AspNet.Authorization;
+    using Microsoft.AspNetCore.Mvc;
+    using Microsoft.AspNetCore.Authorization;
     using Microsoft.WindowsAzure.Storage.Table;
-    using Models.Api.SiteNews;
-    using Utility;
 
     /// <summary>
     /// This controller handles the set of APIs that manage site news
@@ -41,40 +42,47 @@ namespace ClickerHeroesTrackerWebsite.Controllers.Api
         /// <returns>A response with the schema <see cref="SiteNewsEntryListResponse"/></returns>
         [Route("")]
         [HttpGet]
-        public IActionResult List()
+        public async Task<IActionResult> List()
         {
             var table = this.tableClient.GetTableReference("SiteNews");
-            table.CreateIfNotExists();
+            await table.CreateIfNotExistsAsync();
 
             var query = new TableQuery<SiteNewsTableEntity>();
 
             // Group entities by date and sort by order in each group
             int rawr = 0;
             var entitiesByDate = new SortedDictionary<DateTime, SortedList<int, string>>();
-            foreach (var entity in table.ExecuteQuery(query))
+            TableContinuationToken token = null;
+            do
             {
-                DateTime date;
-                int order;
-                if (!DateTime.TryParse(entity.PartitionKey, out date))
+                var segment = await table.ExecuteQuerySegmentedAsync(query, token);
+                token = segment.ContinuationToken;
+                foreach (var entity in segment)
                 {
-                    this.telemetryClient.TrackInvalidTableEntry(entity);
-                    continue;
-                }
+                    DateTime date;
+                    int order;
+                    if (!DateTime.TryParse(entity.PartitionKey, out date))
+                    {
+                        this.telemetryClient.TrackInvalidTableEntry(entity);
+                        continue;
+                    }
 
-                if (!int.TryParse(entity.RowKey, out order))
-                {
-                    order = rawr++;
-                }
+                    if (!int.TryParse(entity.RowKey, out order))
+                    {
+                        order = rawr++;
+                    }
 
-                SortedList<int, string> entities;
-                if (!entitiesByDate.TryGetValue(date, out entities))
-                {
-                    entities = new SortedList<int, string>();
-                    entitiesByDate.Add(date, entities);
-                }
+                    SortedList<int, string> entities;
+                    if (!entitiesByDate.TryGetValue(date, out entities))
+                    {
+                        entities = new SortedList<int, string>();
+                        entitiesByDate.Add(date, entities);
+                    }
 
-                entities.Add(order, entity.Message);
+                    entities.Add(order, entity.Message);
+                }
             }
+            while (token != null);
 
             // Select only the messages
             var entries = new SortedDictionary<DateTime, IList<string>>();
@@ -99,30 +107,37 @@ namespace ClickerHeroesTrackerWebsite.Controllers.Api
         [Route("")]
         [HttpPost]
         [Authorize(Roles = "Admin")]
-        public IActionResult Post(SiteNewsEntry entry)
+        public async Task<IActionResult> Post(SiteNewsEntry entry)
         {
             if (entry == null
                 || entry.Messages == null
                 || entry.Messages.Count == 0)
             {
-                return this.HttpBadRequest();
+                return this.BadRequest();
             }
 
             var table = this.tableClient.GetTableReference("SiteNews");
-            table.CreateIfNotExists();
+            await table.CreateIfNotExistsAsync();
 
             // Delete all rows in the partition first
             var query = new TableQuery<SiteNewsTableEntity>().Where(TableQuery.GenerateFilterCondition("PartitionKey", QueryComparisons.Equal, entry.Date.ToString("yyyy-MM-dd")));
             var batchOperation = new TableBatchOperation();
-            foreach (var entity in table.ExecuteQuery(query))
+            TableContinuationToken token = null;
+            do
             {
-                batchOperation.Delete(entity);
+                var segment = await table.ExecuteQuerySegmentedAsync(query, token);
+                token = segment.ContinuationToken;
+                foreach (var entity in segment)
+                {
+                    batchOperation.Delete(entity);
+                }
             }
+            while (token != null);
 
             IList<TableResult> results;
             if (batchOperation.Count > 0)
             {
-                results = table.ExecuteBatch(batchOperation);
+                results = await table.ExecuteBatchAsync(batchOperation);
                 batchOperation = new TableBatchOperation();
             }
 
@@ -132,7 +147,7 @@ namespace ClickerHeroesTrackerWebsite.Controllers.Api
                 batchOperation.Insert(new SiteNewsTableEntity(entry.Date, i) { Message = entry.Messages[i] });
             }
 
-            results = table.ExecuteBatch(batchOperation);
+            results = await table.ExecuteBatchAsync(batchOperation);
             var returnStatusCode = HttpStatusCode.OK;
             foreach (var result in results)
             {
@@ -149,7 +164,7 @@ namespace ClickerHeroesTrackerWebsite.Controllers.Api
                 }
             }
 
-            return new HttpStatusCodeResult((int)returnStatusCode);
+            return this.StatusCode((int)returnStatusCode);
         }
 
         /// <summary>
@@ -160,19 +175,26 @@ namespace ClickerHeroesTrackerWebsite.Controllers.Api
         [Route("{date}")]
         [HttpDelete]
         [Authorize(Roles = "Admin")]
-        public IActionResult Delete(DateTime date)
+        public async Task<IActionResult> Delete(DateTime date)
         {
             var table = this.tableClient.GetTableReference("SiteNews");
-            table.CreateIfNotExists();
+            await table.CreateIfNotExistsAsync();
 
             var query = new TableQuery<SiteNewsTableEntity>().Where(TableQuery.GenerateFilterCondition("PartitionKey", QueryComparisons.Equal, date.ToString("yyyy-MM-dd")));
             var batchOperation = new TableBatchOperation();
-            foreach (var entity in table.ExecuteQuery(query))
+            TableContinuationToken token = null;
+            do
             {
-                batchOperation.Delete(entity);
+                var segment = await table.ExecuteQuerySegmentedAsync(query, token);
+                token = segment.ContinuationToken;
+                foreach (var entity in segment)
+                {
+                    batchOperation.Delete(entity);
+                }
             }
+            while (token != null);
 
-            var results = table.ExecuteBatch(batchOperation);
+            var results = await table.ExecuteBatchAsync(batchOperation);
             var returnStatusCode = HttpStatusCode.OK;
             foreach (var result in results)
             {
@@ -189,7 +211,7 @@ namespace ClickerHeroesTrackerWebsite.Controllers.Api
                 }
             }
 
-            return new HttpStatusCodeResult((int)returnStatusCode);
+            return this.StatusCode((int)returnStatusCode);
         }
     }
 }

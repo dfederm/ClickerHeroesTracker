@@ -7,9 +7,11 @@ namespace ClickerHeroesTrackerWebsite.Instrumentation
     using System.Collections.Generic;
     using System.Security.Claims;
     using System.Threading.Tasks;
+    using ClickerHeroesTrackerWebsite.Models;
     using Microsoft.ApplicationInsights;
-    using Microsoft.AspNet.Builder;
-    using Microsoft.AspNet.Http;
+    using Microsoft.AspNetCore.Builder;
+    using Microsoft.AspNetCore.Http;
+    using Microsoft.AspNetCore.Identity;
 
     /// <summary>
     /// A middleware which instruments the user that made the request.
@@ -34,17 +36,17 @@ namespace ClickerHeroesTrackerWebsite.Instrumentation
         public async Task Invoke(HttpContext context)
         {
             var telemetryClient = ((TelemetryClient)context.RequestServices.GetService(typeof(TelemetryClient)));
+            var userManager = ((UserManager<ApplicationUser>)context.RequestServices.GetService(typeof(UserManager<ApplicationUser>)));
 
-            var user = context.User;
-            var userId = user.GetUserId();
-            if (userId != null)
+            var user = await userManager.GetUserAsync(context.User);
+            if (user != null)
             {
-                telemetryClient.Context.User.AuthenticatedUserId = userId;
+                telemetryClient.Context.User.AuthenticatedUserId = user.Id;
             }
 
             var properties = new Dictionary<string, string>
             {
-                { "UserName", user.GetUserName() ?? "<anonymous>" },
+                { "UserName", user?.UserName ?? "<anonymous>" },
                 { "Referrer", context.Request.Headers["Referer"] },
             };
             telemetryClient.TrackEvent("Request", properties);

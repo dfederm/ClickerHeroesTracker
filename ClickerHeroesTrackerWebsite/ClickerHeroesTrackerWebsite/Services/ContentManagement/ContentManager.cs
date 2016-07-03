@@ -6,12 +6,12 @@ namespace ClickerHeroesTrackerWebsite.Services.ContentManagement
 {
     using System;
     using System.Collections.Generic;
-    using Microsoft.AspNet.Hosting;
+    using Microsoft.AspNetCore.Hosting;
     using Utility;
 
     public sealed class ContentManager : IContentManager
     {
-        private const string ScriptPath = "~/js/";
+        private const string ScriptPath = "/js/";
 
         private readonly List<string> scripts = new List<string>();
 

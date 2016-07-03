@@ -4,7 +4,7 @@
 
 namespace ClickerHeroesTrackerWebsite.Controllers
 {
-    using Microsoft.AspNet.Mvc;
+    using Microsoft.AspNetCore.Mvc;
 
     /// <summary>
     /// Handles the homepage and other related pages.

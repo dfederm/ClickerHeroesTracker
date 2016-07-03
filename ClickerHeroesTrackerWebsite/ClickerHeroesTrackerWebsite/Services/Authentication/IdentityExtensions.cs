@@ -7,7 +7,7 @@ namespace ClickerHeroesTrackerWebsite.Services.Authentication
     using System.Security.Claims;
     using System.Threading.Tasks;
     using ClickerHeroesTrackerWebsite.Models;
-    using Microsoft.AspNet.Identity;
+    using Microsoft.AspNetCore.Identity;
 
     /// <summary>
     /// Identity-based extensions.
@@ -28,7 +28,7 @@ namespace ClickerHeroesTrackerWebsite.Services.Authentication
             }
 
             // Fall back to looking it up in the DB
-            return await userManager.GetEmailAsync(await userManager.FindByIdAsync(principal.GetUserId()));
+            return await userManager.GetEmailAsync(await userManager.GetUserAsync(principal));
         }
     }
 }

@@ -4,11 +4,10 @@
 
 namespace ClickerHeroesTrackerWebsite.Services.Email
 {
-    using System.Net;
-    using System.Net.Mail;
     using System.Threading.Tasks;
-    using Microsoft.Extensions.OptionsModel;
+    using Microsoft.Extensions.Options;
     using SendGrid;
+    using SendGrid.Helpers.Mail;
 
     /// <summary>
     /// Service that sends emails
@@ -25,31 +24,17 @@ namespace ClickerHeroesTrackerWebsite.Services.Email
         /// <inheritdoc />
         public Task SendEmailAsync(string email, string subject, string message)
         {
-            var sendGridMessage = new SendGridMessage();
-            sendGridMessage.AddTo(email);
-            sendGridMessage.From = new MailAddress("do-not-reply@clickerheroestracker.azurewebsites.net", "Clicker Heroes Tracker");
-            sendGridMessage.Subject = subject;
-            sendGridMessage.Text = message;
-            sendGridMessage.Html = message;
+            var client = new SendGridAPIClient(this.emailSenderSettings.ApiKey);
 
-            var userName = this.emailSenderSettings.UserName;
-            var password = this.emailSenderSettings.Password;
-            var credentials = new NetworkCredential(
-                userName,
-                password);
+            var mail = new Mail(
+                new Email("do-not-reply@clickerheroestracker.azurewebsites.net", "Clicker Heroes Tracker"),
+                subject,
+                new Email(email),
+                new Content("text/html", message));
 
-            // Create a Web transport for sending email.
-            var transportWeb = new Web(credentials);
+            client.client.mail.send.post(requestBody: mail.Get());
 
-            // Send the email.
-            if (transportWeb != null)
-            {
-                return transportWeb.DeliverAsync(sendGridMessage);
-            }
-            else
-            {
-                return Task.FromResult(0);
-            }
+            return Task.CompletedTask;
         }
     }
 }

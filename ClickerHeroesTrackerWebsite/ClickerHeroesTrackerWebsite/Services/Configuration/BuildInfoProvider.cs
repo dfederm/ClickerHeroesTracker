@@ -5,7 +5,7 @@
 namespace ClickerHeroesTrackerWebsite.Configuration
 {
     using System.IO;
-    using Microsoft.AspNet.Hosting;
+    using Microsoft.AspNetCore.Hosting;
     using Newtonsoft.Json;
     using Newtonsoft.Json.Linq;
 
@@ -19,7 +19,7 @@ namespace ClickerHeroesTrackerWebsite.Configuration
         /// </summary>
         public BuildInfoProvider(IHostingEnvironment hostingEnvironment)
         {
-            var buildInfoFile = hostingEnvironment.MapPath(@"data\BuildInfo.json");
+            var buildInfoFile = Path.Combine(hostingEnvironment.ContentRootPath, @"data\BuildInfo.json");
             if (!File.Exists(buildInfoFile))
             {
                 throw new InvalidDataException("Could not find build info file: " + buildInfoFile);

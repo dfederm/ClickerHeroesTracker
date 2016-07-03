@@ -5,8 +5,8 @@
 namespace ClickerHeroesTrackerWebsite.Controllers
 {
     using Configuration;
-    using Microsoft.AspNet.Hosting;
-    using Microsoft.AspNet.Mvc;
+    using Microsoft.AspNetCore.Hosting;
+    using Microsoft.AspNetCore.Mvc;
 
     /// <summary>
     /// A diagnostic controller for the service version

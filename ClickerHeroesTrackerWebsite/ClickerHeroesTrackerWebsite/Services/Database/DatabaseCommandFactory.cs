@@ -12,7 +12,7 @@ namespace ClickerHeroesTrackerWebsite.Services.Database
     using ClickerHeroesTrackerWebsite.Utility;
     using Microsoft.ApplicationInsights;
     using Microsoft.Data.Sqlite;
-    using Microsoft.Extensions.OptionsModel;
+    using Microsoft.Extensions.Options;
 
     /// <summary>
     /// A SQL command provider for the default connection string

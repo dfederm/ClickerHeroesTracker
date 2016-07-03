@@ -4,9 +4,9 @@
 
 namespace ClickerHeroesTrackerWebsite
 {
-    using AzureAppService.Configuration;
-    using Microsoft.AspNet.Hosting;
+    using Microsoft.AspNetCore.Hosting;
     using Microsoft.Extensions.Configuration;
+    using Microsoft.Extensions.DependencyInjection;
 
     /// <summary>
     /// Configure the Unity container
@@ -23,13 +23,16 @@ namespace ClickerHeroesTrackerWebsite
 
             // Set up configuration sources.
             var builder = new ConfigurationBuilder()
+                .SetBasePath(env.ContentRootPath)
                 .AddJsonFile("appsettings.json")
-                .AddAzureAppServiceSettings();
+                .AddEnvironmentVariables();
 
             if (env.IsDevelopment())
             {
                 // For more details on using the user secret store see http://go.microsoft.com/fwlink/?LinkID=532709
                 builder.AddUserSecrets();
+
+                builder.AddApplicationInsightsSettings(developerMode: true);
             }
 
             builder.AddEnvironmentVariables();

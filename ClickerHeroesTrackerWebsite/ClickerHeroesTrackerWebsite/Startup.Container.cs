@@ -5,6 +5,7 @@
 namespace ClickerHeroesTrackerWebsite
 {
     using System;
+    using System.IO;
     using System.Linq;
     using ClickerHeroesTrackerWebsite.Configuration;
     using ClickerHeroesTrackerWebsite.Instrumentation;
@@ -16,14 +17,15 @@ namespace ClickerHeroesTrackerWebsite
     using ClickerHeroesTrackerWebsite.Services.Database;
     using ClickerHeroesTrackerWebsite.Services.Email;
     using ClickerHeroesTrackerWebsite.Services.UploadProcessing;
-    using Microsoft.AspNet.DataProtection;
-    using Microsoft.AspNet.Hosting;
-    using Microsoft.AspNet.Identity;
-    using Microsoft.AspNet.Identity.EntityFramework;
-    using Microsoft.AspNet.Mvc.Formatters;
-    using Microsoft.Data.Entity;
+    using Microsoft.AspNetCore.DataProtection;
+    using Microsoft.AspNetCore.Hosting;
+    using Microsoft.AspNetCore.Identity;
+    using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+    using Microsoft.AspNetCore.Mvc.Formatters;
+    using Microsoft.EntityFrameworkCore;
+    using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
-    using Microsoft.Extensions.OptionsModel;
+    using Microsoft.Extensions.Options;
     using Microsoft.Net.Http.Headers;
     using Microsoft.WindowsAzure.Storage;
     using Microsoft.WindowsAzure.Storage.Queue;
@@ -52,40 +54,32 @@ namespace ClickerHeroesTrackerWebsite
             // By default Azure Websites can persist keys across instances within a slot, but not across slots.
             // This means a slot swap will require users to re-log in.
             // See https://github.com/aspnet/Home/issues/466 and https://github.com/aspnet/DataProtection/issues/92 for details.
-            services.AddDataProtection();
-            services.ConfigureDataProtection(options =>
+            var dataProtectionBuilder = services.AddDataProtection();
+            if (storageAccount != null)
             {
-                if (storageAccount != null)
-                {
-                    var client = storageAccount.CreateCloudBlobClient();
-                    var container = client.GetContainerReference("key-container");
+                var client = storageAccount.CreateCloudBlobClient();
+                var container = client.GetContainerReference("key-container");
 
-                    // The container must exist before calling the DataProtection APIs.
-                    // The specific file within the container does not have to exist,
-                    // as it will be created on-demand.
-                    container.CreateIfNotExists();
+                // The container must exist before calling the DataProtection APIs.
+                // The specific file within the container does not have to exist,
+                // as it will be created on-demand.
+                container.CreateIfNotExistsAsync().Wait();
 
-                    options.PersistKeysToAzureBlobStorage(container, "keys.xml");
-                }
-            });
+                dataProtectionBuilder.PersistKeysToAzureBlobStorage(container, "keys.xml");
+            }
 
             // Add Entity framework services.
-            var entityFramework = services.AddEntityFramework();
             var connectionString = this.Configuration["Database:ConnectionString"];
             switch (this.Configuration["Database:Kind"])
             {
                 case "SqlServer":
                 {
-                    entityFramework
-                        .AddSqlServer()
-                        .AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(connectionString));
+                    services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(connectionString));
                     break;
                 }
                 case "Sqlite":
                 {
-                    entityFramework
-                        .AddSqlite()
-                        .AddDbContext<ApplicationDbContext>(options => options.UseSqlite(connectionString));
+                    services.AddDbContext<ApplicationDbContext>(options => options.UseSqlite(connectionString));
                     break;
                 }
                 default:
@@ -104,7 +98,7 @@ namespace ClickerHeroesTrackerWebsite
                     options.Password.RequiredLength = 4;
                     options.Password.RequireDigit = false;
                     options.Password.RequireLowercase = false;
-                    options.Password.RequireNonLetterOrDigit = false;
+                    options.Password.RequireNonAlphanumeric = false;
                     options.Password.RequireUppercase = false;
                 })
                 .AddEntityFrameworkStores<ApplicationDbContext>()
@@ -120,19 +114,19 @@ namespace ClickerHeroesTrackerWebsite
 
                 // Allow the json formatter to handle requests from the browser
                 jsonFormatter.SupportedMediaTypes.Add(new MediaTypeHeaderValue("text/html"));
-
+            }).AddJsonOptions(options =>
+            {
                 // Beautify by default for debuggability. When gzipping, this barely adds anything to the payload.
-                jsonFormatter.SerializerSettings.Formatting = Formatting.Indented;
+                options.SerializerSettings.Formatting = Formatting.Indented;
 
                 // Omit nulls
-                jsonFormatter.SerializerSettings.NullValueHandling = NullValueHandling.Ignore;
+                options.SerializerSettings.NullValueHandling = NullValueHandling.Ignore;
 
                 // Use camel-casing for fields (lower case first character)
-                jsonFormatter.SerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver();
+                options.SerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver();
 
                 // Convert enum values to strings
-                jsonFormatter.SerializerSettings.Converters.Add(new StringEnumConverter { CamelCaseText = true });
-
+                options.SerializerSettings.Converters.Add(new StringEnumConverter { CamelCaseText = true });
             });
 
             // Allow IOptions<T> to be available through DI
@@ -142,7 +136,7 @@ namespace ClickerHeroesTrackerWebsite
             services.AddSingleton<CloudStorageAccount>(_ => storageAccount);
             services.AddSingleton<CloudTableClient>(_ => _.GetService<CloudStorageAccount>().CreateCloudTableClient());
             services.AddSingleton<CloudQueueClient>(_ => _.GetService<CloudStorageAccount>().CreateCloudQueueClient());
-            services.AddSingleton<GameData>(_ => GameData.Parse(this.Environment.MapPath(@"data\GameData.json")));
+            services.AddSingleton<GameData>(_ => GameData.Parse(Path.Combine(this.Environment.ContentRootPath, @"data\GameData.json")));
             services.AddSingleton<IBuildInfoProvider, BuildInfoProvider>();
             services.AddSingleton<IEmailSender, EmailSender>();
             services.AddSingleton<IOptions<PasswordHasherOptions>, PasswordHasherOptionsAccessor>();
@@ -155,9 +149,9 @@ namespace ClickerHeroesTrackerWebsite
             services.AddScoped<IUserSettingsProvider, UserSettingsProvider>();
 
             // Configuration
-            services.Configure<AuthenticationSettings>(this.Configuration.GetSection("Authentication"));
-            services.Configure<DatabaseSettings>(this.Configuration.GetSection("Database"));
-            services.Configure<EmailSenderSettings>(this.Configuration.GetSection("EmailSender"));
+            services.Configure<AuthenticationSettings>(options => this.Configuration.GetSection("Authentication").Bind(options));
+            services.Configure<DatabaseSettings>(options => this.Configuration.GetSection("Database").Bind(options));
+            services.Configure<EmailSenderSettings>(options => this.Configuration.GetSection("EmailSender").Bind(options));
         }
     }
 }

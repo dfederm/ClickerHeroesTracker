@@ -5,8 +5,7 @@
 namespace ClickerHeroesTrackerWebsite.Instrumentation
 {
     using System.Threading.Tasks;
-    using Microsoft.AspNet.Builder;
-    using Microsoft.AspNet.Http;
+    using Microsoft.AspNetCore.Http;
 
     /// <summary>
     /// A middleware which measures the latency for the request.

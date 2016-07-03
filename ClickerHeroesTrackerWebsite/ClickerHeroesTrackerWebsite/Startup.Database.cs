@@ -9,10 +9,10 @@ namespace ClickerHeroesTrackerWebsite
     using System.IO;
     using ClickerHeroesTrackerWebsite.Models;
     using ClickerHeroesTrackerWebsite.Services.Database;
-    using Microsoft.AspNet.Builder;
+    using Microsoft.AspNetCore.Builder;
+    using Microsoft.AspNetCore.Hosting;
     using Microsoft.Extensions.DependencyInjection;
-    using Microsoft.Extensions.OptionsModel;
-    using Microsoft.Extensions.PlatformAbstractions;
+    using Microsoft.Extensions.Options;
 
     /// <summary>
     /// Ensures the database schemas are created
@@ -71,8 +71,7 @@ namespace ClickerHeroesTrackerWebsite
                 }
 
                 // Read all sql files and execute their contents if required
-                var applicationEnvironement = serviceProvider.GetService<IApplicationEnvironment>();
-                var tableFiles = Directory.GetFiles(Path.Combine(applicationEnvironement.ApplicationBasePath, @"Services\Database\Schemas"), "*.sql");
+                var tableFiles = Directory.GetFiles(Path.Combine(this.Environment.ContentRootPath, @"Services\Database\Schemas"), "*.sql");
                 foreach (var tableFile in tableFiles)
                 {
                     var tableName = Path.GetFileNameWithoutExtension(tableFile);

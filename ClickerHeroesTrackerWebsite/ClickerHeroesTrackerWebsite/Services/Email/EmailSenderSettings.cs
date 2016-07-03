@@ -4,10 +4,12 @@
 
 namespace ClickerHeroesTrackerWebsite.Services.Email
 {
+    using System.Collections.Generic;
+
     public sealed class EmailSenderSettings
     {
-        public string UserName { get; set; }
+        public string ApiKey { get; set; }
 
-        public string Password { get; set; }
+        public List<string> FeedbackRecievers { get; set; }
     }
 }

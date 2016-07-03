@@ -8,9 +8,9 @@ namespace ClickerHeroesTrackerWebsite.Controllers
     using System.Linq;
     using System.Security.Claims;
     using System.Threading.Tasks;
-    using Microsoft.AspNet.Authorization;
-    using Microsoft.AspNet.Identity;
-    using Microsoft.AspNet.Mvc;
+    using Microsoft.AspNetCore.Authorization;
+    using Microsoft.AspNetCore.Identity;
+    using Microsoft.AspNetCore.Mvc;
     using ClickerHeroesTrackerWebsite.Models;
     using ClickerHeroesTrackerWebsite.Models.Settings;
     using ClickerHeroesTrackerWebsite.Services.Email;
@@ -319,7 +319,7 @@ namespace ClickerHeroesTrackerWebsite.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> ExternalLoginConfirmation(ExternalLoginConfirmationViewModel model, string returnUrl = null)
         {
-            if (this.User.IsSignedIn())
+            if (this.signInManager.IsSignedIn(this.User))
             {
                 return this.RedirectToAction(nameof(ManageController.Index), "Manage");
             }
@@ -333,7 +333,7 @@ namespace ClickerHeroesTrackerWebsite.Controllers
                     return this.View("ExternalLoginFailure");
                 }
 
-                var email = info.ExternalPrincipal.FindFirstValue(ClaimTypes.Email);
+                var email = info.Principal.FindFirstValue(ClaimTypes.Email);
                 var user = new ApplicationUser { UserName = model.UserName, Email = email };
                 var result = await this.userManager.CreateAsync(user);
                 if (result.Succeeded)

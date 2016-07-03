@@ -16,7 +16,7 @@ namespace ClickerHeroesTracker.UploadProcessor
     using Microsoft.ApplicationInsights.Extensibility;
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
-    using Microsoft.Extensions.OptionsModel;
+    using Microsoft.Extensions.Options;
     using Microsoft.WindowsAzure.Storage;
     using Microsoft.WindowsAzure.Storage.Queue;
 
@@ -53,12 +53,15 @@ namespace ClickerHeroesTracker.UploadProcessor
 
             // Set up configuration.
             var builder = new ConfigurationBuilder()
+                .SetBasePath(Environment.CurrentDirectory)
                 .AddJsonFile("appsettings.json")
                 .AddUserSecrets()
                 .AddApplicationInsightsSettings(developerMode: true);
             var configuration = builder.Build();
 
-            databaseSettingsOptions = new OptionsWrapper<DatabaseSettings>(configuration.GetSection("Database").Get<DatabaseSettings>());
+            var databaseSettings = new DatabaseSettings();
+            configuration.GetSection("Database").Bind(databaseSettings);
+            databaseSettingsOptions = Options.Create(databaseSettings);
 
             queueClient = CloudStorageAccount.Parse(configuration["Storage:ConnectionString"]).CreateCloudQueueClient();
 

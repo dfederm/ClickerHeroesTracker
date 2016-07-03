@@ -19,7 +19,7 @@ namespace ClickerHeroesTrackerWebsite.Models.Dashboard.Graph
         /// <inheritdoc/>
         public override bool CanConvert(Type objectType)
         {
-            return typeof(Point).IsAssignableFrom(objectType);
+            return typeof(Point) == objectType;
         }
 
         /// <inheritdoc/>

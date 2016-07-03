@@ -14,6 +14,7 @@ namespace ClickerHeroesTrackerWebsite.Models.Dashboard
     using ClickerHeroesTrackerWebsite.Models.Game;
     using ClickerHeroesTrackerWebsite.Models.Settings;
     using Microsoft.ApplicationInsights;
+    using Microsoft.AspNetCore.Identity;
 
     /// <summary>
     /// The model for the dashboard view.
@@ -28,9 +29,10 @@ namespace ClickerHeroesTrackerWebsite.Models.Dashboard
             TelemetryClient telemetryClient,
             IDatabaseCommandFactory databaseCommandFactory,
             IUserSettingsProvider userSettingsProvider,
-            ClaimsPrincipal user)
+            ClaimsPrincipal user,
+            UserManager<ApplicationUser> userManager)
         {
-            var userId = user.GetUserId();
+            var userId = userManager.GetUserId(user);
 
             var userSettings = userSettingsProvider.Get(userId);
 

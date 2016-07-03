@@ -5,7 +5,7 @@
 namespace ClickerHeroesTrackerWebsite.Utility
 {
     using System;
-    using Microsoft.AspNet.Hosting;
+    using Microsoft.AspNetCore.Hosting;
 
     /// <summary>
     /// Extension methods for <see cref="IHostingEnvironment"/>.

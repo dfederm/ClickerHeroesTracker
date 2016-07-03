@@ -7,12 +7,14 @@ namespace ClickerHeroesTrackerWebsite.Controllers
     using System;
     using System.Collections.Generic;
     using System.Linq;
-    using System.Security.Claims;
     using System.Threading.Tasks;
+    using ClickerHeroesTrackerWebsite.Models;
     using ClickerHeroesTrackerWebsite.Services.Database;
     using ClickerHeroesTrackerWebsite.Services.UploadProcessing;
-    using Microsoft.AspNet.Mvc;
-    using Microsoft.AspNet.Authorization;
+    using Microsoft.AspNetCore.Mvc;
+    using Microsoft.AspNetCore.Authorization;
+    using Microsoft.AspNetCore.Identity;
+    using Microsoft.Extensions.Options;
     using Microsoft.WindowsAzure.Storage.Queue;
 
     /// <summary>
@@ -29,17 +31,21 @@ namespace ClickerHeroesTrackerWebsite.Controllers
 
         private readonly CloudQueueClient queueClient;
 
+        private readonly UserManager<ApplicationUser> userManager;
+
         /// <summary>
         /// Initializes a new instance of the <see cref="AdminController"/> class.
         /// </summary>
         public AdminController(
             IDatabaseCommandFactory databaseCommandFactory,
             IUploadScheduler uploadScheduler,
-            CloudQueueClient queueClient)
+            CloudQueueClient queueClient,
+            UserManager<ApplicationUser> userManager)
         {
             this.databaseCommandFactory = databaseCommandFactory;
             this.uploadScheduler = uploadScheduler;
             this.queueClient = queueClient;
+            this.userManager = userManager;
         }
 
         /// <summary>
@@ -70,7 +76,7 @@ namespace ClickerHeroesTrackerWebsite.Controllers
         /// <returns>The admin homepage view</returns>
         public async Task<IActionResult> UpdateComputedStats(string uploadIds)
         {
-            var userId = this.User.GetUserId();
+            var userId = this.userManager.GetUserId(this.User);
 
             var parsedUploadIds = new List<int>();
             if (uploadIds != null)
