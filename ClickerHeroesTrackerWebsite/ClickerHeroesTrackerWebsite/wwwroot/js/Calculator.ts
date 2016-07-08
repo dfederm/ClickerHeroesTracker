@@ -70,9 +70,39 @@
                 }
             }
 
-            // Show the correct suggested ancient level text
-            if (!hasOutsiderData)
+            // Show outsider suggestions
+            if (hasOutsiderData)
             {
+                // Default Xyl to something reasonable for the playstyle
+                const ancientSouls = getAncientSouls();
+                let suggestedXylLevel = 0;
+                if (userSettings.playStyle === "idle")
+                {
+                    // RoT says "at max 20% of total", but I prefer just 6
+                    suggestedXylLevel = 6;
+                }
+                else if (userSettings.playStyle === "hybrid")
+                {
+                    suggestedXylLevel = Math.round(0.05 * ancientSouls);
+                }
+                else if (userSettings.playStyle === "active")
+                {
+                    // RoT says 0-3, let's guess 3.
+                    suggestedXylLevel = 3;
+                }
+
+                // Only suggest what they can buy
+                suggestedXylLevel = Math.min(ancientSouls, suggestedXylLevel);
+
+                const suggestedXylElement = Helpers.getElementsByDataType("suggestedOutsiderXyliqil")[0] as HTMLInputElement;
+                suggestedXylElement.value = suggestedXylLevel.toString();
+                suggestedXylElement.addEventListener("change", calculateOutsiderSuggestions);
+
+                calculateOutsiderSuggestions();
+            }
+            else
+            {
+                // Show the correct suggested ancient level text
                 const textElements = Helpers.getElementsByDataType("suggestedLevelsText");
                 for (let i = 0; i < textElements.length; i++)
                 {
@@ -247,6 +277,85 @@
     function displayFailure(): void
     {
         // BUGBUG 51: Create Loading and Failure states for ajax loading
+    }
+
+    function calculateOutsiderSuggestions(): void
+    {
+        let ancientSouls = parseInt(Helpers.getElementsByDataType("totalAncientSouls")[0].textContent);
+        if (ancientSouls === 0)
+        {
+            return;
+        }
+
+        const xylElement = Helpers.getElementsByDataType("suggestedOutsiderXyliqil")[0] as HTMLInputElement;
+        let xylLevel = parseInt(xylElement.value);
+        if (xylLevel < 0 || isNaN(xylLevel))
+        {
+            xylLevel = 0;
+            xylElement.value = xylLevel.toString();
+        }
+
+        if (xylLevel > ancientSouls)
+        {
+            xylLevel = ancientSouls;
+            xylElement.value = xylLevel.toString();
+        }
+
+        // Cost of Xyl
+        ancientSouls -= xylLevel;
+
+        // The index of this array is 1 less than the level Phan should be if the value at that index can just barely be bought.
+        const phanTable = [3, 10, 21, 36, 54, 60, 67, 75, 84, 94, 104, 117, 129, 143, 158, 174, 190, 208, 228];
+        let suggestedPhan = 0;
+        for ( ; suggestedPhan < phanTable.length; suggestedPhan++)
+        {
+            // If we can no longer afford it, break.
+            if (phanTable[suggestedPhan] > ancientSouls)
+            {
+                break;
+            }
+        }
+
+        // Cost of Phan
+        ancientSouls -= (1 + suggestedPhan) * suggestedPhan / 2;
+
+        // Put 1/10 of your remaining AS in Borb (round as you like, probably round up).
+        let suggestedBorb = Math.ceil(0.1 * ancientSouls);
+        ancientSouls -= suggestedBorb;
+
+        // Get Pony to level 19.
+        let suggestedPony = Math.min(ancientSouls, 19);
+        ancientSouls -= suggestedPony;
+
+        // Get Chor'gorloth to level 10.
+        let suggestedChor = Math.min(ancientSouls, 10);
+        ancientSouls -= suggestedChor;
+
+        // Get Borb to 10 now.
+        if (ancientSouls > 0)
+        {
+            ancientSouls += suggestedBorb;
+            suggestedBorb = Math.min(ancientSouls, 10);
+            ancientSouls -= suggestedBorb;
+        }
+
+        //  If you still have AS left over, put them equally into Pony and Borb (e.g.if 4 AS left over: Pony to 21 and Borb to 12 total)
+        if (ancientSouls > 0)
+        {
+            // For uneven AS, preferring Borb. Why not?
+            suggestedPony += Math.floor(ancientSouls / 2);
+            suggestedBorb += Math.ceil(ancientSouls / 2);
+        }
+
+        Helpers.getElementsByDataType("suggestedOutsiderChorgorloth")[0].textContent = suggestedChor.toString();
+        Helpers.getElementsByDataType("suggestedOutsiderPhandoryss")[0].textContent = suggestedPhan.toString();
+        Helpers.getElementsByDataType("suggestedOutsiderBorb")[0].textContent = suggestedBorb.toString();
+        Helpers.getElementsByDataType("suggestedOutsiderPonyboy")[0].textContent = suggestedPony.toString();
+    }
+
+    function getAncientSouls(): number
+    {
+        return parseInt(Helpers.getElementsByDataType("totalAncientSouls")[0].textContent);
     }
 
     const uploadId = Helpers.getElementsByDataType("uploadId")[0].textContent;
