@@ -37,7 +37,7 @@
             }
         }
 
-        const hasOutsiderData = upload.stats && upload.stats.hasOwnProperty("outsiderXyliqil");
+        const hasOutsiderData = upload.stats && upload.stats.hasOwnProperty("totalAncientSouls");
         const hasSimulationData = upload.stats && upload.stats.hasOwnProperty("optimalLevel");
 
         if (upload.stats)
