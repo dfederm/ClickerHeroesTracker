@@ -107,7 +107,8 @@ namespace ClickerHeroesTrackerWebsite.Models.Dashboard
                         Y = 16,
                         Format = "{value:.,0f}"
                     },
-                    ShowFirstLabel = false
+                    ShowFirstLabel = false,
+                    Type = GetYAxisType(dataSeries, userSettings),
                 },
                 Legend = new Legend
                 {
@@ -155,5 +156,16 @@ namespace ClickerHeroesTrackerWebsite.Models.Dashboard
         /// Gets the rivals list data.
         /// </summary>
         public RivalDataList RivalDataList { get; }
+
+        private static AxisType GetYAxisType(
+            IDictionary<DateTime, double> data,
+            IUserSettings userSettings)
+        {
+            return userSettings.UseLogarithmicGraphScale
+                && data.Values.Max() - data.Values.Min() > userSettings.LogarithmicGraphScaleThreshold
+                && !data.Values.Any(datum => datum == 0)
+                ? AxisType.Logarithmic
+                : AxisType.Linear;
+        }
     }
 }

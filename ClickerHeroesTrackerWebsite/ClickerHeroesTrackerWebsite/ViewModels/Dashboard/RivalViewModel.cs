@@ -285,7 +285,12 @@ namespace ClickerHeroesTrackerWebsite.Models.Dashboard
                 var maxUserData = userData != null ? userData.Values.Max() : 0;
                 var maxRivalData = rivalData != null ? rivalData.Values.Max() : 0;
 
-                if (Math.Max(maxUserData, maxRivalData) - Math.Min(minUserData, minRivalData) > userSettings.LogarithmicGraphScaleThreshold)
+                var hasZeroUser = userData != null ? userData.Values.Any(datum => datum == 0) : false;
+                var hasZeroRival = rivalData != null ? rivalData.Values.Any(datum => datum == 0) : false;
+
+                if (Math.Max(maxUserData, maxRivalData) - Math.Min(minUserData, minRivalData) > userSettings.LogarithmicGraphScaleThreshold
+                    && !hasZeroUser
+                    && !hasZeroRival)
                 {
                     return AxisType.Logarithmic;
                 }
