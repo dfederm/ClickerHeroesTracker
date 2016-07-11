@@ -1,32 +1,11 @@
-# You've added your first ReadMe file!
-A README.md file is intended to quickly orient readers to what your project can do.  New to Markdown? [Learn more](http://go.microsoft.com/fwlink/p/?LinkId=524306&clcid=0x409)
-
-## Edit this ReadMe and commit your change to a topic branch
-In Git, branches are cheap.  You should use them whenever you're making changes to your repository.  Edit this file by clicking on the edit icon.
-
-Then make some changes to this ReadMe file.
-
-> Make some **edits** to _this_ blockquote
-
-When you are done, click the dropdown arrow next to the save button - that will allow you to commit your changes to a new branch.
-
-## Create a pull request to contribute your changes back into master
-Pull requests are the way to move changes from a topic branch back into the master branch.
-
-Click on the **Pull Requests** page in the **CODE** hub, then click "New Pull Request" to create a new pull request from your topic branch to the master branch.
-
-When you are done adding details, click "Create Pull request". Once a pull request is sent, reviewers can see your changes, recommend modifications, or even push follow-up commits.
-
-First time creating a pull request?  [Learn more](http://go.microsoft.com/fwlink/?LinkId=533211&clcid=0x409)
-
-### Congratulations! You've completed the grand tour of the CODE hub!
-
-# Next steps
-
-If you haven't done so yet:
-* [Install Visual Studio](http://go.microsoft.com/fwlink/?LinkId=309297&clcid=0x409&slcid=0x409)
-* [Install Git](http://git-scm.com/downloads)
-
-Then clone this repo to your local machine to get started with your own project.
-
-Happy coding!
+# Getting started #
+## Prereqs ##
+1. **Clone the Repo** - There should be a "Clone" button to the right on this page.
+2. If you want to use **Visual Studio**
+    1. Install [Visual Studio Community Edition](https://www.visualstudio.com/products/free-developer-offers-vs) for free
+    2. If you already had it installed, ensure you have [Visual Studio Update 3](https://go.microsoft.com/fwlink/?LinkId=691129) installed.
+    3. Install [.NET Core 1.0 for Visual Studio](https://go.microsoft.com/fwlink/?LinkId=817245)
+    4. Skip the next step.
+3. If you'd like to build from the **command line** and use an editor like [Visual Studio Code](https://code.visualstudio.com/), install the [.NET Core SDK for Windows](https://go.microsoft.com/fwlink/?LinkID=809122).
+4. (Optional) Install [SqliteBrowser](http://sqlitebrowser.org/) to easily query Sqlite during local development.
+5. (Optional) Install [Azure Storage Emulator](https://go.microsoft.com/fwlink/?linkid=717179&clcid=0x409) to locally mock a storage account.
