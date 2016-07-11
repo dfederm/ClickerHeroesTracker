@@ -43,9 +43,10 @@ namespace ClickerHeroesTrackerWebsite
         public void ConfigureServices(IServiceCollection services)
         {
             // The DevelopmentStorageAccount will only work if you have the Storage emulator v4.3 installed: https://go.microsoft.com/fwlink/?linkid=717179&clcid=0x409
+            bool useDevelopmentStorageAccount;
             var storageConnectionString = this.Configuration["Storage:ConnectionString"];
             var storageAccount = string.IsNullOrEmpty(storageConnectionString)
-                ? this.Environment.IsDevelopment()
+                ? bool.TryParse(this.Configuration["Storage:UseDevelopmentStorageAccount"], out useDevelopmentStorageAccount) && useDevelopmentStorageAccount
                     ? CloudStorageAccount.DevelopmentStorageAccount
                     : null
                 : CloudStorageAccount.Parse(storageConnectionString);
