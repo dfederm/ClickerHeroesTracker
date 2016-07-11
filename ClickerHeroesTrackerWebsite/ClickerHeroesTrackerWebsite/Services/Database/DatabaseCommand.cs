@@ -42,7 +42,7 @@ namespace ClickerHeroesTrackerWebsite.Services.Database
 
         public string CommandText { get; set; }
 
-        public CommandType CommandType { get; set; }
+        public CommandType CommandType { get; set; } = CommandType.Text;
 
         public IDictionary<string, object> Parameters { get; set; }
 
@@ -155,6 +155,13 @@ namespace ClickerHeroesTrackerWebsite.Services.Database
             if (string.IsNullOrEmpty(this.CommandText))
             {
                 throw new InvalidOperationException("CommandText may not be empty");
+            }
+
+            // Compat shim for Sqlite. This is terrible!
+            if (this.command is SqliteCommand)
+            {
+                this.CommandText = this.CommandText
+                    .Replace("SCOPE_IDENTITY", "last_insert_rowid");
             }
 
             this.command.CommandText = this.CommandText;
