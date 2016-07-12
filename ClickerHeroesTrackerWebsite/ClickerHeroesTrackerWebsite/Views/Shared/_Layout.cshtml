@@ -8,6 +8,8 @@
 @inject SignInManager<ApplicationUser> SignInManager
 @inject UserManager<ApplicationUser> UserManager
 
+@{ ContentManager.RegisterScript("AjaxLoader"); }
+
 <!DOCTYPE html>
 <html>
 <head>
@@ -58,6 +60,7 @@
             </div>
         </div>
     </div>
+    <div id="loadingElement"><img src="/images/spin.svg" /></div>
     <div class="container body-content">
         @RenderBody()
         <hr />

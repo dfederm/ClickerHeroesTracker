@@ -32,3 +32,18 @@ textarea
 {
     max-width: none;
 }
+
+/* Ajax loading spinner */
+div#loadingElement
+{
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    text-align:center;
+    padding:10px;
+    margin-left: -50px;
+    margin-top: -50px;
+    z-index:2;
+    overflow: auto;
+}
