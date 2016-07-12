@@ -46,30 +46,6 @@ namespace ClickerHeroesTrackerWebsite.Services.Database
 
         public IDictionary<string, object> Parameters { get; set; }
 
-        public void AddTableParameter(string parameterName, string tableTypeName, DataTable table)
-        {
-            this.EnsureNotDisposed();
-
-            var parameter = this.command.CreateParameter();
-            parameter.ParameterName = parameterName;
-            parameter.Value = table;
-
-            var sqlParameter = parameter as SqlParameter;
-            if (sqlParameter != null)
-            {
-                sqlParameter.SqlDbType = SqlDbType.Structured;
-                sqlParameter.TypeName = tableTypeName;
-            }
-
-            var sqliteParameter = parameter as SqliteParameter;
-            if (sqliteParameter != null)
-            {
-                sqliteParameter.SqliteType = SqliteType.Blob;
-            }
-
-            this.command.Parameters.Add(parameter);
-        }
-
         public void BeginTransaction()
         {
             if (this.transaction != null)
@@ -167,14 +143,7 @@ namespace ClickerHeroesTrackerWebsite.Services.Database
             this.command.CommandText = this.CommandText;
             this.command.CommandType = this.CommandType;
 
-            // Only clear the params when this is part of a transaction. This is required since
-            // some usages add params via direct casts and calls to AddTableParameter.
-            // BUGBUG 63 - Remove casts to SqlDatabaseCommand (and remove this conditional, always clear).
-            if (this.transaction != null)
-            {
-                this.command.Parameters.Clear();
-            }
-
+            this.command.Parameters.Clear();
             if (this.Parameters != null)
             {
                 foreach (var parameter in this.Parameters)
