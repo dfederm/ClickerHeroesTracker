@@ -7,6 +7,7 @@ namespace ClickerHeroesTrackerWebsite.Models.Settings
     using System;
     using System.Collections.Generic;
     using System.Data;
+    using System.Text;
     using ClickerHeroesTrackerWebsite.Services.Database;
     using Newtonsoft.Json;
 
@@ -179,26 +180,67 @@ namespace ClickerHeroesTrackerWebsite.Models.Settings
                 return;
             }
 
-            var parameters = new Dictionary<string, object>
+            /* Build a query that looks like this:
+                MERGE INTO UserSettings WITH (HOLDLOCK)
+                USING
+                    (VALUES (@UserId, 1, @Value1), (@UserId, 2, @Value2), ... )
+                        AS Input(UserId, SettingId, SettingValue)
+                    ON UserSettings.UserId = Input.UserId
+                    AND UserSettings.SettingId = Input.SettingId
+                WHEN MATCHED THEN
+                    UPDATE
+                    SET
+                        SettingValue = Input.SettingValue
+                WHEN NOT MATCHED THEN
+                    INSERT (UserId, SettingId, SettingValue)
+                    VALUES (Input.UserId, Input.SettingId, Input.SettingValue);");
+            */
+            var setUserSettingsCommandText = new StringBuilder();
+            var parameters = new Dictionary<string, object>(this.dirtySettings.Count + 1)
             {
                 { "@UserId", this.userId },
             };
-            using (var command = this.databaseCommandFactory.Create(
-                "SetUserSettings",
-                CommandType.StoredProcedure,
-                parameters))
+
+            setUserSettingsCommandText.Append(@"
+                MERGE INTO UserSettings WITH (HOLDLOCK)
+                USING
+                    ( VALUES ");
+            var isFirst = true;
+            foreach (var settingId in this.dirtySettings)
             {
-                DataTable settingsTable = new DataTable();
-                settingsTable.Columns.Add("SettingId", typeof(byte));
-                settingsTable.Columns.Add("SettingValue", typeof(string));
-                foreach (var settingId in this.dirtySettings)
+                if (!isFirst)
                 {
-                    settingsTable.Rows.Add(settingId, this.settingValues[settingId]);
+                    setUserSettingsCommandText.Append(",");
                 }
 
-                // BUGBUG 63 - Remove casts to SqlDatabaseCommand
-                ((DatabaseCommand)command).AddTableParameter("@UserSettings", "UserSetting", settingsTable);
+                // No need to sanitize settingId as it's just a number
+                setUserSettingsCommandText.Append("(@UserId,");
+                setUserSettingsCommandText.Append(settingId);
+                setUserSettingsCommandText.Append(",@Value");
+                setUserSettingsCommandText.Append(settingId);
+                setUserSettingsCommandText.Append(")");
 
+                parameters.Add("@Value" + settingId, this.settingValues[settingId]);
+
+                isFirst = false;
+            }
+
+            setUserSettingsCommandText.Append(@"
+                    )
+                        AS Input(UserId, SettingId, SettingValue)
+                    ON UserSettings.UserId = Input.UserId
+                    AND UserSettings.SettingId = Input.SettingId
+                WHEN MATCHED THEN
+                    UPDATE
+                    SET
+                        SettingValue = Input.SettingValue
+                WHEN NOT MATCHED THEN
+                    INSERT (UserId, SettingId, SettingValue)
+                    VALUES (Input.UserId, Input.SettingId, Input.SettingValue);");
+            using (var command = this.databaseCommandFactory.Create(
+                setUserSettingsCommandText.ToString(),
+                parameters))
+            {
                 command.ExecuteNonQuery();
             }
 
