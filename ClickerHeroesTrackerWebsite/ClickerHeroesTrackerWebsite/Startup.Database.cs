@@ -7,10 +7,10 @@ namespace ClickerHeroesTrackerWebsite
     using System;
     using System.Collections.Generic;
     using System.IO;
+    using System.Linq;
     using ClickerHeroesTrackerWebsite.Models;
     using ClickerHeroesTrackerWebsite.Services.Database;
     using Microsoft.AspNetCore.Builder;
-    using Microsoft.AspNetCore.Hosting;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Options;
 
@@ -70,8 +70,16 @@ namespace ClickerHeroesTrackerWebsite
                     }
                 }
 
-                // Read all sql files and execute their contents if required
-                var tableFiles = Directory.GetFiles(Path.Combine(this.Environment.ContentRootPath, @"Services\Database\Schemas"), "*.sql");
+                // Read sql files and execute their contents in order if required.
+                var tables = new[] {
+                    "Uploads",
+                    "AncientLevels",
+                    "ComputedStats",
+                    "OutsiderLevels",
+                    "Rivals",
+                    "UserSettings",
+                };
+                var tableFiles = tables.Select(table => Path.Combine(this.Environment.ContentRootPath, @"Services\Database\Schemas", databaseSettingsOptions.Value.Kind, table + ".sql"));
                 foreach (var tableFile in tableFiles)
                 {
                     var tableName = Path.GetFileNameWithoutExtension(tableFile);
