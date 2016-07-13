@@ -13,6 +13,7 @@ namespace ClickerHeroesTrackerWebsite.Models.Dashboard
     using ClickerHeroesTrackerWebsite.Models.Game;
     using ClickerHeroesTrackerWebsite.Models.Settings;
     using ClickerHeroesTrackerWebsite.Services.Database;
+    using ClickerHeroesTrackerWebsite.Utility;
     using Microsoft.ApplicationInsights;
     using Microsoft.AspNetCore.Identity;
 
@@ -34,7 +35,7 @@ namespace ClickerHeroesTrackerWebsite.Models.Dashboard
             int rivalId,
             string range)
         {
-            var user = userManager.GetUserAsync(principal).Result;
+            var user = AsyncHelper.RunSynchronously(async () => await userManager.GetUserAsync(principal));
             var userId = user.Id;
             var userName = user.UserName;
 

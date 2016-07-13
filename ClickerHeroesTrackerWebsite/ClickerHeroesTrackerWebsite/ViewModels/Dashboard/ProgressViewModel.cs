@@ -13,6 +13,7 @@ namespace ClickerHeroesTrackerWebsite.Models.Dashboard
     using ClickerHeroesTrackerWebsite.Models.Game;
     using ClickerHeroesTrackerWebsite.Models.Settings;
     using ClickerHeroesTrackerWebsite.Services.Database;
+    using ClickerHeroesTrackerWebsite.Utility;
     using Microsoft.ApplicationInsights;
     using Microsoft.AspNetCore.Identity;
 
@@ -44,10 +45,10 @@ namespace ClickerHeroesTrackerWebsite.Models.Dashboard
             }
             else
             {
-                var progressUser = userManager.FindByNameAsync(progressUserName).Result;
+                var progressUser = AsyncHelper.RunSynchronously(async () => await userManager.FindByNameAsync(progressUserName));
                 if (progressUser != null)
                 {
-                    progressUserId = userManager.GetUserIdAsync(progressUser).Result;
+                    progressUserId = AsyncHelper.RunSynchronously(async () => await userManager.GetUserIdAsync(progressUser));
                 }
             }
 
