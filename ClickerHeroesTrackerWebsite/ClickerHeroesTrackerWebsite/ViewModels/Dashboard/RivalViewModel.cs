@@ -43,50 +43,53 @@ namespace ClickerHeroesTrackerWebsite.Models.Dashboard
 
             this.RangeSelector = new GraphRangeSelectorViewModel(range);
 
-            ProgressData userData;
-            ProgressData rivalData;
-
+            // BUGBUG 126 - Get the two users to compare from the query string.
             var parameters = new Dictionary<string, object>
             {
                 { "@UserId", userId },
                 { "@RivalId", rivalId },
-                { "@StartTime", this.RangeSelector.Start },
-                { "@EndTime", this.RangeSelector.End },
             };
+            const string GetRivalDataCommandText = @"
+	            SELECT Id, UserName
+	            FROM AspNetUsers
+	            WHERE Id = (
+		            SELECT RivalUserId
+		            FROM Rivals
+		            WHERE Id = @RivalId
+		            AND UserId = @UserId
+	            )";
+
+            string rivalUserId;
             using (var command = databaseCommandFactory.Create(
-                "GetRivalData",
-                CommandType.StoredProcedure,
+                GetRivalDataCommandText,
                 parameters))
             using (var reader = command.ExecuteReader())
             {
-                userData = new ProgressData(
-                    gameData,
-                    telemetryClient,
-                    reader);
-                if (!reader.NextResult())
-                {
-                    return;
-                }
-
                 if (reader.Read())
                 {
-                    this.RivalUserName = reader["RivalUserName"].ToString();
+                    rivalUserId = reader["Id"].ToString();
+                    this.RivalUserName = reader["UserName"].ToString();
                 }
                 else
                 {
                     return;
                 }
-
-                if (!reader.NextResult())
-                {
-                    return;
-                }
-
-                rivalData = new ProgressData(
-                    gameData,
-                    telemetryClient,
-                    reader);
             }
+
+            var userData = new ProgressData(
+                gameData,
+                telemetryClient,
+                databaseCommandFactory,
+                userId,
+                this.RangeSelector.Start,
+                this.RangeSelector.End);
+            var rivalData = new ProgressData(
+                gameData,
+                telemetryClient,
+                databaseCommandFactory,
+                rivalUserId,
+                this.RangeSelector.Start,
+                this.RangeSelector.End);
 
             this.ProminentGraphs = new List<GraphViewModel>();
 
@@ -94,7 +97,6 @@ namespace ClickerHeroesTrackerWebsite.Models.Dashboard
             if (userData.SoulsPerHourData.Any(datum => datum.Value > 0)
                 && rivalData.SoulsPerHourData.Any(datum => datum.Value > 0))
             {
-
                 this.ProminentGraphs.Add(this.CreateGraph(
                     "soulsPerHourGraph",
                     "Souls/hr",

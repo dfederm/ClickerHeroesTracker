@@ -27,16 +27,22 @@ namespace ClickerHeroesTrackerWebsite.Models.Dashboard
             {
                 { "@UserId", userId }
             };
+            const string GetUserRivalsCommandText = @"
+	            SELECT Rivals.Id, UserName
+	            FROM Rivals
+	            INNER JOIN AspNetUsers
+	            ON Rivals.RivalUserId = AspNetUsers.Id
+	            WHERE UserId = @UserId
+	            ORDER BY UserName ASC";
             using (var command = databaseCommandFactory.Create(
-                "GetUserRivals",
-                CommandType.StoredProcedure,
+                GetUserRivalsCommandText,
                 parameters))
             using (var reader = command.ExecuteReader())
             {
                 while (reader.Read())
                 {
                     var rivalId = Convert.ToInt32(reader["Id"]);
-                    var rivalUserName = reader["RivalUserName"].ToString();
+                    var rivalUserName = reader["UserName"].ToString();
                     var rivalData = new RivalData(rivalId, rivalUserName);
                     rivals.Add(rivalData);
                 }

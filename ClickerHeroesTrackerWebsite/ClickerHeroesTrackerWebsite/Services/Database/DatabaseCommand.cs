@@ -42,8 +42,6 @@ namespace ClickerHeroesTrackerWebsite.Services.Database
 
         public string CommandText { get; set; }
 
-        public CommandType CommandType { get; set; } = CommandType.Text;
-
         public IDictionary<string, object> Parameters { get; set; }
 
         public void BeginTransaction()
@@ -141,7 +139,6 @@ namespace ClickerHeroesTrackerWebsite.Services.Database
             }
 
             this.command.CommandText = this.CommandText;
-            this.command.CommandType = this.CommandType;
 
             this.command.Parameters.Clear();
             if (this.Parameters != null)

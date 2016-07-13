@@ -72,25 +72,13 @@ namespace ClickerHeroesTrackerWebsite.Models.Dashboard
 
             this.RangeSelector = new GraphRangeSelectorViewModel(range);
 
-            ProgressData data;
-
-            var commandParameters = new Dictionary<string, object>
-            {
-                { "@UserId", progressUserId },
-                { "@StartTime", this.RangeSelector.Start },
-                { "@EndTime", this.RangeSelector.End },
-            };
-            using (var command = databaseCommandFactory.Create(
-                "GetProgressData",
-                CommandType.StoredProcedure,
-                commandParameters))
-            using (var reader = command.ExecuteReader())
-            {
-                data = new ProgressData(
-                    gameData,
-                    telemetryClient,
-                    reader);
-            }
+            var data = new ProgressData(
+                gameData,
+                telemetryClient,
+                databaseCommandFactory,
+                userId,
+                this.RangeSelector.Start,
+                this.RangeSelector.End);
 
             if (!data.IsValid)
             {

@@ -19,11 +19,6 @@ namespace ClickerHeroesTrackerWebsite.Services.Database
         string CommandText { get; set; }
 
         /// <summary>
-        /// Gets or sets the command type
-        /// </summary>
-        CommandType CommandType { get; set; }
-
-        /// <summary>
         /// Gets or sets the parameters used in the command.
         /// </summary>
         IDictionary<string, object> Parameters { get; set; }

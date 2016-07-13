@@ -38,23 +38,13 @@ namespace ClickerHeroesTrackerWebsite.Models.Dashboard
 
             var startTime = DateTime.UtcNow.AddDays(-7);
 
-            ProgressData data;
-            var parameters = new Dictionary<string, object>
-            {
-                { "@UserId", userId },
-                { "@StartTime", startTime },
-            };
-            using (var command = databaseCommandFactory.Create(
-                "GetProgressData",
-                CommandType.StoredProcedure,
-                parameters))
-            using (var reader = command.ExecuteReader())
-            {
-                data = new ProgressData(
-                    gameData,
-                    telemetryClient,
-                    reader);
-            }
+            var data = new ProgressData(
+                gameData,
+                telemetryClient,
+                databaseCommandFactory,
+                userId,
+                startTime,
+                null);
 
             if (!data.IsValid || data.SoulsPerHourData.Count == 0)
             {
@@ -137,6 +127,7 @@ namespace ClickerHeroesTrackerWebsite.Models.Dashboard
                 }
             };
 
+            // BUGBUG 9 - Update to be a "follower" system
             this.RivalDataList = new RivalDataList(databaseCommandFactory, userId);
 
             this.IsValid = true;
