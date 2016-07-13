@@ -4,7 +4,7 @@
 
 namespace ClickerHeroesTrackerWebsite.Models
 {
-    using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+    using OpenIddict;
 
     /// <summary>
     /// A user for the application
@@ -12,7 +12,7 @@ namespace ClickerHeroesTrackerWebsite.Models
     /// <remarks>
     /// You can add profile data for the user by adding more properties to your ApplicationUser class, please visit http://go.microsoft.com/fwlink/?LinkID=317594 to learn more.
     /// </remarks>
-    public class ApplicationUser : IdentityUser
+    public class ApplicationUser : OpenIddictUser
     {
     }
 }

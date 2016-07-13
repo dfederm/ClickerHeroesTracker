@@ -18,6 +18,8 @@ namespace ClickerHeroesTrackerWebsite
         private void ConfigureAuthentication(IApplicationBuilder app, IHostingEnvironment env)
         {
             app.UseIdentity();
+            app.UseOAuthValidation();
+            app.UseOpenIddict();
 
             var authenticationSettingsOptions = app.ApplicationServices.GetService<IOptions<AuthenticationSettings>>();
             if (authenticationSettingsOptions.Value != null)

@@ -17,6 +17,7 @@ namespace ClickerHeroesTrackerWebsite
     using ClickerHeroesTrackerWebsite.Services.Database;
     using ClickerHeroesTrackerWebsite.Services.Email;
     using ClickerHeroesTrackerWebsite.Services.UploadProcessing;
+    using Microsoft.AspNetCore.Builder;
     using Microsoft.AspNetCore.DataProtection;
     using Microsoft.AspNetCore.Hosting;
     using Microsoft.AspNetCore.Identity;
@@ -104,6 +105,17 @@ namespace ClickerHeroesTrackerWebsite
                 })
                 .AddEntityFrameworkStores<ApplicationDbContext>()
                 .AddDefaultTokenProviders();
+
+            // Register the OpenIddict services, including the default Entity Framework stores.
+            services.AddOpenIddict<ApplicationUser, ApplicationDbContext>()
+                // Enable the token endpoint (required to use the password flow).
+                .EnableTokenEndpoint("/api/connect/token")
+
+                // Allow client applications to use the grant_type=password flow.
+                .AllowPasswordFlow()
+
+                // We don't currently use SSL.
+                .DisableHttpsRequirement();
 
             services.AddApplicationInsightsTelemetry(this.Configuration);
 
