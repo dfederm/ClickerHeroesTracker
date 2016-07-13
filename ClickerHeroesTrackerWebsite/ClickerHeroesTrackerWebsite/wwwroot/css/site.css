@@ -59,4 +59,10 @@ div#loadingElement
 
 .alert-success {
     display: none;
+    position:fixed; 
+    top: 50px; 
+    left: 50%;
+    z-index:9999;
+    width: inherit;
+    transform: translateX(-50%);
 }

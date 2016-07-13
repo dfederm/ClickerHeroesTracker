@@ -68,7 +68,7 @@
 
         // Show copied alert
         $(".alert-success").find("strong").text("Value copied to clipboard");
-        $(".alert-success").show();
+        $(".alert-success").fadeIn(200);
         $(".alert-success").delay(2000).slideUp(600, function (): void
         {
             $(".alert-success").hide();

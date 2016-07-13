@@ -6,10 +6,12 @@
 
     // Show and hide loading spinner on Ajax start/stop.
     $(document)
-        .ajaxStart(function(): void {
+        .ajaxStart(function (): void
+        {
             loadingElement.show();
         })
-        .ajaxStop(function(): void {
+        .ajaxStop(function (): void
+        {
             loadingElement.hide();
         });
 }

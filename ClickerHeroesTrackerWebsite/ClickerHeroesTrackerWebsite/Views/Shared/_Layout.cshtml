@@ -8,7 +8,10 @@
 @inject SignInManager<ApplicationUser> SignInManager
 @inject UserManager<ApplicationUser> UserManager
 
-@{ ContentManager.RegisterScript("AjaxLoader"); }
+@{
+    ContentManager.RegisterScript("AjaxLoader");
+    ContentManager.RegisterScript("Alerts");
+}
 
 <!DOCTYPE html>
 <html>
@@ -61,11 +64,12 @@
         </div>
     </div>
     <div id="loadingElement"><img src="/images/spin.svg"/></div>
-    <div class="alert alert-success container" id="success-alert">
-        <button type="button" class="close" data-dismiss="alert">x</button>
-        <strong></strong>
-    </div>
+
     <div class="container body-content">
+        <div class="alert alert-success" id="success-alert">
+            <button type="button" class="close">x</button>
+            <strong></strong>
+        </div>
         @RenderBody()
         <hr />
         <footer>
