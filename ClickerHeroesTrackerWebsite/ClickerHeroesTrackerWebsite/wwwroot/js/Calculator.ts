@@ -254,6 +254,12 @@
                     diffStatValue -= itemStatValue;
                 }
 
+                const statElement = Helpers.getElementsByDataType(diffStatType)[0];
+                statElement.addEventListener("click", function (): void
+                {
+                    Helpers.copyToClipboard(diffStatValue.toString());
+                });
+
                 hydrateStat(stats, diffStatType, diffStatValue);
             }
 

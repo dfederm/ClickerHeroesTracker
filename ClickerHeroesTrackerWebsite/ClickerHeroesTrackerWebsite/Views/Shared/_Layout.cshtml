@@ -60,7 +60,11 @@
             </div>
         </div>
     </div>
-    <div id="loadingElement"><img src="/images/spin.svg" /></div>
+    <div id="loadingElement"><img src="/images/spin.svg"/></div>
+    <div class="alert alert-success container" id="success-alert">
+        <button type="button" class="close" data-dismiss="alert">x</button>
+        <strong></strong>
+    </div>
     <div class="container body-content">
         @RenderBody()
         <hr />

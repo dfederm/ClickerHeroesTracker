@@ -56,4 +56,22 @@
 
         return elements;
     }
+
+    export function copyToClipboard(item: string): void {
+
+        // Set up temp field to copy from
+        const $temp = $("<input>");
+        $("body").append($temp);
+        $temp.val(item).select();
+        document.execCommand("copy");
+        $temp.remove();
+
+        // Show copied alert
+        $(".alert-success").find("strong").text("Value copied to clipboard");
+        $(".alert-success").show();
+        $(".alert-success").delay(2000).slideUp(600, function (): void
+        {
+            $(".alert-success").hide();
+        });
+    }
 }

@@ -47,3 +47,16 @@ div#loadingElement
     z-index:2;
     overflow: auto;
 }
+
+.clickable {
+    cursor: pointer;
+
+}
+.clickable:hover {
+    background-color: #e6e6e6;
+    border: 1px solid #ccc;
+}
+
+.alert-success {
+    display: none;
+}
