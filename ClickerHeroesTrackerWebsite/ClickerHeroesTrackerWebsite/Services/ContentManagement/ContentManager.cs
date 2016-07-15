@@ -30,7 +30,8 @@ namespace ClickerHeroesTrackerWebsite.Services.ContentManagement
 
         public void RegisterScript(string name)
         {
-            if (name.StartsWith("http", StringComparison.OrdinalIgnoreCase))
+            if (name.StartsWith("http", StringComparison.OrdinalIgnoreCase)
+                || name.StartsWith("//", StringComparison.OrdinalIgnoreCase))
             {
                 this.scripts.Add(name);
             }
