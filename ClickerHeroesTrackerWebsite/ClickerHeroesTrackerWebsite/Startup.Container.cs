@@ -107,15 +107,18 @@ namespace ClickerHeroesTrackerWebsite
                 .AddDefaultTokenProviders();
 
             // Register the OpenIddict services, including the default Entity Framework stores.
-            services.AddOpenIddict<ApplicationUser, ApplicationDbContext>()
+            var openIddictBuilder = services.AddOpenIddict<ApplicationUser, ApplicationDbContext>()
                 // Enable the token endpoint (required to use the password flow).
                 .EnableTokenEndpoint("/api/connect/token")
 
                 // Allow client applications to use the grant_type=password flow.
-                .AllowPasswordFlow()
+                .AllowPasswordFlow();
 
-                // We don't currently use SSL.
-                .DisableHttpsRequirement();
+            // Allow Http on devbox
+            if (this.Environment.IsDevelopment())
+            {
+                openIddictBuilder.DisableHttpsRequirement();
+            }
 
             services.AddApplicationInsightsTelemetry(this.Configuration);
 

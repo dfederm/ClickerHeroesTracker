@@ -9,7 +9,7 @@ try
     Write-Host "WebsiteName=$WebsiteName"
     Write-Host "Slot=$Slot"
 
-    $siteUrl = "http://" + $WebsiteName
+    $siteUrl = "https://" + $WebsiteName
 
     if (![string]::IsNullOrEmpty($Slot))
     {

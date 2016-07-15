@@ -26,28 +26,27 @@ namespace ClickerHeroesTrackerWebsite.IntegrationTests.Helpers
 
         private static Uri GetBaseUri()
         {
-            const string Protocol = "http://";
-            string host;
+            string baseUrl;
 
             if (Environment.GetEnvironmentVariable("IsInCloud") == null)
             {
-                host = "localhost:5000";
+                baseUrl = "http://localhost:5000";
             }
             else
             {
                 var websiteName = Environment.GetEnvironmentVariable("WebsiteName");
                 var slot = Environment.GetEnvironmentVariable("Slot");
 
-                host = websiteName;
+                baseUrl = Uri.UriSchemeHttps + Uri.SchemeDelimiter + websiteName;
                 if (slot != null)
                 {
-                    host += "-" + slot;
+                    baseUrl += "-" + slot;
                 }
 
-                host += ".azurewebsites.net";
+                baseUrl += ".azurewebsites.net";
             }
 
-            return new Uri(Protocol + host);
+            return new Uri(baseUrl);
         }
     }
 }

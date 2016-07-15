@@ -7,6 +7,7 @@ namespace ClickerHeroesTrackerWebsite
     using ClickerHeroesTrackerWebsite.Instrumentation;
     using ClickerHeroesTrackerWebsite.Models.Game;
     using ClickerHeroesTrackerWebsite.Models.Settings;
+    using ClickerHeroesTrackerWebsite.Services.Security;
     using ClickerHeroesTrackerWebsite.Utility;
     using Microsoft.AspNetCore.Builder;
     using Microsoft.AspNetCore.Hosting;
@@ -39,6 +40,12 @@ namespace ClickerHeroesTrackerWebsite
 
             // We want to start measuring latency as soon as possible during a request.
             app.UseMiddleware<MeasureLatencyMiddleware>();
+
+            // Require https on non-devbox
+            if (!env.IsDevelopment())
+            {
+                app.UseMiddleware<RequireHttpsMiddleware>();
+            }
 
             app.UseStaticFiles();
 
