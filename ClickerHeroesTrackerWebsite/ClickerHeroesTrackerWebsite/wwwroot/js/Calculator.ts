@@ -366,9 +366,24 @@
 
     const uploadId = Helpers.getElementsByDataType("uploadId")[0].textContent;
 
+    // Get upload data
     $.ajax({
         url: "/api/uploads/" + uploadId,
     })
         .done(handleSuccess)
         .fail(displayFailure);
+
+    // Set up delete button
+    $("#deleteUpload").click(() =>
+    {
+        $.ajax({
+            method: "DELETE",
+            url: "/api/uploads/" + uploadId,
+        })
+            .done(() =>
+            {
+                window.location.href = "/dashboard";
+            })
+            .fail(displayFailure);
+    });
 }

@@ -41,6 +41,7 @@
                     <div class="modal-dialog modal-sm">
                         <div class="modal-content">
                             <div class="modal-header">
+                                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
                                 <h4 class="modal-title">Save Data</h4>
                             </div>
                             <div class="modal-body">
@@ -53,6 +54,27 @@
                         </div>                    
                     </div>
                 </div>
+
+                <button class="btn btn-default" data-toggle="modal" data-target="#deleteUploadModal">
+                    Delete
+                </button>
+                <div id="deleteUploadModal" class="modal fade">
+                    <div class="modal-dialog modal-sm">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                                <h4 class="modal-title">Delete Upload</h4>
+                            </div>
+                            <div class="modal-body">
+                                <p>Are you sure? <span class="text-danger">This cannot be undone!</span></p>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                                <button type="button" class="btn btn-primary" id="deleteUpload">Delete</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             }
 
             <button class="btn btn-default" data-toggle="modal" data-target="#shareModal">
@@ -62,6 +84,7 @@
                 <div class="modal-dialog modal-sm">
                     <div class="modal-content">
                         <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
                             <h4 class="modal-title">Share</h4>
                         </div>
                         <div class="modal-body">
