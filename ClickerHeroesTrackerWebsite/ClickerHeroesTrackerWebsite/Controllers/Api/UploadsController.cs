@@ -100,7 +100,7 @@ namespace ClickerHeroesTrackerWebsite.Controllers.Api
         /// </summary>
         /// <remarks>BUGBUG 43 - Not implemented</remarks>
         /// <param name="id">The upload id</param>
-        /// <returns>Empty 200, as this is not implemented yet</returns>
+        /// <returns>A response with the schema <see cref="Upload"/></returns>
         [Route("{uploadId:int}")]
         [HttpGet]
         public IActionResult Details(int uploadId)
@@ -274,7 +274,7 @@ namespace ClickerHeroesTrackerWebsite.Controllers.Api
         /// Add and an upload.
         /// </summary>
         /// <param name="rawUpload">The upload data</param>
-        /// <returns>Empty 200, as this is not implemented yet</returns>
+        /// <returns>The new upload id</returns>
         [Route("")]
         [HttpPost]
         public IActionResult Add(RawUpload rawUpload)
@@ -442,6 +442,77 @@ namespace ClickerHeroesTrackerWebsite.Controllers.Api
             }
 
             return this.Ok(uploadId);
+        }
+
+        /// <summary>
+        /// Delete an upload.
+        /// </summary>
+        /// <returns>An appropriate status code with an empty response</returns>
+        [Route("{uploadId:int}")]
+        [HttpDelete]
+        [Authorize]
+        public IActionResult Delete(int uploadId)
+        {
+            var parameters = new Dictionary<string, object>
+            {
+                { "@UploadId", uploadId },
+            };
+
+            // First make sure the upload exists and belongs to the user
+            const string GetUploadUserCommandText = @"
+	            SELECT UserId
+                FROM Uploads
+                WHERE Id = @UploadId";
+            using (var command = this.databaseCommandFactory.Create(
+                GetUploadUserCommandText,
+                parameters))
+            using (var reader = command.ExecuteReader())
+            {
+                if (reader.Read())
+                {
+                    var uploadUserId = reader["UserId"].ToString();
+
+                    var userId = this.userManager.GetUserId(this.User);
+                    var isAdmin = this.User.IsInRole("Admin");
+
+                    if (uploadUserId != userId && !isAdmin)
+                    {
+                        // Not this user's, so not allowed
+                        return this.Unauthorized();
+                    }
+                }
+                else
+                {
+                    // If we didn't get data, it's an upload that doesn't exist
+                    return this.NotFound();
+                }
+            }
+
+            // Perform the deletion from all tables
+            const string DeleteUploadCommandText = @"
+                DELETE
+                FROM AncientLevels
+                WHERE UploadId = @UploadId;
+
+                DELETE
+                FROM OutsiderLevels
+                WHERE UploadId = @UploadId;
+
+                DELETE
+                FROM ComputedStats
+                WHERE UploadId = @UploadId;
+
+                DELETE
+                FROM Uploads
+                WHERE Id = @UploadId;";
+            using (var command = this.databaseCommandFactory.Create(
+                DeleteUploadCommandText,
+                parameters))
+            {
+                command.ExecuteNonQuery();
+            }
+
+            return this.Ok();
         }
 
         private List<Upload> FetchUploads(string userId, int page, int count)
