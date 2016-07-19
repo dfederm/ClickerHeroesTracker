@@ -94,8 +94,11 @@
                         }
                     }
 
-                    container.appendChild(currentDateContainer);
-                    currentDateContainer.appendChild(currentList);
+                    if (currentDateContainer)
+                    {
+                        currentDateContainer.appendChild(currentList);
+                        container.appendChild(currentDateContainer);
+                    }
                 }
 
                 if (typeof SiteNewsAdmin !== "undefined")
