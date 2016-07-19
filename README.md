@@ -14,6 +14,22 @@
 	1. The required schema structure will be set up automatically when starting the application for the first time.
 1. (Optional) Install [Azure Storage Emulator](https://go.microsoft.com/fwlink/?linkid=717179&clcid=0x409) to locally mock a storage account.
 
+# Admin user
+To make a user a site admin:
+1. Create a user via registration normally, or use an existing one.
+1. Get the user id from the database. In this example, suppose it's `71584f37-4165-4cd6-90af-0762ea996b6e`
+1. Ensure the Admin role exists in the `AspNetRoles` table. If it does not, add it with:
+
+       INSERT INTO AspNetRoles(Id, ConcurrencyStamp, Name, NormalizedName)
+       VALUES(NEWID(), NEWID(), 'Admin', 'ADMIN');
+
+1. Add your user to the role. Rememeber to replace the user id below with the one from above.
+
+       INSERT INTO AspNetUserRoles(UserId, RoleId)
+       VALUES('71584f37-4165-4cd6-90af-0762ea996b6e', (SELECT Id FROM AspNetRoles WHERE Name = 'Admin'));
+
+1. You may need to log out and back in for the change to take effect. You should see an Admin link in the navbar if you were successful.
+
 # Using the API
 It sometimes can be easier during development to directly hit the API instead of using the website, especially for automation tasks like database setup or cleanup.
 
