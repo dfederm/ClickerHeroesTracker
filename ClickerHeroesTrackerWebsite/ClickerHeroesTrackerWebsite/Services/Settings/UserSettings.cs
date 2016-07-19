@@ -55,7 +55,7 @@ namespace ClickerHeroesTrackerWebsite.Models.Settings
         {
             get
             {
-                return this.GetValue(2, bool.TryParse, false);
+                return this.GetValue(2, bool.TryParse, true);
             }
 
             set
