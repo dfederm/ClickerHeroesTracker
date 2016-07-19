@@ -76,7 +76,7 @@ namespace ClickerHeroesTrackerWebsite.Models.Dashboard
                 gameData,
                 telemetryClient,
                 databaseCommandFactory,
-                userId,
+                progressUserId,
                 this.RangeSelector.Start,
                 this.RangeSelector.End);
 
