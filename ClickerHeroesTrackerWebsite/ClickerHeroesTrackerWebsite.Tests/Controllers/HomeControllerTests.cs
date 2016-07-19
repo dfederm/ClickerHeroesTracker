@@ -13,13 +13,22 @@ namespace ClickerHeroesTrackerWebsite.Tests.Controllers
         [Fact]
         public void Index()
         {
-            // Arrange
-            HomeController controller = new HomeController();
+            var controller = new HomeController();
 
-            // Act
-            ViewResult result = controller.Index() as ViewResult;
+            var result = controller.Index();
 
-            // Assert
+            Assert.IsType<ViewResult>(result);
+            Assert.NotNull(result);
+        }
+
+        [Fact]
+        public void New()
+        {
+            var controller = new HomeController();
+
+            var result = controller.New();
+
+            Assert.IsType<ViewResult>(result);
             Assert.NotNull(result);
         }
     }
