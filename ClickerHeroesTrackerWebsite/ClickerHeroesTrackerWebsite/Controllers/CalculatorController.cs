@@ -40,7 +40,7 @@ namespace ClickerHeroesTrackerWebsite.Controllers
         /// </summary>
         /// <param name="uploadId">Id of the upload to view</param>
         /// <returns>The calculator view</returns>
-        public ActionResult View(int? uploadId)
+        public IActionResult View(int? uploadId)
         {
             CalculatorViewModel model = uploadId.HasValue
                 ? new CalculatorViewModel(
