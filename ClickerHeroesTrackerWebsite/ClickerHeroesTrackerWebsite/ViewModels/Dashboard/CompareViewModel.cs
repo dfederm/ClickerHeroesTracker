@@ -1,4 +1,4 @@
-﻿// <copyright file="RivalViewModel.cs" company="Clicker Heroes Tracker">
+﻿// <copyright file="CompareViewModel.cs" company="Clicker Heroes Tracker">
 // Copyright (c) Clicker Heroes Tracker. All rights reserved.
 // </copyright>
 
@@ -6,153 +6,112 @@ namespace ClickerHeroesTrackerWebsite.Models.Dashboard
 {
     using System;
     using System.Collections.Generic;
-    using System.Data;
     using System.Linq;
-    using System.Security.Claims;
     using ClickerHeroesTrackerWebsite.Models.Dashboard.Graph;
     using ClickerHeroesTrackerWebsite.Models.Game;
     using ClickerHeroesTrackerWebsite.Models.Settings;
     using ClickerHeroesTrackerWebsite.Services.Database;
-    using ClickerHeroesTrackerWebsite.Utility;
     using Microsoft.ApplicationInsights;
-    using Microsoft.AspNetCore.Identity;
 
     /// <summary>
-    /// A model for the rival view.
+    /// A model for the compare view.
     /// </summary>
-    public class RivalViewModel
+    public class CompareViewModel
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="RivalViewModel"/> class.
+        /// Initializes a new instance of the <see cref="CompareViewModel"/> class.
         /// </summary>
-        public RivalViewModel(
+        public CompareViewModel(
             GameData gameData,
             TelemetryClient telemetryClient,
             IDatabaseCommandFactory databaseCommandFactory,
-            IUserSettingsProvider userSettingsProvider,
-            ClaimsPrincipal principal,
-            UserManager<ApplicationUser> userManager,
-            int rivalId,
+            IUserSettings userSettings,
+            string userId1,
+            string userName1,
+            string userId2,
+            string userName2,
             string range)
         {
-            var user = AsyncHelper.RunSynchronously(async () => await userManager.GetUserAsync(principal));
-            var userId = user.Id;
-            var userName = user.UserName;
-
-            var userSettings = userSettingsProvider.Get(userId);
+            this.UserName1 = userName1;
+            this.UserName2 = userName2;
 
             this.RangeSelector = new GraphRangeSelectorViewModel(range);
 
-            // BUGBUG 126 - Get the two users to compare from the query string.
-            var parameters = new Dictionary<string, object>
-            {
-                { "@UserId", userId },
-                { "@RivalId", rivalId },
-            };
-            const string GetRivalDataCommandText = @"
-	            SELECT Id, UserName
-	            FROM AspNetUsers
-	            WHERE Id = (
-		            SELECT RivalUserId
-		            FROM Rivals
-		            WHERE Id = @RivalId
-		            AND UserId = @UserId
-	            )";
-
-            string rivalUserId;
-            using (var command = databaseCommandFactory.Create(
-                GetRivalDataCommandText,
-                parameters))
-            using (var reader = command.ExecuteReader())
-            {
-                if (reader.Read())
-                {
-                    rivalUserId = reader["Id"].ToString();
-                    this.RivalUserName = reader["UserName"].ToString();
-                }
-                else
-                {
-                    return;
-                }
-            }
-
-            var userData = new ProgressData(
+            var userData1 = new ProgressData(
                 gameData,
                 telemetryClient,
                 databaseCommandFactory,
-                userId,
+                userId1,
                 this.RangeSelector.Start,
                 this.RangeSelector.End);
-            var rivalData = new ProgressData(
+            var userData2 = new ProgressData(
                 gameData,
                 telemetryClient,
                 databaseCommandFactory,
-                rivalUserId,
+                userId2,
                 this.RangeSelector.Start,
                 this.RangeSelector.End);
 
             this.ProminentGraphs = new List<GraphViewModel>();
 
             // Suppress if it's all 0's since 1.0 doesn't support this stat yet.
-            if (userData.SoulsPerHourData.Any(datum => datum.Value > 0)
-                && rivalData.SoulsPerHourData.Any(datum => datum.Value > 0))
+            if (userData1.SoulsPerHourData.Any(datum => datum.Value > 0)
+                && userData2.SoulsPerHourData.Any(datum => datum.Value > 0))
             {
                 this.ProminentGraphs.Add(this.CreateGraph(
                     "soulsPerHourGraph",
                     "Souls/hr",
-                    userName,
-                    userData.SoulsPerHourData,
-                    this.RivalUserName,
-                    rivalData.SoulsPerHourData,
+                    this.UserName1,
+                    userData1.SoulsPerHourData,
+                    this.UserName2,
+                    userData2.SoulsPerHourData,
                     userSettings));
             }
 
             // Suppress if it's all 0's since 1.0 doesn't support this stat yet.
-            if (userData.OptimalLevelData.Any(datum => datum.Value > 0)
-                && rivalData.OptimalLevelData.Any(datum => datum.Value > 0))
+            if (userData1.OptimalLevelData.Any(datum => datum.Value > 0)
+                && userData2.OptimalLevelData.Any(datum => datum.Value > 0))
             {
                 this.ProminentGraphs.Add(this.CreateGraph(
                     "optimalLevelGraph",
                     "Optimal Level",
-                    userName,
-                    userData.OptimalLevelData,
-                    this.RivalUserName,
-                    rivalData.OptimalLevelData,
+                    this.UserName1,
+                    userData1.OptimalLevelData,
+                    this.UserName2,
+                    userData2.OptimalLevelData,
                     userSettings));
             }
 
             this.ProminentGraphs.Add(this.CreateGraph(
                 "soulsSpentGraph",
                 "Souls Spent",
-                userName,
-                userData.SoulsSpentData,
-                this.RivalUserName,
-                rivalData.SoulsSpentData,
+                this.UserName1,
+                userData1.SoulsSpentData,
+                this.UserName2,
+                userData2.SoulsSpentData,
                 userSettings));
             this.ProminentGraphs.Add(this.CreateGraph(
                 "titanDamageGraph",
                 "Titan Damage",
-                userName,
-                userData.TitanDamageData,
-                this.RivalUserName,
-                rivalData.TitanDamageData,
+                this.UserName1,
+                userData1.TitanDamageData,
+                this.UserName2,
+                userData2.TitanDamageData,
                 userSettings));
 
-            this.SecondaryGraphs = userData
+            this.SecondaryGraphs = userData1
                 .AncientLevelData
                 .Select(x => this.CreateGraph(
                     x.Key.Name + "Graph",
                     x.Key.Name,
-                    userName,
+                    this.UserName1,
                     x.Value,
-                    this.RivalUserName,
-                    rivalData.AncientLevelData.SafeGet(x.Key),
+                    this.UserName2,
+                    userData2.AncientLevelData.SafeGet(x.Key),
                     userSettings))
                 .ToList();
 
-            this.IsValid = !string.IsNullOrEmpty(this.RivalUserName)
-                && userData.IsValid
-                && rivalData.IsValid;
+            this.IsValid = userData1.IsValid && userData2.IsValid;
         }
 
         /// <summary>
@@ -161,9 +120,14 @@ namespace ClickerHeroesTrackerWebsite.Models.Dashboard
         public bool IsValid { get; }
 
         /// <summary>
-        /// Gets the rival's user name.
+        /// Gets the first user's name.
         /// </summary>
-        public string RivalUserName { get; }
+        public string UserName1 { get; }
+
+        /// <summary>
+        /// Gets the second user's name.
+        /// </summary>
+        public string UserName2 { get; }
 
         /// <summary>
         /// Gets a list of prominent graphs.
@@ -183,17 +147,17 @@ namespace ClickerHeroesTrackerWebsite.Models.Dashboard
         private GraphViewModel CreateGraph(
             string id,
             string title,
-            string userName,
-            IDictionary<DateTime, double> userData,
-            string rivalName,
-            IDictionary<DateTime, double> rivalData,
+            string userName1,
+            IDictionary<DateTime, double> userData1,
+            string userName2,
+            IDictionary<DateTime, double> userData2,
             IUserSettings userSettings)
         {
             var timeZone = userSettings.TimeZone;
 
             var series = new List<Series>();
-            TryAddSeries(series, timeZone, userName, userData);
-            TryAddSeries(series, timeZone, rivalName, rivalData);
+            TryAddSeries(series, timeZone, userName1, userData1);
+            TryAddSeries(series, timeZone, userName2, userData2);
 
             return new GraphViewModel
             {
@@ -232,7 +196,7 @@ namespace ClickerHeroesTrackerWebsite.Models.Dashboard
                             Format = "{value:.,0f}"
                         },
                         ShowFirstLabel = false,
-                        Type = GetYAxisType(userData, rivalData, userSettings),
+                        Type = GetYAxisType(userData1, userData2, userSettings),
                     },
                     Legend = new Legend
                     {
@@ -276,24 +240,24 @@ namespace ClickerHeroesTrackerWebsite.Models.Dashboard
         }
 
         private static AxisType GetYAxisType(
-            IDictionary<DateTime, double> userData,
-            IDictionary<DateTime, double> rivalData,
+            IDictionary<DateTime, double> userData1,
+            IDictionary<DateTime, double> userData2,
             IUserSettings userSettings)
         {
             if (userSettings.UseLogarithmicGraphScale)
             {
-                var minUserData = userData != null ? userData.Values.Min() : 0;
-                var minRivalData = rivalData != null ? rivalData.Values.Min() : 0;
+                var minUserData1 = userData1 != null ? userData1.Values.Min() : 0;
+                var minUserData2 = userData2 != null ? userData2.Values.Min() : 0;
 
-                var maxUserData = userData != null ? userData.Values.Max() : 0;
-                var maxRivalData = rivalData != null ? rivalData.Values.Max() : 0;
+                var maxUserData1 = userData1 != null ? userData1.Values.Max() : 0;
+                var maxUserData2 = userData2 != null ? userData2.Values.Max() : 0;
 
-                var hasZeroUser = userData != null ? userData.Values.Any(datum => datum == 0) : false;
-                var hasZeroRival = rivalData != null ? rivalData.Values.Any(datum => datum == 0) : false;
+                var hasZeroUser1 = userData1 != null ? userData1.Values.Any(datum => datum == 0) : false;
+                var hasZeroUser2 = userData2 != null ? userData2.Values.Any(datum => datum == 0) : false;
 
-                if (Math.Max(maxUserData, maxRivalData) - Math.Min(minUserData, minRivalData) > userSettings.LogarithmicGraphScaleThreshold
-                    && !hasZeroUser
-                    && !hasZeroRival)
+                if (Math.Max(maxUserData1, maxUserData2) - Math.Min(minUserData1, minUserData2) > userSettings.LogarithmicGraphScaleThreshold
+                    && !hasZeroUser1
+                    && !hasZeroUser2)
                 {
                     return AxisType.Logarithmic;
                 }

@@ -1,14 +1,12 @@
-﻿@using System.Security.Claims
-@using ClickerHeroesTrackerWebsite.Models.Dashboard
+﻿@using ClickerHeroesTrackerWebsite.Models.Dashboard
 
-@model RivalViewModel
-@inject UserManager<ApplicationUser> UserManager
+@model CompareViewModel
 
 @{
-    ViewBag.Title = "Rival";
+    ViewBag.Title = "Compare";
 }
 
-<h2>@UserManager.GetUserName(User) vs @Model.RivalUserName</h2>
+<h2>@Model.UserName1 vs @Model.UserName2</h2>
 
 @Html.Partial("_GraphScripts")
 

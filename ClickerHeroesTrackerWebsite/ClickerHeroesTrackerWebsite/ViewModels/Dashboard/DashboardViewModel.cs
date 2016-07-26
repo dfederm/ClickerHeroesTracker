@@ -127,8 +127,28 @@ namespace ClickerHeroesTrackerWebsite.Models.Dashboard
                 }
             };
 
-            // BUGBUG 9 - Update to be a "follower" system
-            this.RivalDataList = new RivalDataList(databaseCommandFactory, userId);
+            this.Follows = new List<string>();
+            var parameters = new Dictionary<string, object>
+            {
+                { "@UserId", userId }
+            };
+            const string GetUserFollowsCommandText = @"
+	            SELECT UserName
+	            FROM UserFollows
+	            INNER JOIN AspNetUsers
+	            ON UserFollows.FollowUserId = AspNetUsers.Id
+	            WHERE UserId = @UserId
+	            ORDER BY UserName ASC";
+            using (var command = databaseCommandFactory.Create(
+                GetUserFollowsCommandText,
+                parameters))
+            using (var reader = command.ExecuteReader())
+            {
+                while (reader.Read())
+                {
+                    this.Follows.Add(reader["UserName"].ToString());
+                }
+            }
 
             this.IsValid = true;
         }
@@ -144,9 +164,9 @@ namespace ClickerHeroesTrackerWebsite.Models.Dashboard
         public GraphData ProgressSummaryGraph { get; }
 
         /// <summary>
-        /// Gets the rivals list data.
+        /// Gets the names of the users the user follows.
         /// </summary>
-        public RivalDataList RivalDataList { get; }
+        public IList<string> Follows { get; }
 
         private static AxisType GetYAxisType(
             IDictionary<DateTime, double> data,

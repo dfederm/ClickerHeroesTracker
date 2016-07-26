@@ -4,15 +4,17 @@
 
 namespace ClickerHeroesTrackerWebsite.Controllers
 {
+    using System;
+    using System.Threading.Tasks;
     using ClickerHeroesTrackerWebsite.Models;
+    using ClickerHeroesTrackerWebsite.Models.Dashboard;
+    using ClickerHeroesTrackerWebsite.Models.Game;
+    using ClickerHeroesTrackerWebsite.Models.Settings;
     using ClickerHeroesTrackerWebsite.Services.Database;
     using Microsoft.ApplicationInsights;
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Identity;
     using Microsoft.AspNetCore.Mvc;
-    using Models.Dashboard;
-    using Models.Game;
-    using Models.Settings;
 
     /// <summary>
     /// The Dashboard controller is where the user can see a dashboard of their data.
@@ -108,31 +110,74 @@ namespace ClickerHeroesTrackerWebsite.Controllers
         }
 
         /// <summary>
-        /// View the user's progress compared with a rival's
+        /// Compares two users
         /// </summary>
-        /// <returns>The rival view</returns>
-        public ActionResult Rival()
+        /// <returns>The compare view</returns>
+        [AllowAnonymous]
+        public async Task<IActionResult> Compare(string userName1, string userName2)
         {
-            var rivalIdRaw = this.Request.Query["rivalId"];
-            int rivalId;
-            if (!int.TryParse(rivalIdRaw, out rivalId))
+            if (string.IsNullOrEmpty(userName1)
+                || string.IsNullOrEmpty(userName2))
             {
-                return this.RedirectToAction("Index");
+                this.ViewBag.ErrorMessage = "Two users are required to compare.";
+                return this.View("Error");
+            }
+
+            var user1 = await this.userManager.FindByNameAsync(userName1);
+            if (user1 == null)
+            {
+                this.ViewBag.ErrorMessage = $"User does not exist: {userName1}.";
+                return this.View("Error");
+            }
+
+            var user2 = await this.userManager.FindByNameAsync(userName2);
+            if (user2 == null)
+            {
+                this.ViewBag.ErrorMessage = $"User does not exist: {userName2}.";
+                return this.View("Error");
+            }
+
+            var userId = this.userManager.GetUserId(this.User);
+            var userIsAdmin = this.User.IsInRole("Admin");
+
+            var userId1 = await this.userManager.GetUserIdAsync(user1);
+            var userId2 = await this.userManager.GetUserIdAsync(user2);
+
+            // Normalize the user names
+            userName1 = await this.userManager.GetUserNameAsync(user1);
+            userName2 = await this.userManager.GetUserNameAsync(user2);
+
+            if (!userIsAdmin)
+            {
+                var userSettings1 = userSettingsProvider.Get(userId1);
+                if (!userId1.Equals(userId, StringComparison.OrdinalIgnoreCase) && !userSettings1.AreUploadsPublic)
+                {
+                    this.ViewBag.ErrorMessage = $"{userName1}'s data is private and may not be viewed";
+                    return this.View("Error");
+                }
+
+                var userSettings2 = userSettingsProvider.Get(userId2);
+                if (!userId2.Equals(userId, StringComparison.OrdinalIgnoreCase) && !userSettings2.AreUploadsPublic)
+                {
+                    this.ViewBag.ErrorMessage = $"{userName2}'s data is private and may not be viewed";
+                    return this.View("Error");
+                }
             }
 
             var range = this.Request.Query["range"];
-            var model = new RivalViewModel(
+            var model = new CompareViewModel(
                 this.gameData,
                 this.telemetryClient,
                 this.databaseCommandFactory,
-                this.userSettingsProvider,
-                this.User,
-                this.userManager,
-                rivalId,
+                this.userSettingsProvider.Get(userId),
+                userId1,
+                userName1,
+                userId2,
+                userName2,
                 range);
             if (!model.IsValid)
             {
-                this.ViewBag.ErrorMessage = "There was a problem comparing your data to that rival. Man sure they're your rival and have upload data.";
+                this.ViewBag.ErrorMessage = "There was a problem comparing your data to that user. Make sure both you and them have upload data to compare.";
                 return this.View("Error");
             }
 
