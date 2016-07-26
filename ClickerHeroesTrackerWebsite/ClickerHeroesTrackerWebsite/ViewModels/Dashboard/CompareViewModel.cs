@@ -11,6 +11,7 @@ namespace ClickerHeroesTrackerWebsite.Models.Dashboard
     using ClickerHeroesTrackerWebsite.Models.Game;
     using ClickerHeroesTrackerWebsite.Models.Settings;
     using ClickerHeroesTrackerWebsite.Services.Database;
+    using ClickerHeroesTrackerWebsite.ViewModels.Dashboard.Graph;
     using Microsoft.ApplicationInsights;
 
     /// <summary>
@@ -156,8 +157,8 @@ namespace ClickerHeroesTrackerWebsite.Models.Dashboard
             var timeZone = userSettings.TimeZone;
 
             var series = new List<Series>();
-            TryAddSeries(series, timeZone, userName1, userData1);
-            TryAddSeries(series, timeZone, userName2, userData2);
+            TryAddSeries(series, timeZone, userName1, userData1, Colors.PrimarySeriesColor);
+            TryAddSeries(series, timeZone, userName2, userData2, Colors.OpposingSeriesColor);
 
             return new GraphViewModel
             {
@@ -211,13 +212,15 @@ namespace ClickerHeroesTrackerWebsite.Models.Dashboard
             List<Series> series,
             TimeZoneInfo timeZone,
             string name,
-            IDictionary<DateTime, double> data)
+            IDictionary<DateTime, double> data,
+            string color)
         {
             if (data != null && data.Count > 0)
             {
                 series.Add(new Series
                 {
                     Name = name,
+                    Color = color,
                     Data = data
                         .Select(datum => new Point
                         {

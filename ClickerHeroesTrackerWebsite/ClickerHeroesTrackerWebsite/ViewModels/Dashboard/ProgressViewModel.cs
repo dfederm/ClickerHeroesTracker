@@ -14,6 +14,7 @@ namespace ClickerHeroesTrackerWebsite.Models.Dashboard
     using ClickerHeroesTrackerWebsite.Models.Settings;
     using ClickerHeroesTrackerWebsite.Services.Database;
     using ClickerHeroesTrackerWebsite.Utility;
+    using ClickerHeroesTrackerWebsite.ViewModels.Dashboard.Graph;
     using Microsoft.ApplicationInsights;
     using Microsoft.AspNetCore.Identity;
 
@@ -209,6 +210,7 @@ namespace ClickerHeroesTrackerWebsite.Models.Dashboard
                     {
                         new Series
                         {
+                            Color = Colors.PrimarySeriesColor,
                             Data = data
                                 .Select(datum => new Point
                                 {

@@ -20,5 +20,10 @@ namespace ClickerHeroesTrackerWebsite.Models.Dashboard.Graph
         /// Gets or sets a list of data points for the series.
         /// </summary>
         public IList<Point> Data { get; set; }
+
+        /// <summary>
+        /// Gets or sets the main color of the series.
+        /// </summary>
+        public string Color { get; set; }
     }
 }
