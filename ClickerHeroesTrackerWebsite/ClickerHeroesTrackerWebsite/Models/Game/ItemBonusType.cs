@@ -38,7 +38,10 @@ namespace ClickerHeroesTrackerWebsite.Models.Game
             { 21, AncientIds.Mimzee },
             { 22, AncientIds.Mammon },
             { 24, AncientIds.Libertas },
-            { 25, AncientIds.Solomon }
+            { 25, AncientIds.Solomon },
+            { 26, AncientIds.Juggernaut },
+            { 27, AncientIds.Kumawakamaru },
+            { 28, AncientIds.Vaagur },
         };
 
         /// <summary>
