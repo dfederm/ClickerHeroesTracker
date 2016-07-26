@@ -5,7 +5,9 @@
 namespace ClickerHeroesTrackerWebsite.Controllers
 {
     using Microsoft.AspNetCore.Mvc;
+    using Microsoft.AspNetCore.Authorization;
 
+    [Authorize]
     public class ClansController : Controller
     {
         public ActionResult Index()

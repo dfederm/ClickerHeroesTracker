@@ -25,6 +25,7 @@ namespace ClickerHeroesTrackerWebsite.Controllers.Api
     using Newtonsoft.Json;
 
     [Route("api/clans")]
+    [Authorize]
     public class ClansApiController : Controller
     {
         private readonly IDatabaseCommandFactory databaseCommandFactory;
@@ -43,7 +44,6 @@ namespace ClickerHeroesTrackerWebsite.Controllers.Api
 
         [Route("")]
         [HttpGet]
-        [Authorize]
         public async Task<ActionResult> GetClan()
         {
             var userId = this.userManager.GetUserId(this.User);
@@ -121,6 +121,13 @@ namespace ClickerHeroesTrackerWebsite.Controllers.Api
                     messageList.Add(message);
                 }
 
+                var count = messageList.Count - 15;
+                if (count > 0)
+                {
+                    // remove that number of items from the start of the list
+                    messageList.RemoveRange(0, count);
+                }
+
                 messageList.Reverse();
                 clanData.Messages = messageList; 
 
@@ -150,7 +157,7 @@ namespace ClickerHeroesTrackerWebsite.Controllers.Api
                 return this.Ok(clanData);
             }
         }
-
+        
         [Route("messages")]
         [HttpPost]
         public async Task<IActionResult> SendMessage(string message, string clanName)
@@ -182,7 +189,7 @@ namespace ClickerHeroesTrackerWebsite.Controllers.Api
                 return this.Ok(responseString);
             }
         }
-
+        
         [Route("leaderboard")]
         [HttpGet]
         public IActionResult GetLeaderboard()
