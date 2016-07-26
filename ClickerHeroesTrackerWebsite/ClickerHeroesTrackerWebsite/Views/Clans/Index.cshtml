@@ -1,0 +1,41 @@
+﻿@using System
+@using System.Collections.Generic
+@using System.Net.Http;
+@using ClickerHeroesTrackerWebsite.Services.ContentManagement
+@inject IContentManager ContentManager
+
+@{
+    ContentManager.RegisterScript("Clans");
+    ContentManager.RegisterScript("Helpers");
+}
+
+@{
+    ViewBag.Title = "Clans";
+}
+
+<div class="clan-data">
+    <div class="row">
+        <div class="col-lg-6 clan-members">
+            <h2 class="clan-name" id="clan-name"></h2>
+            <table class="table table-responsive table-striped clan-members-table" id="clan-members-table">
+                <tbody class="clan-members-table-body" id="clan-members-table-body"></tbody>
+            </table>
+            <div class="col-lg-12 message-box clan-messages" id="clan-messages">
+                <form id="sendMessage" class="" action="/api/clans/messages" method="post" role="form">
+                    <input type="text" value="" name="message" class="message form-control"/>
+                    <button type="submit" class="btn btn-success">Send</button>
+                </form>
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <div class="row">
+                <div class="col-lg-12 leaderboard">
+                    <h2>Clans Leaderboard</h2>
+                    <table class="table table-responsive table-striped leaderboard-table" id="leaderboard-table">
+                        <tbody class="leaderboard-table-body" id="leaderboard-table-body"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

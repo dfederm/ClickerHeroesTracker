@@ -9,8 +9,6 @@
 @inject UserManager<ApplicationUser> UserManager
 
 @{
-    ContentManager.RegisterScript("AjaxLoader");
-    ContentManager.RegisterScript("Alerts");
 }
 
 <!DOCTYPE html>
@@ -50,6 +48,7 @@
                     @if (SignInManager.IsSignedIn(User))
                     {
                         <li><a asp-controller="Dashboard" asp-action="Index">Dashboard</a></li>
+                        <li><a asp-controller="Clans" asp-action="Index">Clans</a></li>
                     }
                     <li><a asp-controller="Upload" asp-action="Index">Upload</a></li>
                     <li><a asp-controller="Home" asp-action="New">What's New</a></li>
@@ -67,6 +66,10 @@
 
     <div class="container body-content">
         <div class="alert alert-success" id="success-alert">
+            <button type="button" class="close">x</button>
+            <strong></strong>
+        </div>
+        <div class="alert alert-error" id="success-error">
             <button type="button" class="close">x</button>
             <strong></strong>
         </div>

@@ -1,3 +1,7 @@
-﻿@{
+﻿@inject IContentManager ContentManager
+@{
     Layout = "_Layout";
+
+    ContentManager.RegisterScript("AjaxLoader");
+    ContentManager.RegisterScript("Alerts");
 }

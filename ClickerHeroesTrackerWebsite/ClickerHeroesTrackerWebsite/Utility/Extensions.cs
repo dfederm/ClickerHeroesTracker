@@ -48,5 +48,13 @@ namespace ClickerHeroesTrackerWebsite.Models
             TEnum value;
             return Enum.TryParse<TEnum>(str, out value) ? value : default(TEnum);
         }
+
+        public static DateTime UnixTimeStampToDateTime(this double unixTimeStamp)
+        {
+            // Unix timestamp is seconds past epoch
+            var dateTime = new DateTime(1970, 1, 1, 0, 0, 0, 0, System.DateTimeKind.Utc);
+            dateTime = dateTime.AddSeconds(unixTimeStamp);
+            return dateTime;
+        }
     }
 }

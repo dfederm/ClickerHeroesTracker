@@ -48,16 +48,18 @@ div#loadingElement
     overflow: auto;
 }
 
-.clickable {
+.clickable 
+{
     cursor: pointer;
-
 }
-.clickable:hover {
+.clickable:hover 
+{
     background-color: #e6e6e6;
     border: 1px solid #ccc;
 }
 
-.alert-success {
+.alert-success, .alert-error 
+{
     display: none;
     position:fixed; 
     top: 50px; 
@@ -65,4 +67,34 @@ div#loadingElement
     z-index:9999;
     width: inherit;
     transform: translateX(-50%);
+}
+
+.clan-message 
+{
+    border: solid 1px #ccc;
+    border-radius: 3px;
+    margin-bottom: 5px;
+    margin-top: 5px;
+    padding: 5px;
+    background-color: #ECD78B;
+    color: #814141;
+    font-weight: bold;
+    box-shadow: 3px 3px 3px #ccc;
+}
+
+.message-box 
+{
+    margin: 5px;
+    padding: 5px;
+}
+
+.message-box form input 
+{
+    max-width: 482px;
+    display: inline-block;
+}
+
+.message-box form button 
+{
+    display: inline-block;
 }

@@ -67,11 +67,16 @@
         $temp.remove();
 
         // Show copied alert
-        $(".alert-success").find("strong").text("Value copied to clipboard");
-        $(".alert-success").fadeIn(200);
-        $(".alert-success").delay(2000).slideUp(600, function (): void
-        {
-            $(".alert-success").hide();
+        showMessage("Value copied to clipboard", "success");
+    }
+
+    export function showMessage(message: string, type: string): void {
+        type = ".alert-" + type;
+        console.log(type);
+        $(type).find("strong").text(message);
+        $(type).fadeIn(200);
+        $(type).delay(2000).slideUp(600, function (): void {
+            $(type).hide();
         });
     }
 }

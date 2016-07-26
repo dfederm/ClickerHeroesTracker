@@ -129,6 +129,18 @@ namespace ClickerHeroesTrackerWebsite.Models.SaveData
         public bool Transcendent { get; set; }
 
         /// <summary>
+        /// Gets or sets unique Id for the user.
+        /// </summary>
+        [JsonProperty(PropertyName = "uniqueId")]
+        public string UniqueId { get; set; }
+
+        /// <summary>
+        /// Gets or sets Password Hash for the user.
+        /// </summary>
+        [JsonProperty(PropertyName = "passwordHash")]
+        public string PasswordHash { get; set; }
+        
+        /// <summary>
         /// Parsed the encoded save game data to a structured object.
         /// </summary>
         /// <param name="encodedSaveData">The encoded saved game</param>
