@@ -119,9 +119,10 @@ namespace ClickerHeroesTrackerWebsite.Controllers.Api
             };
 
             string uploadContent;
+            PlayStyle playStyle;
             var upload = new Upload { Id = uploadId };
             const string GetUploadDataCommandText = @"
-	            SELECT UserId, UserName, UploadTime, UploadContent
+	            SELECT UserId, UserName, UploadTime, UploadContent, PlayStyle
                 FROM Uploads
                 LEFT JOIN AspNetUsers
                 ON Uploads.UserId = AspNetUsers.Id
@@ -148,6 +149,7 @@ namespace ClickerHeroesTrackerWebsite.Controllers.Api
                     upload.TimeSubmitted = Convert.ToDateTime(reader["UploadTime"]);
 
                     uploadContent = reader["UploadContent"].ToString();
+                    playStyle = reader["PlayStyle"].ToString().SafeParseEnum<PlayStyle>();
                 }
                 else
                 {
@@ -175,7 +177,7 @@ namespace ClickerHeroesTrackerWebsite.Controllers.Api
             }
 
             // Set the play style.
-            upload.PlayStyle = uploadUserSettings.PlayStyle;
+            upload.PlayStyle = playStyle;
 
             var savedGame = SavedGame.Parse(uploadContent);
             upload.Stats = new Dictionary<StatType, double>();

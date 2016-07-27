@@ -28,6 +28,15 @@
             }
         }
 
+        const playStyleElements = Helpers.getElementsByDataType("uploadPlayStyle");
+        if (upload.playStyle)
+        {
+            for (let i = 0; i < playStyleElements.length; i++)
+            {
+                playStyleElements[i].textContent = upload.playStyle.toTitleCase();
+            }
+        }
+
         const uploadContentElements = Helpers.getElementsByDataType("uploadContent");
         if (upload.uploadContent)
         {
