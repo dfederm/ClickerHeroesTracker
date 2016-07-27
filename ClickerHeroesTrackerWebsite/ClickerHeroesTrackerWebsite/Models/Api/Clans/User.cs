@@ -8,7 +8,7 @@ namespace ClickerHeroesTrackerWebsite.Models.Api.Clans
     {
         public string GuildName { get; set; }
         public int HighestZone { get; set; }
-        public bool IsGuildRequest { get; set; }
+        public bool? IsGuildRequest { get; set; }
         public string Nickname { get; set; }
         public string PasswordHash { get; set; }
         public string Uid { get; set; }
