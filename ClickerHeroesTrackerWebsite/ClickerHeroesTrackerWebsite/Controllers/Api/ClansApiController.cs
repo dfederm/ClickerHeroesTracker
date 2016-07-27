@@ -48,7 +48,12 @@ namespace ClickerHeroesTrackerWebsite.Controllers.Api
         {
             var userId = this.userManager.GetUserId(this.User);
             SavedGame savedGame = GetLatestSave(userId);
-            
+
+            if (savedGame?.UniqueId == null)
+            {
+                return this.NotFound();
+            }
+
             using (var client = new HttpClient())
             {
                 var guildValues = new Dictionary<string, string>
@@ -62,7 +67,12 @@ namespace ClickerHeroesTrackerWebsite.Controllers.Api
                 var response = await client.PostAsync(url + "/clans/getGuildInfo.php", content);
                 
                 var responseString = await response.Content.ReadAsStringAsync();
-                
+
+                if (responseString.Contains("\"success\": false"))
+                {
+                    return this.NoContent();
+                }
+
                 var clanResponse = JsonConvert.DeserializeObject<ClanResponse>(responseString);
 
                 var clan = clanResponse.Result;

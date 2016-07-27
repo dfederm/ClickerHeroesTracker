@@ -23,10 +23,16 @@
 
     $.ajax({
         url: "/api/clans",
-    }).done((response: IClanData) =>
+    }).done((response: IClanData, textStatus: string, jqXHR: JQueryXHR) =>
     {
+        if (jqXHR.status === 204) {
+            $("#clan-members").html("<h2>Please join a clan to view this data</h2>");
+            return;
+        }
+
         $("#clan-name").html(response.clanName);
         $("#clan-members-table").prepend("<tr><th>Name</th> <th>Highest Zone</th></tr>");
+        $("#clan-members-table").removeClass("hidden");
 
         for (let index = 0; index < Object.keys(response.guildMembers).length; ++index)
         {
@@ -67,6 +73,11 @@
         }
 
         $("form").append("<input type='hidden' name='clanName' value='" + response.clanName + "' />");
+    }).fail((jqXHR: JQueryXHR, ajaxOptions: string, error: string) => {
+        if (jqXHR.status === 404) {
+            $("#clan-members").html("<h2>Please upload a save to view this data</h2>");
+            return;
+        }
     });
 
     $("#sendMessage").submit(function (event: JQueryEventObject): boolean
