@@ -4,12 +4,20 @@
     $.ajax({
         url: "/api/clans/leaderboard",
     }).done((response: Array<ILeaderboardClan>) => {
-        $("#leaderboard-table").prepend("<tr><th>Rank</th><th>Name</th> <th>Current Raid Level</th></tr>");
+        $("#leaderboard-table").prepend("<tr><th>Rank</th><th>Name</th><th>Members</th><th>Current Raid Level</th></tr>");
         for (let index = 0; index < response.length; ++index)
         {
             const clan = response[index];
 
-            $("#leaderboard-table-body").append("<tr><td>" + (index + 1) + "</td><td>" + clan.name + "</td><td>" + clan.currentRaidLevel + "</td></tr>");
+            if (clan.memberCount > 0)
+            {
+                $("#leaderboard-table-body").append("<tr><td>" + (index + 1) + "</td><td>" + clan.name + "</td><td>" + clan.memberCount + "</td><td>" + clan.currentRaidLevel + "</td></tr>");
+            }
+            else
+            {
+                $("#leaderboard-table-body").append("<tr><td>" + (index + 1) + "</td><td>" + clan.name + "</td><td></td><td>" + clan.currentRaidLevel + "</td></tr>");
+
+            }
         }
     });
 
@@ -37,22 +45,25 @@
             let timeDiff = Math.abs(date2.getTime() - date1.getTime());
             let diffDays = Math.ceil(timeDiff / dayInMilliSeconds);
 
+            $("#clan-messages").append("<div class='col-xs-12 clan-message'><p class='timeName'></p><p class='messageContent'></p></div>");
+
             if (timeDiff > dayInMilliSeconds)
             {
-                $("#clan-messages").append("<div class='col-xs-12 clan-message'>(" + diffDays + " days ago) " + message.username + "<br>" + message.content + "</div>");
+                $(".timeName").last().text("(" + diffDays + " days ago) " + message.username);
             }
             else if (timeDiff > hourInMilliSeconds)
             {
-                $("#clan-messages").append("<div class='col-xs-12 clan-message'>(" + Math.ceil(timeDiff / hourInMilliSeconds) + " hours ago) " + message.username + "<br>" + message.content + "</div>");
+                $(".timeName").last().text("(" + Math.ceil(timeDiff / hourInMilliSeconds) + " hours ago) " + message.username);
             }
             else if (timeDiff > minuteInMilliSeconds)
             {
-                $("#clan-messages").append("<div class='col-xs-12 clan-message'>(" + Math.ceil(timeDiff / minuteInMilliSeconds) + " minutes ago) " + message.username + "<br>" + message.content + "</div>");
+                $(".timeName").last().text("(" + Math.ceil(timeDiff / minuteInMilliSeconds) + " minutes ago) " + message.username);
             }
             else
             {
-                $("#clan-messages").append("<div class='col-xs-12 clan-message'>(" + Math.ceil(timeDiff / 1000) + " seconds ago) " + message.username + "<br>" + message.content + "</div>");
+                $(".timeName").last().text("(" + Math.ceil(timeDiff / 1000) + " seconds ago) " + message.username);
             }
+            $(".messageContent").last().text(message.content);
         }
 
         $("form").append("<input type='hidden' name='clanName' value='" + response.clanName + "' />");

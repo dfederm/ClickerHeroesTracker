@@ -138,18 +138,19 @@ namespace ClickerHeroesTrackerWebsite.Controllers.Api
                         IF EXISTS (SELECT * FROM Clans WHERE Name = @Name)
                         BEGIN
                             UPDATE Clans
-                            SET CurrentRaidLevel=@CurrentRaidLevel
+                            SET CurrentRaidLevel=@CurrentRaidLevel,MemberCount=@MemberCount
                             WHERE Name=@Name
                         END
                         ELSE
                         BEGIN
-                            INSERT INTO Clans(Name, CurrentRaidLevel)
-                            VALUES(@Name, @CurrentRaidLevel);
+                            INSERT INTO Clans(Name, CurrentRaidLevel,MemberCount)
+                            VALUES(@Name, @CurrentRaidLevel, @MemberCount);
                         END";
                     command.Parameters = new Dictionary<string, object>
                     {
                         { "@Name", clan.Guild.Name },
                         { "@CurrentRaidLevel", clan.Guild.CurrentRaidLevel },
+                        { "@MemberCount", reindexedGuildMembers.Count }
                     };
                     command.ExecuteNonQuery();
                 }
@@ -196,7 +197,7 @@ namespace ClickerHeroesTrackerWebsite.Controllers.Api
         {
             var clans = new List<LeaderboardClan>();
             const string getLeaderboardDataCommandText = @"
-	            SELECT TOP 20 Name, CurrentRaidLevel
+	            SELECT TOP 20 Name, CurrentRaidLevel, MemberCount
                 FROM Clans
                 ORDER BY CurrentRaidLevel DESC";
             using (var command = this.databaseCommandFactory.Create(getLeaderboardDataCommandText))
@@ -207,7 +208,8 @@ namespace ClickerHeroesTrackerWebsite.Controllers.Api
                     clans.Add(new LeaderboardClan
                     {
                         Name = reader["Name"].ToString(),
-                        CurrentRaidLevel = Convert.ToInt32(reader["CurrentRaidLevel"])
+                        CurrentRaidLevel = Convert.ToInt32(reader["CurrentRaidLevel"]),
+                        MemberCount = Convert.ToInt32(reader["MemberCount"])
                     });
                 }
             }

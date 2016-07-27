@@ -80,6 +80,7 @@ div#loadingElement
     color: #814141;
     font-weight: bold;
     box-shadow: 3px 3px 3px #ccc;
+    white-space: pre-line;
 }
 
 .message-box 
@@ -97,4 +98,8 @@ div#loadingElement
 .message-box form button 
 {
     display: inline-block;
+}
+
+.timeName, .messageContent {
+    margin-bottom: 0;
 }

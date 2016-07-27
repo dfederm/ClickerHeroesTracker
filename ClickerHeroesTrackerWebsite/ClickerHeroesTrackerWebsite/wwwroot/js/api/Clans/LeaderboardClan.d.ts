@@ -3,4 +3,5 @@
 
     currentRaidLevel: number;
 
+    memberCount: number;
 }
