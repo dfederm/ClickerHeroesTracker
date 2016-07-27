@@ -22,7 +22,7 @@
             </table>
             <div class="col-lg-12 message-box clan-messages hidden" id="clan-messages">
                 <form id="sendMessage" class="" action="/api/clans/messages" method="post" role="form">
-                    <input type="text" value="" name="message" class="message form-control" />
+                    <input type="text" value="" name="message" class="message form-control" maxlength="150"/>
                     <button type="submit" class="btn btn-success">
                         Send
                     </button>

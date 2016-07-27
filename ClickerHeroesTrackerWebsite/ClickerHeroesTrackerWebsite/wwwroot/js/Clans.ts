@@ -32,7 +32,7 @@
 
         $("#clan-name").html(response.clanName);
         $("#clan-members-table").prepend("<tr><th>Name</th> <th>Highest Zone</th></tr>");
-        $("#clan-members-table").removeClass("hidden");
+        $("#clan-messages").removeClass("hidden");
 
         for (let index = 0; index < Object.keys(response.guildMembers).length; ++index)
         {
