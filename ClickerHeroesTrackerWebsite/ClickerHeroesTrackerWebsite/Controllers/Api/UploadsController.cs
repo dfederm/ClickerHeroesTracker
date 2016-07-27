@@ -334,13 +334,14 @@ namespace ClickerHeroesTrackerWebsite.Controllers.Api
 
                 // Insert Upload
                 command.CommandText = @"
-	                INSERT INTO Uploads(UserId, UploadContent)
-                    VALUES(@UserId, @UploadContent);
+	                INSERT INTO Uploads(UserId, UploadContent, PlayStyle)
+                    VALUES(@UserId, @UploadContent, @PlayStyle);
                     SELECT SCOPE_IDENTITY();";
                 command.Parameters = new Dictionary<string, object>
                 {
                     { "@UserId", userId },
                     { "@UploadContent", rawUpload.EncodedSaveData },
+                    { "@PlayStyle", userSettings.PlayStyle.ToString() },
                 };
                 uploadId = Convert.ToInt32(command.ExecuteScalar());
 
