@@ -81,13 +81,15 @@
             throw new Error("Element not found: " + tableId);
         }
 
-        updateLeaderboard(count, table);
+        const userRow = getUserClanRow();
+
+        updateLeaderboard(count, table, userRow);
 
         // Upon a hash change, re-create the table
         window.addEventListener("hashchange", () => {
             window.scrollTo(0, 0);
             clearTable(table);
-            updateLeaderboard(count, table);
+            updateLeaderboard(count, table, userRow);
         });
     }
 
@@ -105,7 +107,44 @@
         }
     }
 
-    function updateLeaderboard(count: number, table: HTMLElement): void
+    function getUserClanRow(): HTMLTableRowElement {
+        const row = document.createElement("tr");
+        $.ajax({
+            url: "/api/clans/userClan",
+        }).done((response: ILeaderboardClan, textStatus: string, jqXHR: JQueryXHR) => {
+
+            if (jqXHR.status === 204) {
+                $("#clan-members").html("<h2>Please join a clan to view this data</h2>");
+                return;
+            }
+
+            row.classList.add("highlighted-clan");
+
+            const rankCell = document.createElement("td");
+            rankCell.appendChild(document.createTextNode(response.rank.toString()));
+            row.appendChild(rankCell);
+
+            const nameCell = document.createElement("td");
+            nameCell.appendChild(document.createTextNode(response.name));
+            row.appendChild(nameCell);
+
+            const memberCountCell = document.createElement("td");
+            if (response.memberCount > 0) {
+                memberCountCell.appendChild(document.createTextNode(response.memberCount.toString()));
+            }
+
+            row.appendChild(memberCountCell);
+
+            const currentRaidLevelCell = document.createElement("td");
+            currentRaidLevelCell.appendChild(document.createTextNode(response.currentRaidLevel.toString()));
+            row.appendChild(currentRaidLevelCell);
+
+        });
+
+        return row;
+    }
+
+    function updateLeaderboard(count: number, table: HTMLElement, userClanRow: HTMLElement): void
     {
         const queryParameters = Helpers.getQueryParameters();
         const currentPage = parseInt(queryParameters["page"]) || 1;
@@ -146,6 +185,15 @@
                 row.appendChild(currentRaidLevelCell);
 
                 tablebody.appendChild(row);
+            }
+
+            if (userClanRow.firstChild != null)
+            {
+                const rank = parseInt(userClanRow.firstChild.textContent);
+                if (rank < (currentPage * count - count) || rank > (currentPage * count))
+                {
+                    tablebody.appendChild(userClanRow);
+                }
             }
 
             const pagination = response.pagination;

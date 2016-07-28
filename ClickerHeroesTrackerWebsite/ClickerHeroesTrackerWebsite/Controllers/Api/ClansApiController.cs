@@ -57,26 +57,12 @@ namespace ClickerHeroesTrackerWebsite.Controllers.Api
 
             using (var client = new HttpClient())
             {
-                var guildValues = new Dictionary<string, string>
-                {
-                   { "uid", savedGame.UniqueId },
-                   { "passwordHash", savedGame.PasswordHash }
-                };
-                
-                var content = new FormUrlEncodedContent(guildValues);
+                Clan clan = await GetClanInfomation(client, savedGame);
 
-                var response = await client.PostAsync(url + "/clans/getGuildInfo.php", content);
-                
-                var responseString = await response.Content.ReadAsStringAsync();
-
-                if (responseString.Contains("\"success\": false"))
+                if (clan == null)
                 {
                     return this.NoContent();
                 }
-
-                var clanResponse = JsonConvert.DeserializeObject<ClanResponse>(responseString);
-
-                var clan = clanResponse.Result;
 
                 HashSet<string> guildMemberIds = new HashSet<string>();
                 foreach (var x in clan.Guild.MemberUids)
@@ -98,8 +84,8 @@ namespace ClickerHeroesTrackerWebsite.Controllers.Api
 
                 ClanData clanData = new ClanData()
                 {
-                    ClanName = clanResponse.Result.Guild.Name,
-                    CurrentRaidLevel = clanResponse.Result.Guild.CurrentRaidLevel,
+                    ClanName = clan.Guild.Name,
+                    CurrentRaidLevel = clan.Guild.CurrentRaidLevel,
                     GuildMembers = reindexedGuildMembers
                 };
 
@@ -111,7 +97,7 @@ namespace ClickerHeroesTrackerWebsite.Controllers.Api
                 };
 
                 var messagesUrl = url + "/clans/getGuildMessages.php";
-                content = new FormUrlEncodedContent(mesagesValues);
+                var content = new FormUrlEncodedContent(mesagesValues);
 
                 var messagesResponse = await client.PostAsync(messagesUrl, content);
 
@@ -228,24 +214,10 @@ namespace ClickerHeroesTrackerWebsite.Controllers.Api
             {
                 using (var client = new HttpClient())
                 {
-                    var guildValues = new Dictionary<string, string>
+                    Clan clan = await GetClanInfomation(client, savedGame);
+
+                    if (clan != null)
                     {
-                        {"uid", savedGame.UniqueId},
-                        {"passwordHash", savedGame.PasswordHash}
-                    };
-
-                    var content = new FormUrlEncodedContent(guildValues);
-
-                    var response = await client.PostAsync(url + "/clans/getGuildInfo.php", content);
-
-                    var responseString = await response.Content.ReadAsStringAsync();
-
-                    if (!responseString.Contains("\"success\": false"))
-                    {
-                        var clanResponse = JsonConvert.DeserializeObject<ClanResponse>(responseString);
-
-                        Clan clan = clanResponse.Result;
-
                         clanName = clan.Guild.Name;
                     }
                 }
@@ -258,6 +230,54 @@ namespace ClickerHeroesTrackerWebsite.Controllers.Api
             };
 
             return this.Ok(model);
+        }
+
+        [Route("userClan")]
+        [HttpGet]
+        public async Task<IActionResult> GetUserClan()
+        {
+            var userId = this.userManager.GetUserId(this.User);
+            SavedGame savedGame = GetLatestSave(userId);
+
+            if (savedGame?.UniqueId == null)
+            {
+                return this.NoContent();
+            }
+            using (var client = new HttpClient())
+            {
+                Clan clan = await GetClanInfomation(client, savedGame);
+
+                if (clan == null)
+                {
+                    return this.NoContent();
+                }
+
+                const string GetLeaderboardDataCommandText = @"
+                    WITH NumberedRows
+                    AS
+                    (SELECT Name, CurrentRaidLevel, MemberCount, ROW_NUMBER() OVER (ORDER BY CurrentRaidLevel DESC) AS RowNumber
+                    FROM Clans)
+                    SELECT Name, CurrentRaidLevel, MemberCount, RowNumber FROM NumberedRows WHERE Name = @Name";
+                var parameters = new Dictionary<string, object>
+                {
+                    { "@Name", clan.Guild.Name },
+                };
+                var leaderboardClan = new LeaderboardClan();
+                using (var command = this.databaseCommandFactory.Create(GetLeaderboardDataCommandText, parameters))
+                using (var reader = command.ExecuteReader())
+                {
+                    if (reader.Read())
+                    {
+                        leaderboardClan.Name = reader["Name"].ToString();
+                        leaderboardClan.CurrentRaidLevel = Convert.ToInt32(reader["CurrentRaidLevel"]);
+                        leaderboardClan.MemberCount = Convert.ToInt32(reader["MemberCount"]);
+                        leaderboardClan.Rank = Convert.ToInt32(reader["RowNumber"]);
+                        leaderboardClan.IsUserClan = true;
+                    }
+                }
+
+                return this.Ok(leaderboardClan);
+            }
         }
 
         public IList<LeaderboardClan> FetchLeaderboard(int page, int count, string clanName)
@@ -369,6 +389,34 @@ namespace ClickerHeroesTrackerWebsite.Controllers.Api
                 }
 
                 return pagination;
+            }
+        }
+
+        private async Task<Clan> GetClanInfomation(HttpClient client, SavedGame savedGame)
+        {
+            var guildValues = new Dictionary<string, string>
+                {
+                    {"uid", savedGame.UniqueId},
+                    {"passwordHash", savedGame.PasswordHash}
+                };
+
+            var content = new FormUrlEncodedContent(guildValues);
+
+            var response = await client.PostAsync(url + "/clans/getGuildInfo.php", content);
+
+            var responseString = await response.Content.ReadAsStringAsync();
+
+            if (!responseString.Contains("\"success\": false"))
+            {
+                var clanResponse = JsonConvert.DeserializeObject<ClanResponse>(responseString);
+
+                Clan clan = clanResponse.Result;
+
+                return clan;
+            }
+            else
+            {
+                return null;
             }
         }
 
