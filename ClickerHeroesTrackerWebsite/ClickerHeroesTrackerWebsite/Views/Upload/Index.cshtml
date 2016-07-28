@@ -1,12 +1,17 @@
-﻿@using System.Security.Claims;
+﻿@using ClickerHeroesTrackerWebsite.Models.Settings
 
 @inject IContentManager ContentManager
 @inject SignInManager<ApplicationUser> SignInManager
+@inject IUserSettingsProvider UserSettingsProvider
+@inject UserManager<ApplicationUser> UserManager
 
 @{
     ViewBag.Title = "Upload";
 
     ContentManager.RegisterScript("AddUpload");
+
+    var userSettings = UserSettingsProvider.Get(UserManager.GetUserId(User));
+    var userPlayStyle = userSettings.PlayStyle.ToString();
 }
 
 <h2>@ViewBag.Title.</h2>
@@ -26,6 +31,19 @@
                 </div>
             </div>
             <div class="form-group">
+                <label class="col-md-2 control-label" for="PlayStyle">
+                    Play Style
+                </label>
+                <div class="col-md-10">
+                    @foreach (var playStyle in Enum.GetNames(typeof(PlayStyle)))
+                    {
+                        <label class="radio-inline">
+                            <input type="radio" name="PlayStyle" value="@playStyle" checked="@userPlayStyle.Equals(playStyle)" /> @playStyle
+                        </label>
+                    }
+                </div>
+            </div>
+            <div class="form-group">
                 <div class="col-md-offset-2 col-md-10">
                     @if (SignInManager.IsSignedIn(User))
                     {
@@ -42,7 +60,7 @@
                             Progress can only be tracked over time for logged in users.
                             Please @Html.ActionLink("Log in", "Login", "Account") or @Html.ActionLink("Register", "Register", "Account").
                         </div>
-                        }
+                    }
                 </div>
             </div>
             <div class="form-group">
@@ -51,5 +69,6 @@
                 </div>
             </div>
         </form>
+
     </div>
 </div>
