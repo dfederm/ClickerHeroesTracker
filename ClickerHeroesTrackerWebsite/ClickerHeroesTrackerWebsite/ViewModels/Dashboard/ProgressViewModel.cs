@@ -86,38 +86,20 @@ namespace ClickerHeroesTrackerWebsite.Models.Dashboard
                 return;
             }
 
-            this.ProminentGraphs = new List<GraphViewModel>();
-
-            // Suppress if it's all 0's since 1.0 doesn't support this stat yet.
-            if (data.SoulsPerHourData.Any(datum => datum.Value > 0))
+            this.ProminentGraphs = new List<GraphViewModel>
             {
-                this.ProminentGraphs.Add(this.CreateGraph(
-                        "soulsPerHourGraph",
-                        "Souls/hr",
-                        data.SoulsPerHourData,
-                        userSettings));
-            }
+                this.CreateGraph(
+                    "soulsSpentGraph",
+                    "Souls Spent",
+                    data.SoulsSpentData,
+                    userSettings),
+                this.CreateGraph(
+                    "titanDamageGraph",
+                    "Titan Damage",
+                    data.TitanDamageData,
+                    userSettings),
+            };
 
-            // Suppress if it's all 0's since 1.0 doesn't support this stat yet.
-            if (data.OptimalLevelData.Any(datum => datum.Value > 0))
-            {
-                this.ProminentGraphs.Add(this.CreateGraph(
-                    "optimalLevelGraph",
-                    "Optimal Level",
-                    data.OptimalLevelData,
-                    userSettings));
-            }
-
-            this.ProminentGraphs.Add(this.CreateGraph(
-                "soulsSpentGraph",
-                "Souls Spent",
-                data.SoulsSpentData,
-                userSettings));
-            this.ProminentGraphs.Add(this.CreateGraph(
-                "titanDamageGraph",
-                "Titan Damage",
-                data.TitanDamageData,
-                userSettings));
             this.SecondaryGraphs = data
                 .AncientLevelData
                 .Select(x => this.CreateGraph(

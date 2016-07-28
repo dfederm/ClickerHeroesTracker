@@ -35,11 +35,6 @@ namespace ClickerHeroesTrackerWebsite.Instrumentation
         Result,
 
         /// <summary>
-        /// The Simulation latency
-        /// </summary>
-        Simulation,
-
-        /// <summary>
         /// The Upload Scheduling latency
         /// </summary>
         ScheduleUpload,

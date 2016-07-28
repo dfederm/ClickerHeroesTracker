@@ -27,12 +27,6 @@ namespace ClickerHeroesTrackerWebsite.Models.SaveData
         public AncientsData AncientsData { get; set; }
 
         /// <summary>
-        /// Gets or sets the heroes data for the saved game.
-        /// </summary>
-        [JsonProperty(PropertyName = "heroCollection")]
-        public HeroesData HeroesData { get; set; }
-
-        /// <summary>
         /// Gets or sets the items data for the saved game.
         /// </summary>
         [JsonProperty(PropertyName = "items")]
@@ -43,36 +37,6 @@ namespace ClickerHeroesTrackerWebsite.Models.SaveData
         /// </summary>
         [JsonProperty(PropertyName = "outsiders")]
         public OutsidersData OutsidersData { get; set; }
-
-        /// <summary>
-        /// Gets or sets a mapping of the achievement id and whether the user has earned the achievement.
-        /// </summary>
-        [JsonProperty(PropertyName = "achievements")]
-        public IDictionary<int, bool> AchievementsData { get; set; }
-
-        /// <summary>
-        /// Gets or sets a mapping of the upgrade id and whether the user has earned the upgrade.
-        /// </summary>
-        [JsonProperty(PropertyName = "upgrades")]
-        public IDictionary<int, bool> UpgradeData { get; set; }
-
-        /// <summary>
-        /// Gets or sets the aggregate dps multiplier.
-        /// </summary>
-        [JsonProperty(PropertyName = "allDpsMultiplier")]
-        public double AllDpsMultiplier { get; set; }
-
-        /// <summary>
-        /// Gets or sets current number of souls.
-        /// </summary>
-        [JsonProperty(PropertyName = "heroSouls")]
-        public double HeroSouls { get; set; }
-
-        /// <summary>
-        /// Gets or sets a value indicating whether the user has purchased the double damage perk with rubies.
-        /// </summary>
-        [JsonProperty(PropertyName = "paidForRubyMultiplier")]
-        public bool HasRubyMultiplier { get; set; }
 
         /// <summary>
         /// Gets or sets the user's titan damage.

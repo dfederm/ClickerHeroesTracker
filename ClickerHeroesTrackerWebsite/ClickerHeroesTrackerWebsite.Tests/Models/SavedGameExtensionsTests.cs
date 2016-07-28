@@ -13,14 +13,12 @@ namespace ClickerHeroesTrackerWebsite.Tests.Models
     {
         private static ItemData item1 = new ItemData
         {
-            Name = "Item100",
             Bonus1Type = 1,
             Bonus1Level = 10,
         };
 
         private static ItemData item2 = new ItemData
         {
-            Name = "Item200",
             Bonus1Type = 1,
             Bonus1Level = 10,
             Bonus2Type = 2,
@@ -29,7 +27,6 @@ namespace ClickerHeroesTrackerWebsite.Tests.Models
 
         private static ItemData item3 = new ItemData
         {
-            Name = "Item300",
             Bonus1Type = 1,
             Bonus1Level = 10,
             Bonus2Type = 2,
@@ -40,7 +37,6 @@ namespace ClickerHeroesTrackerWebsite.Tests.Models
 
         private static ItemData item4 = new ItemData
         {
-            Name = "Item400",
             Bonus1Type = 1,
             Bonus1Level = 10,
             Bonus2Type = 2,
@@ -53,7 +49,6 @@ namespace ClickerHeroesTrackerWebsite.Tests.Models
 
         private static ItemData item5 = new ItemData
         {
-            Name = "Item500",
             Bonus1Type = 1,
             Bonus1Level = 99,
             Bonus2Type = 2,

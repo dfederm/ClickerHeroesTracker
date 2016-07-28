@@ -111,12 +111,6 @@ namespace ClickerHeroesTrackerWebsite.Models.Api.Stats
         OutsiderBorb,
         OutsiderPonyboy,
 
-        /* Computed stats */
-        SoulsPerHour,
-        OptimalLevel,
-        SoulsPerAscension,
-        OptimalAscensionTime,
-
         /* Miscelaneous stats */
         HeroSoulsSpent,
         HeroSoulsSacrificed,

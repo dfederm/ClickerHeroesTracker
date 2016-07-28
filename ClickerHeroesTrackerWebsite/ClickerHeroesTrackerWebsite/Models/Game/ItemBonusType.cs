@@ -5,12 +5,10 @@
 namespace ClickerHeroesTrackerWebsite.Models.Game
 {
     using System.Collections.Generic;
-    using Newtonsoft.Json;
 
     /// <summary>
     /// Represents an item (relic) type. Relics possess attributes related to a specific ancient.
     /// </summary>
-    [JsonObject]
     public class ItemBonusType
     {
         private static Dictionary<int, int> itemTypeMap = new Dictionary<int, int>
@@ -43,42 +41,6 @@ namespace ClickerHeroesTrackerWebsite.Models.Game
             { 27, AncientIds.Kumawakamaru },
             { 28, AncientIds.Vaagur },
         };
-
-        /// <summary>
-        /// Gets or sets the scaling for the item bonus
-        /// </summary>
-        [JsonProperty(PropertyName = "scaling", Required = Required.Always)]
-        public Scaling Scaling { get; set; }
-
-        /// <summary>
-        /// Gets or sets the max level for the item bonus type.
-        /// </summary>
-        [JsonProperty(PropertyName = "maxLevel", Required = Required.Always)]
-        public int MaxLevel { get; set; }
-
-        /// <summary>
-        /// Gets or sets the description for the item bonus.
-        /// </summary>
-        [JsonProperty(PropertyName = "effectDescription", Required = Required.Always)]
-        public string Description { get; set; }
-
-        /// <summary>
-        /// Gets or sets the id for the item bonus type.
-        /// </summary>
-        [JsonProperty(PropertyName = "id", Required = Required.Always)]
-        public int Id { get; set; }
-
-        /// <summary>
-        /// Gets or sets the name for the item bonus type.
-        /// </summary>
-        [JsonProperty(PropertyName = "name", Required = Required.Always)]
-        public string Name { get; set; }
-
-        /// <summary>
-        /// Gets or sets the level amount formula.
-        /// </summary>
-        [JsonProperty(PropertyName = "levelAmountFormula", Required = Required.Always)]
-        public LevelAmountFormula LevelAmountFormula { get; set; }
 
         /// <summary>
         /// Gets the id of the <see cref="Ancient"/> associated with the item type's attributes.

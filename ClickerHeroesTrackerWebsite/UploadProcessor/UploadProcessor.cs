@@ -154,7 +154,7 @@ namespace ClickerHeroesTrackerWebsite.UploadProcessing
                         return false;
                     }
 
-                    this.telemetryClient.TrackEvent("UploadProcessor-Simulation", properties);
+                    this.telemetryClient.TrackEvent("UploadProcessor-Processing", properties);
                     var ancientLevels = new AncientLevelsModel(
                         this.gameData,
                         savedGame,
@@ -162,11 +162,6 @@ namespace ClickerHeroesTrackerWebsite.UploadProcessing
                     var outsiderLevels = new OutsiderLevelsModel(
                         savedGame,
                         this.telemetryClient);
-                    var computedStats = new ComputedStatsModel(
-                        this.gameData,
-                        savedGame,
-                        playStyle,
-                        counterProvider);
                     var miscellaneousStatsModel = new MiscellaneousStatsModel(
                         gameData,
                         savedGame);
@@ -288,10 +283,6 @@ namespace ClickerHeroesTrackerWebsite.UploadProcessing
                         USING
                             (VALUES (
                                     @UploadId,
-                                    @OptimalLevel,
-                                    @SoulsPerHour,
-                                    @SoulsPerAscension,
-                                    @AscensionTime,
                                     @TitanDamage,
                                     @SoulsSpent,
                                     @HeroSoulsSacrificed,
@@ -306,10 +297,6 @@ namespace ClickerHeroesTrackerWebsite.UploadProcessing
                                     @BossLevelToTranscendentPrimalCap) )
                                 AS Input(
                                     UploadId,
-                                    OptimalLevel,
-                                    SoulsPerHour,
-                                    SoulsPerAscension,
-                                    AscensionTime,
                                     TitanDamage,
                                     SoulsSpent,
                                     HeroSoulsSacrificed,
@@ -326,10 +313,6 @@ namespace ClickerHeroesTrackerWebsite.UploadProcessing
                         WHEN MATCHED THEN
                             UPDATE
                             SET
-                                OptimalLevel = Input.OptimalLevel,
-                                SoulsPerHour = Input.SoulsPerHour,
-                                SoulsPerAscension = Input.SoulsPerAscension,
-                                AscensionTime = Input.AscensionTime,
                                 TitanDamage = Input.TitanDamage,
                                 SoulsSpent = Input.SoulsSpent,
                                 HeroSoulsSacrificed = Input.HeroSoulsSacrificed,
@@ -345,10 +328,6 @@ namespace ClickerHeroesTrackerWebsite.UploadProcessing
                         WHEN NOT MATCHED THEN
                             INSERT (
                                 UploadId,
-                                OptimalLevel,
-                                SoulsPerHour,
-                                SoulsPerAscension,
-                                AscensionTime,
                                 TitanDamage,
                                 SoulsSpent,
                                 HeroSoulsSacrificed,
@@ -363,10 +342,6 @@ namespace ClickerHeroesTrackerWebsite.UploadProcessing
                                 BossLevelToTranscendentPrimalCap)
                             VALUES (
                                 Input.UploadId,
-                                Input.OptimalLevel,
-                                Input.SoulsPerHour,
-                                Input.SoulsPerAscension,
-                                Input.AscensionTime,
                                 Input.TitanDamage,
                                 Input.SoulsSpent,
                                 Input.HeroSoulsSacrificed,
@@ -382,10 +357,6 @@ namespace ClickerHeroesTrackerWebsite.UploadProcessing
                     var computedStatsCommandParameters = new Dictionary<string, object>
                     {
                         { "@UploadId", uploadId },
-                        { "@OptimalLevel", computedStats.OptimalLevel },
-                        { "@SoulsPerHour", computedStats.SoulsPerHour },
-                        { "@SoulsPerAscension", computedStats.OptimalSoulsPerAscension },
-                        { "@AscensionTime", computedStats.OptimalAscensionTime },
                         { "@TitanDamage", miscellaneousStatsModel.TitanDamage },
                         { "@SoulsSpent", miscellaneousStatsModel.HeroSoulsSpent },
                         { "@HeroSoulsSacrificed", miscellaneousStatsModel.HeroSoulsSacrificed },

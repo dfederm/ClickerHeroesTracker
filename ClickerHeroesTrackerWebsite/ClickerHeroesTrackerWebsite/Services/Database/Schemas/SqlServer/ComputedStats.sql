@@ -1,9 +1,5 @@
 ﻿CREATE TABLE [dbo].[ComputedStats] (
     [UploadId]                         INT        NOT NULL,
-    [OptimalLevel]                     SMALLINT   DEFAULT ((0)) NOT NULL,
-    [SoulsPerHour]                     BIGINT     DEFAULT ((0)) NOT NULL,
-    [SoulsPerAscension]                BIGINT     DEFAULT ((0)) NOT NULL,
-    [AscensionTime]                    SMALLINT   DEFAULT ((0)) NOT NULL,
     [TitanDamage]                      FLOAT (53) DEFAULT ((0)) NOT NULL,
     [SoulsSpent]                       FLOAT (53) DEFAULT ((0)) NOT NULL,
     [HeroSoulsSacrificed]              FLOAT (53) DEFAULT ((0)) NOT NULL,

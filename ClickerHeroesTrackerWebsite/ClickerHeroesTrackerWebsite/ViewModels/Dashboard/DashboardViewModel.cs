@@ -6,7 +6,6 @@ namespace ClickerHeroesTrackerWebsite.Models.Dashboard
 {
     using System;
     using System.Collections.Generic;
-    using System.Data;
     using System.Linq;
     using System.Security.Claims;
     using ClickerHeroesTrackerWebsite.Services.Database;
@@ -47,24 +46,12 @@ namespace ClickerHeroesTrackerWebsite.Models.Dashboard
                 startTime,
                 null);
 
-            if (!data.IsValid || data.SoulsPerHourData.Count == 0)
+            if (!data.IsValid)
             {
                 return;
             }
 
-            IDictionary<DateTime, double> dataSeries;
-            string graphTitle;
-            if (data.SoulsPerHourData.Any(datum => datum.Value > 0))
-            {
-                dataSeries = data.SoulsPerHourData;
-                graphTitle = "Souls/hr";
-            }
-            else
-            {
-                dataSeries = data.SoulsSpentData;
-                graphTitle = "Souls Spent";
-            }
-
+            var dataSeries = data.SoulsSpentData;
             this.ProgressSummaryGraph = new GraphData
             {
                 Chart = new Chart
@@ -73,7 +60,7 @@ namespace ClickerHeroesTrackerWebsite.Models.Dashboard
                 },
                 Title = new Title
                 {
-                    Text = graphTitle
+                    Text = "Souls Spent"
                 },
                 XAxis = new Axis
                 {

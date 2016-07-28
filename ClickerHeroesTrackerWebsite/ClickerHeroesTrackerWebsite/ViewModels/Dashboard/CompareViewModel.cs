@@ -53,52 +53,25 @@ namespace ClickerHeroesTrackerWebsite.Models.Dashboard
                 this.RangeSelector.Start,
                 this.RangeSelector.End);
 
-            this.ProminentGraphs = new List<GraphViewModel>();
-
-            // Suppress if it's all 0's since 1.0 doesn't support this stat yet.
-            if (userData1.SoulsPerHourData.Any(datum => datum.Value > 0)
-                && userData2.SoulsPerHourData.Any(datum => datum.Value > 0))
+            this.ProminentGraphs = new List<GraphViewModel>
             {
-                this.ProminentGraphs.Add(this.CreateGraph(
-                    "soulsPerHourGraph",
-                    "Souls/hr",
+                this.CreateGraph(
+                    "soulsSpentGraph",
+                    "Souls Spent",
                     this.UserName1,
-                    userData1.SoulsPerHourData,
+                    userData1.SoulsSpentData,
                     this.UserName2,
-                    userData2.SoulsPerHourData,
-                    userSettings));
-            }
-
-            // Suppress if it's all 0's since 1.0 doesn't support this stat yet.
-            if (userData1.OptimalLevelData.Any(datum => datum.Value > 0)
-                && userData2.OptimalLevelData.Any(datum => datum.Value > 0))
-            {
-                this.ProminentGraphs.Add(this.CreateGraph(
-                    "optimalLevelGraph",
-                    "Optimal Level",
+                    userData2.SoulsSpentData,
+                    userSettings),
+                this.CreateGraph(
+                    "titanDamageGraph",
+                    "Titan Damage",
                     this.UserName1,
-                    userData1.OptimalLevelData,
+                    userData1.TitanDamageData,
                     this.UserName2,
-                    userData2.OptimalLevelData,
-                    userSettings));
-            }
-
-            this.ProminentGraphs.Add(this.CreateGraph(
-                "soulsSpentGraph",
-                "Souls Spent",
-                this.UserName1,
-                userData1.SoulsSpentData,
-                this.UserName2,
-                userData2.SoulsSpentData,
-                userSettings));
-            this.ProminentGraphs.Add(this.CreateGraph(
-                "titanDamageGraph",
-                "Titan Damage",
-                this.UserName1,
-                userData1.TitanDamageData,
-                this.UserName2,
-                userData2.TitanDamageData,
-                userSettings));
+                    userData2.TitanDamageData,
+                    userSettings),
+            };
 
             this.SecondaryGraphs = userData1
                 .AncientLevelData

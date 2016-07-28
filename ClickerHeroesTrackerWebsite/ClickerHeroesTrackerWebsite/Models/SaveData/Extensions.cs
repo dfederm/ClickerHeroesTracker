@@ -18,14 +18,6 @@ namespace ClickerHeroesTrackerWebsite.Models.SaveData
                 : 0;
         }
 
-        public static int GetHeroGilds(this HeroesData heroesData, Hero hero)
-        {
-            HeroData heroData;
-            return heroesData != null && heroesData.Heroes.TryGetValue(hero.Id, out heroData)
-                ? heroData.Gilds
-                : 0;
-        }
-
         public static double GetItemLevel(this IDictionary<int, double> itemLevels, int ancientId)
         {
             double itemLevel;

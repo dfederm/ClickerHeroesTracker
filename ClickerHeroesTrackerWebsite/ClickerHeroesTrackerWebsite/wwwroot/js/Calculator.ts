@@ -46,9 +46,6 @@
             }
         }
 
-        const hasOutsiderData = upload.stats && upload.stats.hasOwnProperty("totalAncientSouls");
-        const hasSimulationData = upload.stats && upload.stats.hasOwnProperty("optimalLevel");
-
         if (upload.stats)
         {
             for (let statType in upload.stats)
@@ -79,81 +76,39 @@
                 }
             }
 
-            // Show outsider suggestions
-            if (hasOutsiderData)
+            // Default Xyl to something reasonable for the playstyle
+            const ancientSouls = getAncientSouls();
+            let suggestedXylLevel = 0;
+            if (userSettings.playStyle === "idle")
             {
-                // Default Xyl to something reasonable for the playstyle
-                const ancientSouls = getAncientSouls();
-                let suggestedXylLevel = 0;
-                if (userSettings.playStyle === "idle")
-                {
-                    // RoT says "at max 20% of total", but I prefer just 6
-                    suggestedXylLevel = 6;
-                }
-                else if (userSettings.playStyle === "hybrid")
-                {
-                    suggestedXylLevel = Math.round(0.05 * ancientSouls);
-                }
-                else if (userSettings.playStyle === "active")
-                {
-                    // RoT says 0-3, let's guess 3.
-                    suggestedXylLevel = 3;
-                }
-
-                // Only suggest what they can buy
-                suggestedXylLevel = Math.min(ancientSouls, suggestedXylLevel);
-
-                const suggestedXylElement = Helpers.getElementsByDataType("suggestedOutsiderXyliqil")[0] as HTMLInputElement;
-                suggestedXylElement.value = suggestedXylLevel.toString();
-                suggestedXylElement.addEventListener("change", calculateOutsiderSuggestions);
-
-                calculateOutsiderSuggestions();
+                // RoT says "at max 20% of total", but I prefer just 6
+                suggestedXylLevel = 6;
             }
-            else
+            else if (userSettings.playStyle === "hybrid")
             {
-                // Show the correct suggested ancient level text
-                const textElements = Helpers.getElementsByDataType("suggestedLevelsText");
-                for (let i = 0; i < textElements.length; i++)
-                {
-                    textElements[i].classList.add("hidden");
-                }
+                suggestedXylLevel = Math.round(0.05 * ancientSouls);
+            }
+            else if (userSettings.playStyle === "active")
+            {
+                // RoT says 0-3, let's guess 3.
+                suggestedXylLevel = 3;
+            }
 
-                const legacyTextElements = Helpers.getElementsByDataType("suggestedLevelsTextLegacy");
-                for (let i = 0; i < legacyTextElements.length; i++)
-                {
-                    legacyTextElements[i].classList.remove("hidden");
-                }
+            // Only suggest what they can buy
+            suggestedXylLevel = Math.min(ancientSouls, suggestedXylLevel);
 
+            const suggestedXylElement = Helpers.getElementsByDataType("suggestedOutsiderXyliqil")[0] as HTMLInputElement;
+            suggestedXylElement.value = suggestedXylLevel.toString();
+            suggestedXylElement.addEventListener("change", calculateOutsiderSuggestions);
+
+            calculateOutsiderSuggestions();
+
+            if (upload.stats["transcendentPower"] === 0)
+            {
                 const solomonTooltipElements = Helpers.getElementsByDataType("solomonTooltip");
                 for (let i = 0; i < solomonTooltipElements.length; i++)
                 {
                     solomonTooltipElements[i].classList.remove("hidden");
-                }
-            }
-
-            // Hide computed stats if there is no simulation data
-            if (!hasSimulationData)
-            {
-                const elementsToHide = Helpers.getElementsByDataType("simulationData");
-                if (elementsToHide)
-                {
-                    for (let i = 0; i < elementsToHide.length; i++)
-                    {
-                        elementsToHide[i].classList.add("hidden");
-                    }
-                }
-            }
-
-            // Hide outsider stats if there is no data
-            if (!hasOutsiderData)
-            {
-                const elementsToHide = Helpers.getElementsByDataType("outsiderLevels");
-                if (elementsToHide)
-                {
-                    for (let i = 0; i < elementsToHide.length; i++)
-                    {
-                        elementsToHide[i].classList.add("hidden");
-                    }
                 }
             }
         }

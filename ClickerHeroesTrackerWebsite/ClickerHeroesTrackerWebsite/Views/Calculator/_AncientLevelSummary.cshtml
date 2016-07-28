@@ -9,7 +9,7 @@
         <th>Level</th>
         <th></th>
     </tr>
-    @foreach (var ancient in GameData.Ancients.Values.OrderBy(a => a.Name, StringComparer.OrdinalIgnoreCase))
+    @foreach (var ancient in GameData.Ancients.Values.Where(a => !a.NonTranscendent).OrderBy(a => a.Name, StringComparer.OrdinalIgnoreCase))
     {
         <tr>
             <td>@ancient.Name:</td>

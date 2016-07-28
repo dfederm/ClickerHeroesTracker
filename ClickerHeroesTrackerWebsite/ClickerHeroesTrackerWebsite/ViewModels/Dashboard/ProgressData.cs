@@ -52,7 +52,7 @@ namespace ClickerHeroesTrackerWebsite.Models.Dashboard
 	            AND UploadTime <= ISNULL(@EndTime, '9999-12-31 23:59:59');
 
 	            -- Computed Stats
-	            SELECT #ScopedUploads.UploadTime, ComputedStats.OptimalLevel, ComputedStats.SoulsPerHour, ComputedStats.TitanDamage, ComputedStats.SoulsSpent
+	            SELECT #ScopedUploads.UploadTime, ComputedStats.TitanDamage, ComputedStats.SoulsSpent
 	            FROM ComputedStats
 	            INNER JOIN #ScopedUploads
 	            ON ComputedStats.UploadId = #ScopedUploads.Id;
@@ -70,16 +70,12 @@ namespace ClickerHeroesTrackerWebsite.Models.Dashboard
                 parameters))
             using (var reader = command.ExecuteReader())
             {
-                this.OptimalLevelData = new SortedDictionary<DateTime, double>();
-                this.SoulsPerHourData = new SortedDictionary<DateTime, double>();
                 this.TitanDamageData = new SortedDictionary<DateTime, double>();
                 this.SoulsSpentData = new SortedDictionary<DateTime, double>();
 
                 while (reader.Read())
                 {
                     var uploadTime = Convert.ToDateTime(reader["UploadTime"]);
-                    this.OptimalLevelData.AddOrUpdate(uploadTime, Convert.ToInt64(reader["OptimalLevel"]));
-                    this.SoulsPerHourData.AddOrUpdate(uploadTime, Convert.ToInt64(reader["SoulsPerHour"]));
                     this.TitanDamageData.AddOrUpdate(uploadTime, Convert.ToDouble(reader["TitanDamage"]));
                     this.SoulsSpentData.AddOrUpdate(uploadTime, Convert.ToDouble(reader["SoulsSpent"]));
                 }
@@ -122,16 +118,6 @@ namespace ClickerHeroesTrackerWebsite.Models.Dashboard
         /// Gets a value indicating whether the model is valid.
         /// </summary>
         public bool IsValid { get; }
-
-        /// <summary>
-        /// Gets the optimal level data, keyed on upload time.
-        /// </summary>
-        public IDictionary<DateTime, double> OptimalLevelData { get; }
-
-        /// <summary>
-        /// Gets the souls per hour data, keyed on upload time.
-        /// </summary>
-        public IDictionary<DateTime, double> SoulsPerHourData { get; }
 
         /// <summary>
         /// Gets the titan damage data, keyed on upload time.

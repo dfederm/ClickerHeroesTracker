@@ -13,12 +13,6 @@ namespace ClickerHeroesTrackerWebsite.Models.SaveData
     public class ItemData
     {
         /// <summary>
-        /// Gets or sets the item name
-        /// </summary>
-        [JsonProperty(PropertyName = "name")]
-        public string Name { get; set; }
-
-        /// <summary>
         /// Gets or sets the first item bonus type.
         /// </summary>
         [JsonProperty(PropertyName = "bonusType1")]

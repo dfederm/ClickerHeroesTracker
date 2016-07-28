@@ -215,30 +215,6 @@ namespace ClickerHeroesTrackerWebsite.Controllers.Api
                 }
             }
 
-            // Get computed stats
-            var optimalLevel = 0;
-            const string GetComputedStatsCommandText = @"
-                SELECT OptimalLevel, SoulsPerHour, SoulsPerAscension, AscensionTime
-                FROM ComputedStats
-                WHERE UploadId = @UploadId";
-            using (var command = this.databaseCommandFactory.Create(
-                GetComputedStatsCommandText,
-                uploadIdParameters))
-            using (var reader = command.ExecuteReader())
-            {
-                if (reader.Read())
-                {
-                    optimalLevel = Convert.ToInt32(reader["OptimalLevel"]);
-                    if (optimalLevel > 0)
-                    {
-                        upload.Stats.Add(StatType.OptimalLevel, optimalLevel);
-                        upload.Stats.Add(StatType.SoulsPerHour, Convert.ToInt64(reader["SoulsPerHour"]));
-                        upload.Stats.Add(StatType.SoulsPerAscension, Convert.ToInt64(reader["SoulsPerAscension"]));
-                        upload.Stats.Add(StatType.OptimalAscensionTime, Convert.ToInt64(reader["AscensionTime"]));
-                    }
-                }
-            }
-
             // Get misc stats
             var miscellaneousStatsModel = new MiscellaneousStatsModel(
                 gameData,
@@ -261,7 +237,6 @@ namespace ClickerHeroesTrackerWebsite.Controllers.Api
                 gameData,
                 savedGame,
                 ancientLevelsModel.AncientLevels,
-                optimalLevel,
                 uploadUserSettings,
                 miscellaneousStatsModel);
             foreach (var suggestedAncientLevel in suggestedAncientLevelsModel.SuggestedAncientLevels)
@@ -329,11 +304,6 @@ namespace ClickerHeroesTrackerWebsite.Controllers.Api
             var outsiderLevels = new OutsiderLevelsModel(
                 savedGame,
                 this.telemetryClient);
-            var computedStats = new ComputedStatsModel(
-                this.gameData,
-                savedGame,
-                playStyle,
-                this.counterProvider);
             var miscellaneousStatsModel = new MiscellaneousStatsModel(
                 gameData,
                 savedGame);
@@ -360,10 +330,6 @@ namespace ClickerHeroesTrackerWebsite.Controllers.Api
                 command.CommandText = @"
                     INSERT INTO ComputedStats(
                         UploadId,
-                        OptimalLevel,
-                        SoulsPerHour,
-                        SoulsPerAscension,
-                        AscensionTime,
                         TitanDamage,
                         SoulsSpent,
                         HeroSoulsSacrificed,
@@ -378,10 +344,6 @@ namespace ClickerHeroesTrackerWebsite.Controllers.Api
                         BossLevelToTranscendentPrimalCap)
                     VALUES(
                         @UploadId,
-                        @OptimalLevel,
-                        @SoulsPerHour,
-                        @SoulsPerAscension,
-                        @AscensionTime,
                         @TitanDamage,
                         @SoulsSpent,
                         @HeroSoulsSacrificed,
@@ -397,10 +359,6 @@ namespace ClickerHeroesTrackerWebsite.Controllers.Api
                 command.Parameters = new Dictionary<string, object>
                 {
                     { "@UploadId", uploadId },
-                    { "@OptimalLevel", computedStats.OptimalLevel },
-                    { "@SoulsPerHour", computedStats.SoulsPerHour },
-                    { "@SoulsPerAscension", computedStats.OptimalSoulsPerAscension },
-                    { "@AscensionTime", computedStats.OptimalAscensionTime },
                     { "@TitanDamage", miscellaneousStatsModel.TitanDamage },
                     { "@SoulsSpent", miscellaneousStatsModel.HeroSoulsSpent },
                     { "@HeroSoulsSacrificed", miscellaneousStatsModel.HeroSoulsSacrificed },

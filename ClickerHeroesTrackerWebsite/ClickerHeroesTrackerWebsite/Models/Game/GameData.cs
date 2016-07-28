@@ -12,9 +12,9 @@ namespace ClickerHeroesTrackerWebsite.Models.Game
     /// Represents the root game data object.
     /// </summary>
     /// <remarks>
-    /// See GameData.json, last saved from ClickerHeroes_v5117.swf
+    /// See GameData.json, last saved from ClickerHeroes_v6565.swf
     /// Instructions:
-    /// Download: https://d1snsxh2hr65cz.cloudfront.net/ClickerHeroes_v5117.swf
+    /// Download game swf (eg. https://d1snsxh2hr65cz.cloudfront.net/ClickerHeroes_v6565.swf)
     /// Decompile
     /// Go to binary data, decompile inner HeroClicker_swf
     /// Go to binary data, save 165: staticdata, save as file
@@ -32,30 +32,6 @@ namespace ClickerHeroesTrackerWebsite.Models.Game
     public class GameData
     {
         private static readonly JsonSerializer Serializer = CreateSerializer();
-
-        /// <summary>
-        /// Gets or sets a collection of hero upgrades.
-        /// </summary>
-        [JsonProperty(PropertyName = "upgrades", Required = Required.Always)]
-        public IDictionary<int, Upgrade> Upgrades { get; set; }
-
-        /// <summary>
-        /// Gets or sets a collection of heroes.
-        /// </summary>
-        [JsonProperty(PropertyName = "heroes", Required = Required.Always)]
-        public IDictionary<int, Hero> Heroes { get; set; }
-
-        /// <summary>
-        /// Gets or sets a collection of achievements.
-        /// </summary>
-        [JsonProperty(PropertyName = "achievements", Required = Required.Always)]
-        public IDictionary<int, Achievement> Achievements { get; set; }
-
-        /// <summary>
-        /// Gets or sets a collection of achievements.
-        /// </summary>
-        [JsonProperty(PropertyName = "itemBonusTypes", Required = Required.Always)]
-        public IDictionary<int, ItemBonusType> ItemBonusTypes { get; set; }
 
         /// <summary>
         /// Gets or sets a collection of ancients.
