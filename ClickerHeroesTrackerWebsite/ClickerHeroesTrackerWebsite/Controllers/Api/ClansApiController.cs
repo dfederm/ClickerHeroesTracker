@@ -7,28 +7,24 @@ namespace ClickerHeroesTrackerWebsite.Controllers.Api
     using System;
     using System.Collections.Generic;
     using System.Linq;
-    using System.Threading.Tasks;
-    using Microsoft.AspNetCore.Mvc;
-    using Microsoft.AspNetCore.Authorization;
     using System.Net.Http;
-    using Newtonsoft.Json.Linq;
-    using Models.Api.Clans;
-    using System.Web.Script.Serialization;
-    using Microsoft.AspNetCore.Identity;
-    using Models;
-    using Models.Api.Uploads;
-    using Services.Database;
-    using Models.SaveData;
-    using Utility;
-    using System.Net;
-    using Microsoft.DotNet.Cli.Utils;
-    using Newtonsoft.Json;
+    using System.Threading.Tasks;
+    using ClickerHeroesTrackerWebsite.Models;
     using ClickerHeroesTrackerWebsite.Models.Api;
+    using ClickerHeroesTrackerWebsite.Models.Api.Clans;
+    using ClickerHeroesTrackerWebsite.Models.SaveData;
+    using ClickerHeroesTrackerWebsite.Services.Database;
+    using Microsoft.AspNetCore.Authorization;
+    using Microsoft.AspNetCore.Identity;
+    using Microsoft.AspNetCore.Mvc;
+    using Newtonsoft.Json;
 
     [Route("api/clans")]
     [Authorize]
     public class ClansApiController : Controller
     {
+        private static readonly char[] messageDelimeter = new[] { ';' };
+
         private readonly IDatabaseCommandFactory databaseCommandFactory;
 
         private readonly UserManager<ApplicationUser> userManager;
@@ -108,7 +104,7 @@ namespace ClickerHeroesTrackerWebsite.Controllers.Api
                 foreach (var mess in messages.Result.Messages)
                 {
                     Message message = new Message();
-                    string[] messageSplit = mess.Value.Split(';');
+                    string[] messageSplit = mess.Value.Split(messageDelimeter, 2);
                     message.Content = messageSplit[1];
                     double timestamp = Convert.ToDouble(mess.Key);
                     message.Date = timestamp.UnixTimeStampToDateTime();
