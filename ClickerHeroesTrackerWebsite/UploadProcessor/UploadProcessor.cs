@@ -10,6 +10,7 @@ namespace ClickerHeroesTrackerWebsite.UploadProcessing
     using System.Threading;
     using System.Threading.Tasks;
     using ClickerHeroesTrackerWebsite.Instrumentation;
+    using ClickerHeroesTrackerWebsite.Models;
     using ClickerHeroesTrackerWebsite.Models.Game;
     using ClickerHeroesTrackerWebsite.Models.SaveData;
     using ClickerHeroesTrackerWebsite.Models.Settings;
@@ -123,7 +124,8 @@ namespace ClickerHeroesTrackerWebsite.UploadProcessing
 
                     string uploadContent;
                     string userId;
-                    this.GetUploadDetails(databaseCommandFactory, uploadId, out uploadContent, out userId);
+                    PlayStyle playStyle;
+                    this.GetUploadDetails(databaseCommandFactory, uploadId, out uploadContent, out userId, out playStyle);
                     properties.Add("UserId", userId);
                     if (string.IsNullOrWhiteSpace(uploadContent))
                     {
@@ -163,7 +165,7 @@ namespace ClickerHeroesTrackerWebsite.UploadProcessing
                     var computedStats = new ComputedStatsModel(
                         this.gameData,
                         savedGame,
-                        userSettings,
+                        playStyle,
                         counterProvider);
                     var miscellaneousStatsModel = new MiscellaneousStatsModel(
                         gameData,
@@ -441,10 +443,15 @@ namespace ClickerHeroesTrackerWebsite.UploadProcessing
             }
         }
 
-        private void GetUploadDetails(IDatabaseCommandFactory databaseCommandFactory, int uploadId, out string uploadContent, out string userId)
+        private void GetUploadDetails(
+            IDatabaseCommandFactory databaseCommandFactory,
+            int uploadId,
+            out string uploadContent,
+            out string userId,
+            out PlayStyle playStyle)
         {
             const string CommandText = @"
-	            SELECT UploadContent, UserId
+	            SELECT UploadContent, UserId, PlayStyle
 	            FROM Uploads
 	            WHERE Id = @UploadId";
             var commandParameters = new Dictionary<string, object>
@@ -459,6 +466,11 @@ namespace ClickerHeroesTrackerWebsite.UploadProcessing
                 reader.Read();
                 uploadContent = reader["UploadContent"].ToString();
                 userId = reader["UserId"].ToString();
+
+                if (!Enum.TryParse(reader["PlayStyle"].ToString(), out playStyle))
+                {
+                    playStyle = default(PlayStyle);
+                }
             }
         }
     }

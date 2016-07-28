@@ -8,7 +8,6 @@ namespace ClickerHeroesTrackerWebsite.Models.Stats
     using ClickerHeroesTrackerWebsite.Instrumentation;
     using ClickerHeroesTrackerWebsite.Models.Game;
     using ClickerHeroesTrackerWebsite.Models.SaveData;
-    using ClickerHeroesTrackerWebsite.Models.Settings;
     using ClickerHeroesTrackerWebsite.Models.Simulation;
 
     /// <summary>
@@ -22,7 +21,7 @@ namespace ClickerHeroesTrackerWebsite.Models.Stats
         public ComputedStatsModel(
             GameData gameData,
             SavedGame savedGame,
-            IUserSettings userSettings,
+            PlayStyle playStyle,
             ICounterProvider counterProvider)
         {
             // Simulation is only enabled for legacy saves, before outsiders were a thing.
@@ -32,7 +31,7 @@ namespace ClickerHeroesTrackerWebsite.Models.Stats
                 var simulation = new Simulation(
                     gameData,
                     savedGame,
-                    userSettings.PlayStyle);
+                    playStyle);
 
                 Simulation.SimulateResult simulationResult;
                 using (var scope = counterProvider.Measure(Counter.Simulation))

@@ -275,13 +275,13 @@ namespace ClickerHeroesTrackerWebsite.Controllers.Api
         /// <summary>
         /// Add and an upload.
         /// </summary>
-        /// <param name="rawUpload">The upload data</param>
+        /// <param name="uploadRequest">The upload data</param>
         /// <returns>The new upload id</returns>
         [Route("")]
         [HttpPost]
-        public IActionResult Add(RawUpload rawUpload)
+        public IActionResult Add(UploadRequest uploadRequest)
         {
-            if (rawUpload.EncodedSaveData == null)
+            if (uploadRequest.EncodedSaveData == null)
             {
                 // Not a valid save
                 return this.BadRequest();
@@ -290,7 +290,7 @@ namespace ClickerHeroesTrackerWebsite.Controllers.Api
             // Instrument the encoded save data in case something goes wrong.
             // It needs to be spit into chunks as TelemetryClient has a max property value length.
             // See: https://azure.microsoft.com/en-us/documentation/articles/app-insights-pricing/#limits-summary
-            var chunks = rawUpload.EncodedSaveData.SplitIntoChunks(10000);
+            var chunks = uploadRequest.EncodedSaveData.SplitIntoChunks(10000);
             var properties = new Dictionary<string, string>();
             for (int i = 0; i < chunks.Length; i++)
             {
@@ -300,18 +300,27 @@ namespace ClickerHeroesTrackerWebsite.Controllers.Api
             this.telemetryClient.TrackTrace("Upload", properties);
 
             // Only associate it with the user if they requested that it be added to their progress.
-            var userId = rawUpload.AddToProgress && this.User.Identity.IsAuthenticated
+            var userId = uploadRequest.AddToProgress && this.User.Identity.IsAuthenticated
                 ? this.userManager.GetUserId(this.User)
                 : null;
 
-            var savedGame = SavedGame.Parse(rawUpload.EncodedSaveData);
+            var savedGame = SavedGame.Parse(uploadRequest.EncodedSaveData);
             if (savedGame == null)
             {
                 // Not a valid save
                 return this.BadRequest();
             }
 
-            var userSettings = this.userSettingsProvider.Get(userId);
+            PlayStyle playStyle;
+            if (uploadRequest.PlayStyle.HasValue)
+            {
+                playStyle = uploadRequest.PlayStyle.Value;
+            }
+            else
+            {
+                var userSettings = this.userSettingsProvider.Get(userId);
+                playStyle = userSettings.PlayStyle;
+            }
 
             var ancientLevels = new AncientLevelsModel(
                 this.gameData,
@@ -323,7 +332,7 @@ namespace ClickerHeroesTrackerWebsite.Controllers.Api
             var computedStats = new ComputedStatsModel(
                 this.gameData,
                 savedGame,
-                userSettings,
+                playStyle,
                 this.counterProvider);
             var miscellaneousStatsModel = new MiscellaneousStatsModel(
                 gameData,
@@ -342,8 +351,8 @@ namespace ClickerHeroesTrackerWebsite.Controllers.Api
                 command.Parameters = new Dictionary<string, object>
                 {
                     { "@UserId", userId },
-                    { "@UploadContent", rawUpload.EncodedSaveData },
-                    { "@PlayStyle", userSettings.PlayStyle.ToString() },
+                    { "@UploadContent", uploadRequest.EncodedSaveData },
+                    { "@PlayStyle", playStyle.ToString() },
                 };
                 uploadId = Convert.ToInt32(command.ExecuteScalar());
 
