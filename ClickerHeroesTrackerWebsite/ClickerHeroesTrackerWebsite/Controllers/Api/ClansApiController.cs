@@ -23,6 +23,7 @@ namespace ClickerHeroesTrackerWebsite.Controllers.Api
     using System.Net;
     using Microsoft.DotNet.Cli.Utils;
     using Newtonsoft.Json;
+    using ClickerHeroesTrackerWebsite.Models.Api;
 
     [Route("api/clans")]
     [Authorize]
@@ -126,7 +127,7 @@ namespace ClickerHeroesTrackerWebsite.Controllers.Api
                     double timestamp = Convert.ToDouble(mess.Key);
                     message.Date = timestamp.UnixTimeStampToDateTime();
                     GuildMember member = clan.GuildMembers.Values.FirstOrDefault(t => t.Uid == messageSplit[0]);
-                    message.Username = member.Nickname;
+                    message.Username = member?.Nickname;
 
                     messageList.Add(message);
                 }
@@ -200,31 +201,102 @@ namespace ClickerHeroesTrackerWebsite.Controllers.Api
                 return this.Ok(responseString);
             }
         }
-        
+
         [Route("leaderboard")]
         [HttpGet]
-        public IActionResult GetLeaderboard()
+        public async Task<IActionResult> GetLeaderboard(
+            int page = ParameterConstants.LeaderboardSummaryList.Page.Default,
+            int count = ParameterConstants.LeaderboardSummaryList.Count.Default)
+        {
+            // Validate parameters
+            if (page < ParameterConstants.LeaderboardSummaryList.Page.Min)
+            {
+                return this.BadRequest("Invalid parameter: page");
+            }
+
+            if (count < ParameterConstants.LeaderboardSummaryList.Count.Min
+                || count > ParameterConstants.LeaderboardSummaryList.Count.Max)
+            {
+                return this.BadRequest("Invalid parameter: count");
+            }
+
+            var userId = this.userManager.GetUserId(this.User);
+            SavedGame savedGame = GetLatestSave(userId);
+            var clanName = "";
+
+            if (savedGame?.UniqueId != null)
+            {
+                using (var client = new HttpClient())
+                {
+                    var guildValues = new Dictionary<string, string>
+                    {
+                        {"uid", savedGame.UniqueId},
+                        {"passwordHash", savedGame.PasswordHash}
+                    };
+
+                    var content = new FormUrlEncodedContent(guildValues);
+
+                    var response = await client.PostAsync(url + "/clans/getGuildInfo.php", content);
+
+                    var responseString = await response.Content.ReadAsStringAsync();
+
+                    if (!responseString.Contains("\"success\": false"))
+                    {
+                        var clanResponse = JsonConvert.DeserializeObject<ClanResponse>(responseString);
+
+                        Clan clan = clanResponse.Result;
+
+                        clanName = clan.Guild.Name;
+                    }
+                }
+            }
+            
+            var model = new LeaderboardSummaryListResponse()
+            {
+                LeaderboardClans = this.FetchLeaderboard(page, count, clanName),
+                Pagination = this.FetchPagination(page, count),
+            };
+
+            return this.Ok(model);
+        }
+
+        public IList<LeaderboardClan> FetchLeaderboard(int page, int count, string clanName)
         {
             var clans = new List<LeaderboardClan>();
+            var offset = (page - 1) * count;
+
             const string getLeaderboardDataCommandText = @"
-	            SELECT TOP 20 Name, CurrentRaidLevel, MemberCount
+	            SELECT Name, CurrentRaidLevel, MemberCount
                 FROM Clans
-                ORDER BY CurrentRaidLevel DESC";
-            using (var command = this.databaseCommandFactory.Create(getLeaderboardDataCommandText))
+                ORDER BY CurrentRaidLevel DESC
+                    OFFSET @Offset ROWS
+		            FETCH NEXT @Count ROWS ONLY;";
+            var parameters = new Dictionary<string, object>
+            {
+                { "@Offset", offset },
+                { "@Count", count },
+            };
+            using (var command = this.databaseCommandFactory.Create(getLeaderboardDataCommandText, parameters))
             using (var reader = command.ExecuteReader())
             {
+                var i = 1;
                 while (reader.Read())
                 {
+                    bool IsUserClan = clanName == reader["Name"].ToString();
+
                     clans.Add(new LeaderboardClan
                     {
                         Name = reader["Name"].ToString(),
                         CurrentRaidLevel = Convert.ToInt32(reader["CurrentRaidLevel"]),
-                        MemberCount = Convert.ToInt32(reader["MemberCount"])
+                        MemberCount = Convert.ToInt32(reader["MemberCount"]),
+                        Rank = offset + i,
+                        IsUserClan = IsUserClan
                     });
+                    i++;
                 }
             }
 
-            return this.Ok(clans);
+            return clans;
         }
 
         public SavedGame GetLatestSave(string userId)
@@ -251,6 +323,74 @@ namespace ClickerHeroesTrackerWebsite.Controllers.Api
                 }
 
                 return null;
+            }
+        }
+
+        private PaginationMetadata FetchPagination(int page, int count)
+        {
+            const string GetLeaderboardCountCommandText = @"
+	            SELECT COUNT(*) AS TotalClans
+		        FROM Clans";
+
+            using (var command = this.databaseCommandFactory.Create(GetLeaderboardCountCommandText))
+            using (var reader = command.ExecuteReader())
+            {
+                if (!reader.Read())
+                {
+                    return null;
+                }
+
+                var pagination = new PaginationMetadata
+                {
+                    Count = Convert.ToInt32(reader["TotalClans"])
+                };
+
+                var currentPath = this.Request.Path;
+                if (page > 1)
+                {
+                    pagination.Previous = string.Format(
+                        "{0}?{1}={2}&{3}={4}",
+                        currentPath,
+                        nameof(page),
+                        page - 1,
+                        nameof(count),
+                        count);
+                }
+
+                if (page <= Math.Ceiling((float)pagination.Count / count))
+                {
+                    pagination.Next = string.Format(
+                        "{0}?{1}={2}&{3}={4}",
+                        currentPath,
+                        nameof(page),
+                        page + 1,
+                        nameof(count),
+                        count);
+                }
+
+                return pagination;
+            }
+        }
+
+        internal static class ParameterConstants
+        {
+            internal static class LeaderboardSummaryList
+            {
+                internal static class Page
+                {
+                    internal const int Min = 1;
+
+                    internal const int Default = 1;
+                }
+
+                internal static class Count
+                {
+                    internal const int Min = 1;
+
+                    internal const int Max = 100;
+
+                    internal const int Default = 10;
+                }
             }
         }
     }

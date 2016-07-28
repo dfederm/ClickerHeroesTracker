@@ -4,4 +4,8 @@
     currentRaidLevel: number;
 
     memberCount: number;
+
+    rank: number;
+
+    isUserClan: boolean;
 }

@@ -2,26 +2,6 @@
     "use strict";
 
     $.ajax({
-        url: "/api/clans/leaderboard",
-    }).done((response: Array<ILeaderboardClan>) => {
-        $("#leaderboard-table").prepend("<tr><th>Rank</th><th>Name</th><th>Members</th><th>Current Raid Level</th></tr>");
-        for (let index = 0; index < response.length; ++index)
-        {
-            const clan = response[index];
-
-            if (clan.memberCount > 0)
-            {
-                $("#leaderboard-table-body").append("<tr><td>" + (index + 1) + "</td><td>" + clan.name + "</td><td>" + clan.memberCount + "</td><td>" + clan.currentRaidLevel + "</td></tr>");
-            }
-            else
-            {
-                $("#leaderboard-table-body").append("<tr><td>" + (index + 1) + "</td><td>" + clan.name + "</td><td></td><td>" + clan.currentRaidLevel + "</td></tr>");
-
-            }
-        }
-    });
-
-    $.ajax({
         url: "/api/clans",
     }).done((response: IClanData, textStatus: string, jqXHR: JQueryXHR) =>
     {
@@ -53,22 +33,36 @@
 
             $("#clan-messages").append("<div class='col-xs-12 clan-message'><p class='timeName'></p><p class='messageContent'></p></div>");
 
-            if (timeDiff > dayInMilliSeconds)
+            let username = "";
+            let timeName = $(".timeName").last();
+
+            if (message.username == null)
             {
-                $(".timeName").last().text("(" + diffDays + " days ago) " + message.username);
-            }
-            else if (timeDiff > hourInMilliSeconds)
-            {
-                $(".timeName").last().text("(" + Math.ceil(timeDiff / hourInMilliSeconds) + " hours ago) " + message.username);
-            }
-            else if (timeDiff > minuteInMilliSeconds)
-            {
-                $(".timeName").last().text("(" + Math.ceil(timeDiff / minuteInMilliSeconds) + " minutes ago) " + message.username);
+                username = "(Unknown)";
+                timeName.addClass("text-muted");
             }
             else
             {
-                $(".timeName").last().text("(" + Math.ceil(timeDiff / 1000) + " seconds ago) " + message.username);
+                username = message.username;
             }
+
+            if (timeDiff > dayInMilliSeconds)
+            {
+                timeName.text("(" + diffDays + " days ago) " + username);
+            }
+            else if (timeDiff > hourInMilliSeconds)
+            {
+                timeName.text("(" + Math.ceil(timeDiff / hourInMilliSeconds) + " hours ago) " + username);
+            }
+            else if (timeDiff > minuteInMilliSeconds)
+            {
+                timeName.text("(" + Math.ceil(timeDiff / minuteInMilliSeconds) + " minutes ago) " + username);
+            }
+            else
+            {
+                timeName.text("(" + Math.ceil(timeDiff / 1000) + " seconds ago) " + username);
+            }
+
             $(".messageContent").last().text(message.content);
         }
 
@@ -79,6 +73,99 @@
             return;
         }
     });
+
+    export function createLeaderboard(count: number, tableId: string): void
+    {
+        const table = document.getElementById(tableId);
+        if (!table) {
+            throw new Error("Element not found: " + tableId);
+        }
+
+        updateLeaderboard(count, table);
+
+        // Upon a hash change, re-create the table
+        window.addEventListener("hashchange", () => {
+            window.scrollTo(0, 0);
+            clearTable(table);
+            updateLeaderboard(count, table);
+        });
+    }
+
+    function clearTable(table: HTMLElement): void {
+        const tableBody = table.querySelector("tbody");
+        if (tableBody)
+        {
+            tableBody.remove();
+        }
+
+        const tableFoot = table.querySelector("tfoot");
+        if (tableFoot)
+        {
+            tableFoot.remove();
+        }
+    }
+
+    function updateLeaderboard(count: number, table: HTMLElement): void
+    {
+        const queryParameters = Helpers.getQueryParameters();
+        const currentPage = parseInt(queryParameters["page"]) || 1;
+
+        $.ajax({
+            url: "/api/clans/leaderboard?page=" + currentPage + "&count=" + count,
+        }).done((response: ILeaderboardSummaryListResponse) =>
+        {
+            $("#leaderboard-table").append("<tbody class='leaderboard-table-body' id='leaderboard-table-body'></tbody>");
+            const tablebody = document.getElementById("leaderboard-table-body");
+
+            for (let index = 0; index < response.leaderboardClans.length; ++index)
+            {
+                const clan = response.leaderboardClans[index];
+
+                const row = document.createElement("tr");
+                if (clan.isUserClan) {
+                    row.classList.add("highlighted-clan");
+                }
+
+                const rankCell = document.createElement("td");
+                rankCell.appendChild(document.createTextNode(clan.rank.toString()));
+                row.appendChild(rankCell);
+
+                const nameCell = document.createElement("td");
+                nameCell.appendChild(document.createTextNode(clan.name));
+                row.appendChild(nameCell);
+
+                const memberCountCell = document.createElement("td");
+                if (clan.memberCount > 0) {
+                    memberCountCell.appendChild(document.createTextNode(clan.memberCount.toString()));
+                }
+
+                row.appendChild(memberCountCell);
+
+                const currentRaidLevelCell = document.createElement("td");
+                currentRaidLevelCell.appendChild(document.createTextNode(clan.currentRaidLevel.toString()));
+                row.appendChild(currentRaidLevelCell);
+
+                tablebody.appendChild(row);
+            }
+
+            const pagination = response.pagination;
+
+            if (pagination)
+            {
+                const tableFoot = document.createElement("tfoot");
+                const row = document.createElement("tr");
+                const paginationCell = document.createElement("td");
+                paginationCell.colSpan = 4;
+
+                const paginationList = Pagination.create(pagination, count, currentPage);
+
+                paginationCell.appendChild(paginationList);
+                row.appendChild(paginationCell);
+                tableFoot.appendChild(row);
+                table.appendChild(tableFoot);
+            }
+        });
+    }
 
     $("#sendMessage").submit(function (event: JQueryEventObject): boolean
     {

@@ -103,3 +103,9 @@ div#loadingElement
 .timeName, .messageContent {
     margin-bottom: 0;
 }
+
+.highlighted-clan {
+    background-color: #5cb85c !important;
+    color: white !important;
+    font-weight: bold;
+}
