@@ -13,6 +13,12 @@
     scientificNotationThreshold: number;
 
     useEffectiveLevelForSuggestions: boolean;
+
+    useLogarithmicGraphScale: boolean;
+
+    logarithmicGraphScaleThreshold: number;
+
+    hybridRatio: number;
 }
 
 // Serialized singleton for every request

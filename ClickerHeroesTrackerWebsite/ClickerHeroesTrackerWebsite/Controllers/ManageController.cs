@@ -138,6 +138,16 @@ namespace ClickerHeroesTrackerWebsite.Controllers
                 userSettings.LogarithmicGraphScaleThreshold = 1000000;
             }
 
+            if (indexViewModel.HybridRatio.HasValue)
+            {
+                userSettings.HybridRatio = indexViewModel.HybridRatio.Value;
+            }
+            else if (userSettings.UseLogarithmicGraphScale)
+            {
+                // If they cleared the value, reset to the default.
+                userSettings.HybridRatio = 10;
+            }
+
             return await this.GetIndexResult(user, userSettings);
         }
 
@@ -336,6 +346,7 @@ namespace ClickerHeroesTrackerWebsite.Controllers
                 UseEffectiveLevelForSuggestions = userSettings.UseEffectiveLevelForSuggestions,
                 UseLogarithmicGraphScale = userSettings.UseLogarithmicGraphScale,
                 LogarithmicGraphScaleThreshold = userSettings.LogarithmicGraphScaleThreshold,
+                HybridRatio = userSettings.HybridRatio,
             };
 
             return this.View(model);

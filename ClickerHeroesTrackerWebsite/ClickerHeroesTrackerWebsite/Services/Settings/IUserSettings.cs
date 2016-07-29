@@ -60,5 +60,10 @@ namespace ClickerHeroesTrackerWebsite.Models.Settings
         /// Gets or sets the range a graph must cover to use logarithmic scale
         /// </summary>
         int LogarithmicGraphScaleThreshold { get; set; }
+
+        /// <summary>
+        /// Gets or sets the hybrid idle:active ratio
+        /// </summary>
+        int HybridRatio { get; set; }
     }
 }

@@ -98,6 +98,16 @@
         </dl>
         <dl class="dl-horizontal">
             <dt>
+                <label asp-for="HybridRatio" class="control-label"></label>
+                <a href="#" class="text-muted" data-toggle="tooltip" data-placement="bottom" title="This is the ratio to use for leveling idle and active ancients. Clear the value to reset it to the default">(?)</a>
+            </dt>
+            <dd>
+                <input type="number" asp-for="HybridRatio" />
+                <span asp-validation-for="HybridRatio" class="text-danger"></span>
+            </dd>
+        </dl>
+        <dl class="dl-horizontal">
+            <dt>
                 <label asp-for="UseExperimentalStats" class="control-label"></label>
                 <a href="#" class="text-muted" data-toggle="tooltip" data-placement="bottom" title="This will show you experimental stats which may not be fully fleshed out and data availability may be spotty. Consider these &quot;beta&quot; features">(?)</a>
             </dt>

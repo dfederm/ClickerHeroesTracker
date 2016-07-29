@@ -168,6 +168,19 @@ namespace ClickerHeroesTrackerWebsite.Models.Settings
             }
         }
 
+        public int HybridRatio
+        {
+            get
+            {
+                return this.GetValue(11, int.TryParse, 10);
+            }
+
+            set
+            {
+                this.SetValue(11, value.ToString());
+            }
+        }
+
         internal void FlushChanges()
         {
             if (this.userId == null)

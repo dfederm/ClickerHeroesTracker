@@ -94,6 +94,12 @@ namespace ClickerHeroesTrackerWebsite.Models
         public int? LogarithmicGraphScaleThreshold { get; set; }
 
         /// <summary>
+        /// Gets or sets the hybrid idle:active ratio
+        /// </summary>
+        [Display(Name = "Hybrid Ratio")]
+        public int? HybridRatio { get; set; }
+
+        /// <summary>
         /// Model for an option for the time zone select control.
         /// </summary>
         public class TimeZoneSelectItem

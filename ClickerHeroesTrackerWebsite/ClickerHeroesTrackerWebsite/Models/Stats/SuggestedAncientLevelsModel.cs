@@ -135,8 +135,10 @@ namespace ClickerHeroesTrackerWebsite.Models.Stats
 
                 case PlayStyle.Hybrid:
                 {
-                    var suggestedActiveLevel = Math.Round(0.1 * currentPrimaryAncientLevel);
-                    var suggestedJuggernautLevel = Math.Round(Math.Pow(0.1 * currentPrimaryAncientLevel, 0.8));
+                    var hybridRatioReciprocal = 1d / userSettings.HybridRatio;
+                    var suggestedActiveLevelUnrounded = hybridRatioReciprocal * currentPrimaryAncientLevel;
+                    var suggestedActiveLevel = Math.Round(suggestedActiveLevelUnrounded);
+                    var suggestedJuggernautLevel = Math.Round(Math.Pow(suggestedActiveLevelUnrounded, 0.8));
                     return new KeyValuePair<int, double>[]
                     {
                         new KeyValuePair<int, double>(AncientIds.Siyalatas, currentPrimaryAncientLevel),
