@@ -2,12 +2,12 @@
     ViewBag.Title = "Error";
 }
 
-<h1 class="text-danger">Error.</h1>
+<h1 class="text-danger">Oops!</h1>
 @if (ViewBag.ErrorMessage != null)
 {
     <h2 class="text-danger">@ViewBag.ErrorMessage</h2>
 }
 else
 {
-    <h2 class="text-danger">An error occurred while processing your request.</h2>
+    <h2 class="text-danger">Something went wrong. Please try again or report the issue using the feedback link above.</h2>
 }

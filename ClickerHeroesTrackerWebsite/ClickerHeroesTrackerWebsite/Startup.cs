@@ -32,7 +32,7 @@ namespace ClickerHeroesTrackerWebsite
             }
             else
             {
-                app.UseExceptionHandler("/Home/Error");
+                app.UseExceptionHandler("/Error");
             }
 
             // Exception middleware should be added after error page and any other error handling middleware.
