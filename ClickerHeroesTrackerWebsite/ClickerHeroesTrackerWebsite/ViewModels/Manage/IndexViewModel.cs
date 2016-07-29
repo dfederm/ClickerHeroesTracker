@@ -47,7 +47,7 @@ namespace ClickerHeroesTrackerWebsite.Models
         /// <summary>
         /// Gets or sets the user's preferred solomon formula (Log or Ln).
         /// </summary>
-        [Display(Name = "Solomon formula")]
+        [Display(Name = "Pre-transcendant Solomon formula")]
         public string SolomonFormula { get; set; }
 
         /// <summary>
@@ -65,7 +65,7 @@ namespace ClickerHeroesTrackerWebsite.Models
         /// <summary>
         /// Gets or sets a value indicating whether the user wants to see numbers in scientific notation
         /// </summary>
-        [Display(Name = "Use scientific notation")]
+        [Display(Name = "Scientific notation")]
         public bool UseScientificNotation { get; set; }
 
         /// <summary>
@@ -78,19 +78,19 @@ namespace ClickerHeroesTrackerWebsite.Models
         /// <summary>
         /// Gets or sets a value indicating whether the effective level is used for suggestions vs the actual ancient levels.
         /// </summary>
-        [Display(Name = "Use effective levels for suggestions")]
+        [Display(Name = "Effective levels")]
         public bool UseEffectiveLevelForSuggestions { get; set; }
 
         /// <summary>
         /// Gets or sets a value indicating whether the user wants to see graphs with logarithmic scale
         /// </summary>
-        [Display(Name = "Use logarithmic scale for graphs")]
+        [Display(Name = "Logarithmic scale")]
         public bool UseLogarithmicGraphScale { get; set; }
 
         /// <summary>
         /// Gets or sets the range a graph must cover to use logarithmic scale
         /// </summary>
-        [Display(Name = "Graph logarithmic scale threshold")]
+        [Display(Name = "Logarithmic scale threshold")]
         public int? LogarithmicGraphScaleThreshold { get; set; }
 
         /// <summary>

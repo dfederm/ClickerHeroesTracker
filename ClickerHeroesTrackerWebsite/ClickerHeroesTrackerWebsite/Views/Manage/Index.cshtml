@@ -63,23 +63,27 @@
         <dl class="dl-horizontal">
             <dt>
                 <label asp-for="AreUploadsPublic" class="control-label"></label>
-                <a href="#" class="text-muted" data-toggle="tooltip" data-placement="bottom" title="Allow your uploads to be viewed by others if you choose to share the url with them">(?)</a>
             </dt>
-            <dd>
-                <input type="checkbox" asp-for="AreUploadsPublic" checked="@Model.AreUploadsPublic" />
+            <dd class="checkbox">
+                <label asp-for="AreUploadsPublic">
+                    <input type="checkbox" asp-for="AreUploadsPublic" />
+                    Allow your uploads to be viewed by others if you choose to share the url with them
+                </label>
             </dd>
         </dl>
         <dl class="dl-horizontal">
             <dt>
                 <label asp-for="SolomonFormula" class="control-label"></label>
-                <div class="text-muted">(Pre-transcendance only)</div>
             </dt>
             <dd>
-                <input type="radio" asp-for="SolomonFormula" value="Ln" checked="@Model.SolomonFormula.Equals("Ln", StringComparison.OrdinalIgnoreCase)" />
-                Ln <a href="#" class="text-muted" data-toggle="tooltip" data-placement="right" title="This formula is for optimal efficiency, but some consider it more boring as it causes you to dump many levels into Solomon">(?)</a>
-                <br />
-                <input type="radio" asp-for="SolomonFormula" value="Log" checked="@Model.SolomonFormula.Equals("Log", StringComparison.OrdinalIgnoreCase)" />
-                Log <a href="#" class="text-muted" data-toggle="tooltip" data-placement="right" title="This formula favors Solomon a little less. It's less efficient than the Ln formula, but some consider it more exciting as you will spend less time dumping levels into Solomon">(?)</a>
+                <label class="radio-inline">
+                    <input type="radio" asp-for="SolomonFormula" value="Ln" />
+                    Ln <a href="#" class="text-muted" data-toggle="tooltip" data-placement="right" title="This formula is for optimal efficiency, but some consider it more boring as it causes you to dump many levels into Solomon">(?)</a>
+                </label>
+                <label class="radio-inline">
+                    <input type="radio" asp-for="SolomonFormula" value="Log" />
+                    Log <a href="#" class="text-muted" data-toggle="tooltip" data-placement="right" title="This formula favors Solomon a little less. It's less efficient than the Ln formula, but some consider it more exciting as you will spend less time dumping levels into Solomon">(?)</a>
+                </label>
             </dd>
         </dl>
         <dl class="dl-horizontal">
@@ -88,11 +92,11 @@
                 <a href="https://www.reddit.com/r/ClickerHeroes/wiki/introduction#wiki_types_of_playstyle_builds" target="_blank" class="text-muted" data-toggle="tooltip" data-placement="bottom" title="This is how you play the game. Click for details on Idle and Active. Hybrid is basically Idle but using all cooldowns before ascending.">(?)</a>
             </dt>
             <dd>
-                @foreach (var enumValue in Enum.GetNames(typeof(PlayStyle)))
+                @foreach (var playStyle in Enum.GetNames(typeof(PlayStyle)))
                 {
-                    <input type="radio" asp-for="PlayStyle" value="@enumValue" checked="@Model.SolomonFormula.Equals(enumValue, StringComparison.OrdinalIgnoreCase)" />
-                    @enumValue;
-                    <br />
+                    <label class="radio-inline">
+                        <input type="radio" asp-for="PlayStyle" value="@playStyle" /> @playStyle
+                    </label>
                 }
             </dd>
         </dl>
@@ -102,25 +106,31 @@
                 <a href="#" class="text-muted" data-toggle="tooltip" data-placement="bottom" title="This is the ratio to use for leveling idle and active ancients. Clear the value to reset it to the default">(?)</a>
             </dt>
             <dd>
-                <input type="number" asp-for="HybridRatio" />
+                <input type="number" asp-for="HybridRatio" class="form-control" />
                 <span asp-validation-for="HybridRatio" class="text-danger"></span>
             </dd>
         </dl>
         <dl class="dl-horizontal">
             <dt>
                 <label asp-for="UseExperimentalStats" class="control-label"></label>
-                <a href="#" class="text-muted" data-toggle="tooltip" data-placement="bottom" title="This will show you experimental stats which may not be fully fleshed out and data availability may be spotty. Consider these &quot;beta&quot; features">(?)</a>
+                <a href="#" class="text-muted" data-toggle="tooltip" data-placement="bottom" title="">(?)</a>
             </dt>
-            <dd>
-                <input type="checkbox" asp-for="UseExperimentalStats" checked="@Model.UseExperimentalStats" />
+            <dd class="checkbox">
+                <label asp-for="UseExperimentalStats">
+                    <input type="checkbox" asp-for="UseExperimentalStats" />
+                    Show experimental stats which may not be fully fleshed out and data availability may be spotty. Consider these &quot;beta&quot; features
+                </label>
             </dd>
         </dl>
         <dl class="dl-horizontal">
             <dt>
                 <label asp-for="UseScientificNotation" class="control-label"></label>
             </dt>
-            <dd>
-                <input type="checkbox" asp-for="UseScientificNotation" checked="@Model.UseScientificNotation" onchange="$('#scientificNotationThresholdContainer').toggle()" />
+            <dd class="checkbox">
+                <label asp-for="UseScientificNotation">
+                    <input type="checkbox" asp-for="UseScientificNotation" onchange="$('#scientificNotationThresholdContainer').toggle()" />
+                    Use scientific notation
+                </label>
             </dd>
         </dl>
         <dl class="dl-horizontal" id="scientificNotationThresholdContainer" style="@(Model.UseScientificNotation ? string.Empty : "display:none")">
@@ -129,25 +139,30 @@
                 <a href="#" class="text-muted" data-toggle="tooltip" data-placement="bottom" title="This is the value at which to start showing numbers in scientific notation. Use &quot;0&quot; to always use it or clear the value to reset it to the default.">(?)</a>
             </dt>
             <dd>
-                <input type="number" asp-for="ScientificNotationThreshold" value="@Model.ScientificNotationThreshold" />
+                <input type="number" asp-for="ScientificNotationThreshold" class="form-control" />
                 <span asp-validation-for="ScientificNotationThreshold" class="text-danger"></span>
             </dd>
         </dl>
         <dl class="dl-horizontal">
             <dt>
                 <label asp-for="UseEffectiveLevelForSuggestions" class="control-label"></label>
-                <a href="#" class="text-muted" data-toggle="tooltip" data-placement="bottom" title="Use the effective level (ancient + relic levels) for ancient suggestions">(?)</a>
             </dt>
-            <dd>
-                <input type="checkbox" asp-for="UseEffectiveLevelForSuggestions" checked="@Model.UseEffectiveLevelForSuggestions" />
+            <dd class="checkbox">
+                <label asp-for="UseEffectiveLevelForSuggestions">
+                    <input type="checkbox" asp-for="UseEffectiveLevelForSuggestions" />
+                    Use the effective level (ancient + relic levels) for ancient suggestions
+                </label>
             </dd>
         </dl>
         <dl class="dl-horizontal">
             <dt>
                 <label asp-for="UseLogarithmicGraphScale" class="control-label"></label>
             </dt>
-            <dd>
-                <input type="checkbox" asp-for="UseLogarithmicGraphScale" checked="@Model.UseLogarithmicGraphScale" onchange="$('#logarithmicGraphScaleThresholdContainer').toggle()" />
+            <dd class="checkbox">
+                <label asp-for="UseLogarithmicGraphScale">
+                    <input type="checkbox" asp-for="UseLogarithmicGraphScale" onchange="$('#logarithmicGraphScaleThresholdContainer').toggle()" />
+                    Use logarithmic scale for graphs
+                </label>
             </dd>
         </dl>
         <dl class="dl-horizontal" id="logarithmicGraphScaleThresholdContainer" style="@(Model.UseLogarithmicGraphScale ? string.Empty : "display:none")">
@@ -156,7 +171,7 @@
                 <a href="#" class="text-muted" data-toggle="tooltip" data-placement="bottom" title="This is the range (max - min values) a graph must be to start using logarithmic scale. Use &quot;0&quot; to always use it or clear the value to reset it to the default.">(?)</a>
             </dt>
             <dd>
-                <input type="number" asp-for="LogarithmicGraphScaleThreshold" value="@Model.LogarithmicGraphScaleThreshold" />
+                <input type="number" asp-for="LogarithmicGraphScaleThreshold" class="form-control" />
                 <span asp-validation-for="LogarithmicGraphScaleThreshold" class="text-danger"></span>
             </dd>
         </dl>
