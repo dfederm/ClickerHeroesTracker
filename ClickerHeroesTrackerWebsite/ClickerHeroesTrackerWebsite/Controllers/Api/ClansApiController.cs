@@ -55,7 +55,7 @@ namespace ClickerHeroesTrackerWebsite.Controllers.Api
             {
                 Clan clan = await GetClanInfomation(client, savedGame);
 
-                if (clan == null)
+                if (clan?.Guild == null)
                 {
                     return this.NoContent();
                 }
@@ -204,18 +204,14 @@ namespace ClickerHeroesTrackerWebsite.Controllers.Api
 
             var userId = this.userManager.GetUserId(this.User);
             SavedGame savedGame = GetLatestSave(userId);
-            var clanName = "";
+            var clanName = string.Empty;
 
             if (savedGame?.UniqueId != null)
             {
                 using (var client = new HttpClient())
                 {
                     Clan clan = await GetClanInfomation(client, savedGame);
-
-                    if (clan != null)
-                    {
-                        clanName = clan.Guild.Name;
-                    }
+                    clanName = clan?.Guild?.Name ?? string.Empty;
                 }
             }
             
@@ -243,7 +239,7 @@ namespace ClickerHeroesTrackerWebsite.Controllers.Api
             {
                 Clan clan = await GetClanInfomation(client, savedGame);
 
-                if (clan == null)
+                if (clan?.Guild == null)
                 {
                     return this.NoContent();
                 }
