@@ -232,18 +232,6 @@ namespace ClickerHeroesTrackerWebsite.Controllers.Api
             upload.Stats.Add(StatType.MaxTranscendentPrimalReward, miscellaneousStatsModel.MaxTranscendentPrimalReward);
             upload.Stats.Add(StatType.BossLevelToTranscendentPrimalCap, miscellaneousStatsModel.BossLevelToTranscendentPrimalCap);
 
-            // Get suggested level stats
-            var suggestedAncientLevelsModel = new SuggestedAncientLevelsModel(
-                gameData,
-                savedGame,
-                ancientLevelsModel.AncientLevels,
-                uploadUserSettings,
-                miscellaneousStatsModel);
-            foreach (var suggestedAncientLevel in suggestedAncientLevelsModel.SuggestedAncientLevels)
-            {
-                upload.Stats.Add(AncientIds.GetSuggestedStatType(suggestedAncientLevel.Key), suggestedAncientLevel.Value);
-            }
-
             return this.Ok(upload);
         }
 

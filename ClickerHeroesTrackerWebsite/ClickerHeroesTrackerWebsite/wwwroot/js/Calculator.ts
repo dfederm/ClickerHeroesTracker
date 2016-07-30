@@ -53,7 +53,7 @@
                 hydrateStat(upload.stats, statType, upload.stats[statType]);
             }
 
-            // Remove the stats that didn't have values
+            // Add click to copy handlers
             const suggestedLevelsTables = Helpers.getElementsByDataType("suggestedLevels");
             if (suggestedLevelsTables)
             {
@@ -66,29 +66,30 @@
                     for (let j = 1; j < rows.length; j++)
                     {
                         const row = rows[j] as HTMLTableRowElement;
-                        const cell = row.cells[2] as HTMLTableCellElement;
-                        const dataType = cell.getAttribute("data-type");
-                        if (!upload.stats.hasOwnProperty(dataType) && cell.textContent === "0")
+                        const diffCell = row.cells[row.cells.length - 1];
+                        diffCell.addEventListener("click", function (): void
                         {
-                            row.classList.add("hidden");
-                        }
+                            Helpers.copyToClipboard(diffCell.textContent);
+                        });
                     }
                 }
             }
 
+            calculateAncientSuggestions(upload.stats, upload.playStyle);
+
             // Default Xyl to something reasonable for the playstyle
-            const ancientSouls = getAncientSouls();
+            const ancientSouls = upload.stats["totalAncientSouls"];
             let suggestedXylLevel = 0;
-            if (userSettings.playStyle === "idle")
+            if (upload.playStyle === "idle")
             {
                 // RoT says "at max 20% of total", but I prefer just 6
                 suggestedXylLevel = 6;
             }
-            else if (userSettings.playStyle === "hybrid")
+            else if (upload.playStyle === "hybrid")
             {
                 suggestedXylLevel = Math.round(0.05 * ancientSouls);
             }
-            else if (userSettings.playStyle === "active")
+            else if (upload.playStyle === "active")
             {
                 // RoT says 0-3, let's guess 3.
                 suggestedXylLevel = 3;
@@ -204,29 +205,6 @@
                 }
             }
 
-            if (statType.indexOf("suggested") === 0)
-            {
-                const diffStatType = statType.replace("suggested", "diff");
-                const ancientStatType = statType.replace("suggested", "ancient");
-                const itemStatType = statType.replace("suggested", "item");
-                const ancientStatValue = stats[ancientStatType] || 0;
-                const itemStatValue = Math.floor(stats[itemStatType]) || 0;
-
-                let diffStatValue = statValue - ancientStatValue;
-                if (userSettings.useEffectiveLevelForSuggestions)
-                {
-                    diffStatValue -= itemStatValue;
-                }
-
-                const statElement = Helpers.getElementsByDataType(diffStatType)[0];
-                statElement.addEventListener("click", function (): void
-                {
-                    Helpers.copyToClipboard(diffStatValue.toString());
-                });
-
-                hydrateStat(stats, diffStatType, diffStatValue);
-            }
-
             if (statType.indexOf("transcendentPower") === 0)
             {
                 displayText = (statValue * 100).toFixed(2) + "%";
@@ -244,9 +222,94 @@
         }
     }
 
+    function hydrateAncientSuggestion(stats: IMap<number>, ancient: string, suggestedLevel: number): void
+    {
+        // Normalize the value
+        suggestedLevel = Math.max(Math.round(suggestedLevel), 0);
+
+        hydrateStat(stats, "suggested" + ancient, suggestedLevel);
+        hydrateStat(stats, "diff" + ancient, suggestedLevel - getCurrentAncientLevel(stats, ancient));
+    }
+
+    function hideAncientSuggestion(ancient: string): void
+    {
+        const statElements = Helpers.getElementsByDataType("suggested" + ancient);
+        if (statElements)
+        {
+            for (let i = 0; i < statElements.length; i++)
+            {
+                statElements[i].parentElement.classList.add("hidden");
+            }
+        }
+    }
+
     function displayFailure(): void
     {
         // BUGBUG 51: Create Loading and Failure states for ajax loading
+    }
+
+    function calculateAncientSuggestions(stats: IMap<number>, playStyle: string): void
+    {
+        const primaryAncient = playStyle === "active" ? "Fragsworth" : "Siyalatas";
+
+        const currentPrimaryAncientLevel = getCurrentAncientLevel(stats, primaryAncient);
+        const currentBubosLevel = getCurrentAncientLevel(stats, "Bubos");
+        const currentChronosLevel = getCurrentAncientLevel(stats, "Chronos");
+        const currentDoraLevel = getCurrentAncientLevel(stats, "Dora");
+        const currentDogcogLevel = getCurrentAncientLevel(stats, "Dogcog");
+        const currentFortunaLevel = getCurrentAncientLevel(stats, "Fortuna");
+        const currentAtmanLevel = getCurrentAncientLevel(stats, "Atman");
+        const currentKumaLevel = getCurrentAncientLevel(stats, "Kumawakamaru");
+
+        const highestZone = stats["highestZoneThisTranscension"];
+        const transcendentPower = stats["transcendentPower"];
+
+        const lnPrimary = Math.log(currentPrimaryAncientLevel);
+        const hpScale = 1.145 + (0.005 * Math.floor(highestZone / 500));
+        const alpha = transcendentPower === 0 ? 0 : 1.4067 * Math.log(1 + transcendentPower) / Math.log(hpScale);
+        const lnAlpha = transcendentPower === 0 ? 0 : Math.log(alpha);
+
+        // Common formulas across play styles
+        hydrateAncientSuggestion(stats, "Argaiv", currentPrimaryAncientLevel);
+        hydrateAncientSuggestion(stats, "Atman", (2.832 * lnPrimary) - (1.416 * lnAlpha) - (1.416 * Math.log((4 / 3) - Math.pow(Math.E, -0.013 * currentAtmanLevel))) - 6.613);
+        hydrateAncientSuggestion(stats, "Bubos", (2.8 * lnPrimary) - (1.4 * Math.log(1 + Math.pow(Math.E, -0.02 * currentBubosLevel))) - 5.94);
+        hydrateAncientSuggestion(stats, "Chronos", (2.75 * lnPrimary) - (1.375 * Math.log(2 - Math.pow(Math.E, -0.034 * currentChronosLevel))) - 5.1);
+        hydrateAncientSuggestion(stats, "Dogcog", (2.844 * lnPrimary) - (1.422 * Math.log((1 / 99) + Math.pow(Math.E, -0.01 * currentDogcogLevel))) - 7.232);
+        hydrateAncientSuggestion(stats, "Dora", (2.877 * lnPrimary) - (1.4365 * Math.log((100 / 99) - Math.pow(Math.E, -0.002 * currentDoraLevel))) - 9.63);
+        hydrateAncientSuggestion(stats, "Fortuna", (2.875 * lnPrimary) - (1.4375 * Math.log((10 / 9) - Math.pow(Math.E, -0.0025 * currentFortunaLevel))) - 9.3);
+        hydrateAncientSuggestion(stats, "Kumawakamaru", (2.844 * lnPrimary) - (1.422 * lnAlpha) - (1.422 * Math.log(0.25 + Math.pow(Math.E, -0.001 * currentKumaLevel))) - 7.014);
+        const suggestedGoldLevel = currentPrimaryAncientLevel * 0.926;
+        hydrateAncientSuggestion(stats, "Libertas", suggestedGoldLevel);
+        hydrateAncientSuggestion(stats, "Mammon", suggestedGoldLevel);
+        hydrateAncientSuggestion(stats, "Mimzee", suggestedGoldLevel);
+        hydrateAncientSuggestion(stats, "Morgulis", currentPrimaryAncientLevel * currentPrimaryAncientLevel);
+        hydrateAncientSuggestion(stats, "Solomon", stats["transcendentPower"] > 0
+            ? Math.pow(currentPrimaryAncientLevel, 0.8) / Math.pow(alpha, 0.4)
+            : getPreTranscendentSuggestedSolomonLevel(currentPrimaryAncientLevel, playStyle));
+
+        // Math per play style
+        switch (playStyle)
+        {
+            case "idle":
+                hideAncientSuggestion("Bhaal");
+                hideAncientSuggestion("Fragsworth");
+                hideAncientSuggestion("Juggernaut");
+                break;
+            case "hybrid":
+                const hybridRatioReciprocal = 1 / userSettings.hybridRatio;
+                const suggestedActiveLevelUnrounded = hybridRatioReciprocal * currentPrimaryAncientLevel;
+                const suggestedActiveLevel = Math.round(suggestedActiveLevelUnrounded);
+                hydrateAncientSuggestion(stats, "Bhaal", suggestedActiveLevel);
+                hydrateAncientSuggestion(stats, "Fragsworth", suggestedActiveLevel);
+                hydrateAncientSuggestion(stats, "Juggernaut", Math.pow(suggestedActiveLevelUnrounded, 0.8));
+                break;
+            case "active":
+                hydrateAncientSuggestion(stats, "Bhaal", currentPrimaryAncientLevel);
+                hydrateAncientSuggestion(stats, "Juggernaut", Math.pow(currentPrimaryAncientLevel, 0.8));
+                hideAncientSuggestion("Libertas");
+                hideAncientSuggestion("Siyalatas");
+                break;
+        }
     }
 
     function calculateOutsiderSuggestions(): void
@@ -323,9 +386,43 @@
         Helpers.getElementsByDataType("suggestedOutsiderPonyboy")[0].textContent = suggestedPony.toString();
     }
 
-    function getAncientSouls(): number
+    function getCurrentAncientLevel(stats: IMap<number>, ancient: string): number
     {
-        return parseInt(Helpers.getElementsByDataType("totalAncientSouls")[0].textContent);
+        let ancientLevel = stats["ancient" + ancient] || 0;
+        if (userSettings.useEffectiveLevelForSuggestions)
+        {
+            ancientLevel += stats["item" + ancient] || 0;
+        }
+
+        return ancientLevel;
+    }
+
+    function getPreTranscendentSuggestedSolomonLevel(currentPrimaryAncientLevel: number, playStyle: string): number
+    {
+        let solomonMultiplier1: number;
+        let solomonMultiplier2: number;
+        switch (playStyle)
+        {
+            case "idle":
+                solomonMultiplier1 = 1.15;
+                solomonMultiplier2 = 3.25;
+                break;
+            case "hybrid":
+                solomonMultiplier1 = 1.32;
+                solomonMultiplier2 = 4.65;
+                break;
+            case "active":
+                solomonMultiplier1 = 1.21;
+                solomonMultiplier2 = 3.73;
+                break;
+        }
+
+        const solomonLogFunction = userSettings.useReducedSolomonFormula
+            ? Math.log10
+            : Math.log;
+        return currentPrimaryAncientLevel < 100
+            ? currentPrimaryAncientLevel
+            : Math.round(solomonMultiplier1 * Math.pow(solomonLogFunction(solomonMultiplier2 * Math.pow(currentPrimaryAncientLevel, 2)), 0.4) * Math.pow(currentPrimaryAncientLevel, 0.8));
     }
 
     const uploadId = Helpers.getElementsByDataType("uploadId")[0].textContent;
