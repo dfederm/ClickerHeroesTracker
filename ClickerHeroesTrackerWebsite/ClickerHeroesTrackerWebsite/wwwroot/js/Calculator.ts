@@ -53,28 +53,6 @@
                 hydrateStat(upload.stats, statType, upload.stats[statType]);
             }
 
-            // Add click to copy handlers
-            const suggestedLevelsTables = Helpers.getElementsByDataType("suggestedLevels");
-            if (suggestedLevelsTables)
-            {
-                for (let i = 0; i < suggestedLevelsTables.length; i++)
-                {
-                    const table = suggestedLevelsTables[i] as HTMLTableElement;
-                    const rows = table.rows;
-
-                    // Skip the first row since it's the header.
-                    for (let j = 1; j < rows.length; j++)
-                    {
-                        const row = rows[j] as HTMLTableRowElement;
-                        const diffCell = row.cells[row.cells.length - 1];
-                        diffCell.addEventListener("click", function (): void
-                        {
-                            Helpers.copyToClipboard(diffCell.textContent);
-                        });
-                    }
-                }
-            }
-
             calculateAncientSuggestions(upload.stats, upload.playStyle);
 
             // Default Xyl to something reasonable for the playstyle
@@ -202,6 +180,17 @@
                             tooltipElement.classList.remove("hidden");
                         }
                     }
+                }
+            }
+
+            if (statType.indexOf("diff") === 0)
+            {
+                for (let i = 0; i < statElements.length; i++)
+                {
+                    statElements[i].addEventListener("click", function (): void
+                    {
+                        Helpers.copyToClipboard(statValue.toString());
+                    });
                 }
             }
 
