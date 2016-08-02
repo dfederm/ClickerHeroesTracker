@@ -29,7 +29,7 @@
     "Microsoft.Extensions.Logging.Console": "1.0.0",
     "Microsoft.Extensions.Logging.Debug": "1.0.0",
     "OpenIddict": "1.0.0-alpha2-0383",
-    "Sendgrid": "7.0.3",
+    "Sendgrid": "8.0.2",
     "WindowsAzure.Storage": "7.1.3-preview"
   },
 
