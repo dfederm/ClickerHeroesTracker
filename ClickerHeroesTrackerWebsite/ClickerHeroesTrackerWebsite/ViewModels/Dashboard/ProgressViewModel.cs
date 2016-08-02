@@ -86,22 +86,29 @@ namespace ClickerHeroesTrackerWebsite.Models.Dashboard
                 return;
             }
 
-            this.ProminentGraphs = new List<GraphViewModel>
+            this.ProminentGraphs = new List<GraphViewModel>();
+
+            if (data.SoulsSpentData.Count > 0)
             {
                 this.CreateGraph(
                     "soulsSpentGraph",
                     "Souls Spent",
                     data.SoulsSpentData,
-                    userSettings),
+                    userSettings);
+            }
+
+            if (data.TitanDamageData.Count > 0)
+            {
                 this.CreateGraph(
                     "titanDamageGraph",
                     "Titan Damage",
                     data.TitanDamageData,
-                    userSettings),
+                    userSettings);
             };
 
             this.SecondaryGraphs = data
                 .AncientLevelData
+                .Where(x => x.Value.Count > 0)
                 .Select(x => this.CreateGraph(
                     x.Key.Name + "Graph",
                     x.Key.Name,
