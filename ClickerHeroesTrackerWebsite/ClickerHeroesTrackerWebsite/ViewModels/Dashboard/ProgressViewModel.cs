@@ -90,20 +90,20 @@ namespace ClickerHeroesTrackerWebsite.Models.Dashboard
 
             if (data.SoulsSpentData.Count > 0)
             {
-                this.CreateGraph(
+                this.ProminentGraphs.Add(this.CreateGraph(
                     "soulsSpentGraph",
                     "Souls Spent",
                     data.SoulsSpentData,
-                    userSettings);
+                    userSettings));
             }
 
             if (data.TitanDamageData.Count > 0)
             {
-                this.CreateGraph(
+                this.ProminentGraphs.Add(this.CreateGraph(
                     "titanDamageGraph",
                     "Titan Damage",
                     data.TitanDamageData,
-                    userSettings);
+                    userSettings));
             };
 
             this.SecondaryGraphs = data
