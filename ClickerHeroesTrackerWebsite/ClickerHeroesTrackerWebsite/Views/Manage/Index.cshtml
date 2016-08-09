@@ -7,26 +7,9 @@
 @{
     ViewBag.Title = "Manage your account";
 
-    // Detect user's timezone
-    var timeZoneEntries = new StringBuilder();
-    foreach (var timeZone in TimeZoneInfo
-        .GetSystemTimeZones()
-        .GroupBy(tz => tz.GetUtcOffset(DateTime.UtcNow))
-        .Select(grp => new KeyValuePair<string, string>(grp.Key.TotalMinutes.ToString(), grp.First().Id)))
-    {
-        timeZoneEntries.AppendFormat($"\"{timeZone.Key}\":\"{timeZone.Value}\",");
-    }
-
-    ContentManager.RegisterRawScript("$(\"#autodetectTimeZone\").click(function(evt){var timeZoneMapping={" + timeZoneEntries.ToString() + "};$(\"#TimeZoneId\").val(timeZoneMapping[-new Date().getTimezoneOffset()]);evt.preventDefault();});");
-
     // Wire up tooltips
     ContentManager.RegisterRawScript("$('[data-toggle=\"tooltip\"]').tooltip();");
 }
-
-@* Detect user's timezone *@
-<script type="text/javascript">
-    
-</script>
 
 <h2>@ViewBag.Title.</h2>
 <p class="text-success">@ViewBag.StatusMessage</p>
@@ -53,13 +36,6 @@
     </dl>
     <hr />
     <form asp-controller="Manage" asp-action="Index" method="post" class="form-horizontal" role="form">
-        <dl class="dl-horizontal">
-            <dt><label asp-for="TimeZoneId" class="control-label"></label></dt>
-            <dd>
-                <select asp-for="TimeZoneId" asp-items="@(new SelectList(IndexViewModel.TimeZones, "Id", "Name", Model.TimeZoneId))" class="input-sm"></select>
-                <button id="autodetectTimeZone" class="btn btn-default">Autodetect</button>
-            </dd>
-        </dl>
         <dl class="dl-horizontal">
             <dt>
                 <label asp-for="AreUploadsPublic" class="control-label"></label>

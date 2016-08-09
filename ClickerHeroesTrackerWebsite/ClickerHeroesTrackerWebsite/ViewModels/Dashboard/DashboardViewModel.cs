@@ -102,14 +102,14 @@ namespace ClickerHeroesTrackerWebsite.Models.Dashboard
                             Data = dataSeries
                                 .Select(datum => new Point
                                 {
-                                    X = datum.Key.ToJavascriptTime(userSettings.TimeZone),
+                                    X = datum.Key.ToJavascriptTime(),
                                     Y = datum.Value
                                 })
                                 .Concat(new[]
                                 {
                                     new Point
                                     {
-                                        X = DateTime.UtcNow.ToJavascriptTime(userSettings.TimeZone),
+                                        X = DateTime.UtcNow.ToJavascriptTime(),
                                         Y = dataSeries.Last().Value
                                     }
                                 })

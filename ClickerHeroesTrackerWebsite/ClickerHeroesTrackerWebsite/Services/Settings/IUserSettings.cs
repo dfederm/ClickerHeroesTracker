@@ -4,18 +4,11 @@
 
 namespace ClickerHeroesTrackerWebsite.Models.Settings
 {
-    using System;
-
     /// <summary>
     /// The user's persistent site settings
     /// </summary>
     public interface IUserSettings
     {
-        /// <summary>
-        /// Gets or sets the user's time zone
-        /// </summary>
-        TimeZoneInfo TimeZone { get; set; }
-
         /// <summary>
         /// Gets or sets a value indicating whether the user's uploads are public.
         /// </summary>

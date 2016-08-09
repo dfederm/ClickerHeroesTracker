@@ -109,7 +109,6 @@ namespace ClickerHeroesTrackerWebsite.Controllers
             var user = await this.userManager.GetUserAsync(this.User);
             var userSettings = this.userSettingsProvider.Get(user.Id);
 
-            userSettings.TimeZone = TimeZoneInfo.FindSystemTimeZoneById(indexViewModel.TimeZoneId);
             userSettings.AreUploadsPublic = indexViewModel.AreUploadsPublic;
             userSettings.UseReducedSolomonFormula = indexViewModel.SolomonFormula.Equals("Log", StringComparison.OrdinalIgnoreCase);
             userSettings.PlayStyle = indexViewModel.PlayStyle.SafeParseEnum<PlayStyle>();
@@ -336,7 +335,6 @@ namespace ClickerHeroesTrackerWebsite.Controllers
             {
                 HasPassword = await this.userManager.HasPasswordAsync(user),
                 Logins = await this.userManager.GetLoginsAsync(user),
-                TimeZoneId = userSettings.TimeZone.Id,
                 AreUploadsPublic = userSettings.AreUploadsPublic,
                 SolomonFormula = userSettings.UseReducedSolomonFormula ? "Log" : "Ln",
                 PlayStyle = userSettings.PlayStyle.ToString(),

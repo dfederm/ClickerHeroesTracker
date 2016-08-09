@@ -4,15 +4,12 @@
 
 namespace ClickerHeroesTrackerWebsite.Controllers
 {
-    using System;
-    using System.Linq;
     using System.Security.Claims;
     using System.Threading.Tasks;
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Identity;
     using Microsoft.AspNetCore.Mvc;
     using ClickerHeroesTrackerWebsite.Models;
-    using ClickerHeroesTrackerWebsite.Models.Settings;
     using ClickerHeroesTrackerWebsite.Services.Email;
     using ClickerHeroesTrackerWebsite.ViewModels.Account;
 
@@ -22,7 +19,6 @@ namespace ClickerHeroesTrackerWebsite.Controllers
     [Authorize]
     public class AccountController : Controller
     {
-        private readonly IUserSettingsProvider userSettingsProvider;
         private readonly SignInManager<ApplicationUser> signInManager;
         private readonly UserManager<ApplicationUser> userManager;
         private readonly IEmailSender emailSender;
@@ -30,14 +26,11 @@ namespace ClickerHeroesTrackerWebsite.Controllers
         /// <summary>
         /// Initializes a new instance of the <see cref="AccountController"/> class.
         /// </summary>
-        /// <param name="userSettingsProvider">The user settings provider</param>
         public AccountController(
-            IUserSettingsProvider userSettingsProvider,
             SignInManager<ApplicationUser> signInManager,
             UserManager<ApplicationUser> userManager,
             IEmailSender emailSender)
         {
-            this.userSettingsProvider = userSettingsProvider;
             this.signInManager = signInManager;
             this.userManager = userManager;
             this.emailSender = emailSender;
@@ -128,10 +121,6 @@ namespace ClickerHeroesTrackerWebsite.Controllers
                 var result = await this.userManager.CreateAsync(user, model.Password);
                 if (result.Succeeded)
                 {
-                    // Save the user's initial settings
-                    var userSettings = this.userSettingsProvider.Get(user.Id);
-                    userSettings.TimeZone = TimeZoneInfo.GetSystemTimeZones().FirstOrDefault(tz => tz.GetUtcOffset(DateTime.UtcNow).TotalMinutes == -model.TimezoneOffset);
-
                     await this.signInManager.SignInAsync(user, isPersistent: false);
                     return this.RedirectToAction(nameof(HomeController.Index), "Home");
                 }

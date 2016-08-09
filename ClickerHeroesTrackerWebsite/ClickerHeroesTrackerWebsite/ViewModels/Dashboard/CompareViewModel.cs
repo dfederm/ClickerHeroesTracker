@@ -127,11 +127,9 @@ namespace ClickerHeroesTrackerWebsite.Models.Dashboard
             IDictionary<DateTime, double> userData2,
             IUserSettings userSettings)
         {
-            var timeZone = userSettings.TimeZone;
-
             var series = new List<Series>();
-            TryAddSeries(series, timeZone, userName1, userData1, Colors.PrimarySeriesColor);
-            TryAddSeries(series, timeZone, userName2, userData2, Colors.OpposingSeriesColor);
+            TryAddSeries(series, userName1, userData1, Colors.PrimarySeriesColor);
+            TryAddSeries(series, userName2, userData2, Colors.OpposingSeriesColor);
 
             return new GraphViewModel
             {
@@ -183,7 +181,6 @@ namespace ClickerHeroesTrackerWebsite.Models.Dashboard
 
         private static List<Series> TryAddSeries(
             List<Series> series,
-            TimeZoneInfo timeZone,
             string name,
             IDictionary<DateTime, double> data,
             string color)
@@ -197,14 +194,14 @@ namespace ClickerHeroesTrackerWebsite.Models.Dashboard
                     Data = data
                         .Select(datum => new Point
                         {
-                            X = datum.Key.ToJavascriptTime(timeZone),
+                            X = datum.Key.ToJavascriptTime(),
                             Y = datum.Value
                         })
                         .Concat(new[]
                         {
                             new Point
                             {
-                                X = DateTime.UtcNow.ToJavascriptTime(timeZone),
+                                X = DateTime.UtcNow.ToJavascriptTime(),
                                 Y = data.Last().Value
                             }
                         })

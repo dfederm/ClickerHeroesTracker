@@ -6,10 +6,8 @@ namespace ClickerHeroesTrackerWebsite.Models.Settings
 {
     using System;
     using System.Collections.Generic;
-    using System.Data;
     using System.Text;
     using ClickerHeroesTrackerWebsite.Services.Database;
-    using Newtonsoft.Json;
 
     internal sealed class UserSettings : IUserSettings
     {
@@ -36,20 +34,6 @@ namespace ClickerHeroesTrackerWebsite.Models.Settings
         }
 
         private delegate bool TryParse<T>(string rawValue, out T value);
-
-        [JsonIgnore] // Don't send down to the client since we can get the value from their browser and TimeZoneInfo doesn't serialize well.
-        public TimeZoneInfo TimeZone
-        {
-            get
-            {
-                return this.GetValue(1, TryParseTimeZone, TimeZoneInfo.Utc);
-            }
-
-            set
-            {
-                this.SetValue(1, value.Id);
-            }
-        }
 
         public bool AreUploadsPublic
         {
@@ -258,20 +242,6 @@ namespace ClickerHeroesTrackerWebsite.Models.Settings
             }
 
             this.dirtySettings.Clear();
-        }
-
-        private static bool TryParseTimeZone(string value, out TimeZoneInfo timeZone)
-        {
-            try
-            {
-                timeZone = TimeZoneInfo.FindSystemTimeZoneById(value);
-                return true;
-            }
-            catch (TimeZoneNotFoundException)
-            {
-                timeZone = null;
-                return false;
-            }
         }
 
         private void Fill()

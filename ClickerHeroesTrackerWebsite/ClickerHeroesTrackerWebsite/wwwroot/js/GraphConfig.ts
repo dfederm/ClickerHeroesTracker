@@ -9,6 +9,12 @@ namespace GraphConfig
 {
     "use strict";
 
+    Highcharts.setOptions({
+        global: {
+            useUTC: false,
+        },
+    });
+
     Highcharts.wrap(Highcharts, "numberFormat", function (orig: () => string): string
     {
         const value = arguments[1] as number;

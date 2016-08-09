@@ -150,8 +150,6 @@ namespace ClickerHeroesTrackerWebsite.Models.Dashboard
             IDictionary<DateTime, double> data,
             IUserSettings userSettings)
         {
-            var timeZone = userSettings.TimeZone;
-
             return new GraphViewModel
             {
                 Id = id,
@@ -203,14 +201,14 @@ namespace ClickerHeroesTrackerWebsite.Models.Dashboard
                             Data = data
                                 .Select(datum => new Point
                                 {
-                                    X = datum.Key.ToJavascriptTime(timeZone),
+                                    X = datum.Key.ToJavascriptTime(),
                                     Y = datum.Value
                                 })
                                 .Concat(new[]
                                 {
                                     new Point
                                     {
-                                        X = DateTime.UtcNow.ToJavascriptTime(timeZone),
+                                        X = DateTime.UtcNow.ToJavascriptTime(),
                                         Y = data.Last().Value
                                     }
                                 })

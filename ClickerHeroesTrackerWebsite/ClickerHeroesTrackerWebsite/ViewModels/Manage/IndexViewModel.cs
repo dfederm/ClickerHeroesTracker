@@ -4,9 +4,7 @@
 
 namespace ClickerHeroesTrackerWebsite.Models
 {
-    using System;
     using System.Collections.Generic;
-    using System.Linq;
     using Microsoft.AspNetCore.Identity;
     using System.ComponentModel.DataAnnotations;
 
@@ -16,13 +14,6 @@ namespace ClickerHeroesTrackerWebsite.Models
     public class IndexViewModel
     {
         /// <summary>
-        /// Gets a collection of all supported time zones.
-        /// </summary>
-        public static IEnumerable<TimeZoneSelectItem> TimeZones { get; } = TimeZoneInfo
-            .GetSystemTimeZones()
-            .Select(tz => new TimeZoneSelectItem { Id = tz.Id, Name = tz.DisplayName });
-
-        /// <summary>
         /// Gets or sets a value indicating whether the user has a password set.
         /// </summary>
         public bool HasPassword { get; set; }
@@ -31,12 +22,6 @@ namespace ClickerHeroesTrackerWebsite.Models
         /// Gets or sets a list of login providers the user has set up.
         /// </summary>
         public IList<UserLoginInfo> Logins { get; set; }
-
-        /// <summary>
-        /// Gets or sets the user's time zone id.
-        /// </summary>
-        [Display(Name = "Time Zone")]
-        public string TimeZoneId { get; set; }
 
         /// <summary>
         /// Gets or sets a value indicating whether the user's uploads are public.
@@ -98,21 +83,5 @@ namespace ClickerHeroesTrackerWebsite.Models
         /// </summary>
         [Display(Name = "Hybrid Ratio")]
         public int? HybridRatio { get; set; }
-
-        /// <summary>
-        /// Model for an option for the time zone select control.
-        /// </summary>
-        public class TimeZoneSelectItem
-        {
-            /// <summary>
-            /// Gets or sets the time zone id
-            /// </summary>
-            public string Id { get; set; }
-
-            /// <summary>
-            /// Gets or sets the time zone display name.
-            /// </summary>
-            public string Name { get; set; }
-        }
     }
 }

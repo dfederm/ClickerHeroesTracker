@@ -3,9 +3,6 @@
 @model RegisterViewModel
 @{
     ViewBag.Title = "Register";
-
-    @* Detect user's timezone *@
-    ContentManager.RegisterRawScript("$(\"input[name=TimezoneOffset]\").val(new Date().getTimezoneOffset())");
 }
 
 <h2>@ViewBag.Title.</h2>
@@ -47,7 +44,6 @@
             </div>
             <div class="form-group">
                 <div class="col-md-offset-2 col-md-10">
-                    <input type="hidden" asp-for="TimezoneOffset" id="timezoneOffset" />
                     <button type="submit" class="btn btn-default">Register</button>
                 </div>
             </div>

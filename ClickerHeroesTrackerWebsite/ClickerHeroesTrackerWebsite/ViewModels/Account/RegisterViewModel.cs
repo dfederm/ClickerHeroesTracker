@@ -44,10 +44,5 @@ namespace ClickerHeroesTrackerWebsite.ViewModels.Account
         [Display(Name = "Confirm password")]
         [Compare("Password", ErrorMessage = "The password and confirmation password do not match.")]
         public string ConfirmPassword { get; set; }
-
-        /// <summary>
-        /// Gets or sets the user's detected timezone offset.
-        /// </summary>
-        public int TimezoneOffset { get; set; }
     }
 }

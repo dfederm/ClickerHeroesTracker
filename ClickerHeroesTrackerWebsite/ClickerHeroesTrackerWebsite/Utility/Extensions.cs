@@ -11,10 +11,9 @@ namespace ClickerHeroesTrackerWebsite.Models
     {
         private static DateTime javascriptEpoch = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
 
-        public static long ToJavascriptTime(this DateTime datetime, TimeZoneInfo timeZone)
+        public static long ToJavascriptTime(this DateTime datetime)
         {
-            var totalMilliseconds = (long)TimeZoneInfo
-                .ConvertTime(datetime, TimeZoneInfo.Utc, timeZone)
+            var totalMilliseconds = (long)datetime
                 .Subtract(javascriptEpoch)
                 .TotalMilliseconds;
 
@@ -52,9 +51,7 @@ namespace ClickerHeroesTrackerWebsite.Models
         public static DateTime UnixTimeStampToDateTime(this double unixTimeStamp)
         {
             // Unix timestamp is seconds past epoch
-            var dateTime = new DateTime(1970, 1, 1, 0, 0, 0, 0, System.DateTimeKind.Utc);
-            dateTime = dateTime.AddSeconds(unixTimeStamp);
-            return dateTime;
+            return javascriptEpoch.AddSeconds(unixTimeStamp);
         }
     }
 }
