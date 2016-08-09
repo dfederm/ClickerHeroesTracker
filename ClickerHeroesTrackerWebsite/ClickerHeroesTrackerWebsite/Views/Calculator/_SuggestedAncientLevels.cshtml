@@ -23,7 +23,7 @@
         <th>Ancient</th>
         <th>Current</th>
         <th>Suggested</th>
-        <th>Difference <span class="text-muted" data-toggle="tooltip" data-original-title="Click value to copy">(?)</span></th>
+        <th>Difference</th>
     </tr>
     @for (var i = 0; i < Model.Count; i++)
     {
@@ -52,7 +52,12 @@
             </td>
 
             <td data-type="@AncientIds.GetSuggestedStatType(ancient.Id).ToString().ToCamelCase()" class="text-right">0</td>
-            <td data-type="diff@(ancient.Name)" class="text-right clickable">0</td>
+            <td
+                data-type="diff@(ancient.Name)"
+                class="text-right clickable"
+                data-toggle="tooltip"
+                data-placement="right"
+                title="Click to copy to clipboard">0</td>
         </tr>
     }
 </table>

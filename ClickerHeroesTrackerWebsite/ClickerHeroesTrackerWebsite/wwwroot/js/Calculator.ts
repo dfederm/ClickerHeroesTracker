@@ -119,7 +119,11 @@
         const diffPrimaryAncientElements = Helpers.getElementsByDataType("diff" + primaryAncient);
         for (let i = 0; i < diffPrimaryAncientElements.length; i++)
         {
-            diffPrimaryAncientElements[i].textContent = "";
+            const diffPrimaryAncientElement = diffPrimaryAncientElements[i];
+
+            diffPrimaryAncientElement.textContent = "";
+            diffPrimaryAncientElement.classList.remove("clickable");
+            $(diffPrimaryAncientElement).tooltip("disable");
         }
     }
 
