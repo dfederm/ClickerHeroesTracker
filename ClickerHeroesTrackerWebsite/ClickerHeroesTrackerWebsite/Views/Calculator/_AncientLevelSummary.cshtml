@@ -1,25 +1,53 @@
 ﻿@using ClickerHeroesTrackerWebsite.Models.Game
 
 @inject GameData GameData
+@inject SignInManager<ApplicationUser> SignInManager
 
-<h4>Ancient Summary:</h4>
+<h4>Ancients:</h4>
+
+<p class="text-muted">
+    Based on the <a href="https://redd.it/4naohc" target="_blank">Math by /u/sugima</a>.
+</p>
+
+<p class="text-muted">
+    These suggestions are based on your play style. You may change your play style in your @Html.ActionLink("settings", "Index", "Manage").
+</p>
+
 <table class="table">
     <tr>
         <th>Ancient</th>
-        <th>Level</th>
-        <th></th>
+        <th>Current</th>
+        <th>Suggested</th>
+        <th>Difference</th>
     </tr>
     @foreach (var ancient in GameData.Ancients.Values.Where(a => !a.NonTranscendent).OrderBy(a => a.Name, StringComparer.OrdinalIgnoreCase))
     {
         <tr>
-            <td>@ancient.Name:</td>
-            <td data-type="@AncientIds.GetAncientStatType(ancient.Id).ToString().ToCamelCase()" class="text-right">0</td>
-            <td data-type="@AncientIds.GetAncientStatType(ancient.Id).ToString().ToCamelCase()Tooltip"
-                class="hidden"
-                data-toggle="tooltip"
-                data-placement="bottom"
-                data-html="true"
-                title="">(*)</td>
+            <td>
+                @ancient.Name:
+                @if (ancient.Id == AncientIds.Solomon)
+                {
+                    var solomonTooltip = SignInManager.IsSignedIn(User)
+                        ? "This is using your settings for the Solomon formula preference. You can change this on your settings page."
+                        : "By default we use the \"Ln\" Solomon formula. You may change this by logging in and changing your settings.";
+                    <a href="/Manage" class="text-muted hidden" data-toggle="tooltip" data-placement="right" data-type="solomonTooltip" title="@solomonTooltip">(?)</a>
+                }
+            </td>
+
+            <td class="text-right">
+                <span data-type="@AncientIds.GetAncientStatType(ancient.Id).ToString().ToCamelCase()" class="text-right">0</span>
+                <span data-type="@AncientIds.GetAncientStatType(ancient.Id).ToString().ToCamelCase()Tooltip"
+                      class="hidden"
+                      data-toggle="tooltip"
+                      data-placement="bottom"
+                      data-html="true"
+                      title="">(*)</span>
+            </td>
+
+            <td data-type="@AncientIds.GetSuggestedStatType(ancient.Id).ToString().ToCamelCase()" class="text-right">-</td>
+            <td data-type="diff@(ancient.Name)" class="text-right">
+                -
+            </td>
         </tr>
     }
 </table>

@@ -119,11 +119,7 @@
         const diffPrimaryAncientElements = Helpers.getElementsByDataType("diff" + primaryAncient);
         for (let i = 0; i < diffPrimaryAncientElements.length; i++)
         {
-            const diffPrimaryAncientElement = diffPrimaryAncientElements[i];
-
-            diffPrimaryAncientElement.textContent = "";
-            diffPrimaryAncientElement.classList.remove("clickable");
-            $(diffPrimaryAncientElement).tooltip("disable");
+            diffPrimaryAncientElements[i].textContent = "";
         }
     }
 
@@ -191,7 +187,13 @@
             {
                 for (let i = 0; i < statElements.length; i++)
                 {
-                    statElements[i].addEventListener("click", function (): void
+                    const statElement = statElements[i];
+                    $(statElement).tooltip({
+                        placement: "right",
+                        title: "Click to copy to clipboard",
+                    });
+                    statElement.classList.add("clickable");
+                    statElement.addEventListener("click", function (): void
                     {
                         Helpers.copyToClipboard(statValue.toString());
                     });
@@ -222,18 +224,6 @@
 
         hydrateStat(stats, "suggested" + ancient, suggestedLevel);
         hydrateStat(stats, "diff" + ancient, suggestedLevel - getCurrentAncientLevel(stats, ancient));
-    }
-
-    function hideAncientSuggestion(ancient: string): void
-    {
-        const statElements = Helpers.getElementsByDataType("suggested" + ancient);
-        if (statElements)
-        {
-            for (let i = 0; i < statElements.length; i++)
-            {
-                statElements[i].parentElement.classList.add("hidden");
-            }
-        }
     }
 
     function displayFailure(): void
@@ -284,9 +274,6 @@
         switch (playStyle)
         {
             case "idle":
-                hideAncientSuggestion("Bhaal");
-                hideAncientSuggestion("Fragsworth");
-                hideAncientSuggestion("Juggernaut");
                 break;
             case "hybrid":
                 const hybridRatioReciprocal = 1 / userSettings.hybridRatio;
@@ -299,8 +286,6 @@
             case "active":
                 hydrateAncientSuggestion(stats, "Bhaal", currentPrimaryAncientLevel);
                 hydrateAncientSuggestion(stats, "Juggernaut", Math.pow(currentPrimaryAncientLevel, 0.8));
-                hideAncientSuggestion("Libertas");
-                hideAncientSuggestion("Siyalatas");
                 break;
         }
     }
