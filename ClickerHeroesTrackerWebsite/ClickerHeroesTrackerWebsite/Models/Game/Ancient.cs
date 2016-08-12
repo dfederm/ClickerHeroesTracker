@@ -33,9 +33,15 @@ namespace ClickerHeroesTrackerWebsite.Models.Game
         public bool NonTranscendent { get; set; }
 
         /// <summary>
+        /// Gets or sets the level cost formula.
+        /// </summary>
+        [JsonProperty(PropertyName = "levelCostFormula", Required = Required.Always)]
+        public LevelCostFormula LevelCostFormula { get; set; }
+
+        /// <summary>
         /// Gets the ancient's name.
         /// </summary>
-        [JsonIgnore]
+        [JsonProperty(PropertyName = "shortName")]
         public string Name
         {
             get

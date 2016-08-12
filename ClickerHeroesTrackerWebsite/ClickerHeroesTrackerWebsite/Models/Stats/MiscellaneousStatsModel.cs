@@ -75,6 +75,9 @@ namespace ClickerHeroesTrackerWebsite.Models.Stats
                 var bossNumber = Math.Ceiling(Math.Log(this.MaxTranscendentPrimalReward / (20 * solomonMultiplier)) / Math.Log(1 + this.TranscendentPower));
                 this.BossLevelToTranscendentPrimalCap = (bossNumber * 5) + 100;
             }
+
+            this.HeroSouls = savedGame.HeroSouls;
+            this.PendingSouls = savedGame.PendingSouls;
         }
 
         /// <summary>
@@ -136,5 +139,15 @@ namespace ClickerHeroesTrackerWebsite.Models.Stats
         /// Gets the boss level at which the TP primal cap is reached.
         /// </summary>
         public double BossLevelToTranscendentPrimalCap { get; }
+
+        /// <summary>
+        /// Gets or sets current number of souls.
+        /// </summary>
+        public double HeroSouls { get; set; }
+
+        /// <summary>
+        /// Gets or sets number of souls earned upon ascending.
+        /// </summary>
+        public double PendingSouls { get; }
     }
 }

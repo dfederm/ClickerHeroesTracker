@@ -124,5 +124,7 @@ namespace ClickerHeroesTrackerWebsite.Models.Api.Stats
         AscensionsLifetime,
         MaxTranscendentPrimalReward,
         BossLevelToTranscendentPrimalCap,
+        HeroSouls,
+        PendingSouls,
     }
 }

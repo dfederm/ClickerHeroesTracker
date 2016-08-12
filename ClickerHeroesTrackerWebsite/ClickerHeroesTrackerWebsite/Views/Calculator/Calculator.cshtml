@@ -1,6 +1,8 @@
 ﻿@using ClickerHeroesTrackerWebsite.Models.Calculator;
+@using ClickerHeroesTrackerWebsite.Models.Game;
 
 @inject IContentManager ContentManager
+@inject GameData GameData
 
 @model CalculatorViewModel
 
@@ -136,3 +138,7 @@
         @Html.Partial("_ComputedStats")
     </div>
 </div>
+
+<script type="text/javascript">
+    var ancientsData = @Json.Serialize(GameData.Ancients);
+</script>

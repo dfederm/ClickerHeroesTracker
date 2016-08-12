@@ -231,6 +231,8 @@ namespace ClickerHeroesTrackerWebsite.Controllers.Api
             upload.Stats.Add(StatType.TranscendentPower, miscellaneousStatsModel.TranscendentPower);
             upload.Stats.Add(StatType.MaxTranscendentPrimalReward, miscellaneousStatsModel.MaxTranscendentPrimalReward);
             upload.Stats.Add(StatType.BossLevelToTranscendentPrimalCap, miscellaneousStatsModel.BossLevelToTranscendentPrimalCap);
+            upload.Stats.Add(StatType.HeroSouls, miscellaneousStatsModel.HeroSouls);
+            upload.Stats.Add(StatType.PendingSouls, miscellaneousStatsModel.PendingSouls);
 
             return this.Ok(upload);
         }

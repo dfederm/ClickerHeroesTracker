@@ -103,7 +103,19 @@ namespace ClickerHeroesTrackerWebsite.Models.SaveData
         /// </summary>
         [JsonProperty(PropertyName = "passwordHash")]
         public string PasswordHash { get; set; }
-        
+
+        /// <summary>
+        /// Gets or sets current number of souls.
+        /// </summary>
+        [JsonProperty(PropertyName = "heroSouls")]
+        public double HeroSouls { get; set; }
+
+        /// <summary>
+        /// Gets or sets number of souls earned upon ascending.
+        /// </summary>
+        [JsonProperty(PropertyName = "primalSouls")]
+        public double PendingSouls { get; set; }
+
         /// <summary>
         /// Parsed the encoded save game data to a structured object.
         /// </summary>

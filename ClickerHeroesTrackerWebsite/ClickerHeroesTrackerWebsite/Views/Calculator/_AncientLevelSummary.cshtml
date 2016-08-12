@@ -9,7 +9,38 @@
     Based on the <a href="https://redd.it/4naohc" target="_blank">Math by /u/sugima</a>.
 </p>
 
-<table class="table">
+<div class="form-group row">
+    <label class="col-sm-3 control-label" for="SuggestionType">
+        Suggestion Type
+    </label>
+    <div class="col-sm-9">
+        <label class="radio-inline">
+            <input type="radio" name="SuggestionType" value="RulesOfThumb" checked="checked" />
+            Rules of Thumb
+            <span class="text-muted"
+                  data-toggle="tooltip"
+                  data-placement="bottom"
+                  title="This shows the optimal levels based on your primary ancient's level. It does not take into account what you can afford currently">(?)</span>
+        </label>
+        <label class="radio-inline">
+            <input type="radio" name="SuggestionType" value="AvailableSouls" />
+            Available Souls (Beta)
+            <span class="text-muted"
+                  data-toggle="tooltip"
+                  data-placement="bottom"
+                  title="This mode suggests what to buy based on the souls you currently have available">(?)</span>
+        </label>
+    </div>
+    <div class="checkbox col-sm-offset-3 col-sm-9 hidden">
+        <label for="UseSoulsFromAscension">
+            <input checked="checked" id="UseSoulsFromAscension" name="UseSoulsFromAscension" type="checkbox" value="true">
+            Include souls from ascension
+            (+<span data-type="pendingSouls">0</span>)
+        </label>
+    </div>
+</div>
+
+<table class="table" data-type="ancientLevels">
     <tr>
         <th>Ancient</th>
         <th>Current</th>

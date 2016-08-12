@@ -2,8 +2,16 @@
 {
     "use strict";
 
+    // An index for quick lookup of ancient cost formulas.
+    // Each formula gets the sum of the cost of the ancient from 1 to N.
+    const ancientCostFormulas = getAncientCostFormulas();
+
+    let lastUpload: IUpload;
+
     function handleSuccess(upload: IUpload): void
     {
+        lastUpload = upload;
+
         const userNameElements = Helpers.getElementsByDataType("uploadUserName");
         for (let i = 0; i < userNameElements.length; i++)
         {
@@ -53,7 +61,7 @@
                 hydrateStat(upload.stats, statType, upload.stats[statType]);
             }
 
-            calculateAncientSuggestions(upload.stats, upload.playStyle);
+            hydrateAncientSuggestions();
 
             // Default Xyl to something reasonable for the playstyle
             const ancientSouls = upload.stats["totalAncientSouls"];
@@ -90,36 +98,6 @@
                     solomonTooltipElements[i].classList.remove("hidden");
                 }
             }
-        }
-
-        // Handle play style
-        const primaryAncient = upload.playStyle === "active"
-            ? "Fragsworth"
-            : "Siyalatas";
-
-        const suggestedPrimaryAncientElements = Helpers.getElementsByDataType("suggested" + primaryAncient);
-        for (let i = 0; i < suggestedPrimaryAncientElements.length; i++)
-        {
-            const suggestedPrimaryAncientElement = suggestedPrimaryAncientElements[i];
-            suggestedPrimaryAncientElement.textContent = "N/A ";
-
-            const suggestedPrimaryAncientTooltip = document.createElement("span");
-            suggestedPrimaryAncientTooltip.classList.add("text-muted");
-            suggestedPrimaryAncientTooltip.setAttribute("data-toggle", "tooltip");
-            suggestedPrimaryAncientTooltip.setAttribute("data-placement", "bottom");
-            suggestedPrimaryAncientTooltip.title = "The formulae are based on this ancient. If all suggestions below are negative or zero, level this ancient.";
-            suggestedPrimaryAncientTooltip.textContent = "(?)";
-
-            suggestedPrimaryAncientElement.appendChild(suggestedPrimaryAncientTooltip);
-
-            // Wire up tooltip
-            $(suggestedPrimaryAncientTooltip).tooltip();
-        }
-
-        const diffPrimaryAncientElements = Helpers.getElementsByDataType("diff" + primaryAncient);
-        for (let i = 0; i < diffPrimaryAncientElements.length; i++)
-        {
-            diffPrimaryAncientElements[i].textContent = "";
         }
     }
 
@@ -219,9 +197,6 @@
 
     function hydrateAncientSuggestion(stats: IMap<number>, ancient: string, suggestedLevel: number): void
     {
-        // Normalize the value
-        suggestedLevel = Math.max(Math.round(suggestedLevel), 0);
-
         hydrateStat(stats, "suggested" + ancient, suggestedLevel);
         hydrateStat(stats, "diff" + ancient, suggestedLevel - getCurrentAncientLevel(stats, ancient));
     }
@@ -231,11 +206,130 @@
         // BUGBUG 51: Create Loading and Failure states for ajax loading
     }
 
-    function calculateAncientSuggestions(stats: IMap<number>, playStyle: string): void
+    function hydrateAncientSuggestions(): void
     {
-        const primaryAncient = playStyle === "active" ? "Fragsworth" : "Siyalatas";
+        const stats = lastUpload.stats;
+        if (!stats)
+        {
+            return;
+        }
 
-        const currentPrimaryAncientLevel = getCurrentAncientLevel(stats, primaryAncient);
+        const primaryAncient = lastUpload.playStyle === "active"
+            ? "Fragsworth"
+            : "Siyalatas";
+
+        let suggestedLevels: IMap<number>;
+
+        const suggestionType = $("input[name='SuggestionType']:checked").val();
+        const useSoulsFromAscensionElement = document.getElementById("UseSoulsFromAscension") as HTMLInputElement;
+        const useSoulsFromAscensionContainer = useSoulsFromAscensionElement.parentElement.parentElement;
+        if (suggestionType === "AvailableSouls")
+        {
+            useSoulsFromAscensionContainer.classList.remove("hidden");
+
+            let availableSouls = stats["heroSouls"] || 0;
+            if (useSoulsFromAscensionElement.checked)
+            {
+                availableSouls += stats["pendingSouls"] || 0;
+            }
+
+            /*
+                As an optimization, instead of incrementing only by 1 each time,
+                we increment by increasing by a power of 2 until we can no longer afford it.
+                Then we back off by a power of 2 until we're back to trying just 1. In this
+                way we only calculate the suggestions log(n) times instead of n times where n
+                is the optimial primary ancient level.
+            */
+            let power = 0;
+            let primaryAncientLevel = 0;
+            let powerChange = 1;
+
+            // Seed with some values in case nothing can be afforded
+            suggestedLevels = calculateAncientSuggestions(primaryAncientLevel);
+
+            while (power >= 0)
+            {
+                // If we're on our way up we're trying to find the limit, so use the power.
+                let newPrimaryAncientLevel = Math.pow(2, power);
+                if (powerChange < 0)
+                {
+                    // If we're on the way down we're filling the space, so add the last affordable value.
+                    newPrimaryAncientLevel += primaryAncientLevel;
+                }
+
+                const newSuggestedLevels = calculateAncientSuggestions(newPrimaryAncientLevel);
+                if (availableSouls >= getTotalAncientCost(newSuggestedLevels, stats))
+                {
+                    primaryAncientLevel = newPrimaryAncientLevel;
+                    suggestedLevels = newSuggestedLevels;
+                }
+                else if (powerChange > 0)
+                {
+                    // We found the limit, so reverse the direction to try and fill.
+                    powerChange = -1;
+                }
+
+                power += powerChange;
+            }
+
+            // Ensure we don't suggest removing levels
+            suggestedLevels[primaryAncient] = primaryAncientLevel;
+            for (let ancient in suggestedLevels)
+            {
+                suggestedLevels[ancient] = Math.max(suggestedLevels[ancient], getCurrentAncientLevel(stats, ancient));
+            }
+        }
+        else
+        {
+            useSoulsFromAscensionContainer.classList.add("hidden");
+            suggestedLevels = calculateAncientSuggestions();
+
+            // Special-case the primary ancient
+            const suggestedPrimaryAncientElements = Helpers.getElementsByDataType("suggested" + primaryAncient);
+            for (let i = 0; i < suggestedPrimaryAncientElements.length; i++)
+            {
+                const suggestedPrimaryAncientElement = suggestedPrimaryAncientElements[i];
+                suggestedPrimaryAncientElement.textContent = "N/A ";
+
+                const suggestedPrimaryAncientTooltip = document.createElement("span");
+                suggestedPrimaryAncientTooltip.classList.add("text-muted");
+                suggestedPrimaryAncientTooltip.setAttribute("data-toggle", "tooltip");
+                suggestedPrimaryAncientTooltip.setAttribute("data-placement", "bottom");
+                suggestedPrimaryAncientTooltip.title = "The formulae are based on this ancient. If all suggestions below are negative or zero, level this ancient.";
+                suggestedPrimaryAncientTooltip.textContent = "(?)";
+
+                suggestedPrimaryAncientElement.appendChild(suggestedPrimaryAncientTooltip);
+
+                // Wire up tooltip
+                $(suggestedPrimaryAncientTooltip).tooltip();
+            }
+
+            const diffPrimaryAncientElements = Helpers.getElementsByDataType("diff" + primaryAncient);
+            for (let i = 0; i < diffPrimaryAncientElements.length; i++)
+            {
+                diffPrimaryAncientElements[i].textContent = "";
+            }
+        }
+
+        for (let ancient in suggestedLevels)
+        {
+            hydrateAncientSuggestion(stats, ancient, suggestedLevels[ancient]);
+        }
+    }
+
+    function calculateAncientSuggestions(currentPrimaryAncientLevel?: number): IMap<number>
+    {
+        const stats = lastUpload.stats;
+        const playStyle = lastUpload.playStyle;
+
+        const primaryAncient = playStyle === "active" ? "Fragsworth" : "Siyalatas";
+        if (currentPrimaryAncientLevel === undefined)
+        {
+            currentPrimaryAncientLevel = getCurrentAncientLevel(stats, primaryAncient);
+        }
+
+        const suggestedLevels: IMap<number> = {};
+
         const currentBubosLevel = getCurrentAncientLevel(stats, "Bubos");
         const currentChronosLevel = getCurrentAncientLevel(stats, "Chronos");
         const currentDoraLevel = getCurrentAncientLevel(stats, "Dora");
@@ -253,22 +347,19 @@
         const lnAlpha = transcendentPower === 0 ? 0 : Math.log(alpha);
 
         // Common formulas across play styles
-        hydrateAncientSuggestion(stats, "Argaiv", currentPrimaryAncientLevel);
-        hydrateAncientSuggestion(stats, "Atman", (2.832 * lnPrimary) - (1.416 * lnAlpha) - (1.416 * Math.log((4 / 3) - Math.pow(Math.E, -0.013 * currentAtmanLevel))) - 6.613);
-        hydrateAncientSuggestion(stats, "Bubos", (2.8 * lnPrimary) - (1.4 * Math.log(1 + Math.pow(Math.E, -0.02 * currentBubosLevel))) - 5.94);
-        hydrateAncientSuggestion(stats, "Chronos", (2.75 * lnPrimary) - (1.375 * Math.log(2 - Math.pow(Math.E, -0.034 * currentChronosLevel))) - 5.1);
-        hydrateAncientSuggestion(stats, "Dogcog", (2.844 * lnPrimary) - (1.422 * Math.log((1 / 99) + Math.pow(Math.E, -0.01 * currentDogcogLevel))) - 7.232);
-        hydrateAncientSuggestion(stats, "Dora", (2.877 * lnPrimary) - (1.4365 * Math.log((100 / 99) - Math.pow(Math.E, -0.002 * currentDoraLevel))) - 9.63);
-        hydrateAncientSuggestion(stats, "Fortuna", (2.875 * lnPrimary) - (1.4375 * Math.log((10 / 9) - Math.pow(Math.E, -0.0025 * currentFortunaLevel))) - 9.3);
-        hydrateAncientSuggestion(stats, "Kumawakamaru", (2.844 * lnPrimary) - (1.422 * lnAlpha) - (1.422 * Math.log(0.25 + Math.pow(Math.E, -0.001 * currentKumaLevel))) - 7.014);
-        const suggestedGoldLevel = currentPrimaryAncientLevel * 0.926;
-        hydrateAncientSuggestion(stats, "Libertas", suggestedGoldLevel);
-        hydrateAncientSuggestion(stats, "Mammon", suggestedGoldLevel);
-        hydrateAncientSuggestion(stats, "Mimzee", suggestedGoldLevel);
-        hydrateAncientSuggestion(stats, "Morgulis", currentPrimaryAncientLevel * currentPrimaryAncientLevel);
-        hydrateAncientSuggestion(stats, "Solomon", stats["transcendentPower"] > 0
+        suggestedLevels["Argaiv"] = currentPrimaryAncientLevel;
+        suggestedLevels["Atman"] = (2.832 * lnPrimary) - (1.416 * lnAlpha) - (1.416 * Math.log((4 / 3) - Math.pow(Math.E, -0.013 * currentAtmanLevel))) - 6.613;
+        suggestedLevels["Bubos"] = (2.8 * lnPrimary) - (1.4 * Math.log(1 + Math.pow(Math.E, -0.02 * currentBubosLevel))) - 5.94;
+        suggestedLevels["Chronos"] = (2.75 * lnPrimary) - (1.375 * Math.log(2 - Math.pow(Math.E, -0.034 * currentChronosLevel))) - 5.1;
+        suggestedLevels["Dogcog"] = (2.844 * lnPrimary) - (1.422 * Math.log((1 / 99) + Math.pow(Math.E, -0.01 * currentDogcogLevel))) - 7.232;
+        suggestedLevels["Dora"] = (2.877 * lnPrimary) - (1.4365 * Math.log((100 / 99) - Math.pow(Math.E, -0.002 * currentDoraLevel))) - 9.63;
+        suggestedLevels["Fortuna"] = (2.875 * lnPrimary) - (1.4375 * Math.log((10 / 9) - Math.pow(Math.E, -0.0025 * currentFortunaLevel))) - 9.3;
+        suggestedLevels["Kumawakamaru"] = (2.844 * lnPrimary) - (1.422 * lnAlpha) - (1.422 * Math.log(0.25 + Math.pow(Math.E, -0.001 * currentKumaLevel))) - 7.014;
+        suggestedLevels["Libertas"] = suggestedLevels["Mammon"] = suggestedLevels["Mimzee"] = currentPrimaryAncientLevel * 0.926;
+        suggestedLevels["Morgulis"] = currentPrimaryAncientLevel * currentPrimaryAncientLevel;
+        suggestedLevels["Solomon"] = stats["transcendentPower"] > 0
             ? Math.pow(currentPrimaryAncientLevel, 0.8) / Math.pow(alpha, 0.4)
-            : getPreTranscendentSuggestedSolomonLevel(currentPrimaryAncientLevel, playStyle));
+            : getPreTranscendentSuggestedSolomonLevel(currentPrimaryAncientLevel, playStyle);
 
         // Math per play style
         switch (playStyle)
@@ -278,16 +369,22 @@
             case "hybrid":
                 const hybridRatioReciprocal = 1 / userSettings.hybridRatio;
                 const suggestedActiveLevelUnrounded = hybridRatioReciprocal * currentPrimaryAncientLevel;
-                const suggestedActiveLevel = Math.round(suggestedActiveLevelUnrounded);
-                hydrateAncientSuggestion(stats, "Bhaal", suggestedActiveLevel);
-                hydrateAncientSuggestion(stats, "Fragsworth", suggestedActiveLevel);
-                hydrateAncientSuggestion(stats, "Juggernaut", Math.pow(suggestedActiveLevelUnrounded, 0.8));
+                suggestedLevels["Bhaal"] = suggestedLevels["Fragsworth"] = Math.round(suggestedActiveLevelUnrounded);
+                suggestedLevels["Juggernaut"] = Math.pow(suggestedActiveLevelUnrounded, 0.8);
                 break;
             case "active":
-                hydrateAncientSuggestion(stats, "Bhaal", currentPrimaryAncientLevel);
-                hydrateAncientSuggestion(stats, "Juggernaut", Math.pow(currentPrimaryAncientLevel, 0.8));
+                suggestedLevels["Bhaal"] = currentPrimaryAncientLevel;
+                suggestedLevels["Juggernaut"] = Math.pow(currentPrimaryAncientLevel, 0.8);
                 break;
         }
+
+        // Normalize the values
+        for (let ancient in suggestedLevels)
+        {
+            suggestedLevels[ancient] = Math.max(Math.round(suggestedLevels[ancient]), 0);
+        }
+
+        return suggestedLevels;
     }
 
     function calculateOutsiderSuggestions(): void
@@ -403,6 +500,84 @@
             : Math.round(solomonMultiplier1 * Math.pow(solomonLogFunction(solomonMultiplier2 * Math.pow(currentPrimaryAncientLevel, 2)), 0.4) * Math.pow(currentPrimaryAncientLevel, 0.8));
     }
 
+    function getTotalAncientCost(suggestedLevels: IMap<number>, stats: IMap<number>): number
+    {
+        let cost = 0;
+        const chorgorlothLevel = stats["outsiderChorgorloth"] || 0;
+        const ancientCostMultiplier = Math.pow(0.95, chorgorlothLevel);
+
+        for (let ancient in suggestedLevels)
+        {
+            const suggestedLevel = suggestedLevels[ancient];
+            const currentLevel = getCurrentAncientLevel(stats, ancient);
+
+            // If the ancient is over-leveled, no cost
+            if (suggestedLevel < currentLevel)
+            {
+                continue;
+            }
+
+            const costFormula = ancientCostFormulas[ancient];
+            if (!costFormula)
+            {
+                continue;
+            }
+
+            cost += Math.ceil((costFormula(suggestedLevel) - costFormula(currentLevel)) * ancientCostMultiplier);
+        }
+
+        return cost;
+    }
+
+    function getAncientCostFormulas(): IMap<(level: number) => number>
+    {
+        const ancientCosts: IMap<(level: number) => number> = {};
+
+        for (const ancientId in ancientsData)
+        {
+            const ancient = ancientsData[ancientId];
+
+            let ancientCost: (level: number) => number;
+            switch (ancient.levelCostFormula)
+            {
+                case "one":
+                    ancientCost = (n: number) => n;
+                    break;
+                case "linear":
+                    ancientCost = (n: number) => n * (n + 1) / 2;
+                    break;
+                case "polynomial1_5":
+                    ancientCost = (n: number) =>
+                    {
+                        // Approximate above a certain level for perf
+                        // Formula taken from https://github.com/superbob/clicker-heroes-1.0-hsoptimizer/blob/335f13b7304627065a4e515edeb3fb3c4e08f8ad/src/app/components/maths/maths.service.js
+                        if (n > 100)
+                        {
+                            return Math.ceil(2 * Math.pow(n, 2.5) / 5 + Math.pow(n, 1.5) / 2 + Math.pow(n, 0.5) / 8 + Math.pow(n, - 1.5) / 1920);
+                        }
+
+                        let cost = 0;
+                        for (let i = 1; i <= n; i++)
+                        {
+                            cost += Math.pow(i, 1.5);
+                        }
+
+                        return Math.ceil(cost);
+                    };
+                    break;
+                case "exponential":
+                    ancientCost = (n: number) => n;
+                    break;
+                default:
+                    ancientCost = (n: number) => 0;
+            }
+
+            ancientCosts[ancient.shortName] = ancientCost;
+        }
+
+        return ancientCosts;
+    }
+
     const uploadId = Helpers.getElementsByDataType("uploadId")[0].textContent;
 
     // Get upload data
@@ -425,4 +600,8 @@
             })
             .fail(displayFailure);
     });
+
+    // Set up suggestion type handlers
+    $("input[name='SuggestionType']").change(hydrateAncientSuggestions);
+    $("#UseSoulsFromAscension").click(hydrateAncientSuggestions);
 }
