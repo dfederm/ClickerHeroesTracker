@@ -273,7 +273,6 @@
             }
 
             // Ensure we don't suggest removing levels
-            suggestedLevels[primaryAncient] = primaryAncientLevel;
             for (let ancient in suggestedLevels)
             {
                 suggestedLevels[ancient] = Math.max(suggestedLevels[ancient], getCurrentAncientLevel(stats, ancient));
@@ -322,13 +321,19 @@
         const stats = lastUpload.stats;
         const playStyle = lastUpload.playStyle;
 
+        const suggestedLevels: IMap<number> = {};
+
         const primaryAncient = playStyle === "active" ? "Fragsworth" : "Siyalatas";
         if (currentPrimaryAncientLevel === undefined)
         {
+            // Use the current level, but don't use it in the suggestions.
             currentPrimaryAncientLevel = getCurrentAncientLevel(stats, primaryAncient);
         }
-
-        const suggestedLevels: IMap<number> = {};
+        else
+        {
+            // When provided, add it to the suggestions
+            suggestedLevels[primaryAncient] = currentPrimaryAncientLevel;
+        }
 
         const currentBubosLevel = getCurrentAncientLevel(stats, "Bubos");
         const currentChronosLevel = getCurrentAncientLevel(stats, "Chronos");
@@ -566,7 +571,7 @@
                     };
                     break;
                 case "exponential":
-                    ancientCost = (n: number) => n;
+                    ancientCost = (n: number) => Math.pow(2, n + 1) - 1;
                     break;
                 default:
                     ancientCost = (n: number) => 0;
