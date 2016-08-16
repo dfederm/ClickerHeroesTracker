@@ -42,7 +42,7 @@ namespace ClickerHeroesTrackerWebsite.Models.Stats
             var currentBorbLevel = savedGame.OutsidersData != null && savedGame.OutsidersData.Outsiders != null
                 ? savedGame.OutsidersData.Outsiders.GetOutsiderLevel(OutsiderIds.Borb)
                 : 0;
-            this.MaxTranscendentPrimalReward = this.HeroSoulsSacrificed * (0.05 + (0.005 * currentBorbLevel));
+            this.MaxTranscendentPrimalReward = Math.Floor(this.HeroSoulsSacrificed * (0.05 + (0.005 * currentBorbLevel)));
 
             double solomonMultiplier;
             var currentPonyboyLevel = savedGame.OutsidersData != null && savedGame.OutsidersData.Outsiders != null
@@ -73,7 +73,11 @@ namespace ClickerHeroesTrackerWebsite.Models.Stats
             if (savedGame.Transcendent)
             {
                 var bossNumber = Math.Ceiling(Math.Log(this.MaxTranscendentPrimalReward / (20 * solomonMultiplier)) / Math.Log(1 + this.TranscendentPower));
-                this.BossLevelToTranscendentPrimalCap = (bossNumber * 5) + 100;
+
+                // If the boss number is <= 0, that basically means the player is always at the cap. Since zone 100 always gives 0 from TP, the cap is technically 105.
+                this.BossLevelToTranscendentPrimalCap = bossNumber > 0
+                    ? (bossNumber * 5) + 100
+                    : 105;
             }
 
             this.HeroSouls = savedGame.HeroSouls;
