@@ -6,6 +6,8 @@
     // Each formula gets the sum of the cost of the ancient from 1 to N.
     const ancientCostFormulas = getAncientCostFormulas();
 
+    const optimalOutsiderLevels = getOptimalOutsiderLevels();
+
     let lastUpload: IUpload;
 
     function handleSuccess(upload: IUpload): void
@@ -62,31 +64,6 @@
             }
 
             hydrateAncientSuggestions();
-
-            // Default Xyl to something reasonable for the playstyle
-            const ancientSouls = upload.stats["totalAncientSouls"];
-            let suggestedXylLevel = 0;
-            if (upload.playStyle === "idle")
-            {
-                // RoT says "at max 20% of total", but I prefer just 6
-                suggestedXylLevel = 6;
-            }
-            else if (upload.playStyle === "hybrid")
-            {
-                suggestedXylLevel = Math.round(0.05 * ancientSouls);
-            }
-            else if (upload.playStyle === "active")
-            {
-                // RoT says 0-3, let's guess 3.
-                suggestedXylLevel = 3;
-            }
-
-            // Only suggest what they can buy
-            suggestedXylLevel = Math.min(ancientSouls, suggestedXylLevel);
-
-            const suggestedXylElement = Helpers.getElementsByDataType("suggestedOutsiderXyliqil")[0] as HTMLInputElement;
-            suggestedXylElement.value = suggestedXylLevel.toString();
-            suggestedXylElement.addEventListener("change", calculateOutsiderSuggestions);
 
             calculateOutsiderSuggestions();
 
@@ -394,76 +371,101 @@
 
     function calculateOutsiderSuggestions(): void
     {
-        let ancientSouls = parseInt(Helpers.getElementsByDataType("totalAncientSouls")[0].textContent);
+        const stats = lastUpload.stats;
+        if (!stats)
+        {
+            return;
+        }
+
+        let ancientSouls = stats["totalAncientSouls"];
         if (ancientSouls === 0)
         {
             return;
         }
 
-        const xylElement = Helpers.getElementsByDataType("suggestedOutsiderXyliqil")[0] as HTMLInputElement;
-        let xylLevel = parseInt(xylElement.value);
-        if (xylLevel < 0 || isNaN(xylLevel))
-        {
-            xylLevel = 0;
-            xylElement.value = xylLevel.toString();
-        }
+        let showLowAncientSoulWarning = false;
+        let showMissingSimulationWarning = false;
 
-        if (xylLevel > ancientSouls)
-        {
-            xylLevel = ancientSouls;
-            xylElement.value = xylLevel.toString();
-        }
-
-        // Cost of Xyl
-        ancientSouls -= xylLevel;
-
-        // The index of this array is 1 less than the level Phan should be if the value at that index can just barely be bought.
-        const phanTable = [3, 10, 21, 36, 54, 60, 67, 75, 84, 94, 104, 117, 129, 143, 158, 174, 190, 208, 228];
+        let suggestedXyl = 0;
+        let suggestedChor = 0;
         let suggestedPhan = 0;
-        for ( ; suggestedPhan < phanTable.length; suggestedPhan++)
+        let suggestedBorb = 0;
+        let suggestedPony = 0;
+
+        // Less ancient souls than the simulation data supported. We can try to guess though.
+        // Our guess just alternates leveling Xyl and Pony until Xylk hits 7 and then dump into Pony unti lit matches the 30 AS simulation data. 
+        if (ancientSouls < 30)
         {
-            // If we can no longer afford it, break.
-            if (phanTable[suggestedPhan] > ancientSouls)
+            showLowAncientSoulWarning = true;
+            if (ancientSouls < 14)
             {
-                break;
+                suggestedXyl = Math.ceil(ancientSouls / 2);
+                suggestedPony = Math.floor(ancientSouls / 2);
+            }
+            else
+            {
+                suggestedXyl = 7;
+                suggestedPony = ancientSouls - 7;
             }
         }
-
-        // Cost of Phan
-        ancientSouls -= (1 + suggestedPhan) * suggestedPhan / 2;
-
-        // Put 1/10 of your remaining AS in Borb (round as you like, probably round up).
-        let suggestedBorb = Math.ceil(0.1 * ancientSouls);
-        ancientSouls -= suggestedBorb;
-
-        // Get Pony to level 19.
-        let suggestedPony = Math.min(ancientSouls, 19);
-        ancientSouls -= suggestedPony;
-
-        // Get Chor'gorloth to level 10.
-        let suggestedChor = Math.min(ancientSouls, 10);
-        ancientSouls -= suggestedChor;
-
-        // Get Borb to 10 now.
-        if (ancientSouls > 0)
+        else
         {
-            ancientSouls += suggestedBorb;
-            suggestedBorb = Math.min(ancientSouls, 10);
-            ancientSouls -= suggestedBorb;
+            if (ancientSouls > 210)
+            {
+                showMissingSimulationWarning = true;
+                if (ancientSouls >= 1500)
+                {
+                    ancientSouls = 1500;
+                }
+                else if (ancientSouls >= 500)
+                {
+                    ancientSouls -= ancientSouls % 100;
+                }
+                else
+                {
+                    ancientSouls -= ancientSouls % 10;
+                }
+            }
+
+            const outsiderLevels = optimalOutsiderLevels[ancientSouls];
+            if (outsiderLevels === null)
+            {
+                // Should not happen.
+                throw Error("Could not look up optimal outsider levels for " + ancientSouls + " ancient souls. Raw ancient souls: " + Helpers.getElementsByDataType("totalAncientSouls")[0].textContent);
+            }
+
+            suggestedXyl = outsiderLevels[0];
+            suggestedChor = outsiderLevels[1];
+            suggestedPhan = outsiderLevels[2];
+            suggestedBorb = outsiderLevels[3];
+            suggestedPony = outsiderLevels[4];
         }
 
-        //  If you still have AS left over, put them equally into Pony and Borb (e.g.if 4 AS left over: Pony to 21 and Borb to 12 total)
-        if (ancientSouls > 0)
-        {
-            // For uneven AS, preferring Borb. Why not?
-            suggestedPony += Math.floor(ancientSouls / 2);
-            suggestedBorb += Math.ceil(ancientSouls / 2);
-        }
-
+        Helpers.getElementsByDataType("suggestedOutsiderXyliqil")[0].textContent = suggestedXyl.toString();
         Helpers.getElementsByDataType("suggestedOutsiderChorgorloth")[0].textContent = suggestedChor.toString();
         Helpers.getElementsByDataType("suggestedOutsiderPhandoryss")[0].textContent = suggestedPhan.toString();
         Helpers.getElementsByDataType("suggestedOutsiderBorb")[0].textContent = suggestedBorb.toString();
         Helpers.getElementsByDataType("suggestedOutsiderPonyboy")[0].textContent = suggestedPony.toString();
+
+        const lowAncientSoulWarning = document.getElementById("lowAncientSoulWarning");
+        if (showLowAncientSoulWarning)
+        {
+            lowAncientSoulWarning.classList.remove("hidden");
+        }
+        else
+        {
+            lowAncientSoulWarning.classList.add("hidden");
+        }
+
+        const missingSimulationWarning = document.getElementById("missingSimulationWarning");
+        if (showMissingSimulationWarning)
+        {
+            missingSimulationWarning.classList.remove("hidden");
+        }
+        else
+        {
+            missingSimulationWarning.classList.add("hidden");
+        }
     }
 
     function getCurrentAncientLevel(stats: IMap<number>, ancient: string): number
@@ -581,6 +583,236 @@
         }
 
         return ancientCosts;
+    }
+
+    function getOptimalOutsiderLevels(): IMap<[number, number, number, number, number]>
+    {
+        return {
+            // From https://docs.google.com/spreadsheets/d/1m09HoNiLW-7t96gzguG9tU_HHaRrDrtMpAoAuukLB4w/edit#gid=0
+            "30": [7, 0, 0, 0, 23],
+            "31": [7, 0, 1, 0, 23],
+            "32": [7, 0, 1, 0, 24],
+            "33": [7, 0, 1, 0, 25],
+            "34": [6, 0, 1, 0, 27],
+            "35": [6, 0, 1, 0, 28],
+            "36": [7, 0, 2, 0, 26],
+            "37": [7, 1, 2, 0, 26],
+            "38": [7, 1, 2, 0, 27],
+            "39": [7, 2, 2, 0, 27],
+            // From https://docs.google.com/spreadsheets/d/1LlW5ZJUY5QuQlkdk1FRWrsOeB8PuWQwig9L-ZyRUekY/edit#gid=1843865711
+            "40": [6, 5, 2, 0, 26],
+            "41": [6, 4, 3, 0, 25],
+            "42": [5, 4, 3, 0, 27],
+            "43": [5, 6, 3, 0, 26],
+            "44": [5, 6, 3, 0, 27],
+            "45": [5, 5, 4, 0, 25],
+            "46": [5, 5, 4, 0, 26],
+            "47": [5, 7, 4, 0, 25],
+            "48": [6, 7, 4, 0, 25],
+            "49": [5, 10, 4, 0, 24],
+            "50": [5, 5, 5, 0, 25],
+            "51": [5, 6, 5, 0, 25],
+            "52": [5, 9, 5, 0, 23],
+            "53": [5, 8, 5, 0, 25],
+            "54": [5, 10, 5, 0, 24],
+            "55": [5, 10, 5, 0, 25],
+            "56": [5, 10, 5, 0, 26],
+            "57": [6, 10, 5, 0, 26],
+            "58": [5, 9, 6, 0, 23],
+            "59": [5, 9, 6, 0, 24],
+            "60": [5, 10, 6, 0, 24],
+            "61": [6, 10, 6, 0, 24],
+            "62": [5, 10, 6, 0, 26],
+            "63": [5, 10, 6, 0, 27],
+            "64": [6, 10, 6, 0, 27],
+            "65": [5, 8, 7, 0, 24],
+            "66": [5, 10, 7, 0, 23],
+            "67": [5, 10, 7, 0, 24],
+            "68": [5, 10, 7, 0, 25],
+            "69": [5, 10, 7, 0, 26],
+            "70": [6, 10, 7, 0, 26],
+            "71": [6, 10, 7, 0, 27],
+            "72": [5, 9, 8, 0, 22],
+            "73": [5, 9, 8, 0, 23],
+            "74": [5, 10, 8, 0, 23],
+            "75": [6, 10, 8, 0, 23],
+            "76": [6, 10, 8, 0, 24],
+            "77": [5, 10, 8, 0, 26],
+            "78": [6, 10, 8, 0, 26],
+            "79": [6, 10, 8, 0, 27],
+            "80": [5, 8, 9, 0, 22],
+            "81": [5, 9, 9, 0, 22],
+            "82": [5, 8, 9, 0, 24],
+            "83": [5, 9, 9, 0, 24],
+            "84": [5, 10, 9, 0, 24],
+            "85": [5, 10, 9, 0, 25],
+            "86": [5, 10, 9, 0, 26],
+            "87": [6, 10, 9, 0, 26],
+            "88": [5, 10, 9, 0, 28],
+            "89": [6, 10, 9, 1, 27],
+            "90": [5, 8, 10, 0, 22],
+            "91": [5, 9, 10, 0, 22],
+            "92": [5, 10, 10, 0, 22],
+            "93": [5, 9, 10, 0, 24],
+            "94": [5, 10, 10, 0, 24],
+            "95": [5, 10, 10, 1, 24],
+            "96": [6, 10, 10, 0, 25],
+            "97": [5, 10, 10, 0, 27],
+            "98": [6, 10, 10, 0, 27],
+            "99": [6, 10, 10, 1, 27],
+            "100": [6, 10, 10, 1, 28],
+            "101": [5, 9, 11, 0, 21],
+            "102": [5, 10, 11, 0, 21],
+            "103": [5, 10, 11, 0, 22],
+            "104": [5, 10, 11, 0, 23],
+            "105": [5, 10, 11, 0, 24],
+            "106": [6, 10, 11, 1, 23],
+            "107": [5, 10, 11, 1, 25],
+            "108": [6, 10, 11, 1, 25],
+            "109": [6, 10, 11, 3, 24],
+            "110": [6, 10, 11, 2, 26],
+            "111": [6, 10, 11, 2, 27],
+            "112": [6, 10, 11, 3, 27],
+            "113": [5, 7, 12, 1, 22],
+            "114": [5, 7, 12, 1, 23],
+            "115": [5, 10, 12, 2, 20],
+            "116": [5, 9, 12, 1, 23],
+            "117": [5, 9, 12, 3, 22],
+            "118": [5, 10, 12, 2, 23],
+            "119": [5, 10, 12, 3, 23],
+            "120": [6, 10, 12, 3, 23],
+            "121": [6, 10, 12, 3, 24],
+            "122": [5, 10, 12, 3, 26],
+            "123": [6, 10, 12, 4, 25],
+            "124": [6, 10, 12, 4, 26],
+            "125": [6, 10, 12, 4, 27],
+            "126": [6, 10, 12, 5, 27],
+            "127": [5, 7, 13, 2, 22],
+            "128": [5, 9, 13, 2, 21],
+            "129": [5, 9, 13, 3, 21],
+            "130": [5, 9, 13, 3, 22],
+            "131": [5, 9, 13, 3, 23],
+            "132": [6, 10, 13, 3, 22],
+            "133": [5, 10, 13, 4, 23],
+            "134": [6, 10, 13, 4, 23],
+            "135": [6, 10, 13, 4, 24],
+            "136": [6, 10, 13, 5, 24],
+            "137": [6, 10, 13, 5, 25],
+            "138": [7, 10, 13, 5, 25],
+            "139": [6, 10, 13, 5, 27],
+            "140": [6, 10, 13, 6, 27],
+            "141": [6, 10, 13, 7, 27],
+            "142": [7, 10, 13, 6, 28],
+            "143": [5, 7, 14, 5, 21],
+            "144": [5, 7, 14, 5, 22],
+            "145": [5, 8, 14, 6, 21],
+            "146": [5, 8, 14, 6, 22],
+            "147": [5, 9, 14, 6, 22],
+            "148": [5, 10, 14, 6, 22],
+            "149": [5, 10, 14, 7, 22],
+            "150": [6, 10, 14, 7, 22],
+            "151": [6, 10, 14, 8, 22],
+            "152": [6, 10, 14, 8, 23],
+            "153": [6, 10, 14, 8, 24],
+            "154": [6, 10, 14, 9, 24],
+            "155": [7, 10, 14, 8, 25],
+            "156": [6, 10, 14, 9, 26],
+            "157": [6, 10, 14, 10, 26],
+            "158": [7, 10, 14, 10, 26],
+            "159": [6, 10, 14, 10, 28],
+            "160": [7, 10, 14, 11, 27],
+            "161": [7, 10, 14, 11, 28],
+            "162": [7, 10, 14, 12, 28],
+            "163": [8, 10, 14, 12, 28],
+            "164": [6, 7, 15, 9, 22],
+            "165": [6, 9, 15, 9, 21],
+            "166": [6, 9, 15, 9, 22],
+            "167": [5, 10, 15, 9, 23],
+            "168": [6, 10, 15, 9, 23],
+            "169": [6, 10, 15, 10, 23],
+            "170": [7, 10, 15, 10, 23],
+            "171": [6, 9, 15, 11, 25],
+            "172": [7, 10, 15, 11, 24],
+            "173": [7, 10, 15, 12, 24],
+            "174": [7, 10, 15, 13, 24],
+            "175": [7, 10, 15, 14, 24],
+            "176": [7, 10, 15, 14, 25],
+            "177": [7, 10, 15, 14, 26],
+            "178": [8, 10, 15, 13, 27],
+            "179": [8, 10, 15, 14, 27],
+            "180": [7, 10, 15, 15, 28],
+            "181": [7, 10, 15, 15, 29],
+            "182": [8, 10, 15, 15, 29],
+            "183": [8, 10, 15, 16, 29],
+            "184": [7, 10, 15, 17, 30],
+            "185": [7, 10, 15, 20, 28],
+            "186": [8, 10, 15, 19, 29],
+            "187": [8, 10, 15, 19, 30],
+            "188": [7, 10, 16, 14, 21],
+            "189": [7, 8, 16, 17, 21],
+            "190": [7, 9, 16, 15, 23],
+            "191": [6, 10, 16, 16, 23],
+            "192": [6, 10, 16, 19, 21],
+            "193": [7, 10, 16, 18, 22],
+            "194": [7, 10, 16, 18, 23],
+            "195": [7, 10, 16, 18, 24],
+            "196": [7, 10, 16, 17, 26],
+            "197": [7, 10, 16, 19, 25],
+            "198": [8, 10, 16, 19, 25],
+            "199": [8, 10, 16, 19, 26],
+            "200": [8, 10, 16, 21, 25],
+            "201": [8, 10, 16, 21, 26],
+            "202": [8, 10, 16, 22, 26],
+            "203": [7, 10, 16, 23, 27],
+            "204": [8, 10, 16, 22, 28],
+            "205": [8, 10, 16, 25, 26],
+            "206": [8, 10, 16, 25, 27],
+            "207": [8, 10, 16, 25, 28],
+            "208": [8, 10, 16, 25, 29],
+            "209": [9, 10, 16, 25, 29],
+            "210": [9, 10, 16, 26, 29],
+            // Goes every 10 from here
+            "220": [8, 10, 17, 26, 23],
+            "230": [9, 10, 17, 31, 27],
+            "240": [10, 10, 17, 40, 27],
+            "250": [9, 10, 18, 34, 26],
+            "260": [9, 10, 18, 41, 29],
+            "270": [11, 10, 18, 46, 32],
+            "280": [10, 10, 19, 42, 28],
+            "290": [9, 10, 19, 54, 27],
+            "300": [12, 10, 19, 61, 27],
+            "310": [10, 10, 20, 55, 25],
+            "320": [10, 10, 20, 64, 26],
+            "330": [12, 10, 20, 69, 29],
+            "340": [10, 10, 20, 80, 30],
+            "350": [10, 10, 20, 84, 36],
+            "360": [13, 10, 21, 75, 31],
+            "370": [13, 10, 21, 82, 34],
+            "380": [13, 10, 21, 92, 34],
+            "390": [15, 11, 21, 96, 36],
+            "400": [12, 10, 22, 95, 30],
+            "410": [12, 10, 22, 111, 24],
+            "420": [16, 11, 22, 101, 38],
+            "430": [16, 10, 23, 95, 33],
+            "440": [17, 10, 23, 109, 28],
+            "450": [17, 16, 23, 106, 29],
+            "460": [16, 10, 24, 101, 33],
+            "470": [19, 10, 24, 108, 33],
+            "480": [17, 13, 24, 112, 35],
+            "490": [16, 10, 25, 114, 25],
+            "500": [16, 10, 25, 121, 28],
+            // Goes every 100 from here
+            "600": [18, 10, 28, 137, 29],
+            "700": [20, 3, 31, 154, 27],
+            "800": [21, 10, 34, 145, 29],
+            "900": [24, 10, 36, 174, 26],
+            "1000": [19, 10, 38, 207, 23],
+            "1100": [22, 3, 41, 189, 25],
+            "1200": [23, 10, 43, 198, 23],
+            "1300": [25, 10, 45, 205, 25],
+            "1400": [25, 10, 47, 211, 26],
+            "1500": [32, 10, 48, 257, 25],
+        };
     }
 
     const uploadId = Helpers.getElementsByDataType("uploadId")[0].textContent;

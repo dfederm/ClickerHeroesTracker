@@ -3,7 +3,13 @@
 <div data-type="outsiderLevels">
     <h4>Outsider:</h4>
     <p class="text-muted">
-        Based on the <a href="https://redd.it/4rrbpi" target="_blank">Math by /u/stratege1337</a>.
+        Based on simulation results from <a href="https://redd.it/4slacm" target="_blank">/u/bzzzzzu</a> and <a href="https://redd.it/4xj8im" target="_blank">/u/kragnir</a>.
+    </p>
+    <p id="lowAncientSoulWarning" class="hidden text-warning">
+        The simulation data doesn't support ancient souls less than 30. The suggestions below are guesses and not based on hard math.
+    </p>
+    <p id="missingSimulationWarning" class="hidden text-warning">
+        The simulation data is missing data for high level ancients. The suggestions below show the closest result that exists but you may have some AS left over to spend based on your own judgement.
     </p>
     <table class="table">
         <tr>
@@ -14,9 +20,7 @@
         <tr>
             <td>Xyliqil:</td>
             <td data-type="@OutsiderIds.GetOusiderStatType(OutsiderIds.Xyliqil).ToString().ToCamelCase()" class="text-right">0</td>
-            <td class="text-right">
-                <input type="number" data-type="suggested@(OutsiderIds.GetOusiderStatType(OutsiderIds.Xyliqil).ToString())" class="text-right" value="0" style="width: 75px" />
-            </td>
+            <td data-type="suggested@(OutsiderIds.GetOusiderStatType(OutsiderIds.Xyliqil).ToString())" class="text-right">0</td>
         </tr>
         <tr>
             <td>Chor'gorloth:</td>
