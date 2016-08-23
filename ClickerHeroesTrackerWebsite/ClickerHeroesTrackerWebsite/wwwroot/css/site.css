@@ -52,6 +52,7 @@ div#loadingElement
 {
     cursor: pointer;
 }
+
 .clickable:hover 
 {
     background-color: #e6e6e6;
@@ -82,6 +83,18 @@ div#loadingElement
     white-space: pre-line;
 }
 
+.clan-message p
+{
+    margin-bottom: 0;
+}
+
+.highlighted-clan
+{
+    background-color: #5cb85c !important;
+    color: white !important;
+    font-weight: bold;
+}
+
 .message-box 
 {
     margin: 5px;
@@ -97,14 +110,4 @@ div#loadingElement
 .message-box form button 
 {
     display: inline-block;
-}
-
-.timeName, .messageContent {
-    margin-bottom: 0;
-}
-
-.highlighted-clan {
-    background-color: #5cb85c !important;
-    color: white !important;
-    font-weight: bold;
 }

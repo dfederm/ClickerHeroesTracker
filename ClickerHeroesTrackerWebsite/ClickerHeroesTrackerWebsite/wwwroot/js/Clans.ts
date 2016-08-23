@@ -1,167 +1,133 @@
-﻿namespace Clans {
+﻿namespace Clans
+{
     "use strict";
 
-    $.ajax({
-        url: "/api/clans",
-    }).done((response: IClanData, textStatus: string, jqXHR: JQueryXHR) =>
+    const leaderboardCount = 10;
+
+    function buildClanInformation(response: IClanData, textStatus: string, xhr: JQueryXHR): void
     {
-        if (jqXHR.status === 204) {
-            $("#clan-members").html("<h2>Please join a clan to view this data</h2>");
+        const clanMemebersTable = document.getElementById("clan-members-table") as HTMLTableElement;
+
+        if (xhr.status === 204)
+        {
+            document.getElementById("clan-name").appendChild(document.createTextNode("Please join a clan to view the clan's data"));
+            clanMemebersTable.classList.add("hidden");
             return;
         }
 
-        $("#clan-name").html(response.clanName);
-        $("#clan-members-table").prepend("<tr><th>Name</th> <th>Highest Zone</th></tr>");
-        $("#clan-messages").removeClass("hidden");
+        document.getElementById("clan-name").appendChild(document.createTextNode(response.clanName));
+        document.getElementById("clan-messages").classList.remove("hidden");
 
-        for (let index = 0; index < Object.keys(response.guildMembers).length; ++index)
+        const bodyElement = clanMemebersTable.tBodies[0];
+        for (let i = 0; i < response.guildMembers.length; i++)
         {
-            $("#clan-members-table-body").append("<tr><td>" + response.guildMembers[index].nickname + "</td><td>" + response.guildMembers[index].highestZone + "</td></tr>");
+            const guildMember = response.guildMembers[i];
+
+            const nameCell = document.createElement("td");
+            nameCell.appendChild(document.createTextNode(guildMember.nickname));
+
+            const highestZoneCell = document.createElement("td");
+            highestZoneCell.appendChild(document.createTextNode(guildMember.highestZone.toString()));
+
+            const row = document.createElement("tr");
+            row.appendChild(nameCell);
+            row.appendChild(highestZoneCell);
+
+            bodyElement.appendChild(row);
         }
 
-        for (let index = 0; index < response.messages.length; ++index)
+        const minuteInMilliSeconds = 1000 * 60;
+        const hourInMilliSeconds = minuteInMilliSeconds * 60;
+        const dayInMilliSeconds = hourInMilliSeconds * 24;
+        const clanMessagesElement = document.getElementById("clan-messages");
+        for (let i = 0; i < response.messages.length; i++)
         {
-            const message = response.messages[index];
-            const minuteInMilliSeconds = 1000 * 60;
-            const hourInMilliSeconds = minuteInMilliSeconds * 60;
-            const dayInMilliSeconds = hourInMilliSeconds * 24;
+            const message = response.messages[i];
 
-            let date1 = new Date(message.date);
-            let date2 = new Date();
-            let timeDiff = Math.abs(date2.getTime() - date1.getTime());
-            let diffDays = Math.ceil(timeDiff / dayInMilliSeconds);
+            const messageDate = new Date(message.date);
+            const nowDate = new Date();
+            const timeDiff = Math.abs(nowDate.getTime() - messageDate.getTime());
+            const diffDays = Math.ceil(timeDiff / dayInMilliSeconds);
 
-            $("#clan-messages").append("<div class='col-xs-12 clan-message'><p class='timeName'></p><p class='messageContent'></p></div>");
+            const messageElement = document.createElement("div");
+            messageElement.classList.add("col-xs-12", "clan-message");
 
-            let username = "";
-            let timeName = $(".timeName").last();
+            const messageHeaderElement = document.createElement("p");
 
-            if (message.username == null)
-            {
-                username = "(Unknown)";
-                timeName.addClass("text-muted");
-            }
-            else
-            {
-                username = message.username;
-            }
-
+            let displayTimeDiff: string;
             if (timeDiff > dayInMilliSeconds)
             {
-                timeName.text("(" + diffDays + " days ago) " + username);
+                displayTimeDiff = diffDays + " days";
             }
             else if (timeDiff > hourInMilliSeconds)
             {
-                timeName.text("(" + Math.ceil(timeDiff / hourInMilliSeconds) + " hours ago) " + username);
+                displayTimeDiff = Math.ceil(timeDiff / hourInMilliSeconds) + " hours";
             }
             else if (timeDiff > minuteInMilliSeconds)
             {
-                timeName.text("(" + Math.ceil(timeDiff / minuteInMilliSeconds) + " minutes ago) " + username);
+                displayTimeDiff = Math.ceil(timeDiff / minuteInMilliSeconds) + " minutes";
             }
             else
             {
-                timeName.text("(" + Math.ceil(timeDiff / 1000) + " seconds ago) " + username);
+                displayTimeDiff = Math.ceil(timeDiff / 1000) + " seconds";
             }
 
-            $(".messageContent").last().text(message.content);
+            let username = message.username;
+            if (username === null)
+            {
+                username = "(Unknown)";
+                messageHeaderElement.classList.add("text-muted");
+            }
+
+            messageHeaderElement.appendChild(document.createTextNode("(" + displayTimeDiff + " ago) " + username));
+            messageElement.appendChild(messageHeaderElement);
+
+            const messageContentElement = document.createElement("p");
+            messageContentElement.appendChild(document.createTextNode(message.content));
+            messageElement.appendChild(messageContentElement);
+
+            clanMessagesElement.appendChild(messageElement);
         }
 
-        $("form").append("<input type='hidden' name='clanName' value='" + response.clanName + "' />");
-    }).fail((jqXHR: JQueryXHR, ajaxOptions: string, error: string) => {
-        if (jqXHR.status === 404) {
-            $("#clan-members").html("<h2>Please upload a save to view this data</h2>");
-            return;
-        }
-    });
-
-    export function createLeaderboard(count: number, tableId: string): void
-    {
-        const table = document.getElementById(tableId);
-        if (!table) {
-            throw new Error("Element not found: " + tableId);
-        }
-
-        const userRow = getUserClanRow();
-
-        updateLeaderboard(count, table, userRow);
-
-        // Upon a hash change, re-create the table
-        window.addEventListener("hashchange", () => {
-            window.scrollTo(0, 0);
-            clearTable(table);
-            updateLeaderboard(count, table, userRow);
-        });
+        const clanNameHiddenElement = document.createElement("input");
+        clanNameHiddenElement.type = "hidden";
+        clanNameHiddenElement.name = "clanName";
+        clanNameHiddenElement.value = response.clanName;
+        document.getElementById("sendMessage").appendChild(clanNameHiddenElement);
     }
 
-    function clearTable(table: HTMLElement): void {
+    function clearTable(table: HTMLElement): void
+    {
         const tableBody = table.querySelector("tbody");
         if (tableBody)
         {
-            tableBody.remove();
+            tableBody.parentNode.removeChild(tableBody);
         }
 
         const tableFoot = table.querySelector("tfoot");
         if (tableFoot)
         {
-            tableFoot.remove();
+            tableFoot.parentNode.removeChild(tableFoot);
         }
     }
 
-    function getUserClanRow(): HTMLTableRowElement {
-        const row = document.createElement("tr");
-        $.ajax({
-            url: "/api/clans/userClan",
-        }).done((response: ILeaderboardClan, textStatus: string, jqXHR: JQueryXHR) => {
-
-            if (jqXHR.status === 204) {
-                $("#clan-members").html("<h2>Please join a clan to view this data</h2>");
-                return;
-            }
-
-            row.classList.add("highlighted-clan");
-
-            const rankCell = document.createElement("td");
-            rankCell.appendChild(document.createTextNode(response.rank.toString()));
-            row.appendChild(rankCell);
-
-            const nameCell = document.createElement("td");
-            nameCell.appendChild(document.createTextNode(response.name));
-            row.appendChild(nameCell);
-
-            const memberCountCell = document.createElement("td");
-            if (response.memberCount > 0) {
-                memberCountCell.appendChild(document.createTextNode(response.memberCount.toString()));
-            }
-
-            row.appendChild(memberCountCell);
-
-            const currentRaidLevelCell = document.createElement("td");
-            currentRaidLevelCell.appendChild(document.createTextNode(response.currentRaidLevel.toString()));
-            row.appendChild(currentRaidLevelCell);
-
-        });
-
-        return row;
-    }
-
-    function updateLeaderboard(count: number, table: HTMLElement, userClanRow: HTMLElement): void
+    function updateLeaderboard(table: HTMLElement, userClanRow: HTMLTableRowElement): void
     {
         const queryParameters = Helpers.getQueryParameters();
         const currentPage = parseInt(queryParameters["page"]) || 1;
-
         $.ajax({
-            url: "/api/clans/leaderboard?page=" + currentPage + "&count=" + count,
-        }).done((response: ILeaderboardSummaryListResponse) =>
+            url: "/api/clans/leaderboard?page=" + currentPage + "&count=" + leaderboardCount,
+        }).done((response: ILeaderboardSummaryListResponse): void =>
         {
-            $("#leaderboard-table").append("<tbody class='leaderboard-table-body' id='leaderboard-table-body'></tbody>");
-            const tablebody = document.getElementById("leaderboard-table-body");
+            const tablebody = document.createElement("tbody");
 
-            for (let index = 0; index < response.leaderboardClans.length; ++index)
+            for (let i = 0; i < response.leaderboardClans.length; i++)
             {
-                const clan = response.leaderboardClans[index];
+                const clan = response.leaderboardClans[i];
 
                 const row = document.createElement("tr");
-                if (clan.isUserClan) {
+                if (clan.isUserClan)
+                {
                     row.classList.add("highlighted-clan");
                 }
 
@@ -174,7 +140,8 @@
                 row.appendChild(nameCell);
 
                 const memberCountCell = document.createElement("td");
-                if (clan.memberCount > 0) {
+                if (clan.memberCount > 0)
+                {
                     memberCountCell.appendChild(document.createTextNode(clan.memberCount.toString()));
                 }
 
@@ -187,17 +154,18 @@
                 tablebody.appendChild(row);
             }
 
-            if (userClanRow.firstChild != null)
+            if (userClanRow !== null && userClanRow.firstChild !== null)
             {
                 const rank = parseInt(userClanRow.firstChild.textContent);
-                if (rank < (currentPage * count - count) || rank > (currentPage * count))
+                if (rank < (currentPage * leaderboardCount - leaderboardCount) || rank > (currentPage * leaderboardCount))
                 {
                     tablebody.appendChild(userClanRow);
                 }
             }
 
-            const pagination = response.pagination;
+            table.appendChild(tablebody);
 
+            const pagination = response.pagination;
             if (pagination)
             {
                 const tableFoot = document.createElement("tfoot");
@@ -205,7 +173,7 @@
                 const paginationCell = document.createElement("td");
                 paginationCell.colSpan = 4;
 
-                const paginationList = Pagination.create(pagination, count, currentPage);
+                const paginationList = Pagination.create(pagination, leaderboardCount, currentPage);
 
                 paginationCell.appendChild(paginationList);
                 row.appendChild(paginationCell);
@@ -214,6 +182,69 @@
             }
         });
     }
+
+    $.ajax({
+        url: "/api/clans",
+    })
+        .done(buildClanInformation)
+        .fail((jqXHR: JQueryXHR, ajaxOptions: string, error: string) =>
+        {
+            if (jqXHR.status === 404)
+            {
+                const clanMemebersElement = document.getElementById("clan-members");
+                while (clanMemebersElement.hasChildNodes())
+                {
+                    clanMemebersElement.removeChild(clanMemebersElement.firstChild);
+                }
+
+                const errorElement = document.createElement("h2");
+                errorElement.appendChild(document.createTextNode("Please upload a save to view your clan data"));
+                clanMemebersElement.appendChild(errorElement);
+            }
+        });
+
+    const table = document.getElementById("leaderboard-table");
+
+    $.ajax({
+        url: "/api/clans/userClan",
+    }).done((response: ILeaderboardClan, textStatus: string, xhr: JQueryXHR) =>
+    {
+        let userClanRow: HTMLTableRowElement = null;
+        if (xhr.status !== 204)
+        {
+            userClanRow = document.createElement("tr");
+            userClanRow.classList.add("highlighted-clan");
+
+            const rankCell = document.createElement("td");
+            rankCell.appendChild(document.createTextNode(response.rank.toString()));
+            userClanRow.appendChild(rankCell);
+
+            const nameCell = document.createElement("td");
+            nameCell.appendChild(document.createTextNode(response.name));
+            userClanRow.appendChild(nameCell);
+
+            const memberCountCell = document.createElement("td");
+            if (response.memberCount > 0)
+            {
+                memberCountCell.appendChild(document.createTextNode(response.memberCount.toString()));
+            }
+
+            userClanRow.appendChild(memberCountCell);
+
+            const currentRaidLevelCell = document.createElement("td");
+            currentRaidLevelCell.appendChild(document.createTextNode(response.currentRaidLevel.toString()));
+            userClanRow.appendChild(currentRaidLevelCell);
+        }
+
+        updateLeaderboard(table, userClanRow);
+
+        window.addEventListener("hashchange", () =>
+        {
+            window.scrollTo(0, 0);
+            clearTable(table);
+            updateLeaderboard(table, userClanRow);
+        });
+    });
 
     $("#sendMessage").submit(function (event: JQueryEventObject): boolean
     {
