@@ -57,20 +57,23 @@
         return elements;
     }
 
-    export function copyToClipboard(item: string): void {
+    export function copyToClipboard(value: string): void
+    {
+        appInsights.trackEvent("copyToClipboard", { value: value });
 
         // Set up temp field to copy from
-        const $temp = $("<input>");
-        $("body").append($temp);
-        $temp.val(item).select();
+        const temp = $("<input>");
+        $("body").append(temp);
+        temp.val(value).select();
         document.execCommand("copy");
-        $temp.remove();
+        temp.remove();
 
         // Show copied alert
         showMessage("Value copied to clipboard", "success");
     }
 
-    export function showMessage(message: string, type: string): void {
+    export function showMessage(message: string, type: string): void
+    {
         type = ".alert-" + type;
         console.log(type);
         $(type).find("strong").text(message);

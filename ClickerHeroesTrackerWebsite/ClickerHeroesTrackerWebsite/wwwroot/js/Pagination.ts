@@ -62,5 +62,4 @@
 
         return paginationList;
     }
-
 }

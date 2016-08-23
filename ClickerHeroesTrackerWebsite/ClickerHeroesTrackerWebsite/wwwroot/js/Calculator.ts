@@ -196,13 +196,16 @@
             return;
         }
 
+        const availableSoulsSuggestionsLatency = "AncientSuggestions";
+        appInsights.startTrackEvent(availableSoulsSuggestionsLatency);
+
         const primaryAncient = lastUpload.playStyle === "active"
             ? "Fragsworth"
             : "Siyalatas";
 
         let suggestedLevels: IMap<number>;
 
-        const suggestionType = $("input[name='SuggestionType']:checked").val();
+        const suggestionType = $("input[name='SuggestionType']:checked").val() as string;
         const useSoulsFromAscensionElement = document.getElementById("UseSoulsFromAscension") as HTMLInputElement;
         const useSoulsFromAscensionContainer = useSoulsFromAscensionElement.parentElement.parentElement;
         if (suggestionType === "AvailableSouls")
@@ -296,6 +299,13 @@
         {
             hydrateAncientSuggestion(stats, ancient, suggestedLevels[ancient]);
         }
+
+        appInsights.stopTrackEvent(
+            availableSoulsSuggestionsLatency,
+            {
+                suggestionType: suggestionType,
+                useSoulsFromAscension: useSoulsFromAscensionElement.checked.toString(),
+            });
     }
 
     function calculateAncientSuggestions(currentPrimaryAncientLevel?: number): IMap<number>
@@ -456,6 +466,7 @@
         if (showLowAncientSoulWarning)
         {
             lowAncientSoulWarning.classList.remove("hidden");
+            appInsights.trackEvent("LowAncientSouls", { ancientSouls: ancientSouls.toString() });
         }
         else
         {
@@ -466,6 +477,7 @@
         if (showMissingSimulationWarning)
         {
             missingSimulationWarning.classList.remove("hidden");
+            appInsights.trackEvent("MissingSimulationData", { ancientSouls: ancientSouls.toString() });
         }
         else
         {
