@@ -185,6 +185,11 @@
 
     function hydrateAncientSuggestions(): void
     {
+        if (!lastUpload)
+        {
+            return;
+        }
+
         const stats = lastUpload.stats;
         if (!stats)
         {
