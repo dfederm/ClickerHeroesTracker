@@ -30,6 +30,11 @@
     </environment>
 
     @Html.ApplicationInsightsJavaScript(TelemetryConfiguration)
+    <!-- Stub out APIs which aren't properly stubbed out.
+        See: https://github.com/Microsoft/ApplicationInsights-JS/issues/293 -->
+    <script>
+        (function(t){function r(f){if(!t[f])t[f]=function(){var i=arguments;t.queue.push(function(){t[f].apply(t,i)})}};r("startTrackEvent");r("stopTrackEvent")})(appInsights)
+    </script>
 </head>
 <body>
     <div class="navbar navbar-inverse navbar-fixed-top">
