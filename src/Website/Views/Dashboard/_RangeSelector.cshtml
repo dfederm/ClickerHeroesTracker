@@ -1,0 +1,42 @@
+﻿@using System.Collections.Specialized
+@using System.Text
+@using ClickerHeroesTrackerWebsite.Models.Dashboard.Graph
+
+@model GraphRangeSelectorViewModel
+
+<ul class="list-inline">
+    <li>
+        @foreach (var range in GraphRangeSelectorViewModel.Ranges)
+        {
+            var disabledClass = range.Equals(Model.CurrentRange, StringComparison.OrdinalIgnoreCase) ? "disabled" : null;
+
+            var sb = new StringBuilder();
+            var sawRange = false;
+            foreach (var pair in this.Context.Request.Query)
+            {
+                sb.Append(sb.Length > 0 ? "&" : "?");
+                sb.Append(pair.Key);
+                sb.Append("=");
+
+                if (pair.Key.Equals("range", StringComparison.OrdinalIgnoreCase))
+                {
+                    sb.Append(range);
+                    sawRange = true;
+                }
+                else
+                {
+                    sb.Append(pair.Value);
+                }
+            }
+
+            if (!sawRange)
+            {
+                sb.Append(sb.Length > 0 ? "&" : "?");
+                sb.Append("range=");
+                sb.Append(range);
+            }
+
+            <a href="@sb" class="btn btn-default @disabledClass">@range</a>
+        }
+    </li>
+</ul>
