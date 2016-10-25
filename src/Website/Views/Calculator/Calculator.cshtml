@@ -1,0 +1,144 @@
+﻿@using ClickerHeroesTrackerWebsite.Models.Calculator;
+@using ClickerHeroesTrackerWebsite.Models.Game;
+
+@inject IContentManager ContentManager
+@inject GameData GameData
+
+@model CalculatorViewModel
+
+@{
+    ViewBag.Title = "Calculator";
+
+    @* Wire up tooltips *@
+    ContentManager.RegisterRawScript("$('[data-toggle=\"tooltip\"]').tooltip();");
+
+    ContentManager.RegisterScript("Helpers");
+    ContentManager.RegisterScript("Calculator");
+}
+
+<h2>@ViewBag.Title.</h2>
+
+<span data-type="uploadId" class="hidden">@Model.UploadId</span>
+
+<div class="clearfix">
+    <ul class="list-inline pull-left">
+        <li>
+            <label>User:</label>
+            <span data-type="uploadUserName"></span>
+        </li>
+        <li>
+            <label>Upload Time:</label>
+            <span data-type="uploadSubmitTime"></span>
+        </li>
+        <li>
+            <label>Play Style:</label>
+            <span data-type="uploadPlayStyle"></span>
+        </li>
+    </ul>
+    @if (Model.IsOwn || Model.IsPublic || User.IsInRole("Admin"))
+    {
+        <div class="pull-right">
+            @if (Model.IsOwn || User.IsInRole("Admin"))
+            {
+                <button class="btn btn-default" data-toggle="modal" data-target="#saveDataModal">
+                    View Save Data
+                </button>
+                <div id="saveDataModal" class="modal fade">
+                    <div class="modal-dialog modal-sm">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                                <h4 class="modal-title">Save Data</h4>
+                            </div>
+                            <div class="modal-body">
+                                <p>This is the raw content previously uploaded.</p>
+                                <textarea data-type="uploadContent" class="input-lg" onclick="$(this).select()" readonly></textarea>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-default" data-dismiss="modal">Done</button>
+                            </div>
+                        </div>                    
+                    </div>
+                </div>
+
+                <button class="btn btn-default" data-toggle="modal" data-target="#deleteUploadModal">
+                    Delete
+                </button>
+                <div id="deleteUploadModal" class="modal fade">
+                    <div class="modal-dialog modal-sm">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                                <h4 class="modal-title">Delete Upload</h4>
+                            </div>
+                            <div class="modal-body">
+                                <p>Are you sure? <span class="text-danger">This cannot be undone!</span></p>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                                <button type="button" class="btn btn-primary" id="deleteUpload">Delete</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+
+            <button class="btn btn-default" data-toggle="modal" data-target="#shareModal">
+                Share
+            </button>
+            <div id="shareModal" class="modal fade">
+                <div class="modal-dialog modal-sm">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                            <h4 class="modal-title">Share</h4>
+                        </div>
+                        <div class="modal-body">
+                            @if (Model.IsPublic)
+                            {
+                                <p>
+                                    You can share the url below to others to let them view this upload.
+                                </p>
+                                <input type="text"
+                                        id="shareUrl"
+                                        class="input-lg"
+                                        readonly="readonly"
+                                        onclick="$(this).select()"
+                                        value="https://clickerheroestracker.azurewebsites.net/Calculator/View?uploadId=@Model.UploadId" />
+                            }
+                            else if (User.IsInRole("Admin"))
+                            {
+                                <p class="text-danger">
+                                    This user's uploads are not public. Please keep their data private.
+                                </p>
+                            }
+                            else
+                            {
+                                <p>
+                                    Your uploads are not public. You can change this in your <a asp-controller="Manage" asp-action="Index">settings</a>
+                                </p>
+                            }
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-default" data-dismiss="modal">Done</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+<div class="row">
+    <div class="col-lg-6">
+        @Html.Partial("_AncientLevelSummary")
+    </div>
+    <div class="col-lg-6">
+        @Html.Partial("_OutsiderLevelSummary")
+        @Html.Partial("_ComputedStats")
+    </div>
+</div>
+
+<script type="text/javascript">
+    var ancientsData = @Json.Serialize(GameData.Ancients);
+</script>

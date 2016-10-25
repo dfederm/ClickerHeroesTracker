@@ -1,0 +1,34 @@
+﻿@using ClickerHeroesTrackerWebsite.Models.Dashboard
+
+@inject IContentManager ContentManager
+@{
+    ViewBag.Title = "Uploads";
+
+    ContentManager.RegisterScript("Pagination");
+    ContentManager.RegisterScript("Helpers");
+    ContentManager.RegisterScript("UploadTable");
+
+    @* Wire up tooltips *@
+    ContentManager.RegisterRawScript("$('[data-toggle=\"tooltip\"]').tooltip();");
+
+    @* Create upload table *@
+    ContentManager.RegisterRawScript("UploadTable.create('uploads', 20, true);");
+}
+
+<h2>Uploads</h2>
+
+<div class="row">
+    <div class="col-md-6">
+        <table id="uploads" class="table">
+            <thead>
+                <tr>
+                    <th>
+                        Upload Time
+                        <a href="/Manage" class="text-muted" data-toggle="tooltip" data-placement="right" title="Times not displayed in your time zone? You can adjust your time zone on the settings page.">(?)</a>
+                    </th>
+                    <th></th>
+                </tr>
+            </thead>
+        </table>
+    </div>
+</div>

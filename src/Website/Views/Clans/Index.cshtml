@@ -1,0 +1,53 @@
+﻿@using System
+@using System.Collections.Generic
+@using System.Net.Http;
+@using ClickerHeroesTrackerWebsite.Services.ContentManagement
+@inject IContentManager ContentManager
+
+@{
+    ViewBag.Title = "Clans";
+
+    ContentManager.RegisterScript("Helpers");
+    ContentManager.RegisterScript("Pagination");
+    ContentManager.RegisterScript("Clans");
+}
+
+<div class="row">
+    <div class="col-lg-6" id="clan-members">
+        <h2 id="clan-name"></h2>
+        <table class="table table-responsive table-striped" id="clan-members-table">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Highest Zone</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+        <div class="col-lg-12 message-box hidden" id="clan-messages">
+            <form id="sendMessage" action="/api/clans/messages" method="post" role="form">
+                <input type="text" name="message" class="message form-control" maxlength="150"/>
+                <button type="submit" class="btn btn-success">
+                    Send
+                </button>
+            </form>
+        </div>
+    </div>
+    <div class="col-lg-6">
+        <div class="row">
+            <div class="col-lg-12 leaderboard">
+                <h2>Clans Leaderboard</h2>
+                <table class="table table-responsive table-striped leaderboard-table" id="leaderboard-table">
+                    <thead>
+                        <tr>
+                            <th>Rank</th>
+                            <th>Name</th>
+                            <th>Members</th>
+                            <th>Current Raid Level</th>
+                        </tr>
+                    </thead>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,29 @@
+﻿@using ClickerHeroesTrackerWebsite.Models.Dashboard
+
+@model CompareViewModel
+
+@{
+    ViewBag.Title = "Compare";
+}
+
+<h2>@Model.UserName1 vs @Model.UserName2</h2>
+
+@Html.Partial("_GraphScripts")
+
+@Html.Partial("_RangeSelector", Model.RangeSelector)
+
+<div class="row">
+    @foreach (var graph in Model.ProminentGraphs)
+    {
+        <div class="col-md-6">
+            @Html.Partial("_Graph", graph)
+        </div>
+    }
+
+    @foreach (var graph in Model.SecondaryGraphs)
+    {
+        <div class="col-md-4">
+            @Html.Partial("_Graph", graph)
+        </div>
+    }
+</div>

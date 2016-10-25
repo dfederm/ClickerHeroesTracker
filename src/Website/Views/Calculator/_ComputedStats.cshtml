@@ -1,0 +1,54 @@
+﻿@using ClickerHeroesTrackerWebsite.Models.Api.Stats;
+
+<h4>Miscellaneous stats:</h4>
+
+<table class="table">
+    <tr>
+        <td>Hero Souls Spent</td>
+        <td data-type="@StatType.HeroSoulsSpent.ToString().ToCamelCase()">0</td>
+    </tr>
+    <tr>
+        <td>Hero Souls Sacrificed</td>
+        <td data-type="@StatType.HeroSoulsSacrificed.ToString().ToCamelCase()">0</td>
+    </tr>
+    <tr>
+        <td>Ancient Souls Earned</td>
+        <td data-type="@StatType.TotalAncientSouls.ToString().ToCamelCase()">0</td>
+    </tr>
+    <tr>
+        <td>Transcendent Power</td>
+        <td data-type="@StatType.TranscendentPower.ToString().ToCamelCase()">0</td>
+    </tr>
+    <tr>
+        <td>Max Transcendent Primal Reward</td>
+        <td data-type="@StatType.MaxTranscendentPrimalReward.ToString().ToCamelCase()">0</td>
+    </tr>
+    <tr>
+        <td>Transcendent Primal Cap Zone</td>
+        <td data-type="@StatType.BossLevelToTranscendentPrimalCap.ToString().ToCamelCase()">0</td>
+    </tr>
+    <tr>
+        <td>Titan Damage</td>
+        <td data-type="@StatType.TitanDamage.ToString().ToCamelCase()">0</td>
+    </tr>
+    <tr>
+        <td>Highest Zone</td>
+        <td data-type="@StatType.HighestZoneThisTranscension.ToString().ToCamelCase()">0</td>
+    </tr>
+    <tr>
+        <td>Highest Zone (Lifetime)</td>
+        <td data-type="@StatType.HighestZoneLifetime.ToString().ToCamelCase()">0</td>
+    </tr>
+    <tr>
+        <td>Ascensions</td>
+        <td data-type="@StatType.AscensionsThisTranscension.ToString().ToCamelCase()">0</td>
+    </tr>
+    <tr>
+        <td>Ascensions (Lifetime)</td>
+        <td data-type="@StatType.AscensionsLifetime.ToString().ToCamelCase()">0</td>
+    </tr>
+    <tr>
+        <td>Rubies</td>
+        <td data-type="@StatType.Rubies.ToString().ToCamelCase()">0</td>
+    </tr>
+</table>

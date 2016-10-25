@@ -4,7 +4,7 @@
 1. If you want to use **Visual Studio**
     1. Install [Visual Studio Community Edition](https://www.visualstudio.com/products/free-developer-offers-vs) for free
     1. If you already had it installed, ensure you have [Visual Studio Update 3](https://go.microsoft.com/fwlink/?LinkId=691129) installed.
-    1. Install [.NET Core 1.0 for Visual Studio](https://go.microsoft.com/fwlink/?LinkId=817245)
+    1. Install [.NET Core 1.0.1 for Visual Studio](https://go.microsoft.com/fwlink/?LinkID=827546)
     1. Skip the next step.
 1. If you'd like to build from the **command line** and use an editor like [Visual Studio Code](https://code.visualstudio.com/), install the [.NET Core SDK for Windows](https://go.microsoft.com/fwlink/?LinkID=809122).
 1. (Optional) If you want to use **Sqlite** for the local database, install [SqliteBrowser](http://sqlitebrowser.org/) to easily query Sqlite during local development.
