@@ -352,7 +352,7 @@
         suggestedLevels["Dora"] = (2.877 * lnPrimary) - (1.4365 * Math.log((100 / 99) - Math.pow(Math.E, -0.002 * currentDoraLevel))) - 9.63;
         suggestedLevels["Fortuna"] = (2.875 * lnPrimary) - (1.4375 * Math.log((10 / 9) - Math.pow(Math.E, -0.0025 * currentFortunaLevel))) - 9.3;
         suggestedLevels["Kumawakamaru"] = (2.844 * lnPrimary) - (1.422 * lnAlpha) - (1.422 * Math.log(0.25 + Math.pow(Math.E, -0.001 * currentKumaLevel))) - 7.014;
-        suggestedLevels["Libertas"] = suggestedLevels["Mammon"] = suggestedLevels["Mimzee"] = currentPrimaryAncientLevel * 0.926;
+        suggestedLevels["Mammon"] = suggestedLevels["Mimzee"] = currentPrimaryAncientLevel * 0.926;
         suggestedLevels["Morgulis"] = currentPrimaryAncientLevel * currentPrimaryAncientLevel;
         suggestedLevels["Solomon"] = stats["transcendentPower"] > 0
             ? Math.pow(currentPrimaryAncientLevel, 0.8) / Math.pow(alpha, 0.4)
@@ -362,12 +362,14 @@
         switch (playStyle)
         {
             case "idle":
+                suggestedLevels["Libertas"] = suggestedLevels["Mammon"];
                 break;
             case "hybrid":
                 const hybridRatioReciprocal = 1 / userSettings.hybridRatio;
                 const suggestedActiveLevelUnrounded = hybridRatioReciprocal * currentPrimaryAncientLevel;
                 suggestedLevels["Bhaal"] = suggestedLevels["Fragsworth"] = Math.round(suggestedActiveLevelUnrounded);
                 suggestedLevels["Juggernaut"] = Math.pow(suggestedActiveLevelUnrounded, 0.8);
+                suggestedLevels["Libertas"] = suggestedLevels["Mammon"];
                 break;
             case "active":
                 suggestedLevels["Bhaal"] = currentPrimaryAncientLevel;
