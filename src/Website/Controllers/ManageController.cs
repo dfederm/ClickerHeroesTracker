@@ -6,7 +6,6 @@ namespace ClickerHeroesTrackerWebsite.Controllers
 {
     using System;
     using System.Linq;
-    using System.Security.Claims;
     using System.Threading.Tasks;
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Identity;
@@ -14,6 +13,7 @@ namespace ClickerHeroesTrackerWebsite.Controllers
     using ClickerHeroesTrackerWebsite.Models;
     using ClickerHeroesTrackerWebsite.Models.Settings;
     using ClickerHeroesTrackerWebsite.Services.Email;
+    using ClickerHeroesTrackerWebsite.Utility;
     using ClickerHeroesTrackerWebsite.ViewModels.Manage;
 
     /// <summary>

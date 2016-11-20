@@ -6,10 +6,9 @@ namespace ClickerHeroesTrackerWebsite.Models.Dashboard
 {
     using System;
     using System.Collections.Generic;
-    using System.Data;
-    using ClickerHeroesTrackerWebsite.Models;
     using ClickerHeroesTrackerWebsite.Models.Game;
     using ClickerHeroesTrackerWebsite.Services.Database;
+    using ClickerHeroesTrackerWebsite.Utility;
     using Microsoft.ApplicationInsights;
 
     /// <summary>

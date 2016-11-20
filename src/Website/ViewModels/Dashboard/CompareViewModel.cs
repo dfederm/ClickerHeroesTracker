@@ -11,6 +11,7 @@ namespace ClickerHeroesTrackerWebsite.Models.Dashboard
     using ClickerHeroesTrackerWebsite.Models.Game;
     using ClickerHeroesTrackerWebsite.Models.Settings;
     using ClickerHeroesTrackerWebsite.Services.Database;
+    using ClickerHeroesTrackerWebsite.Utility;
     using ClickerHeroesTrackerWebsite.ViewModels.Dashboard.Graph;
     using Microsoft.ApplicationInsights;
 

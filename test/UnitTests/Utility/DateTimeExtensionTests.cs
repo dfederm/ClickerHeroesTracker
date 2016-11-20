@@ -1,13 +1,13 @@
-﻿// <copyright file="ExtensionsTests.cs" company="Clicker Heroes Tracker">
+﻿// <copyright file="DateTimeExtensionTests.cs" company="Clicker Heroes Tracker">
 // Copyright (c) Clicker Heroes Tracker. All rights reserved.
 // </copyright>
 
 namespace ClickerHeroesTrackerWebsite.Tests.Utility
 {
+    using ClickerHeroesTrackerWebsite.Utility;
     using Xunit;
-    using ClickerHeroesTrackerWebsite.Models;
 
-    public class ExtensionTests
+    public class DateTimeExtensionTests
     {
         [Theory]
         [InlineData(1469496451, "2016-07-26T01:27:31")]

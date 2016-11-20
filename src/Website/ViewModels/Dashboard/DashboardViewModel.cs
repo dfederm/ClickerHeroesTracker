@@ -12,6 +12,7 @@ namespace ClickerHeroesTrackerWebsite.Models.Dashboard
     using ClickerHeroesTrackerWebsite.Models.Dashboard.Graph;
     using ClickerHeroesTrackerWebsite.Models.Game;
     using ClickerHeroesTrackerWebsite.Models.Settings;
+    using ClickerHeroesTrackerWebsite.Utility;
     using ClickerHeroesTrackerWebsite.ViewModels.Dashboard.Graph;
     using Microsoft.ApplicationInsights;
     using Microsoft.AspNetCore.Identity;
