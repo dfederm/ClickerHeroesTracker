@@ -363,13 +363,14 @@
         {
             case "idle":
                 suggestedLevels["Libertas"] = suggestedLevels["Mammon"];
+                suggestedLevels["Nogardnit"] = Math.pow(suggestedLevels["Libertas"], 0.8);
                 break;
             case "hybrid":
                 const hybridRatioReciprocal = 1 / userSettings.hybridRatio;
-                const suggestedActiveLevelUnrounded = hybridRatioReciprocal * currentPrimaryAncientLevel;
-                suggestedLevels["Bhaal"] = suggestedLevels["Fragsworth"] = Math.round(suggestedActiveLevelUnrounded);
-                suggestedLevels["Juggernaut"] = Math.pow(suggestedActiveLevelUnrounded, 0.8);
+                suggestedLevels["Bhaal"] = suggestedLevels["Fragsworth"] = hybridRatioReciprocal * currentPrimaryAncientLevel;
+                suggestedLevels["Juggernaut"] = Math.pow(suggestedLevels["Fragsworth"], 0.8);
                 suggestedLevels["Libertas"] = suggestedLevels["Mammon"];
+                suggestedLevels["Nogardnit"] = Math.pow(suggestedLevels["Libertas"], 0.8);
                 break;
             case "active":
                 suggestedLevels["Bhaal"] = currentPrimaryAncientLevel;

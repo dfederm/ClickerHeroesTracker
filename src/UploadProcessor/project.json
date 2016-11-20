@@ -1,7 +1,12 @@
 {
   "buildOptions": {
     "emitEntryPoint": true,
-    "warningsAsErrors": true
+    "warningsAsErrors": true,
+    "copyToOutput": {
+      "mappings": {
+        "GameData.json": "../Website/data/GameData.json"
+      }
+    }
   },
 
   "dependencies": {
