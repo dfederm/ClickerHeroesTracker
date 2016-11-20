@@ -34,7 +34,7 @@ namespace ClickerHeroesTrackerWebsite.Models.SaveData
                 : 0;
         }
 
-        public static IDictionary<int, double> GetItemLevels(this ItemsData itemsData)
+        public static IDictionary<int, double> GetItemLevels(this ItemsData itemsData, GameData gameData)
         {
             var itemLevels = new Dictionary<int, double>();
 
@@ -57,10 +57,10 @@ namespace ClickerHeroesTrackerWebsite.Models.SaveData
                         continue;
                     }
 
-                    AddItemLevels(itemLevels, itemData.Bonus1Type, itemData.Bonus1Level);
-                    AddItemLevels(itemLevels, itemData.Bonus2Type, itemData.Bonus2Level);
-                    AddItemLevels(itemLevels, itemData.Bonus3Type, itemData.Bonus3Level);
-                    AddItemLevels(itemLevels, itemData.Bonus4Type, itemData.Bonus4Level);
+                    AddItemLevels(gameData, itemLevels, itemData.Bonus1Type, itemData.Bonus1Level);
+                    AddItemLevels(gameData, itemLevels, itemData.Bonus2Type, itemData.Bonus2Level);
+                    AddItemLevels(gameData, itemLevels, itemData.Bonus3Type, itemData.Bonus3Level);
+                    AddItemLevels(gameData, itemLevels, itemData.Bonus4Type, itemData.Bonus4Level);
                 }
             }
 
@@ -68,6 +68,7 @@ namespace ClickerHeroesTrackerWebsite.Models.SaveData
         }
 
         private static void AddItemLevels(
+            GameData gameData,
             Dictionary<int, double> itemLevels,
             int? itemType,
             double? itemLevel)
@@ -79,12 +80,13 @@ namespace ClickerHeroesTrackerWebsite.Models.SaveData
                 return;
             }
 
-            var ancientId = ItemBonusType.GetAncientId(itemType.Value);
-            if (ancientId == 0)
+            ItemBonusType itemBonusType;
+            if (!gameData.ItemBonusTypes.TryGetValue(itemType.Value, out itemBonusType))
             {
                 return;
             }
 
+            var ancientId = itemBonusType.AncientId;
             double currentLevel;
             if (itemLevels.TryGetValue(ancientId, out currentLevel))
             {

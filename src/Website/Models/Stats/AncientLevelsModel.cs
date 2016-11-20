@@ -23,7 +23,7 @@ namespace ClickerHeroesTrackerWebsite.Models.Stats
             TelemetryClient telemetryClient)
         {
             var ancientLevels = new SortedDictionary<Ancient, AncientLevelInfo>(AncientComparer.Instance);
-            var itemLevelsById = savedGame.ItemsData.GetItemLevels();
+            var itemLevelsById = savedGame.ItemsData.GetItemLevels(gameData);
             foreach (var ancientData in savedGame.AncientsData.Ancients.Values)
             {
                 Ancient ancient;
