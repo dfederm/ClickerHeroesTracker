@@ -34,6 +34,12 @@ namespace ClickerHeroesTrackerWebsite.Models.Game
         public IDictionary<int, Ancient> Ancients { get; set; }
 
         /// <summary>
+        /// Gets or sets a collection of item bonus types.
+        /// </summary>
+        [JsonProperty(PropertyName = "itemBonusTypes", Required = Required.Always)]
+        public IDictionary<int, ItemBonusType> ItemBonusTypes { get; set; }
+
+        /// <summary>
         /// Parses a <see cref="GameData"/> from a json file.
         /// </summary>
         /// <param name="file">The file with the data</param>

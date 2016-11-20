@@ -5,8 +5,8 @@
 namespace ClickerHeroesTrackerWebsite.Tests.Models
 {
     using System.Collections.Generic;
-    using ClickerHeroesTrackerWebsite.Models.Game;
     using ClickerHeroesTrackerWebsite.Models.SaveData;
+    using ClickerHeroesTrackerWebsite.Tests.Mocks;
     using Xunit;
 
     public class SavedGameExtensionsTests
@@ -81,7 +81,7 @@ namespace ClickerHeroesTrackerWebsite.Tests.Models
         {
             ItemsData itemsData = null;
 
-            var itemsLevels = itemsData.GetItemLevels();
+            var itemsLevels = itemsData.GetItemLevels(MockGameData.RealData);
 
             Assert.NotNull(itemsLevels);
             Assert.Equal(0, itemsLevels.Count);
@@ -96,7 +96,7 @@ namespace ClickerHeroesTrackerWebsite.Tests.Models
                 Items = validItems,
             };
 
-            var itemsLevels = itemsData.GetItemLevels();
+            var itemsLevels = itemsData.GetItemLevels(MockGameData.RealData);
 
             Assert.NotNull(itemsLevels);
             Assert.Equal(0, itemsLevels.Count);
@@ -111,7 +111,7 @@ namespace ClickerHeroesTrackerWebsite.Tests.Models
                 Items = null,
             };
 
-            var itemsLevels = itemsData.GetItemLevels();
+            var itemsLevels = itemsData.GetItemLevels(MockGameData.RealData);
 
             Assert.NotNull(itemsLevels);
             Assert.Equal(0, itemsLevels.Count);
@@ -126,7 +126,7 @@ namespace ClickerHeroesTrackerWebsite.Tests.Models
                 Items = new Dictionary<int, ItemData>(),
             };
 
-            var itemsLevels = itemsData.GetItemLevels();
+            var itemsLevels = itemsData.GetItemLevels(MockGameData.RealData);
 
             Assert.NotNull(itemsLevels);
             Assert.Equal(0, itemsLevels.Count);
@@ -148,7 +148,7 @@ namespace ClickerHeroesTrackerWebsite.Tests.Models
                 Items = validItems,
             };
 
-            var itemsLevels = itemsData.GetItemLevels();
+            var itemsLevels = itemsData.GetItemLevels(MockGameData.RealData);
 
             Assert.NotNull(itemsLevels);
             Assert.Equal(0, itemsLevels.Count);
@@ -170,7 +170,7 @@ namespace ClickerHeroesTrackerWebsite.Tests.Models
                 },
             };
 
-            var itemsLevels = itemsData.GetItemLevels();
+            var itemsLevels = itemsData.GetItemLevels(MockGameData.RealData);
 
             Assert.NotNull(itemsLevels);
             Assert.Equal(0, itemsLevels.Count);
@@ -185,14 +185,14 @@ namespace ClickerHeroesTrackerWebsite.Tests.Models
                 Items = validItems,
             };
 
-            var itemsLevels = itemsData.GetItemLevels();
+            var itemsLevels = itemsData.GetItemLevels(MockGameData.RealData);
 
             Assert.NotNull(itemsLevels);
             Assert.Equal(4, itemsLevels.Count);
-            Assert.Equal(40, itemsLevels[ItemBonusType.GetAncientId(1)]);
-            Assert.Equal(60, itemsLevels[ItemBonusType.GetAncientId(2)]);
-            Assert.Equal(60, itemsLevels[ItemBonusType.GetAncientId(3)]);
-            Assert.Equal(40, itemsLevels[ItemBonusType.GetAncientId(4)]);
+            Assert.Equal(40, itemsLevels[MockGameData.RealData.ItemBonusTypes[1].AncientId]);
+            Assert.Equal(60, itemsLevels[MockGameData.RealData.ItemBonusTypes[2].AncientId]);
+            Assert.Equal(60, itemsLevels[MockGameData.RealData.ItemBonusTypes[3].AncientId]);
+            Assert.Equal(40, itemsLevels[MockGameData.RealData.ItemBonusTypes[4].AncientId]);
         }
 
         [Fact]
@@ -210,14 +210,14 @@ namespace ClickerHeroesTrackerWebsite.Tests.Models
                 Items = validItems,
             };
 
-            var itemsLevels = itemsData.GetItemLevels();
+            var itemsLevels = itemsData.GetItemLevels(MockGameData.RealData);
 
             Assert.NotNull(itemsLevels);
             Assert.Equal(4, itemsLevels.Count);
-            Assert.Equal(40, itemsLevels[ItemBonusType.GetAncientId(1)]);
-            Assert.Equal(60, itemsLevels[ItemBonusType.GetAncientId(2)]);
-            Assert.Equal(60, itemsLevels[ItemBonusType.GetAncientId(3)]);
-            Assert.Equal(40, itemsLevels[ItemBonusType.GetAncientId(4)]);
+            Assert.Equal(40, itemsLevels[MockGameData.RealData.ItemBonusTypes[1].AncientId]);
+            Assert.Equal(60, itemsLevels[MockGameData.RealData.ItemBonusTypes[2].AncientId]);
+            Assert.Equal(60, itemsLevels[MockGameData.RealData.ItemBonusTypes[3].AncientId]);
+            Assert.Equal(40, itemsLevels[MockGameData.RealData.ItemBonusTypes[4].AncientId]);
         }
     }
 }
