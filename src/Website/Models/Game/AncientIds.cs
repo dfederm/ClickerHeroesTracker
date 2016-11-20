@@ -157,6 +157,11 @@ namespace ClickerHeroesTrackerWebsite.Models.Game
         /// </summary>
         public const int Revolc = 31;
 
+        /// <summary>
+        /// Nogardnit
+        /// </summary>
+        public const int Nogardnit = 32;
+
         private static readonly Dictionary<int, StatType> AncientStatTypeMap = new Dictionary<int, StatType>
         {
             { AncientIds.Argaiv, StatType.AncientArgaiv },
@@ -181,6 +186,7 @@ namespace ClickerHeroesTrackerWebsite.Models.Game
             { AncientIds.Mammon, StatType.AncientMammon },
             { AncientIds.Mimzee, StatType.AncientMimzee },
             { AncientIds.Morgulis, StatType.AncientMorgulis },
+            { AncientIds.Nogardnit, StatType.AncientNogardnit },
             { AncientIds.Pluto, StatType.AncientPluto },
             { AncientIds.Revolc, StatType.AncientRevolc },
             { AncientIds.Siyalatas, StatType.AncientSiyalatas },
@@ -214,6 +220,7 @@ namespace ClickerHeroesTrackerWebsite.Models.Game
             { AncientIds.Mammon, StatType.ItemMammon },
             { AncientIds.Mimzee, StatType.ItemMimzee },
             { AncientIds.Morgulis, StatType.ItemMorgulis },
+            { AncientIds.Nogardnit, StatType.ItemNogardnit },
             { AncientIds.Pluto, StatType.ItemPluto },
             { AncientIds.Revolc, StatType.ItemRevolc },
             { AncientIds.Siyalatas, StatType.ItemSiyalatas },
@@ -247,6 +254,7 @@ namespace ClickerHeroesTrackerWebsite.Models.Game
             { AncientIds.Mammon, StatType.SuggestedMammon },
             { AncientIds.Mimzee, StatType.SuggestedMimzee },
             { AncientIds.Morgulis, StatType.SuggestedMorgulis },
+            { AncientIds.Nogardnit, StatType.SuggestedNogardnit },
             { AncientIds.Pluto, StatType.SuggestedPluto },
             { AncientIds.Revolc, StatType.SuggestedRevolc },
             { AncientIds.Siyalatas, StatType.SuggestedSiyalatas },

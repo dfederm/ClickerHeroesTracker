@@ -4,10 +4,9 @@
   "buildOptions": {
     "warningsAsErrors": true,
     "copyToOutput": {
-      "include": [
-        "TestData/*.*",
-        "GameData.json"
-      ]
+      "mappings": {
+        "GameData.json": "../../src/Website/data/GameData.json"
+      }
     }
   },
   "dependencies": {

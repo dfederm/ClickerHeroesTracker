@@ -34,6 +34,7 @@ namespace ClickerHeroesTrackerWebsite.Models.Calculator
             AncientIds.Mammon,
             AncientIds.Mimzee,
             AncientIds.Morgulis,
+            AncientIds.Nogardnit,
             AncientIds.Siyalatas,
             AncientIds.Solomon,
         };

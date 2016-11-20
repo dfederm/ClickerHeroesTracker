@@ -14,12 +14,6 @@ namespace ClickerHeroesTrackerWebsite.Models.Game
     /// <remarks>
     /// See GameData.json, last saved from ClickerHeroes_v6565.swf
     /// Instructions:
-    /// Download game swf (eg. https://d1snsxh2hr65cz.cloudfront.net/ClickerHeroes_v6565.swf)
-    /// Decompile
-    /// Go to binary data, decompile inner HeroClicker_swf
-    /// Go to binary data, save 165: staticdata, save as file
-    /// It'll be a json file.
-    /// OR
     /// Download the.swf from the link in the source code.
     /// Decompile using JPEXS Free Flash Decompiler
     /// Go to binary data folder and click on the only thing in there
