@@ -7,10 +7,10 @@ namespace ClickerHeroesTrackerWebsite
     using ClickerHeroesTrackerWebsite.Instrumentation;
     using ClickerHeroesTrackerWebsite.Models.Game;
     using ClickerHeroesTrackerWebsite.Models.Settings;
-    using ClickerHeroesTrackerWebsite.Services.Security;
     using ClickerHeroesTrackerWebsite.Utility;
     using Microsoft.AspNetCore.Builder;
     using Microsoft.AspNetCore.Hosting;
+    using Microsoft.AspNetCore.Rewrite;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Logging;
 
@@ -44,7 +44,9 @@ namespace ClickerHeroesTrackerWebsite
             // Require https on non-devbox
             if (!env.IsDevelopment())
             {
-                app.UseMiddleware<RequireHttpsMiddleware>();
+                var options = new RewriteOptions()
+                    .AddRedirectToHttpsPermanent();
+                app.UseRewriter(options);
             }
 
             app.UseStaticFiles();
