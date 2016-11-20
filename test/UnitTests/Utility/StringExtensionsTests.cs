@@ -25,13 +25,22 @@ namespace ClickerHeroesTrackerWebsite.Tests.Utility
             }
         }
 
+        [Fact]
+        public void StringExtensions_NullString()
+        {
+            Assert.Throws<ArgumentNullException>("str", () =>
+            {
+                string str = null;
+                str.SplitIntoChunks(1);
+            });
+        }
+
         [Theory]
-        [InlineData(null, 1)]
         [InlineData("123", 0)]
         [InlineData("123", -1)]
-        public void StringExtensions_ExceptionTests(string str, int chunkLength)
+        public void StringExtensions_ChunkLengthExceptions(string str, int chunkLength)
         {
-            Assert.Throws<ArgumentException>("str", () =>
+            Assert.Throws<ArgumentException>("chunkLength", () =>
             {
                 str.SplitIntoChunks(chunkLength);
             });
