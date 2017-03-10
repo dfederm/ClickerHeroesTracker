@@ -189,9 +189,9 @@
             n = Math.floor(n);
             exponent -= 5;
 
-            return exponent == 0
+            return exponent === 0
                 ? n.toFixed()
-                : (n.toFixed() + 'e' + exponent);
+                : (n.toFixed() + "e" + exponent);
         }
         else
         {
