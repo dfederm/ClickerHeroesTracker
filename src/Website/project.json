@@ -4,7 +4,7 @@
   "userSecretsId": "aspnet-ClickerHeroesTrackerWebsite-20161025101322",
 
   "dependencies": {
-    "AspNet.Security.OAuth.Validation": "1.0.0-alpha3-0181",
+    "AspNet.Security.OAuth.Validation": "1.0.0-*",
     "Microsoft.ApplicationInsights.AspNetCore": "1.0.2",
     "Microsoft.AspNetCore.Authentication.Cookies": "1.1.0",
     "Microsoft.AspNetCore.Authentication.Facebook": "1.1.0",
@@ -29,7 +29,9 @@
     "Microsoft.Extensions.Logging": "1.1.0",
     "Microsoft.Extensions.Logging.Console": "1.1.0",
     "Microsoft.Extensions.Logging.Debug": "1.1.0",
-    "OpenIddict": "1.0.0-alpha2-0383",
+    "OpenIddict": "1.0.0-*",
+    "OpenIddict.EntityFrameworkCore": "1.0.0-*",
+    "OpenIddict.Mvc": "1.0.0-*",
     "Sendgrid": "8.0.5",
     "WindowsAzure.Storage": "7.2.1"
   },
