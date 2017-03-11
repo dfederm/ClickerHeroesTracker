@@ -2,6 +2,8 @@
 {
     "use strict";
 
+    const exponentialRegex = new RegExp("^(\\d+\\.\\d+)e\\+?(\\d+)$", "i");
+
     // An index for quick lookup of ancient cost formulas.
     // Each formula gets the sum of the cost of the ancient from 1 to N.
     const ancientCostFormulas = getAncientCostFormulas();
@@ -150,7 +152,8 @@
                     statElement.classList.add("clickable");
                     statElement.addEventListener("click", function (): void
                     {
-                        Helpers.copyToClipboard(statValue.toString());
+                        let copyValue = formatForClipboard(statValue);
+                        Helpers.copyToClipboard(copyValue);
                     });
                 }
             }
@@ -169,6 +172,30 @@
 
                 statElements[i].textContent = displayText;
             }
+        }
+    }
+
+    function formatForClipboard(num: number): string
+    {
+        // The game can't handle pasting in decimal points, so we'll just use an altered sci-not form that excludes the decimal (eg. 1.234e5 => 1234e2)
+        if (num >= 1e6)
+        {
+            let str = num.toExponential();
+            let groups = exponentialRegex.exec(str);
+            let n = parseFloat(groups[1]);
+            let exponent = parseInt(groups[3]);
+
+            n *= 1e5;
+            n = Math.floor(n);
+            exponent -= 5;
+
+            return exponent === 0
+                ? n.toFixed()
+                : (n.toFixed() + "e" + exponent);
+        }
+        else
+        {
+            return num.toFixed(0);
         }
     }
 
