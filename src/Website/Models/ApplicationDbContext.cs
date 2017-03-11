@@ -6,9 +6,8 @@ namespace ClickerHeroesTrackerWebsite.Models
 {
     using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
     using Microsoft.EntityFrameworkCore;
-    using OpenIddict;
 
-    public class ApplicationDbContext : OpenIddictDbContext<ApplicationUser>
+    public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     {
         public ApplicationDbContext(DbContextOptions options)
             : base(options)

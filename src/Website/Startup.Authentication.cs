@@ -19,7 +19,6 @@ namespace ClickerHeroesTrackerWebsite
         {
             app.UseIdentity();
             app.UseOAuthValidation();
-            app.UseOpenIddict();
 
             var authenticationSettingsOptions = app.ApplicationServices.GetService<IOptions<AuthenticationSettings>>();
             if (authenticationSettingsOptions.Value != null)
@@ -72,6 +71,9 @@ namespace ClickerHeroesTrackerWebsite
                     });
                 }
             }
+
+            // Note: UseOpenIddict() must be registered after app.UseIdentity() and the external social providers.
+            app.UseOpenIddict();
 
             // Allow auth mocking when not in prod
             if (!env.IsProduction())

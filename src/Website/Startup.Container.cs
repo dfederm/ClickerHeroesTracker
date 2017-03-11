@@ -72,16 +72,17 @@ namespace ClickerHeroesTrackerWebsite
 
             // Add Entity framework services.
             var connectionString = this.Configuration["Database:ConnectionString"];
+            Action<DbContextOptionsBuilder> useDatabase;
             switch (this.Configuration["Database:Kind"])
             {
                 case "SqlServer":
                 {
-                    services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(connectionString));
+                    useDatabase = options => options.UseSqlServer(connectionString);
                     break;
                 }
                 case "Sqlite":
                 {
-                    services.AddDbContext<ApplicationDbContext>(options => options.UseSqlite(connectionString));
+                    useDatabase = options => options.UseSqlite(connectionString);
                     break;
                 }
                 default:
@@ -89,6 +90,14 @@ namespace ClickerHeroesTrackerWebsite
                     throw new InvalidOperationException($"Invalid configuration for \"Database:Kind\": {this.Configuration["Database:Kind"]}");
                 }
             }
+
+            services.AddDbContext<ApplicationDbContext>(options =>
+                {
+                    useDatabase(options);
+
+                    // Register the entity sets needed by OpenIddict.
+                    options.UseOpenIddict();
+                });
 
             services.AddIdentity<ApplicationUser, IdentityRole>(options =>
                 {
@@ -106,19 +115,29 @@ namespace ClickerHeroesTrackerWebsite
                 .AddEntityFrameworkStores<ApplicationDbContext>()
                 .AddDefaultTokenProviders();
 
-            // Register the OpenIddict services, including the default Entity Framework stores.
-            var openIddictBuilder = services.AddOpenIddict<ApplicationUser, ApplicationDbContext>()
+            // Register the OpenIddict services.
+            services.AddOpenIddict(options =>
+            {
+                // Register the Entity Framework stores.
+                options.AddEntityFrameworkCoreStores<ApplicationDbContext>();
+
+                // Register the ASP.NET Core MVC binder used by OpenIddict.
+                // Note: if you don't call this method, you won't be able to
+                // bind OpenIdConnectRequest or OpenIdConnectResponse parameters.
+                options.AddMvcBinders();
+
                 // Enable the token endpoint (required to use the password flow).
-                .EnableTokenEndpoint("/api/connect/token")
+                options.EnableTokenEndpoint("/api/connect/token");
 
                 // Allow client applications to use the grant_type=password flow.
-                .AllowPasswordFlow();
+                options.AllowPasswordFlow();
 
-            // Allow Http on devbox
-            if (this.Environment.IsDevelopment())
-            {
-                openIddictBuilder.DisableHttpsRequirement();
-            }
+                // Allow Http on devbox
+                if (this.Environment.IsDevelopment())
+                {
+                    options.DisableHttpsRequirement();
+                }
+            });
 
             services.AddApplicationInsightsTelemetry(this.Configuration);
 
