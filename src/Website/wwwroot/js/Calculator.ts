@@ -2,7 +2,7 @@
 {
     "use strict";
 
-    const exponentialRegex = new RegExp("^(\\d+\\.\\d+)e\\+?(\\d+)$", "i");
+    const exponentialRegex = new RegExp("^(\\d+(\\.\\d+)?)e\\+?(\\d+)$", "i");
 
     // An index for quick lookup of ancient cost formulas.
     // Each formula gets the sum of the cost of the ancient from 1 to N.
