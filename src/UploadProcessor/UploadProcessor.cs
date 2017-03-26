@@ -106,7 +106,6 @@ namespace ClickerHeroesTrackerWebsite.UploadProcessing
             using (counterProvider.Measure(Counter.ProcessUpload))
             {
                 int uploadId = -1;
-                var userSettingsProvider = new UserSettingsProvider(databaseCommandFactory);
                 try
                 {
                     var message = JsonConvert.DeserializeObject<UploadProcessingMessage>(queueMessage.AsString);
@@ -124,7 +123,7 @@ namespace ClickerHeroesTrackerWebsite.UploadProcessing
                     string uploadContent;
                     string userId;
                     PlayStyle playStyle;
-                    this.GetUploadDetails(databaseCommandFactory, uploadId, out uploadContent, out userId, out playStyle);
+                    GetUploadDetails(databaseCommandFactory, uploadId, out uploadContent, out userId, out playStyle);
                     properties.Add("UserId", userId);
                     if (string.IsNullOrWhiteSpace(uploadContent))
                     {
@@ -137,13 +136,6 @@ namespace ClickerHeroesTrackerWebsite.UploadProcessing
                     {
                         this.telemetryClient.TrackEvent("UploadProcessor-Complete-Legacy", properties);
                         return true;
-                    }
-
-                    var userSettings = userSettingsProvider.Get(userId);
-                    if (userSettings == null)
-                    {
-                        this.telemetryClient.TrackEvent("UploadProcessor-Abandoned-FetchUserSettings", properties);
-                        return false;
                     }
 
                     var savedGame = SavedGame.Parse(uploadContent);
@@ -413,7 +405,7 @@ namespace ClickerHeroesTrackerWebsite.UploadProcessing
             }
         }
 
-        private void GetUploadDetails(
+        private static void GetUploadDetails(
             IDatabaseCommandFactory databaseCommandFactory,
             int uploadId,
             out string uploadContent,
