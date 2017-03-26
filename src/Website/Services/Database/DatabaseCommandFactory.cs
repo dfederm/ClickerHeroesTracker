@@ -10,7 +10,6 @@ namespace ClickerHeroesTrackerWebsite.Services.Database
     using System.Data.SqlClient;
     using ClickerHeroesTrackerWebsite.Instrumentation;
     using ClickerHeroesTrackerWebsite.Utility;
-    using Microsoft.ApplicationInsights;
     using Microsoft.Data.Sqlite;
     using Microsoft.Extensions.Options;
 
@@ -27,8 +26,6 @@ namespace ClickerHeroesTrackerWebsite.Services.Database
 
         private readonly DatabaseSettings databaseSettings;
 
-        private readonly TelemetryClient telemetryClient;
-
         private readonly ICounterProvider counterProvider;
 
         private DbConnection connection;
@@ -38,11 +35,9 @@ namespace ClickerHeroesTrackerWebsite.Services.Database
         /// </summary>
         public DatabaseCommandFactory(
             IOptions<DatabaseSettings> databaseSettingsOptions,
-            TelemetryClient telemetryClient,
             ICounterProvider counterProvider)
         {
             this.databaseSettings = databaseSettingsOptions.Value;
-            this.telemetryClient = telemetryClient;
             this.counterProvider = counterProvider;
         }
 
@@ -54,8 +49,6 @@ namespace ClickerHeroesTrackerWebsite.Services.Database
             // Create the connection if it hasn't been created yet.
             if (this.connection == null)
             {
-                this.telemetryClient.TrackEvent("SqlConnectionOpen");
-
                 using (this.counterProvider.Suspend(Counter.Internal))
                 using (this.counterProvider.Measure(Counter.Dependency))
                 {
@@ -74,8 +67,6 @@ namespace ClickerHeroesTrackerWebsite.Services.Database
         {
             if (this.connection != null)
             {
-                this.telemetryClient.TrackEvent("SqlConnectionClose");
-
                 // SqlConntection throws if it's being disposed in a finalizer
                 if (isDisposing)
                 {
