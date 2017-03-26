@@ -19,9 +19,9 @@ namespace ClickerHeroesTrackerWebsite.Controllers.Api
     using ClickerHeroesTrackerWebsite.Services.Database;
     using ClickerHeroesTrackerWebsite.Utility;
     using Microsoft.ApplicationInsights;
+    using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Identity;
     using Microsoft.AspNetCore.Mvc;
-    using Microsoft.AspNetCore.Authorization;
 
     /// <summary>
     /// This controller handles the set of APIs that manage uploads

@@ -24,16 +24,19 @@ namespace ClickerHeroesTrackerWebsite.Models.Stats
         {
             var ancientLevels = new SortedDictionary<Ancient, AncientLevelInfo>(AncientComparer.Instance);
             var itemLevelsById = savedGame.ItemsData.GetItemLevels(gameData);
-            foreach (var ancientData in savedGame.AncientsData.Ancients.Values)
+            foreach (var ancient in gameData.Ancients.Values)
             {
-                Ancient ancient;
-                if (!gameData.Ancients.TryGetValue(ancientData.Id, out ancient))
+                // Skip ancients no longer in the game.
+                if (ancient.NonTranscendent)
                 {
-                    telemetryClient.TrackEvent("Unknown ancient", new Dictionary<string, string> { { "AncientId", ancientData.Id.ToString() } });
                     continue;
                 }
 
-                var ancientLevelInfo = new AncientLevelInfo(ancientData.Level, itemLevelsById.GetItemLevel(ancient.Id));
+                AncientData ancientData;
+                var ancientLevel = savedGame.AncientsData.Ancients.TryGetValue(ancient.Id, out ancientData)
+                    ? ancientData.Level
+                    : 0;
+                var ancientLevelInfo = new AncientLevelInfo(ancientLevel, itemLevelsById.GetItemLevel(ancient.Id));
                 ancientLevels.Add(ancient, ancientLevelInfo);
             }
 
