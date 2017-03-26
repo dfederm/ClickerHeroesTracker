@@ -102,7 +102,6 @@ namespace ClickerHeroesTrackerWebsite.UploadProcessing
             using (var counterProvider = new CounterProvider(this.telemetryClient))
             using (var databaseCommandFactory = new DatabaseCommandFactory(
                 this.databaseSettingsOptions,
-                this.telemetryClient,
                 counterProvider))
             using (counterProvider.Measure(Counter.ProcessUpload))
             {
