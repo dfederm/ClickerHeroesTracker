@@ -110,17 +110,5 @@ namespace ClickerHeroesTracker.UploadProcessor
 
             telemetryClient.Flush();
         }
-
-        // Taken from https://github.com/aspnet/Options/blob/dev/src/Microsoft.Extensions.Options/OptionsWrapper.cs
-        // Remove after upgrading to RC2 and use Options.Create<TOptions>(TOptions options) instead.
-        private sealed class OptionsWrapper<TOptions> : IOptions<TOptions> where TOptions : class, new()
-        {
-            public OptionsWrapper(TOptions options)
-            {
-                Value = options;
-            }
-
-            public TOptions Value { get; }
-        }
     }
 }

@@ -11,10 +11,9 @@ namespace ClickerHeroesTrackerWebsite.Controllers
     using ClickerHeroesTrackerWebsite.Models;
     using ClickerHeroesTrackerWebsite.Services.Database;
     using ClickerHeroesTrackerWebsite.Services.UploadProcessing;
-    using Microsoft.AspNetCore.Mvc;
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Identity;
-    using Microsoft.Extensions.Options;
+    using Microsoft.AspNetCore.Mvc;
     using Microsoft.WindowsAzure.Storage.Queue;
 
     /// <summary>
@@ -141,6 +140,30 @@ namespace ClickerHeroesTrackerWebsite.Controllers
             await queue.ClearAsync();
 
             this.ViewBag.Message = $"Cleared the {priority.Value} priority queue ({numMessages} messages)";
+            return await this.Index();
+        }
+
+        public async Task<IActionResult> GetStaleAnonymousUploads()
+        {
+            const string CommandText = @"
+                SELECT Id
+                FROM Uploads
+                WHERE UserId IS NULL
+                AND UploadTime < DATEADD(day, -30, GETDATE())";
+            var uploadIds = new List<int>();
+            using (var command = this.databaseCommandFactory.Create(CommandText))
+            using (var reader = command.ExecuteReader())
+            {
+                while (reader.Read())
+                {
+                    var uploadId = Convert.ToInt32(reader["Id"]);
+                    uploadIds.Add(uploadId);
+                }
+            }
+
+            this.ViewBag.StaleUploads = uploadIds;
+            this.ViewBag.Message = $"Found {uploadIds.Count} stale anonymous uploads";
+
             return await this.Index();
         }
     }
