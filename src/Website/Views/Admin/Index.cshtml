@@ -33,9 +33,17 @@
                     <div class="text-muted">
                         Use commas to separate the Ids.
                     </div>
-                    <div class="text-muted">
-                        Leave blank to recompute all uploads.
-                    </div>
+                </dd>
+            </dl>
+            <dl class="dl-horizontal">
+                <dt>Queue Priority</dt>
+                <dd>
+                    <select name="priority" class="input-sm">
+                        @foreach (var queue in this.ViewBag.Queues)
+                        {
+                            <option value="@queue.Key">@queue.Key (~@queue.Value messages)</option>
+                        }
+                    </select>
                 </dd>
             </dl>
             <dl class="dl-horizontal">

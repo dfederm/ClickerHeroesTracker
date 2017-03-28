@@ -73,36 +73,26 @@ namespace ClickerHeroesTrackerWebsite.Controllers
         /// </summary>
         /// <param name="uploadIds">The upload ids to recomute stats for</param>
         /// <returns>The admin homepage view</returns>
-        public async Task<IActionResult> UpdateComputedStats(string uploadIds)
+        public async Task<IActionResult> UpdateComputedStats(string uploadIds, UploadProcessingMessagePriority? priority)
         {
+            if (!priority.HasValue)
+            {
+                this.ViewBag.Error = "Invalid Priority";
+                return await this.Index();
+            }
+
             var userId = this.userManager.GetUserId(this.User);
 
             var parsedUploadIds = new List<int>();
             if (uploadIds != null)
             {
-                if (uploadIds.Equals("ALL", StringComparison.OrdinalIgnoreCase))
+                var uploadIdsRaw = uploadIds.Split(',');
+                foreach (var uploadIdRaw in uploadIdsRaw)
                 {
-                    const string CommandText = "SELECT Id FROM Uploads ORDER BY UploadTime DESC";
-                    using (var command = this.databaseCommandFactory.Create(CommandText))
-                    using (var reader = command.ExecuteReader())
+                    int uploadId;
+                    if (int.TryParse(uploadIdRaw.Trim(), out uploadId))
                     {
-                        while (reader.Read())
-                        {
-                            var uploadId = Convert.ToInt32(reader["Id"]);
-                            parsedUploadIds.Add(uploadId);
-                        }
-                    }
-                }
-                else
-                {
-                    var uploadIdsRaw = uploadIds.Split(',');
-                    foreach (var uploadIdRaw in uploadIdsRaw)
-                    {
-                        int uploadId;
-                        if (int.TryParse(uploadIdRaw.Trim(), out uploadId))
-                        {
-                            parsedUploadIds.Add(uploadId);
-                        }
+                        parsedUploadIds.Add(uploadId);
                     }
                 }
             }
@@ -113,7 +103,7 @@ namespace ClickerHeroesTrackerWebsite.Controllers
                 return await this.Index();
             }
 
-            var messages = parsedUploadIds.Select(uploadId => new UploadProcessingMessage { UploadId = uploadId, Requester = userId, Priority = UploadProcessingMessagePriority.Low });
+            var messages = parsedUploadIds.Select(uploadId => new UploadProcessingMessage { UploadId = uploadId, Requester = userId, Priority = priority.Value });
             await this.uploadScheduler.ScheduleAsync(messages);
 
             this.ViewBag.Message = $"Scheduled {parsedUploadIds.Count} uploads";
@@ -135,7 +125,7 @@ namespace ClickerHeroesTrackerWebsite.Controllers
 
             var queue = queueClient.GetQueueReference($"upload-processing-{priority.Value.ToString().ToLower()}-priority");
 
-            var numMessages = queue.ApproximateMessageCount;
+            var numMessages = queue.ApproximateMessageCount.GetValueOrDefault();
 
             await queue.ClearAsync();
 
