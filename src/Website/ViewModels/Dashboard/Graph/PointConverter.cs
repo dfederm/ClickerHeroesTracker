@@ -35,7 +35,7 @@ namespace ClickerHeroesTrackerWebsite.Models.Dashboard.Graph
             writer.WriteStartArray();
             writer.WriteRaw(point.X.ToString("F0"));
             writer.WriteRaw(",");
-            writer.WriteRaw(point.Y.ToString("F0"));
+            writer.WriteRaw(point.Y.ToString(point.YFormat ?? "F0"));
             writer.WriteEndArray();
         }
     }

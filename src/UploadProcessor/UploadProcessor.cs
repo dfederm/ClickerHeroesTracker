@@ -156,6 +156,7 @@ namespace ClickerHeroesTrackerWebsite.UploadProcessing
                         savedGame,
                         this.telemetryClient);
                     var outsiderLevels = new OutsiderLevelsModel(
+                        this.gameData,
                         savedGame,
                         this.telemetryClient);
                     var miscellaneousStatsModel = new MiscellaneousStatsModel(
@@ -196,7 +197,7 @@ namespace ClickerHeroesTrackerWebsite.UploadProcessing
                             ancientLevelsCommandText.Append("(");
                             ancientLevelsCommandText.Append(uploadId);
                             ancientLevelsCommandText.Append(",");
-                            ancientLevelsCommandText.Append(pair.Key.Id);
+                            ancientLevelsCommandText.Append(pair.Key);
                             ancientLevelsCommandText.Append(",");
                             ancientLevelsCommandText.Append(pair.Value.AncientLevel);
                             ancientLevelsCommandText.Append(")");

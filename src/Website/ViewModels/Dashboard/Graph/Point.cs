@@ -21,5 +21,7 @@ namespace ClickerHeroesTrackerWebsite.Models.Dashboard.Graph
         /// Gets or sets y value of the point.
         /// </summary>
         public double Y { get; set; }
+
+        public string YFormat { get; set; }
     }
 }

@@ -6,7 +6,6 @@ namespace ClickerHeroesTrackerWebsite.Models.Dashboard
 {
     using System;
     using System.Collections.Generic;
-    using System.Data;
     using System.Linq;
     using System.Security.Claims;
     using ClickerHeroesTrackerWebsite.Models.Dashboard.Graph;
@@ -86,36 +85,31 @@ namespace ClickerHeroesTrackerWebsite.Models.Dashboard
                 return;
             }
 
-            this.ProminentGraphs = new List<GraphViewModel>();
+            var prominentGraphs = new List<GraphViewModel>();
+            this.TryAddGraph(prominentGraphs, "Souls Spent", data.SoulsSpentData, userSettings);
+            this.TryAddGraph(prominentGraphs, "Titan Damage", data.TitanDamageData, userSettings);
+            this.TryAddGraph(prominentGraphs, "Hero Souls Sacrificed", data.HeroSoulsSacrificedData, userSettings);
+            this.TryAddGraph(prominentGraphs, "Total Ancient Souls", data.TotalAncientSoulsData, userSettings);
+            this.TryAddGraph(prominentGraphs, "Transcendent Power", data.TranscendentPowerData, userSettings, 2);
+            this.TryAddGraph(prominentGraphs, "Rubies", data.RubiesData, userSettings);
+            this.TryAddGraph(prominentGraphs, "Highest Zone This Transcension", data.HighestZoneThisTranscensionData, userSettings);
+            this.TryAddGraph(prominentGraphs, "Highest Zone Lifetime", data.HighestZoneLifetimeData, userSettings);
+            this.TryAddGraph(prominentGraphs, "Ascensions This Transcension", data.AscensionsThisTranscensionData, userSettings);
+            this.TryAddGraph(prominentGraphs, "Ascensions Lifetime", data.AscensionsLifetimeData, userSettings);
 
-            if (data.SoulsSpentData.Count > 0)
+            var secondaryGraphs = new List<GraphViewModel>();
+            foreach (var pair in data.OutsiderLevelData)
             {
-                this.ProminentGraphs.Add(this.CreateGraph(
-                    "soulsSpentGraph",
-                    "Souls Spent",
-                    data.SoulsSpentData,
-                    userSettings));
+                this.TryAddGraph(secondaryGraphs, pair.Key, pair.Value, userSettings);
             }
 
-            if (data.TitanDamageData.Count > 0)
+            foreach (var pair in data.AncientLevelData)
             {
-                this.ProminentGraphs.Add(this.CreateGraph(
-                    "titanDamageGraph",
-                    "Titan Damage",
-                    data.TitanDamageData,
-                    userSettings));
-            };
+                this.TryAddGraph(secondaryGraphs, pair.Key, pair.Value, userSettings);
+            }
 
-            this.SecondaryGraphs = data
-                .AncientLevelData
-                .Where(x => x.Value.Count > 0)
-                .Select(x => this.CreateGraph(
-                    x.Key.Name + "Graph",
-                    x.Key.Name,
-                    x.Value,
-                    userSettings))
-                .ToList();
-
+            this.ProminentGraphs = prominentGraphs;
+            this.SecondaryGraphs = secondaryGraphs;
             this.IsValid = true;
         }
 
@@ -144,13 +138,20 @@ namespace ClickerHeroesTrackerWebsite.Models.Dashboard
         /// </summary>
         public bool IsValid { get; }
 
-        private GraphViewModel CreateGraph(
-            string id,
+        private void TryAddGraph(
+            List<GraphViewModel> graphs,
             string title,
             IDictionary<DateTime, double> data,
-            IUserSettings userSettings)
+            IUserSettings userSettings,
+            int numDecimals = 0)
         {
-            return new GraphViewModel
+            if (data == null || data.Count == 0)
+            {
+                return;
+            }
+
+            var id = title.Replace(" ", string.Empty).Replace("'", string.Empty) + "Graph";
+            graphs.Add(new GraphViewModel
             {
                 Id = id,
                 Data = new GraphData
@@ -184,7 +185,7 @@ namespace ClickerHeroesTrackerWebsite.Models.Dashboard
                             Align = Align.Left,
                             X = 3,
                             Y = 16,
-                            Format = "{value:.,0f}"
+                            Format = "{value:,." + numDecimals + "f}"
                         },
                         ShowFirstLabel = false,
                         Type = GetYAxisType(data, userSettings),
@@ -202,21 +203,23 @@ namespace ClickerHeroesTrackerWebsite.Models.Dashboard
                                 .Select(datum => new Point
                                 {
                                     X = datum.Key.ToJavascriptTime(),
-                                    Y = datum.Value
+                                    Y = datum.Value,
+                                    YFormat = "F" + numDecimals,
                                 })
                                 .Concat(new[]
                                 {
                                     new Point
                                     {
                                         X = DateTime.UtcNow.ToJavascriptTime(),
-                                        Y = data.Last().Value
+                                        Y = data.Last().Value,
+                                        YFormat = "F" + numDecimals,
                                     }
                                 })
                                 .ToList()
                         }
                     }
                 }
-            };
+            });
         }
 
         private static AxisType GetYAxisType(

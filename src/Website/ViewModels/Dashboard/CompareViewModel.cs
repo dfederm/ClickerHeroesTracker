@@ -53,40 +53,37 @@ namespace ClickerHeroesTrackerWebsite.Models.Dashboard
                 userId2,
                 this.RangeSelector.Start,
                 this.RangeSelector.End);
-
-            this.ProminentGraphs = new List<GraphViewModel>
+            if (!userData1.IsValid || !userData2.IsValid)
             {
-                this.CreateGraph(
-                    "soulsSpentGraph",
-                    "Souls Spent",
-                    this.UserName1,
-                    userData1.SoulsSpentData,
-                    this.UserName2,
-                    userData2.SoulsSpentData,
-                    userSettings),
-                this.CreateGraph(
-                    "titanDamageGraph",
-                    "Titan Damage",
-                    this.UserName1,
-                    userData1.TitanDamageData,
-                    this.UserName2,
-                    userData2.TitanDamageData,
-                    userSettings),
-            };
+                return;
+            }
 
-            this.SecondaryGraphs = userData1
-                .AncientLevelData
-                .Select(x => this.CreateGraph(
-                    x.Key.Name + "Graph",
-                    x.Key.Name,
-                    this.UserName1,
-                    x.Value,
-                    this.UserName2,
-                    userData2.AncientLevelData.SafeGet(x.Key),
-                    userSettings))
-                .ToList();
+            var prominentGraphs = new List<GraphViewModel>();
+            this.TryAddGraph(prominentGraphs, "Souls Spent", this.UserName1, userData1.SoulsSpentData, this.UserName2, userData2.SoulsSpentData, userSettings);
+            this.TryAddGraph(prominentGraphs, "Titan Damage", this.UserName1, userData1.TitanDamageData, this.UserName2, userData2.TitanDamageData, userSettings);
+            this.TryAddGraph(prominentGraphs, "Hero Souls Sacrificed", this.UserName1, userData1.HeroSoulsSacrificedData, this.UserName2, userData2.HeroSoulsSacrificedData, userSettings);
+            this.TryAddGraph(prominentGraphs, "Total Ancient Souls", this.UserName1, userData1.TotalAncientSoulsData, this.UserName2, userData2.TotalAncientSoulsData, userSettings);
+            this.TryAddGraph(prominentGraphs, "Transcendent Power", this.UserName1, userData1.TranscendentPowerData, this.UserName2, userData2.TranscendentPowerData, userSettings, 2);
+            this.TryAddGraph(prominentGraphs, "Rubies", this.UserName1, userData1.RubiesData, this.UserName2, userData2.RubiesData, userSettings);
+            this.TryAddGraph(prominentGraphs, "Highest Zone This Transcension", this.UserName1, userData1.HighestZoneThisTranscensionData, this.UserName2, userData2.HighestZoneThisTranscensionData, userSettings);
+            this.TryAddGraph(prominentGraphs, "Highest Zone Lifetime", this.UserName1, userData1.HighestZoneLifetimeData, this.UserName2, userData2.HighestZoneLifetimeData, userSettings);
+            this.TryAddGraph(prominentGraphs, "Ascensions This Transcension", this.UserName1, userData1.AscensionsThisTranscensionData, this.UserName2, userData2.AscensionsThisTranscensionData, userSettings);
+            this.TryAddGraph(prominentGraphs, "Ascensions Lifetime", this.UserName1, userData1.AscensionsLifetimeData, this.UserName2, userData2.AscensionsLifetimeData, userSettings);
 
-            this.IsValid = userData1.IsValid && userData2.IsValid;
+            var secondaryGraphs = new List<GraphViewModel>();
+            foreach (var pair in userData1.OutsiderLevelData)
+            {
+                this.TryAddGraph(secondaryGraphs, pair.Key, this.UserName1, pair.Value, this.UserName2, userData2.OutsiderLevelData.SafeGet(pair.Key), userSettings);
+            }
+
+            foreach (var pair in userData1.AncientLevelData)
+            {
+                this.TryAddGraph(secondaryGraphs, pair.Key, this.UserName1, pair.Value, this.UserName2, userData2.AncientLevelData.SafeGet(pair.Key), userSettings);
+            }
+
+            this.ProminentGraphs = prominentGraphs;
+            this.SecondaryGraphs = secondaryGraphs;
+            this.IsValid = true;
         }
 
         /// <summary>
@@ -119,20 +116,26 @@ namespace ClickerHeroesTrackerWebsite.Models.Dashboard
         /// </summary>
         public GraphRangeSelectorViewModel RangeSelector { get; }
 
-        private GraphViewModel CreateGraph(
-            string id,
+        private void TryAddGraph(
+            List<GraphViewModel> graphs,
             string title,
             string userName1,
             IDictionary<DateTime, double> userData1,
             string userName2,
             IDictionary<DateTime, double> userData2,
-            IUserSettings userSettings)
+            IUserSettings userSettings,
+            int numDecimals = 0)
         {
             var series = new List<Series>();
-            TryAddSeries(series, userName1, userData1, Colors.PrimarySeriesColor);
-            TryAddSeries(series, userName2, userData2, Colors.OpposingSeriesColor);
+            var user1Added = TryAddSeries(series, userName1, userData1, Colors.PrimarySeriesColor, numDecimals);
+            var user2Added = TryAddSeries(series, userName2, userData2, Colors.OpposingSeriesColor, numDecimals);
+            if (!user1Added && !user2Added)
+            {
+                return;
+            }
 
-            return new GraphViewModel
+            var id = title.Replace(" ", string.Empty).Replace("'", string.Empty) + "Graph";
+            graphs.Add(new GraphViewModel
             {
                 Id = id,
                 Data = new GraphData
@@ -166,7 +169,7 @@ namespace ClickerHeroesTrackerWebsite.Models.Dashboard
                             Align = Align.Left,
                             X = 3,
                             Y = 16,
-                            Format = "{value:.,0f}"
+                            Format = "{value:,." + numDecimals + "f}"
                         },
                         ShowFirstLabel = false,
                         Type = GetYAxisType(userData1, userData2, userSettings),
@@ -177,40 +180,44 @@ namespace ClickerHeroesTrackerWebsite.Models.Dashboard
                     },
                     Series = series
                 }
-            };
+            });
         }
 
-        private static List<Series> TryAddSeries(
+        private static bool TryAddSeries(
             List<Series> series,
             string name,
             IDictionary<DateTime, double> data,
-            string color)
+            string color,
+            int numDecimals)
         {
-            if (data != null && data.Count > 0)
+            if (data == null || data.Count == 0)
             {
-                series.Add(new Series
-                {
-                    Name = name,
-                    Color = color,
-                    Data = data
-                        .Select(datum => new Point
-                        {
-                            X = datum.Key.ToJavascriptTime(),
-                            Y = datum.Value
-                        })
-                        .Concat(new[]
-                        {
-                            new Point
-                            {
-                                X = DateTime.UtcNow.ToJavascriptTime(),
-                                Y = data.Last().Value
-                            }
-                        })
-                        .ToList()
-                });
+                return false;
             }
 
-            return series;
+            series.Add(new Series
+            {
+                Name = name,
+                Color = color,
+                Data = data
+                    .Select(datum => new Point
+                    {
+                        X = datum.Key.ToJavascriptTime(),
+                        Y = datum.Value,
+                        YFormat = "F" + numDecimals,
+                    })
+                    .Concat(new[]
+                    {
+                        new Point
+                        {
+                            X = DateTime.UtcNow.ToJavascriptTime(),
+                            Y = data.Last().Value,
+                            YFormat = "F" + numDecimals,
+                        }
+                    })
+                    .ToList()
+            });
+            return true;
         }
 
         private static AxisType GetYAxisType(
