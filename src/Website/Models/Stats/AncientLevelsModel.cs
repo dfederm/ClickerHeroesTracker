@@ -22,7 +22,7 @@ namespace ClickerHeroesTrackerWebsite.Models.Stats
             SavedGame savedGame,
             TelemetryClient telemetryClient)
         {
-            var ancientLevels = new SortedDictionary<Ancient, AncientLevelInfo>(AncientComparer.Instance);
+            var ancientLevels = new SortedDictionary<int, AncientLevelInfo>();
             var itemLevelsById = savedGame.ItemsData.GetItemLevels(gameData);
             foreach (var ancient in gameData.Ancients.Values)
             {
@@ -37,7 +37,7 @@ namespace ClickerHeroesTrackerWebsite.Models.Stats
                     ? ancientData.Level
                     : 0;
                 var ancientLevelInfo = new AncientLevelInfo(ancientLevel, itemLevelsById.GetItemLevel(ancient.Id));
-                ancientLevels.Add(ancient, ancientLevelInfo);
+                ancientLevels.Add(ancient.Id, ancientLevelInfo);
             }
 
             this.AncientLevels = ancientLevels;
@@ -46,24 +46,6 @@ namespace ClickerHeroesTrackerWebsite.Models.Stats
         /// <summary>
         /// Gets the levels for each ancient.
         /// </summary>
-        public IDictionary<Ancient, AncientLevelInfo> AncientLevels { get; }
-
-        private class AncientComparer : IComparer<Ancient>
-        {
-            private static AncientComparer instance = new AncientComparer();
-
-            public static AncientComparer Instance
-            {
-                get
-                {
-                    return instance;
-                }
-            }
-
-            public int Compare(Ancient x, Ancient y)
-            {
-                return x.Name.CompareTo(y.Name);
-            }
-        }
+        public IDictionary<int, AncientLevelInfo> AncientLevels { get; }
     }
 }

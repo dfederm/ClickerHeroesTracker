@@ -184,7 +184,7 @@ namespace ClickerHeroesTrackerWebsite.Controllers.Api
 
             // Get ancient level stats
             var ancientLevelsModel = new AncientLevelsModel(
-                gameData,
+                this.gameData,
                 savedGame,
                 telemetryClient);
             foreach (var ancientLevelInfo in ancientLevelsModel.AncientLevels)
@@ -192,18 +192,19 @@ namespace ClickerHeroesTrackerWebsite.Controllers.Api
                 var ancientLevel = ancientLevelInfo.Value.AncientLevel;
                 if (ancientLevel > 0)
                 {
-                    upload.Stats.Add(AncientIds.GetAncientStatType(ancientLevelInfo.Key.Id), ancientLevel);
+                    upload.Stats.Add(AncientIds.GetAncientStatType(ancientLevelInfo.Key), ancientLevel);
                 }
 
                 var itemLevel = ancientLevelInfo.Value.ItemLevel;
                 if (itemLevel > 0)
                 {
-                    upload.Stats.Add(AncientIds.GetItemStatType(ancientLevelInfo.Key.Id), itemLevel);
+                    upload.Stats.Add(AncientIds.GetItemStatType(ancientLevelInfo.Key), itemLevel);
                 }
             }
 
             // Get outsider level stats
             var outsiderLevelsModel = new OutsiderLevelsModel(
+                this.gameData,
                 savedGame,
                 this.telemetryClient);
             foreach (var pair in outsiderLevelsModel.OutsiderLevels)
@@ -217,7 +218,7 @@ namespace ClickerHeroesTrackerWebsite.Controllers.Api
 
             // Get misc stats
             var miscellaneousStatsModel = new MiscellaneousStatsModel(
-                gameData,
+                this.gameData,
                 savedGame);
             upload.Stats.Add(StatType.AscensionsLifetime, miscellaneousStatsModel.AscensionsLifetime);
             upload.Stats.Add(StatType.AscensionsThisTranscension, miscellaneousStatsModel.AscensionsThisTranscension);
@@ -292,10 +293,11 @@ namespace ClickerHeroesTrackerWebsite.Controllers.Api
                 savedGame,
                 this.telemetryClient);
             var outsiderLevels = new OutsiderLevelsModel(
+                this.gameData,
                 savedGame,
                 this.telemetryClient);
             var miscellaneousStatsModel = new MiscellaneousStatsModel(
-                gameData,
+                this.gameData,
                 savedGame);
 
             int uploadId;
@@ -373,7 +375,7 @@ namespace ClickerHeroesTrackerWebsite.Controllers.Api
                     command.Parameters = new Dictionary<string, object>
                     {
                         { "@UploadId", uploadId },
-                        { "@AncientId", pair.Key.Id },
+                        { "@AncientId", pair.Key },
                         { "@Level", pair.Value.AncientLevel },
                     };
                     command.ExecuteNonQuery();

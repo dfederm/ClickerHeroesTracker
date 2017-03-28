@@ -28,6 +28,12 @@ namespace ClickerHeroesTrackerWebsite.Models.Game
         private static readonly JsonSerializer Serializer = CreateSerializer();
 
         /// <summary>
+        /// Gets or sets a collection of outsiders.
+        /// </summary>
+        [JsonProperty(PropertyName = "outsiders", Required = Required.Always)]
+        public IDictionary<int, Outsider> Outsiders { get; set; }
+
+        /// <summary>
         /// Gets or sets a collection of ancients.
         /// </summary>
         [JsonProperty(PropertyName = "ancients", Required = Required.Always)]

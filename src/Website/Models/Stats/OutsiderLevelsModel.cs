@@ -5,6 +5,7 @@
 namespace ClickerHeroesTrackerWebsite.Models.Stats
 {
     using System.Collections.Generic;
+    using ClickerHeroesTrackerWebsite.Models.Game;
     using ClickerHeroesTrackerWebsite.Models.SaveData;
     using Microsoft.ApplicationInsights;
 
@@ -13,37 +14,26 @@ namespace ClickerHeroesTrackerWebsite.Models.Stats
     /// </summary>
     public class OutsiderLevelsModel
     {
-        // BUGBUG 119 - Get real game data
-        private static Dictionary<int, string> outsiderNames = new Dictionary<int, string>
-        {
-            { 1, "Xyliqil" },
-            { 2, "Chor'gorloth" },
-            { 3, "Phandoryss" },
-            { 4, "Borb" },
-            { 5, "Ponyboy" },
-        };
-
         /// <summary>
         /// Initializes a new instance of the <see cref="OutsiderLevelsModel"/> class.
         /// </summary>
         public OutsiderLevelsModel(
+            GameData gameData,
             SavedGame savedGame,
             TelemetryClient telemetryClient)
         {
-            if (savedGame.OutsidersData != null && savedGame.OutsidersData.Outsiders != null)
+            var outsiderLevels = new SortedDictionary<int, OutsiderLevelInfo>();
+            foreach (var outsider in gameData.Outsiders.Values)
             {
-                foreach (var outsiderData in savedGame.OutsidersData.Outsiders.Values)
-                {
-                    string outsider;
-                    if (!outsiderNames.TryGetValue(outsiderData.Id, out outsider))
-                    {
-                        telemetryClient.TrackEvent("Unknown outsider", new Dictionary<string, string> { { "OutsiderId", outsiderData.Id.ToString() } });
-                        continue;
-                    }
-
-                    this.OutsiderLevels.Add(outsiderData.Id, new OutsiderLevelInfo(outsider, outsiderData.Level));
-                }
+                OutsiderData outsiderData;
+                var outsiderLevel = savedGame.OutsidersData.Outsiders.TryGetValue(outsider.Id, out outsiderData)
+                    ? outsiderData.Level
+                    : 0;
+                var outsiderLevelInfo = new OutsiderLevelInfo(outsider.Name, outsiderData.Level);
+                outsiderLevels.Add(outsider.Id, outsiderLevelInfo);
             }
+
+            this.OutsiderLevels = outsiderLevels;
         }
 
         /// <summary>
