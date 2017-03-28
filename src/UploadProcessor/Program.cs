@@ -7,10 +7,13 @@ namespace ClickerHeroesTracker.UploadProcessor
     using System;
     using System.Collections.Concurrent;
     using System.Collections.Generic;
+    using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
+    using ClickerHeroesTrackerWebsite.Instrumentation;
     using ClickerHeroesTrackerWebsite.Models.Game;
     using ClickerHeroesTrackerWebsite.Services.Database;
+    using ClickerHeroesTrackerWebsite.Services.UploadProcessing;
     using ClickerHeroesTrackerWebsite.UploadProcessing;
     using Microsoft.ApplicationInsights;
     using Microsoft.ApplicationInsights.Extensibility;
@@ -25,6 +28,10 @@ namespace ClickerHeroesTracker.UploadProcessor
     /// </summary>
     public static class Program
     {
+        private const bool ScheduleRecompute = true;
+
+        private const string LastComputeTime = "2017-03-27 03:04:18";
+
         private static ConcurrentBag<UploadProcessor> processors = new ConcurrentBag<UploadProcessor>();
 
         private static GameData gameData;
@@ -42,10 +49,12 @@ namespace ClickerHeroesTracker.UploadProcessor
         public static void Main(string[] args)
         {
             var exitEvent = new ManualResetEvent(false);
+            var cancelSource = new CancellationTokenSource();
             Console.CancelKeyPress += (sender, eventArgs) =>
             {
                 // Cancel the exit, as we need to cleanup first.
                 eventArgs.Cancel = true;
+                cancelSource.Cancel();
                 exitEvent.Set();
             };
 
@@ -71,10 +80,49 @@ namespace ClickerHeroesTracker.UploadProcessor
             telemetryConfiguration.TelemetryProcessorChainBuilder.Use(next => new ConsoleLoggingProcessor(next)).Build();
             telemetryClient = new TelemetryClient(telemetryConfiguration);
 
+            if (ScheduleRecompute)
+            {
+                Task.Run(async () =>
+                {
+                    var uploadIds = new List<int>();
+
+                    const string CommandText = "SELECT Id FROM Uploads WHERE LastComputeTime < '" + LastComputeTime + "' ORDER BY LastComputeTime DESC";
+                    using (var counterProvider = new CounterProvider(telemetryClient))
+                    using (var databaseCommandFactory = new DatabaseCommandFactory(databaseSettingsOptions, counterProvider))
+                    using (var command = databaseCommandFactory.Create(CommandText))
+                    using (var reader = command.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            var uploadId = Convert.ToInt32(reader["Id"]);
+                            uploadIds.Add(uploadId);
+                        }
+                    }
+
+                    Console.WriteLine($"Found {uploadIds.Count} uploads to schedule");
+                    using (var counterProvider = new CounterProvider(telemetryClient))
+                    {
+                        var uploadScheduler = new UploadScheduler(counterProvider, queueClient);
+                        for (var i = 0; i < uploadIds.Count; i++)
+                        {
+                            if (cancelSource.IsCancellationRequested)
+                            {
+                                break;
+                            }
+
+                            Console.WriteLine($"Scheduling message {i + 1} of {uploadIds.Count} - {100 * (i + 1) / uploadIds.Count}%");
+                            var message = new UploadProcessingMessage { UploadId = uploadIds[i], Requester = "Ad-hoc Recompute", Priority = UploadProcessingMessagePriority.Low };
+                            await uploadScheduler.ScheduleAsync(message);
+                        }
+                    }
+
+                    Console.WriteLine($"Stopped scheduling");
+                });
+            }
+
             // Spin up one per logical core
             Console.WriteLine($"Number of processors: {Environment.ProcessorCount}");
             var tasks = new Task[Environment.ProcessorCount];
-            var cancelSource = new CancellationTokenSource();
             for (var i = 0; i < tasks.Length; i++)
             {
                 var processor = new UploadProcessor(databaseSettingsOptions, gameData, telemetryClient, queueClient);

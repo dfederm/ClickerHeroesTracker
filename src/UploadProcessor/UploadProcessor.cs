@@ -13,7 +13,6 @@ namespace ClickerHeroesTrackerWebsite.UploadProcessing
     using ClickerHeroesTrackerWebsite.Models;
     using ClickerHeroesTrackerWebsite.Models.Game;
     using ClickerHeroesTrackerWebsite.Models.SaveData;
-    using ClickerHeroesTrackerWebsite.Models.Settings;
     using ClickerHeroesTrackerWebsite.Models.Stats;
     using ClickerHeroesTrackerWebsite.Services.Database;
     using ClickerHeroesTrackerWebsite.Services.UploadProcessing;
@@ -65,7 +64,7 @@ namespace ClickerHeroesTrackerWebsite.UploadProcessing
                         return;
                     }
 
-                    var message = await queue.GetMessageAsync(visibilityTimeout, null, null, cancellationToken);
+                    var message = await queue.GetMessageAsync(visibilityTimeout, null, null);
                     if (message == null)
                     {
                         // if there was no work to do, wait for a bit to avoid spamming the empty queue with requests
@@ -135,6 +134,12 @@ namespace ClickerHeroesTrackerWebsite.UploadProcessing
                     if (uploadContent.Equals("LEGACY", StringComparison.OrdinalIgnoreCase))
                     {
                         this.telemetryClient.TrackEvent("UploadProcessor-Complete-Legacy", properties);
+                        using (var command = databaseCommandFactory.Create())
+                        {
+                            command.CommandText = "UPDATE Uploads SET LastComputeTime = getutcdate() WHERE Id = " + uploadId;
+                            command.ExecuteNonQuery();
+                        }
+
                         return true;
                     }
 
@@ -380,6 +385,9 @@ namespace ClickerHeroesTrackerWebsite.UploadProcessing
 
                         command.CommandText = ComputedStatsCommandText;
                         command.Parameters = computedStatsCommandParameters;
+                        command.ExecuteNonQuery();
+
+                        command.CommandText = "UPDATE Uploads SET LastComputeTime = getutcdate() WHERE Id = " + uploadId;
                         command.ExecuteNonQuery();
 
                         var commited = command.CommitTransaction();
