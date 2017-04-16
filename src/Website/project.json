@@ -11,6 +11,7 @@
     "Microsoft.AspNetCore.Authentication.Google": "1.1.0",
     "Microsoft.AspNetCore.Authentication.MicrosoftAccount": "1.1.0",
     "Microsoft.AspNetCore.Authentication.Twitter": "1.1.0",
+    "Microsoft.AspNetCore.DataProtection.AzureStorage": "1.0.1",
     "Microsoft.AspNetCore.Diagnostics": "1.1.0",
     "Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore": "1.1.0",
     "Microsoft.AspNetCore.Identity.EntityFrameworkCore": "1.1.0",
