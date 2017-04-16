@@ -38,15 +38,14 @@ namespace ClickerHeroesTrackerWebsite.Instrumentation
             var telemetryClient = ((TelemetryClient)context.RequestServices.GetService(typeof(TelemetryClient)));
             var userManager = ((UserManager<ApplicationUser>)context.RequestServices.GetService(typeof(UserManager<ApplicationUser>)));
 
-            var user = await userManager.GetUserAsync(context.User);
-            if (user != null)
+            var identity = context.User?.Identity;
+            if (identity != null && identity.IsAuthenticated)
             {
-                telemetryClient.Context.User.AuthenticatedUserId = user.Id;
+                telemetryClient.Context.User.AuthenticatedUserId = identity.Name;
             }
 
             var properties = new Dictionary<string, string>
             {
-                { "UserName", user?.UserName ?? "<anonymous>" },
                 { "Referrer", context.Request.Headers["Referer"] },
             };
             telemetryClient.TrackEvent("Request", properties);
