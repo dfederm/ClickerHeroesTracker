@@ -150,6 +150,28 @@ namespace ClickerHeroesTrackerWebsite.Models.Dashboard
                 return;
             }
 
+            var yAxisType = GetYAxisType(data, userSettings);
+
+            // If we're using a log scale, hack around the inability to plot a 0 value
+            // by changing it to 0.1 (1e-1) or "one below" 1 (1e0).
+            if (yAxisType == AxisType.Logarithmic)
+            {
+                // Defer the modifications until after we're done iterating to avoid an InvalidOperationException.
+                var actions = new List<Action>();
+                foreach (var pair in data)
+                {
+                    if (pair.Value == 0)
+                    {
+                        actions.Add(() => data[pair.Key] = 0.1);
+                    }
+                }
+
+                for (var i = 0; i < actions.Count; i++)
+                {
+                    actions[i]();
+                }
+            }
+
             var id = title.Replace(" ", string.Empty).Replace("'", string.Empty) + "Graph";
             graphs.Add(new GraphViewModel
             {
@@ -188,7 +210,7 @@ namespace ClickerHeroesTrackerWebsite.Models.Dashboard
                             Format = "{value:,." + numDecimals + "f}"
                         },
                         ShowFirstLabel = false,
-                        Type = GetYAxisType(data, userSettings),
+                        Type = yAxisType,
                     },
                     Legend = new Legend
                     {
@@ -204,7 +226,7 @@ namespace ClickerHeroesTrackerWebsite.Models.Dashboard
                                 {
                                     X = datum.Key.ToJavascriptTime(),
                                     Y = datum.Value,
-                                    YFormat = "F" + numDecimals,
+                                    YFormat = "F" + (datum.Value == 0.1 ? 1 : numDecimals),
                                 })
                                 .Concat(new[]
                                 {
@@ -212,7 +234,7 @@ namespace ClickerHeroesTrackerWebsite.Models.Dashboard
                                     {
                                         X = DateTime.UtcNow.ToJavascriptTime(),
                                         Y = data.Last().Value,
-                                        YFormat = "F" + numDecimals,
+                                        YFormat = "F" + (data.Last().Value == 0.1 ? 1 : numDecimals),
                                     }
                                 })
                                 .ToList()
@@ -228,7 +250,6 @@ namespace ClickerHeroesTrackerWebsite.Models.Dashboard
         {
             return userSettings.UseLogarithmicGraphScale
                 && data.Values.Max() - data.Values.Min() > userSettings.LogarithmicGraphScaleThreshold
-                && !data.Values.Any(datum => datum == 0)
                 ? AxisType.Logarithmic
                 : AxisType.Linear;
         }

@@ -126,9 +126,11 @@ namespace ClickerHeroesTrackerWebsite.Models.Dashboard
             IUserSettings userSettings,
             int numDecimals = 0)
         {
+            var yAxisType = GetYAxisType(userData1, userData2, userSettings);
+
             var series = new List<Series>();
-            var user1Added = TryAddSeries(series, userName1, userData1, Colors.PrimarySeriesColor, numDecimals);
-            var user2Added = TryAddSeries(series, userName2, userData2, Colors.OpposingSeriesColor, numDecimals);
+            var user1Added = TryAddSeries(series, userName1, userData1, Colors.PrimarySeriesColor, numDecimals, yAxisType);
+            var user2Added = TryAddSeries(series, userName2, userData2, Colors.OpposingSeriesColor, numDecimals, yAxisType);
             if (!user1Added && !user2Added)
             {
                 return;
@@ -172,7 +174,7 @@ namespace ClickerHeroesTrackerWebsite.Models.Dashboard
                             Format = "{value:,." + numDecimals + "f}"
                         },
                         ShowFirstLabel = false,
-                        Type = GetYAxisType(userData1, userData2, userSettings),
+                        Type = yAxisType,
                     },
                     Legend = new Legend
                     {
@@ -188,11 +190,32 @@ namespace ClickerHeroesTrackerWebsite.Models.Dashboard
             string name,
             IDictionary<DateTime, double> data,
             string color,
-            int numDecimals)
+            int numDecimals,
+            AxisType yAxisType)
         {
             if (data == null || data.Count == 0)
             {
                 return false;
+            }
+
+            // If we're using a log scale, hack around the inability to plot a 0 value
+            // by changing it to 0.1 (1e-1) or "one below" 1 (1e0).
+            if (yAxisType == AxisType.Logarithmic)
+            {
+                // Defer the modifications until after we're done iterating to avoid an InvalidOperationException.
+                var actions = new List<Action>();
+                foreach (var pair in data)
+                {
+                    if (pair.Value == 0)
+                    {
+                        actions.Add(() => data[pair.Key] = 0.1);
+                    }
+                }
+
+                for (var i = 0; i < actions.Count; i++)
+                {
+                    actions[i]();
+                }
             }
 
             series.Add(new Series
@@ -204,7 +227,7 @@ namespace ClickerHeroesTrackerWebsite.Models.Dashboard
                     {
                         X = datum.Key.ToJavascriptTime(),
                         Y = datum.Value,
-                        YFormat = "F" + numDecimals,
+                        YFormat = "F" + (datum.Value == 0.1 ? 1 : numDecimals),
                     })
                     .Concat(new[]
                     {
@@ -212,7 +235,7 @@ namespace ClickerHeroesTrackerWebsite.Models.Dashboard
                         {
                             X = DateTime.UtcNow.ToJavascriptTime(),
                             Y = data.Last().Value,
-                            YFormat = "F" + numDecimals,
+                            YFormat = "F" + (data.Last().Value == 0.1 ? 1 : numDecimals),
                         }
                     })
                     .ToList()
@@ -233,12 +256,7 @@ namespace ClickerHeroesTrackerWebsite.Models.Dashboard
                 var maxUserData1 = userData1 != null ? userData1.Values.Max() : 0;
                 var maxUserData2 = userData2 != null ? userData2.Values.Max() : 0;
 
-                var hasZeroUser1 = userData1 != null ? userData1.Values.Any(datum => datum == 0) : false;
-                var hasZeroUser2 = userData2 != null ? userData2.Values.Any(datum => datum == 0) : false;
-
-                if (Math.Max(maxUserData1, maxUserData2) - Math.Min(minUserData1, minUserData2) > userSettings.LogarithmicGraphScaleThreshold
-                    && !hasZeroUser1
-                    && !hasZeroUser2)
+                if (Math.Max(maxUserData1, maxUserData2) - Math.Min(minUserData1, minUserData2) > userSettings.LogarithmicGraphScaleThreshold)
                 {
                     return AxisType.Logarithmic;
                 }
