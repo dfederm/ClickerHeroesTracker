@@ -56,15 +56,11 @@ namespace ClickerHeroesTracker.UploadProcessor
             {
                 sb.Append(metricTelemetry.Name);
                 sb.Append(" = ");
-                sb.Append(metricTelemetry.Value);
+                sb.Append(metricTelemetry.Sum / metricTelemetry.Count);
             }
             else if (item is DependencyTelemetry)
             {
                 // NOOP, these are the SQL commands.
-            }
-            else if (item is PerformanceCounterTelemetry)
-            {
-                // NOOP, we don't really care about machine perf counters
             }
             else
             {

@@ -5,7 +5,7 @@
 
   "dependencies": {
     "AspNet.Security.OAuth.Validation": "1.0.0-*",
-    "Microsoft.ApplicationInsights.AspNetCore": "1.0.2",
+    "Microsoft.ApplicationInsights.AspNetCore": "2.1.0-beta1",
     "Microsoft.AspNetCore.Authentication.Cookies": "1.1.0",
     "Microsoft.AspNetCore.Authentication.Facebook": "1.1.0",
     "Microsoft.AspNetCore.Authentication.Google": "1.1.0",
