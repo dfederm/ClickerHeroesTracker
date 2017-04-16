@@ -179,7 +179,6 @@ namespace ClickerHeroesTrackerWebsite
             services.AddOptions();
 
             // Container controlled registrations
-            services.AddSingleton<CloudStorageAccount>(storageAccount);
             services.AddSingleton<CloudTableClient>(_ => storageAccount.CreateCloudTableClient());
             services.AddSingleton<CloudQueueClient>(_ => storageAccount.CreateCloudQueueClient());
             services.AddSingleton<GameData>(_ => GameData.Parse(Path.Combine(this.Environment.ContentRootPath, @"data\GameData.json")));
