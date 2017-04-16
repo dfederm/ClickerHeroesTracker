@@ -15,6 +15,7 @@ namespace ClickerHeroesTrackerWebsite.UploadProcessing
     using ClickerHeroesTrackerWebsite.Models.SaveData;
     using ClickerHeroesTrackerWebsite.Models.Stats;
     using ClickerHeroesTrackerWebsite.Services.Database;
+    using ClickerHeroesTrackerWebsite.Services.Instrumentation;
     using ClickerHeroesTrackerWebsite.Services.UploadProcessing;
     using Microsoft.ApplicationInsights;
     using Microsoft.Extensions.Options;
@@ -26,6 +27,7 @@ namespace ClickerHeroesTrackerWebsite.UploadProcessing
         private readonly IOptions<DatabaseSettings> databaseSettingsOptions;
         private readonly GameData gameData;
         private readonly TelemetryClient telemetryClient;
+        private readonly IMetricProvider metricProvider;
 
         private readonly Dictionary<UploadProcessingMessagePriority, CloudQueue> queues;
 
@@ -36,11 +38,13 @@ namespace ClickerHeroesTrackerWebsite.UploadProcessing
             IOptions<DatabaseSettings> databaseSettingsOptions,
             GameData gameData,
             TelemetryClient telemetryClient,
+            IMetricProvider metricProvider,
             CloudQueueClient queueClient)
         {
             this.databaseSettingsOptions = databaseSettingsOptions;
             this.gameData = gameData;
             this.telemetryClient = telemetryClient;
+            this.metricProvider = metricProvider;
             this.queues = new Dictionary<UploadProcessingMessagePriority, CloudQueue>
             {
                 { UploadProcessingMessagePriority.Low, GetQueue(queueClient, UploadProcessingMessagePriority.Low) },
@@ -98,7 +102,7 @@ namespace ClickerHeroesTrackerWebsite.UploadProcessing
 
             this.telemetryClient.TrackEvent("UploadProcessor-Recieved", properties);
 
-            using (var counterProvider = new CounterProvider(this.telemetryClient))
+            using (var counterProvider = new CounterProvider(this.telemetryClient, this.metricProvider))
             using (var databaseCommandFactory = new DatabaseCommandFactory(
                 this.databaseSettingsOptions,
                 counterProvider))

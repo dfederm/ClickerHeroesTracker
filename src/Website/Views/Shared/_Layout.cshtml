@@ -1,15 +1,12 @@
 ﻿@using System.Security.Claims
-@using Microsoft.ApplicationInsights.Extensibility
+@using Microsoft.ApplicationInsights.AspNetCore
 @using ClickerHeroesTrackerWebsite.Models.Settings
 
-@inject TelemetryConfiguration TelemetryConfiguration
+@inject JavaScriptSnippet JavaScriptSnippet
 @inject IContentManager ContentManager
 @inject IUserSettingsProvider UserSettingsProvider
 @inject SignInManager<ApplicationUser> SignInManager
 @inject UserManager<ApplicationUser> UserManager
-
-@{
-}
 
 <!DOCTYPE html>
 <html>
@@ -29,12 +26,7 @@
         <link rel="stylesheet" href="~/css/site.min.css" asp-append-version="true" />
     </environment>
 
-    @Html.ApplicationInsightsJavaScript(TelemetryConfiguration)
-    <!-- Stub out APIs which aren't properly stubbed out.
-        See: https://github.com/Microsoft/ApplicationInsights-JS/issues/293 -->
-    <script>
-        (function(t){function r(f){if(!t[f])t[f]=function(){var i=arguments;t.queue.push(function(){t[f].apply(t,i)})}};r("startTrackEvent");r("stopTrackEvent")})(appInsights)
-    </script>
+    @Html.Raw(JavaScriptSnippet.FullScript)
 </head>
 <body>
     <div class="navbar navbar-inverse navbar-fixed-top">

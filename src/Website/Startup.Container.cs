@@ -16,7 +16,11 @@ namespace ClickerHeroesTrackerWebsite
     using ClickerHeroesTrackerWebsite.Services.ContentManagement;
     using ClickerHeroesTrackerWebsite.Services.Database;
     using ClickerHeroesTrackerWebsite.Services.Email;
+    using ClickerHeroesTrackerWebsite.Services.Instrumentation;
     using ClickerHeroesTrackerWebsite.Services.UploadProcessing;
+    using Microsoft.ApplicationInsights;
+    using Microsoft.ApplicationInsights.AspNetCore.Extensions;
+    using Microsoft.ApplicationInsights.Extensibility;
     using Microsoft.AspNetCore.Builder;
     using Microsoft.AspNetCore.DataProtection;
     using Microsoft.AspNetCore.Hosting;
@@ -139,7 +143,14 @@ namespace ClickerHeroesTrackerWebsite
                 }
             });
 
+            var buildInfoProvider = new BuildInfoProvider(this.Environment);
+
             services.AddApplicationInsightsTelemetry(this.Configuration);
+            services.Configure((ApplicationInsightsServiceOptions options) =>
+            {
+                options.ApplicationVersion = buildInfoProvider.BuildId;
+                options.EnableAuthenticationTrackingJavaScript = true;
+            });
 
             services.AddMvc(options =>
             {
@@ -168,14 +179,16 @@ namespace ClickerHeroesTrackerWebsite
             services.AddOptions();
 
             // Container controlled registrations
-            services.AddSingleton<CloudStorageAccount>(_ => storageAccount);
-            services.AddSingleton<CloudTableClient>(_ => _.GetService<CloudStorageAccount>().CreateCloudTableClient());
-            services.AddSingleton<CloudQueueClient>(_ => _.GetService<CloudStorageAccount>().CreateCloudQueueClient());
+            services.AddSingleton<CloudStorageAccount>(storageAccount);
+            services.AddSingleton<CloudTableClient>(_ => storageAccount.CreateCloudTableClient());
+            services.AddSingleton<CloudQueueClient>(_ => storageAccount.CreateCloudQueueClient());
             services.AddSingleton<GameData>(_ => GameData.Parse(Path.Combine(this.Environment.ContentRootPath, @"data\GameData.json")));
-            services.AddSingleton<IBuildInfoProvider, BuildInfoProvider>();
+            services.AddSingleton<IBuildInfoProvider>(buildInfoProvider);
             services.AddSingleton<IEmailSender, EmailSender>();
+            services.AddSingleton<IMetricProvider, MetricProvider>();
             services.AddSingleton<IOptions<PasswordHasherOptions>, PasswordHasherOptionsAccessor>();
             services.AddSingleton<IUploadScheduler, UploadScheduler>();
+            services.AddSingleton<MetricManager>(_ => new MetricManager(_.GetService<TelemetryClient>()));
 
             // Per request registrations
             services.AddScoped<IContentManager, ContentManager>();

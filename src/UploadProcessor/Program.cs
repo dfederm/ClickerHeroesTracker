@@ -7,12 +7,12 @@ namespace ClickerHeroesTracker.UploadProcessor
     using System;
     using System.Collections.Concurrent;
     using System.Collections.Generic;
-    using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
     using ClickerHeroesTrackerWebsite.Instrumentation;
     using ClickerHeroesTrackerWebsite.Models.Game;
     using ClickerHeroesTrackerWebsite.Services.Database;
+    using ClickerHeroesTrackerWebsite.Services.Instrumentation;
     using ClickerHeroesTrackerWebsite.Services.UploadProcessing;
     using ClickerHeroesTrackerWebsite.UploadProcessing;
     using Microsoft.ApplicationInsights;
@@ -32,16 +32,6 @@ namespace ClickerHeroesTracker.UploadProcessor
 
         private const string LastComputeTime = "2017-03-27 03:04:18";
 
-        private static ConcurrentBag<UploadProcessor> processors = new ConcurrentBag<UploadProcessor>();
-
-        private static GameData gameData;
-
-        private static TelemetryClient telemetryClient;
-
-        private static IOptions<DatabaseSettings> databaseSettingsOptions;
-
-        private static CloudQueueClient queueClient;
-
         /// <summary>
         /// The entrypoint method to the program.
         /// </summary>
@@ -58,7 +48,7 @@ namespace ClickerHeroesTracker.UploadProcessor
                 exitEvent.Set();
             };
 
-            gameData = GameData.Parse(@"GameData.json");
+            var gameData = GameData.Parse(@"GameData.json");
 
             // Set up configuration.
             var builder = new ConfigurationBuilder()
@@ -70,15 +60,16 @@ namespace ClickerHeroesTracker.UploadProcessor
 
             var databaseSettings = new DatabaseSettings();
             configuration.GetSection("Database").Bind(databaseSettings);
-            databaseSettingsOptions = Options.Create(databaseSettings);
+            var databaseSettingsOptions = Options.Create(databaseSettings);
 
-            queueClient = CloudStorageAccount.Parse(configuration["Storage:ConnectionString"]).CreateCloudQueueClient();
+            var queueClient = CloudStorageAccount.Parse(configuration["Storage:ConnectionString"]).CreateCloudQueueClient();
 
             // Set up telemetry
             var telemetryConfiguration = TelemetryConfiguration.CreateDefault();
             telemetryConfiguration.InstrumentationKey = configuration["ApplicationInsights:InstrumentationKey"];
             telemetryConfiguration.TelemetryProcessorChainBuilder.Use(next => new ConsoleLoggingProcessor(next)).Build();
-            telemetryClient = new TelemetryClient(telemetryConfiguration);
+            var telemetryClient = new TelemetryClient(telemetryConfiguration);
+            var metricProvider = new MetricProvider(new MetricManager(telemetryClient));
 
             if (ScheduleRecompute)
             {
@@ -87,7 +78,7 @@ namespace ClickerHeroesTracker.UploadProcessor
                     var uploadIds = new List<int>();
 
                     const string CommandText = "SELECT Id FROM Uploads WHERE LastComputeTime < '" + LastComputeTime + "' ORDER BY LastComputeTime DESC";
-                    using (var counterProvider = new CounterProvider(telemetryClient))
+                    using (var counterProvider = new CounterProvider(telemetryClient, metricProvider))
                     using (var databaseCommandFactory = new DatabaseCommandFactory(databaseSettingsOptions, counterProvider))
                     using (var command = databaseCommandFactory.Create(CommandText))
                     using (var reader = command.ExecuteReader())
@@ -100,7 +91,7 @@ namespace ClickerHeroesTracker.UploadProcessor
                     }
 
                     Console.WriteLine($"Found {uploadIds.Count} uploads to schedule");
-                    using (var counterProvider = new CounterProvider(telemetryClient))
+                    using (var counterProvider = new CounterProvider(telemetryClient, metricProvider))
                     {
                         var uploadScheduler = new UploadScheduler(counterProvider, queueClient);
                         for (var i = 0; i < uploadIds.Count; i++)
@@ -120,12 +111,14 @@ namespace ClickerHeroesTracker.UploadProcessor
                 });
             }
 
+            var processors = new ConcurrentBag<UploadProcessor>();
+
             // Spin up one per logical core
             Console.WriteLine($"Number of processors: {Environment.ProcessorCount}");
             var tasks = new Task[Environment.ProcessorCount];
             for (var i = 0; i < tasks.Length; i++)
             {
-                var processor = new UploadProcessor(databaseSettingsOptions, gameData, telemetryClient, queueClient);
+                var processor = new UploadProcessor(databaseSettingsOptions, gameData, telemetryClient, metricProvider, queueClient);
                 processors.Add(processor);
                 tasks[i] = processor.ProcessAsync(cancelSource.Token);
             }
