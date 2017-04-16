@@ -57,6 +57,12 @@ namespace ClickerHeroesTrackerWebsite.Models.SaveData
         public double TranscendentHighestFinishedZone { get; set; }
 
         /// <summary>
+        /// Gets or sets the highest finished zone ever
+        /// </summary>
+        [JsonProperty(PropertyName = "pretranscendentHighestFinishedZone")]
+        public double PretranscendentHighestFinishedZone { get; set; }
+
+        /// <summary>
         /// Gets or sets the highest finished zone in this transcendence
         /// </summary>
         [JsonProperty(PropertyName = "highestFinishedZonePersist")]
