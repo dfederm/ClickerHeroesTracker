@@ -8,6 +8,7 @@
     <OutputType>Exe</OutputType>
     <PackageId>Website</PackageId>
     <UserSecretsId>aspnet-ClickerHeroesTrackerWebsite-20161025101322</UserSecretsId>
+    <PlatformTarget>AnyCPU</PlatformTarget>
     <!-- We use gulp to do TypeScript compilation instead -->
     <TypeScriptCompileBlocked>True</TypeScriptCompileBlocked>
   </PropertyGroup>
