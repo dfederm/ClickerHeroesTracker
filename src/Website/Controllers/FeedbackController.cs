@@ -5,9 +5,6 @@
 namespace ClickerHeroesTrackerWebsite.Controllers
 {
     using System.Collections.Generic;
-    using System.Net;
-    using System.Net.Mail;
-    using System.Security.Claims;
     using System.Threading.Tasks;
     using ClickerHeroesTrackerWebsite.Models;
     using ClickerHeroesTrackerWebsite.Models.Feedback;
@@ -76,21 +73,21 @@ namespace ClickerHeroesTrackerWebsite.Controllers
 
             this.telemetryClient.TrackEvent("FeedbackSubmit", feedbackData);
 
-            var client = new SendGridAPIClient(this.emailSenderSettings.ApiKey);
+            var client = new SendGridClient(this.emailSenderSettings.ApiKey);
 
-            var mail = new Mail();
-            mail.From = new Email(email ?? "do-not-reply@clickerheroestracker.azurewebsites.net", userName ?? "Clicker Heroes Tracker");
-            mail.Subject = $"Clicker Heroes Tracker Feedback from {userName ?? "<anonymous>"}";
-            mail.AddContent(new Content("text/plain", JsonConvert.SerializeObject(feedbackData, Formatting.Indented)));
-            var personalization = new Personalization();
+            var message = new SendGridMessage
+            {
+                From = new EmailAddress(email ?? "do-not-reply@clickerheroestracker.azurewebsites.net", userName ?? "Clicker Heroes Tracker"),
+                Subject = $"Clicker Heroes Tracker Feedback from {userName ?? "<anonymous>"}",
+                PlainTextContent = JsonConvert.SerializeObject(feedbackData, Formatting.Indented),
+            };
+
             foreach (var feedbackReciever in this.emailSenderSettings.FeedbackRecievers)
             {
-                personalization.AddTo(new Email(feedbackReciever));
+                message.AddTo(new EmailAddress(feedbackReciever));
             }
 
-            mail.AddPersonalization(personalization);
-
-            client.client.mail.send.post(requestBody: mail.Get());
+            await client.SendEmailAsync(message);
 
             return this.Ok();
         }
