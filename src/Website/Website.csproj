@@ -11,6 +11,7 @@
     <UserSecretsId>aspnet-ClickerHeroesTrackerWebsite-20161025101322</UserSecretsId>
     <!-- We use gulp to do TypeScript compilation instead -->
     <TypeScriptCompileBlocked>True</TypeScriptCompileBlocked>
+    <TypeScriptCompileOnSaveEnabled>False</TypeScriptCompileOnSaveEnabled>
   </PropertyGroup>
 
   <ItemGroup>
