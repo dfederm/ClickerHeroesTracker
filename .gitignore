@@ -8,9 +8,7 @@
 [Dd]ebug/
 [Rr]elease/
 [Bb]in/
-
-# DNX expanded dependencies
-project.lock.json
+[Oo]bj/
 
 # Visual Studio Publish settings
 PublishProfiles/

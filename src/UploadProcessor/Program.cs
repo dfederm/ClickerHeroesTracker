@@ -21,7 +21,7 @@ namespace ClickerHeroesTracker.UploadProcessor
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Options;
     using Microsoft.WindowsAzure.Storage;
-    using Microsoft.WindowsAzure.Storage.Queue;
+    using ClickerHeroesTrackerWebsite;
 
     /// <summary>
     /// The entrypoint class to the program.
@@ -54,7 +54,7 @@ namespace ClickerHeroesTracker.UploadProcessor
             var builder = new ConfigurationBuilder()
                 .SetBasePath(Environment.CurrentDirectory)
                 .AddJsonFile("appsettings.json")
-                .AddUserSecrets()
+                .AddUserSecrets<Startup>()
                 .AddApplicationInsightsSettings(developerMode: true);
             var configuration = builder.Build();
 
