@@ -22,19 +22,19 @@ namespace ClickerHeroesTrackerWebsite.Services.Email
         }
 
         /// <inheritdoc />
-        public Task SendEmailAsync(string email, string subject, string message)
+        public async Task SendEmailAsync(string email, string subject, string message)
         {
-            var client = new SendGridAPIClient(this.emailSenderSettings.ApiKey);
+            var client = new SendGridClient(this.emailSenderSettings.ApiKey);
 
-            var mail = new Mail(
-                new Email("do-not-reply@clickerheroestracker.azurewebsites.net", "Clicker Heroes Tracker"),
-                subject,
-                new Email(email),
-                new Content("text/html", message));
+            var emailMessage = new SendGridMessage
+            {
+                From = new EmailAddress("do-not-reply@clickerheroestracker.azurewebsites.net", "Clicker Heroes Tracker"),
+                Subject = subject,
+                HtmlContent = message,
+            };
+            emailMessage.AddTo(new EmailAddress(email));
 
-            client.client.mail.send.post(requestBody: mail.Get());
-
-            return Task.CompletedTask;
+            await client.SendEmailAsync(emailMessage);
         }
     }
 }
