@@ -1,9 +1,0 @@
-{
-  "projects": [
-    "src/Website",
-    "src/UploadProcessor",
-    "test/UnitTests",
-    "test/IntegrationTests",
-    "src"
-  ]
-}
