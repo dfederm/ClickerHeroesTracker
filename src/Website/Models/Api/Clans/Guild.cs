@@ -9,8 +9,11 @@ namespace ClickerHeroesTrackerWebsite.Models.Api.Clans
     public sealed class Guild
     {
         public int CurrentRaidLevel { get; set; }
+
         public string GuildMasterUid { get; set; }
-        public IDictionary<string, MemberType> MemberUids { get; set; } 
+
+        public IDictionary<string, MemberType> MemberUids { get; set; }
+
         public string Name { get; set; }
     }
 }

@@ -5,8 +5,8 @@
 namespace ClickerHeroesTrackerWebsite.Models
 {
     using System.Collections.Generic;
-    using Microsoft.AspNetCore.Identity;
     using System.ComponentModel.DataAnnotations;
+    using Microsoft.AspNetCore.Identity;
 
     /// <summary>
     /// Model for the manage view.

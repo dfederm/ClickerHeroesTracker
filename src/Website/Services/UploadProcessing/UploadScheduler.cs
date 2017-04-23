@@ -48,8 +48,15 @@ namespace ClickerHeroesTrackerWebsite.Services.UploadProcessing
             using (this.counterProvider.Measure(Counter.BatchScheduleUpload))
             {
                 // Use WaitAll to do them in parallel
-                await Task.WhenAll(messages.Select(ScheduleInternal));
+                await Task.WhenAll(messages.Select(this.ScheduleInternal));
             }
+        }
+
+        private static CloudQueue GetQueue(CloudQueueClient queueClient, UploadProcessingMessagePriority priority)
+        {
+            var queue = queueClient.GetQueueReference($"upload-processing-{priority.ToString().ToLower()}-priority");
+            queue.CreateIfNotExistsAsync().Wait();
+            return queue;
         }
 
         private async Task ScheduleInternal(UploadProcessingMessage message)
@@ -58,13 +65,6 @@ namespace ClickerHeroesTrackerWebsite.Services.UploadProcessing
             var serializedMessage = JsonConvert.SerializeObject(message);
             var queueMessage = new CloudQueueMessage(serializedMessage);
             await client.AddMessageAsync(queueMessage);
-        }
-
-        private static CloudQueue GetQueue(CloudQueueClient queueClient, UploadProcessingMessagePriority priority)
-        {
-            var queue = queueClient.GetQueueReference($"upload-processing-{priority.ToString().ToLower()}-priority");
-            queue.CreateIfNotExistsAsync().Wait();
-            return queue;
         }
     }
 }

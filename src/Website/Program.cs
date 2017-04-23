@@ -7,9 +7,9 @@ namespace ClickerHeroesTrackerWebsite
     using System.IO;
     using Microsoft.AspNetCore.Hosting;
 
-    public class Program
+    public static class Program
     {
-        public static void Main(string[] args)
+        public static void Main()
         {
             var host = new WebHostBuilder()
                 .UseKestrel()

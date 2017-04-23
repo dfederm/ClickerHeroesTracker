@@ -9,19 +9,18 @@ namespace ClickerHeroesTracker.UploadProcessor
     using System.Collections.Generic;
     using System.Threading;
     using System.Threading.Tasks;
+    using ClickerHeroesTrackerWebsite;
     using ClickerHeroesTrackerWebsite.Instrumentation;
     using ClickerHeroesTrackerWebsite.Models.Game;
     using ClickerHeroesTrackerWebsite.Services.Database;
     using ClickerHeroesTrackerWebsite.Services.Instrumentation;
     using ClickerHeroesTrackerWebsite.Services.UploadProcessing;
-    using ClickerHeroesTrackerWebsite.UploadProcessing;
     using Microsoft.ApplicationInsights;
     using Microsoft.ApplicationInsights.Extensibility;
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Options;
     using Microsoft.WindowsAzure.Storage;
-    using ClickerHeroesTrackerWebsite;
 
     /// <summary>
     /// The entrypoint class to the program.
@@ -142,7 +141,7 @@ namespace ClickerHeroesTracker.UploadProcessor
                     {
                         var properties = new Dictionary<string, string>
                         {
-                            { "UploadId", currentUploadId.Value.ToString() }
+                            { "UploadId", currentUploadId.Value.ToString() },
                         };
                         telemetryClient.TrackEvent("UploadProcessor-Abandoned-Stuck", properties);
                     }

@@ -51,9 +51,6 @@ namespace ClickerHeroesTrackerWebsite.Utility
         /// <summary>
         /// Execute's an async Task<T> method which has a T return type synchronously
         /// </summary>
-        /// <typeparam name="T">Return Type</typeparam>
-        /// <param name="task">Task<T> method to execute</param>
-        /// <returns></returns>
         public static T RunSynchronously<T>(Func<Task<T>> task)
         {
             var oldContext = SynchronizationContext.Current;
@@ -83,13 +80,13 @@ namespace ClickerHeroesTrackerWebsite.Utility
             return ret;
         }
 
-        private sealed class ExclusiveSynchronizationContext : SynchronizationContext
+        private sealed class ExclusiveSynchronizationContext : SynchronizationContext, IDisposable
         {
-            private bool done;
-
-            private readonly AutoResetEvent workItemsWaiting = new AutoResetEvent(false);
-
             private readonly Queue<Tuple<SendOrPostCallback, object>> items = new Queue<Tuple<SendOrPostCallback, object>>();
+
+            private AutoResetEvent workItemsWaiting = new AutoResetEvent(false);
+
+            private bool done;
 
             public Exception InnerException { get; set; }
 
@@ -110,7 +107,7 @@ namespace ClickerHeroesTrackerWebsite.Utility
 
             public void EndMessageLoop()
             {
-                Post(_ => this.done = true, null);
+                this.Post(_ => this.done = true, null);
             }
 
             public void BeginMessageLoop()
@@ -129,7 +126,9 @@ namespace ClickerHeroesTrackerWebsite.Utility
                     if (task != null)
                     {
                         task.Item1(task.Item2);
-                        if (this.InnerException != null) // the method threw an exeption
+
+                        // The method threw an exeption
+                        if (this.InnerException != null)
                         {
                             throw new AggregateException("AsyncHelpers.RunSync method threw an exception.", this.InnerException);
                         }
@@ -144,6 +143,15 @@ namespace ClickerHeroesTrackerWebsite.Utility
             public override SynchronizationContext CreateCopy()
             {
                 return this;
+            }
+
+            public void Dispose()
+            {
+                if (this.workItemsWaiting != null)
+                {
+                    this.workItemsWaiting.Dispose();
+                    this.workItemsWaiting = null;
+                }
             }
         }
     }

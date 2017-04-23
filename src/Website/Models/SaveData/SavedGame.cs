@@ -5,7 +5,6 @@
 namespace ClickerHeroesTrackerWebsite.Models.SaveData
 {
     using System;
-    using System.Collections.Generic;
     using System.Diagnostics.CodeAnalysis;
     using System.IO;
     using System.Security.Cryptography;
@@ -184,7 +183,7 @@ namespace ClickerHeroesTrackerWebsite.Models.SaveData
         private static TextReader DecodeWebSaveData(string encodedSaveData)
         {
             const string AntiCheatCode = "Fe12NAfA3R6z4k0z";
-            var antiCheatCodeIndex = encodedSaveData.IndexOf(AntiCheatCode);
+            var antiCheatCodeIndex = encodedSaveData.IndexOf(AntiCheatCode, StringComparison.Ordinal);
             if (antiCheatCodeIndex == -1)
             {
                 // Couldn't find anti-cheat

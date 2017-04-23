@@ -13,10 +13,6 @@ namespace ClickerHeroesTrackerWebsite
     /// </summary>
     public partial class Startup
     {
-        public IConfiguration Configuration { get; set; }
-
-        public IHostingEnvironment Environment { get; set; }
-
         public Startup(IHostingEnvironment env)
         {
             this.Environment = env;
@@ -38,5 +34,9 @@ namespace ClickerHeroesTrackerWebsite
             builder.AddEnvironmentVariables();
             this.Configuration = builder.Build();
         }
+
+        public IConfiguration Configuration { get; set; }
+
+        public IHostingEnvironment Environment { get; set; }
     }
 }

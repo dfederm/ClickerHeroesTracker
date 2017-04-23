@@ -1,4 +1,4 @@
-﻿// <copyright file="IEnvironmentProvider.cs" company="Clicker Heroes Tracker">
+﻿// <copyright file="IBuildInfoProvider.cs" company="Clicker Heroes Tracker">
 // Copyright (c) Clicker Heroes Tracker. All rights reserved.
 // </copyright>
 

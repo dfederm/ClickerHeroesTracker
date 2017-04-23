@@ -9,6 +9,7 @@ namespace ClickerHeroesTrackerWebsite.Models.Api.Clans
     public class MessageResponseContent
     {
         public string GuildName { get; set; }
+
         public IDictionary<string, string> Messages { get; set; }
     }
 }

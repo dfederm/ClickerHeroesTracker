@@ -149,14 +149,14 @@ namespace ClickerHeroesTrackerWebsite.Controllers
 
             if (!userIsAdmin)
             {
-                var userSettings1 = userSettingsProvider.Get(userId1);
+                var userSettings1 = this.userSettingsProvider.Get(userId1);
                 if (!userId1.Equals(userId, StringComparison.OrdinalIgnoreCase) && !userSettings1.AreUploadsPublic)
                 {
                     this.ViewBag.ErrorMessage = $"{userName1}'s data is private and may not be viewed";
                     return this.View("Error");
                 }
 
-                var userSettings2 = userSettingsProvider.Get(userId2);
+                var userSettings2 = this.userSettingsProvider.Get(userId2);
                 if (!userId2.Equals(userId, StringComparison.OrdinalIgnoreCase) && !userSettings2.AreUploadsPublic)
                 {
                     this.ViewBag.ErrorMessage = $"{userName2}'s data is private and may not be viewed";

@@ -29,7 +29,7 @@ namespace ClickerHeroesTrackerWebsite.Instrumentation
         /// <returns>The async task</returns>
         public async Task Invoke(HttpContext context)
         {
-            var counterProvider = ((ICounterProvider)context.RequestServices.GetService(typeof(ICounterProvider)));
+            var counterProvider = (ICounterProvider)context.RequestServices.GetService(typeof(ICounterProvider));
 
             counterProvider.Start(Counter.Total);
             counterProvider.Start(Counter.Internal);

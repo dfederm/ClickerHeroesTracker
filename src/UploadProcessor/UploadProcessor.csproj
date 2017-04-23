@@ -2,11 +2,15 @@
 
   <PropertyGroup>
     <TargetFramework>net461</TargetFramework>
+    <RuntimeIdentifier>win7-x86</RuntimeIdentifier>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <AssemblyName>UploadProcessor</AssemblyName>
     <OutputType>Exe</OutputType>
     <PackageId>UploadProcessor</PackageId>
     <UserSecretsId>aspnet5-UploadProcessor-20160417084905</UserSecretsId>
+    <CodeAnalysisRuleSet>..\..\build\CodeAnalysis.ruleset</CodeAnalysisRuleSet>
+    <!-- Required for Analyzers to work -->
+    <Features>IOperation</Features> 
   </PropertyGroup>
 
   <ItemGroup>
@@ -14,6 +18,14 @@
       <Link>GameData.json</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+  </ItemGroup>
+  <ItemGroup>
+    <AdditionalFiles Include="..\..\build\stylecop.json" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.CodeAnalysis.FxCopAnalyzers" Version="1.2.0-beta2" />
+    <PackageReference Include="StyleCop.Analyzers" Version="1.1.0-beta001" />
   </ItemGroup>
 
   <ItemGroup>

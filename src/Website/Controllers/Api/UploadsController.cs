@@ -23,9 +23,6 @@ namespace ClickerHeroesTrackerWebsite.Controllers.Api
     using Microsoft.AspNetCore.Identity;
     using Microsoft.AspNetCore.Mvc;
 
-    /// <summary>
-    /// This controller handles the set of APIs that manage uploads
-    /// </summary>
     [Route("api/uploads")]
     public sealed class UploadsController : Controller
     {
@@ -41,9 +38,6 @@ namespace ClickerHeroesTrackerWebsite.Controllers.Api
 
         private readonly UserManager<ApplicationUser> userManager;
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="UploadsController"/> class.
-        /// </summary>
         public UploadsController(
             IDatabaseCommandFactory databaseCommandFactory,
             GameData gameData,
@@ -60,12 +54,6 @@ namespace ClickerHeroesTrackerWebsite.Controllers.Api
             this.userManager = userManager;
         }
 
-        /// <summary>
-        /// Gets the user's uploads
-        /// </summary>
-        /// <param name="page">The page of results to get</param>
-        /// <param name="count">The number of results per page</param>
-        /// <returns>A response with the schema <see cref="UploadSummaryListResponse"/></returns>
         [Route("")]
         [HttpGet]
         [Authorize]
@@ -95,12 +83,6 @@ namespace ClickerHeroesTrackerWebsite.Controllers.Api
             return this.Ok(model);
         }
 
-        /// <summary>
-        /// Retrieve the details for an upload.
-        /// </summary>
-        /// <remarks>BUGBUG 43 - Not implemented</remarks>
-        /// <param name="id">The upload id</param>
-        /// <returns>A response with the schema <see cref="Upload"/></returns>
         [Route("{uploadId:int}")]
         [HttpGet]
         public IActionResult Details(int uploadId)
@@ -186,7 +168,7 @@ namespace ClickerHeroesTrackerWebsite.Controllers.Api
             var ancientLevelsModel = new AncientLevelsModel(
                 this.gameData,
                 savedGame,
-                telemetryClient);
+                this.telemetryClient);
             foreach (var ancientLevelInfo in ancientLevelsModel.AncientLevels)
             {
                 var ancientLevel = ancientLevelInfo.Value.AncientLevel;
@@ -217,9 +199,7 @@ namespace ClickerHeroesTrackerWebsite.Controllers.Api
             }
 
             // Get misc stats
-            var miscellaneousStatsModel = new MiscellaneousStatsModel(
-                this.gameData,
-                savedGame);
+            var miscellaneousStatsModel = new MiscellaneousStatsModel(savedGame);
             upload.Stats.Add(StatType.AscensionsLifetime, miscellaneousStatsModel.AscensionsLifetime);
             upload.Stats.Add(StatType.AscensionsThisTranscension, miscellaneousStatsModel.AscensionsThisTranscension);
             upload.Stats.Add(StatType.HeroSoulsSacrificed, miscellaneousStatsModel.HeroSoulsSacrificed);
@@ -238,11 +218,6 @@ namespace ClickerHeroesTrackerWebsite.Controllers.Api
             return this.Ok(upload);
         }
 
-        /// <summary>
-        /// Add and an upload.
-        /// </summary>
-        /// <param name="uploadRequest">The upload data</param>
-        /// <returns>The new upload id</returns>
         [Route("")]
         [HttpPost]
         public IActionResult Add(UploadRequest uploadRequest)
@@ -296,9 +271,7 @@ namespace ClickerHeroesTrackerWebsite.Controllers.Api
                 this.gameData,
                 savedGame,
                 this.telemetryClient);
-            var miscellaneousStatsModel = new MiscellaneousStatsModel(
-                this.gameData,
-                savedGame);
+            var miscellaneousStatsModel = new MiscellaneousStatsModel(savedGame);
 
             int uploadId;
             using (var command = this.databaseCommandFactory.Create())
@@ -406,10 +379,6 @@ namespace ClickerHeroesTrackerWebsite.Controllers.Api
             return this.Ok(uploadId);
         }
 
-        /// <summary>
-        /// Delete an upload.
-        /// </summary>
-        /// <returns>An appropriate status code with an empty response</returns>
         [Route("{uploadId:int}")]
         [HttpDelete]
         [Authorize]
@@ -437,7 +406,7 @@ namespace ClickerHeroesTrackerWebsite.Controllers.Api
                     var userId = this.userManager.GetUserId(this.User);
                     var isAdmin = this.User.IsInRole("Admin");
 
-                    if (uploadUserId != userId && !isAdmin)
+                    if (!string.Equals(uploadUserId, userId, StringComparison.OrdinalIgnoreCase) && !isAdmin)
                     {
                         // Not this user's, so not allowed
                         return this.Unauthorized();
@@ -502,7 +471,7 @@ namespace ClickerHeroesTrackerWebsite.Controllers.Api
                     uploads.Add(new Upload
                     {
                         Id = Convert.ToInt32(reader["Id"]),
-                        TimeSubmitted = Convert.ToDateTime(reader["UploadTime"])
+                        TimeSubmitted = Convert.ToDateTime(reader["UploadTime"]),
                     });
                 }
 
@@ -531,7 +500,7 @@ namespace ClickerHeroesTrackerWebsite.Controllers.Api
 
                 var pagination = new PaginationMetadata
                 {
-                    Count = Convert.ToInt32(reader["TotalUploads"])
+                    Count = Convert.ToInt32(reader["TotalUploads"]),
                 };
 
                 var currentPath = this.Request.Path;

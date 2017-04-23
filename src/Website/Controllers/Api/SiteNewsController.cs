@@ -11,8 +11,8 @@ namespace ClickerHeroesTrackerWebsite.Controllers.Api
     using ClickerHeroesTrackerWebsite.Models.Api.SiteNews;
     using ClickerHeroesTrackerWebsite.Utility;
     using Microsoft.ApplicationInsights;
-    using Microsoft.AspNetCore.Mvc;
     using Microsoft.AspNetCore.Authorization;
+    using Microsoft.AspNetCore.Mvc;
     using Microsoft.WindowsAzure.Storage.Table;
 
     /// <summary>
@@ -93,7 +93,7 @@ namespace ClickerHeroesTrackerWebsite.Controllers.Api
 
             var model = new SiteNewsEntryListResponse
             {
-                Entries = entries
+                Entries = entries,
             };
 
             return this.Ok(model);

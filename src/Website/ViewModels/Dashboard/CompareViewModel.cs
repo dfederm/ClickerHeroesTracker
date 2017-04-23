@@ -116,75 +116,6 @@ namespace ClickerHeroesTrackerWebsite.Models.Dashboard
         /// </summary>
         public GraphRangeSelectorViewModel RangeSelector { get; }
 
-        private void TryAddGraph(
-            List<GraphViewModel> graphs,
-            string title,
-            string userName1,
-            IDictionary<DateTime, double> userData1,
-            string userName2,
-            IDictionary<DateTime, double> userData2,
-            IUserSettings userSettings,
-            int numDecimals = 0)
-        {
-            var yAxisType = GetYAxisType(userData1, userData2, userSettings);
-
-            var series = new List<Series>();
-            var user1Added = TryAddSeries(series, userName1, userData1, Colors.PrimarySeriesColor, numDecimals, yAxisType);
-            var user2Added = TryAddSeries(series, userName2, userData2, Colors.OpposingSeriesColor, numDecimals, yAxisType);
-            if (!user1Added && !user2Added)
-            {
-                return;
-            }
-
-            var id = title.Replace(" ", string.Empty).Replace("'", string.Empty) + "Graph";
-            graphs.Add(new GraphViewModel
-            {
-                Id = id,
-                Data = new GraphData
-                {
-                    Chart = new Chart
-                    {
-                        Type = ChartType.Line
-                    },
-                    Title = new Title
-                    {
-                        Text = title
-                    },
-                    XAxis = new Axis
-                    {
-                        TickInterval = 24 * 3600 * 1000, // one day
-                        Type = AxisType.Datetime,
-                        TickWidth = 0,
-                        GridLineWidth = 1,
-                        Labels = new Labels
-                        {
-                            Align = Align.Left,
-                            X = 3,
-                            Y = -3,
-                            Format = "{value:%m/%d}"
-                        }
-                    },
-                    YAxis = new Axis
-                    {
-                        Labels = new Labels
-                        {
-                            Align = Align.Left,
-                            X = 3,
-                            Y = 16,
-                            Format = "{value:,." + numDecimals + "f}"
-                        },
-                        ShowFirstLabel = false,
-                        Type = yAxisType,
-                    },
-                    Legend = new Legend
-                    {
-                        Enabled = false
-                    },
-                    Series = series
-                }
-            });
-        }
-
         private static bool TryAddSeries(
             List<Series> series,
             string name,
@@ -236,9 +167,9 @@ namespace ClickerHeroesTrackerWebsite.Models.Dashboard
                             X = DateTime.UtcNow.ToJavascriptTime(),
                             Y = data.Last().Value,
                             YFormat = "F" + (data.Last().Value == 0.1 ? 1 : numDecimals),
-                        }
+                        },
                     })
-                    .ToList()
+                    .ToList(),
             });
             return true;
         }
@@ -263,6 +194,75 @@ namespace ClickerHeroesTrackerWebsite.Models.Dashboard
             }
 
             return AxisType.Linear;
+        }
+
+        private void TryAddGraph(
+            List<GraphViewModel> graphs,
+            string title,
+            string userName1,
+            IDictionary<DateTime, double> userData1,
+            string userName2,
+            IDictionary<DateTime, double> userData2,
+            IUserSettings userSettings,
+            int numDecimals = 0)
+        {
+            var yAxisType = GetYAxisType(userData1, userData2, userSettings);
+
+            var series = new List<Series>();
+            var user1Added = TryAddSeries(series, userName1, userData1, Colors.PrimarySeriesColor, numDecimals, yAxisType);
+            var user2Added = TryAddSeries(series, userName2, userData2, Colors.OpposingSeriesColor, numDecimals, yAxisType);
+            if (!user1Added && !user2Added)
+            {
+                return;
+            }
+
+            var id = title.Replace(" ", string.Empty).Replace("'", string.Empty) + "Graph";
+            graphs.Add(new GraphViewModel
+            {
+                Id = id,
+                Data = new GraphData
+                {
+                    Chart = new Chart
+                    {
+                        Type = ChartType.Line,
+                    },
+                    Title = new Title
+                    {
+                        Text = title,
+                    },
+                    XAxis = new Axis
+                    {
+                        TickInterval = 24 * 3600 * 1000, // one day
+                        Type = AxisType.Datetime,
+                        TickWidth = 0,
+                        GridLineWidth = 1,
+                        Labels = new Labels
+                        {
+                            Align = Align.Left,
+                            X = 3,
+                            Y = -3,
+                            Format = "{value:%m/%d}",
+                        },
+                    },
+                    YAxis = new Axis
+                    {
+                        Labels = new Labels
+                        {
+                            Align = Align.Left,
+                            X = 3,
+                            Y = 16,
+                            Format = "{value:,." + numDecimals + "f}",
+                        },
+                        ShowFirstLabel = false,
+                        Type = yAxisType,
+                    },
+                    Legend = new Legend
+                    {
+                        Enabled = false,
+                    },
+                    Series = series,
+                },
+            });
         }
     }
 }

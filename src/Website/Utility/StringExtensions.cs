@@ -1,4 +1,4 @@
-﻿// <copyright file="Extensions.cs" company="Clicker Heroes Tracker">
+﻿// <copyright file="StringExtensions.cs" company="Clicker Heroes Tracker">
 // Copyright (c) Clicker Heroes Tracker. All rights reserved.
 // </copyright>
 
@@ -10,12 +10,12 @@ namespace ClickerHeroesTrackerWebsite.Utility
     {
         public static string ToCamelCase(this string str)
         {
-            if (str == null || str.Length == 0 || Char.IsLower(str[0]))
+            if (str == null || str.Length == 0 || char.IsLower(str[0]))
             {
                 return str;
             }
 
-            return Char.ToLowerInvariant(str[0]) + str.Substring(1);
+            return char.ToLowerInvariant(str[0]) + str.Substring(1);
         }
 
         public static TEnum SafeParseEnum<TEnum>(this string str)
@@ -24,7 +24,6 @@ namespace ClickerHeroesTrackerWebsite.Utility
             TEnum value;
             return Enum.TryParse<TEnum>(str, out value) ? value : default(TEnum);
         }
-
 
         public static string[] SplitIntoChunks(this string str, int chunkLength)
         {

@@ -4,7 +4,6 @@
 
 namespace ClickerHeroesTrackerWebsite.Utility
 {
-    using System;
     using System.Collections.Generic;
 
     internal static class DictionaryExtensions

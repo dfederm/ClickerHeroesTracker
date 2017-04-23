@@ -138,6 +138,16 @@ namespace ClickerHeroesTrackerWebsite.Models.Dashboard
         /// </summary>
         public bool IsValid { get; }
 
+        private static AxisType GetYAxisType(
+            IDictionary<DateTime, double> data,
+            IUserSettings userSettings)
+        {
+            return userSettings.UseLogarithmicGraphScale
+                && data.Values.Max() - data.Values.Min() > userSettings.LogarithmicGraphScaleThreshold
+                ? AxisType.Logarithmic
+                : AxisType.Linear;
+        }
+
         private void TryAddGraph(
             List<GraphViewModel> graphs,
             string title,
@@ -180,11 +190,11 @@ namespace ClickerHeroesTrackerWebsite.Models.Dashboard
                 {
                     Chart = new Chart
                     {
-                        Type = ChartType.Line
+                        Type = ChartType.Line,
                     },
                     Title = new Title
                     {
-                        Text = title
+                        Text = title,
                     },
                     XAxis = new Axis
                     {
@@ -197,8 +207,8 @@ namespace ClickerHeroesTrackerWebsite.Models.Dashboard
                             Align = Align.Left,
                             X = 3,
                             Y = -3,
-                            Format = "{value:%m/%d}"
-                        }
+                            Format = "{value:%m/%d}",
+                        },
                     },
                     YAxis = new Axis
                     {
@@ -207,14 +217,14 @@ namespace ClickerHeroesTrackerWebsite.Models.Dashboard
                             Align = Align.Left,
                             X = 3,
                             Y = 16,
-                            Format = "{value:,." + numDecimals + "f}"
+                            Format = "{value:,." + numDecimals + "f}",
                         },
                         ShowFirstLabel = false,
                         Type = yAxisType,
                     },
                     Legend = new Legend
                     {
-                        Enabled = false
+                        Enabled = false,
                     },
                     Series = new Series[]
                     {
@@ -235,23 +245,13 @@ namespace ClickerHeroesTrackerWebsite.Models.Dashboard
                                         X = DateTime.UtcNow.ToJavascriptTime(),
                                         Y = data.Last().Value,
                                         YFormat = "F" + (data.Last().Value == 0.1 ? 1 : numDecimals),
-                                    }
+                                    },
                                 })
-                                .ToList()
-                        }
-                    }
-                }
+                                .ToList(),
+                        },
+                    },
+                },
             });
-        }
-
-        private static AxisType GetYAxisType(
-            IDictionary<DateTime, double> data,
-            IUserSettings userSettings)
-        {
-            return userSettings.UseLogarithmicGraphScale
-                && data.Values.Max() - data.Values.Min() > userSettings.LogarithmicGraphScaleThreshold
-                ? AxisType.Logarithmic
-                : AxisType.Linear;
         }
     }
 }
