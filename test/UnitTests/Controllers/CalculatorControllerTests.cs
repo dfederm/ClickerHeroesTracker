@@ -156,7 +156,7 @@ namespace ClickerHeroesTrackerWebsite.Tests.Controllers
                 Assert.Equal(1, model.UploadId);
                 Assert.True(model.IsValid);
                 Assert.True(model.IsPermitted);
-                Assert.Equal(userId.Equals(uploadUserId, StringComparison.OrdinalIgnoreCase), model.IsOwn);
+                Assert.Equal(userId == uploadUserId, model.IsOwn);
                 Assert.Equal(isPublic || uploadUserId == null, model.IsPublic);
                 Assert.NotNull(model.SuggestedAncientIds);
                 Assert.NotEmpty(model.SuggestedAncientIds);
