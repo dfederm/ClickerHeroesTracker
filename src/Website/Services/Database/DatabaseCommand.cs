@@ -8,12 +8,10 @@ namespace ClickerHeroesTrackerWebsite.Services.Database
     using System.Collections.Generic;
     using System.Data;
     using System.Data.Common;
-    using System.Data.SqlClient;
     using ClickerHeroesTrackerWebsite.Instrumentation;
-    using ClickerHeroesTrackerWebsite.Utility;
     using Microsoft.Data.Sqlite;
 
-    internal sealed class DatabaseCommand : DisposableBase, IDatabaseCommand
+    internal sealed class DatabaseCommand : IDisposable, IDatabaseCommand
     {
         private readonly ICounterProvider counterProvider;
 
@@ -107,7 +105,7 @@ namespace ClickerHeroesTrackerWebsite.Services.Database
             }
         }
 
-        protected override void Dispose(bool isDisposing)
+        public void Dispose()
         {
             if (this.transaction != null)
             {
@@ -124,8 +122,6 @@ namespace ClickerHeroesTrackerWebsite.Services.Database
 
         private void PrepareForExecution()
         {
-            this.EnsureNotDisposed();
-
             if (string.IsNullOrEmpty(this.CommandText))
             {
                 throw new InvalidOperationException("CommandText may not be empty");

@@ -1,4 +1,4 @@
-﻿// <copyright file="DatabaseSchemas.cs" company="Clicker Heroes Tracker">
+﻿// <copyright file="Startup.Database.cs" company="Clicker Heroes Tracker">
 // Copyright (c) Clicker Heroes Tracker. All rights reserved.
 // </copyright>
 
@@ -47,11 +47,13 @@ namespace ClickerHeroesTrackerWebsite
                         tableNamesCommand = "SELECT Name FROM sys.Tables WHERE Type = N'U'";
                         break;
                     }
+
                     case "Sqlite":
                     {
                         tableNamesCommand = "SELECT name AS Name FROM sqlite_master WHERE type='table'";
                         break;
                     }
+
                     default:
                     {
                         throw new InvalidOperationException($"Invalid configuration for \"Database:Kind\": {databaseSettingsOptions.Value?.Kind}");
@@ -71,7 +73,8 @@ namespace ClickerHeroesTrackerWebsite
                 }
 
                 // Read sql files and execute their contents in order if required.
-                var tables = new[] {
+                var tables = new[]
+                {
                     "Uploads",
                     "AncientLevels",
                     "ComputedStats",

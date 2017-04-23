@@ -24,14 +24,14 @@ namespace ClickerHeroesTrackerWebsite.Controllers.Api
     [Authorize]
     public class ClansApiController : Controller
     {
-        private static readonly char[] messageDelimeter = new[] { ';' };
+        private const string BaseUrl = "http://clickerheroes-savedgames3-747864888.us-east-1.elb.amazonaws.com";
+
+        private static readonly char[] MessageDelimeter = new[] { ';' };
 
         private readonly IDatabaseCommandFactory databaseCommandFactory;
 
         private readonly UserManager<ApplicationUser> userManager;
 
-        private const string url = "http://clickerheroes-savedgames3-747864888.us-east-1.elb.amazonaws.com";
-        
         public ClansApiController(
             IDatabaseCommandFactory databaseCommandFactory,
             UserManager<ApplicationUser> userManager)
@@ -45,7 +45,7 @@ namespace ClickerHeroesTrackerWebsite.Controllers.Api
         public async Task<ActionResult> GetClan()
         {
             var userId = this.userManager.GetUserId(this.User);
-            SavedGame savedGame = GetLatestSave(userId);
+            SavedGame savedGame = this.GetLatestSave(userId);
 
             if (savedGame?.UniqueId == null)
             {
@@ -54,7 +54,7 @@ namespace ClickerHeroesTrackerWebsite.Controllers.Api
 
             using (var client = new HttpClient())
             {
-                Clan clan = await GetClanInfomation(client, savedGame);
+                Clan clan = await this.GetClanInfomation(client, savedGame);
 
                 if (clan?.Guild == null)
                 {
@@ -83,33 +83,33 @@ namespace ClickerHeroesTrackerWebsite.Controllers.Api
                 {
                     ClanName = clan.Guild.Name,
                     CurrentRaidLevel = clan.Guild.CurrentRaidLevel,
-                    GuildMembers = reindexedGuildMembers
+                    GuildMembers = reindexedGuildMembers,
                 };
 
                 var mesagesValues = new Dictionary<string, string>
                 {
                    { "uid", savedGame.UniqueId },
                    { "passwordHash", savedGame.PasswordHash },
-                   { "guildName", clan.Guild.Name }
+                   { "guildName", clan.Guild.Name },
                 };
 
-                var messagesUrl = url + "/clans/getGuildMessages.php";
+                var messagesUrl = BaseUrl + "/clans/getGuildMessages.php";
                 var content = new FormUrlEncodedContent(mesagesValues);
 
                 var messagesResponse = await client.PostAsync(messagesUrl, content);
 
                 var messagesResponseString = await messagesResponse.Content.ReadAsStringAsync();
-                
+
                 MessageResponse messages = JsonConvert.DeserializeObject<MessageResponse>(messagesResponseString);
                 List<Message> messageList = new List<Message>();
                 foreach (var mess in messages.Result.Messages)
                 {
                     Message message = new Message();
-                    string[] messageSplit = mess.Value.Split(messageDelimeter, 2);
+                    string[] messageSplit = mess.Value.Split(MessageDelimeter, 2);
                     message.Content = messageSplit[1];
                     double timestamp = Convert.ToDouble(mess.Key);
                     message.Date = timestamp.UnixTimeStampToDateTime();
-                    GuildMember member = clan.GuildMembers.Values.FirstOrDefault(t => t.Uid == messageSplit[0]);
+                    GuildMember member = clan.GuildMembers.Values.FirstOrDefault(t => string.Equals(t.Uid, messageSplit[0], StringComparison.OrdinalIgnoreCase));
                     message.Username = member?.Nickname;
 
                     messageList.Add(message);
@@ -123,7 +123,7 @@ namespace ClickerHeroesTrackerWebsite.Controllers.Api
                 }
 
                 messageList.Reverse();
-                clanData.Messages = messageList; 
+                clanData.Messages = messageList;
 
                 using (var command = this.databaseCommandFactory.Create())
                 {
@@ -144,7 +144,7 @@ namespace ClickerHeroesTrackerWebsite.Controllers.Api
                     {
                         { "@Name", clan.Guild.Name },
                         { "@CurrentRaidLevel", clan.Guild.CurrentRaidLevel },
-                        { "@MemberCount", reindexedGuildMembers.Count }
+                        { "@MemberCount", reindexedGuildMembers.Count },
                     };
                     command.ExecuteNonQuery();
                 }
@@ -152,14 +152,13 @@ namespace ClickerHeroesTrackerWebsite.Controllers.Api
                 return this.Ok(clanData);
             }
         }
-        
+
         [Route("messages")]
         [HttpPost]
         public async Task<IActionResult> SendMessage(string message, string clanName)
         {
-            
             var userId = this.userManager.GetUserId(this.User);
-            SavedGame savedGame = GetLatestSave(userId);
+            SavedGame savedGame = this.GetLatestSave(userId);
 
             if (savedGame?.UniqueId == null)
             {
@@ -170,16 +169,16 @@ namespace ClickerHeroesTrackerWebsite.Controllers.Api
             {
                 var guildValues = new Dictionary<string, string>
                 {
-                    {"guildName", clanName},
-                    {"message", message},
-                    {"uid", savedGame.UniqueId},
-                    {"passwordHash", savedGame.PasswordHash}
+                    { "guildName", clanName },
+                    { "message", message },
+                    { "uid", savedGame.UniqueId },
+                    { "passwordHash", savedGame.PasswordHash },
                 };
 
                 var content = new FormUrlEncodedContent(guildValues);
 
-                var response = await client.PostAsync(url + "/clans/sendGuildMessage.php", content);
-                
+                var response = await client.PostAsync(BaseUrl + "/clans/sendGuildMessage.php", content);
+
                 var responseString = await response.Content.ReadAsStringAsync();
                 return this.Ok(responseString);
             }
@@ -204,18 +203,18 @@ namespace ClickerHeroesTrackerWebsite.Controllers.Api
             }
 
             var userId = this.userManager.GetUserId(this.User);
-            SavedGame savedGame = GetLatestSave(userId);
+            SavedGame savedGame = this.GetLatestSave(userId);
             var clanName = string.Empty;
 
             if (savedGame?.UniqueId != null)
             {
                 using (var client = new HttpClient())
                 {
-                    Clan clan = await GetClanInfomation(client, savedGame);
+                    Clan clan = await this.GetClanInfomation(client, savedGame);
                     clanName = clan?.Guild?.Name ?? string.Empty;
                 }
             }
-            
+
             var model = new LeaderboardSummaryListResponse()
             {
                 LeaderboardClans = this.FetchLeaderboard(page, count, clanName),
@@ -230,15 +229,16 @@ namespace ClickerHeroesTrackerWebsite.Controllers.Api
         public async Task<IActionResult> GetUserClan()
         {
             var userId = this.userManager.GetUserId(this.User);
-            SavedGame savedGame = GetLatestSave(userId);
+            SavedGame savedGame = this.GetLatestSave(userId);
 
             if (savedGame?.UniqueId == null)
             {
                 return this.NoContent();
             }
+
             using (var client = new HttpClient())
             {
-                Clan clan = await GetClanInfomation(client, savedGame);
+                Clan clan = await this.GetClanInfomation(client, savedGame);
 
                 if (clan?.Guild == null)
                 {
@@ -295,7 +295,7 @@ namespace ClickerHeroesTrackerWebsite.Controllers.Api
                 var i = 1;
                 while (reader.Read())
                 {
-                    bool IsUserClan = clanName == reader["Name"].ToString();
+                    var isUserClan = string.Equals(clanName, reader["Name"].ToString(), StringComparison.OrdinalIgnoreCase);
 
                     clans.Add(new LeaderboardClan
                     {
@@ -303,7 +303,7 @@ namespace ClickerHeroesTrackerWebsite.Controllers.Api
                         CurrentRaidLevel = Convert.ToInt32(reader["CurrentRaidLevel"]),
                         MemberCount = Convert.ToInt32(reader["MemberCount"]),
                         Rank = offset + i,
-                        IsUserClan = IsUserClan
+                        IsUserClan = isUserClan,
                     });
                     i++;
                 }
@@ -355,7 +355,7 @@ namespace ClickerHeroesTrackerWebsite.Controllers.Api
 
                 var pagination = new PaginationMetadata
                 {
-                    Count = Convert.ToInt32(reader["TotalClans"])
+                    Count = Convert.ToInt32(reader["TotalClans"]),
                 };
 
                 var currentPath = this.Request.Path;
@@ -389,13 +389,13 @@ namespace ClickerHeroesTrackerWebsite.Controllers.Api
         {
             var guildValues = new Dictionary<string, string>
                 {
-                    {"uid", savedGame.UniqueId},
-                    {"passwordHash", savedGame.PasswordHash}
+                    { "uid", savedGame.UniqueId },
+                    { "passwordHash", savedGame.PasswordHash },
                 };
 
             var content = new FormUrlEncodedContent(guildValues);
 
-            var response = await client.PostAsync(url + "/clans/getGuildInfo.php", content);
+            var response = await client.PostAsync(BaseUrl + "/clans/getGuildInfo.php", content);
 
             var responseString = await response.Content.ReadAsStringAsync();
 

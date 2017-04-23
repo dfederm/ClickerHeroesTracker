@@ -8,13 +8,12 @@ namespace ClickerHeroesTrackerWebsite.Instrumentation
     using System.Collections.Generic;
     using System.Diagnostics;
     using ClickerHeroesTrackerWebsite.Services.Instrumentation;
-    using ClickerHeroesTrackerWebsite.Utility;
     using Microsoft.ApplicationInsights;
 
     /// <summary>
     /// Allows interaction with counters for a request, such as measuring latency.
     /// </summary>
-    public sealed class CounterProvider : DisposableBase, ICounterProvider
+    public sealed class CounterProvider : IDisposable, ICounterProvider
     {
         private static int totalCounters = Enum.GetValues(typeof(Counter)).Length;
 
@@ -24,9 +23,6 @@ namespace ClickerHeroesTrackerWebsite.Instrumentation
 
         private readonly IMetricProvider metricProvider;
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="CounterProvider"/> class.
-        /// </summary>
         public CounterProvider(TelemetryClient telemetryClient, IMetricProvider metricProvider)
         {
             this.telemetryClient = telemetryClient;
@@ -58,7 +54,7 @@ namespace ClickerHeroesTrackerWebsite.Instrumentation
         }
 
         /// <inheritdoc/>
-        protected override void Dispose(bool isDisposing)
+        public void Dispose()
         {
             foreach (var pair in this.counters)
             {
@@ -75,8 +71,6 @@ namespace ClickerHeroesTrackerWebsite.Instrumentation
 
         private Stopwatch Get(Counter counterType)
         {
-            this.EnsureNotDisposed();
-
             Stopwatch counter;
             if (!this.counters.TryGetValue(counterType, out counter))
             {
@@ -87,7 +81,7 @@ namespace ClickerHeroesTrackerWebsite.Instrumentation
             return counter;
         }
 
-        private sealed class MeasureScope : DisposableBase
+        private sealed class MeasureScope : IDisposable
         {
             private readonly Stopwatch counter;
 
@@ -97,13 +91,13 @@ namespace ClickerHeroesTrackerWebsite.Instrumentation
                 this.counter.Start();
             }
 
-            protected override void Dispose(bool isDisposing)
+            public void Dispose()
             {
                 this.counter.Stop();
             }
         }
 
-        private sealed class SuspendScope : DisposableBase
+        private sealed class SuspendScope : IDisposable
         {
             private readonly Stopwatch counter;
 
@@ -113,7 +107,7 @@ namespace ClickerHeroesTrackerWebsite.Instrumentation
                 this.counter.Stop();
             }
 
-            protected override void Dispose(bool isDisposing)
+            public void Dispose()
             {
                 this.counter.Start();
             }

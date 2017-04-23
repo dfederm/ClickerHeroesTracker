@@ -7,14 +7,14 @@ namespace ClickerHeroesTrackerWebsite.Controllers
     using System;
     using System.Linq;
     using System.Threading.Tasks;
-    using Microsoft.AspNetCore.Authorization;
-    using Microsoft.AspNetCore.Identity;
-    using Microsoft.AspNetCore.Mvc;
     using ClickerHeroesTrackerWebsite.Models;
     using ClickerHeroesTrackerWebsite.Models.Settings;
     using ClickerHeroesTrackerWebsite.Services.Email;
     using ClickerHeroesTrackerWebsite.Utility;
     using ClickerHeroesTrackerWebsite.ViewModels.Manage;
+    using Microsoft.AspNetCore.Authorization;
+    using Microsoft.AspNetCore.Identity;
+    using Microsoft.AspNetCore.Mvc;
 
     /// <summary>
     /// The manage controller allows users to manage their settings.
@@ -153,8 +153,6 @@ namespace ClickerHeroesTrackerWebsite.Controllers
         /// <summary>
         /// POST: /Manage/RemoveLogin
         /// </summary>
-        /// <param name="loginProvider">The external login provider name</param>
-        /// <param name="providerKey">The login provider key</param>
         /// <returns>A redirection to the manage logins page</returns>
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -172,7 +170,7 @@ namespace ClickerHeroesTrackerWebsite.Controllers
                 }
             }
 
-            return this.RedirectToAction(nameof(ManageLogins), new { Message = message });
+            return this.RedirectToAction(nameof(this.ManageLogins), new { Message = message });
         }
 
         /// <summary>
@@ -182,7 +180,7 @@ namespace ClickerHeroesTrackerWebsite.Controllers
         [HttpGet]
         public IActionResult ChangePassword()
         {
-            return View();
+            return this.View();
         }
 
         /// <summary>
@@ -194,9 +192,9 @@ namespace ClickerHeroesTrackerWebsite.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> ChangePassword(ChangePasswordViewModel model)
         {
-            if (!ModelState.IsValid)
+            if (!this.ModelState.IsValid)
             {
-                return View(model);
+                return this.View(model);
             }
 
             var user = await this.userManager.GetUserAsync(this.User);
@@ -206,14 +204,14 @@ namespace ClickerHeroesTrackerWebsite.Controllers
                 if (result.Succeeded)
                 {
                     await this.signInManager.SignInAsync(user, isPersistent: false);
-                    return this.RedirectToAction(nameof(Index), new { Message = ManageMessageId.ChangePasswordSuccess });
+                    return this.RedirectToAction(nameof(this.Index), new { Message = ManageMessageId.ChangePasswordSuccess });
                 }
 
                 this.AddErrors(result);
                 return this.View(model);
             }
 
-            return this.RedirectToAction(nameof(Index), new { Message = ManageMessageId.Error });
+            return this.RedirectToAction(nameof(this.Index), new { Message = ManageMessageId.Error });
         }
 
         /// <summary>
@@ -247,14 +245,14 @@ namespace ClickerHeroesTrackerWebsite.Controllers
                 if (result.Succeeded)
                 {
                     await this.signInManager.SignInAsync(user, isPersistent: false);
-                    return RedirectToAction(nameof(Index), new { Message = ManageMessageId.SetPasswordSuccess });
+                    return this.RedirectToAction(nameof(this.Index), new { Message = ManageMessageId.SetPasswordSuccess });
                 }
 
                 this.AddErrors(result);
                 return this.View(model);
             }
 
-            return RedirectToAction(nameof(Index), new { Message = ManageMessageId.Error });
+            return this.RedirectToAction(nameof(this.Index), new { Message = ManageMessageId.Error });
         }
 
         /// <summary>
@@ -273,19 +271,19 @@ namespace ClickerHeroesTrackerWebsite.Controllers
             var user = await this.userManager.GetUserAsync(this.User);
             if (user == null)
             {
-                return View("Error");
+                return this.View("Error");
             }
 
             var userLogins = await this.userManager.GetLoginsAsync(user);
             var otherLogins = this.signInManager
                 .GetExternalAuthenticationSchemes()
-                .Where(auth => userLogins.All(ul => auth.AuthenticationScheme != ul.LoginProvider))
+                .Where(auth => userLogins.All(ul => !string.Equals(auth.AuthenticationScheme, ul.LoginProvider, StringComparison.OrdinalIgnoreCase)))
                 .ToList();
             this.ViewBag.ShowRemoveButton = user.PasswordHash != null || userLogins.Count > 1;
             return this.View(new ManageLoginsViewModel
             {
                 CurrentLogins = userLogins,
-                OtherLogins = otherLogins
+                OtherLogins = otherLogins,
             });
         }
 
@@ -321,12 +319,12 @@ namespace ClickerHeroesTrackerWebsite.Controllers
             var info = await this.signInManager.GetExternalLoginInfoAsync(user.Id);
             if (info == null)
             {
-                return this.RedirectToAction(nameof(ManageLogins), new { Message = ManageMessageId.Error });
+                return this.RedirectToAction(nameof(this.ManageLogins), new { Message = ManageMessageId.Error });
             }
 
             var result = await this.userManager.AddLoginAsync(user, info);
             var message = result.Succeeded ? ManageMessageId.AddLoginSuccess : ManageMessageId.Error;
-            return this.RedirectToAction(nameof(ManageLogins), new { Message = message });
+            return this.RedirectToAction(nameof(this.ManageLogins), new { Message = message });
         }
 
         private async Task<ActionResult> GetIndexResult(ApplicationUser user, IUserSettings userSettings)
@@ -354,7 +352,7 @@ namespace ClickerHeroesTrackerWebsite.Controllers
         {
             foreach (var error in result.Errors)
             {
-                ModelState.AddModelError(string.Empty, error.Description);
+                this.ModelState.AddModelError(string.Empty, error.Description);
             }
         }
     }

@@ -10,6 +10,8 @@ namespace ClickerHeroesTrackerWebsite.Services.Email
     {
         public string ApiKey { get; set; }
 
+#pragma warning disable CA2227 // Collection properties should be read only
         public List<string> FeedbackRecievers { get; set; }
+#pragma warning restore CA2227 // Collection properties should be read only
     }
 }

@@ -84,11 +84,13 @@ namespace ClickerHeroesTrackerWebsite
                     useDatabase = options => options.UseSqlServer(connectionString);
                     break;
                 }
+
                 case "Sqlite":
                 {
                     useDatabase = options => options.UseSqlite(connectionString);
                     break;
                 }
+
                 default:
                 {
                     throw new InvalidOperationException($"Invalid configuration for \"Database:Kind\": {this.Configuration["Database:Kind"]}");

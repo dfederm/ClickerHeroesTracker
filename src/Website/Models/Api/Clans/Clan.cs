@@ -9,8 +9,11 @@ namespace ClickerHeroesTrackerWebsite.Models.Api.Clans
     public sealed class Clan
     {
         public Guild Guild { get; set; }
+
         public IDictionary<string, GuildMember> GuildMembers { get; set; }
+
         public User User { get; set; }
-        public IList<Message> Messages { get; set; } 
+
+        public IList<Message> Messages { get; set; }
     }
 }

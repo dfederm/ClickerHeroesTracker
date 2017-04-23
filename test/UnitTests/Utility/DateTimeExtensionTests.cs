@@ -7,7 +7,7 @@ namespace ClickerHeroesTrackerWebsite.Tests.Utility
     using ClickerHeroesTrackerWebsite.Utility;
     using Xunit;
 
-    public class DateTimeExtensionTests
+    public static class DateTimeExtensionTests
     {
         [Theory]
         [InlineData(1469496451, "2016-07-26T01:27:31")]

@@ -9,8 +9,11 @@ namespace ClickerHeroesTrackerWebsite.Models.Api.Clans
     public sealed class ClanData
     {
         public string ClanName { get; set; }
+
         public int CurrentRaidLevel { get; set; }
+
         public IList<GuildMember> GuildMembers { get; set; }
-        public IList<Message> Messages { get; set; } 
+
+        public IList<Message> Messages { get; set; }
     }
 }

@@ -5,11 +5,9 @@
 namespace ClickerHeroesTrackerWebsite.Instrumentation
 {
     using System.Collections.Generic;
-    using System.Security.Claims;
     using System.Threading.Tasks;
     using ClickerHeroesTrackerWebsite.Models;
     using Microsoft.ApplicationInsights;
-    using Microsoft.AspNetCore.Builder;
     using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.Identity;
 
@@ -35,8 +33,8 @@ namespace ClickerHeroesTrackerWebsite.Instrumentation
         /// <returns>The async task</returns>
         public async Task Invoke(HttpContext context)
         {
-            var telemetryClient = ((TelemetryClient)context.RequestServices.GetService(typeof(TelemetryClient)));
-            var userManager = ((UserManager<ApplicationUser>)context.RequestServices.GetService(typeof(UserManager<ApplicationUser>)));
+            var telemetryClient = (TelemetryClient)context.RequestServices.GetService(typeof(TelemetryClient));
+            var userManager = (UserManager<ApplicationUser>)context.RequestServices.GetService(typeof(UserManager<ApplicationUser>));
 
             var identity = context.User?.Identity;
             if (identity != null && identity.IsAuthenticated)

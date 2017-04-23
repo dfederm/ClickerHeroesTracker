@@ -4,6 +4,7 @@
 
 namespace ClickerHeroesTrackerWebsite.IntegrationTests
 {
+    using System;
     using System.Net;
     using System.Net.Http;
     using System.Threading.Tasks;
@@ -30,9 +31,9 @@ namespace ClickerHeroesTrackerWebsite.IntegrationTests
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 
             var content = await response.Content.ReadAsStringAsync();
-            Assert.DoesNotContain(EmailInputLoggedIn, content);
-            Assert.Contains(EmailInputAnonymous, content);
-            Assert.Contains(EmailHelpTextAnonymous, content);
+            Assert.DoesNotContain(EmailInputLoggedIn, content, StringComparison.Ordinal);
+            Assert.Contains(EmailInputAnonymous, content, StringComparison.Ordinal);
+            Assert.Contains(EmailHelpTextAnonymous, content, StringComparison.Ordinal);
         }
 
         [Fact]
@@ -45,9 +46,9 @@ namespace ClickerHeroesTrackerWebsite.IntegrationTests
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 
             var content = await response.Content.ReadAsStringAsync();
-            Assert.Contains(EmailInputLoggedIn, content);
-            Assert.DoesNotContain(EmailInputAnonymous, content);
-            Assert.DoesNotContain(EmailHelpTextAnonymous, content);
+            Assert.Contains(EmailInputLoggedIn, content, StringComparison.Ordinal);
+            Assert.DoesNotContain(EmailInputAnonymous, content, StringComparison.Ordinal);
+            Assert.DoesNotContain(EmailHelpTextAnonymous, content, StringComparison.Ordinal);
         }
     }
 }

@@ -7,6 +7,7 @@ namespace ClickerHeroesTrackerWebsite.Models.Api.Clans
     public sealed class MemberUid
     {
         public string Uid { get; set; }
+
         public string MembershipType { get; set; }
     }
 }

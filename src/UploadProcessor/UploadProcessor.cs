@@ -2,7 +2,7 @@
 // Copyright (c) Clicker Heroes Tracker. All rights reserved.
 // </copyright>
 
-namespace ClickerHeroesTrackerWebsite.UploadProcessing
+namespace ClickerHeroesTracker.UploadProcessor
 {
     using System;
     using System.Collections.Generic;
@@ -31,9 +31,6 @@ namespace ClickerHeroesTrackerWebsite.UploadProcessing
 
         private readonly Dictionary<UploadProcessingMessagePriority, CloudQueue> queues;
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="UploadProcessor"/> class.
-        /// </summary>
         public UploadProcessor(
             IOptions<DatabaseSettings> databaseSettingsOptions,
             GameData gameData,
@@ -91,6 +88,37 @@ namespace ClickerHeroesTrackerWebsite.UploadProcessing
             var queue = queueClient.GetQueueReference($"upload-processing-{priority.ToString().ToLower()}-priority");
             queue.CreateIfNotExistsAsync().Wait();
             return queue;
+        }
+
+        private static void GetUploadDetails(
+            IDatabaseCommandFactory databaseCommandFactory,
+            int uploadId,
+            out string uploadContent,
+            out string userId,
+            out PlayStyle playStyle)
+        {
+            const string CommandText = @"
+	            SELECT UploadContent, UserId, PlayStyle
+	            FROM Uploads
+	            WHERE Id = @UploadId";
+            var commandParameters = new Dictionary<string, object>
+            {
+                { "@UploadId", uploadId },
+            };
+            using (var command = databaseCommandFactory.Create(
+                CommandText,
+                commandParameters))
+            using (var reader = command.ExecuteReader())
+            {
+                reader.Read();
+                uploadContent = reader["UploadContent"].ToString();
+                userId = reader["UserId"].ToString();
+
+                if (!Enum.TryParse(reader["PlayStyle"].ToString(), out playStyle))
+                {
+                    playStyle = default(PlayStyle);
+                }
+            }
         }
 
         private bool ProcessMessage(CloudQueueMessage queueMessage)
@@ -163,9 +191,7 @@ namespace ClickerHeroesTrackerWebsite.UploadProcessing
                         this.gameData,
                         savedGame,
                         this.telemetryClient);
-                    var miscellaneousStatsModel = new MiscellaneousStatsModel(
-                        gameData,
-                        savedGame);
+                    var miscellaneousStatsModel = new MiscellaneousStatsModel(savedGame);
 
                     /* Build a query that looks like this:
                         MERGE INTO AncientLevels WITH (HOLDLOCK)
@@ -414,37 +440,6 @@ namespace ClickerHeroesTrackerWebsite.UploadProcessing
                 finally
                 {
                     this.CurrentUploadId = null;
-                }
-            }
-        }
-
-        private static void GetUploadDetails(
-            IDatabaseCommandFactory databaseCommandFactory,
-            int uploadId,
-            out string uploadContent,
-            out string userId,
-            out PlayStyle playStyle)
-        {
-            const string CommandText = @"
-	            SELECT UploadContent, UserId, PlayStyle
-	            FROM Uploads
-	            WHERE Id = @UploadId";
-            var commandParameters = new Dictionary<string, object>
-            {
-                { "@UploadId", uploadId },
-            };
-            using (var command = databaseCommandFactory.Create(
-                CommandText,
-                commandParameters))
-            using (var reader = command.ExecuteReader())
-            {
-                reader.Read();
-                uploadContent = reader["UploadContent"].ToString();
-                userId = reader["UserId"].ToString();
-
-                if (!Enum.TryParse(reader["PlayStyle"].ToString(), out playStyle))
-                {
-                    playStyle = default(PlayStyle);
                 }
             }
         }

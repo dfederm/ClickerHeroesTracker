@@ -8,10 +8,10 @@ namespace ClickerHeroesTrackerWebsite.Models.Dashboard
     using System.Collections.Generic;
     using System.Linq;
     using System.Security.Claims;
-    using ClickerHeroesTrackerWebsite.Services.Database;
     using ClickerHeroesTrackerWebsite.Models.Dashboard.Graph;
     using ClickerHeroesTrackerWebsite.Models.Game;
     using ClickerHeroesTrackerWebsite.Models.Settings;
+    using ClickerHeroesTrackerWebsite.Services.Database;
     using ClickerHeroesTrackerWebsite.Utility;
     using ClickerHeroesTrackerWebsite.ViewModels.Dashboard.Graph;
     using Microsoft.ApplicationInsights;
@@ -59,11 +59,11 @@ namespace ClickerHeroesTrackerWebsite.Models.Dashboard
                 {
                     Chart = new Chart
                     {
-                        Type = ChartType.Line
+                        Type = ChartType.Line,
                     },
                     Title = new Title
                     {
-                        Text = "Souls Spent"
+                        Text = "Souls Spent",
                     },
                     XAxis = new Axis
                     {
@@ -76,8 +76,8 @@ namespace ClickerHeroesTrackerWebsite.Models.Dashboard
                             Align = Align.Left,
                             X = 3,
                             Y = -3,
-                            Format = "{value:%m/%d}"
-                        }
+                            Format = "{value:%m/%d}",
+                        },
                     },
                     YAxis = new Axis
                     {
@@ -86,14 +86,14 @@ namespace ClickerHeroesTrackerWebsite.Models.Dashboard
                             Align = Align.Left,
                             X = 3,
                             Y = 16,
-                            Format = "{value:.,0f}"
+                            Format = "{value:.,0f}",
                         },
                         ShowFirstLabel = false,
                         Type = GetYAxisType(dataSeries, userSettings),
                     },
                     Legend = new Legend
                     {
-                        Enabled = false
+                        Enabled = false,
                     },
                     Series = new Series[]
                     {
@@ -104,26 +104,26 @@ namespace ClickerHeroesTrackerWebsite.Models.Dashboard
                                 .Select(datum => new Point
                                 {
                                     X = datum.Key.ToJavascriptTime(),
-                                    Y = datum.Value
+                                    Y = datum.Value,
                                 })
                                 .Concat(new[]
                                 {
                                     new Point
                                     {
                                         X = DateTime.UtcNow.ToJavascriptTime(),
-                                        Y = dataSeries.Last().Value
-                                    }
+                                        Y = dataSeries.Last().Value,
+                                    },
                                 })
-                                .ToList()
-                        }
-                    }
+                                .ToList(),
+                        },
+                    },
                 };
             }
 
             this.Follows = new List<string>();
             var parameters = new Dictionary<string, object>
             {
-                { "@UserId", userId }
+                { "@UserId", userId },
             };
             const string GetUserFollowsCommandText = @"
 	            SELECT UserName

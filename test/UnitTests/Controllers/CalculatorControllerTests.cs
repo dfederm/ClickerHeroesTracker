@@ -38,7 +38,7 @@ namespace ClickerHeroesTrackerWebsite.Tests.Controllers
             Assert.NotNull(result);
             Assert.IsType<ViewResult>(result);
 
-            var viewResult = ((ViewResult)result);
+            var viewResult = (ViewResult)result;
             Assert.Null(viewResult.Model);
             Assert.Equal("Error", viewResult.ViewName);
             Assert.Equal("The upload does not exist", viewResult.ViewData["ErrorMessage"]);
@@ -77,7 +77,7 @@ namespace ClickerHeroesTrackerWebsite.Tests.Controllers
             Assert.NotNull(result);
             Assert.IsType<ViewResult>(result);
 
-            var viewResult = ((ViewResult)result);
+            var viewResult = (ViewResult)result;
 
             Assert.Null(viewResult.Model);
             Assert.Equal("Error", viewResult.ViewName);
@@ -144,7 +144,7 @@ namespace ClickerHeroesTrackerWebsite.Tests.Controllers
             Assert.NotNull(result);
             Assert.IsType<ViewResult>(result);
 
-            var viewResult = ((ViewResult)result);
+            var viewResult = (ViewResult)result;
 
             if (expectedPermitted)
             {
@@ -156,7 +156,7 @@ namespace ClickerHeroesTrackerWebsite.Tests.Controllers
                 Assert.Equal(1, model.UploadId);
                 Assert.True(model.IsValid);
                 Assert.True(model.IsPermitted);
-                Assert.Equal(userId == uploadUserId, model.IsOwn);
+                Assert.Equal(userId.Equals(uploadUserId, StringComparison.OrdinalIgnoreCase), model.IsOwn);
                 Assert.Equal(isPublic || uploadUserId == null, model.IsPublic);
                 Assert.NotNull(model.SuggestedAncientIds);
                 Assert.NotEmpty(model.SuggestedAncientIds);

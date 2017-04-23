@@ -9,14 +9,13 @@ namespace ClickerHeroesTrackerWebsite.Services.Database
     using System.Data.Common;
     using System.Data.SqlClient;
     using ClickerHeroesTrackerWebsite.Instrumentation;
-    using ClickerHeroesTrackerWebsite.Utility;
     using Microsoft.Data.Sqlite;
     using Microsoft.Extensions.Options;
 
     /// <summary>
     /// A SQL command provider for the default connection string
     /// </summary>
-    public sealed class DatabaseCommandFactory : DisposableBase, IDatabaseCommandFactory
+    public sealed class DatabaseCommandFactory : IDisposable, IDatabaseCommandFactory
     {
         private static Dictionary<string, Func<string, DbConnection>> connectionFactories = new Dictionary<string, Func<string, DbConnection>>(StringComparer.OrdinalIgnoreCase)
         {
@@ -30,9 +29,6 @@ namespace ClickerHeroesTrackerWebsite.Services.Database
 
         private DbConnection connection;
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="DatabaseCommandFactory"/> class.
-        /// </summary>
         public DatabaseCommandFactory(
             IOptions<DatabaseSettings> databaseSettingsOptions,
             ICounterProvider counterProvider)
@@ -44,8 +40,6 @@ namespace ClickerHeroesTrackerWebsite.Services.Database
         /// <inheritdoc/>
         public IDatabaseCommand Create()
         {
-            this.EnsureNotDisposed();
-
             // Create the connection if it hasn't been created yet.
             if (this.connection == null)
             {
@@ -62,17 +56,11 @@ namespace ClickerHeroesTrackerWebsite.Services.Database
                 this.counterProvider);
         }
 
-        /// <inheritdoc/>
-        protected override void Dispose(bool isDisposing)
+        public void Dispose()
         {
             if (this.connection != null)
             {
-                // SqlConntection throws if it's being disposed in a finalizer
-                if (isDisposing)
-                {
-                    this.connection.Dispose();
-                }
-
+                this.connection.Dispose();
                 this.connection = null;
             }
         }

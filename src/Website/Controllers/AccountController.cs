@@ -6,12 +6,12 @@ namespace ClickerHeroesTrackerWebsite.Controllers
 {
     using System.Security.Claims;
     using System.Threading.Tasks;
-    using Microsoft.AspNetCore.Authorization;
-    using Microsoft.AspNetCore.Identity;
-    using Microsoft.AspNetCore.Mvc;
     using ClickerHeroesTrackerWebsite.Models;
     using ClickerHeroesTrackerWebsite.Services.Email;
     using ClickerHeroesTrackerWebsite.ViewModels.Account;
+    using Microsoft.AspNetCore.Authorization;
+    using Microsoft.AspNetCore.Identity;
+    using Microsoft.AspNetCore.Mvc;
 
     /// <summary>
     /// The Account controller is where users register and log in.
@@ -115,7 +115,7 @@ namespace ClickerHeroesTrackerWebsite.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Register(RegisterViewModel model)
         {
-            if (ModelState.IsValid)
+            if (this.ModelState.IsValid)
             {
                 var user = new ApplicationUser { UserName = model.UserName, Email = model.Email };
                 var result = await this.userManager.CreateAsync(user, model.Password);
@@ -225,12 +225,14 @@ namespace ClickerHeroesTrackerWebsite.Controllers
             {
                 return this.View(model);
             }
+
             var user = await this.userManager.FindByNameAsync(model.UserName);
             if (user == null)
             {
                 // Don't reveal that the user does not exist
                 return this.RedirectToAction(nameof(AccountController.ResetPasswordConfirmation), "Account");
             }
+
             var result = await this.userManager.ResetPasswordAsync(user, model.Code, model.Password);
             if (result.Succeeded)
             {
@@ -264,7 +266,7 @@ namespace ClickerHeroesTrackerWebsite.Controllers
         public IActionResult ExternalLogin(string provider, string returnUrl = null)
         {
             // Request a redirect to the external login provider.
-            var redirectUrl = Url.Action("ExternalLoginCallback", "Account", new { ReturnUrl = returnUrl });
+            var redirectUrl = this.Url.Action("ExternalLoginCallback", "Account", new { ReturnUrl = returnUrl });
             var properties = this.signInManager.ConfigureExternalAuthenticationProperties(provider, redirectUrl);
             return new ChallengeResult(provider, properties);
         }
@@ -281,7 +283,7 @@ namespace ClickerHeroesTrackerWebsite.Controllers
             var info = await this.signInManager.GetExternalLoginInfoAsync();
             if (info == null)
             {
-                return this.RedirectToAction(nameof(Login));
+                return this.RedirectToAction(nameof(this.Login));
             }
 
             // Sign in the user with this external login provider if the user already has a login.
@@ -380,9 +382,7 @@ namespace ClickerHeroesTrackerWebsite.Controllers
                 return this.Redirect(returnUrl);
             }
 
-
             return this.RedirectToAction(nameof(HomeController.Index), "Home");
-
         }
     }
 }

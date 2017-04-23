@@ -20,7 +20,7 @@ namespace ClickerHeroesTrackerWebsite.Tests.Controllers
             Assert.NotNull(result);
             Assert.IsType<ViewResult>(result);
 
-            var viewResult = ((ViewResult)result);
+            var viewResult = (ViewResult)result;
             Assert.Null(viewResult.Model);
             Assert.Equal("Error", viewResult.ViewName);
         }

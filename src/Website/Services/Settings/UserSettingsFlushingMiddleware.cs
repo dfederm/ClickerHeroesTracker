@@ -31,7 +31,7 @@ namespace ClickerHeroesTrackerWebsite.Models.Settings
         {
             await this.next.Invoke(context);
 
-            var userSettingsProvider = ((IUserSettingsProvider)context.RequestServices.GetService(typeof(IUserSettingsProvider)));
+            var userSettingsProvider = (IUserSettingsProvider)context.RequestServices.GetService(typeof(IUserSettingsProvider));
             userSettingsProvider.FlushChanges();
         }
     }
