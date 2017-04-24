@@ -50,7 +50,7 @@ gulp.task("typings", function ()
         .pipe(typings());
 });
 
-gulp.task("tslint", function ()
+gulp.task("tslint", ["typings"], function ()
 {
     var gulpTslint = require("gulp-tslint");
     var tslint = require("tslint");
