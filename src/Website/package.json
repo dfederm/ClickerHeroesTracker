@@ -24,13 +24,15 @@
     "zone.js": "^0.8.4"
   },
   "devDependencies": {
+    "@types/applicationinsights-js": "^1.0.2",
+    "@types/highcharts": "^4.2.54",
+    "@types/jquery": "^2.0.41",
     "bluebird": "3.5.0",
     "gulp": "3.9.1",
     "gulp-clean-css": "3.0.4",
+    "gulp-rename": "1.2.2",
     "gulp-tslint": "8.0.0",
     "gulp-typescript": "3.1.6",
-    "gulp-typings": "2.0.4",
-    "gulp-rename": "1.2.2",
     "gulp-uglify": "2.1.2",
     "merge-stream": "1.0.1",
     "rimraf": "2.6.1",

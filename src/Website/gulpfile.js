@@ -14,10 +14,6 @@ var paths = {
 paths.jsDir = paths.webroot + "js/";
 paths.jsFiles = paths.jsDir + "**/*.js";
 
-paths.typingsConfig = "./typings.json";
-paths.typingsFiles = "./typings/**/*.d.ts";
-paths.ambientTypingsFiles = "./typings/browser/ambient/**/*.d.ts";
-
 paths.tsFiles = paths.jsDir + "**/*.ts";
 
 paths.cssDir = paths.webroot + "css/";
@@ -25,11 +21,6 @@ paths.cssFiles = paths.cssDir + "**/*.css";
 paths.cssMinFiles = paths.cssDir + "**/*.min.css";
 
 paths.libDir = paths.webroot + "lib/";
-
-gulp.task("clean:typings", function (cb)
-{
-    rimraf(paths.typingsFiles, cb);
-});
 
 gulp.task("clean:js", function (cb)
 {
@@ -41,16 +32,9 @@ gulp.task("clean:css", function (cb)
     rimraf(paths.cssMinFiles, cb);
 });
 
-gulp.task("clean", ["clean:typings", "clean:js", "clean:css"]);
+gulp.task("clean", ["clean:js", "clean:css"]);
 
-gulp.task("typings", function ()
-{
-    var typings = require("gulp-typings");
-    return gulp.src(paths.typingsConfig)
-        .pipe(typings());
-});
-
-gulp.task("tslint", ["typings"], function ()
+gulp.task("tslint", function ()
 {
     var gulpTslint = require("gulp-tslint");
     var tslint = require("tslint");
@@ -69,7 +53,7 @@ var tsProject = typescript.createProject('tsconfig.json', {
     typescript: require('typescript')
 });
 
-gulp.task("js", ["typings", "tslint"], function ()
+gulp.task("js", ["tslint"], function ()
 {
     var uglify = require("gulp-uglify");
 
@@ -115,6 +99,6 @@ gulp.task("build", ["js", "css", "copy"]);
 
 gulp.task("watch", function ()
 {
-    gulp.watch([paths.tsFiles, paths.typingsConfig], ["js"]);
+    gulp.watch([paths.tsFiles], ["js"]);
     gulp.watch([paths.cssFiles, "!" + paths.cssMinFiles], ["css"]);
 });
