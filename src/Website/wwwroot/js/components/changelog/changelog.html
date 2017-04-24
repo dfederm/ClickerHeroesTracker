@@ -1,0 +1,14 @@
+<h2>What's New</h2>
+
+<div *ngIf="errorMessage">
+  {{errorMessage}}
+</div>
+
+<div *ngFor="let section of sections">
+  <h3 *ngIf="section.title">
+    {{section.title}}
+  </h3>
+  <ul>
+    <li *ngFor="let entry of section.entries" [innerHTML]="entry"></li>
+  </ul>
+</div>
