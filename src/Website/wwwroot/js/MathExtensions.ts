@@ -1,6 +1,5 @@
-﻿/* tslint:disable:interface-name:We don't own this interface name, just extending it */
+﻿// tslint:disable-next-line:interface-name - We don't own this interface name, just extending it */
 interface Math
-/* tslint:enable:interface-name */
 {
     log10(x: number): number;
 }

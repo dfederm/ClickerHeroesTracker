@@ -1,6 +1,6 @@
 ﻿declare var staleUploads: string[];
 
-$("#deleteStaleUploads").click(function (event: JQueryEventObject): boolean
+$("#deleteStaleUploads").click((): boolean =>
 {
     $("#deleteStaleUploads").attr("disabled", "true");
 

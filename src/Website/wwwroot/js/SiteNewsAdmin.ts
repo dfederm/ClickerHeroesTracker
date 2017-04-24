@@ -197,7 +197,7 @@
                 type: "delete",
                 url: "/api/news/" + originalDateStr.substring(0, 10),
             })
-                .done((response: ISiteNewsEntryListResponse) =>
+                .done(() =>
                 {
                     // TODO. Need to wait for this before doing the below
                 })
@@ -223,7 +223,7 @@
             type: "post",
             url: "/api/news",
         })
-            .done((response: ISiteNewsEntryListResponse) =>
+            .done(() =>
             {
                 for (let i = 0; i < buttons.length; i++)
                 {
@@ -297,7 +297,7 @@
             type: "delete",
             url: "/api/news/" + dateStr.substring(0, 10),
         })
-            .done((response: ISiteNewsEntryListResponse) =>
+            .done(() =>
             {
                 container.remove();
             })

@@ -4,7 +4,7 @@
 
     const leaderboardCount = 10;
 
-    function buildClanInformation(response: IClanData, textStatus: string, xhr: JQueryXHR): void
+    function buildClanInformation(response: IClanData, _: string, xhr: JQueryXHR): void
     {
         const clanMemebersTable = document.getElementById("clan-members-table") as HTMLTableElement;
 
@@ -187,7 +187,7 @@
         url: "/api/clans",
     })
         .done(buildClanInformation)
-        .fail((jqXHR: JQueryXHR, ajaxOptions: string, error: string) =>
+        .fail((jqXHR: JQueryXHR) =>
         {
             if (jqXHR.status === 404)
             {
@@ -207,7 +207,7 @@
 
     $.ajax({
         url: "/api/clans/userClan",
-    }).done((response: ILeaderboardClan, textStatus: string, xhr: JQueryXHR) =>
+    }).done((response: ILeaderboardClan, _: string, xhr: JQueryXHR) =>
     {
         let userClanRow: HTMLTableRowElement = null;
         if (xhr.status !== 204)
@@ -248,12 +248,12 @@
 
     $("#sendMessage").submit(function (event: JQueryEventObject): boolean
     {
-        function handleSuccess(result: string): void
+        function handleSuccess(): void
         {
             Helpers.showMessage("Message successfully sent to clan", "success");
         }
 
-        function handleError(xhr: JQueryXHR): void
+        function handleError(): void
         {
             Helpers.showMessage("Could not send message to clan", "error");
         }

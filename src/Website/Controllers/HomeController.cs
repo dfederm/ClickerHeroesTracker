@@ -28,5 +28,10 @@ namespace ClickerHeroesTrackerWebsite.Controllers
         {
             return this.View();
         }
+
+        public ActionResult Beta()
+        {
+            return this.View();
+        }
     }
 }
