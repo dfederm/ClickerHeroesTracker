@@ -438,7 +438,7 @@
         let suggestedPony = 0;
 
         // Less ancient souls than the simulation data supported. We can try to guess though.
-        // Our guess just alternates leveling Xyl and Pony until Xylk hits 7 and then dump into Pony unti lit matches the 30 AS simulation data. 
+        // Our guess just alternates leveling Xyl and Pony until Xylk hits 7 and then dump into Pony unti lit matches the 30 AS simulation data.
         if (ancientSouls < 30)
         {
             showLowAncientSoulWarning = true;
@@ -623,7 +623,7 @@
                     ancientCost = (n: number) => Math.pow(2, n + 1) - 1;
                     break;
                 default:
-                    ancientCost = (n: number) => 0;
+                    ancientCost = () => 0;
             }
 
             ancientCosts[ancient.shortName] = ancientCost;

@@ -27,6 +27,8 @@
     </environment>
 
     @Html.Raw(JavaScriptSnippet.FullScript)
+
+    @await RenderSectionAsync("head", required: false)
 </head>
 <body>
     <div class="navbar navbar-inverse navbar-fixed-top">

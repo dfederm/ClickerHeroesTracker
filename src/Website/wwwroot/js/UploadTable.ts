@@ -47,7 +47,7 @@
             {
                 if (!response)
                 {
-                    displayFailure(table);
+                    // BUGBUG 51: Create Loading and Failure states for ajax loading
                 }
 
                 const uploads = response.uploads;
@@ -97,12 +97,7 @@
             })
             .fail(() =>
             {
-                displayFailure(table);
+                // BUGBUG 51: Create Loading and Failure states for ajax loading
             });
-    }
-
-    function displayFailure(table: HTMLElement): void
-    {
-        // BUGBUG 51: Create Loading and Failure states for ajax loading
     }
 }

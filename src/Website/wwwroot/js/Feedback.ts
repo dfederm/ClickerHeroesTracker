@@ -1,5 +1,5 @@
 ﻿// On hiding the modal, reset it.
-$("#feedbackModal").on("hidden.bs.modal", (event: JQueryEventObject) =>
+$("#feedbackModal").on("hidden.bs.modal", () =>
 {
     $("#feedbackComments").val("");
     $("#feedbackSubmit").removeAttr("disabled");
@@ -12,12 +12,12 @@ $("#feedbackModal").on("hidden.bs.modal", (event: JQueryEventObject) =>
 
 $("#feedbackForm").submit(function (event: JQueryEventObject): boolean
 {
-    function handleSuccess(result: string): void
+    function handleSuccess(): void
     {
         $("#feedbackModal").modal("hide");
     }
 
-    function handleError(xhr: JQueryXHR): void
+    function handleError(): void
     {
         // Custom error message
         const container = $("span[data-valmsg-for='feedbackComments']");

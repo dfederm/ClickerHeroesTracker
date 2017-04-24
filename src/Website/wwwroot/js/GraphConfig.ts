@@ -1,8 +1,7 @@
-﻿/* tslint:disable:interface-name:We don't own this interface name, just extending it */
-interface HighchartsStatic
-/* tslint:enable:interface-name */
+﻿// tslint:disable-next-line:interface-name - We don't own this interface name, just extending it
+interface HighchartsStatic extends Highcharts.Static
 {
-    wrap: (obj: HighchartsStatic, funcName: string, callback: (orig: () => string) => string) => void;
+    wrap: (obj: Highcharts.Static, funcName: string, callback: (orig: () => string) => string) => void;
 }
 
 namespace GraphConfig
@@ -15,7 +14,7 @@ namespace GraphConfig
         },
     });
 
-    Highcharts.wrap(Highcharts, "numberFormat", function (orig: () => string): string
+    (Highcharts as HighchartsStatic).wrap(Highcharts, "numberFormat", function (): string
     {
         const value = arguments[1] as number;
 

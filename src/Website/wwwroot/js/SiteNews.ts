@@ -17,7 +17,7 @@
             {
                 if (!response)
                 {
-                    displayFailure(container);
+                    // BUGBUG 51: Create Loading and Failure states for ajax loading
                 }
 
                 const entries = response.entries;
@@ -108,12 +108,7 @@
             })
             .fail((): void =>
             {
-                displayFailure(container);
+                // BUGBUG 51: Create Loading and Failure states for ajax loading
             });
-    }
-
-    function displayFailure(container: HTMLElement): void
-    {
-        // BUGBUG 51: Create Loading and Failure states for ajax loading
     }
 }

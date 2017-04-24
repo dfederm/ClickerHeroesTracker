@@ -1,14 +1,21 @@
 {
   "compilerOptions": {
+    "target": "es5",
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "lib": [ "es2015", "dom" ],
     "noEmitOnError": true,
     "noImplicitAny": true,
     "noImplicitReturns": true,
-    "noExternalResolve": true,
-    "target": "es5"
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true
   },
   "exclude": [
-    "node_modules",
-    "typings/main",
+    "node_modules/*",
+    "wwwroot/lib/*",
+    "typings/main/*",
     "typings/main.d.ts",
     "typings/browser.d.ts"
   ]

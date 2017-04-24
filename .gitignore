@@ -16,15 +16,15 @@ PublishProfiles/
 # npm package dir too
 node_modules/
 
-# bower package dir
+# bower and npm package dir
 **/wwwroot/lib/*
 
 # typings downloaded by gulp
 typings/
 
 # generated js
-**/wwwroot/js/*.js
-**/wwwroot/js/*.js.map
+**/wwwroot/js/**/*.js
+**/wwwroot/js/**/*.js.map
 
 # generated css
 **/wwwroot/css/*.min.css
