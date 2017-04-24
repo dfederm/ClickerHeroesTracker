@@ -58,6 +58,16 @@ namespace ClickerHeroesTrackerWebsite
                 routes.MapRoute(
                     name: "default",
                     template: "{controller=Home}/{action=Index}");
+
+                // Frontend routes. Eventually just match a wildcard and let Angular render the 404
+                routes.MapRoute(
+                    name: "frontend-home",
+                    template: "beta",
+                    defaults: new { controller = "Home", action = "Beta" });
+                routes.MapRoute(
+                    name: "frontend-news",
+                    template: "news",
+                    defaults: new { controller = "Home", action = "Beta" });
             });
 
             this.EnsureDatabaseCreated(app);

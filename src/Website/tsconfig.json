@@ -14,9 +14,6 @@
   },
   "exclude": [
     "node_modules/*",
-    "wwwroot/lib/*",
-    "typings/main/*",
-    "typings/main.d.ts",
-    "typings/browser.d.ts"
+    "wwwroot/lib/*"
   ]
 }
