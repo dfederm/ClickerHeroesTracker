@@ -27,6 +27,7 @@
     "@types/applicationinsights-js": "^1.0.2",
     "@types/highcharts": "^4.2.54",
     "@types/jquery": "^2.0.41",
+    "@types/systemjs": "^0.20.2",
     "bluebird": "3.5.0",
     "gulp": "3.9.1",
     "gulp-clean-css": "3.0.4",
