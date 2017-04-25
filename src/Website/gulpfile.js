@@ -88,7 +88,7 @@ gulp.task("copy", function ()
     var merged = mergeStream();
     for (let pkg of packages)
     {
-        merged.add(gulp.src("node_modules/" + pkg + "/**", { read: false })
+        merged.add(gulp.src("node_modules/" + pkg + "/**")
             .pipe(gulp.dest(paths.libDir + pkg)));
     }
 
