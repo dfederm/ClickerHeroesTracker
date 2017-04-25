@@ -2,7 +2,7 @@
   SystemJS.config({
     // Map tells the System loader where to look for things
     map: {
-      // Our app is within the app folder
+      // Our app is within the js folder
       "app": "js",
 
       // Angular bundles
