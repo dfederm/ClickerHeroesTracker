@@ -9,6 +9,8 @@ import { HomeComponent } from "./components/home/home";
 import { NewsComponent } from "./components/news/news";
 import { ChangelogComponent } from "./components/changelog/changelog";
 
+import { NewsService } from "./services/newsService/newsService";
+
 const routes: Routes = [
   { path: "", component: HomeComponent, pathMatch: "full" },
   { path: "news",  component: NewsComponent },
@@ -30,7 +32,9 @@ const routes: Routes = [
     ChangelogComponent,
     NewsComponent,
   ],
-  providers: [ ],
+  providers: [
+    NewsService,
+  ],
   bootstrap: [ AppComponent ],
 })
 export class AppModule { }

@@ -2,6 +2,7 @@
 "use strict";
 
 var gulp = require("gulp");
+var gutil = require('gulp-util');
 var rimraf = require("rimraf");
 var typescript = require("gulp-typescript");
 var rename = require('gulp-rename');
@@ -96,6 +97,18 @@ gulp.task("copy", function ()
 });
 
 gulp.task("build", ["js", "css", "copy"]);
+
+gulp.task("test", [ "js", "copy" ], function (done)
+{
+    var karma = require("karma").Server;
+    // new karma({ configFile: __dirname + "/karma.conf.js" }, done).start();
+
+    karma.start({
+        configFile: __dirname + '/karma.conf.js'
+    }, function(exitStatus) {
+        done(exitStatus ? new gutil.PluginError('karma', { message: 'Karma Tests failed' }) : undefined);
+    });
+});
 
 gulp.task("watch", function ()
 {

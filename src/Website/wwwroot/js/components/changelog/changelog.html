@@ -1,7 +1,7 @@
 <h2>What's New</h2>
 
-<div *ngIf="errorMessage">
-  {{errorMessage}}
+<div *ngIf="isError">
+  There was a problem getting the site news
 </div>
 
 <div *ngFor="let section of sections">

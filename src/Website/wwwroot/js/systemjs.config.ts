@@ -32,6 +32,4 @@
       rxjs: { defaultExtension: "js" },
     },
   });
-
-  SystemJS.import("js/main.js").catch(console.error.bind(console));
 })();
