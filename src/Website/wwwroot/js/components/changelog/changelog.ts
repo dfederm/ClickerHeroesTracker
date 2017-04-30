@@ -1,5 +1,6 @@
 import { Component, OnInit, Input } from "@angular/core";
-import { Http, Response } from "@angular/http";
+
+import { NewsService } from "../../services/newsService/newsService";
 
 interface IChangelogSectionViewModel
 {
@@ -14,27 +15,26 @@ interface IChangelogSectionViewModel
 export class ChangelogComponent implements OnInit
 {
     public sections: IChangelogSectionViewModel[];
-    public errorMessage: string;
+    public isError: boolean;
 
     @Input()
     public isFull: boolean;
 
-    constructor(private http: Http) {}
+    constructor(private newsService: NewsService) {}
 
     public ngOnInit(): void
     {
-        this.http
-            .get("/api/news")
-            .subscribe(
-                response => this.handleData(response.json() as ISiteNewsEntryListResponse),
-                error => this.handleError(error));
+        this.newsService
+            .getNews()
+            .then(response => this.handleData(response))
+            .catch(() => this.isError = true);
     }
 
     private handleData(response: ISiteNewsEntryListResponse): void
     {
         if (!response || !response.entries)
         {
-            this.errorMessage = "There was a problem getting the site news";
+            this.isError = true;
             return;
         }
 
@@ -94,20 +94,6 @@ export class ChangelogComponent implements OnInit
         if (currentSection)
         {
             this.sections.push(currentSection);
-        }
-    }
-
-    private handleError(error: Response | { message?: string }): void
-    {
-        if (error instanceof Response)
-        {
-            let body = error.json() || "";
-            let err = body.error || JSON.stringify(body);
-            this.errorMessage = `${error.status} - ${error.statusText || ""} ${err}`;
-        }
-        else
-        {
-            this.errorMessage = error.message ? error.message : error.toString();
         }
     }
 }
