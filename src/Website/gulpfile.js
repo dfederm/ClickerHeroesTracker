@@ -5,6 +5,7 @@ var gulp = require("gulp");
 var gutil = require('gulp-util');
 var rimraf = require("rimraf");
 var typescript = require("gulp-typescript");
+var sourcemaps = require("gulp-sourcemaps");
 var rename = require('gulp-rename');
 var mergeStream = require("merge-stream");
 
@@ -59,7 +60,9 @@ gulp.task("js", ["tslint"], function ()
     var uglify = require("gulp-uglify");
 
     return tsProject.src()
+        .pipe(sourcemaps.init())
         .pipe(tsProject())
+        .pipe(sourcemaps.write())
         .pipe(gulp.dest(paths.jsDir))
         .pipe(uglify())
         .pipe(rename({ suffix: '.min' }))
@@ -100,18 +103,28 @@ gulp.task("build", ["js", "css", "copy"]);
 
 gulp.task("test", [ "js", "copy" ], function (done)
 {
-    var karma = require("karma").Server;
-    // new karma({ configFile: __dirname + "/karma.conf.js" }, done).start();
+    runKarma(done, { singleRun: true });
+});
 
-    karma.start({
-        configFile: __dirname + '/karma.conf.js'
-    }, function(exitStatus) {
+gulp.task("test-debug", [ "js", "copy" ], function (done)
+{
+    runKarma(done);
+});
+
+function runKarma(done, config)
+{
+    config = config || {};
+    config.configFile = __dirname + '/karma.conf.js';
+    var karma = require("karma").Server;
+    karma.start(config, function(exitStatus) {
         done(exitStatus ? new gutil.PluginError('karma', { message: 'Karma Tests failed' }) : undefined);
     });
-});
+}
 
 gulp.task("watch", function ()
 {
     gulp.watch([paths.tsFiles], ["js"]);
     gulp.watch([paths.cssFiles, "!" + paths.cssMinFiles], ["css"]);
 });
+
+gulp.task("test-watch", ["watch", "test-debug"]);
