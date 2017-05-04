@@ -8,6 +8,17 @@ module.exports = function(config) {
     // available frameworks: https://npmjs.org/browse/keyword/karma-adapter
     frameworks: ['jasmine'],
 
+    plugins: [
+      require('karma-jasmine'),
+      require('karma-chrome-launcher'),
+      require('karma-jasmine-html-reporter')
+    ],
+
+    client: {
+      // leave Jasmine Spec Runner output visible in browser
+      clearContext: false
+    },
+
     // list of files / patterns to load in the browser
     files: [
       // System.js for module loading
@@ -35,12 +46,22 @@ module.exports = function(config) {
       { pattern: 'lib/@angular/**/*.js', included: false, watched: false },
       { pattern: 'lib/@angular/**/*.js.map', included: false, watched: false },
 
-
       { pattern: 'js/systemjs.config.js', included: false, watched: false },
       '../karma-test-shim.js',
 
+      // Transpiled application & spec code paths loaded via module imports
       { pattern: 'js/**/*.js', included: false, watched: true },
+
+      // Asset (HTML & CSS) paths loaded via Angular's component compiler
+      { pattern: 'js/**/*.html', included: false, watched: true },
+      ////{ pattern: 'js/**/*.css', included: false, watched: true },
     ],
+
+    // Proxied base paths for loading assets
+    proxies: {
+      // required for modules fetched by SystemJS
+      '/js/': '/base/js/'
+    },
 
     // list of files to exclude
     exclude: [
@@ -64,15 +85,15 @@ module.exports = function(config) {
     logLevel: config.LOG_INFO,
 
     // enable / disable watching file and executing tests whenever any file changes
-    autoWatch: false,
+    autoWatch: true,
 
     // start these browsers
     // available browser launchers: https://npmjs.org/browse/keyword/karma-launcher
-    browsers: ['PhantomJS'],
+    browsers: ['Chrome'],
 
     // Continuous Integration mode
     // if true, Karma captures browsers, runs the tests and exits
-    singleRun: true,
+    singleRun: false,
 
     // Concurrency level
     // how many browser should be started simultaneous

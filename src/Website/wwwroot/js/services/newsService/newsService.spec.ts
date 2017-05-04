@@ -6,9 +6,11 @@ import { MockBackend, MockConnection } from "@angular/http/testing";
 
 import { NewsService } from "./newsService";
 
-declare global {
+declare global
+{
     // tslint:disable-next-line:interface-name - We don't own this interface name, just extending it
-    interface Window {
+    interface Window
+    {
         appInsights: Microsoft.ApplicationInsights.IAppInsights;
     }
 }
@@ -39,7 +41,8 @@ describe("NewsService", () =>
             window.appInsights = jasmine.createSpyObj("appInsights", [ "trackEvent" ]);
         });
 
-        afterAll(() => {
+        afterAll(() =>
+        {
             backend.verifyNoPendingRequests();
         });
 
