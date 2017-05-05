@@ -26,7 +26,8 @@ node_modules/
 # generated css
 **/wwwroot/css/*.min.css
 
-# code coverage report
+# JS test reports
+**/wwwroot/test-results.xml
 **/wwwroot/coverage/
 
 # in-memory database used on dev machines

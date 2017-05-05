@@ -12,7 +12,8 @@ module.exports = function(config) {
       require('karma-jasmine'),
       require('karma-chrome-launcher'),
       require('karma-jasmine-html-reporter'),
-      require('karma-coverage')
+      require('karma-coverage'),
+      require('karma-junit-reporter')
     ],
 
     client: {
@@ -71,7 +72,7 @@ module.exports = function(config) {
     ],
 
     // test results reporter to use
-    reporters: ['progress', 'coverage', 'kjhtml'],
+    reporters: ['progress', 'coverage', 'kjhtml', 'junit'],
 
     preprocessors: {
       // source files, that you wanna generate coverage for
@@ -87,6 +88,12 @@ module.exports = function(config) {
         { type: 'html', subdir: 'report-html' },
         { type: 'cobertura', subdir: '.', file: 'cobertura.xml' },
       ]
+    },
+
+    junitReporter: {
+      outputDir: '',
+      outputFile: 'test-results.xml',
+      useBrowserName: false,
     },
 
     // web server port
