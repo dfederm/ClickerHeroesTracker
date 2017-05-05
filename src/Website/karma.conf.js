@@ -11,7 +11,8 @@ module.exports = function(config) {
     plugins: [
       require('karma-jasmine'),
       require('karma-chrome-launcher'),
-      require('karma-jasmine-html-reporter')
+      require('karma-jasmine-html-reporter'),
+      require('karma-coverage')
     ],
 
     client: {
@@ -70,9 +71,23 @@ module.exports = function(config) {
     ],
 
     // test results reporter to use
-    // possible values: 'dots', 'progress'
-    // available reporters: https://npmjs.org/browse/keyword/karma-reporter
-    reporters: ['progress', 'kjhtml'],
+    reporters: ['progress', 'coverage', 'kjhtml'],
+
+    preprocessors: {
+      // source files, that you wanna generate coverage for
+      // do not include tests or libraries
+      // (these files will be instrumented by Istanbul)
+      'js/**/!(*.spec).js': ['coverage']
+    },
+
+    coverageReporter: {
+      dir: 'coverage',
+      includeAllSources: true,
+      reporters: [
+        { type: 'html', subdir: 'report-html' },
+        { type: 'cobertura', subdir: '.', file: 'cobertura.xml' },
+      ]
+    },
 
     // web server port
     port: 9876,

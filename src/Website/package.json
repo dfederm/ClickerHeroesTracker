@@ -40,6 +40,7 @@
     "jasmine": "^2.6.0",
     "karma": "^1.6.0",
     "karma-chrome-launcher": "^2.1.0",
+    "karma-coverage": "^1.1.1",
     "karma-jasmine": "^1.1.0",
     "karma-jasmine-html-reporter": "^0.2.2",
     "merge-stream": "1.0.1",

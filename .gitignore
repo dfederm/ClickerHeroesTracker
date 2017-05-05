@@ -19,15 +19,15 @@ node_modules/
 # bower and npm package dir
 **/wwwroot/lib/*
 
-# typings downloaded by gulp
-typings/
-
 # generated js
 **/wwwroot/js/**/*.js
 **/wwwroot/js/**/*.js.map
 
 # generated css
 **/wwwroot/css/*.min.css
+
+# code coverage report
+**/wwwroot/coverage/
 
 # in-memory database used on dev machines
 cht.db
