@@ -44,9 +44,10 @@ module.exports = function(config) {
       { pattern: 'lib/rxjs/**/*.js.map', included: false, watched: false },
 
       // Paths loaded via module imports:
-      // Angular itself
       { pattern: 'lib/@angular/**/*.js', included: false, watched: false },
       { pattern: 'lib/@angular/**/*.js.map', included: false, watched: false },
+      { pattern: 'lib/@ng-bootstrap/ng-bootstrap/bundles/ng-bootstrap.js', included: false, watched: false },
+      { pattern: 'lib/@ng-bootstrap/ng-bootstrap/bundles/ng-bootstrap.js.map', included: false, watched: false },
 
       { pattern: 'js/systemjs.config.js', included: false, watched: false },
       '../karma-test-shim.js',

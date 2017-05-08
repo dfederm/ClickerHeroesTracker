@@ -24,6 +24,7 @@
       // Other libraries
       "rxjs": "lib/rxjs",
       "angular-in-memory-web-api": "lib/angular-in-memory-web-api/bundles/in-memory-web-api.umd.js",
+      "@ng-bootstrap/ng-bootstrap": "lib/@ng-bootstrap/ng-bootstrap/bundles/ng-bootstrap.js",
     },
 
     // Packages tells the System loader how to load when no filename and/or no extension

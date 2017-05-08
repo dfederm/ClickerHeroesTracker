@@ -7,6 +7,7 @@ namespace ClickerHeroesTrackerWebsite
     using System;
     using System.IO;
     using System.Linq;
+    using AspNet.Security.OpenIdConnect.Primitives;
     using ClickerHeroesTrackerWebsite.Configuration;
     using ClickerHeroesTrackerWebsite.Instrumentation;
     using ClickerHeroesTrackerWebsite.Models;
@@ -121,6 +122,16 @@ namespace ClickerHeroesTrackerWebsite
                 .AddEntityFrameworkStores<ApplicationDbContext>()
                 .AddDefaultTokenProviders();
 
+            // Configure Identity to use the same JWT claims as OpenIddict instead
+            // of the legacy WS-Federation claims it uses by default (ClaimTypes),
+            // which saves you from doing the mapping in your authorization controller.
+            services.Configure<IdentityOptions>(options =>
+            {
+                options.ClaimsIdentity.UserNameClaimType = OpenIdConnectConstants.Claims.Name;
+                options.ClaimsIdentity.UserIdClaimType = OpenIdConnectConstants.Claims.Subject;
+                options.ClaimsIdentity.RoleClaimType = OpenIdConnectConstants.Claims.Role;
+            });
+
             // Register the OpenIddict services.
             services.AddOpenIddict(options =>
             {
@@ -133,7 +144,7 @@ namespace ClickerHeroesTrackerWebsite
                 options.AddMvcBinders();
 
                 // Enable the token endpoint (required to use the password flow).
-                options.EnableTokenEndpoint("/api/connect/token");
+                options.EnableTokenEndpoint("/api/auth/token");
 
                 // Allow client applications to use the grant_type=password flow.
                 options.AllowPasswordFlow();

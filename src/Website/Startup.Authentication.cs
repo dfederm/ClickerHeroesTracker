@@ -17,8 +17,9 @@ namespace ClickerHeroesTrackerWebsite
     {
         private void ConfigureAuthentication(IApplicationBuilder app, IHostingEnvironment env)
         {
-            app.UseIdentity();
-            app.UseOAuthValidation();
+            // While we transition, support both Cookie-based and Bearer-based authentication
+            app.UseWhen(context => !context.Request.Headers.ContainsKey("Authorization"), branch => branch.UseIdentity());
+            app.UseWhen(context => context.Request.Headers.ContainsKey("Authorization"), branch => branch.UseOAuthValidation());
 
             var authenticationSettingsOptions = app.ApplicationServices.GetService<IOptions<AuthenticationSettings>>();
             if (authenticationSettingsOptions.Value != null)

@@ -1,0 +1,28 @@
+<div class="modal-header">
+    <h4 class="modal-title">Log in</h4>
+    <button type="button" class="close" (click)="activeModal.dismiss()">
+        &times;
+    </button>
+</div>
+<div class="modal-body">
+    <div *ngIf="isError" class="alert alert-danger">
+        Incorrect username or password.
+    </div>
+    <form (ngSubmit)="logIn()">
+        <div class="form-group">
+            <label for="username">Username or Email</label>
+            <input type="text" class="form-control" id="username" name="username" [(ngModel)]="username" />
+        </div>
+        <div class="form-group">
+            <label for="password">Password</label>
+            <input type="password" class="form-control" id="password" name="password" [(ngModel)]="password" />
+        </div>
+        <button type="submit" class="btn btn-primary">Log in</button>
+        <p>
+            <a>Register as a new user?</a>
+        </p>
+        <p>
+            <a>Forgot your password?</a>
+        </p>
+    </form>
+</div>

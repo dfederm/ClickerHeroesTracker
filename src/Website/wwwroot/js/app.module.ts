@@ -3,16 +3,21 @@ import { BrowserModule } from "@angular/platform-browser";
 import { FormsModule } from "@angular/forms";
 import { RouterModule, Routes } from "@angular/router";
 import { HttpModule } from "@angular/http";
+import { NgbModule } from "@ng-bootstrap/ng-bootstrap";
 
 import { AppComponent } from "./components/app/app";
 import { HomeComponent } from "./components/home/home";
 import { NewsComponent } from "./components/news/news";
 import { ChangelogComponent } from "./components/changelog/changelog";
+import { AdComponent } from "./components/ad/ad";
+import { NavbarComponent } from "./components/navbar/navbar";
+import { LogInDialogComponent } from "./components/logInDialog/logInDialog";
 
 import { NewsService } from "./services/newsService/newsService";
+import { AuthenticationService } from "./services/authenticationService/authenticationService";
 
 const routes: Routes = [
-  { path: "", component: HomeComponent, pathMatch: "full" },
+  { path: "", redirectTo: "beta", pathMatch: "full" },
   { path: "news",  component: NewsComponent },
   // Remove these once the beta is over
   { path: "Home/Beta", redirectTo: "beta" },
@@ -20,20 +25,32 @@ const routes: Routes = [
 ];
 
 @NgModule({
-  imports: [
+  imports:
+  [
     BrowserModule,
     FormsModule,
     RouterModule.forRoot(routes),
     HttpModule,
+    NgbModule.forRoot(),
   ],
-  declarations: [
+  declarations:
+  [
     AppComponent,
     HomeComponent,
-    ChangelogComponent,
     NewsComponent,
+    ChangelogComponent,
+    AdComponent,
+    NavbarComponent,
+    LogInDialogComponent,
   ],
-  providers: [
+  entryComponents:
+  [
+    LogInDialogComponent,
+  ],
+  providers:
+  [
     NewsService,
+    AuthenticationService,
   ],
   bootstrap: [ AppComponent ],
 })

@@ -1,8 +1,8 @@
 <h2>What's New</h2>
 
-<div *ngIf="isError">
+<p *ngIf="isError">
   There was a problem getting the site news
-</div>
+</p>
 
 <div *ngFor="let section of sections">
   <h3 *ngIf="section.title">
