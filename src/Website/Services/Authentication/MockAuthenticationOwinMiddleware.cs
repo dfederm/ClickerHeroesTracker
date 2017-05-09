@@ -10,6 +10,7 @@ namespace ClickerHeroesTrackerWebsite.Services.Authentication
     using System.Security.Claims;
     using System.Text.Encodings.Web;
     using System.Threading.Tasks;
+    using AspNet.Security.OpenIdConnect.Primitives;
     using Microsoft.AspNetCore.Authentication;
     using Microsoft.AspNetCore.Builder;
     using Microsoft.AspNetCore.Http;
@@ -81,12 +82,14 @@ namespace ClickerHeroesTrackerWebsite.Services.Authentication
                 var identity = new ClaimsIdentity(
                     new Claim[]
                     {
-                        new Claim(ClaimTypes.NameIdentifier, parts[0]),
-                        new Claim(ClaimTypes.Name, parts[1]),
+                        new Claim(OpenIdConnectConstants.Claims.Subject, parts[0]),
+                        new Claim(OpenIdConnectConstants.Claims.Name, parts[1]),
                         new Claim(ClaimTypes.Email, parts[1] + "@test.com"),
                     }
-                    .Concat(parts[2].Split(RoleDelimeter, StringSplitOptions.RemoveEmptyEntries).Select(role => new Claim(ClaimTypes.Role, role))),
-                    new IdentityOptions().Cookies.ApplicationCookieAuthenticationScheme);
+                    .Concat(parts[2].Split(RoleDelimeter, StringSplitOptions.RemoveEmptyEntries).Select(role => new Claim(OpenIdConnectConstants.Claims.Role, role))),
+                    new IdentityOptions().Cookies.ApplicationCookieAuthenticationScheme,
+                    OpenIdConnectConstants.Claims.Name,
+                    OpenIdConnectConstants.Claims.Role);
 
                 var ticket = new AuthenticationTicket(new ClaimsPrincipal(identity), null, this.Options.AuthenticationScheme);
                 return Task.FromResult(AuthenticateResult.Success(ticket));
