@@ -119,7 +119,7 @@ describe("ChangelogComponent", () =>
         {
             fixture.detectChanges();
 
-            let error = fixture.debugElement.query(By.css("div"));
+            let error = fixture.debugElement.query(By.css("p"));
             expect(error.nativeElement.textContent.trim()).toEqual("There was a problem getting the site news");
         });
     }));

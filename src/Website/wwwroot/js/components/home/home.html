@@ -1,17 +1,19 @@
 <div class="jumbotron">
-    <h1>Clicker Heroes Tracker</h1>
-    <p class="lead">Try uploading your save to get started</p>
-
-    <p>
-        <a href="/Upload" class="btn btn-primary btn-lg">Upload »</a>
-    </p>
-</div>
-<div class="row">
-    <div class="col-md-4">
-        <changelog [isFull]="false"></changelog>
-
+    <div class="container">
+        <h1 class="display-3">Clicker Heroes Tracker</h1>
+        <p>Try uploading your save to get started</p>
         <p>
-            <a routerLink="/news" class="btn btn-default">See all »</a>
+            <a routerLink="/upload" class="btn btn-primary btn-lg">Upload »</a>
         </p>
+    </div>
+</div>
+<div class="container">
+    <div class="row">
+        <div class="col-md-4">
+            <changelog [isFull]="false"></changelog>
+            <p>
+                <a routerLink="/news" class="btn btn-secondary">See all »</a>
+            </p>
+        </div>
     </div>
 </div>

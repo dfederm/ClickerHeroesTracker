@@ -37,7 +37,7 @@ describe("HomeComponent", () =>
 
         let uploadLink = jumbotron.query(By.css("a"));
         expect(uploadLink).not.toBeNull();
-        expect(uploadLink.attributes["href"]).toEqual("/Upload");
+        expect(uploadLink.attributes["routerLink"]).toEqual("/upload");
     });
 
     it("should display the short changelog", () =>

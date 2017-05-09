@@ -4,8 +4,8 @@ import { Http } from "@angular/http";
 import "rxjs/add/operator/toPromise";
 
 @Injectable()
-export class NewsService {
-
+export class NewsService
+{
     constructor(private http: Http) { }
 
     public getNews(): Promise<ISiteNewsEntryListResponse>

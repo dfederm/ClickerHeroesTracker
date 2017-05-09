@@ -87,6 +87,7 @@ gulp.task("copy", function ()
         "rxjs",
         "systemjs",
         "zone.js",
+        "@ng-bootstrap/ng-bootstrap",
     ];
 
     var merged = mergeStream();
@@ -108,7 +109,7 @@ gulp.task("test", [ "js", "copy" ], function (done)
 
 gulp.task("test-debug", [ "js", "copy" ], function (done)
 {
-    runKarma(done);
+    runKarma(done, { reporters: ['kjhtml'] });
 });
 
 function runKarma(done, config)
