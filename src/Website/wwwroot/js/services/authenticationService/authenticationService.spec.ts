@@ -6,15 +6,6 @@ import { MockBackend, MockConnection } from "@angular/http/testing";
 
 import { AuthenticationService } from "./authenticationService";
 
-declare global
-{
-    // tslint:disable-next-line:interface-name - We don't own this interface name, just extending it
-    interface Window
-    {
-        appInsights: Microsoft.ApplicationInsights.IAppInsights;
-    }
-}
-
 describe("AuthenticationService", () =>
 {
     let injector: ReflectiveInjector;
@@ -39,7 +30,7 @@ describe("AuthenticationService", () =>
         backend.connections.subscribe((connection: MockConnection) => lastConnection = connection);
     });
 
-    afterAll(() =>
+    afterEach(() =>
     {
         backend.verifyNoPendingRequests();
     });

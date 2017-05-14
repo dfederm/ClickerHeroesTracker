@@ -1,11 +1,10 @@
-import { NO_ERRORS_SCHEMA } from "@angular/core";
+import { NO_ERRORS_SCHEMA, Type } from "@angular/core";
 import { ComponentFixture, TestBed, async } from "@angular/core/testing";
 import { By } from "@angular/platform-browser";
 import { NgbModal } from "@ng-bootstrap/ng-bootstrap";
 import { BehaviorSubject } from "rxjs/BehaviorSubject";
 
 import { NavbarComponent } from "./navbar";
-import { LogInDialogComponent } from "../logInDialog/logInDialog";
 import { AuthenticationService } from "../../services/authenticationService/authenticationService";
 
 describe("NavbarComponent", () =>
@@ -49,13 +48,13 @@ describe("NavbarComponent", () =>
             expect(navItems).not.toBeNull();
             expect(navItems.length).toEqual(5);
 
-            let expectedLinks: { text: string, url?: string, hasClickHandler?: boolean }[] =
+            let expectedLinks: { text: string, url?: string, dialog?: Type<{}> }[] =
             [
-                { text: "Upload" },
+                { text: "Upload", dialog: component.UploadDialogComponent },
                 { text: "What's New", url: "/news" },
                 { text: "Feedback" },
                 { text: "Register" },
-                { text: "Log in", hasClickHandler: true },
+                { text: "Log in", dialog: component.LogInDialogComponent },
             ];
             for (let i = 0; i < navItems.length; i++)
             {
@@ -70,14 +69,12 @@ describe("NavbarComponent", () =>
 
                 if (expectations.url)
                 {
-                    expect(link.attributes["routerLink"]).toEqual(expectations.url);
+                    expect(link.attributes.routerLink).toEqual(expectations.url);
                 }
 
-                if (expectations.hasClickHandler)
+                if (expectations.dialog)
                 {
-                    expect(link.listeners).not.toBeNull();
-                    expect(link.listeners.length).toEqual(1);
-                    expect(link.listeners[0].name).toEqual("click");
+                    expect(link.properties.openDialog).toEqual(expectations.dialog);
                 }
             }
         });
@@ -96,9 +93,9 @@ describe("NavbarComponent", () =>
             expect(navItems).not.toBeNull();
             expect(navItems.length).toEqual(5);
 
-            let expectedLinks: { text: string, url?: string, hasClickHandler?: boolean }[] =
+            let expectedLinks: { text: string, url?: string, hasClickHandler?: boolean, dialog?: Type<{}> }[] =
             [
-                { text: "Upload" },
+                { text: "Upload", dialog: component.UploadDialogComponent },
                 { text: "What's New", url: "/news" },
                 { text: "Feedback" },
                 { text: "Hello User!" },
@@ -117,7 +114,7 @@ describe("NavbarComponent", () =>
 
                 if (expectations.url)
                 {
-                    expect(link.attributes["routerLink"]).toEqual(expectations.url);
+                    expect(link.attributes.routerLink).toEqual(expectations.url);
                 }
 
                 if (expectations.hasClickHandler)
@@ -125,6 +122,11 @@ describe("NavbarComponent", () =>
                     expect(link.listeners).not.toBeNull();
                     expect(link.listeners.length).toEqual(1);
                     expect(link.listeners[0].name).toEqual("click");
+                }
+
+                if (expectations.dialog)
+                {
+                    expect(link.properties.openDialog).toEqual(expectations.dialog);
                 }
             }
         });
@@ -180,22 +182,6 @@ describe("NavbarComponent", () =>
         toggler.nativeElement.click();
         fixture.detectChanges();
         expect(component.isCollapsed).toEqual(false);
-    });
-
-    it("should open the log in dialog", () =>
-    {
-        let authenticationService = TestBed.get(AuthenticationService) as AuthenticationService;
-        spyOn(authenticationService, "isLoggedIn").and.returnValue(new BehaviorSubject(false));
-
-        fixture.detectChanges();
-
-        let modalService = TestBed.get(NgbModal) as NgbModal;
-        spyOn(modalService, "open");
-
-        let logInLink = fixture.debugElement.queryAll(By.css(".nav-link"))[4];
-        logInLink.nativeElement.click();
-
-        expect(modalService.open).toHaveBeenCalledWith(LogInDialogComponent);
     });
 
     it("should log out after clicking the log out button", () =>

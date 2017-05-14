@@ -90,8 +90,7 @@
       true,
       "call-signature",
       "parameter",
-      "property-declaration",
-      "member-variable-declaration"
+      "property-declaration"
     ],
     "typedef-whitespace": [
       true,

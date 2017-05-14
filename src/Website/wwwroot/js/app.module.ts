@@ -12,6 +12,9 @@ import { ChangelogComponent } from "./components/changelog/changelog";
 import { AdComponent } from "./components/ad/ad";
 import { NavbarComponent } from "./components/navbar/navbar";
 import { LogInDialogComponent } from "./components/logInDialog/logInDialog";
+import { UploadDialogComponent } from "./components/uploadDialog/uploadDialog";
+
+import { OpenDialogDirective } from "./directives/openDialog/openDialog";
 
 import { NewsService } from "./services/newsService/newsService";
 import { AuthenticationService } from "./services/authenticationService/authenticationService";
@@ -42,10 +45,13 @@ const routes: Routes = [
     AdComponent,
     NavbarComponent,
     LogInDialogComponent,
+    UploadDialogComponent,
+    OpenDialogDirective,
   ],
   entryComponents:
   [
     LogInDialogComponent,
+    UploadDialogComponent,
   ],
   providers:
   [

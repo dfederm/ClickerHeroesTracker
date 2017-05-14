@@ -1,8 +1,8 @@
 import { Component, OnInit } from "@angular/core";
-import { NgbModal } from "@ng-bootstrap/ng-bootstrap";
 
 import { AuthenticationService } from "../../services/authenticationService/authenticationService";
 import { LogInDialogComponent } from "../logInDialog/logInDialog";
+import { UploadDialogComponent } from "../uploadDialog/uploadDialog";
 
 declare global
 {
@@ -23,9 +23,11 @@ export class NavbarComponent implements OnInit
 
     public isLoggedIn: boolean;
 
+    public LogInDialogComponent = LogInDialogComponent;
+    public UploadDialogComponent = UploadDialogComponent;
+
     constructor(
         private authenticationService: AuthenticationService,
-        private modalService: NgbModal,
     ) { }
 
     public ngOnInit(): void
@@ -33,11 +35,6 @@ export class NavbarComponent implements OnInit
         this.authenticationService
             .isLoggedIn()
             .subscribe(isLoggedIn => this.isLoggedIn = isLoggedIn);
-    }
-
-    public openLogInDialog(): void
-    {
-        this.modalService.open(LogInDialogComponent);
     }
 
     public logOut(): void

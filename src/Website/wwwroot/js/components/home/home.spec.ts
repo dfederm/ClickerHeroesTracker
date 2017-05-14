@@ -37,7 +37,7 @@ describe("HomeComponent", () =>
 
         let uploadLink = jumbotron.query(By.css("a"));
         expect(uploadLink).not.toBeNull();
-        expect(uploadLink.attributes["routerLink"]).toEqual("/upload");
+        expect(uploadLink.properties["openDialog"]).toEqual(component.UploadDialogComponent);
     });
 
     it("should display the short changelog", () =>
@@ -49,10 +49,10 @@ describe("HomeComponent", () =>
 
         let changelog = changelogContainer.query(By.css("changelog"));
         expect(changelog).not.toBeNull();
-        expect(changelog.properties["isFull"]).toEqual(false);
+        expect(changelog.properties.isFull).toEqual(false);
 
         let fullChangelogLink = changelogContainer.query(By.css("a"));
         expect(fullChangelogLink).not.toBeNull();
-        expect(fullChangelogLink.attributes["routerLink"]).toEqual("/news");
+        expect(fullChangelogLink.attributes.routerLink).toEqual("/news");
     });
 });

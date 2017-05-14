@@ -14,7 +14,7 @@ describe("NewsComponent", () =>
         TestBed.configureTestingModule(
         {
             declarations: [ NewsComponent ],
-            schemas:      [ NO_ERRORS_SCHEMA ],
+            schemas: [ NO_ERRORS_SCHEMA ],
         })
         .compileComponents()
         .then(() =>
@@ -28,7 +28,7 @@ describe("NewsComponent", () =>
     {
         fixture.detectChanges();
 
-        let changelogContainer = fixture.debugElement.query(By.css(".col-md-6"));
+        let changelogContainer = fixture.debugElement.query(By.css(".container"));
         expect(changelogContainer).not.toBeNull();
 
         let changelog = changelogContainer.query(By.css("changelog"));
