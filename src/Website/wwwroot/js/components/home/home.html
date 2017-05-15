@@ -1,15 +1,16 @@
 <div class="jumbotron">
     <div class="container">
         <h1 class="display-3">Clicker Heroes Tracker</h1>
-        <p>Try uploading your save to get started</p>
+        <p class="lead">Try uploading your save to get started</p>
         <p>
-            <a routerLink="/upload" class="btn btn-primary btn-lg">Upload »</a>
+            <a class="btn btn-primary btn-lg" [openDialog]="UploadDialogComponent">Upload »</a>
         </p>
     </div>
 </div>
 <div class="container">
     <div class="row">
         <div class="col-md-4">
+            <h2>What's New</h2>
             <changelog [isFull]="false"></changelog>
             <p>
                 <a routerLink="/news" class="btn btn-secondary">See all »</a>

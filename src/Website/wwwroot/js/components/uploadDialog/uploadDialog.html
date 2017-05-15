@@ -1,0 +1,36 @@
+<div class="modal-header">
+    <h4 class="modal-title">Upload your save</h4>
+    <button type="button" class="close" (click)="activeModal.dismiss()">
+        &times;
+    </button>
+</div>
+<div class="modal-body">
+    <div *ngIf="errorMessage" class="alert alert-danger">
+        {{errorMessage}}
+    </div>
+    <form (ngSubmit)="upload()">
+        <div class="form-group">
+            <label for="encodedSaveData">Save Data</label>
+            <textarea class="form-control" rows="2" id="encodedSaveData" name="encodedSaveData" [(ngModel)]="encodedSaveData"></textarea>
+        </div>
+        <fieldset class="form-group">
+            <legend class="col-form-legend">Play Style</legend>
+            <div *ngFor="let p of playStyles" class="form-check form-check-inline">
+                <label class="form-check-label">
+                    <input class="form-check-input" type="radio" name="playStyle" [(ngModel)]="playStyle" [value]="p"> {{p}}
+                </label>
+            </div>
+        </fieldset>
+        <div *ngIf="isLoggedIn" class="form-group">
+            <label class="form-check-label">
+                <input class="form-check-input" id="addToProgress" name="addToProgress" [(ngModel)]="addToProgress" type="checkbox">
+                Add this upload to my progress
+            </label>
+        </div>
+        <div *ngIf="!isLoggedIn" class="alert alert-warning">
+            Progress can only be tracked over time for logged in users.
+            Please <a [openDialog]="LogInDialogComponent" class="alert-link">Log in</a> or <a>Register</a>.
+        </div>
+        <button type="submit" class="btn btn-primary">Upload</button>
+    </form>
+</div>
