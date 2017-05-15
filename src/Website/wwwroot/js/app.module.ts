@@ -19,7 +19,8 @@ import { OpenDialogDirective } from "./directives/openDialog/openDialog";
 import { NewsService } from "./services/newsService/newsService";
 import { AuthenticationService } from "./services/authenticationService/authenticationService";
 
-const routes: Routes = [
+const routes: Routes =
+[
   { path: "", redirectTo: "beta", pathMatch: "full" },
   { path: "news",  component: NewsComponent },
   // Remove these once the beta is over
