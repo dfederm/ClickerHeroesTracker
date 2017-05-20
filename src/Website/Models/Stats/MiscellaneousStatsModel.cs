@@ -26,7 +26,7 @@ namespace ClickerHeroesTrackerWebsite.Models.Stats
             this.Rubies = savedGame.Rubies;
             this.HighestZoneThisTranscension = savedGame.HighestFinishedZonePersist;
             this.HighestZoneLifetime = Math.Max(savedGame.PretranscendentHighestFinishedZone, Math.Max(savedGame.TranscendentHighestFinishedZone, this.HighestZoneThisTranscension));
-            this.AscensionsThisTranscension = savedGame.NumAscensionsThisTranscension != 0
+            this.AscensionsThisTranscension = savedGame.Transcendent
                 ? savedGame.NumAscensionsThisTranscension
                 : savedGame.NumWorldResets;
             this.AscensionsLifetime = savedGame.NumWorldResets;

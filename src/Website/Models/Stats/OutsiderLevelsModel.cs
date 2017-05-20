@@ -25,11 +25,11 @@ namespace ClickerHeroesTrackerWebsite.Models.Stats
             var outsiderLevels = new SortedDictionary<int, OutsiderLevelInfo>();
             foreach (var outsider in gameData.Outsiders.Values)
             {
-                OutsiderData outsiderData;
-                var outsiderLevel = savedGame.OutsidersData.Outsiders.TryGetValue(outsider.Id, out outsiderData)
+                OutsiderData outsiderData = null;
+                var outsiderLevel = (savedGame?.OutsidersData?.Outsiders?.TryGetValue(outsider.Id, out outsiderData)).GetValueOrDefault()
                     ? outsiderData.Level
                     : 0;
-                var outsiderLevelInfo = new OutsiderLevelInfo(outsider.Name, outsiderData.Level);
+                var outsiderLevelInfo = new OutsiderLevelInfo(outsider.Name, outsiderLevel);
                 outsiderLevels.Add(outsider.Id, outsiderLevelInfo);
             }
 
