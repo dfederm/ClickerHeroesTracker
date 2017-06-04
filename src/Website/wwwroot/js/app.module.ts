@@ -13,19 +13,22 @@ import { AdComponent } from "./components/ad/ad";
 import { NavbarComponent } from "./components/navbar/navbar";
 import { LogInDialogComponent } from "./components/logInDialog/logInDialog";
 import { UploadDialogComponent } from "./components/uploadDialog/uploadDialog";
+import { DashboardComponent } from "./components/dashboard/dashboard";
+import { UploadsTableComponent } from "./components/uploadsTable/uploadsTable";
+import { UploadsComponent } from "./components/uploads/uploads";
 
 import { OpenDialogDirective } from "./directives/openDialog/openDialog";
 
 import { NewsService } from "./services/newsService/newsService";
 import { AuthenticationService } from "./services/authenticationService/authenticationService";
+import { UploadService } from "./services/uploadService/uploadService";
 
 const routes: Routes =
 [
-  { path: "", redirectTo: "beta", pathMatch: "full" },
+  { path: "", pathMatch: "full", component: HomeComponent },
   { path: "news",  component: NewsComponent },
-  // Remove these once the beta is over
-  { path: "Home/Beta", redirectTo: "beta" },
-  { path: "beta", component: HomeComponent },
+  { path: "dashboard",  component: DashboardComponent },
+  { path: "uploads",  component: UploadsComponent },
 ];
 
 @NgModule({
@@ -48,6 +51,9 @@ const routes: Routes =
     LogInDialogComponent,
     UploadDialogComponent,
     OpenDialogDirective,
+    DashboardComponent,
+    UploadsTableComponent,
+    UploadsComponent,
   ],
   entryComponents:
   [
@@ -58,6 +64,7 @@ const routes: Routes =
   [
     NewsService,
     AuthenticationService,
+    UploadService,
   ],
   bootstrap: [ AppComponent ],
 })

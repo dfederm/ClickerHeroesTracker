@@ -3,8 +3,8 @@
 </p>
 
 <div *ngFor="let section of sections">
-  <h3 *ngIf="section.title">
-    {{section.title}}
+  <h3 *ngIf="section.date">
+    {{section.date | date:'shortDate'}}
   </h3>
   <ul>
     <li *ngFor="let entry of section.entries" [innerHTML]="entry"></li>

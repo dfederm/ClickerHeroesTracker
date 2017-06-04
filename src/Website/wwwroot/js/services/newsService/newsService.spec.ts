@@ -43,6 +43,7 @@ describe("NewsService", () =>
 
         afterAll(() =>
         {
+            lastConnection = null;
             backend.verifyNoPendingRequests();
         });
 
@@ -79,6 +80,7 @@ describe("NewsService", () =>
 
             expect(response).toBeUndefined();
             expect(error).toEqual("someError");
+            expect(appInsights.trackEvent).toHaveBeenCalled();
         }));
     });
 });

@@ -2,13 +2,13 @@
 {
     id: number;
 
-    user: IUser;
-
     timeSubmitted: string;
-
-    uploadContent: string;
 
     playStyle: string;
 
-    stats: IMap<number>;
+    user?: IUser;
+
+    uploadContent?: string;
+
+    stats?: IMap<number>;
 }

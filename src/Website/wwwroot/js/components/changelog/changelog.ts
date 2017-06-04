@@ -4,7 +4,7 @@ import { NewsService } from "../../services/newsService/newsService";
 
 interface IChangelogSectionViewModel
 {
-    title?: string;
+    date?: Date;
     entries: string[];
 }
 
@@ -58,7 +58,7 @@ export class ChangelogComponent implements OnInit
 
             // The date comes back as a UTC time at midnight of the date. We need to adjust for the user's local timezone offset or the date may move back by a day.
             let dateUtc = new Date(dateStr);
-            let date = new Date(dateUtc.getUTCFullYear(), dateUtc.getUTCMonth(), dateUtc.getUTCDate()).toLocaleDateString();
+            let date = new Date(dateUtc.getUTCFullYear(), dateUtc.getUTCMonth(), dateUtc.getUTCDate());
 
             if (this.isFull || !currentSection)
             {
@@ -69,7 +69,7 @@ export class ChangelogComponent implements OnInit
 
                 currentSection =
                 {
-                    title: this.isFull ? date : null,
+                    date: this.isFull ? date : null,
                     entries: [],
                 };
             }
