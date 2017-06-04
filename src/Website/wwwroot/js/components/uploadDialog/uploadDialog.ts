@@ -1,10 +1,11 @@
 import { Component } from "@angular/core";
 import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
-import { Http, Response, RequestOptions, Headers } from "@angular/http";
+import { Response } from "@angular/http";
 import { Router } from "@angular/router";
 
 import { LogInDialogComponent } from "../logInDialog/logInDialog";
 import { AuthenticationService } from "../../services/authenticationService/authenticationService";
+import { UploadService } from "../../services/uploadService/uploadService";
 
 @Component({
     selector: "upload",
@@ -29,8 +30,8 @@ export class UploadDialogComponent
 
     constructor(
         private authenticationService: AuthenticationService,
+        private uploadService: UploadService,
         public activeModal: NgbActiveModal,
-        private http: Http,
         private router: Router,
     ) { }
 
@@ -49,33 +50,13 @@ export class UploadDialogComponent
             return;
         }
 
-        let headersPromise = this.isLoggedIn
-            ? this.authenticationService.getAuthHeaders()
-            : Promise.resolve(new Headers());
-        headersPromise
-            .then(headers =>
+        this.uploadService.create(this.encodedSaveData, this.addToProgress, this.playStyle)
+            .then(uploadId =>
             {
-                headers.append("Content-Type", "application/x-www-form-urlencoded");
-                let options = new RequestOptions({ headers: headers });
-                let params = new URLSearchParams();
-                params.append("encodedSaveData", this.encodedSaveData);
-                params.append("addToProgress", (this.addToProgress && this.isLoggedIn).toString());
-                params.append("playStyle", this.playStyle);
-                return this.http
-                    .post("/api/uploads", params.toString(), options)
-                    .toPromise();
-            })
-            .then(result =>
-            {
-                const uploadId = parseInt(result.text());
-                if (uploadId)
-                {
-                    this.router.navigate(["/calculator/view", uploadId]);
-                }
+                this.router.navigate(["/upload", uploadId]);
             })
             .catch((error: Response) =>
             {
-                appInsights.trackEvent("UploadDialog.upload.error", { message: error.toString() });
                 this.errorMessage = error.status >= 400 && error.status < 500
                     ? "The uploaded save was not valid"
                     : "An unknown error occurred";

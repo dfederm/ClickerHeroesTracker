@@ -1,5 +1,6 @@
 import { ComponentFixture, TestBed, async } from "@angular/core/testing";
 import { By } from "@angular/platform-browser";
+import { DatePipe } from "@angular/common";
 
 import { ChangelogComponent } from "./changelog";
 import { NewsService } from "../../services/newsService/newsService";
@@ -16,7 +17,11 @@ describe("ChangelogComponent", () =>
         TestBed.configureTestingModule(
         {
             declarations: [ ChangelogComponent ],
-            providers: [ {provide: NewsService, useValue: newsService } ],
+            providers:
+            [
+                { provide: NewsService, useValue: newsService },
+                DatePipe,
+            ],
         })
         .compileComponents()
         .then(() =>
@@ -32,17 +37,19 @@ describe("ChangelogComponent", () =>
         {
             entries:
             {
-                "2017-01-01": [ "2017-01-01.0", "2017-01-01.1" ],
-                "2017-01-02": [ "2017-01-02.0", "2017-01-02.1" ],
-                "2017-01-03": [ "2017-01-03.0", "2017-01-03.1" ],
+                "2017-01-01": [ "1.0", "1.1" ],
+                "2017-01-02": [ "2.0", "2.1" ],
+                "2017-01-03": [ "3.0", "3.1" ],
             },
         };
         let newsService = TestBed.get(NewsService);
         spyOn(newsService, "getNews").and.returnValue(Promise.resolve(siteNewsEntryListResponse));
 
         component.isFull = true;
-        fixture.detectChanges();
 
+        let datePipe = TestBed.get(DatePipe) as DatePipe;
+
+        fixture.detectChanges();
         fixture.whenStable().then(() =>
         {
             fixture.detectChanges();
@@ -56,7 +63,7 @@ describe("ChangelogComponent", () =>
                 let expectedDate = sections.length - i;
 
                 let dateElement = sections[i].query(By.css("h3"));
-                expect(dateElement.nativeElement.textContent.trim()).toEqual(`1/${expectedDate}/2017`);
+                expect(dateElement.nativeElement.textContent.trim()).toEqual(datePipe.transform(`1/${expectedDate}/2017`, "shortDate"));
 
                 let list = sections[i].query(By.css("ul"));
                 let listItems = list.queryAll(By.css("li"));
@@ -64,7 +71,7 @@ describe("ChangelogComponent", () =>
                 for (let j = 0; j < listItems.length; j++)
                 {
                     let listItem: HTMLElement = listItems[j].nativeElement;
-                    expect(listItem.textContent).toEqual(`2017-01-0${expectedDate}.${j}`);
+                    expect(listItem.textContent).toEqual(`${expectedDate}.${j}`);
                 }
             }
         });
@@ -76,9 +83,9 @@ describe("ChangelogComponent", () =>
         {
             entries:
             {
-                "2017-01-01": [ "2017-01-01.0", "2017-01-01.1" ],
-                "2017-01-02": [ "2017-01-02.0", "2017-01-02.1" ],
-                "2017-01-03": [ "2017-01-03.0", "2017-01-03.1" ],
+                "2017-01-01": [ "1.0", "1.1" ],
+                "2017-01-02": [ "2.0", "2.1" ],
+                "2017-01-03": [ "3.0", "3.1" ],
             },
         };
         let newsService = TestBed.get(NewsService);
@@ -102,9 +109,9 @@ describe("ChangelogComponent", () =>
             let list = section.query(By.css("ul"));
             let listItems = list.queryAll(By.css("li"));
             expect(listItems.length).toEqual(3);
-            expect(listItems[0].nativeElement.textContent).toEqual("2017-01-03.0");
-            expect(listItems[1].nativeElement.textContent).toEqual("2017-01-03.1");
-            expect(listItems[2].nativeElement.textContent).toEqual("2017-01-02.0");
+            expect(listItems[0].nativeElement.textContent).toEqual("3.0");
+            expect(listItems[1].nativeElement.textContent).toEqual("3.1");
+            expect(listItems[2].nativeElement.textContent).toEqual("2.0");
         });
     }));
 

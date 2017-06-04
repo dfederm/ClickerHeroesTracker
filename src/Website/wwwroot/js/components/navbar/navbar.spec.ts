@@ -91,10 +91,12 @@ describe("NavbarComponent", () =>
 
             let navItems = fixture.debugElement.queryAll(By.css(".nav-item"));
             expect(navItems).not.toBeNull();
-            expect(navItems.length).toEqual(5);
+            expect(navItems.length).toEqual(7);
 
             let expectedLinks: { text: string, url?: string, hasClickHandler?: boolean, dialog?: Type<{}> }[] =
             [
+                { text: "Dashboard", url: "/dashboard" },
+                { text: "Clans" },
                 { text: "Upload", dialog: component.UploadDialogComponent },
                 { text: "What's New", url: "/news" },
                 { text: "Feedback" },
@@ -193,7 +195,7 @@ describe("NavbarComponent", () =>
 
         spyOn(authenticationService, "logOut");
 
-        let logOutLink = fixture.debugElement.queryAll(By.css(".nav-link"))[4];
+        let logOutLink = fixture.debugElement.queryAll(By.css(".nav-link"))[6];
         logOutLink.nativeElement.click();
 
         expect(authenticationService.logOut).toHaveBeenCalled();

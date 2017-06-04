@@ -162,6 +162,8 @@ namespace ClickerHeroesTrackerWebsite
                 options.EnableAuthenticationTrackingJavaScript = true;
             });
 
+            services.AddCors();
+
             services.AddMvc(options =>
             {
                 options.Filters.Add(typeof(MeasureLatencyFilter));

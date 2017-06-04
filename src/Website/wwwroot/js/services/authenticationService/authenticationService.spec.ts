@@ -32,6 +32,7 @@ describe("AuthenticationService", () =>
 
     afterEach(() =>
     {
+        lastConnection = null;
         backend.verifyNoPendingRequests();
     });
 
