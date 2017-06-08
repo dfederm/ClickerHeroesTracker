@@ -21,12 +21,12 @@
     "core-js": "^2.4.1",
     "rxjs": "^5.4.0",
     "systemjs": "^0.20.13",
-    "zone.js": "^0.8.4"
+    "zone.js": "^0.8.12"
   },
   "devDependencies": {
-    "@types/applicationinsights-js": "^1.0.2",
+    "@types/applicationinsights-js": "^1.0.3",
     "@types/bootstrap": "^3.3.33",
-    "@types/highcharts": "^4.2.54",
+    "@types/highcharts": "^4.2.56",
     "@types/jasmine": "^2.5.51",
     "@types/jquery": "^2.0.46",
     "@types/jquery.validation": "^1.16.2",
@@ -36,7 +36,7 @@
     "gulp-clean-css": "^3.4.1",
     "gulp-rename": "^1.2.2",
     "gulp-sourcemaps": "^2.6.0",
-    "gulp-tslint": "^8.1.0",
+    "gulp-tslint": "^8.1.1",
     "gulp-typescript": "^3.1.7",
     "gulp-uglify": "^3.0.0",
     "jasmine": "^2.6.0",
@@ -48,7 +48,7 @@
     "karma-junit-reporter": "^1.2.0",
     "merge-stream": "^1.0.1",
     "rimraf": "^2.6.1",
-    "tslint": "^5.4.2",
+    "tslint": "^5.4.3",
     "typescript": "^2.3.4"
   }
 }
