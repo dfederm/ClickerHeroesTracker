@@ -10,7 +10,7 @@ $("#feedbackModal").on("hidden.bs.modal", () =>
     container.text("");
 });
 
-$("#feedbackForm").submit(function (event: JQueryEventObject): boolean
+$("#feedbackForm").submit((event: JQuery.Event<HTMLFormElement>) =>
 {
     function handleSuccess(): void
     {
@@ -27,7 +27,7 @@ $("#feedbackForm").submit(function (event: JQueryEventObject): boolean
         $("#feedbackSubmit").removeAttr("disabled");
     }
 
-    const form = event.target as HTMLFormElement;
+    const form = event.target;
     if ($(form).valid())
     {
         $("#feedbackSubmit").attr("disabled", "disabled");

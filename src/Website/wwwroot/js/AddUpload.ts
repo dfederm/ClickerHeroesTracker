@@ -1,4 +1,4 @@
-﻿$("#addUpload").submit(function (event: JQueryEventObject): boolean
+﻿$("#addUpload").submit((event: JQuery.Event<HTMLFormElement>) =>
 {
     function handleSuccess(result: string): void
     {
@@ -31,7 +31,7 @@
         $("#addUploadSubmit").removeAttr("disabled");
     }
 
-    const form = event.target as HTMLFormElement;
+    const form = event.target;
     if ($(form).valid())
     {
         $("#addUploadSubmit").attr("disabled", "disabled");
