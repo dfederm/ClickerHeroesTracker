@@ -81,21 +81,21 @@ namespace ClickerHeroesTrackerWebsite
             switch (this.Configuration["Database:Kind"])
             {
                 case "SqlServer":
-                {
-                    useDatabase = options => options.UseSqlServer(connectionString);
-                    break;
-                }
+                    {
+                        useDatabase = options => options.UseSqlServer(connectionString);
+                        break;
+                    }
 
                 case "Sqlite":
-                {
-                    useDatabase = options => options.UseSqlite(connectionString);
-                    break;
-                }
+                    {
+                        useDatabase = options => options.UseSqlite(connectionString);
+                        break;
+                    }
 
                 default:
-                {
-                    throw new InvalidOperationException($"Invalid configuration for \"Database:Kind\": {this.Configuration["Database:Kind"]}");
-                }
+                    {
+                        throw new InvalidOperationException($"Invalid configuration for \"Database:Kind\": {this.Configuration["Database:Kind"]}");
+                    }
             }
 
             services.AddDbContext<ApplicationDbContext>(options =>
@@ -193,7 +193,7 @@ namespace ClickerHeroesTrackerWebsite
             // Container controlled registrations
             services.AddSingleton<CloudTableClient>(_ => storageAccount.CreateCloudTableClient());
             services.AddSingleton<CloudQueueClient>(_ => storageAccount.CreateCloudQueueClient());
-            services.AddSingleton<GameData>(_ => GameData.Parse(Path.Combine(this.Environment.ContentRootPath, @"data\GameData.json")));
+            services.AddSingleton<GameData>(_ => GameData.Parse(Path.Combine(this.Environment.WebRootPath, @"data\GameData.json")));
             services.AddSingleton<IBuildInfoProvider>(buildInfoProvider);
             services.AddSingleton<IEmailSender, EmailSender>();
             services.AddSingleton<IMetricProvider, MetricProvider>();

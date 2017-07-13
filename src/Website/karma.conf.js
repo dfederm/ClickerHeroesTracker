@@ -1,4 +1,5 @@
-module.exports = function(config) {
+module.exports = function (config)
+{
   config.set({
 
     // base path that will be used to resolve all patterns (eg. files, exclude)
@@ -27,6 +28,9 @@ module.exports = function(config) {
       'lib/systemjs/dist/system.src.js',
       'lib/systemjs/dist/system-polyfills.js',
 
+      // System.js json loader
+      { pattern: 'lib/systemjs-plugin-json/json.js', included: false, watched: false },
+
       // Polyfills
       'lib/core-js/client/shim.js',
 
@@ -48,6 +52,8 @@ module.exports = function(config) {
       { pattern: 'lib/@angular/**/*.js.map', included: false, watched: false },
       { pattern: 'lib/@ng-bootstrap/ng-bootstrap/bundles/ng-bootstrap.js', included: false, watched: false },
       { pattern: 'lib/@ng-bootstrap/ng-bootstrap/bundles/ng-bootstrap.js.map', included: false, watched: false },
+      { pattern: 'lib/ngx-clipboard/dist/bundles/ngxClipboard.umd.js', included: false, watched: false },
+      { pattern: 'lib/ngx-window-token/dist/bundles/ngxWindowToken.umd.js', included: false, watched: false },
 
       { pattern: 'js/systemjs.config.js', included: false, watched: false },
       '../karma-test-shim.js',
@@ -57,7 +63,10 @@ module.exports = function(config) {
 
       // Asset (HTML & CSS) paths loaded via Angular's component compiler
       { pattern: 'js/**/*.html', included: false, watched: true },
-      ////{ pattern: 'js/**/*.css', included: false, watched: true },
+      { pattern: 'js/**/*.css', included: false, watched: true },
+
+      // Application data
+      { pattern: 'data/**/*.json', included: false, watched: true },
     ],
 
     // Proxied base paths for loading assets
