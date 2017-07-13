@@ -203,8 +203,6 @@
             }
         });
 
-    const table = document.getElementById("leaderboard-table");
-
     $.ajax({
         url: "/api/clans/userClan",
     }).done((response: ILeaderboardClan, _: string, xhr: JQueryXHR) =>
@@ -236,6 +234,7 @@
             userClanRow.appendChild(currentRaidLevelCell);
         }
 
+        const table = document.getElementById("leaderboard-table");
         updateLeaderboard(table, userClanRow);
 
         window.addEventListener("hashchange", () =>
@@ -246,7 +245,7 @@
         });
     });
 
-    $("#sendMessage").submit(function (event: JQueryEventObject): boolean
+    $("#sendMessage").submit((event: JQuery.Event<HTMLFormElement>) =>
     {
         function handleSuccess(): void
         {
@@ -258,7 +257,7 @@
             Helpers.showMessage("Could not send message to clan", "error");
         }
 
-        const form = event.target as HTMLFormElement;
+        const form = event.target;
         console.log($(form).serialize());
         if ($(form).valid())
         {

@@ -124,13 +124,13 @@
             listItem.appendChild(input);
         }
 
-        const listItem = document.createElement("li");
-        const input = document.createElement("textarea");
-        input.classList.add("form-control");
-        input.style.maxWidth = "none";
-        input.addEventListener("blur", inputBlurred);
-        listItem.appendChild(input);
-        list.appendChild(listItem);
+        const newListItem = document.createElement("li");
+        const newInput = document.createElement("textarea");
+        newInput.classList.add("form-control");
+        newInput.style.maxWidth = "none";
+        newInput.addEventListener("blur", inputBlurred);
+        newListItem.appendChild(newInput);
+        list.appendChild(newListItem);
 
         const buttons = container.querySelectorAll("button");
         for (let i = 0; i < buttons.length; i++)
@@ -213,10 +213,10 @@
         }
 
         const data =
-        {
-            date: dateUtcStr.substring(0, 10),
-            messages: messages,
-        };
+            {
+                date: dateUtcStr.substring(0, 10),
+                messages: messages,
+            };
 
         $.ajax({
             data: data,
