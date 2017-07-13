@@ -86,8 +86,11 @@ gulp.task("copy", function ()
         "core-js",
         "rxjs",
         "systemjs",
+        "systemjs-plugin-json",
         "zone.js",
         "@ng-bootstrap/ng-bootstrap",
+        "ngx-clipboard",
+        "ngx-window-token", // Required by ngx-clipboard
     ];
 
     var merged = mergeStream();
@@ -102,12 +105,12 @@ gulp.task("copy", function ()
 
 gulp.task("build", ["js", "css", "copy"]);
 
-gulp.task("test", [ "js", "copy" ], function (done)
+gulp.task("test", ["js", "copy"], function (done)
 {
     runKarma(done, { singleRun: true });
 });
 
-gulp.task("test-debug", [ "js", "copy" ], function (done)
+gulp.task("test-debug", ["js", "copy"], function (done)
 {
     runKarma(done, { reporters: ['kjhtml'] });
 });
@@ -117,7 +120,8 @@ function runKarma(done, config)
     config = config || {};
     config.configFile = __dirname + '/karma.conf.js';
     var karma = require("karma").Server;
-    karma.start(config, function(exitStatus) {
+    karma.start(config, function (exitStatus)
+    {
         done(exitStatus ? new gutil.PluginError('karma', { message: 'Karma Tests failed' }) : undefined);
     });
 }

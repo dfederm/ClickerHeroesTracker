@@ -4,6 +4,7 @@ import { FormsModule } from "@angular/forms";
 import { RouterModule, Routes } from "@angular/router";
 import { HttpModule } from "@angular/http";
 import { NgbModule } from "@ng-bootstrap/ng-bootstrap";
+import { ClipboardModule } from "ngx-clipboard/dist";
 
 import { AppComponent } from "./components/app/app";
 import { HomeComponent } from "./components/home/home";
@@ -16,20 +17,24 @@ import { UploadDialogComponent } from "./components/uploadDialog/uploadDialog";
 import { DashboardComponent } from "./components/dashboard/dashboard";
 import { UploadsTableComponent } from "./components/uploadsTable/uploadsTable";
 import { UploadsComponent } from "./components/uploads/uploads";
+import { UploadComponent } from "./components/upload/upload";
 
 import { OpenDialogDirective } from "./directives/openDialog/openDialog";
+
+import { ExponentialPipe } from "./pipes/exponentialPipe";
 
 import { NewsService } from "./services/newsService/newsService";
 import { AuthenticationService } from "./services/authenticationService/authenticationService";
 import { UploadService } from "./services/uploadService/uploadService";
 
 const routes: Routes =
-[
-  { path: "", pathMatch: "full", component: HomeComponent },
-  { path: "news",  component: NewsComponent },
-  { path: "dashboard",  component: DashboardComponent },
-  { path: "uploads",  component: UploadsComponent },
-];
+  [
+    { path: "", pathMatch: "full", component: HomeComponent },
+    { path: "news", component: NewsComponent },
+    { path: "dashboard", component: DashboardComponent },
+    { path: "uploads", component: UploadsComponent },
+    { path: "upload/:id", component: UploadComponent },
+  ];
 
 @NgModule({
   imports:
@@ -39,6 +44,7 @@ const routes: Routes =
     RouterModule.forRoot(routes),
     HttpModule,
     NgbModule.forRoot(),
+    ClipboardModule,
   ],
   declarations:
   [
@@ -54,6 +60,8 @@ const routes: Routes =
     DashboardComponent,
     UploadsTableComponent,
     UploadsComponent,
+    UploadComponent,
+    ExponentialPipe,
   ],
   entryComponents:
   [
@@ -66,6 +74,6 @@ const routes: Routes =
     AuthenticationService,
     UploadService,
   ],
-  bootstrap: [ AppComponent ],
+  bootstrap: [AppComponent],
 })
 export class AppModule { }

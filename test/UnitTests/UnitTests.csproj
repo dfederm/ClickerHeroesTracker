@@ -12,7 +12,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Include="..\..\src\Website\data\GameData.json">
+    <None Include="..\..\src\Website\wwwroot\data\GameData.json">
       <Link>GameData.json</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

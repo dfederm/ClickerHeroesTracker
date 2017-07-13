@@ -13,7 +13,8 @@ export class UploadService
     constructor(
         private authenticationService: AuthenticationService,
         private http: Http,
-    ) {
+    )
+    {
         this.authenticationService
             .isLoggedIn()
             .subscribe(isLoggedIn => this.isLoggedIn = isLoggedIn);
@@ -34,6 +35,28 @@ export class UploadService
             {
                 let errorMessage = error.message || error.toString();
                 appInsights.trackEvent("UploadService.getUploads.error", { message: errorMessage });
+                return Promise.reject(errorMessage);
+            });
+    }
+
+    public get(id: number): Promise<IUpload>
+    {
+        let headersPromise = this.isLoggedIn
+            ? this.authenticationService.getAuthHeaders()
+            : Promise.resolve(new Headers());
+        return headersPromise
+            .then(headers =>
+            {
+                let options = new RequestOptions({ headers: headers });
+                return this.http
+                    .get(`/api/uploads/${id}`, options)
+                    .toPromise();
+            })
+            .then(response => response.json() as IUpload)
+            .catch(error =>
+            {
+                let errorMessage = error.message || error.toString();
+                appInsights.trackEvent("UploadService.get.error", { message: errorMessage });
                 return Promise.reject(errorMessage);
             });
     }
@@ -62,6 +85,25 @@ export class UploadService
                 let errorMessage = error.message || error.toString();
                 appInsights.trackEvent("UploadService.create.error", { message: errorMessage });
                 return Promise.reject(error);
+            });
+    }
+
+    public delete(id: number): Promise<void>
+    {
+        return this.authenticationService.getAuthHeaders()
+            .then(headers =>
+            {
+                let options = new RequestOptions({ headers: headers });
+                return this.http
+                    .delete(`/api/uploads/${id}`, options)
+                    .toPromise();
+            })
+            .then(() => void 0)
+            .catch(error =>
+            {
+                let errorMessage = error.message || error.toString();
+                appInsights.trackEvent("UploadService.delete.error", { message: errorMessage });
+                return Promise.reject(errorMessage);
             });
     }
 }
