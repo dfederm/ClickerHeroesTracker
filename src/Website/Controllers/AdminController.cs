@@ -6,6 +6,7 @@ namespace ClickerHeroesTrackerWebsite.Controllers
 {
     using System;
     using System.Collections.Generic;
+    using System.Globalization;
     using System.Linq;
     using System.Threading.Tasks;
     using ClickerHeroesTrackerWebsite.Models;
@@ -56,7 +57,7 @@ namespace ClickerHeroesTrackerWebsite.Controllers
             var queues = new Dictionary<string, int>();
             foreach (var priority in priorities)
             {
-                var queue = this.queueClient.GetQueueReference($"upload-processing-{priority.ToLower()}-priority");
+                var queue = this.queueClient.GetQueueReference($"upload-processing-{priority.ToLower(CultureInfo.InvariantCulture)}-priority");
                 await queue.FetchAttributesAsync();
                 var numMessages = queue.ApproximateMessageCount.GetValueOrDefault();
                 queues.Add(priority, numMessages);
@@ -123,7 +124,7 @@ namespace ClickerHeroesTrackerWebsite.Controllers
                 return await this.Index();
             }
 
-            var queue = this.queueClient.GetQueueReference($"upload-processing-{priority.Value.ToString().ToLower()}-priority");
+            var queue = this.queueClient.GetQueueReference($"upload-processing-{priority.Value.ToString().ToLower(CultureInfo.InvariantCulture)}-priority");
 
             var numMessages = queue.ApproximateMessageCount.GetValueOrDefault();
 
