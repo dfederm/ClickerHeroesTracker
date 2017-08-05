@@ -5,6 +5,7 @@
 namespace ClickerHeroesTrackerWebsite.Services.UploadProcessing
 {
     using System.Collections.Generic;
+    using System.Globalization;
     using System.Linq;
     using System.Threading.Tasks;
     using ClickerHeroesTrackerWebsite.Instrumentation;
@@ -54,7 +55,7 @@ namespace ClickerHeroesTrackerWebsite.Services.UploadProcessing
 
         private static CloudQueue GetQueue(CloudQueueClient queueClient, UploadProcessingMessagePriority priority)
         {
-            var queue = queueClient.GetQueueReference($"upload-processing-{priority.ToString().ToLower()}-priority");
+            var queue = queueClient.GetQueueReference($"upload-processing-{priority.ToString().ToLower(CultureInfo.InvariantCulture)}-priority");
             queue.CreateIfNotExistsAsync().Wait();
             return queue;
         }
