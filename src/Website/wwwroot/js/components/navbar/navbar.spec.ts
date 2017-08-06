@@ -18,21 +18,21 @@ describe("NavbarComponent", () =>
         let modalService = { open: (): void => void 0 };
 
         TestBed.configureTestingModule(
-        {
-            declarations: [ NavbarComponent ],
-            providers:
-            [
-                { provide: AuthenticationService, useValue: authenticationService },
-                { provide: NgbModal, useValue: modalService },
-            ],
-            schemas: [ NO_ERRORS_SCHEMA ],
-        })
-        .compileComponents()
-        .then(() =>
-        {
-            fixture = TestBed.createComponent(NavbarComponent);
-            component = fixture.componentInstance;
-        });
+            {
+                declarations: [NavbarComponent],
+                providers:
+                [
+                    { provide: AuthenticationService, useValue: authenticationService },
+                    { provide: NgbModal, useValue: modalService },
+                ],
+                schemas: [NO_ERRORS_SCHEMA],
+            })
+            .compileComponents()
+            .then(() =>
+            {
+                fixture = TestBed.createComponent(NavbarComponent);
+                component = fixture.componentInstance;
+            });
     }));
 
     it("should display the anonymous nav bar when the user is not logged in", async(() =>
@@ -41,7 +41,8 @@ describe("NavbarComponent", () =>
         spyOn(authenticationService, "isLoggedIn").and.returnValue(new BehaviorSubject(false));
 
         fixture.detectChanges();
-        fixture.whenStable().then(() => {
+        fixture.whenStable().then(() =>
+        {
             fixture.detectChanges();
 
             let navItems = fixture.debugElement.queryAll(By.css(".nav-item"));
@@ -49,13 +50,13 @@ describe("NavbarComponent", () =>
             expect(navItems.length).toEqual(5);
 
             let expectedLinks: { text: string, url?: string, dialog?: Type<{}> }[] =
-            [
-                { text: "Upload", dialog: component.UploadDialogComponent },
-                { text: "What's New", url: "/news" },
-                { text: "Feedback" },
-                { text: "Register" },
-                { text: "Log in", dialog: component.LogInDialogComponent },
-            ];
+                [
+                    { text: "Upload", dialog: component.UploadDialogComponent },
+                    { text: "What's New", url: "/news" },
+                    { text: "Feedback" },
+                    { text: "Register" },
+                    { text: "Log in", dialog: component.LogInDialogComponent },
+                ];
             for (let i = 0; i < navItems.length; i++)
             {
                 let link = navItems[i].query(By.css(".nav-link"));
@@ -86,7 +87,8 @@ describe("NavbarComponent", () =>
         spyOn(authenticationService, "isLoggedIn").and.returnValue(new BehaviorSubject(true));
 
         fixture.detectChanges();
-        fixture.whenStable().then(() => {
+        fixture.whenStable().then(() =>
+        {
             fixture.detectChanges();
 
             let navItems = fixture.debugElement.queryAll(By.css(".nav-item"));
@@ -94,15 +96,15 @@ describe("NavbarComponent", () =>
             expect(navItems.length).toEqual(7);
 
             let expectedLinks: { text: string, url?: string, hasClickHandler?: boolean, dialog?: Type<{}> }[] =
-            [
-                { text: "Dashboard", url: "/dashboard" },
-                { text: "Clans" },
-                { text: "Upload", dialog: component.UploadDialogComponent },
-                { text: "What's New", url: "/news" },
-                { text: "Feedback" },
-                { text: "Hello User!" },
-                { text: "Log off", hasClickHandler: true },
-            ];
+                [
+                    { text: "Dashboard", url: "/dashboard" },
+                    { text: "Upload", dialog: component.UploadDialogComponent },
+                    { text: "Clans", url: "/clans" },
+                    { text: "What's New", url: "/news" },
+                    { text: "Feedback" },
+                    { text: "Hello User!" },
+                    { text: "Log off", hasClickHandler: true },
+                ];
             for (let i = 0; i < navItems.length; i++)
             {
                 let link = navItems[i].query(By.css(".nav-link"));
@@ -142,22 +144,26 @@ describe("NavbarComponent", () =>
 
         fixture.detectChanges();
         fixture.whenStable()
-            .then(() => {
+            .then(() =>
+            {
                 expect(component.isLoggedIn).toEqual(false);
                 isLoggedIn.next(true);
                 return fixture.whenStable();
             })
-            .then(() => {
+            .then(() =>
+            {
                 expect(component.isLoggedIn).toEqual(true);
                 isLoggedIn.next(true);
                 return fixture.whenStable();
             })
-            .then(() => {
+            .then(() =>
+            {
                 expect(component.isLoggedIn).toEqual(true);
                 isLoggedIn.next(false);
                 return fixture.whenStable();
             })
-            .then(() => {
+            .then(() =>
+            {
                 expect(component.isLoggedIn).toEqual(false);
             });
     }));

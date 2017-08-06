@@ -91,6 +91,7 @@ gulp.task("copy", function ()
         "@ng-bootstrap/ng-bootstrap",
         "ngx-clipboard",
         "ngx-window-token", // Required by ngx-clipboard
+        "time-ago-pipe",
     ];
 
     var merged = mergeStream();
