@@ -5,6 +5,7 @@ import { RouterModule, Routes } from "@angular/router";
 import { HttpModule } from "@angular/http";
 import { NgbModule } from "@ng-bootstrap/ng-bootstrap";
 import { ClipboardModule } from "ngx-clipboard/dist";
+import { TimeAgoPipe } from "time-ago-pipe";
 
 import { AppComponent } from "./components/app/app";
 import { HomeComponent } from "./components/home/home";
@@ -18,6 +19,7 @@ import { DashboardComponent } from "./components/dashboard/dashboard";
 import { UploadsTableComponent } from "./components/uploadsTable/uploadsTable";
 import { UploadsComponent } from "./components/uploads/uploads";
 import { UploadComponent } from "./components/upload/upload";
+import { ClansComponent } from "./components/clans/clans";
 
 import { OpenDialogDirective } from "./directives/openDialog/openDialog";
 
@@ -26,6 +28,7 @@ import { ExponentialPipe } from "./pipes/exponentialPipe";
 import { NewsService } from "./services/newsService/newsService";
 import { AuthenticationService } from "./services/authenticationService/authenticationService";
 import { UploadService } from "./services/uploadService/uploadService";
+import { ClanService } from "./services/clanService/clanService";
 
 const routes: Routes =
   [
@@ -34,6 +37,7 @@ const routes: Routes =
     { path: "dashboard", component: DashboardComponent },
     { path: "uploads", component: UploadsComponent },
     { path: "upload/:id", component: UploadComponent },
+    { path: "clans", component: ClansComponent },
   ];
 
 @NgModule({
@@ -62,6 +66,8 @@ const routes: Routes =
     UploadsComponent,
     UploadComponent,
     ExponentialPipe,
+    ClansComponent,
+    TimeAgoPipe,
   ],
   entryComponents:
   [
@@ -73,6 +79,7 @@ const routes: Routes =
     NewsService,
     AuthenticationService,
     UploadService,
+    ClanService,
   ],
   bootstrap: [AppComponent],
 })

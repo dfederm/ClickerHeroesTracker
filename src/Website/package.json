@@ -23,6 +23,7 @@
     "rxjs": "^5.4.2",
     "systemjs": "^0.20.15",
     "systemjs-plugin-json": "^0.3.0",
+    "time-ago-pipe": "^1.2.1",
     "zone.js": "^0.8.13"
   },
   "devDependencies": {

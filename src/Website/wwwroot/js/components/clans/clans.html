@@ -1,0 +1,94 @@
+<div class="container">
+    <h2>Clans</h2>
+    <div class="row">
+        <div *ngIf="!isInClan || isClanInformationError"
+             class="col-lg-6">
+            <p *ngIf="isClanInformationError">
+                There was a problem getting your clan's data
+            </p>
+            <p *ngIf="!isInClan && !isClanInformationError">
+                Please join a clan to view the clan's data
+            </p>
+        </div>
+        <div *ngIf="isInClan && !isClanInformationError"
+             class="col-lg-6">
+            <h3>{{clanName}}</h3>
+            <table class="table table-responsive table-striped">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Highest Zone</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngFor="let guildMember of guildMembers">
+                        <td>{{guildMember.nickname}}</td>
+                        <td>{{guildMember.highestZone}}</td>
+                    </tr>
+                </tbody>
+            </table>
+            <div>
+                <p *ngIf="isMessageSendError">
+                    There was a problem sending your message. Please try again.
+                </p>
+                <form (ngSubmit)="sendMessage()"
+                      class="form-inline">
+                    <input type="text"
+                           id="newMessage"
+                           name="newMessage"
+                           class="form-control"
+                           maxlength="150"
+                           [(ngModel)]="newMessage" />
+                    <button type="submit"
+                            class="btn btn-success">Send</button>
+                </form>
+                <div *ngFor="let message of messages"
+                     class="clan-message">
+                    <p>
+                        <span>
+                            ({{ message.date | timeAgo }})
+                        </span>
+                        <span [ngClass]="{'text-muted' : !message.username}">
+                            {{message.username || "(Unknown)"}}
+                        </span>
+                    </p>
+                    <p class="clan-message-content">{{message.content}}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <h3>Clans Leaderboard</h3>
+            <p *ngIf="isLeaderboardError">
+                There was a problem getting your clan's data
+            </p>
+            <table *ngIf="!isLeaderboardError"
+                   class="table table-responsive table-striped">
+                <thead>
+                    <tr>
+                        <th>Rank</th>
+                        <th>Name</th>
+                        <th>Members</th>
+                        <th>Current Raid Level</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngFor="let clan of clans"
+                        [ngClass]="{'table-success' : clan.isUserClan}">
+                        <td>{{clan.rank}}</td>
+                        <td>{{clan.name}}</td>
+                        <td>{{clan.memberCount}}</td>
+                        <td>{{clan.currentRaidLevel}}</td>
+                    </tr>
+                </tbody>
+            </table>
+            <ngb-pagination [collectionSize]="totalClans"
+                            [(page)]="leaderboardPage"
+                            [pageSize]="leaderboardCount"
+                            [maxSize]="5"
+                            [rotate]="true"
+                            [ellipses]="false"
+                            [boundaryLinks]="true">
+            </ngb-pagination>
+        </div>
+    </div>
+</div>
