@@ -1,10 +1,4 @@
-﻿// tslint:disable-next-line:interface-name - We don't own this interface name, just extending it
-interface HighchartsStatic extends Highcharts.Static
-{
-    wrap: (obj: Highcharts.Static, funcName: string, callback: (orig: () => string) => string) => void;
-}
-
-namespace GraphConfig
+﻿namespace GraphConfig
 {
     "use strict";
 
@@ -14,7 +8,7 @@ namespace GraphConfig
         },
     });
 
-    (Highcharts as HighchartsStatic).wrap(Highcharts, "numberFormat", function (): string
+    Highcharts.wrap(Highcharts, "numberFormat", function (): string
     {
         const value = arguments[1] as number;
 
