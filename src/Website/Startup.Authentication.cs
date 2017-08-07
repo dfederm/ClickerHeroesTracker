@@ -5,7 +5,6 @@
 namespace ClickerHeroesTrackerWebsite
 {
     using ClickerHeroesTrackerWebsite.Services.Authentication;
-    using Microsoft.AspNetCore.Authentication;
     using Microsoft.AspNetCore.Authentication.Cookies;
     using Microsoft.AspNetCore.Builder;
     using Microsoft.AspNetCore.Hosting;
@@ -57,8 +56,8 @@ namespace ClickerHeroesTrackerWebsite
                 });
             }
 
-            var twitterConsumerKey = this.Configuration["Authentication:Facebook:ConsumerKey"];
-            var twitterConsumerSecret = this.Configuration["Authentication:Facebook:ConsumerSecret"];
+            var twitterConsumerKey = this.Configuration["Authentication:Twitter:ConsumerKey"];
+            var twitterConsumerSecret = this.Configuration["Authentication:Twitter:ConsumerSecret"];
             if (!string.IsNullOrEmpty(twitterConsumerKey) && !string.IsNullOrEmpty(twitterConsumerSecret))
             {
                 authenticationBuilder.AddTwitter(options =>
@@ -68,14 +67,11 @@ namespace ClickerHeroesTrackerWebsite
                 });
             }
 
-            // Allow auth mocking when not in prod
-            if (!this.Environment.IsProduction())
+            authenticationBuilder.AddScheme<MockAuthenticationSchemeOptions, MockAuthenticationHandler>("Mock", options =>
             {
-                authenticationBuilder.AddScheme<AuthenticationSchemeOptions, MockAuthenticationHandler>("Mock", options =>
-                {
-                    options.ClaimsIssuer = "Mock";
-                });
-            }
+                // Don't enable it in production. It probably wouldn't be the worst thing in the world since the handler uses a user id whitelist, but it's better to err on the safe side.
+                options.IsEnabled = !this.Environment.IsProduction();
+            });
         }
     }
 }
