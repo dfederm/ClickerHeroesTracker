@@ -44,8 +44,14 @@
 
   <!-- Don't worry about documentation -->
   <Rules AnalyzerId="StyleCop.Analyzers" RuleNamespace="StyleCop.Analyzers">
+    <!-- XmlCommentAnalysisDisabled -->
+    <Rule Id="SA0001" Action="None" />
     <!-- ElementsMustBeDocumented -->
     <Rule Id="SA1600" Action="None" />
+    <!-- PartialElementsMustBeDocumented -->
+    <Rule Id="SA1601" Action="None" />
+    <!-- ElementParametersMustBeDocumented -->
+    <Rule Id="SA1611" Action="None" />
   </Rules>
 
   <!-- We'll name things appropriately -->
@@ -54,12 +60,6 @@
     <Rule Id="CA1721" Action="None" />
     <!-- TypeNamesShouldNotMatchNamespaces -->
     <Rule Id="CA1724" Action="None" />
-  </Rules>
-
-  <!-- We don't need to document these -->
-  <Rules AnalyzerId="StyleCop.Analyzers" RuleNamespace="StyleCop.Analyzers">
-    <!-- XmlCommentAnalysisDisabled -->
-    <Rule Id="SA0001" Action="None" />
   </Rules>
 
 </RuleSet>

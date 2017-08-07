@@ -12,17 +12,13 @@ namespace ClickerHeroesTrackerWebsite
     using Microsoft.AspNetCore.Hosting;
     using Microsoft.AspNetCore.Rewrite;
     using Microsoft.Extensions.DependencyInjection;
-    using Microsoft.Extensions.Logging;
 
     public partial class Startup
     {
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
+        public void Configure(IApplicationBuilder app)
         {
-            loggerFactory.AddConsole(this.Configuration.GetSection("Logging"));
-            loggerFactory.AddDebug();
-
-            if (env.IsDevelopment() || this.Environment.IsBuddy())
+            if (this.Environment.IsDevelopment() || this.Environment.IsBuddy())
             {
                 app.UseDeveloperExceptionPage();
                 app.UseDatabaseErrorPage();
@@ -36,7 +32,7 @@ namespace ClickerHeroesTrackerWebsite
             app.UseMiddleware<MeasureLatencyMiddleware>();
 
             // Require https on non-devbox
-            if (!env.IsDevelopment())
+            if (!this.Environment.IsDevelopment())
             {
                 var options = new RewriteOptions()
                     .AddRedirectToHttpsPermanent();
@@ -45,7 +41,7 @@ namespace ClickerHeroesTrackerWebsite
 
             app.UseStaticFiles();
 
-            this.ConfigureAuthentication(app, env);
+            app.UseAuthentication();
 
             // Instrument the user as soon as they're auth'd.
             app.UseMiddleware<UserInstrumentationMiddleware>();

@@ -16,7 +16,6 @@ namespace ClickerHeroesTracker.UploadProcessor
     using ClickerHeroesTrackerWebsite.Models.SaveData;
     using ClickerHeroesTrackerWebsite.Models.Stats;
     using ClickerHeroesTrackerWebsite.Services.Database;
-    using ClickerHeroesTrackerWebsite.Services.Instrumentation;
     using ClickerHeroesTrackerWebsite.Services.UploadProcessing;
     using Microsoft.ApplicationInsights;
     using Microsoft.Extensions.Options;
@@ -28,7 +27,6 @@ namespace ClickerHeroesTracker.UploadProcessor
         private readonly IOptions<DatabaseSettings> databaseSettingsOptions;
         private readonly GameData gameData;
         private readonly TelemetryClient telemetryClient;
-        private readonly IMetricProvider metricProvider;
 
         private readonly Dictionary<UploadProcessingMessagePriority, CloudQueue> queues;
 
@@ -36,13 +34,11 @@ namespace ClickerHeroesTracker.UploadProcessor
             IOptions<DatabaseSettings> databaseSettingsOptions,
             GameData gameData,
             TelemetryClient telemetryClient,
-            IMetricProvider metricProvider,
             CloudQueueClient queueClient)
         {
             this.databaseSettingsOptions = databaseSettingsOptions;
             this.gameData = gameData;
             this.telemetryClient = telemetryClient;
-            this.metricProvider = metricProvider;
             this.queues = new Dictionary<UploadProcessingMessagePriority, CloudQueue>
             {
                 { UploadProcessingMessagePriority.Low, GetQueue(queueClient, UploadProcessingMessagePriority.Low) },
@@ -124,14 +120,16 @@ namespace ClickerHeroesTracker.UploadProcessor
 
         private bool ProcessMessage(CloudQueueMessage queueMessage)
         {
-            var properties = new Dictionary<string, string>();
-            properties.Add("CloudQueueMessage-DequeueCount", queueMessage.DequeueCount.ToString());
-            properties.Add("CloudQueueMessage-InsertionTime", queueMessage.InsertionTime.ToString());
-            properties.Add("CloudQueueMessage-Id", queueMessage.Id);
+            var properties = new Dictionary<string, string>
+            {
+                { "CloudQueueMessage-DequeueCount", queueMessage.DequeueCount.ToString() },
+                { "CloudQueueMessage-InsertionTime", queueMessage.InsertionTime.ToString() },
+                { "CloudQueueMessage-Id", queueMessage.Id },
+            };
 
             this.telemetryClient.TrackEvent("UploadProcessor-Recieved", properties);
 
-            using (var counterProvider = new CounterProvider(this.telemetryClient, this.metricProvider))
+            using (var counterProvider = new CounterProvider(this.telemetryClient))
             using (var databaseCommandFactory = new DatabaseCommandFactory(
                 this.databaseSettingsOptions,
                 counterProvider))
@@ -152,10 +150,7 @@ namespace ClickerHeroesTracker.UploadProcessor
 
                     this.CurrentUploadId = uploadId;
 
-                    string uploadContent;
-                    string userId;
-                    PlayStyle playStyle;
-                    GetUploadDetails(databaseCommandFactory, uploadId, out uploadContent, out userId, out playStyle);
+                    GetUploadDetails(databaseCommandFactory, uploadId, out var uploadContent, out var userId, out var playStyle);
                     properties.Add("UserId", userId);
                     if (string.IsNullOrWhiteSpace(uploadContent))
                     {

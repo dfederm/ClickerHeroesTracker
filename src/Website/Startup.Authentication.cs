@@ -5,81 +5,76 @@
 namespace ClickerHeroesTrackerWebsite
 {
     using ClickerHeroesTrackerWebsite.Services.Authentication;
+    using Microsoft.AspNetCore.Authentication;
+    using Microsoft.AspNetCore.Authentication.Cookies;
     using Microsoft.AspNetCore.Builder;
     using Microsoft.AspNetCore.Hosting;
+    using Microsoft.AspNetCore.Http;
     using Microsoft.Extensions.DependencyInjection;
-    using Microsoft.Extensions.Options;
 
     /// <summary>
     /// Configure authentication
     /// </summary>
     public partial class Startup
     {
-        private void ConfigureAuthentication(IApplicationBuilder app, IHostingEnvironment env)
+        private void ConfigureAuthentication(IServiceCollection services)
         {
-            // While we transition, support both Cookie-based and Bearer-based authentication
-            app.UseWhen(context => !context.Request.Headers.ContainsKey("Authorization"), branch => branch.UseIdentity());
-            app.UseWhen(context => context.Request.Headers.ContainsKey("Authorization"), branch => branch.UseOAuthValidation());
+            var authenticationBuilder = services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme);
 
-            var authenticationSettingsOptions = app.ApplicationServices.GetService<IOptions<AuthenticationSettings>>();
-            if (authenticationSettingsOptions.Value != null)
+            authenticationBuilder.AddCookie(options => options.LoginPath = new PathString("/Account/Login"));
+            authenticationBuilder.AddOAuthValidation();
+
+            var microsoftClientId = this.Configuration["Authentication:Microsoft:ClientId"];
+            var microsoftClientSecret = this.Configuration["Authentication:Microsoft:ClientSecret"];
+            if (!string.IsNullOrEmpty(microsoftClientId) && !string.IsNullOrEmpty(microsoftClientSecret))
             {
-                var microsoftAuthenticationSettings = authenticationSettingsOptions.Value.Microsoft;
-                if (microsoftAuthenticationSettings != null
-                    && !string.IsNullOrEmpty(microsoftAuthenticationSettings.ClientId)
-                    && !string.IsNullOrEmpty(microsoftAuthenticationSettings.ClientSecret))
+                authenticationBuilder.AddMicrosoftAccount(options =>
                 {
-                    app.UseMicrosoftAccountAuthentication(new MicrosoftAccountOptions
-                    {
-                        ClientId = microsoftAuthenticationSettings.ClientId,
-                        ClientSecret = microsoftAuthenticationSettings.ClientSecret,
-                    });
-                }
-
-                var facebookAuthenticationSettings = authenticationSettingsOptions.Value.Facebook;
-                if (facebookAuthenticationSettings != null
-                    && !string.IsNullOrEmpty(facebookAuthenticationSettings.AppId)
-                    && !string.IsNullOrEmpty(facebookAuthenticationSettings.AppSecret))
-                {
-                    app.UseFacebookAuthentication(new FacebookOptions
-                    {
-                        AppId = facebookAuthenticationSettings.AppId,
-                        AppSecret = facebookAuthenticationSettings.AppSecret,
-                    });
-                }
-
-                var googleAuthenticationSettings = authenticationSettingsOptions.Value.Google;
-                if (googleAuthenticationSettings != null
-                    && !string.IsNullOrEmpty(googleAuthenticationSettings.ClientId)
-                    && !string.IsNullOrEmpty(googleAuthenticationSettings.ClientSecret))
-                {
-                    app.UseGoogleAuthentication(new GoogleOptions
-                    {
-                        ClientId = googleAuthenticationSettings.ClientId,
-                        ClientSecret = googleAuthenticationSettings.ClientSecret,
-                    });
-                }
-
-                var twitterAuthenticationSettings = authenticationSettingsOptions.Value.Twitter;
-                if (twitterAuthenticationSettings != null
-                    && !string.IsNullOrEmpty(twitterAuthenticationSettings.ConsumerKey)
-                    && !string.IsNullOrEmpty(twitterAuthenticationSettings.ConsumerSecret))
-                {
-                    app.UseTwitterAuthentication(new TwitterOptions
-                    {
-                        ConsumerKey = twitterAuthenticationSettings.ConsumerKey,
-                        ConsumerSecret = twitterAuthenticationSettings.ConsumerSecret,
-                    });
-                }
+                    options.ClientId = microsoftClientId;
+                    options.ClientSecret = microsoftClientSecret;
+                });
             }
 
-            // Note: UseOpenIddict() must be registered after app.UseIdentity() and the external social providers.
-            app.UseOpenIddict();
+            var facebookAppId = this.Configuration["Authentication:Facebook:AppId"];
+            var facebookAppSecret = this.Configuration["Authentication:Facebook:AppSecret"];
+            if (!string.IsNullOrEmpty(facebookAppId) && !string.IsNullOrEmpty(facebookAppSecret))
+            {
+                authenticationBuilder.AddFacebook(options =>
+                {
+                    options.AppId = facebookAppId;
+                    options.AppSecret = facebookAppSecret;
+                });
+            }
+
+            var googleClientId = this.Configuration["Authentication:Google:ClientId"];
+            var googleClientSecret = this.Configuration["Authentication:Google:ClientSecret"];
+            if (!string.IsNullOrEmpty(googleClientId) && !string.IsNullOrEmpty(googleClientSecret))
+            {
+                authenticationBuilder.AddGoogle(options =>
+                {
+                    options.ClientId = googleClientId;
+                    options.ClientSecret = googleClientSecret;
+                });
+            }
+
+            var twitterConsumerKey = this.Configuration["Authentication:Facebook:ConsumerKey"];
+            var twitterConsumerSecret = this.Configuration["Authentication:Facebook:ConsumerSecret"];
+            if (!string.IsNullOrEmpty(twitterConsumerKey) && !string.IsNullOrEmpty(twitterConsumerSecret))
+            {
+                authenticationBuilder.AddTwitter(options =>
+                {
+                    options.ConsumerKey = twitterConsumerKey;
+                    options.ConsumerSecret = twitterConsumerSecret;
+                });
+            }
 
             // Allow auth mocking when not in prod
-            if (!env.IsProduction())
+            if (!this.Environment.IsProduction())
             {
-                app.UseMiddleware<MockAuthenticationOwinMiddleware>();
+                authenticationBuilder.AddScheme<AuthenticationSchemeOptions, MockAuthenticationHandler>("Mock", options =>
+                {
+                    options.ClaimsIssuer = "Mock";
+                });
             }
         }
     }

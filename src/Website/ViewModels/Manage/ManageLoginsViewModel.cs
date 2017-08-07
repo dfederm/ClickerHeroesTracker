@@ -5,7 +5,7 @@
 namespace ClickerHeroesTrackerWebsite.ViewModels.Manage
 {
     using System.Collections.Generic;
-    using Microsoft.AspNetCore.Http.Authentication;
+    using Microsoft.AspNetCore.Authentication;
     using Microsoft.AspNetCore.Identity;
 
     /// <summary>
@@ -21,6 +21,6 @@ namespace ClickerHeroesTrackerWebsite.ViewModels.Manage
         /// <summary>
         /// Gets or sets a collection of the remaining external login providers the user can choose.
         /// </summary>
-        public IList<AuthenticationDescription> OtherLogins { get; set; }
+        public IList<AuthenticationScheme> OtherLogins { get; set; }
     }
 }

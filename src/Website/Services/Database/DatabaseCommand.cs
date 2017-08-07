@@ -131,7 +131,7 @@ namespace ClickerHeroesTrackerWebsite.Services.Database
             if (this.command is SqliteCommand)
             {
                 this.CommandText = this.CommandText
-                    .Replace("SCOPE_IDENTITY", "last_insert_rowid");
+                    .Replace("SCOPE_IDENTITY", "last_insert_rowid", StringComparison.OrdinalIgnoreCase);
             }
 
             this.command.CommandText = this.CommandText;

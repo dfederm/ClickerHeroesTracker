@@ -7,6 +7,7 @@ namespace ClickerHeroesTrackerWebsite.Controllers.Api
     using System;
     using System.Collections.Generic;
     using System.Net;
+    using AspNet.Security.OAuth.Validation;
     using ClickerHeroesTrackerWebsite.Instrumentation;
     using ClickerHeroesTrackerWebsite.Models;
     using ClickerHeroesTrackerWebsite.Models.Api;
@@ -19,11 +20,13 @@ namespace ClickerHeroesTrackerWebsite.Controllers.Api
     using ClickerHeroesTrackerWebsite.Services.Database;
     using ClickerHeroesTrackerWebsite.Utility;
     using Microsoft.ApplicationInsights;
+    using Microsoft.AspNetCore.Authentication.Cookies;
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Identity;
     using Microsoft.AspNetCore.Mvc;
 
     [Route("api/uploads")]
+    [Authorize(AuthenticationSchemes = OAuthValidationDefaults.AuthenticationScheme + "," + CookieAuthenticationDefaults.AuthenticationScheme)]
     public sealed class UploadsController : Controller
     {
         private readonly IDatabaseCommandFactory databaseCommandFactory;
@@ -56,7 +59,6 @@ namespace ClickerHeroesTrackerWebsite.Controllers.Api
 
         [Route("")]
         [HttpGet]
-        [Authorize]
         public IActionResult List(
             int page = ParameterConstants.UploadSummaryList.Page.Default,
             int count = ParameterConstants.UploadSummaryList.Count.Default)
@@ -85,6 +87,7 @@ namespace ClickerHeroesTrackerWebsite.Controllers.Api
 
         [Route("{uploadId:int}")]
         [HttpGet]
+        [AllowAnonymous]
         public IActionResult Details(int uploadId)
         {
             if (uploadId < 0)
@@ -220,6 +223,7 @@ namespace ClickerHeroesTrackerWebsite.Controllers.Api
 
         [Route("")]
         [HttpPost]
+        [AllowAnonymous]
         public IActionResult Add(UploadRequest uploadRequest)
         {
             if (uploadRequest.EncodedSaveData == null)
@@ -369,7 +373,6 @@ namespace ClickerHeroesTrackerWebsite.Controllers.Api
 
         [Route("{uploadId:int}")]
         [HttpDelete]
-        [Authorize]
         public IActionResult Delete(int uploadId)
         {
             var parameters = new Dictionary<string, object>
@@ -437,12 +440,12 @@ namespace ClickerHeroesTrackerWebsite.Controllers.Api
         private List<Upload> FetchUploads(string userId, int page, int count)
         {
             const string CommandText = @"
-	            SELECT Id, UploadTime
-	            FROM Uploads
-	            WHERE UserId = @UserId
-	            ORDER BY UploadTime DESC
-		            OFFSET @Offset ROWS
-		            FETCH NEXT @Count ROWS ONLY;";
+                SELECT Id, UploadTime
+                FROM Uploads
+                WHERE UserId = @UserId
+                ORDER BY UploadTime DESC
+                OFFSET @Offset ROWS
+                FETCH NEXT @Count ROWS ONLY;";
             var parameters = new Dictionary<string, object>
             {
                 { "@UserId", userId },
