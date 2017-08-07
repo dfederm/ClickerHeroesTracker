@@ -4,6 +4,7 @@
 
 namespace ClickerHeroesTrackerWebsite.IntegrationTests
 {
+    using System;
     using System.Net;
     using System.Net.Http;
     using System.Threading.Tasks;
@@ -23,7 +24,7 @@ namespace ClickerHeroesTrackerWebsite.IntegrationTests
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 
             var content = await response.Content.ReadAsStringAsync();
-            Assert.True(content.Contains("jumbotron"));
+            Assert.Contains("jumbotron", content, StringComparison.Ordinal);
         }
 
         [Fact]
@@ -36,7 +37,7 @@ namespace ClickerHeroesTrackerWebsite.IntegrationTests
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 
             var content = await response.Content.ReadAsStringAsync();
-            Assert.True(content.Contains("jumbotron"));
+            Assert.Contains("jumbotron", content, StringComparison.Ordinal);
         }
     }
 }

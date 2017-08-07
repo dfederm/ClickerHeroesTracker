@@ -12,7 +12,6 @@ namespace ClickerHeroesTrackerWebsite.Controllers.Api
     using ClickerHeroesTrackerWebsite.Models;
     using Microsoft.AspNetCore.Authentication;
     using Microsoft.AspNetCore.Builder;
-    using Microsoft.AspNetCore.Http.Authentication;
     using Microsoft.AspNetCore.Identity;
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.Extensions.Options;
@@ -50,54 +49,15 @@ namespace ClickerHeroesTrackerWebsite.Controllers.Api
                     });
                 }
 
-                // Ensure the user is allowed to sign in.
-                if (!await this.signInManager.CanSignInAsync(user))
-                {
-                    return this.BadRequest(new OpenIdConnectResponse
-                    {
-                        Error = OpenIdConnectConstants.Errors.InvalidGrant,
-                        ErrorDescription = "The specified user is not allowed to sign in.",
-                    });
-                }
-
-                // Reject the token request if two-factor authentication has been enabled by the user.
-                if (this.userManager.SupportsUserTwoFactor && await this.userManager.GetTwoFactorEnabledAsync(user))
-                {
-                    return this.BadRequest(new OpenIdConnectResponse
-                    {
-                        Error = OpenIdConnectConstants.Errors.InvalidGrant,
-                        ErrorDescription = "The specified user is not allowed to sign in.",
-                    });
-                }
-
-                // Ensure the user is not already locked out.
-                if (this.userManager.SupportsUserLockout && await this.userManager.IsLockedOutAsync(user))
+                // Validate the username/password parameters and ensure the account is not locked out.
+                var result = await this.signInManager.CheckPasswordSignInAsync(user, request.Password, lockoutOnFailure: false);
+                if (!result.Succeeded)
                 {
                     return this.BadRequest(new OpenIdConnectResponse
                     {
                         Error = OpenIdConnectConstants.Errors.InvalidGrant,
                         ErrorDescription = "The username/password couple is invalid.",
                     });
-                }
-
-                // Ensure the password is valid.
-                if (!await this.userManager.CheckPasswordAsync(user, request.Password))
-                {
-                    if (this.userManager.SupportsUserLockout)
-                    {
-                        await this.userManager.AccessFailedAsync(user);
-                    }
-
-                    return this.BadRequest(new OpenIdConnectResponse
-                    {
-                        Error = OpenIdConnectConstants.Errors.InvalidGrant,
-                        ErrorDescription = "The username/password couple is invalid.",
-                    });
-                }
-
-                if (this.userManager.SupportsUserLockout)
-                {
-                    await this.userManager.ResetAccessFailedCountAsync(user);
                 }
 
                 // Create a new authentication ticket.
