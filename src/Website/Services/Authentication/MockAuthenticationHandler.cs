@@ -18,12 +18,9 @@ namespace ClickerHeroesTrackerWebsite.Services.Authentication
     using Microsoft.Extensions.Options;
 
     /// <summary>
-    /// Middleware which mocks the authentication with the identity data from the request.
+    /// Authentication handler which mocks the authentication with the identity data from the request.
     /// </summary>
-    /// <remarks>
-    /// This should never be used in production, as it allows complete bypass of authentication.
-    /// </remarks>
-    internal sealed class MockAuthenticationHandler : AuthenticationHandler<AuthenticationSchemeOptions>
+    internal sealed class MockAuthenticationHandler : AuthenticationHandler<MockAuthenticationSchemeOptions>
     {
         private static readonly char[] AuthorizationTokenDelimeter = new[] { ':' };
 
@@ -36,13 +33,18 @@ namespace ClickerHeroesTrackerWebsite.Services.Authentication
             "00000000-0000-0000-0000-000000000000",
         });
 
-        public MockAuthenticationHandler(IOptionsMonitor<AuthenticationSchemeOptions> options, ILoggerFactory logger, UrlEncoder encoder, ISystemClock clock)
+        public MockAuthenticationHandler(IOptionsMonitor<MockAuthenticationSchemeOptions> options, ILoggerFactory logger, UrlEncoder encoder, ISystemClock clock)
             : base(options, logger, encoder, clock)
         {
         }
 
         protected override Task<AuthenticateResult> HandleAuthenticateAsync()
         {
+            if (!this.Options.IsEnabled)
+            {
+                return Task.FromResult(AuthenticateResult.NoResult());
+            }
+
             // Supported format: "Authorization: <Scheme==AuthenticationType> <Parameter>"
             var authorizationHeaderRaw = this.Request.Headers["Authorization"];
             if (!AuthenticationHeaderValue.TryParse(authorizationHeaderRaw, out var authorization)
