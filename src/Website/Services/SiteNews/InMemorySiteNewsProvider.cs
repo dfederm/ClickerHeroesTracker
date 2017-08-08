@@ -5,6 +5,7 @@
 namespace Website.Services.SiteNews
 {
     using System;
+    using System.Collections.Concurrent;
     using System.Collections.Generic;
     using System.Threading.Tasks;
 
@@ -14,29 +15,20 @@ namespace Website.Services.SiteNews
     /// </summary>
     public class InMemorySiteNewsProvider : ISiteNewsProvider
     {
-        private readonly IDictionary<DateTime, IList<string>> siteNewsDictionary = new Dictionary<DateTime, IList<string>>();
+        private readonly ConcurrentDictionary<DateTime, IList<string>> siteNewsDictionary = new ConcurrentDictionary<DateTime, IList<string>>();
 
         /// <inheritdoc />
         public Task AddSiteNewsEntriesAsync(DateTime newsDate, IList<string> messages)
         {
-            IList<string> currentMessages;
-            if (!this.siteNewsDictionary.TryGetValue(newsDate, out currentMessages))
-            {
-                currentMessages = new List<string>(messages);
-                this.siteNewsDictionary.Add(newsDate, currentMessages);
-            }
-            else
-            {
-                ((List<string>)currentMessages).AddRange(messages);
-            }
-
+            this.siteNewsDictionary.AddOrUpdate(newsDate, messages, (c, m) => messages);
             return Task.CompletedTask;
         }
 
         /// <inheritdoc />
         public Task DeleteSiteNewsForDateAsync(DateTime newsDate)
         {
-            this.siteNewsDictionary.Remove(newsDate);
+            IList<string> currentValues;
+            this.siteNewsDictionary.TryRemove(newsDate, out currentValues);
             return Task.CompletedTask;
         }
 
