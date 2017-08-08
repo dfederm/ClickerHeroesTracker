@@ -39,6 +39,7 @@ namespace ClickerHeroesTrackerWebsite
     using Newtonsoft.Json;
     using Newtonsoft.Json.Converters;
     using Newtonsoft.Json.Serialization;
+    using Website.Services.SiteNews;
 
     /// <summary>
     /// Configure the Unity container
@@ -49,13 +50,10 @@ namespace ClickerHeroesTrackerWebsite
         public void ConfigureServices(IServiceCollection services)
         {
             // The DevelopmentStorageAccount will only work if you have the Storage emulator v4.3 installed: https://go.microsoft.com/fwlink/?linkid=717179&clcid=0x409
-            bool useDevelopmentStorageAccount;
             var storageConnectionString = this.Configuration["Storage:ConnectionString"];
-            var storageAccount = string.IsNullOrEmpty(storageConnectionString)
-                ? bool.TryParse(this.Configuration["Storage:UseDevelopmentStorageAccount"], out useDevelopmentStorageAccount) && useDevelopmentStorageAccount
-                    ? CloudStorageAccount.DevelopmentStorageAccount
-                    : null
-                : CloudStorageAccount.Parse(storageConnectionString);
+            var storageAccount = !string.IsNullOrEmpty(storageConnectionString)
+                ? CloudStorageAccount.Parse(storageConnectionString)
+                : null;
 
             // Nesessary to persist keys (like the ones used to generate auth cookies)
             // By default Azure Websites can persist keys across instances within a slot, but not across slots.
@@ -191,14 +189,24 @@ namespace ClickerHeroesTrackerWebsite
             services.AddOptions();
 
             // Container controlled registrations
-            services.AddSingleton<CloudTableClient>(_ => storageAccount.CreateCloudTableClient());
-            services.AddSingleton<CloudQueueClient>(_ => storageAccount.CreateCloudQueueClient());
+            if (storageAccount != null)
+            {
+                services.AddSingleton<CloudTableClient>(_ => storageAccount.CreateCloudTableClient());
+                services.AddSingleton<CloudQueueClient>(_ => storageAccount.CreateCloudQueueClient());
+                services.AddSingleton<IUploadScheduler, AzureStorageUploadScheduler>();
+                services.AddSingleton<ISiteNewsProvider, AzureStorageSiteNewsProvider>();
+            }
+            else
+            {
+                services.AddSingleton<IUploadScheduler, NoOpUploadScheduler>();
+                services.AddSingleton<ISiteNewsProvider, InMemorySiteNewsProvider>();
+            }
+
             services.AddSingleton<GameData>(_ => GameData.Parse(Path.Combine(this.Environment.WebRootPath, @"data\GameData.json")));
             services.AddSingleton<IBuildInfoProvider>(buildInfoProvider);
             services.AddSingleton<IEmailSender, EmailSender>();
             services.AddSingleton<IMetricProvider, MetricProvider>();
             services.AddSingleton<IOptions<PasswordHasherOptions>, PasswordHasherOptionsAccessor>();
-            services.AddSingleton<IUploadScheduler, UploadScheduler>();
             services.AddSingleton<MetricManager>(_ => new MetricManager(_.GetService<TelemetryClient>()));
 
             // Per request registrations

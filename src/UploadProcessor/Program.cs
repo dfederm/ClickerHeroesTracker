@@ -92,7 +92,7 @@ namespace ClickerHeroesTracker.UploadProcessor
                     Console.WriteLine($"Found {uploadIds.Count} uploads to schedule");
                     using (var counterProvider = new CounterProvider(telemetryClient, metricProvider))
                     {
-                        var uploadScheduler = new UploadScheduler(counterProvider, queueClient);
+                        var uploadScheduler = new AzureStorageUploadScheduler(counterProvider, queueClient);
                         for (var i = 0; i < uploadIds.Count; i++)
                         {
                             if (cancelSource.IsCancellationRequested)

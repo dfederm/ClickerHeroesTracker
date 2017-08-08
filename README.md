@@ -12,6 +12,8 @@
 	1. Update `appsettings.json` with the database connection string and change the Database Kind to "SqlServer".
 	1. The required schema structure will be set up automatically when starting the application for the first time.
 1. (Optional) Install [Azure Storage Emulator](https://go.microsoft.com/fwlink/?linkid=717179&clcid=0x409) to locally mock a storage account.
+    - By default, in memory stores are used.
+    -To use the Azure Storage Emulator set Storage:ConnectionString to "UseDevelopmentStorage=true;" by uncommenting it out.
 
 # Admin user
 To make a user a site admin:
@@ -21,6 +23,8 @@ To make a user a site admin:
 
        INSERT INTO AspNetRoles(Id, ConcurrencyStamp, Name, NormalizedName)
        VALUES(NEWID(), NEWID(), 'Admin', 'ADMIN');
+
+*NOTE: for SqlLite, you will have to manually create guids to replace unsupported NEWID()*
 
 1. Add your user to the role. Rememeber to replace the user id below with the one from above.
 

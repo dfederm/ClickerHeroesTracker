@@ -1,4 +1,4 @@
-﻿// <copyright file="UploadScheduler.cs" company="Clicker Heroes Tracker">
+﻿// <copyright file="AzureStorageUploadScheduler.cs" company="Clicker Heroes Tracker">
 // Copyright (c) Clicker Heroes Tracker. All rights reserved.
 // </copyright>
 
@@ -13,16 +13,16 @@ namespace ClickerHeroesTrackerWebsite.Services.UploadProcessing
     using Newtonsoft.Json;
 
     /// <inheritdoc />
-    public sealed class UploadScheduler : IUploadScheduler
+    public sealed class AzureStorageUploadScheduler : IUploadScheduler
     {
         private readonly ICounterProvider counterProvider;
 
         private readonly Dictionary<UploadProcessingMessagePriority, CloudQueue> clients;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="UploadScheduler"/> class.
+        /// Initializes a new instance of the <see cref="AzureStorageUploadScheduler"/> class.
         /// </summary>
-        public UploadScheduler(
+        public AzureStorageUploadScheduler(
             ICounterProvider counterProvider,
             CloudQueueClient queueClient)
         {
@@ -51,6 +51,30 @@ namespace ClickerHeroesTrackerWebsite.Services.UploadProcessing
                 // Use WaitAll to do them in parallel
                 await Task.WhenAll(messages.Select(this.ScheduleInternal));
             }
+        }
+
+        /// <inheritdoc />
+        public async Task<int> ClearQueueAsync(UploadProcessingMessagePriority priority)
+        {
+            var queue = this.clients[priority];
+            var numMessages = queue.ApproximateMessageCount.GetValueOrDefault();
+
+            await queue.ClearAsync();
+            return numMessages;
+        }
+
+        /// <inheritdoc />
+        public async Task<IDictionary<string, int>> RetrieveQueueStatsAsync()
+        {
+            var queueStats = new Dictionary<string, int>();
+            foreach (var queue in this.clients)
+            {
+                await queue.Value.FetchAttributesAsync();
+                var numMessages = queue.Value.ApproximateMessageCount.GetValueOrDefault();
+                queueStats.Add(queue.Key.ToString(), numMessages);
+            }
+
+            return queueStats;
         }
 
         private static CloudQueue GetQueue(CloudQueueClient queueClient, UploadProcessingMessagePriority priority)
