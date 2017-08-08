@@ -23,7 +23,7 @@ namespace ClickerHeroesTrackerWebsite.Controllers.Api
     using Newtonsoft.Json;
 
     [Route("api/clans")]
-    [Authorize(AuthenticationSchemes = OAuthValidationDefaults.AuthenticationScheme + "," + CookieAuthenticationDefaults.AuthenticationScheme)]
+    [Authorize]
     public class ClansApiController : Controller
     {
         private const string BaseUrl = "http://clickerheroes-savedgames3-747864888.us-east-1.elb.amazonaws.com";

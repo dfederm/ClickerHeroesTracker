@@ -20,7 +20,7 @@ namespace ClickerHeroesTrackerWebsite.Services.Authentication
     /// <summary>
     /// Authentication handler which mocks the authentication with the identity data from the request.
     /// </summary>
-    internal sealed class MockAuthenticationHandler : AuthenticationHandler<MockAuthenticationSchemeOptions>
+    internal sealed class MockAuthenticationHandler : AuthenticationHandler<AuthenticationSchemeOptions>
     {
         private static readonly char[] AuthorizationTokenDelimeter = new[] { ':' };
 
@@ -33,18 +33,13 @@ namespace ClickerHeroesTrackerWebsite.Services.Authentication
             "00000000-0000-0000-0000-000000000000",
         });
 
-        public MockAuthenticationHandler(IOptionsMonitor<MockAuthenticationSchemeOptions> options, ILoggerFactory logger, UrlEncoder encoder, ISystemClock clock)
+        public MockAuthenticationHandler(IOptionsMonitor<AuthenticationSchemeOptions> options, ILoggerFactory logger, UrlEncoder encoder, ISystemClock clock)
             : base(options, logger, encoder, clock)
         {
         }
 
         protected override Task<AuthenticateResult> HandleAuthenticateAsync()
         {
-            if (!this.Options.IsEnabled)
-            {
-                return Task.FromResult(AuthenticateResult.NoResult());
-            }
-
             // Supported format: "Authorization: <Scheme==AuthenticationType> <Parameter>"
             var authorizationHeaderRaw = this.Request.Headers["Authorization"];
             if (!AuthenticationHeaderValue.TryParse(authorizationHeaderRaw, out var authorization)
@@ -53,7 +48,7 @@ namespace ClickerHeroesTrackerWebsite.Services.Authentication
                 || !authorization.Scheme.Equals(this.Scheme.Name, StringComparison.OrdinalIgnoreCase)
                 || string.IsNullOrWhiteSpace(authorization.Parameter))
             {
-                return Task.FromResult(AuthenticateResult.Fail("Unexpected AuthenticationScheme"));
+                return Task.FromResult(AuthenticateResult.NoResult());
             }
 
             // Supportered parameter format: "<UserId>:<UserName>:[<Role1>,<Role2>,...]"

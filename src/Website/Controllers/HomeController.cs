@@ -4,12 +4,11 @@
 
 namespace ClickerHeroesTrackerWebsite.Controllers
 {
-    using Microsoft.AspNetCore.Authentication.Cookies;
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Mvc;
 
-    // Add the Mock AuthenticationScheme for Integration tests.
-    [Authorize(AuthenticationSchemes = CookieAuthenticationDefaults.AuthenticationScheme + ",Mock")]
+    // Authorize + AllowAnonymous to basically force Mock authentication to work without requiring it. There's probably a better way for this to work...
+    [Authorize]
     [AllowAnonymous]
     public class HomeController : Controller
     {

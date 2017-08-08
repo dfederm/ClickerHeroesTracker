@@ -7,7 +7,6 @@ namespace ClickerHeroesTrackerWebsite.Controllers.Api
     using System;
     using System.Collections.Generic;
     using System.Net;
-    using AspNet.Security.OAuth.Validation;
     using ClickerHeroesTrackerWebsite.Instrumentation;
     using ClickerHeroesTrackerWebsite.Models;
     using ClickerHeroesTrackerWebsite.Models.Api;
@@ -20,13 +19,12 @@ namespace ClickerHeroesTrackerWebsite.Controllers.Api
     using ClickerHeroesTrackerWebsite.Services.Database;
     using ClickerHeroesTrackerWebsite.Utility;
     using Microsoft.ApplicationInsights;
-    using Microsoft.AspNetCore.Authentication.Cookies;
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Identity;
     using Microsoft.AspNetCore.Mvc;
 
     [Route("api/uploads")]
-    [Authorize(AuthenticationSchemes = OAuthValidationDefaults.AuthenticationScheme + "," + CookieAuthenticationDefaults.AuthenticationScheme)]
+    [Authorize]
     public sealed class UploadsController : Controller
     {
         private readonly IDatabaseCommandFactory databaseCommandFactory;
