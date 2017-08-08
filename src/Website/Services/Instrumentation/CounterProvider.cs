@@ -7,7 +7,6 @@ namespace ClickerHeroesTrackerWebsite.Instrumentation
     using System;
     using System.Collections.Generic;
     using System.Diagnostics;
-    using ClickerHeroesTrackerWebsite.Services.Instrumentation;
     using Microsoft.ApplicationInsights;
 
     /// <summary>
@@ -21,12 +20,9 @@ namespace ClickerHeroesTrackerWebsite.Instrumentation
 
         private readonly TelemetryClient telemetryClient;
 
-        private readonly IMetricProvider metricProvider;
-
-        public CounterProvider(TelemetryClient telemetryClient, IMetricProvider metricProvider)
+        public CounterProvider(TelemetryClient telemetryClient)
         {
             this.telemetryClient = telemetryClient;
-            this.metricProvider = metricProvider;
         }
 
         /// <inheritdoc/>
@@ -64,15 +60,13 @@ namespace ClickerHeroesTrackerWebsite.Instrumentation
                 // Stop the counter just in case it's still running.
                 counter.Stop();
 
-                var metric = this.metricProvider.GetMetric(counterType);
-                metric.Track(counter.Elapsed.TotalMilliseconds);
+                this.telemetryClient.TrackMetric("Latency_" + counterType.ToString(), counter.Elapsed.TotalMilliseconds);
             }
         }
 
         private Stopwatch Get(Counter counterType)
         {
-            Stopwatch counter;
-            if (!this.counters.TryGetValue(counterType, out counter))
+            if (!this.counters.TryGetValue(counterType, out var counter))
             {
                 counter = new Stopwatch();
                 this.counters.Add(counterType, counter);

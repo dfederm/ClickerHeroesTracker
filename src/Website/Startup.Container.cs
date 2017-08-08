@@ -17,16 +17,12 @@ namespace ClickerHeroesTrackerWebsite
     using ClickerHeroesTrackerWebsite.Services.ContentManagement;
     using ClickerHeroesTrackerWebsite.Services.Database;
     using ClickerHeroesTrackerWebsite.Services.Email;
-    using ClickerHeroesTrackerWebsite.Services.Instrumentation;
     using ClickerHeroesTrackerWebsite.Services.UploadProcessing;
-    using Microsoft.ApplicationInsights;
     using Microsoft.ApplicationInsights.AspNetCore.Extensions;
-    using Microsoft.ApplicationInsights.Extensibility;
     using Microsoft.AspNetCore.Builder;
     using Microsoft.AspNetCore.DataProtection;
     using Microsoft.AspNetCore.Hosting;
     using Microsoft.AspNetCore.Identity;
-    using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
     using Microsoft.AspNetCore.Mvc.Formatters;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.Configuration;
@@ -107,7 +103,7 @@ namespace ClickerHeroesTrackerWebsite
             services.AddIdentity<ApplicationUser, IdentityRole>(options =>
                 {
                     // We need to disallow '@' since we need to disambiguate between user names and email addresses during log in
-                    options.User.AllowedUserNameCharacters = options.User.AllowedUserNameCharacters.Replace("@", string.Empty);
+                    options.User.AllowedUserNameCharacters = options.User.AllowedUserNameCharacters.Replace("@", string.Empty, StringComparison.Ordinal);
 
                     options.User.RequireUniqueEmail = true;
 
@@ -150,6 +146,8 @@ namespace ClickerHeroesTrackerWebsite
                     options.DisableHttpsRequirement();
                 }
             });
+
+            this.ConfigureAuthentication(services);
 
             var buildInfoProvider = new BuildInfoProvider(this.Environment);
 
@@ -205,9 +203,7 @@ namespace ClickerHeroesTrackerWebsite
             services.AddSingleton<GameData>(_ => GameData.Parse(Path.Combine(this.Environment.WebRootPath, @"data\GameData.json")));
             services.AddSingleton<IBuildInfoProvider>(buildInfoProvider);
             services.AddSingleton<IEmailSender, EmailSender>();
-            services.AddSingleton<IMetricProvider, MetricProvider>();
             services.AddSingleton<IOptions<PasswordHasherOptions>, PasswordHasherOptionsAccessor>();
-            services.AddSingleton<MetricManager>(_ => new MetricManager(_.GetService<TelemetryClient>()));
 
             // Per request registrations
             services.AddScoped<IContentManager, ContentManager>();
@@ -216,7 +212,6 @@ namespace ClickerHeroesTrackerWebsite
             services.AddScoped<IUserSettingsProvider, UserSettingsProvider>();
 
             // Configuration
-            services.Configure<AuthenticationSettings>(options => this.Configuration.GetSection("Authentication").Bind(options));
             services.Configure<DatabaseSettings>(options => this.Configuration.GetSection("Database").Bind(options));
             services.Configure<EmailSenderSettings>(options => this.Configuration.GetSection("EmailSender").Bind(options));
         }

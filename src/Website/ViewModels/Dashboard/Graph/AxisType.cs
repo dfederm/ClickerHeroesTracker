@@ -22,6 +22,6 @@ namespace ClickerHeroesTrackerWebsite.Models.Dashboard.Graph
         /// <summary>
         /// Plot the data as dates. The data should be in milliseconds
         /// </summary>
-        Datetime
+        Datetime,
     }
 }

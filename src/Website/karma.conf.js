@@ -54,6 +54,7 @@ module.exports = function (config)
       { pattern: 'lib/@ng-bootstrap/ng-bootstrap/bundles/ng-bootstrap.js.map', included: false, watched: false },
       { pattern: 'lib/ngx-clipboard/dist/bundles/ngxClipboard.umd.js', included: false, watched: false },
       { pattern: 'lib/ngx-window-token/dist/bundles/ngxWindowToken.umd.js', included: false, watched: false },
+      { pattern: 'lib/time-ago-pipe/time-ago-pipe.js', included: false, watched: false },
 
       { pattern: 'js/systemjs.config.js', included: false, watched: false },
       '../karma-test-shim.js',

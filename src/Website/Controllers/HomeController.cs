@@ -4,26 +4,20 @@
 
 namespace ClickerHeroesTrackerWebsite.Controllers
 {
+    using Microsoft.AspNetCore.Authentication.Cookies;
+    using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Mvc;
 
-    /// <summary>
-    /// Handles the homepage and other related pages.
-    /// </summary>
+    // Add the Mock AuthenticationScheme for Integration tests.
+    [Authorize(AuthenticationSchemes = CookieAuthenticationDefaults.AuthenticationScheme + ",Mock")]
+    [AllowAnonymous]
     public class HomeController : Controller
     {
-        /// <summary>
-        /// The homepage for the site.
-        /// </summary>
-        /// <returns>The homepage view</returns>
         public ActionResult Index()
         {
             return this.View();
         }
 
-        /// <summary>
-        /// The "what's new" page
-        /// </summary>
-        /// <returns>The "what's new" view</returns>
         public ActionResult New()
         {
             return this.View();

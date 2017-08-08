@@ -1,0 +1,22 @@
+.clan-message
+{
+    border: solid 1px #ccc;
+    border-radius: 3px;
+    margin-bottom: 5px;
+    margin-top: 5px;
+    padding: 5px;
+    background-color: #ECD78B;
+    color: #814141;
+    font-weight: bold;
+    box-shadow: 3px 3px 3px #ccc;
+}
+
+.clan-message-content
+{
+    white-space: pre-line;
+}
+
+.clan-message p
+{
+    margin-bottom: 0;
+}

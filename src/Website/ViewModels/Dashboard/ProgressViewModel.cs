@@ -182,7 +182,7 @@ namespace ClickerHeroesTrackerWebsite.Models.Dashboard
                 }
             }
 
-            var id = title.Replace(" ", string.Empty).Replace("'", string.Empty) + "Graph";
+            var id = title.Replace(" ", string.Empty, StringComparison.Ordinal).Replace("'", string.Empty, StringComparison.Ordinal) + "Graph";
             graphs.Add(new GraphViewModel
             {
                 Id = id,

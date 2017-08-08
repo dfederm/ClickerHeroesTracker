@@ -4,6 +4,7 @@
 
 namespace ClickerHeroesTrackerWebsite.IntegrationTests
 {
+    using System;
     using System.Net;
     using System.Net.Http;
     using System.Threading.Tasks;
@@ -25,9 +26,9 @@ namespace ClickerHeroesTrackerWebsite.IntegrationTests
 
             // Unauthenticated users should have "Register" and "Log in" links, but not an "Admin" link
             var content = await response.Content.ReadAsStringAsync();
-            Assert.False(content.Contains("Admin"));
-            Assert.True(content.Contains("Register"));
-            Assert.True(content.Contains("Log in"));
+            Assert.DoesNotContain("Admin", content, StringComparison.Ordinal);
+            Assert.Contains("Register", content, StringComparison.Ordinal);
+            Assert.Contains("Log in", content, StringComparison.Ordinal);
         }
 
         [Fact]
@@ -41,9 +42,9 @@ namespace ClickerHeroesTrackerWebsite.IntegrationTests
 
             // Authenticated users should have a "Welcome" and and "Log out" links, but not an "Admin" link
             var content = await response.Content.ReadAsStringAsync();
-            Assert.False(content.Contains("Admin"));
-            Assert.True(content.Contains("Hello Test User!"));
-            Assert.True(content.Contains("Log off"));
+            Assert.DoesNotContain("Admin", content, StringComparison.Ordinal);
+            Assert.Contains("Hello Test User!", content, StringComparison.Ordinal);
+            Assert.Contains("Log off", content, StringComparison.Ordinal);
         }
 
         [Fact]
@@ -57,9 +58,9 @@ namespace ClickerHeroesTrackerWebsite.IntegrationTests
 
             // Admins should have a "Admin", "Welcome", and "Log out" links
             var content = await response.Content.ReadAsStringAsync();
-            Assert.True(content.Contains("Admin"));
-            Assert.True(content.Contains("Hello Test User!"));
-            Assert.True(content.Contains("Log off"));
+            Assert.Contains("Admin", content, StringComparison.Ordinal);
+            Assert.Contains("Hello Test User!", content, StringComparison.Ordinal);
+            Assert.Contains("Log off", content, StringComparison.Ordinal);
         }
     }
 }

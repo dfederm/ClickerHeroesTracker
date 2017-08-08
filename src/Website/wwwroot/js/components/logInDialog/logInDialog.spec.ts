@@ -18,21 +18,21 @@ describe("LogInDialogComponent", () =>
         let activeModal = { close: (): void => void 0 };
 
         TestBed.configureTestingModule(
-        {
-            imports: [ FormsModule ],
-            declarations: [ LogInDialogComponent ],
-            providers:
-            [
-                { provide: AuthenticationService, useValue: authenticationService },
-                { provide: NgbActiveModal, useValue: activeModal },
-            ],
-        })
-        .compileComponents()
-        .then(() =>
-        {
-            fixture = TestBed.createComponent(LogInDialogComponent);
-            component = fixture.componentInstance;
-        });
+            {
+                imports: [FormsModule],
+                declarations: [LogInDialogComponent],
+                providers:
+                [
+                    { provide: AuthenticationService, useValue: authenticationService },
+                    { provide: NgbActiveModal, useValue: activeModal },
+                ],
+            })
+            .compileComponents()
+            .then(() =>
+            {
+                fixture = TestBed.createComponent(LogInDialogComponent);
+                component = fixture.componentInstance;
+            });
     }));
 
     it("should display the modal header", () =>

@@ -22,6 +22,6 @@ namespace ClickerHeroesTrackerWebsite.Models
         /// <summary>
         /// The play style that involves continuous clicking to build combos. No idling.
         /// </summary>
-        Active
+        Active,
     }
 }

@@ -13,7 +13,6 @@ namespace ClickerHeroesTracker.UploadProcessor
     using ClickerHeroesTrackerWebsite.Instrumentation;
     using ClickerHeroesTrackerWebsite.Models.Game;
     using ClickerHeroesTrackerWebsite.Services.Database;
-    using ClickerHeroesTrackerWebsite.Services.Instrumentation;
     using ClickerHeroesTrackerWebsite.Services.UploadProcessing;
     using Microsoft.ApplicationInsights;
     using Microsoft.ApplicationInsights.Extensibility;
@@ -68,7 +67,6 @@ namespace ClickerHeroesTracker.UploadProcessor
             telemetryConfiguration.InstrumentationKey = configuration["ApplicationInsights:InstrumentationKey"];
             telemetryConfiguration.TelemetryProcessorChainBuilder.Use(next => new ConsoleLoggingProcessor(next)).Build();
             var telemetryClient = new TelemetryClient(telemetryConfiguration);
-            var metricProvider = new MetricProvider(new MetricManager(telemetryClient));
 
             if (ScheduleRecompute)
             {
@@ -77,7 +75,7 @@ namespace ClickerHeroesTracker.UploadProcessor
                     var uploadIds = new List<int>();
 
                     const string CommandText = "SELECT Id FROM Uploads WHERE LastComputeTime < '" + LastComputeTime + "' ORDER BY LastComputeTime DESC";
-                    using (var counterProvider = new CounterProvider(telemetryClient, metricProvider))
+                    using (var counterProvider = new CounterProvider(telemetryClient))
                     using (var databaseCommandFactory = new DatabaseCommandFactory(databaseSettingsOptions, counterProvider))
                     using (var command = databaseCommandFactory.Create(CommandText))
                     using (var reader = command.ExecuteReader())
@@ -90,7 +88,7 @@ namespace ClickerHeroesTracker.UploadProcessor
                     }
 
                     Console.WriteLine($"Found {uploadIds.Count} uploads to schedule");
-                    using (var counterProvider = new CounterProvider(telemetryClient, metricProvider))
+                    using (var counterProvider = new CounterProvider(telemetryClient))
                     {
                         var uploadScheduler = new AzureStorageUploadScheduler(counterProvider, queueClient);
                         for (var i = 0; i < uploadIds.Count; i++)
@@ -117,7 +115,7 @@ namespace ClickerHeroesTracker.UploadProcessor
             var tasks = new Task[Environment.ProcessorCount];
             for (var i = 0; i < tasks.Length; i++)
             {
-                var processor = new UploadProcessor(databaseSettingsOptions, gameData, telemetryClient, metricProvider, queueClient);
+                var processor = new UploadProcessor(databaseSettingsOptions, gameData, telemetryClient, queueClient);
                 processors.Add(processor);
                 tasks[i] = processor.ProcessAsync(cancelSource.Token);
             }
