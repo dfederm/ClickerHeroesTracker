@@ -2,7 +2,7 @@
 ## Prereqs
 1. **Clone the Repo** - There should be a "Clone" button to the right on this page.
 1. Install [.NET Core 2.1.0](https://github.com/dotnet/cli/blob/master/README.md#installers-and-binaries). Currently there is no official release for this version, so you'll need to download a nightly build. Try to match the version listed in [global.json](global.json)
-1. If you want to use **Visual Studio**, install [Visual Studio 2017](https://www.visualstudio.com/downloads/). The Community version is free.
+1. If you want to use **Visual Studio**, install [Visual Studio 2017 Preview (15.3)](https://www.visualstudio.com/vs/preview/). The Community version is free.
 1. You may also build from the **command line** and use an editor like [Visual Studio Code](https://code.visualstudio.com/).
 1. (Optional, but recommended) If you want to use **SQL** for the local database:
     1. [SQL LocalDB](https://docs.microsoft.com/en-us/sql/database-engine/configure-windows/sql-server-2016-express-localdb#install-localdb) should work just fine.
@@ -12,7 +12,7 @@
 1. (Optional, SQL LocalDB above is recommended instead) If you want to use **Sqlite** for the local database, install [SqliteBrowser](http://sqlitebrowser.org/) to easily query Sqlite during local development. Note that at this point, SqlLite doesn't work very well and may be ripped out soon.
 1. (Optional) Install [Azure Storage Emulator](https://go.microsoft.com/fwlink/?linkid=717179&clcid=0x409) to locally mock a storage account.
     - By default, in memory stores are used.
-    -To use the Azure Storage Emulator set Storage:ConnectionString to "UseDevelopmentStorage=true;" by uncommenting it out.
+    - To use the Azure Storage Emulator set `Storage:ConnectionString` to `"UseDevelopmentStorage=true;"` by uncommenting it out in `appsettings.json`.
 
 # Admin user
 To make a user a site admin:
