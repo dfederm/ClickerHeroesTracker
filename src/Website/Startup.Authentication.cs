@@ -4,11 +4,15 @@
 
 namespace ClickerHeroesTrackerWebsite
 {
+    using AspNet.Security.OAuth.Validation;
     using ClickerHeroesTrackerWebsite.Services.Authentication;
+    using Microsoft.AspNetCore.Authentication;
     using Microsoft.AspNetCore.Authentication.Cookies;
+    using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Builder;
     using Microsoft.AspNetCore.Hosting;
     using Microsoft.AspNetCore.Http;
+    using Microsoft.AspNetCore.Identity;
     using Microsoft.Extensions.DependencyInjection;
 
     /// <summary>
@@ -18,7 +22,7 @@ namespace ClickerHeroesTrackerWebsite
     {
         private void ConfigureAuthentication(IServiceCollection services)
         {
-            var authenticationBuilder = services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme);
+            var authenticationBuilder = services.AddAuthentication();
 
             authenticationBuilder.AddCookie(options => options.LoginPath = new PathString("/Account/Login"));
             authenticationBuilder.AddOAuthValidation();
@@ -67,10 +71,23 @@ namespace ClickerHeroesTrackerWebsite
                 });
             }
 
-            authenticationBuilder.AddScheme<MockAuthenticationSchemeOptions, MockAuthenticationHandler>("Mock", options =>
+            authenticationBuilder.AddScheme<AuthenticationSchemeOptions, MockAuthenticationHandler>("Mock", options => { });
+
+            services.AddAuthorization(options =>
             {
-                // Don't enable it in production. It probably wouldn't be the worst thing in the world since the handler uses a user id whitelist, but it's better to err on the safe side.
-                options.IsEnabled = !this.Environment.IsProduction();
+                var policyBuilder = new AuthorizationPolicyBuilder();
+                policyBuilder.RequireAuthenticatedUser();
+
+                // Allow both the application cookies and bearer tokens for auth
+                policyBuilder.AddAuthenticationSchemes(IdentityConstants.ApplicationScheme, OAuthValidationDefaults.AuthenticationScheme);
+
+                // In non-production, allow mock auth as well
+                if (!this.Environment.IsProduction())
+                {
+                    policyBuilder.AddAuthenticationSchemes("Mock");
+                }
+
+                options.DefaultPolicy = policyBuilder.Build();
             });
         }
     }
