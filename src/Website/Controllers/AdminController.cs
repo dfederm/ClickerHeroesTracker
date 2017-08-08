@@ -15,7 +15,6 @@ namespace ClickerHeroesTrackerWebsite.Controllers
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Identity;
     using Microsoft.AspNetCore.Mvc;
-    using Microsoft.WindowsAzure.Storage.Queue;
 
     /// <summary>
     /// The Admin controller is where Admin users can manage the site.
@@ -23,28 +22,25 @@ namespace ClickerHeroesTrackerWebsite.Controllers
     [Authorize(Roles = "Admin")]
     public class AdminController : Controller
     {
-        private static string[] priorities = Enum.GetNames(typeof(UploadProcessingMessagePriority));
-
         private readonly IDatabaseCommandFactory databaseCommandFactory;
 
         private readonly IUploadScheduler uploadScheduler;
-
-        private readonly CloudQueueClient queueClient;
 
         private readonly UserManager<ApplicationUser> userManager;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="AdminController"/> class.
         /// </summary>
+        /// <param name="databaseCommandFactory">The factory to create database commands.</param>
+        /// <param name="uploadScheduler">The upload scheduler.</param>
+        /// <param name="userManager">The user manager.</param>
         public AdminController(
             IDatabaseCommandFactory databaseCommandFactory,
             IUploadScheduler uploadScheduler,
-            CloudQueueClient queueClient,
             UserManager<ApplicationUser> userManager)
         {
             this.databaseCommandFactory = databaseCommandFactory;
             this.uploadScheduler = uploadScheduler;
-            this.queueClient = queueClient;
             this.userManager = userManager;
         }
 
@@ -54,16 +50,7 @@ namespace ClickerHeroesTrackerWebsite.Controllers
         /// <returns>The admin homepage view</returns>
         public async Task<IActionResult> Index()
         {
-            var queues = new Dictionary<string, int>();
-            foreach (var priority in priorities)
-            {
-                var queue = this.queueClient.GetQueueReference($"upload-processing-{priority.ToLower(CultureInfo.InvariantCulture)}-priority");
-                await queue.FetchAttributesAsync();
-                var numMessages = queue.ApproximateMessageCount.GetValueOrDefault();
-                queues.Add(priority, numMessages);
-            }
-
-            this.ViewBag.Queues = queues;
+            this.ViewBag.Queues = await this.uploadScheduler.RetrieveQueueStatsAsync();
 
             // Be explicit about the view name since other actions directly call this action
             return this.View("Index");
@@ -73,6 +60,7 @@ namespace ClickerHeroesTrackerWebsite.Controllers
         /// GET: UpdateComputedStats
         /// </summary>
         /// <param name="uploadIds">The upload ids to recomute stats for</param>
+        /// <param name="priority">The priority of the queue.</param>
         /// <returns>The admin homepage view</returns>
         public async Task<IActionResult> UpdateComputedStats(string uploadIds, UploadProcessingMessagePriority? priority)
         {
@@ -124,11 +112,7 @@ namespace ClickerHeroesTrackerWebsite.Controllers
                 return await this.Index();
             }
 
-            var queue = this.queueClient.GetQueueReference($"upload-processing-{priority.Value.ToString().ToLower(CultureInfo.InvariantCulture)}-priority");
-
-            var numMessages = queue.ApproximateMessageCount.GetValueOrDefault();
-
-            await queue.ClearAsync();
+            var numMessages = await this.uploadScheduler.ClearQueueAsync(priority.Value);
 
             this.ViewBag.Message = $"Cleared the {priority.Value} priority queue ({numMessages} messages)";
             return await this.Index();

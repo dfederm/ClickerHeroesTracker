@@ -25,5 +25,18 @@ namespace ClickerHeroesTrackerWebsite.Services.UploadProcessing
         /// <param name="messages">The upload ids to schedule processing for</param>
         /// <returns>The asynchronous operation</returns>
         Task ScheduleAsync(IEnumerable<UploadProcessingMessage> messages);
+
+        /// <summary>
+        /// Clears the queue of message in the priority specified.
+        /// </summary>
+        /// <param name="priority">The priority to clear.</param>
+        /// <returns>The number of items cleared.</returns>
+        Task<int> ClearQueueAsync(UploadProcessingMessagePriority priority);
+
+        /// <summary>
+        /// Retrieves queue names and number of items in them.
+        /// </summary>
+        /// <returns>Mapping of queue name and item count.</returns>
+        Task<IDictionary<string, int>> RetrieveQueueStatsAsync();
     }
 }

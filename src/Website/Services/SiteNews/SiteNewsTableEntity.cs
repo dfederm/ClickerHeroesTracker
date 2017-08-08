@@ -2,7 +2,7 @@
 // Copyright (c) Clicker Heroes Tracker. All rights reserved.
 // </copyright>
 
-namespace ClickerHeroesTrackerWebsite.Models.Api.SiteNews
+namespace Website.Services.SiteNews
 {
     using System;
     using Microsoft.WindowsAzure.Storage.Table;

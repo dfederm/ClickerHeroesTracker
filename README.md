@@ -11,6 +11,8 @@
     1. The required schema structure will be set up automatically when starting the application for the first time.
 1. (Optional, SQL LocalDB above is recommended instead) If you want to use **Sqlite** for the local database, install [SqliteBrowser](http://sqlitebrowser.org/) to easily query Sqlite during local development. Note that at this point, SqlLite doesn't work very well and may be ripped out soon.
 1. (Optional) Install [Azure Storage Emulator](https://go.microsoft.com/fwlink/?linkid=717179&clcid=0x409) to locally mock a storage account.
+    - By default, in memory stores are used.
+    -To use the Azure Storage Emulator set Storage:ConnectionString to "UseDevelopmentStorage=true;" by uncommenting it out.
 
 # Admin user
 To make a user a site admin:
@@ -20,6 +22,8 @@ To make a user a site admin:
 
        INSERT INTO AspNetRoles(Id, ConcurrencyStamp, Name, NormalizedName)
        VALUES(NEWID(), NEWID(), 'Admin', 'ADMIN');
+
+*NOTE: for SqlLite, you will have to manually create guids to replace unsupported NEWID()*
 
 1. Add your user to the role. Rememeber to replace the user id below with the one from above.
 
