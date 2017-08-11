@@ -5,10 +5,12 @@
 namespace ClickerHeroesTrackerWebsite.Models.SaveData
 {
     using System;
+    using System.Collections.Generic;
     using System.Diagnostics.CodeAnalysis;
     using System.IO;
     using System.Security.Cryptography;
     using System.Text;
+    using Ionic.Zlib;
     using Newtonsoft.Json;
 
     /// <summary>
@@ -18,6 +20,17 @@ namespace ClickerHeroesTrackerWebsite.Models.SaveData
     public class SavedGame
     {
         private static readonly JsonSerializer Serializer = CreateSerializer();
+
+        private static readonly Dictionary<string, EncodingAlgorithm> EncodingAlgorithmHashes = new Dictionary<string, EncodingAlgorithm>(StringComparer.OrdinalIgnoreCase)
+            {
+                { "7a990d405d2c6fb93aa8fbb0ec1a3b23", EncodingAlgorithm.Zlib },
+            };
+
+        private enum EncodingAlgorithm
+        {
+            Sprinkle,
+            Zlib,
+        }
 
         /// <summary>
         /// Gets or sets the ancients data for the saved game.
@@ -151,9 +164,33 @@ namespace ClickerHeroesTrackerWebsite.Models.SaveData
 
         internal static TextReader DecodeSaveData(string encodedSaveData)
         {
-            return IsAndroid(encodedSaveData)
-                ? DecodeAndroidSaveData(encodedSaveData)
-                : DecodeWebSaveData(encodedSaveData);
+            const int HashLength = 32;
+            if (encodedSaveData.Length < 32)
+            {
+                return null;
+            }
+
+            // Read the first 32 characters as they are the MD5 hash of the used algorithm
+            var encodingAlgorithmHash = encodedSaveData.Substring(0, HashLength);
+
+            // Test if the MD5 hash header corresponds to a known encoding algorithm
+            if (!EncodingAlgorithmHashes.TryGetValue(encodingAlgorithmHash, out var encodingAlgorithm))
+            {
+                // Default to "sprinkle" (old-style encoding)
+                encodingAlgorithm = EncodingAlgorithm.Sprinkle;
+            }
+
+            switch (encodingAlgorithm)
+            {
+                case EncodingAlgorithm.Zlib:
+                    var compressedData = encodedSaveData.Substring(HashLength);
+                    return DecodeZlib(compressedData);
+                case EncodingAlgorithm.Sprinkle:
+                default:
+                    return IsAndroid(encodedSaveData)
+                        ? DecodeAndroidSaveData(encodedSaveData)
+                        : DecodeWebSaveData(encodedSaveData);
+            }
         }
 
         private static TextReader DecodeAndroidSaveData(string encodedSaveData)
@@ -226,6 +263,14 @@ namespace ClickerHeroesTrackerWebsite.Models.SaveData
 
             // Wrap in a text reader
             return new StreamReader(new MemoryStream(bytes));
+        }
+
+        private static TextReader DecodeZlib(string compressedData)
+        {
+            var bytes = Convert.FromBase64String(compressedData);
+            var memStream = new MemoryStream(bytes);
+            var zlibStream = new ZlibStream(memStream, CompressionMode.Decompress);
+            return new StreamReader(zlibStream);
         }
 
         private static JsonSerializer CreateSerializer()

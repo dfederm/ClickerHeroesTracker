@@ -18,6 +18,7 @@ namespace ClickerHeroesTrackerWebsite.Tests.Models
         [InlineData("ValidEncodedAndroid", true)]
         [InlineData("InvalidEncodedAndroidNoBrace", false)]
         [InlineData("InvalidEncodedOddLength", false)] // Length of the substring on the left side of the anti-cheat code is a odd number.
+        [InlineData("ValidEncodedZlib", true)]
         public void SavedGame_DecodeSaveData(string testDataName, bool expectedValid)
         {
             var encodedSaveData = File.ReadAllText(Path.Combine("TestData", testDataName + ".txt"));
@@ -36,6 +37,7 @@ namespace ClickerHeroesTrackerWebsite.Tests.Models
 
         [Theory]
         [InlineData("InvalidEncodedAndroidBadJson")]
+        [InlineData("InvalidEncodedZlibBadData")]
         public void SavedGame_DecodeAndDeserializeSaveData(string testDataName)
         {
             var encodedSaveData = File.ReadAllText(Path.Combine("TestData", testDataName + ".txt"));
