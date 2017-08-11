@@ -30,6 +30,7 @@
 
   <ItemGroup>
     <PackageReference Include="AspNet.Security.OAuth.Validation" Version="2.0.0-*" />
+    <PackageReference Include="Iconic.Zlib.Netstandard" Version="1.0.0" />
     <PackageReference Include="Microsoft.ApplicationInsights.AspNetCore" Version="2.1.1" />
     <PackageReference Include="Microsoft.AspNetCore.All" Version="2.1.0-*" />
     <PackageReference Include="OpenIddict" Version="2.0.0-*" />
@@ -40,9 +41,6 @@
   </ItemGroup>
 
   <!-- View compilation happens automatically at publish time, but we want to also run it at build time -->
-  <Target 
-    Name="PrecompileRazorViews" 
-    AfterTargets="Build"
-    DependsOnTargets="MvcRazorPrecompile" />
+  <Target Name="PrecompileRazorViews" AfterTargets="Build" DependsOnTargets="MvcRazorPrecompile" />
 
 </Project>
