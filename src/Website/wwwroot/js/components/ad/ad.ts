@@ -1,22 +1,41 @@
-import { Component, AfterViewInit } from "@angular/core";
-
-declare global
-{
-    // tslint:disable-next-line:interface-name - We don't own this interface name, just extending it
-    interface Window
-    {
-        adsbygoogle: object[];
-    }
-}
+import { Component, OnInit, OnDestroy, ChangeDetectorRef } from "@angular/core";
+import { Router, NavigationEnd } from "@angular/router";
+import { Subscription } from "rxjs/Subscription";
 
 @Component({
     selector: "ad",
     templateUrl: "./js/components/ad/ad.html",
 })
-export class AdComponent implements AfterViewInit
+export class AdComponent implements OnInit, OnDestroy
 {
-    public ngAfterViewInit(): void
+    public rerender = false;
+
+    private subscription: Subscription;
+
+    constructor(
+        private router: Router,
+        private cdRef: ChangeDetectorRef,
+    ) { }
+
+    public ngOnInit(): void
     {
-        (window.adsbygoogle = window.adsbygoogle || []).push({});
-     }
+        this.subscription = this.router.events.subscribe((event) =>
+        {
+            if (event instanceof NavigationEnd)
+            {
+                this.rerender = true;
+                this.cdRef.detectChanges();
+                this.rerender = false;
+            }
+        });
+    }
+
+    public ngOnDestroy(): void
+    {
+        if (this.subscription)
+        {
+            this.subscription.unsubscribe();
+            this.subscription = null;
+        }
+    }
 }

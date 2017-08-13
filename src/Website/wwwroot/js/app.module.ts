@@ -6,6 +6,7 @@ import { HttpModule } from "@angular/http";
 import { NgbModule } from "@ng-bootstrap/ng-bootstrap";
 import { ClipboardModule } from "ngx-clipboard/dist";
 import { TimeAgoPipe } from "time-ago-pipe";
+import { AdsenseModule } from "ng2-adsense";
 
 import { AppComponent } from "./components/app/app";
 import { HomeComponent } from "./components/home/home";
@@ -49,6 +50,7 @@ const routes: Routes =
     HttpModule,
     NgbModule.forRoot(),
     ClipboardModule,
+    AdsenseModule.forRoot(),
   ],
   declarations:
   [

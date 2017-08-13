@@ -24,10 +24,9 @@ SystemJS.config({
     "rxjs": "lib/rxjs",
     "@ng-bootstrap/ng-bootstrap": "lib/@ng-bootstrap/ng-bootstrap/bundles/ng-bootstrap.js",
     "ngx-clipboard/dist": "lib/ngx-clipboard/dist/bundles/ngxClipboard.umd.js",
+    "ngx-window-token": "lib/ngx-window-token/dist/bundles/ngxWindowToken.umd.js", // Required by ngx-clipboard
     "time-ago-pipe": "lib/time-ago-pipe/time-ago-pipe.js",
-
-    // Required by ngx-clipboard
-    "ngx-window-token": "lib/ngx-window-token/dist/bundles/ngxWindowToken.umd.js",
+    "ng2-adsense": "lib/ng2-adsense/ng2-adsense.umd.js",
   },
 
   meta: {

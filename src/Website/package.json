@@ -19,6 +19,7 @@
     "@angular/upgrade": "^4.3.3",
     "@ng-bootstrap/ng-bootstrap": "^1.0.0-alpha.30",
     "core-js": "^2.4.1",
+    "ng2-adsense": "^3.1.0",
     "ngx-clipboard": "^8.0.3",
     "rxjs": "^5.4.2",
     "systemjs": "^0.20.17",

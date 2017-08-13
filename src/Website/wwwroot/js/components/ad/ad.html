@@ -1,7 +1,6 @@
 <div class="container">
-    <ins class="adsbygoogle"
-        style="display:block"
-        data-ad-client="ca-pub-7807152857287265"
-        data-ad-slot="2070554767"
-        data-ad-format="auto"></ins>
+    <ng2-adsense *ngIf="!rerender"
+                 [adClient]="'ca-pub-7807152857287265'"
+                 [adSlot]="2070554767">
+    </ng2-adsense>
 </div>
