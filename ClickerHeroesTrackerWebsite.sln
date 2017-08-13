@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.26730.0
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{D77FD0C8-CA68-4572-998D-F9475577CB7E}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Website", "Website", "{D77FD0C8-CA68-4572-998D-F9475577CB7E}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{6ADD8E67-6F76-4AC3-A1A6-F92F3AA664CE}"
 	ProjectSection(SolutionItems) = preProject
@@ -23,15 +23,15 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build", "build", "{3D49839D
 		build\UpdateBuildInfo.ps1 = build\UpdateBuildInfo.ps1
 	EndProjectSection
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{320B80A0-2CE5-4F03-92AF-611FA650C435}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "UploadProcessor", "UploadProcessor", "{320B80A0-2CE5-4F03-92AF-611FA650C435}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Website", "src\Website\Website.csproj", "{DECD0F75-D8E0-41D4-B39B-A439E8022C74}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Website", "Website\src\Website.csproj", "{DECD0F75-D8E0-41D4-B39B-A439E8022C74}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UploadProcessor", "src\UploadProcessor\UploadProcessor.csproj", "{EF2FDDD0-E4E0-4AEF-8CF9-3A5030FDF027}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UploadProcessor", "UploadProcessor\src\UploadProcessor.csproj", "{EF2FDDD0-E4E0-4AEF-8CF9-3A5030FDF027}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UnitTests", "test\UnitTests\UnitTests.csproj", "{6CB42835-1C1F-46F3-B92F-C4EEF165595A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UnitTests", "Website\UnitTests\UnitTests.csproj", "{6CB42835-1C1F-46F3-B92F-C4EEF165595A}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IntegrationTests", "test\IntegrationTests\IntegrationTests.csproj", "{E75BB73D-8A4A-4027-9010-06FFACD44C49}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IntegrationTests", "Website\IntegrationTests\IntegrationTests.csproj", "{E75BB73D-8A4A-4027-9010-06FFACD44C49}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -61,9 +61,9 @@ Global
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{DECD0F75-D8E0-41D4-B39B-A439E8022C74} = {D77FD0C8-CA68-4572-998D-F9475577CB7E}
-		{EF2FDDD0-E4E0-4AEF-8CF9-3A5030FDF027} = {D77FD0C8-CA68-4572-998D-F9475577CB7E}
-		{6CB42835-1C1F-46F3-B92F-C4EEF165595A} = {320B80A0-2CE5-4F03-92AF-611FA650C435}
-		{E75BB73D-8A4A-4027-9010-06FFACD44C49} = {320B80A0-2CE5-4F03-92AF-611FA650C435}
+		{EF2FDDD0-E4E0-4AEF-8CF9-3A5030FDF027} = {320B80A0-2CE5-4F03-92AF-611FA650C435}
+		{6CB42835-1C1F-46F3-B92F-C4EEF165595A} = {D77FD0C8-CA68-4572-998D-F9475577CB7E}
+		{E75BB73D-8A4A-4027-9010-06FFACD44C49} = {D77FD0C8-CA68-4572-998D-F9475577CB7E}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {4FFEC186-6362-4BDD-B910-E59CEF282333}

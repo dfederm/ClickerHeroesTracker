@@ -8,6 +8,8 @@
     <UserSecretsId>aspnet-ClickerHeroesTrackerWebsite-20161025101322</UserSecretsId>
     <!-- We use gulp to do TypeScript compilation instead -->
     <TypeScriptEnabled>false</TypeScriptEnabled>
+    <!-- Add this just to get rid of the warning -->
+    <TypeScriptToolsVersion>Latest</TypeScriptToolsVersion>
     <!-- We need this to be self-contained (SCD) since we're using a newer version of .Net Core than is installed on Azure App Service -->
     <RuntimeIdentifiers>win10-x64</RuntimeIdentifiers>
   </PropertyGroup>
