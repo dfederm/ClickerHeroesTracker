@@ -8,14 +8,14 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Include="..\Website\wwwroot\data\GameData.json">
+    <None Include="..\..\Website\src\wwwroot\data\GameData.json">
       <Link>GameData.json</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Website\Website.csproj" />
+    <ProjectReference Include="..\..\Website\src\Website.csproj" />
   </ItemGroup>
 
 </Project>
