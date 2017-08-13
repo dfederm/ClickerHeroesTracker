@@ -138,7 +138,8 @@ namespace ClickerHeroesTrackerWebsite
                 options.EnableTokenEndpoint("/api/auth/token");
 
                 // Allow client applications to use the grant_type=password flow.
-                options.AllowPasswordFlow();
+                options.AllowPasswordFlow()
+                    .AllowRefreshTokenFlow();
 
                 // Allow Http on devbox
                 if (this.Environment.IsDevelopment())
