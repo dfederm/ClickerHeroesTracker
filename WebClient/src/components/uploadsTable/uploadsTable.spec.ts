@@ -4,7 +4,7 @@ import { DatePipe } from "@angular/common";
 import { NO_ERRORS_SCHEMA } from "@angular/core";
 
 import { UploadsTableComponent } from "./uploadsTable";
-import { UploadService } from "../../services/uploadService/uploadService";
+import { UploadService, IUploadSummaryListResponse } from "../../services/uploadService/uploadService";
 
 describe("UploadsTableComponent", () =>
 {
@@ -12,53 +12,53 @@ describe("UploadsTableComponent", () =>
     let fixture: ComponentFixture<UploadsTableComponent>;
 
     let uploads =
-    [
-        { id: 0, timeSubmitted: "2017-01-01T00:00:00", playStyle: "idle" },
-        { id: 1, timeSubmitted: "2017-01-02T00:00:00", playStyle: "idle" },
-        { id: 2, timeSubmitted: "2017-01-03T00:00:00", playStyle: "idle" },
-        { id: 3, timeSubmitted: "2017-01-04T00:00:00", playStyle: "idle" },
-        { id: 4, timeSubmitted: "2017-01-05T00:00:00", playStyle: "idle" },
-        { id: 5, timeSubmitted: "2017-01-06T00:00:00", playStyle: "idle" },
-        { id: 6, timeSubmitted: "2017-01-07T00:00:00", playStyle: "idle" },
-        { id: 7, timeSubmitted: "2017-01-08T00:00:00", playStyle: "idle" },
-    ];
+        [
+            { id: 0, timeSubmitted: "2017-01-01T00:00:00", playStyle: "idle" },
+            { id: 1, timeSubmitted: "2017-01-02T00:00:00", playStyle: "idle" },
+            { id: 2, timeSubmitted: "2017-01-03T00:00:00", playStyle: "idle" },
+            { id: 3, timeSubmitted: "2017-01-04T00:00:00", playStyle: "idle" },
+            { id: 4, timeSubmitted: "2017-01-05T00:00:00", playStyle: "idle" },
+            { id: 5, timeSubmitted: "2017-01-06T00:00:00", playStyle: "idle" },
+            { id: 6, timeSubmitted: "2017-01-07T00:00:00", playStyle: "idle" },
+            { id: 7, timeSubmitted: "2017-01-08T00:00:00", playStyle: "idle" },
+        ];
 
     beforeEach(async(() =>
     {
         let uploadService =
-        {
-            getUploads(page: number, count: number): Promise<IUploadSummaryListResponse>
             {
-                let uploadsResponse: IUploadSummaryListResponse =
+                getUploads(page: number, count: number): Promise<IUploadSummaryListResponse>
                 {
-                    pagination:
-                    {
-                        count: uploads.length,
-                        next: "someNext",
-                        previous: "somePrevious",
-                    },
-                    uploads: uploads.slice((page - 1) * count, page * count),
-                };
-                return Promise.resolve(uploadsResponse);
-            },
-        };
+                    let uploadsResponse: IUploadSummaryListResponse =
+                        {
+                            pagination:
+                            {
+                                count: uploads.length,
+                                next: "someNext",
+                                previous: "somePrevious",
+                            },
+                            uploads: uploads.slice((page - 1) * count, page * count),
+                        };
+                    return Promise.resolve(uploadsResponse);
+                },
+            };
 
         TestBed.configureTestingModule(
-        {
-            declarations: [ UploadsTableComponent ],
-            providers:
-            [
-                { provide: UploadService, useValue: uploadService },
-                DatePipe,
-            ],
-            schemas: [ NO_ERRORS_SCHEMA ],
-        })
-        .compileComponents()
-        .then(() =>
-        {
-            fixture = TestBed.createComponent(UploadsTableComponent);
-            component = fixture.componentInstance;
-        });
+            {
+                declarations: [UploadsTableComponent],
+                providers:
+                [
+                    { provide: UploadService, useValue: uploadService },
+                    DatePipe,
+                ],
+                schemas: [NO_ERRORS_SCHEMA],
+            })
+            .compileComponents()
+            .then(() =>
+            {
+                fixture = TestBed.createComponent(UploadsTableComponent);
+                component = fixture.componentInstance;
+            });
     }));
 
     it("should display a table without pagination when paginate=false", async(() =>

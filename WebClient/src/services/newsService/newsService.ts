@@ -3,6 +3,11 @@ import { Http } from "@angular/http";
 
 import "rxjs/add/operator/toPromise";
 
+export interface ISiteNewsEntryListResponse
+{
+    entries: { [date: string]: string[] };
+}
+
 @Injectable()
 export class NewsService
 {

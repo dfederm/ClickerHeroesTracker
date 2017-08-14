@@ -8,7 +8,8 @@ jasmine.DEFAULT_TIMEOUT_INTERVAL = 1000;
 
 __karma__.loaded = function () { };
 
-function isSpecFile(path) {
+function isSpecFile(path)
+{
   return /\.spec\.(.*\.)?js$/.test(path);
 }
 
@@ -33,27 +34,31 @@ System.import('js/systemjs.config.js')
   .then(initTestBed)
   .then(initTesting);
 
-function initTestBed(){
+function initTestBed()
+{
   return Promise.all([
     System.import('@angular/core/testing'),
     System.import('@angular/platform-browser-dynamic/testing')
   ])
-  .then(function (providers) {
-    var coreTesting = providers[0];
-    var browserTesting = providers[1];
+    .then(function (providers)
+    {
+      var coreTesting = providers[0];
+      var browserTesting = providers[1];
 
-    coreTesting.TestBed.initTestEnvironment(
-      browserTesting.BrowserDynamicTestingModule,
-      browserTesting.platformBrowserDynamicTesting());
-  })
+      coreTesting.TestBed.initTestEnvironment(
+        browserTesting.BrowserDynamicTestingModule,
+        browserTesting.platformBrowserDynamicTesting());
+    })
 }
 
 // Import all spec files and start karma
-function initTesting () {
+function initTesting()
+{
   return Promise.all(
-    allSpecFiles.map(function (moduleName) {
+    allSpecFiles.map(function (moduleName)
+    {
       return System.import(moduleName);
     })
   )
-  .then(__karma__.start, __karma__.error);
+    .then(__karma__.start, __karma__.error);
 }

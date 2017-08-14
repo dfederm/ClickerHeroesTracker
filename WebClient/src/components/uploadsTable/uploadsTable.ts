@@ -1,6 +1,6 @@
 import { Component, OnInit, Input } from "@angular/core";
 
-import { UploadService } from "../../services/uploadService/uploadService";
+import { UploadService, IUploadSummaryListResponse } from "../../services/uploadService/uploadService";
 
 interface IUploadViewModel
 {
@@ -37,14 +37,15 @@ export class UploadsTableComponent implements OnInit
         this.populateUploads();
     }
 
-    constructor(private uploadService: UploadService) {}
+    constructor(private uploadService: UploadService) { }
 
     public ngOnInit(): void
     {
         this.populateUploads();
     }
 
-    private populateUploads(): void {
+    private populateUploads(): void
+    {
         this.uploadService
             .getUploads(this.page, this.count)
             .then(response => this.handleData(response))

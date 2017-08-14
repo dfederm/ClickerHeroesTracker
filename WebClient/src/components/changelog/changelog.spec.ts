@@ -3,7 +3,7 @@ import { By } from "@angular/platform-browser";
 import { DatePipe } from "@angular/common";
 
 import { ChangelogComponent } from "./changelog";
-import { NewsService } from "../../services/newsService/newsService";
+import { NewsService, ISiteNewsEntryListResponse } from "../../services/newsService/newsService";
 
 describe("ChangelogComponent", () =>
 {
@@ -15,33 +15,33 @@ describe("ChangelogComponent", () =>
         let newsService = { getNews: (): void => void 0 };
 
         TestBed.configureTestingModule(
-        {
-            declarations: [ ChangelogComponent ],
-            providers:
-            [
-                { provide: NewsService, useValue: newsService },
-                DatePipe,
-            ],
-        })
-        .compileComponents()
-        .then(() =>
-        {
-            fixture = TestBed.createComponent(ChangelogComponent);
-            component = fixture.componentInstance;
-        });
+            {
+                declarations: [ChangelogComponent],
+                providers:
+                [
+                    { provide: NewsService, useValue: newsService },
+                    DatePipe,
+                ],
+            })
+            .compileComponents()
+            .then(() =>
+            {
+                fixture = TestBed.createComponent(ChangelogComponent);
+                component = fixture.componentInstance;
+            });
     }));
 
     it("should display all sections of news entries when isFull=true", async(() =>
     {
         let siteNewsEntryListResponse: ISiteNewsEntryListResponse =
-        {
-            entries:
             {
-                "2017-01-01": [ "1.0", "1.1" ],
-                "2017-01-02": [ "2.0", "2.1" ],
-                "2017-01-03": [ "3.0", "3.1" ],
-            },
-        };
+                entries:
+                {
+                    "2017-01-01": ["1.0", "1.1"],
+                    "2017-01-02": ["2.0", "2.1"],
+                    "2017-01-03": ["3.0", "3.1"],
+                },
+            };
         let newsService = TestBed.get(NewsService);
         spyOn(newsService, "getNews").and.returnValue(Promise.resolve(siteNewsEntryListResponse));
 
@@ -80,14 +80,14 @@ describe("ChangelogComponent", () =>
     it("should display one section of 3 news entries when isFull=false", async(() =>
     {
         let siteNewsEntryListResponse: ISiteNewsEntryListResponse =
-        {
-            entries:
             {
-                "2017-01-01": [ "1.0", "1.1" ],
-                "2017-01-02": [ "2.0", "2.1" ],
-                "2017-01-03": [ "3.0", "3.1" ],
-            },
-        };
+                entries:
+                {
+                    "2017-01-01": ["1.0", "1.1"],
+                    "2017-01-02": ["2.0", "2.1"],
+                    "2017-01-03": ["3.0", "3.1"],
+                },
+            };
         let newsService = TestBed.get(NewsService);
         spyOn(newsService, "getNews").and.returnValue(Promise.resolve(siteNewsEntryListResponse));
 

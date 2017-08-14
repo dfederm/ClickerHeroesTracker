@@ -4,6 +4,56 @@ import { Http, RequestOptions } from "@angular/http";
 import "rxjs/add/operator/toPromise";
 
 import { AuthenticationService } from "../../services/authenticationService/authenticationService";
+import { IPaginationMetadata } from "../pagination";
+
+export interface IGuildMember
+{
+    highestZone: number;
+
+    nickname: string;
+
+    uid: string;
+}
+
+export interface IClanData
+{
+    clanName: string;
+
+    currentRaidLevel: number;
+
+    guildMembers: Array<IGuildMember>;
+
+    messages: Array<IMessage>;
+}
+
+export interface IMessage
+{
+    date: string;
+
+    username: string;
+
+    content: string;
+}
+
+export interface ILeaderboardSummaryListResponse
+{
+    pagination: IPaginationMetadata;
+
+    leaderboardClans: ILeaderboardClan[];
+}
+
+export interface ILeaderboardClan
+{
+    name: string;
+
+    currentRaidLevel: number;
+
+    memberCount: number;
+
+    rank: number;
+
+    isUserClan: boolean;
+}
 
 export interface ISendMessageResponse
 {

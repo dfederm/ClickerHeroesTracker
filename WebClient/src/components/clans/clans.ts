@@ -1,5 +1,5 @@
 import { Component, OnInit } from "@angular/core";
-import { ClanService } from "../../services/clanService/clanService";
+import { ClanService, IGuildMember, IMessage, ILeaderboardClan, ILeaderboardSummaryListResponse } from "../../services/clanService/clanService";
 
 @Component({
     selector: "clans",

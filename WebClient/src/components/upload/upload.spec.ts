@@ -10,7 +10,7 @@ import { DatePipe, PercentPipe } from "@angular/common";
 import { UploadComponent } from "./upload";
 import { ExponentialPipe } from "../../pipes/exponentialPipe";
 import { AuthenticationService } from "../../services/authenticationService/authenticationService";
-import { UploadService } from "../../services/uploadService/uploadService";
+import { UploadService, IUpload } from "../../services/uploadService/uploadService";
 
 declare global
 {

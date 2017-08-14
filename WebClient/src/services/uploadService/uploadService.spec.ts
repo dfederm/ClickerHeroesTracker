@@ -3,8 +3,9 @@ import { fakeAsync, tick } from "@angular/core/testing";
 import { BaseRequestOptions, ConnectionBackend, Http, RequestOptions } from "@angular/http";
 import { Response, ResponseOptions, RequestMethod } from "@angular/http";
 import { MockBackend, MockConnection } from "@angular/http/testing";
+import { BehaviorSubject } from "rxjs/BehaviorSubject";
 
-import { ClanService, ISendMessageResponse } from "./clanService";
+import { UploadService, IUploadSummaryListResponse, IUpload } from "./uploadService";
 import { AuthenticationService } from "../authenticationService/authenticationService";
 
 declare global
@@ -16,28 +17,31 @@ declare global
     }
 }
 
-describe("ClanService", () =>
+describe("UploadService", () =>
 {
-    let clanService: ClanService;
+    let uploadService: UploadService;
     let authenticationService: AuthenticationService;
     let backend: MockBackend;
     let lastConnection: MockConnection;
+    let isLoggedIn: BehaviorSubject<boolean>;
 
     beforeEach(() =>
     {
-        authenticationService = jasmine.createSpyObj("authenticationService", ["getAuthHeaders"]);
+        isLoggedIn = new BehaviorSubject(false);
+        authenticationService = jasmine.createSpyObj("authenticationService", ["isLoggedIn", "getAuthHeaders"]);
+        (authenticationService.isLoggedIn as jasmine.Spy).and.returnValue(isLoggedIn);
         (authenticationService.getAuthHeaders as jasmine.Spy).and.returnValue(Promise.resolve(new Headers()));
 
         let injector = ReflectiveInjector.resolveAndCreate(
             [
-                ClanService,
+                UploadService,
                 { provide: ConnectionBackend, useClass: MockBackend },
                 { provide: RequestOptions, useClass: BaseRequestOptions },
                 Http,
                 { provide: AuthenticationService, useValue: authenticationService },
             ]);
 
-        clanService = injector.get(ClanService) as ClanService;
+        uploadService = injector.get(UploadService) as UploadService;
         backend = injector.get(ConnectionBackend) as MockBackend;
         backend.connections.subscribe((connection: MockConnection) => lastConnection = connection);
 
@@ -51,27 +55,27 @@ describe("ClanService", () =>
         backend.verifyNoPendingRequests();
     });
 
-    describe("getClan", () =>
+    describe("getUploads", () =>
     {
         it("should make an api call", fakeAsync(() =>
         {
-            clanService.getClan();
+            uploadService.getUploads(1, 2);
             tick();
 
             expect(lastConnection).toBeDefined("no http service connection made");
             expect(lastConnection.request.method).toEqual(RequestMethod.Get, "method invalid");
-            expect(lastConnection.request.url).toEqual("/api/clans", "url invalid");
+            expect(lastConnection.request.url).toEqual("/api/uploads?page=1&count=2", "url invalid");
             expect(authenticationService.getAuthHeaders).toHaveBeenCalled();
         }));
 
-        it("should return clan information", fakeAsync(() =>
+        it("should return some uploads", fakeAsync(() =>
         {
-            let response: IClanData;
-            clanService.getClan()
-                .then((r: IClanData) => response = r);
+            let response: IUploadSummaryListResponse;
+            uploadService.getUploads(1, 2)
+                .then((r: IUploadSummaryListResponse) => response = r);
             tick();
 
-            let expectedResponse: IClanData = { clanName: "", currentRaidLevel: 0, guildMembers: [], messages: [] };
+            let expectedResponse: IUploadSummaryListResponse = { pagination: { count: 0, next: "", previous: "" }, uploads: [] };
             lastConnection.mockRespond(new Response(new ResponseOptions({ body: JSON.stringify(expectedResponse) })));
             tick();
 
@@ -79,30 +83,17 @@ describe("ClanService", () =>
             expect(authenticationService.getAuthHeaders).toHaveBeenCalled();
         }));
 
-        it("should return null when the user isn't in a clan", fakeAsync(() =>
-        {
-            let response: IClanData;
-            clanService.getClan()
-                .then((r: IClanData) => response = r);
-            tick();
-
-            lastConnection.mockRespond(new Response(new ResponseOptions({ status: 204 })));
-            tick();
-
-            expect(response).toBeNull("should return null");
-            expect(authenticationService.getAuthHeaders).toHaveBeenCalled();
-        }));
-
         it("should handle errors from authenticationService.getAuthHeaders", fakeAsync(() =>
         {
             (authenticationService.getAuthHeaders as jasmine.Spy).and.callFake(() => Promise.reject("someError"));
 
+            isLoggedIn.next(true);
             tick();
 
-            let response: IClanData;
+            let response: IUploadSummaryListResponse;
             let error: string;
-            clanService.getClan()
-                .then((r: IClanData) => response = r)
+            uploadService.getUploads(1, 1)
+                .then((r: IUploadSummaryListResponse) => response = r)
                 .catch((e: string) => error = e);
             tick();
 
@@ -114,10 +105,10 @@ describe("ClanService", () =>
 
         it("should handle http errors", fakeAsync(() =>
         {
-            let response: IClanData;
+            let response: IUploadSummaryListResponse;
             let error: string;
-            clanService.getClan()
-                .then((r: IClanData) => response = r)
+            uploadService.getUploads(1, 1)
+                .then((r: IUploadSummaryListResponse) => response = r)
                 .catch((e: string) => error = e);
             tick();
 
@@ -131,62 +122,65 @@ describe("ClanService", () =>
         }));
     });
 
-    describe("getUserClan", () =>
+    describe("get", () =>
     {
-        it("should make an api call", fakeAsync(() =>
+        it("should make the correct api call when the use is not logged in", fakeAsync(() =>
         {
-            clanService.getUserClan();
+            isLoggedIn.next(false);
+            tick();
+
+            uploadService.get(123);
             tick();
 
             expect(lastConnection).toBeDefined("no http service connection made");
             expect(lastConnection.request.method).toEqual(RequestMethod.Get, "method invalid");
-            expect(lastConnection.request.url).toEqual("/api/clans/userClan", "url invalid");
+            expect(lastConnection.request.url).toEqual("/api/uploads/123", "url invalid");
+            expect(authenticationService.getAuthHeaders).not.toHaveBeenCalled();
+        }));
+
+        it("should make the correct api call when the use is logged in", fakeAsync(() =>
+        {
+            isLoggedIn.next(true);
+            tick();
+
+            uploadService.get(123);
+            tick();
+
+            expect(lastConnection).toBeDefined("no http service connection made");
+            expect(lastConnection.request.method).toEqual(RequestMethod.Get, "method invalid");
+            expect(lastConnection.request.url).toEqual("/api/uploads/123", "url invalid");
             expect(authenticationService.getAuthHeaders).toHaveBeenCalled();
         }));
 
-        it("should return the user's clan leaderboard data", fakeAsync(() =>
+        it("should return an upload", fakeAsync(() =>
         {
-            let response: ILeaderboardClan;
-            clanService.getUserClan()
-                .then((r: ILeaderboardClan) => response = r);
+            let upload: IUpload;
+            uploadService.get(123)
+                .then((r: IUpload) => upload = r);
             tick();
 
-            let expectedResponse: ILeaderboardClan = { name: "", currentRaidLevel: 0, memberCount: 0, rank: 0, isUserClan: false };
-            lastConnection.mockRespond(new Response(new ResponseOptions({ body: JSON.stringify(expectedResponse) })));
+            let expectedUpload: IUpload = { id: 123, timeSubmitted: "someTimeSubmitted", playStyle: "somePlayStyle" };
+            lastConnection.mockRespond(new Response(new ResponseOptions({ body: JSON.stringify(expectedUpload) })));
             tick();
 
-            expect(response).toEqual(expectedResponse, "should return the expected response");
-            expect(authenticationService.getAuthHeaders).toHaveBeenCalled();
-        }));
-
-        it("should return null when the user isn't in a clan", fakeAsync(() =>
-        {
-            let response: ILeaderboardClan;
-            clanService.getUserClan()
-                .then((r: ILeaderboardClan) => response = r);
-            tick();
-
-            lastConnection.mockRespond(new Response(new ResponseOptions({ status: 204 })));
-            tick();
-
-            expect(response).toBeNull("should return null");
-            expect(authenticationService.getAuthHeaders).toHaveBeenCalled();
+            expect(upload).toEqual(expectedUpload, "should return the expected upload");
         }));
 
         it("should handle errors from authenticationService.getAuthHeaders", fakeAsync(() =>
         {
             (authenticationService.getAuthHeaders as jasmine.Spy).and.callFake(() => Promise.reject("someError"));
 
+            isLoggedIn.next(true);
             tick();
 
-            let response: ILeaderboardClan;
+            let upload: IUpload;
             let error: string;
-            clanService.getUserClan()
-                .then((r: ILeaderboardClan) => response = r)
+            uploadService.get(123)
+                .then((r: IUpload) => upload = r)
                 .catch((e: string) => error = e);
             tick();
 
-            expect(response).toBeUndefined();
+            expect(upload).toBeUndefined();
             expect(error).toEqual("someError");
             expect(authenticationService.getAuthHeaders).toHaveBeenCalled();
             expect(appInsights.trackEvent).toHaveBeenCalled();
@@ -194,133 +188,51 @@ describe("ClanService", () =>
 
         it("should handle http errors", fakeAsync(() =>
         {
-            let response: ILeaderboardClan;
+            let upload: IUpload;
             let error: string;
-            clanService.getUserClan()
-                .then((r: ILeaderboardClan) => response = r)
+            uploadService.get(123)
+                .then((r: IUpload) => upload = r)
                 .catch((e: string) => error = e);
             tick();
 
             lastConnection.mockError(new Error("someError"));
             tick();
 
-            expect(response).toBeUndefined();
+            expect(upload).toBeUndefined();
             expect(error).toEqual("someError");
-            expect(authenticationService.getAuthHeaders).toHaveBeenCalled();
             expect(appInsights.trackEvent).toHaveBeenCalled();
         }));
     });
 
-    describe("getLeaderboard", () =>
+    describe("create", () =>
     {
-        it("should make an api call", fakeAsync(() =>
+        it("should make the correct api call when the use is not logged in", fakeAsync(() =>
         {
-            clanService.getLeaderboard(1, 2);
+            isLoggedIn.next(false);
             tick();
 
-            expect(lastConnection).toBeDefined("no http service connection made");
-            expect(lastConnection.request.method).toEqual(RequestMethod.Get, "method invalid");
-            expect(lastConnection.request.url).toEqual("/api/clans/leaderboard?page=1&count=2", "url invalid");
-            expect(authenticationService.getAuthHeaders).toHaveBeenCalled();
-        }));
-
-        it("should return the leaderboard data", fakeAsync(() =>
-        {
-            let response: ILeaderboardSummaryListResponse;
-            clanService.getLeaderboard(1, 2)
-                .then((r: ILeaderboardSummaryListResponse) => response = r);
-            tick();
-
-            let expectedResponse: ILeaderboardSummaryListResponse = { leaderboardClans: [], pagination: null };
-            lastConnection.mockRespond(new Response(new ResponseOptions({ body: JSON.stringify(expectedResponse) })));
-            tick();
-
-            expect(response).toEqual(expectedResponse, "should return the expected response");
-            expect(authenticationService.getAuthHeaders).toHaveBeenCalled();
-        }));
-
-        it("should handle errors from authenticationService.getAuthHeaders", fakeAsync(() =>
-        {
-            (authenticationService.getAuthHeaders as jasmine.Spy).and.callFake(() => Promise.reject("someError"));
-
-            tick();
-
-            let response: ILeaderboardSummaryListResponse;
-            let error: string;
-            clanService.getLeaderboard(1, 2)
-                .then((r: ILeaderboardSummaryListResponse) => response = r)
-                .catch((e: string) => error = e);
-            tick();
-
-            expect(response).toBeUndefined();
-            expect(error).toEqual("someError");
-            expect(authenticationService.getAuthHeaders).toHaveBeenCalled();
-            expect(appInsights.trackEvent).toHaveBeenCalled();
-        }));
-
-        it("should handle http errors", fakeAsync(() =>
-        {
-            let response: ILeaderboardSummaryListResponse;
-            let error: string;
-            clanService.getLeaderboard(1, 2)
-                .then((r: ILeaderboardSummaryListResponse) => response = r)
-                .catch((e: string) => error = e);
-            tick();
-
-            lastConnection.mockError(new Error("someError"));
-            tick();
-
-            expect(response).toBeUndefined();
-            expect(error).toEqual("someError");
-            expect(authenticationService.getAuthHeaders).toHaveBeenCalled();
-            expect(appInsights.trackEvent).toHaveBeenCalled();
-        }));
-    });
-
-    describe("sendMessage", () =>
-    {
-        it("should make an api call", fakeAsync(() =>
-        {
-            clanService.sendMessage("someMessage", "someClanName");
+            uploadService.create("someEncodedSaveData", true, "somePlayStyle");
             tick();
 
             expect(lastConnection).toBeDefined("no http service connection made");
             expect(lastConnection.request.method).toEqual(RequestMethod.Post, "method invalid");
-            expect(lastConnection.request.url).toEqual("/api/clans/messages", "url invalid");
-            expect(lastConnection.request.text()).toEqual("message=someMessage&clanName=someClanName", "request body invalid");
-            expect(authenticationService.getAuthHeaders).toHaveBeenCalled();
+            expect(lastConnection.request.url).toEqual("/api/uploads", "url invalid");
+            expect(lastConnection.request.text()).toEqual("encodedSaveData=someEncodedSaveData&addToProgress=false&playStyle=somePlayStyle", "request body invalid");
+            expect(authenticationService.getAuthHeaders).not.toHaveBeenCalled();
         }));
 
-        it("should handle when the api returns a success response", fakeAsync(() =>
+        it("should make the correct api call when the use is logged in", fakeAsync(() =>
         {
-            let succeeded = false;
-            clanService.sendMessage("someMessage", "someClanName")
-                .then(() => succeeded = true);
+            isLoggedIn.next(true);
             tick();
 
-            let expectedResponse: ISendMessageResponse = { success: true };
-            lastConnection.mockRespond(new Response(new ResponseOptions({ body: JSON.stringify(expectedResponse) })));
+            uploadService.create("someEncodedSaveData", true, "somePlayStyle");
             tick();
 
-            expect(succeeded).toEqual(true);
-            expect(authenticationService.getAuthHeaders).toHaveBeenCalled();
-        }));
-
-        it("should handle when the api returns a failed response", fakeAsync(() =>
-        {
-            let succeeded = false;
-            let error: string;
-            clanService.sendMessage("someMessage", "someClanName")
-                .then(() => succeeded = true)
-                .catch((e: string) => error = e);
-            tick();
-
-            let expectedResponse: ISendMessageResponse = { success: false, reason: "someReason" };
-            lastConnection.mockRespond(new Response(new ResponseOptions({ body: JSON.stringify(expectedResponse) })));
-            tick();
-
-            expect(succeeded).toEqual(false);
-            expect(error).toEqual("someReason");
+            expect(lastConnection).toBeDefined("no http service connection made");
+            expect(lastConnection.request.method).toEqual(RequestMethod.Post, "method invalid");
+            expect(lastConnection.request.url).toEqual("/api/uploads", "url invalid");
+            expect(lastConnection.request.text()).toEqual("encodedSaveData=someEncodedSaveData&addToProgress=true&playStyle=somePlayStyle", "request body invalid");
             expect(authenticationService.getAuthHeaders).toHaveBeenCalled();
         }));
 
@@ -328,11 +240,68 @@ describe("ClanService", () =>
         {
             (authenticationService.getAuthHeaders as jasmine.Spy).and.callFake(() => Promise.reject("someError"));
 
+            isLoggedIn.next(true);
+            tick();
+
+            let uploadId: number;
+            let error: string;
+            uploadService.create("someEncodedSaveData", true, "somePlayStyle")
+                .then((id: number) => uploadId = id)
+                .catch((e: string) => error = e);
+            tick();
+
+            expect(uploadId).toBeUndefined();
+            expect(error).toEqual("someError");
+            expect(authenticationService.getAuthHeaders).toHaveBeenCalled();
+            expect(appInsights.trackEvent).toHaveBeenCalled();
+        }));
+
+        it("should handle http errors", fakeAsync(() =>
+        {
+            isLoggedIn.next(true);
+            tick();
+
+            let uploadId: number;
+            let error: Error;
+            uploadService.create("someEncodedSaveData", true, "somePlayStyle")
+                .then((id: number) => uploadId = id)
+                .catch((e: Error) => error = e);
+            tick();
+
+            let expectedError = new Error("someError");
+            lastConnection.mockError(expectedError);
+            tick();
+
+            expect(uploadId).toBeUndefined();
+            expect(error).toEqual(expectedError);
+            expect(authenticationService.getAuthHeaders).toHaveBeenCalled();
+            expect(appInsights.trackEvent).toHaveBeenCalled();
+        }));
+    });
+
+    describe("delete", () =>
+    {
+        it("should make an api call", fakeAsync(() =>
+        {
+            uploadService.delete(123);
+            tick();
+
+            expect(lastConnection).toBeDefined("no http service connection made");
+            expect(lastConnection.request.method).toEqual(RequestMethod.Delete, "method invalid");
+            expect(lastConnection.request.url).toEqual("/api/uploads/123", "url invalid");
+            expect(authenticationService.getAuthHeaders).toHaveBeenCalled();
+        }));
+
+        it("should handle errors from authenticationService.getAuthHeaders", fakeAsync(() =>
+        {
+            (authenticationService.getAuthHeaders as jasmine.Spy).and.callFake(() => Promise.reject("someError"));
+
+            isLoggedIn.next(true);
             tick();
 
             let succeeded = false;
             let error: string;
-            clanService.sendMessage("someMessage", "someClanName")
+            uploadService.delete(123)
                 .then(() => succeeded = true)
                 .catch((e: string) => error = e);
             tick();
@@ -347,7 +316,7 @@ describe("ClanService", () =>
         {
             let succeeded = false;
             let error: string;
-            clanService.sendMessage("someMessage", "someClanName")
+            uploadService.delete(123)
                 .then(() => succeeded = true)
                 .catch((e: string) => error = e);
             tick();

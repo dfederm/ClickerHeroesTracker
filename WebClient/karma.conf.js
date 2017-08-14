@@ -3,7 +3,7 @@ module.exports = function (config)
   config.set({
 
     // base path that will be used to resolve all patterns (eg. files, exclude)
-    basePath: 'wwwroot/',
+    basePath: 'dist/',
 
     // frameworks to use
     // available frameworks: https://npmjs.org/browse/keyword/karma-adapter
@@ -26,7 +26,6 @@ module.exports = function (config)
     files: [
       // System.js for module loading
       'lib/systemjs/dist/system.src.js',
-      'lib/systemjs/dist/system-polyfills.js',
 
       // System.js json loader
       { pattern: 'lib/systemjs-plugin-json/json.js', included: false, watched: false },

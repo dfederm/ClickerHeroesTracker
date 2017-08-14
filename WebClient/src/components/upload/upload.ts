@@ -1,6 +1,6 @@
 import { Component } from "@angular/core";
 import { ActivatedRoute, Router, Params } from "@angular/router";
-import { UploadService } from "../../services/uploadService/uploadService";
+import { UploadService, IUpload } from "../../services/uploadService/uploadService";
 import { AuthenticationService } from "../../services/authenticationService/authenticationService";
 
 import "rxjs/add/operator/switchMap";
@@ -284,7 +284,7 @@ export class UploadComponent
         const availableSoulsSuggestionsLatency = "AncientSuggestions";
         appInsights.startTrackEvent(availableSoulsSuggestionsLatency);
 
-        let suggestedLevels: IMap<number>;
+        let suggestedLevels: { [key: string]: number };
 
         if (this.suggestionType === "AvailableSouls")
         {
@@ -369,9 +369,9 @@ export class UploadComponent
             });
     }
 
-    private calculateAncientSuggestions(currentPrimaryAncientLevel?: number): IMap<number>
+    private calculateAncientSuggestions(currentPrimaryAncientLevel?: number): { [key: string]: number }
     {
-        const suggestedLevels: IMap<number> = {};
+        const suggestedLevels: { [key: string]: number } = {};
 
         const primaryAncient = this.playStyle === "active" ? "Fragsworth" : "Siyalatas";
         if (currentPrimaryAncientLevel === undefined)
@@ -574,7 +574,7 @@ export class UploadComponent
             : Math.round(solomonMultiplier1 * Math.pow(solomonLogFunction(solomonMultiplier2 * Math.pow(currentPrimaryAncientLevel, 2)), 0.4) * Math.pow(currentPrimaryAncientLevel, 0.8));
     }
 
-    private getTotalAncientCost(suggestedLevels: IMap<number>): number
+    private getTotalAncientCost(suggestedLevels: { [key: string]: number }): number
     {
         let cost = 0;
         const chorgorloth = this.outsidersByName["Chor'gorloth"];
@@ -604,9 +604,9 @@ export class UploadComponent
         return cost;
     }
 
-    private getAncientCostFormulas(): IMap<(level: number) => number>
+    private getAncientCostFormulas(): { [key: string]: (level: number) => number }
     {
-        const ancientCosts: IMap<(level: number) => number> = {};
+        const ancientCosts: { [key: string]: (level: number) => number } = {};
 
         for (const ancientId in gameData.ancients)
         {

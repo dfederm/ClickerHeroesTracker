@@ -4,6 +4,36 @@ import { Http, RequestOptions, Headers } from "@angular/http";
 import "rxjs/add/operator/toPromise";
 
 import { AuthenticationService } from "../../services/authenticationService/authenticationService";
+import { IPaginationMetadata } from "../pagination";
+
+export interface IUpload
+{
+    id: number;
+
+    timeSubmitted: string;
+
+    playStyle: string;
+
+    user?: IUser;
+
+    uploadContent?: string;
+
+    stats?: { [key: string]: number };
+}
+
+export interface IUploadSummaryListResponse
+{
+    pagination: IPaginationMetadata;
+
+    uploads: IUpload[];
+}
+
+export interface IUser
+{
+    id: string;
+
+    name: string;
+}
 
 @Injectable()
 export class UploadService
