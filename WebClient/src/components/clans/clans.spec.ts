@@ -5,7 +5,7 @@ import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { TimeAgoPipe } from "time-ago-pipe";
 
 import { ClansComponent } from "./clans";
-import { ClanService } from "../../services/clanService/clanService";
+import { ClanService, ILeaderboardClan, IClanData, ILeaderboardSummaryListResponse } from "../../services/clanService/clanService";
 
 describe("ClansComponent", () =>
 {

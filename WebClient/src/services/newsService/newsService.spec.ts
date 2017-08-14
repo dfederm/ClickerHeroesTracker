@@ -4,7 +4,7 @@ import { BaseRequestOptions, ConnectionBackend, Http, RequestOptions } from "@an
 import { Response, ResponseOptions } from "@angular/http";
 import { MockBackend, MockConnection } from "@angular/http/testing";
 
-import { NewsService } from "./newsService";
+import { NewsService, ISiteNewsEntryListResponse } from "./newsService";
 
 declare global
 {
@@ -26,19 +26,19 @@ describe("NewsService", () =>
         beforeEach(() =>
         {
             let injector = ReflectiveInjector.resolveAndCreate(
-            [
-                { provide: ConnectionBackend, useClass: MockBackend },
-                { provide: RequestOptions, useClass: BaseRequestOptions },
-                Http,
-                NewsService,
-            ]);
+                [
+                    { provide: ConnectionBackend, useClass: MockBackend },
+                    { provide: RequestOptions, useClass: BaseRequestOptions },
+                    Http,
+                    NewsService,
+                ]);
 
             newsService = injector.get(NewsService) as NewsService;
             backend = injector.get(ConnectionBackend) as MockBackend;
             backend.connections.subscribe((connection: MockConnection) => lastConnection = connection);
 
             // Mock the global variable. We should figure out a better way to both inject this in the product and mock this in tests.
-            window.appInsights = jasmine.createSpyObj("appInsights", [ "trackEvent" ]);
+            window.appInsights = jasmine.createSpyObj("appInsights", ["trackEvent"]);
         });
 
         afterAll(() =>
@@ -60,7 +60,7 @@ describe("NewsService", () =>
             newsService.getNews()
                 .then((r: ISiteNewsEntryListResponse) => response = r);
 
-            let expectedResponse: ISiteNewsEntryListResponse = { entries: { someEntry: [ "someEntryValue1", "someEntryValue2" ] } };
+            let expectedResponse: ISiteNewsEntryListResponse = { entries: { someEntry: ["someEntryValue1", "someEntryValue2"] } };
             lastConnection.mockRespond(new Response(new ResponseOptions({ body: JSON.stringify(expectedResponse) })));
             tick();
 

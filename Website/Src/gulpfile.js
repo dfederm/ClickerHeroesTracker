@@ -2,12 +2,10 @@
 "use strict";
 
 var gulp = require("gulp");
-var gutil = require('gulp-util');
 var rimraf = require("rimraf");
 var typescript = require("gulp-typescript");
 var sourcemaps = require("gulp-sourcemaps");
 var rename = require('gulp-rename');
-var mergeStream = require("merge-stream");
 
 var paths = {
     webroot: "./wwwroot/"
@@ -17,12 +15,13 @@ paths.jsDir = paths.webroot + "js/";
 paths.jsFiles = paths.jsDir + "**/*.js";
 
 paths.tsFiles = paths.jsDir + "**/*.ts";
+paths.htmlFiles = paths.jsDir + "**/*.html";
 
 paths.cssDir = paths.webroot + "css/";
 paths.cssFiles = paths.cssDir + "**/*.css";
 paths.cssMinFiles = paths.cssDir + "**/*.min.css";
 
-paths.libDir = paths.webroot + "lib/";
+paths.webClientDist = ["../../WebClient/dist/**/*.*", "!../../WebClient/dist/**/*.spec.js"];
 
 gulp.task("clean:js", function (cb)
 {
@@ -34,7 +33,12 @@ gulp.task("clean:css", function (cb)
     rimraf(paths.cssMinFiles, cb);
 });
 
-gulp.task("clean", ["clean:js", "clean:css"]);
+gulp.task("clean:html", function (cb)
+{
+    rimraf(paths.htmlFiles, cb);
+});
+
+gulp.task("clean", ["clean:js", "clean:css", "clean:html"]);
 
 gulp.task("tslint", function ()
 {
@@ -81,57 +85,15 @@ gulp.task("css", function ()
 
 gulp.task("copy", function ()
 {
-    var packages = [
-        "@angular",
-        "core-js",
-        "rxjs",
-        "systemjs",
-        "systemjs-plugin-json",
-        "zone.js",
-        "@ng-bootstrap/ng-bootstrap",
-        "ngx-clipboard",
-        "ngx-window-token", // Required by ngx-clipboard
-        "time-ago-pipe",
-        "ng2-adsense",
-    ];
-
-    var merged = mergeStream();
-    for (let pkg of packages)
-    {
-        merged.add(gulp.src("node_modules/" + pkg + "/**")
-            .pipe(gulp.dest(paths.libDir + pkg)));
-    }
-
-    return merged;
+    return gulp.src(paths.webClientDist)
+        .pipe(gulp.dest(paths.webroot));
 });
 
 gulp.task("build", ["js", "css", "copy"]);
 
-gulp.task("test", ["js", "copy"], function (done)
-{
-    runKarma(done, { singleRun: true });
-});
-
-gulp.task("test-debug", ["js", "copy"], function (done)
-{
-    runKarma(done, { reporters: ['kjhtml'] });
-});
-
-function runKarma(done, config)
-{
-    config = config || {};
-    config.configFile = __dirname + '/karma.conf.js';
-    var karma = require("karma").Server;
-    karma.start(config, function (exitStatus)
-    {
-        done(exitStatus ? new gutil.PluginError('karma', { message: 'Karma Tests failed' }) : undefined);
-    });
-}
-
 gulp.task("watch", function ()
 {
-    gulp.watch([paths.tsFiles], ["js"]);
+    gulp.watch(paths.webClientDist, ["copy"]);
+    gulp.watch(paths.tsFiles, ["js"]);
     gulp.watch([paths.cssFiles, "!" + paths.cssMinFiles], ["css"]);
 });
-
-gulp.task("test-watch", ["watch", "test-debug"]);

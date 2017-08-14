@@ -16,6 +16,9 @@ PublishProfiles/
 # npm package dir too
 node_modules/
 
+# generated assets from the WebClient
+dist/
+
 # bower and npm package dir
 **/wwwroot/lib/*
 

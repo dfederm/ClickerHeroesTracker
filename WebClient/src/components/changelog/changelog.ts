@@ -1,6 +1,6 @@
 import { Component, OnInit, Input } from "@angular/core";
 
-import { NewsService } from "../../services/newsService/newsService";
+import { NewsService, ISiteNewsEntryListResponse } from "../../services/newsService/newsService";
 
 interface IChangelogSectionViewModel
 {
@@ -20,7 +20,7 @@ export class ChangelogComponent implements OnInit
     @Input()
     public isFull: boolean;
 
-    constructor(private newsService: NewsService) {}
+    constructor(private newsService: NewsService) { }
 
     public ngOnInit(): void
     {
@@ -68,10 +68,10 @@ export class ChangelogComponent implements OnInit
                 }
 
                 currentSection =
-                {
-                    date: this.isFull ? date : null,
-                    entries: [],
-                };
+                    {
+                        date: this.isFull ? date : null,
+                        entries: [],
+                    };
             }
 
             let messages = entries[dateStr];
