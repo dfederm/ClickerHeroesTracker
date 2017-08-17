@@ -29,6 +29,10 @@ dist/
 # generated css
 **/wwwroot/css/*.min.css
 
+# html and css files copied from the WebClient
+**/wwwroot/js/**/*.html
+**/wwwroot/js/**/*.css
+
 # JS test reports
 **/wwwroot/test-results.xml
 **/wwwroot/coverage/
