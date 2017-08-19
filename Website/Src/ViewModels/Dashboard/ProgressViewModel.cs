@@ -7,7 +7,6 @@ namespace ClickerHeroesTrackerWebsite.Models.Dashboard
     using System;
     using System.Collections.Generic;
     using System.Linq;
-    using System.Numerics;
     using System.Security.Claims;
     using ClickerHeroesTrackerWebsite.Models.Dashboard.Graph;
     using ClickerHeroesTrackerWebsite.Models.Game;
@@ -149,16 +148,6 @@ namespace ClickerHeroesTrackerWebsite.Models.Dashboard
                 : AxisType.Linear;
         }
 
-        private static AxisType GetYAxisType(
-            IDictionary<DateTime, BigInteger> data,
-            IUserSettings userSettings)
-        {
-            return userSettings.UseLogarithmicGraphScale
-                && data.Values.Max() - data.Values.Min() > userSettings.LogarithmicGraphScaleThreshold
-                ? AxisType.Logarithmic
-                : AxisType.Linear;
-        }
-
         private void TryAddGraph(
             List<GraphViewModel> graphs,
             string title,
@@ -173,90 +162,26 @@ namespace ClickerHeroesTrackerWebsite.Models.Dashboard
 
             var yAxisType = GetYAxisType(data, userSettings);
 
-            var id = title.Replace(" ", string.Empty, StringComparison.Ordinal).Replace("'", string.Empty, StringComparison.Ordinal) + "Graph";
-            graphs.Add(new GraphViewModel
+            // If we're using a log scale, hack around the inability to plot a 0 value
+            // by changing it to 0.1 (1e-1) or "one below" 1 (1e0).
+            if (yAxisType == AxisType.Logarithmic)
             {
-                Id = id,
-                Data = new GraphData
+                // Defer the modifications until after we're done iterating to avoid an InvalidOperationException.
+                var actions = new List<Action>();
+                foreach (var pair in data)
                 {
-                    Chart = new Chart
+                    if (pair.Value == 0)
                     {
-                        Type = ChartType.Line,
-                    },
-                    Title = new Title
-                    {
-                        Text = title,
-                    },
-                    XAxis = new Axis
-                    {
-                        TickInterval = 24 * 3600 * 1000, // one day
-                        Type = AxisType.Datetime,
-                        TickWidth = 0,
-                        GridLineWidth = 1,
-                        Labels = new Labels
-                        {
-                            Align = Align.Left,
-                            X = 3,
-                            Y = -3,
-                            Format = "{value:%m/%d}",
-                        },
-                    },
-                    YAxis = new Axis
-                    {
-                        Labels = new Labels
-                        {
-                            Align = Align.Left,
-                            X = 3,
-                            Y = 16,
-                            Format = "{value:,." + numDecimals + "f}",
-                        },
-                        ShowFirstLabel = false,
-                        Type = yAxisType,
-                    },
-                    Legend = new Legend
-                    {
-                        Enabled = false,
-                    },
-                    Series = new Series[]
-                    {
-                        new Series
-                        {
-                            Color = Colors.PrimarySeriesColor,
-                            Data = data
-                                .Select(datum => new Point
-                                {
-                                    X = datum.Key.ToJavascriptTime(),
-                                    Y = datum.Value.ToString("F" + numDecimals),
-                                })
-                                .Concat(new[]
-                                {
-                                    new Point
-                                    {
-                                        X = DateTime.UtcNow.ToJavascriptTime(),
-                                        Y = data.Last().Value.ToString("F" + numDecimals),
-                                    },
-                                })
-                                .ToList(),
-                        },
-                    },
-                },
-            });
-        }
+                        actions.Add(() => data[pair.Key] = 0.1);
+                    }
+                }
 
-        private void TryAddGraph(
-            List<GraphViewModel> graphs,
-            string title,
-            IDictionary<DateTime, BigInteger> data,
-            IUserSettings userSettings,
-            int numDecimals = 0)
-        {
-            if (data == null || data.Count == 0)
-            {
-                return;
+                for (var i = 0; i < actions.Count; i++)
+                {
+                    actions[i]();
+                }
             }
 
-            var yAxisType = GetYAxisType(data, userSettings);
-
             var id = title.Replace(" ", string.Empty, StringComparison.Ordinal).Replace("'", string.Empty, StringComparison.Ordinal) + "Graph";
             graphs.Add(new GraphViewModel
             {
@@ -310,14 +235,16 @@ namespace ClickerHeroesTrackerWebsite.Models.Dashboard
                                 .Select(datum => new Point
                                 {
                                     X = datum.Key.ToJavascriptTime(),
-                                    Y = datum.Value.ToString("F" + numDecimals),
+                                    Y = datum.Value,
+                                    YFormat = "F" + (datum.Value == 0.1 ? 1 : numDecimals),
                                 })
                                 .Concat(new[]
                                 {
                                     new Point
                                     {
                                         X = DateTime.UtcNow.ToJavascriptTime(),
-                                        Y = data.Last().Value.ToString("F" + numDecimals),
+                                        Y = data.Last().Value,
+                                        YFormat = "F" + (data.Last().Value == 0.1 ? 1 : numDecimals),
                                     },
                                 })
                                 .ToList(),

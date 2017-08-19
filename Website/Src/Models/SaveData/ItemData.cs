@@ -4,8 +4,6 @@
 
 namespace ClickerHeroesTrackerWebsite.Models.SaveData
 {
-    using System.Numerics;
-    using ClickerHeroesTrackerWebsite.Utility;
     using Newtonsoft.Json;
 
     /// <summary>
@@ -24,8 +22,7 @@ namespace ClickerHeroesTrackerWebsite.Models.SaveData
         /// Gets or sets the first item bonus level.
         /// </summary>
         [JsonProperty(PropertyName = "bonus1Level")]
-        [JsonConverter(typeof(BigIntegerStringConverter))]
-        public BigInteger? Bonus1Level { get; set; }
+        public double? Bonus1Level { get; set; }
 
         /// <summary>
         /// Gets or sets the second item bonus type.
@@ -37,8 +34,7 @@ namespace ClickerHeroesTrackerWebsite.Models.SaveData
         /// Gets or sets the second item bonus level.
         /// </summary>
         [JsonProperty(PropertyName = "bonus2Level")]
-        [JsonConverter(typeof(BigIntegerStringConverter))]
-        public BigInteger? Bonus2Level { get; set; }
+        public double? Bonus2Level { get; set; }
 
         /// <summary>
         /// Gets or sets the third item bonus type.
@@ -50,8 +46,7 @@ namespace ClickerHeroesTrackerWebsite.Models.SaveData
         /// Gets or sets the third item bonus level.
         /// </summary>
         [JsonProperty(PropertyName = "bonus3Level")]
-        [JsonConverter(typeof(BigIntegerStringConverter))]
-        public BigInteger? Bonus3Level { get; set; }
+        public double? Bonus3Level { get; set; }
 
         /// <summary>
         /// Gets or sets the fourth item bonus type.
@@ -63,7 +58,6 @@ namespace ClickerHeroesTrackerWebsite.Models.SaveData
         /// Gets or sets the fourth item bonus level.
         /// </summary>
         [JsonProperty(PropertyName = "bonus4Level")]
-        [JsonConverter(typeof(BigIntegerStringConverter))]
-        public BigInteger? Bonus4Level { get; set; }
+        public double? Bonus4Level { get; set; }
     }
 }

@@ -2,7 +2,6 @@ import { Component } from "@angular/core";
 import { ActivatedRoute, Router, Params } from "@angular/router";
 import { UploadService, IUpload } from "../../services/uploadService/uploadService";
 import { AuthenticationService } from "../../services/authenticationService/authenticationService";
-import * as Decimal from "decimal.js";
 
 import "rxjs/add/operator/switchMap";
 
@@ -21,11 +20,11 @@ interface IGameData
 interface IAncientViewModel
 {
     name: string;
-    ancientLevel: decimal.Decimal;
-    itemLevel: decimal.Decimal;
-    effectiveLevel: decimal.Decimal;
-    suggestedLevel?: decimal.Decimal;
-    diffValue?: decimal.Decimal;
+    ancientLevel: number;
+    itemLevel: number;
+    effectiveLevel: number;
+    suggestedLevel?: number;
+    diffValue?: number;
     diffCopyValue?: string;
     isBase?: boolean;
 }
@@ -34,8 +33,8 @@ interface IOutsiderViewModel
 {
     id: number;
     name: string;
-    currentLevel: decimal.Decimal;
-    suggestedLevel?: decimal.Decimal;
+    currentLevel: number;
+    suggestedLevel?: number;
 }
 
 @Component({
@@ -58,19 +57,19 @@ export class UploadComponent
     public ancients: IAncientViewModel[] = [];
     public outsiders: IOutsiderViewModel[] = [];
 
-    public pendingSouls: decimal.Decimal = new Decimal(0);
-    public heroSoulsSpent: decimal.Decimal = new Decimal(0);
-    public heroSoulsSacrificed: decimal.Decimal = new Decimal(0);
-    public totalAncientSouls: decimal.Decimal = new Decimal(0);
-    public transcendentPower: decimal.Decimal = new Decimal(0);
-    public maxTranscendentPrimalReward: decimal.Decimal = new Decimal(0);
-    public bossLevelToTranscendentPrimalCap: decimal.Decimal = new Decimal(0);
-    public titanDamage: decimal.Decimal = new Decimal(0);
-    public highestZoneThisTranscension: decimal.Decimal = new Decimal(0);
-    public highestZoneLifetime: decimal.Decimal = new Decimal(0);
-    public ascensionsThisTranscension: decimal.Decimal = new Decimal(0);
-    public ascensionsLifetime: decimal.Decimal = new Decimal(0);
-    public rubies: decimal.Decimal = new Decimal(0);
+    public pendingSouls: number;
+    public heroSoulsSpent: number;
+    public heroSoulsSacrificed: number;
+    public totalAncientSouls: number;
+    public transcendentPower: number;
+    public maxTranscendentPrimalReward: number;
+    public bossLevelToTranscendentPrimalCap: number;
+    public titanDamage: number;
+    public highestZoneThisTranscension: number;
+    public highestZoneLifetime: number;
+    public ascensionsThisTranscension: number;
+    public ascensionsLifetime: number;
+    public rubies: number;
 
     public showLowAncientSoulWarning: boolean;
     public showMissingSimulationWarning: boolean;
@@ -121,8 +120,7 @@ export class UploadComponent
     private outsidersByName: { [name: string]: IOutsiderViewModel } = {};
 
     private uploadId: number;
-    private heroSouls: decimal.Decimal;
-    private ancientCostMultiplier: decimal.Decimal;
+    private heroSouls: number;
 
     private static normalizeName(name: string): string
     {
@@ -153,9 +151,9 @@ export class UploadComponent
 
             let ancient: IAncientViewModel = {
                 name: ancientShortName,
-                ancientLevel: new Decimal(0),
-                itemLevel: new Decimal(0),
-                effectiveLevel: new Decimal(0),
+                ancientLevel: 0,
+                itemLevel: 0,
+                effectiveLevel: 0,
             };
 
             this.ancients.push(ancient);
@@ -170,7 +168,7 @@ export class UploadComponent
             let outsider: IOutsiderViewModel = {
                 id: outsiderDefinition.id,
                 name: outsiderDefinition.name,
-                currentLevel: new Decimal(0),
+                currentLevel: 0,
             };
 
             this.outsiders.push(outsider);
@@ -215,47 +213,36 @@ export class UploadComponent
 
         if (upload.stats)
         {
-            let stats: { [key: string]: decimal.Decimal } = {};
-            for (let statType in upload.stats)
-            {
-                stats[statType] = new Decimal(upload.stats[statType]);
-            }
-
             for (let i = 0; i < this.ancients.length; i++)
             {
                 let ancient = this.ancients[i];
                 let ancientName = UploadComponent.normalizeName(ancient.name);
-                ancient.ancientLevel = stats["ancient" + ancientName] || new Decimal(0);
-                ancient.itemLevel = stats["item" + ancientName] || new Decimal(0);
-                ancient.effectiveLevel = ancient.ancientLevel.plus(ancient.itemLevel).floor();
+                ancient.ancientLevel = upload.stats["ancient" + ancientName] || 0;
+                ancient.itemLevel = upload.stats["item" + ancientName] || 0;
+                ancient.effectiveLevel = Math.floor(ancient.ancientLevel + ancient.itemLevel);
             }
 
             for (let i = 0; i < this.outsiders.length; i++)
             {
                 let outsider = this.outsiders[i];
                 let outsiderName = UploadComponent.normalizeName(outsider.name);
-                outsider.currentLevel = stats["outsider" + outsiderName] || new Decimal(0);
+                outsider.currentLevel = upload.stats["outsider" + outsiderName] || 0;
             }
 
-            this.pendingSouls = stats["pendingSouls"];
-            this.heroSouls = stats["heroSouls"];
-            this.heroSoulsSpent = stats["heroSoulsSpent"];
-            this.heroSoulsSacrificed = stats["heroSoulsSacrificed"];
-            this.totalAncientSouls = stats["totalAncientSouls"];
-            this.transcendentPower = stats["transcendentPower"];
-            this.maxTranscendentPrimalReward = stats["maxTranscendentPrimalReward"];
-            this.bossLevelToTranscendentPrimalCap = stats["bossLevelToTranscendentPrimalCap"];
-            this.titanDamage = stats["titanDamage"];
-            this.highestZoneThisTranscension = stats["highestZoneThisTranscension"];
-            this.highestZoneLifetime = stats["highestZoneLifetime"];
-            this.ascensionsThisTranscension = stats["ascensionsThisTranscension"];
-            this.ascensionsLifetime = stats["ascensionsLifetime"];
-            this.rubies = stats["rubies"];
-
-            // Ancient cost discount multiplier
-            const chorgorloth = this.outsidersByName["Chor'gorloth"];
-            const chorgorlothLevel = chorgorloth ? chorgorloth.currentLevel : 0;
-            this.ancientCostMultiplier = Decimal.pow(0.95, chorgorlothLevel);
+            this.pendingSouls = upload.stats["pendingSouls"];
+            this.heroSouls = upload.stats["heroSouls"];
+            this.heroSoulsSpent = upload.stats["heroSoulsSpent"];
+            this.heroSoulsSacrificed = upload.stats["heroSoulsSacrificed"];
+            this.totalAncientSouls = upload.stats["totalAncientSouls"];
+            this.transcendentPower = upload.stats["transcendentPower"];
+            this.maxTranscendentPrimalReward = upload.stats["maxTranscendentPrimalReward"];
+            this.bossLevelToTranscendentPrimalCap = upload.stats["bossLevelToTranscendentPrimalCap"];
+            this.titanDamage = upload.stats["titanDamage"];
+            this.highestZoneThisTranscension = upload.stats["highestZoneThisTranscension"];
+            this.highestZoneLifetime = upload.stats["highestZoneLifetime"];
+            this.ascensionsThisTranscension = upload.stats["ascensionsThisTranscension"];
+            this.ascensionsLifetime = upload.stats["ascensionsLifetime"];
+            this.rubies = upload.stats["rubies"];
 
             this.hydrateAncientSuggestions();
 
@@ -268,10 +255,10 @@ export class UploadComponent
         this.errorMessage = errorMessage;
     }
 
-    private formatForClipboard(num: decimal.Decimal): string
+    private formatForClipboard(num: number): string
     {
         // The game can't handle pasting in decimal points, so we'll just use an altered sci-not form that excludes the decimal (eg. 1.234e5 => 1234e2)
-        if (num.greaterThanOrEqualTo(1e6))
+        if (num >= 1e6)
         {
             let str = num.toExponential();
             let groups = UploadComponent.exponentialRegex.exec(str);
@@ -297,97 +284,68 @@ export class UploadComponent
         const availableSoulsSuggestionsLatency = "AncientSuggestions";
         appInsights.startTrackEvent(availableSoulsSuggestionsLatency);
 
-        const baseAncient = this.playStyle === "active"
-            ? "Fragsworth"
-            : "Siyalatas";
-
-        let suggestedLevels: { [key: string]: decimal.Decimal };
+        let suggestedLevels: { [key: string]: number };
 
         if (this.suggestionType === "AvailableSouls")
         {
             let availableSouls = this.heroSouls;
             if (this.useSoulsFromAscension)
             {
-                availableSouls = availableSouls.plus(this.pendingSouls);
+                availableSouls += this.pendingSouls;
             }
-
-            let baseLevel = this.getAncientLevel(baseAncient);
-            let left = baseLevel.times(-1);
-            let right: decimal.Decimal;
-            let mid: decimal.Decimal;
-            if (availableSouls.greaterThan(0))
-            {
-                /*
-                  If all hs were to be spent on Siya (or Frags), we would have the following cost equation,
-                  where bf and bi are the final and current level of Siya (or Frags) respectively:
-                  (1/2 bf^2 - 1/2 bi^2) * multiplier = hs. Solve for bf and you get the following equation:
-                */
-                right = availableSouls.dividedBy(this.ancientCostMultiplier).times(2).plus(baseLevel.pow(2)).sqrt().ceil();
-            }
-            else
-            {
-                right = new Decimal(0);
-            }
-
-            let spentHS: decimal.Decimal;
 
             /*
-              Iterate until we have converged, or until we are very close to convergence.
-              Converging exactly has run-time complexity in O(log(hs)), which, though sub-
-              polynomial in hs, is still very slow (as hs is basically exponential
-              in play-time). As such, we'll make do with an approximation.
+                As an optimization, instead of incrementing only by 1 each time,
+                we increment by increasing by a power of 2 until we can no longer afford it.
+                Then we back off by a power of 2 until we're back to trying just 1. In this
+                way we only calculate the suggestions log(n) times instead of n times where n
+                is the optimial primary ancient level.
             */
-            let initialDiff = right.minus(left);
-            while (right.minus(left).greaterThan(1) && right.minus(left).dividedBy(initialDiff).greaterThan(0.00001))
+            let power = 0;
+            let primaryAncientLevel = 0;
+            let powerChange = 1;
+
+            // Seed with some values in case nothing can be afforded
+            suggestedLevels = this.calculateAncientSuggestions(primaryAncientLevel);
+
+            while (power >= 0)
             {
-                if (spentHS === undefined)
+                // If we're on our way up we're trying to find the limit, so use the power.
+                let newPrimaryAncientLevel = Math.pow(2, power);
+                if (powerChange < 0)
                 {
-                    mid = right.plus(left).dividedBy(2).floor();
-                }
-                else
-                {
-                    let fitIndicator = spentHS.dividedBy(availableSouls).ln();
-                    let interval = right.minus(left);
-
-                    // If the (log of) the number of the percentage of spent hero souls is very large or very small, place the new search point off-center.
-                    if (fitIndicator.lessThan(-0.1))
-                    {
-                        mid = left.plus(interval.dividedBy(1.25)).floor();
-                    }
-                    else if (fitIndicator.greaterThan(0.1))
-                    {
-                        mid = left.plus(interval.dividedBy(4)).floor();
-                    }
-                    else
-                    {
-                        mid = right.plus(left).dividedBy(2).floor();
-                    }
+                    // If we're on the way down we're filling the space, so add the last affordable value.
+                    newPrimaryAncientLevel += primaryAncientLevel;
                 }
 
-                // Level according to RoT and calculate new cost
-                const newSuggestedLevels = this.calculateAncientSuggestions(baseLevel.plus(mid));
-                spentHS = this.getTotalAncientCost(newSuggestedLevels);
-                if (spentHS.lessThan(availableSouls))
+                const newSuggestedLevels = this.calculateAncientSuggestions(newPrimaryAncientLevel);
+                if (availableSouls >= this.getTotalAncientCost(newSuggestedLevels))
                 {
-                    left = mid;
+                    primaryAncientLevel = newPrimaryAncientLevel;
+                    suggestedLevels = newSuggestedLevels;
                 }
-                else
+                else if (powerChange > 0)
                 {
-                    right = mid;
+                    // We found the limit, so reverse the direction to try and fill.
+                    powerChange = -1;
                 }
+
+                power += powerChange;
             }
-
-            suggestedLevels = this.calculateAncientSuggestions(baseLevel.plus(left));
 
             // Ensure we don't suggest removing levels
             for (let ancient in suggestedLevels)
             {
-                suggestedLevels[ancient] = Decimal.max(suggestedLevels[ancient], this.getAncientLevel(ancient));
+                suggestedLevels[ancient] = Math.max(suggestedLevels[ancient], this.getAncientLevel(ancient));
             }
         }
         else
         {
             suggestedLevels = this.calculateAncientSuggestions();
+
+            const baseAncient = this.playStyle === "active"
+                ? "Fragsworth"
+                : "Siyalatas";
             this.ancientsByName[baseAncient].isBase = true;
         }
 
@@ -398,7 +356,7 @@ export class UploadComponent
             if (ancient)
             {
                 ancient.suggestedLevel = suggestedLevel;
-                ancient.diffValue = ancient.suggestedLevel.minus(this.getAncientLevel(ancientName));
+                ancient.diffValue = ancient.suggestedLevel - this.getAncientLevel(ancientName);
                 ancient.diffCopyValue = this.formatForClipboard(ancient.diffValue);
             }
         }
@@ -411,9 +369,9 @@ export class UploadComponent
             });
     }
 
-    private calculateAncientSuggestions(currentPrimaryAncientLevel?: decimal.Decimal): { [key: string]: decimal.Decimal }
+    private calculateAncientSuggestions(currentPrimaryAncientLevel?: number): { [key: string]: number }
     {
-        const suggestedLevels: { [key: string]: decimal.Decimal } = {};
+        const suggestedLevels: { [key: string]: number } = {};
 
         const primaryAncient = this.playStyle === "active" ? "Fragsworth" : "Siyalatas";
         if (currentPrimaryAncientLevel === undefined)
@@ -435,50 +393,52 @@ export class UploadComponent
         const currentAtmanLevel = this.getAncientLevel("Atman");
         const currentKumaLevel = this.getAncientLevel("Kumawakamaru");
 
-        const lnPrimary = currentPrimaryAncientLevel.ln();
-        const hpScale = this.highestZoneThisTranscension.dividedBy(500).floor().times(0.005).plus(1.145);
-        const alpha = this.transcendentPower.isZero() ? new Decimal(0) : this.transcendentPower.plus(1).ln().times(1.4067).dividedBy(hpScale.ln());
-        const lnAlpha = this.transcendentPower.isZero() ? new Decimal(0) : alpha.ln();
+        const highestZone = this.highestZoneThisTranscension;
+
+        const lnPrimary = Math.log(currentPrimaryAncientLevel);
+        const hpScale = 1.145 + (0.005 * Math.floor(highestZone / 500));
+        const alpha = this.transcendentPower === 0 ? 0 : 1.4067 * Math.log(1 + this.transcendentPower) / Math.log(hpScale);
+        const lnAlpha = this.transcendentPower === 0 ? 0 : Math.log(alpha);
 
         // Common formulas across play styles
         suggestedLevels["Argaiv"] = currentPrimaryAncientLevel;
-        suggestedLevels["Atman"] = lnPrimary.times(2.832).minus(lnAlpha.times(1.416)).minus(new Decimal(4).div(3).minus(currentAtmanLevel.times(-0.013).exp()).ln().times(1.416)).minus(6.613);
-        suggestedLevels["Bubos"] = lnPrimary.times(2.8).minus(new Decimal(1).plus(currentBubosLevel.times(-0.02).exp()).ln().times(1.4)).minus(5.94);
-        suggestedLevels["Chronos"] = lnPrimary.times(2.75).minus(new Decimal(2).minus(currentChronosLevel.times(-0.034).exp()).ln().times(1.375)).minus(5.1);
-        suggestedLevels["Dogcog"] = lnPrimary.times(2.844).minus(new Decimal(1).div(99).plus(currentDogcogLevel.times(-0.01).exp()).ln().times(1.422)).minus(7.232);
-        suggestedLevels["Dora"] = lnPrimary.times(2.877).minus(new Decimal(100).div(99).minus(currentDoraLevel.times(-0.002).exp()).ln().times(1.4365)).minus(9.63);
-        suggestedLevels["Fortuna"] = lnPrimary.times(2.875).minus(Decimal(10).div(9).minus(currentFortunaLevel.times(-0.0025).exp()).ln().times(1.4375)).minus(9.3);
-        suggestedLevels["Kumawakamaru"] = lnPrimary.times(2.844).minus(lnAlpha.times(1.422)).minus(new Decimal(1).div(4).plus(currentKumaLevel.times(-0.01).exp()).ln().times(1.422)).minus(7.014);
-        suggestedLevels["Mammon"] = suggestedLevels["Mimzee"] = currentPrimaryAncientLevel.times(0.926);
-        suggestedLevels["Morgulis"] = currentPrimaryAncientLevel.pow(2);
-        suggestedLevels["Solomon"] = this.transcendentPower.isZero()
-            ? this.getPreTranscendentSuggestedSolomonLevel(currentPrimaryAncientLevel, this.playStyle)
-            : currentPrimaryAncientLevel.pow(0.8).dividedBy(alpha.pow(0.4));
+        suggestedLevels["Atman"] = (2.832 * lnPrimary) - (1.416 * lnAlpha) - (1.416 * Math.log((4 / 3) - Math.pow(Math.E, -0.013 * currentAtmanLevel))) - 6.613;
+        suggestedLevels["Bubos"] = (2.8 * lnPrimary) - (1.4 * Math.log(1 + Math.pow(Math.E, -0.02 * currentBubosLevel))) - 5.94;
+        suggestedLevels["Chronos"] = (2.75 * lnPrimary) - (1.375 * Math.log(2 - Math.pow(Math.E, -0.034 * currentChronosLevel))) - 5.1;
+        suggestedLevels["Dogcog"] = (2.844 * lnPrimary) - (1.422 * Math.log((1 / 99) + Math.pow(Math.E, -0.01 * currentDogcogLevel))) - 7.232;
+        suggestedLevels["Dora"] = (2.877 * lnPrimary) - (1.4365 * Math.log((100 / 99) - Math.pow(Math.E, -0.002 * currentDoraLevel))) - 9.63;
+        suggestedLevels["Fortuna"] = (2.875 * lnPrimary) - (1.4375 * Math.log((10 / 9) - Math.pow(Math.E, -0.0025 * currentFortunaLevel))) - 9.3;
+        suggestedLevels["Kumawakamaru"] = (2.844 * lnPrimary) - (1.422 * lnAlpha) - (1.422 * Math.log(0.25 + Math.pow(Math.E, -0.001 * currentKumaLevel))) - 7.014;
+        suggestedLevels["Mammon"] = suggestedLevels["Mimzee"] = currentPrimaryAncientLevel * 0.926;
+        suggestedLevels["Morgulis"] = currentPrimaryAncientLevel * currentPrimaryAncientLevel;
+        suggestedLevels["Solomon"] = this.transcendentPower > 0
+            ? Math.pow(currentPrimaryAncientLevel, 0.8) / Math.pow(alpha, 0.4)
+            : this.getPreTranscendentSuggestedSolomonLevel(currentPrimaryAncientLevel, this.playStyle);
 
         // Math per play style
         switch (this.playStyle)
         {
             case "idle":
                 suggestedLevels["Libertas"] = suggestedLevels["Mammon"];
-                suggestedLevels["Nogardnit"] = suggestedLevels["Libertas"].pow(0.8);
+                suggestedLevels["Nogardnit"] = Math.pow(suggestedLevels["Libertas"], 0.8);
                 break;
             case "hybrid":
                 const hybridRatioReciprocal = 1 / this.userSettings.hybridRatio;
-                suggestedLevels["Bhaal"] = suggestedLevels["Fragsworth"] = currentPrimaryAncientLevel.times(hybridRatioReciprocal);
-                suggestedLevels["Juggernaut"] = suggestedLevels["Fragsworth"].pow(0.8);
+                suggestedLevels["Bhaal"] = suggestedLevels["Fragsworth"] = hybridRatioReciprocal * currentPrimaryAncientLevel;
+                suggestedLevels["Juggernaut"] = Math.pow(suggestedLevels["Fragsworth"], 0.8);
                 suggestedLevels["Libertas"] = suggestedLevels["Mammon"];
-                suggestedLevels["Nogardnit"] = suggestedLevels["Libertas"].pow(0.8);
+                suggestedLevels["Nogardnit"] = Math.pow(suggestedLevels["Libertas"], 0.8);
                 break;
             case "active":
                 suggestedLevels["Bhaal"] = currentPrimaryAncientLevel;
-                suggestedLevels["Juggernaut"] = currentPrimaryAncientLevel.pow(0.8);
+                suggestedLevels["Juggernaut"] = Math.pow(currentPrimaryAncientLevel, 0.8);
                 break;
         }
 
         // Normalize the values
         for (let ancient in suggestedLevels)
         {
-            suggestedLevels[ancient] = Decimal.max(suggestedLevels[ancient].ceil(), new Decimal(0));
+            suggestedLevels[ancient] = Math.max(Math.round(suggestedLevels[ancient]), 0);
         }
 
         return suggestedLevels;
@@ -487,7 +447,7 @@ export class UploadComponent
     private calculateOutsiderSuggestions(): void
     {
         let ancientSouls = this.totalAncientSouls;
-        if (ancientSouls.isZero())
+        if (ancientSouls === 0)
         {
             return;
         }
@@ -495,61 +455,61 @@ export class UploadComponent
         this.showLowAncientSoulWarning = false;
         this.showMissingSimulationWarning = false;
 
-        let suggestedXyl = new Decimal(0);
-        let suggestedChor = new Decimal(0);
-        let suggestedPhan = new Decimal(0);
-        let suggestedBorb = new Decimal(0);
-        let suggestedPony = new Decimal(0);
+        let suggestedXyl = 0;
+        let suggestedChor = 0;
+        let suggestedPhan = 0;
+        let suggestedBorb = 0;
+        let suggestedPony = 0;
 
         // Less ancient souls than the simulation data supported. We can try to guess though.
         // Our guess just alternates leveling Xyl and Pony until Xylk hits 7 and then dump into Pony unti lit matches the 30 AS simulation data.
-        if (ancientSouls.lessThan(30))
+        if (ancientSouls < 30)
         {
             this.showLowAncientSoulWarning = true;
             appInsights.trackEvent("LowAncientSouls", { ancientSouls: ancientSouls.toString() });
-            if (ancientSouls.lessThan(14))
+            if (ancientSouls < 14)
             {
-                suggestedXyl = ancientSouls.dividedBy(2).ceil();
-                suggestedPony = ancientSouls.dividedBy(2).floor();
+                suggestedXyl = Math.ceil(ancientSouls / 2);
+                suggestedPony = Math.floor(ancientSouls / 2);
             }
             else
             {
-                suggestedXyl = new Decimal(7);
-                suggestedPony = ancientSouls.minus(7);
+                suggestedXyl = 7;
+                suggestedPony = ancientSouls - 7;
             }
         }
         else
         {
-            if (ancientSouls.greaterThan(210))
+            if (ancientSouls > 210)
             {
                 this.showMissingSimulationWarning = true;
                 appInsights.trackEvent("MissingSimulationData", { ancientSouls: ancientSouls.toString() });
-                if (ancientSouls.greaterThanOrEqualTo(1500))
+                if (ancientSouls >= 1500)
                 {
-                    ancientSouls = new Decimal(1500);
+                    ancientSouls = 1500;
                 }
-                else if (ancientSouls.greaterThanOrEqualTo(500))
+                else if (ancientSouls >= 500)
                 {
-                    ancientSouls = ancientSouls.minus(ancientSouls.modulo(100));
+                    ancientSouls -= ancientSouls % 100;
                 }
                 else
                 {
-                    ancientSouls = ancientSouls.minus(ancientSouls.modulo(10));
+                    ancientSouls -= ancientSouls % 10;
                 }
             }
 
-            const outsiderLevels = optimalOutsiderLevels[ancientSouls.toNumber()];
+            const outsiderLevels = optimalOutsiderLevels[ancientSouls];
             if (outsiderLevels === null)
             {
                 // Should not happen.
                 throw Error("Could not look up optimal outsider levels for " + ancientSouls + " ancient souls. Raw ancient souls: " + this.totalAncientSouls);
             }
 
-            suggestedXyl = new Decimal(outsiderLevels[0]);
-            suggestedChor = new Decimal(outsiderLevels[1]);
-            suggestedPhan = new Decimal(outsiderLevels[2]);
-            suggestedBorb = new Decimal(outsiderLevels[3]);
-            suggestedPony = new Decimal(outsiderLevels[4]);
+            suggestedXyl = outsiderLevels[0];
+            suggestedChor = outsiderLevels[1];
+            suggestedPhan = outsiderLevels[2];
+            suggestedBorb = outsiderLevels[3];
+            suggestedPony = outsiderLevels[4];
         }
 
         for (let i = 0; i < this.outsiders.length; i++)
@@ -576,17 +536,17 @@ export class UploadComponent
         }
     }
 
-    private getAncientLevel(ancientName: string): decimal.Decimal
+    private getAncientLevel(ancientName: string): number
     {
         let ancient = this.ancientsByName[ancientName];
         return ancient
             ? this.userSettings.useEffectiveLevelForSuggestions
                 ? ancient.effectiveLevel
                 : ancient.ancientLevel
-            : new Decimal(0);
+            : 0;
     }
 
-    private getPreTranscendentSuggestedSolomonLevel(currentPrimaryAncientLevel: decimal.Decimal, playStyle: string): decimal.Decimal
+    private getPreTranscendentSuggestedSolomonLevel(currentPrimaryAncientLevel: number, playStyle: string): number
     {
         let solomonMultiplier1: number;
         let solomonMultiplier2: number;
@@ -606,21 +566,28 @@ export class UploadComponent
                 break;
         }
 
-        return Decimal.min(
-            currentPrimaryAncientLevel,
-            currentPrimaryAncientLevel.pow(2).times(solomonMultiplier2).ln().pow(0.4).times(currentPrimaryAncientLevel.pow(0.8)).times(solomonMultiplier1));
+        const solomonLogFunction = this.userSettings.useReducedSolomonFormula
+            ? Math.log10
+            : Math.log;
+        return currentPrimaryAncientLevel < 100
+            ? currentPrimaryAncientLevel
+            : Math.round(solomonMultiplier1 * Math.pow(solomonLogFunction(solomonMultiplier2 * Math.pow(currentPrimaryAncientLevel, 2)), 0.4) * Math.pow(currentPrimaryAncientLevel, 0.8));
     }
 
-    private getTotalAncientCost(suggestedLevels: { [key: string]: decimal.Decimal }): decimal.Decimal
+    private getTotalAncientCost(suggestedLevels: { [key: string]: number }): number
     {
-        let cost = new Decimal(0);
+        let cost = 0;
+        const chorgorloth = this.outsidersByName["Chor'gorloth"];
+        const chorgorlothLevel = chorgorloth ? chorgorloth.currentLevel : 0;
+        const ancientCostMultiplier = Math.pow(0.95, chorgorlothLevel);
+
         for (let ancient in suggestedLevels)
         {
             const suggestedLevel = suggestedLevels[ancient];
             const currentLevel = this.getAncientLevel(ancient);
 
             // If the ancient is over-leveled, no cost
-            if (suggestedLevel.lessThan(currentLevel))
+            if (suggestedLevel < currentLevel)
             {
                 continue;
             }
@@ -631,15 +598,15 @@ export class UploadComponent
                 continue;
             }
 
-            cost = cost.plus((costFormula(suggestedLevel).minus(costFormula(currentLevel))).times(this.ancientCostMultiplier).ceil());
+            cost += Math.ceil((costFormula(suggestedLevel) - costFormula(currentLevel)) * ancientCostMultiplier);
         }
 
         return cost;
     }
 
-    private getAncientCostFormulas(): { [key: string]: (level: decimal.Decimal) => decimal.Decimal }
+    private getAncientCostFormulas(): { [key: string]: (level: number) => number }
     {
-        const ancientCosts: { [key: string]: (level: decimal.Decimal) => decimal.Decimal } = {};
+        const ancientCosts: { [key: string]: (level: number) => number } = {};
 
         for (const ancientId in gameData.ancients)
         {
@@ -650,44 +617,39 @@ export class UploadComponent
                 ? ancient.name.substring(0, commaIndex)
                 : ancient.name;
 
-            let ancientCost: (level: decimal.Decimal) => decimal.Decimal;
+            let ancientCost: (level: number) => number;
             switch (ancient.levelCostFormula)
             {
                 case "one":
-                    ancientCost = (n: decimal.Decimal) => n;
+                    ancientCost = (n: number) => n;
                     break;
                 case "linear":
-                    ancientCost = (n: decimal.Decimal) => n.times(n.plus(1)).dividedBy(2);
+                    ancientCost = (n: number) => n * (n + 1) / 2;
                     break;
                 case "polynomial1_5":
-                    ancientCost = (n: decimal.Decimal) =>
+                    ancientCost = (n: number) =>
                     {
                         // Approximate above a certain level for perf
                         // Formula taken from https://github.com/superbob/clicker-heroes-1.0-hsoptimizer/blob/335f13b7304627065a4e515edeb3fb3c4e08f8ad/src/app/components/maths/maths.service.js
-                        if (n.greaterThan(100))
+                        if (n > 100)
                         {
-                            return new Decimal(2).div(5).times(n.pow(new Decimal(5).div(2)))
-                                .plus(new Decimal(1).div(2).times(n.pow(new Decimal(3).div(2))))
-                                .plus(new Decimal(1).div(8).times(n.pow(new Decimal(1).div(2))))
-                                .plus(new Decimal(1).div(1920).times(n.pow(new Decimal(-3).div(2)))).ceil();
-
+                            return Math.ceil(2 * Math.pow(n, 2.5) / 5 + Math.pow(n, 1.5) / 2 + Math.pow(n, 0.5) / 8 + Math.pow(n, - 1.5) / 1920);
                         }
 
-                        let num = n.toNumber();
-                        let cost = new Decimal(0);
-                        for (let i = 1; i <= num; i++)
+                        let cost = 0;
+                        for (let i = 1; i <= n; i++)
                         {
-                            cost = cost.plus(Decimal.pow(i, 1.5));
+                            cost += Math.pow(i, 1.5);
                         }
 
-                        return cost.ceil();
+                        return Math.ceil(cost);
                     };
                     break;
                 case "exponential":
-                    ancientCost = (n: decimal.Decimal) => Decimal.pow(2, n.plus(1)).minus(1);
+                    ancientCost = (n: number) => Math.pow(2, n + 1) - 1;
                     break;
                 default:
-                    ancientCost = () => new Decimal(0);
+                    ancientCost = () => 0;
             }
 
             ancientCosts[ancientShortName] = ancientCost;

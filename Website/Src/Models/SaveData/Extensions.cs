@@ -6,12 +6,11 @@ namespace ClickerHeroesTrackerWebsite.Models.SaveData
 {
     using System;
     using System.Collections.Generic;
-    using System.Numerics;
     using ClickerHeroesTrackerWebsite.Models.Game;
 
     internal static class Extensions
     {
-        public static BigInteger GetAncientLevel(this AncientsData ancientsData, int ancientId)
+        public static double GetAncientLevel(this AncientsData ancientsData, int ancientId)
         {
             AncientData ancientData;
             return ancientsData.Ancients.TryGetValue(ancientId, out ancientData)
@@ -19,15 +18,15 @@ namespace ClickerHeroesTrackerWebsite.Models.SaveData
                 : 0;
         }
 
-        public static BigInteger GetItemLevel(this IDictionary<int, BigInteger> itemLevels, int ancientId)
+        public static double GetItemLevel(this IDictionary<int, double> itemLevels, int ancientId)
         {
-            BigInteger itemLevel;
+            double itemLevel;
             return itemLevels.TryGetValue(ancientId, out itemLevel)
                 ? itemLevel
                 : 0;
         }
 
-        public static long GetOutsiderLevel(this IDictionary<int, OutsiderData> outsiderLevels, int outsiderId)
+        public static double GetOutsiderLevel(this IDictionary<int, OutsiderData> outsiderLevels, int outsiderId)
         {
             OutsiderData outsiderData;
             return outsiderLevels.TryGetValue(outsiderId, out outsiderData)
@@ -35,9 +34,9 @@ namespace ClickerHeroesTrackerWebsite.Models.SaveData
                 : 0;
         }
 
-        public static IDictionary<int, BigInteger> GetItemLevels(this ItemsData itemsData, GameData gameData)
+        public static IDictionary<int, double> GetItemLevels(this ItemsData itemsData, GameData gameData)
         {
-            var itemLevels = new Dictionary<int, BigInteger>();
+            var itemLevels = new Dictionary<int, double>();
 
             if (itemsData != null
                 && itemsData.Slots != null
@@ -70,9 +69,9 @@ namespace ClickerHeroesTrackerWebsite.Models.SaveData
 
         private static void AddItemLevels(
             GameData gameData,
-            Dictionary<int, BigInteger> itemLevels,
+            Dictionary<int, double> itemLevels,
             int? itemType,
-            BigInteger? itemLevel)
+            double? itemLevel)
         {
             if (itemType == null
                 || itemLevel == null
@@ -88,7 +87,7 @@ namespace ClickerHeroesTrackerWebsite.Models.SaveData
             }
 
             var ancientId = itemBonusType.AncientId;
-            BigInteger currentLevel;
+            double currentLevel;
             if (itemLevels.TryGetValue(ancientId, out currentLevel))
             {
                 itemLevels[ancientId] = currentLevel + itemLevel.Value;

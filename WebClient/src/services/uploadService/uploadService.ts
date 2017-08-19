@@ -18,7 +18,7 @@ export interface IUpload
 
     uploadContent?: string;
 
-    stats?: { [key: string]: string };
+    stats?: { [key: string]: number };
 }
 
 export interface IUploadSummaryListResponse
