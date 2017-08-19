@@ -5,6 +5,8 @@
     "bootstrap": "3.3.6",
     "jquery": "2.2.3",
     "jquery-validation": "1.15.0",
-    "jquery-validation-unobtrusive": "3.2.6"
+    "jquery-validation-unobtrusive": "3.2.6",
+    "decimal.js": "v7.2.3",
+    "toFormat": "https://github.com/MikeMcl/toFormat.git#1.0.0"
   }
 }

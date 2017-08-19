@@ -88,7 +88,7 @@
                             {{ancient.name}}:
                             <a href="/Manage"
                                class="text-muted"
-                               *ngIf="ancient.name == 'Solomon' && transcendentPower === 0"
+                               *ngIf="ancient.name == 'Solomon' && transcendentPower.isZero()"
                                placement="right"
                                ngbTooltip="{{isLoggedIn ? 'This is using your settings for the Solomon formula preference. You can change this on your settings page.' : 'By default we use the &quot;Ln&quot; Solomon formula. You may change this by logging in and changing your settings.'}}">
                                 (?)
@@ -97,7 +97,7 @@
 
                         <td class="text-right">
                             {{ancient.ancientLevel | exponential}}
-                            <span *ngIf="ancient.itemLevel"
+                            <span *ngIf="!ancient.itemLevel.isZero()"
                                   placement="bottom"
                                   ngbTooltip="Effective Level: {{ancient.effectiveLevel | exponential}}">
                                 (*)
@@ -176,7 +176,7 @@
                     </tr>
                     <tr>
                         <td>Transcendent Power</td>
-                        <td>{{transcendentPower | percent}}</td>
+                        <td>{{(transcendentPower ? transcendentPower.toNumber() : 0) | percent}}</td>
                     </tr>
                     <tr>
                         <td>Max Transcendent Primal Reward</td>

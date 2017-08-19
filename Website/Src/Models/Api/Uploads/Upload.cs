@@ -6,6 +6,7 @@ namespace ClickerHeroesTrackerWebsite.Models.Api.Uploads
 {
     using System;
     using System.Collections.Generic;
+    using System.Numerics;
     using ClickerHeroesTrackerWebsite.Models.Api.Stats;
 
     /// <summary>
@@ -41,6 +42,6 @@ namespace ClickerHeroesTrackerWebsite.Models.Api.Uploads
         /// <summary>
         /// Gets or sets the upload stats.
         /// </summary>
-        public IDictionary<StatType, double> Stats { get; set; }
+        public IDictionary<StatType, string> Stats { get; set; }
     }
 }

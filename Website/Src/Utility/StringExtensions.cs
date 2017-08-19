@@ -21,8 +21,7 @@ namespace ClickerHeroesTrackerWebsite.Utility
         public static TEnum SafeParseEnum<TEnum>(this string str)
             where TEnum : struct
         {
-            TEnum value;
-            return Enum.TryParse<TEnum>(str, out value) ? value : default(TEnum);
+            return Enum.TryParse<TEnum>(str, out var value) ? value : default(TEnum);
         }
 
         public static string[] SplitIntoChunks(this string str, int chunkLength)

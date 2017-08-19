@@ -6,6 +6,8 @@ namespace ClickerHeroesTrackerWebsite.Models.Dashboard
 {
     using System;
     using System.Collections.Generic;
+    using System.Globalization;
+    using System.Numerics;
     using ClickerHeroesTrackerWebsite.Models.Game;
     using ClickerHeroesTrackerWebsite.Services.Database;
     using ClickerHeroesTrackerWebsite.Utility;
@@ -85,9 +87,9 @@ namespace ClickerHeroesTrackerWebsite.Models.Dashboard
                 parameters))
             using (var reader = command.ExecuteReader())
             {
-                this.TitanDamageData = new SortedDictionary<DateTime, double>();
-                this.SoulsSpentData = new SortedDictionary<DateTime, double>();
-                this.HeroSoulsSacrificedData = new SortedDictionary<DateTime, double>();
+                this.TitanDamageData = new SortedDictionary<DateTime, BigInteger>();
+                this.SoulsSpentData = new SortedDictionary<DateTime, BigInteger>();
+                this.HeroSoulsSacrificedData = new SortedDictionary<DateTime, BigInteger>();
                 this.TotalAncientSoulsData = new SortedDictionary<DateTime, double>();
                 this.TranscendentPowerData = new SortedDictionary<DateTime, double>();
                 this.RubiesData = new SortedDictionary<DateTime, double>();
@@ -99,9 +101,9 @@ namespace ClickerHeroesTrackerWebsite.Models.Dashboard
                 while (reader.Read())
                 {
                     var uploadTime = Convert.ToDateTime(reader["UploadTime"]);
-                    this.TitanDamageData.AddOrUpdate(uploadTime, Convert.ToDouble(reader["TitanDamage"]));
-                    this.SoulsSpentData.AddOrUpdate(uploadTime, Convert.ToDouble(reader["SoulsSpent"]));
-                    this.HeroSoulsSacrificedData.AddOrUpdate(uploadTime, Convert.ToDouble(reader["HeroSoulsSacrificed"]));
+                    this.TitanDamageData.AddOrUpdate(uploadTime, reader["TitanDamage"].ToString().ToBigInteger());
+                    this.SoulsSpentData.AddOrUpdate(uploadTime, reader["SoulsSpent"].ToString().ToBigInteger());
+                    this.HeroSoulsSacrificedData.AddOrUpdate(uploadTime, reader["HeroSoulsSacrificed"].ToString().ToBigInteger());
                     this.TotalAncientSoulsData.AddOrUpdate(uploadTime, Convert.ToDouble(reader["TotalAncientSouls"]));
                     this.TranscendentPowerData.AddOrUpdate(uploadTime, 100 * Convert.ToDouble(reader["TranscendentPower"]));
                     this.RubiesData.AddOrUpdate(uploadTime, Convert.ToDouble(reader["Rubies"]));
@@ -116,24 +118,22 @@ namespace ClickerHeroesTrackerWebsite.Models.Dashboard
                     return;
                 }
 
-                this.AncientLevelData = new SortedDictionary<string, IDictionary<DateTime, double>>(StringComparer.OrdinalIgnoreCase);
+                this.AncientLevelData = new SortedDictionary<string, IDictionary<DateTime, BigInteger>>(StringComparer.OrdinalIgnoreCase);
                 while (reader.Read())
                 {
                     var uploadTime = Convert.ToDateTime(reader["UploadTime"]);
                     var ancientId = Convert.ToInt32(reader["AncientId"]);
-                    var level = Convert.ToDouble(reader["Level"]);
+                    var level = reader["Level"].ToString().ToBigInteger();
 
-                    Ancient ancient;
-                    if (!gameData.Ancients.TryGetValue(ancientId, out ancient))
+                    if (!gameData.Ancients.TryGetValue(ancientId, out var ancient))
                     {
                         telemetryClient.TrackEvent("Unknown Ancient", new Dictionary<string, string> { { "AncientId", ancientId.ToString() } });
                         continue;
                     }
 
-                    IDictionary<DateTime, double> levelData;
-                    if (!this.AncientLevelData.TryGetValue(ancient.Name, out levelData))
+                    if (!this.AncientLevelData.TryGetValue(ancient.Name, out var levelData))
                     {
-                        levelData = new SortedDictionary<DateTime, double>();
+                        levelData = new SortedDictionary<DateTime, BigInteger>();
                         this.AncientLevelData.Add(ancient.Name, levelData);
                     }
 
@@ -152,15 +152,13 @@ namespace ClickerHeroesTrackerWebsite.Models.Dashboard
                     var outsiderId = Convert.ToInt32(reader["OutsiderId"]);
                     var level = Convert.ToDouble(reader["Level"]);
 
-                    Outsider outsider;
-                    if (!gameData.Outsiders.TryGetValue(outsiderId, out outsider))
+                    if (!gameData.Outsiders.TryGetValue(outsiderId, out var outsider))
                     {
                         telemetryClient.TrackEvent("Unknown Outsider", new Dictionary<string, string> { { "OutsiderId", outsiderId.ToString() } });
                         continue;
                     }
 
-                    IDictionary<DateTime, double> levelData;
-                    if (!this.OutsiderLevelData.TryGetValue(outsider.Name, out levelData))
+                    if (!this.OutsiderLevelData.TryGetValue(outsider.Name, out var levelData))
                     {
                         levelData = new SortedDictionary<DateTime, double>();
                         this.OutsiderLevelData.Add(outsider.Name, levelData);
@@ -175,11 +173,11 @@ namespace ClickerHeroesTrackerWebsite.Models.Dashboard
 
         public bool IsValid { get; }
 
-        public IDictionary<DateTime, double> TitanDamageData { get; }
+        public IDictionary<DateTime, BigInteger> TitanDamageData { get; }
 
-        public IDictionary<DateTime, double> SoulsSpentData { get; }
+        public IDictionary<DateTime, BigInteger> SoulsSpentData { get; }
 
-        public IDictionary<DateTime, double> HeroSoulsSacrificedData { get; }
+        public IDictionary<DateTime, BigInteger> HeroSoulsSacrificedData { get; }
 
         public IDictionary<DateTime, double> TotalAncientSoulsData { get; }
 
@@ -195,7 +193,7 @@ namespace ClickerHeroesTrackerWebsite.Models.Dashboard
 
         public IDictionary<DateTime, double> AscensionsLifetimeData { get; }
 
-        public IDictionary<string, IDictionary<DateTime, double>> AncientLevelData { get; }
+        public IDictionary<string, IDictionary<DateTime, BigInteger>> AncientLevelData { get; }
 
         public IDictionary<string, IDictionary<DateTime, double>> OutsiderLevelData { get; }
     }
