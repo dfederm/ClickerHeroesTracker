@@ -16,6 +16,9 @@ PublishProfiles/
 # npm package dir too
 node_modules/
 
+# generated assets from the WebClient
+dist/
+
 # bower and npm package dir
 **/wwwroot/lib/*
 
@@ -25,6 +28,10 @@ node_modules/
 
 # generated css
 **/wwwroot/css/*.min.css
+
+# html and css files copied from the WebClient
+**/wwwroot/js/**/*.html
+**/wwwroot/js/**/*.css
 
 # JS test reports
 **/wwwroot/test-results.xml

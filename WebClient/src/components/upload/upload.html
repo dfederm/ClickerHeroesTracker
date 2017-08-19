@@ -1,0 +1,217 @@
+<div class="container">
+    <h2>Calculator</h2>
+    <p *ngIf="errorMessage"
+       class="alert alert-danger">
+        {{errorMessage}}
+    </p>
+    <div class="row">
+        <div class="col-md-6">
+            <ul class="list-inline">
+                <li>
+                    <label>User:</label>
+                    <span [ngClass]="{'text-muted' : !userName}">
+                        {{userName || "(Anonymous)"}}
+                    </span>
+                </li>
+                <li>
+                    <label>Upload Time:</label>
+                    <span>{{uploadTime | date:'short'}}</span>
+                </li>
+                <li>
+                    <label>Play Style:</label>
+                    <span>{{playStyle | titlecase}}</span>
+                </li>
+            </ul>
+        </div>
+        <div class="col-md-6 pull-right">
+            <button *ngIf="uploadContent"
+                    class="btn btn-secondary">
+                View Save Data
+            </button>
+            <!-- Assume if you can see the raw upload that you own it and can delete. -->
+            <button *ngIf="uploadContent"
+                    class="btn btn-danger"
+                    (click)="deleteUpload()">
+                Delete
+            </button>
+            <button class="btn btn-secondary">
+                Share
+            </button>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-lg-6">
+            <h4>Ancients:</h4>
+            <p class="text-muted">
+                Based on the
+                <a href="https://redd.it/4naohc"
+                   target="_blank">
+                   Math by /u/sugima
+                </a>.
+            </p>
+            <fieldset class="form-group">
+                <legend class="col-form-legend">Suggestion Type</legend>
+                <div class="form-check form-check-inline">
+                    <label class="form-check-label">
+                        <input class="form-check-input" type="radio" name="suggestionType" [(ngModel)]="suggestionType" [value]="'AvailableSouls'">
+                        <span>Available Souls</span>
+                        <span class="text-muted" data-toggle="tooltip" data-placement="bottom" title="This mode suggests what to buy based on the souls you currently have available">(?)</span>
+                    </label>
+                </div>
+                <div class="form-check form-check-inline">
+                    <label class="form-check-label">
+                        <input class="form-check-input" type="radio" name="suggestionType" [(ngModel)]="suggestionType" [value]="'RulesOfThumb'">
+                        <span>Rules of Thumb</span>
+                        <span class="text-muted" data-toggle="tooltip" data-placement="bottom" title="This shows the optimal levels based on your primary ancient's level. It does not take into account what you can afford currently">(?)</span>
+                    </label>
+                </div>
+            </fieldset>
+            <div *ngIf="suggestionType == 'AvailableSouls'"
+                 class="form-group">
+                <label class="form-check-label">
+                    <input class="form-check-input" name="useSoulsFromAscension" [(ngModel)]="useSoulsFromAscension" type="checkbox">
+                    <span>Include souls from ascension (+{{pendingSouls | exponential}})</span>
+                </label>
+            </div>
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Ancient</th>
+                        <th>Current</th>
+                        <th>Suggested</th>
+                        <th>Difference</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngFor="let ancient of ancients">
+                        <td>
+                            {{ancient.name}}:
+                            <a href="/Manage"
+                               class="text-muted"
+                               *ngIf="ancient.name == 'Solomon' && transcendentPower.isZero()"
+                               placement="right"
+                               ngbTooltip="{{isLoggedIn ? 'This is using your settings for the Solomon formula preference. You can change this on your settings page.' : 'By default we use the &quot;Ln&quot; Solomon formula. You may change this by logging in and changing your settings.'}}">
+                                (?)
+                            </a>
+                        </td>
+
+                        <td class="text-right">
+                            {{ancient.ancientLevel | exponential}}
+                            <span *ngIf="!ancient.itemLevel.isZero()"
+                                  placement="bottom"
+                                  ngbTooltip="Effective Level: {{ancient.effectiveLevel | exponential}}">
+                                (*)
+                            </span>
+                        </td>
+
+                        <td class="text-right">
+                            {{ancient.isBase ? "N/A" : ancient.suggestedLevel !== undefined ? (ancient.suggestedLevel | exponential) : "-"}}
+                            <span *ngIf="ancient.isBase"
+                                  class="text-muted"
+                                  placement="bottom"
+                                  ngbTooltip="The formulae are based on this ancient. If all suggestions are negative or zero, level this ancient.">
+                                (*)
+                            </span>
+                        </td>
+                        <td class="text-right"
+                            [ngClass]="{'copiable' : ancient.diffCopyValue}"
+                            ngxClipboard
+                            [cbContent]="ancient.diffCopyValue"
+                            placement="right"
+                            ngbTooltip="{{ancient.diffValue !== undefined ? 'Click to copy to clipboard' : ''}}">
+                            {{ancient.diffValue !== undefined && !ancient.isBase ? (ancient.diffValue | exponential) : "-"}}
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="col-lg-6">
+            <h4>Outsider:</h4>
+            <p class="text-muted">
+                Based on simulation results from
+                <a href="https://redd.it/4slacm"
+                   target="_blank">/u/bzzzzzu</a> and
+                <a href="https://redd.it/4xj8im"
+                   target="_blank">/u/kragnir</a>.
+            </p>
+            <p *ngIf="showLowAncientSoulWarning"
+               class="alert alert-warning">
+                The simulation data doesn't support ancient souls less than 30. The suggestions below are guesses and not based on hard math.
+            </p>
+            <p *ngIf="showMissingSimulationWarning"
+               class="alert alert-warning">
+                The simulation data is missing data for high level ancients. The suggestions below show the closest result that exists but
+                you may have some AS left over to spend based on your own judgement.
+            </p>
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Outsider</th>
+                        <th>Current</th>
+                        <th>Suggested</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngFor="let outsider of outsiders">
+                        <td>{{outsider.name}}:</td>
+                        <td class="text-right">{{outsider.currentLevel | exponential}}</td>
+                        <td class="text-right">{{outsider.suggestedLevel !== undefined ? (outsider.suggestedLevel | exponential) : "-"}}</td>
+                    </tr>
+                </tbody>
+            </table>
+            <h4>Miscellaneous stats:</h4>
+            <table class="table">
+                <tbody>
+                    <tr>
+                        <td>Hero Souls Spent</td>
+                        <td>{{heroSoulsSpent | exponential}}</td>
+                    </tr>
+                    <tr>
+                        <td>Hero Souls Sacrificed</td>
+                        <td>{{heroSoulsSacrificed | exponential}}</td>
+                    </tr>
+                    <tr>
+                        <td>Ancient Souls Earned</td>
+                        <td>{{totalAncientSouls | exponential}}</td>
+                    </tr>
+                    <tr>
+                        <td>Transcendent Power</td>
+                        <td>{{(transcendentPower ? transcendentPower.toNumber() : 0) | percent}}</td>
+                    </tr>
+                    <tr>
+                        <td>Max Transcendent Primal Reward</td>
+                        <td>{{maxTranscendentPrimalReward | exponential}}</td>
+                    </tr>
+                    <tr>
+                        <td>Transcendent Primal Cap Zone</td>
+                        <td>{{bossLevelToTranscendentPrimalCap | exponential}}</td>
+                    </tr>
+                    <tr>
+                        <td>Titan Damage</td>
+                        <td>{{titanDamage | exponential}}</td>
+                    </tr>
+                    <tr>
+                        <td>Highest Zone</td>
+                        <td>{{highestZoneThisTranscension | exponential}}</td>
+                    </tr>
+                    <tr>
+                        <td>Highest Zone (Lifetime)</td>
+                        <td>{{highestZoneLifetime | exponential}}</td>
+                    </tr>
+                    <tr>
+                        <td>Ascensions</td>
+                        <td>{{ascensionsThisTranscension | exponential}}</td>
+                    </tr>
+                    <tr>
+                        <td>Ascensions (Lifetime)</td>
+                        <td>{{ascensionsLifetime | exponential}}</td>
+                    </tr>
+                    <tr>
+                        <td>Rubies</td>
+                        <td>{{rubies | exponential}}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,26 @@
+{
+  "name": "clicker-heroes-tracker-website",
+  "version": "0.0.0",
+  "description": "ClickerHeroesTrackerWebsite",
+  "repository": {},
+  "license": "MIT",
+  "devDependencies": {
+    "@types/applicationinsights-js": "^1.0.4",
+    "@types/bootstrap": "^3.3.35",
+    "@types/decimal.js": "0.0.30",
+    "@types/highcharts": "^5.0.2",
+    "@types/jquery": "^3.2.11",
+    "@types/jquery.validation": "^1.16.3",
+    "bluebird": "^3.5.0",
+    "gulp": "^3.9.1",
+    "gulp-clean-css": "^3.7.0",
+    "gulp-rename": "^1.2.2",
+    "gulp-sourcemaps": "^2.6.0",
+    "gulp-tslint": "^8.1.1",
+    "gulp-typescript": "^3.2.1",
+    "gulp-uglify": "^3.0.0",
+    "rimraf": "^2.6.1",
+    "tslint": "^5.5.0",
+    "typescript": "^2.4.2"
+  }
+}
