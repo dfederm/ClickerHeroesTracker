@@ -7,7 +7,6 @@ namespace ClickerHeroesTrackerWebsite.Controllers.Api
     using System;
     using System.Collections.Generic;
     using System.Net;
-    using System.Numerics;
     using ClickerHeroesTrackerWebsite.Instrumentation;
     using ClickerHeroesTrackerWebsite.Models;
     using ClickerHeroesTrackerWebsite.Models.Api;
@@ -164,7 +163,7 @@ namespace ClickerHeroesTrackerWebsite.Controllers.Api
             upload.PlayStyle = playStyle;
 
             var savedGame = SavedGame.Parse(uploadContent);
-            upload.Stats = new Dictionary<StatType, string>();
+            upload.Stats = new Dictionary<StatType, double>();
 
             // Get ancient level stats
             var ancientLevelsModel = new AncientLevelsModel(
@@ -176,13 +175,13 @@ namespace ClickerHeroesTrackerWebsite.Controllers.Api
                 var ancientLevel = ancientLevelInfo.Value.AncientLevel;
                 if (ancientLevel > 0)
                 {
-                    upload.Stats.Add(AncientIds.GetAncientStatType(ancientLevelInfo.Key), ancientLevel.ToTransportableString());
+                    upload.Stats.Add(AncientIds.GetAncientStatType(ancientLevelInfo.Key), ancientLevel);
                 }
 
                 var itemLevel = ancientLevelInfo.Value.ItemLevel;
                 if (itemLevel > 0)
                 {
-                    upload.Stats.Add(AncientIds.GetItemStatType(ancientLevelInfo.Key), itemLevel.ToString());
+                    upload.Stats.Add(AncientIds.GetItemStatType(ancientLevelInfo.Key), itemLevel);
                 }
             }
 
@@ -196,26 +195,26 @@ namespace ClickerHeroesTrackerWebsite.Controllers.Api
                 var outsiderLevel = pair.Value.Level;
                 if (outsiderLevel > 0)
                 {
-                    upload.Stats.Add(OutsiderIds.GetOusiderStatType(pair.Key), outsiderLevel.ToString());
+                    upload.Stats.Add(OutsiderIds.GetOusiderStatType(pair.Key), outsiderLevel);
                 }
             }
 
             // Get misc stats
             var miscellaneousStatsModel = new MiscellaneousStatsModel(savedGame);
-            upload.Stats.Add(StatType.AscensionsLifetime, miscellaneousStatsModel.AscensionsLifetime.ToString());
-            upload.Stats.Add(StatType.AscensionsThisTranscension, miscellaneousStatsModel.AscensionsThisTranscension.ToString());
-            upload.Stats.Add(StatType.HeroSoulsSacrificed, miscellaneousStatsModel.HeroSoulsSacrificed.ToTransportableString());
-            upload.Stats.Add(StatType.HeroSoulsSpent, miscellaneousStatsModel.HeroSoulsSpent.ToTransportableString());
-            upload.Stats.Add(StatType.HighestZoneLifetime, miscellaneousStatsModel.HighestZoneLifetime.ToString());
-            upload.Stats.Add(StatType.HighestZoneThisTranscension, miscellaneousStatsModel.HighestZoneThisTranscension.ToString());
-            upload.Stats.Add(StatType.Rubies, miscellaneousStatsModel.Rubies.ToString());
-            upload.Stats.Add(StatType.TitanDamage, miscellaneousStatsModel.TitanDamage.ToTransportableString());
-            upload.Stats.Add(StatType.TotalAncientSouls, miscellaneousStatsModel.TotalAncientSouls.ToString());
-            upload.Stats.Add(StatType.TranscendentPower, miscellaneousStatsModel.TranscendentPower.ToString());
-            upload.Stats.Add(StatType.MaxTranscendentPrimalReward, miscellaneousStatsModel.MaxTranscendentPrimalReward.ToTransportableString());
-            upload.Stats.Add(StatType.BossLevelToTranscendentPrimalCap, miscellaneousStatsModel.BossLevelToTranscendentPrimalCap.ToString());
-            upload.Stats.Add(StatType.HeroSouls, miscellaneousStatsModel.HeroSouls.ToTransportableString());
-            upload.Stats.Add(StatType.PendingSouls, miscellaneousStatsModel.PendingSouls.ToTransportableString());
+            upload.Stats.Add(StatType.AscensionsLifetime, miscellaneousStatsModel.AscensionsLifetime);
+            upload.Stats.Add(StatType.AscensionsThisTranscension, miscellaneousStatsModel.AscensionsThisTranscension);
+            upload.Stats.Add(StatType.HeroSoulsSacrificed, miscellaneousStatsModel.HeroSoulsSacrificed);
+            upload.Stats.Add(StatType.HeroSoulsSpent, miscellaneousStatsModel.HeroSoulsSpent);
+            upload.Stats.Add(StatType.HighestZoneLifetime, miscellaneousStatsModel.HighestZoneLifetime);
+            upload.Stats.Add(StatType.HighestZoneThisTranscension, miscellaneousStatsModel.HighestZoneThisTranscension);
+            upload.Stats.Add(StatType.Rubies, miscellaneousStatsModel.Rubies);
+            upload.Stats.Add(StatType.TitanDamage, miscellaneousStatsModel.TitanDamage);
+            upload.Stats.Add(StatType.TotalAncientSouls, miscellaneousStatsModel.TotalAncientSouls);
+            upload.Stats.Add(StatType.TranscendentPower, miscellaneousStatsModel.TranscendentPower);
+            upload.Stats.Add(StatType.MaxTranscendentPrimalReward, miscellaneousStatsModel.MaxTranscendentPrimalReward);
+            upload.Stats.Add(StatType.BossLevelToTranscendentPrimalCap, miscellaneousStatsModel.BossLevelToTranscendentPrimalCap);
+            upload.Stats.Add(StatType.HeroSouls, miscellaneousStatsModel.HeroSouls);
+            upload.Stats.Add(StatType.PendingSouls, miscellaneousStatsModel.PendingSouls);
 
             return this.Ok(upload);
         }
@@ -315,9 +314,9 @@ namespace ClickerHeroesTrackerWebsite.Controllers.Api
                 command.Parameters = new Dictionary<string, object>
                 {
                     { "@UploadId", uploadId },
-                    { "@TitanDamage", miscellaneousStatsModel.TitanDamage.ToTransportableString() },
-                    { "@SoulsSpent", miscellaneousStatsModel.HeroSoulsSpent.ToTransportableString() },
-                    { "@HeroSoulsSacrificed", miscellaneousStatsModel.HeroSoulsSacrificed.ToTransportableString() },
+                    { "@TitanDamage", miscellaneousStatsModel.TitanDamage },
+                    { "@SoulsSpent", miscellaneousStatsModel.HeroSoulsSpent },
+                    { "@HeroSoulsSacrificed", miscellaneousStatsModel.HeroSoulsSacrificed },
                     { "@TotalAncientSouls", miscellaneousStatsModel.TotalAncientSouls },
                     { "@TranscendentPower", miscellaneousStatsModel.TranscendentPower },
                     { "@Rubies", miscellaneousStatsModel.Rubies },
@@ -325,7 +324,7 @@ namespace ClickerHeroesTrackerWebsite.Controllers.Api
                     { "@HighestZoneLifetime", miscellaneousStatsModel.HighestZoneLifetime },
                     { "@AscensionsThisTranscension", miscellaneousStatsModel.AscensionsThisTranscension },
                     { "@AscensionsLifetime", miscellaneousStatsModel.AscensionsLifetime },
-                    { "@MaxTranscendentPrimalReward", miscellaneousStatsModel.MaxTranscendentPrimalReward.ToTransportableString() },
+                    { "@MaxTranscendentPrimalReward", miscellaneousStatsModel.MaxTranscendentPrimalReward },
                     { "@BossLevelToTranscendentPrimalCap", miscellaneousStatsModel.BossLevelToTranscendentPrimalCap },
                 };
                 command.ExecuteNonQuery();
@@ -340,7 +339,7 @@ namespace ClickerHeroesTrackerWebsite.Controllers.Api
                     {
                         { "@UploadId", uploadId },
                         { "@AncientId", pair.Key },
-                        { "@Level", pair.Value.AncientLevel.ToTransportableString() },
+                        { "@Level", pair.Value.AncientLevel },
                     };
                     command.ExecuteNonQuery();
                 }

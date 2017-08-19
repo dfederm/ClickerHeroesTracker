@@ -10,5 +10,5 @@
 
     uploadContent?: string;
 
-    stats?: IMap<string>;
+    stats?: IMap<number>;
 }

@@ -7,5 +7,5 @@
 <div id="@Model.Id" style="width:100%; height:400px;"></div>
 
 @{
-    ContentManager.RegisterRawScript("(graphs = window.graphs || {})['" + Model.Id + "'] = " + Model.Data.ToJsonString() + ";");
+    ContentManager.RegisterRawScript("$(function(){$('#" + Model.Id + "').highcharts(" + Model.Data.ToJsonString() + ");});");
 }

@@ -7,7 +7,6 @@ namespace ClickerHeroesTrackerWebsite.Models.Dashboard
     using System;
     using System.Collections.Generic;
     using System.Linq;
-    using System.Numerics;
     using ClickerHeroesTrackerWebsite.Models.Dashboard.Graph;
     using ClickerHeroesTrackerWebsite.Models.Game;
     using ClickerHeroesTrackerWebsite.Models.Settings;
@@ -130,40 +129,24 @@ namespace ClickerHeroesTrackerWebsite.Models.Dashboard
                 return false;
             }
 
-            series.Add(new Series
+            // If we're using a log scale, hack around the inability to plot a 0 value
+            // by changing it to 0.1 (1e-1) or "one below" 1 (1e0).
+            if (yAxisType == AxisType.Logarithmic)
             {
-                Name = name,
-                Color = color,
-                Data = data
-                    .Select(datum => new Point
+                // Defer the modifications until after we're done iterating to avoid an InvalidOperationException.
+                var actions = new List<Action>();
+                foreach (var pair in data)
+                {
+                    if (pair.Value == 0)
                     {
-                        X = datum.Key.ToJavascriptTime(),
-                        Y = datum.Value.ToString("F" + numDecimals),
-                    })
-                    .Concat(new[]
-                    {
-                        new Point
-                        {
-                            X = DateTime.UtcNow.ToJavascriptTime(),
-                            Y = data.Last().Value.ToString("F" + numDecimals),
-                        },
-                    })
-                    .ToList(),
-            });
-            return true;
-        }
+                        actions.Add(() => data[pair.Key] = 0.1);
+                    }
+                }
 
-        private static bool TryAddSeries(
-            List<Series> series,
-            string name,
-            IDictionary<DateTime, BigInteger> data,
-            string color,
-            int numDecimals,
-            AxisType yAxisType)
-        {
-            if (data == null || data.Count == 0)
-            {
-                return false;
+                for (var i = 0; i < actions.Count; i++)
+                {
+                    actions[i]();
+                }
             }
 
             series.Add(new Series
@@ -174,14 +157,16 @@ namespace ClickerHeroesTrackerWebsite.Models.Dashboard
                     .Select(datum => new Point
                     {
                         X = datum.Key.ToJavascriptTime(),
-                        Y = datum.Value.ToString("F" + numDecimals),
+                        Y = datum.Value,
+                        YFormat = "F" + (datum.Value == 0.1 ? 1 : numDecimals),
                     })
                     .Concat(new[]
                     {
                         new Point
                         {
                             X = DateTime.UtcNow.ToJavascriptTime(),
-                            Y = data.Last().Value.ToString("F" + numDecimals),
+                            Y = data.Last().Value,
+                            YFormat = "F" + (data.Last().Value == 0.1 ? 1 : numDecimals),
                         },
                     })
                     .ToList(),
@@ -211,28 +196,6 @@ namespace ClickerHeroesTrackerWebsite.Models.Dashboard
             return AxisType.Linear;
         }
 
-        private static AxisType GetYAxisType(
-            IDictionary<DateTime, BigInteger> userData1,
-            IDictionary<DateTime, BigInteger> userData2,
-            IUserSettings userSettings)
-        {
-            if (userSettings.UseLogarithmicGraphScale)
-            {
-                var minUserData1 = userData1 != null ? userData1.Values.Min() : 0;
-                var minUserData2 = userData2 != null ? userData2.Values.Min() : 0;
-
-                var maxUserData1 = userData1 != null ? userData1.Values.Max() : 0;
-                var maxUserData2 = userData2 != null ? userData2.Values.Max() : 0;
-
-                if (BigInteger.Max(maxUserData1, maxUserData2) - BigInteger.Min(minUserData1, minUserData2) > userSettings.LogarithmicGraphScaleThreshold)
-                {
-                    return AxisType.Logarithmic;
-                }
-            }
-
-            return AxisType.Linear;
-        }
-
         private void TryAddGraph(
             List<GraphViewModel> graphs,
             string title,
@@ -240,75 +203,6 @@ namespace ClickerHeroesTrackerWebsite.Models.Dashboard
             IDictionary<DateTime, double> userData1,
             string userName2,
             IDictionary<DateTime, double> userData2,
-            IUserSettings userSettings,
-            int numDecimals = 0)
-        {
-            var yAxisType = GetYAxisType(userData1, userData2, userSettings);
-
-            var series = new List<Series>();
-            var user1Added = TryAddSeries(series, userName1, userData1, Colors.PrimarySeriesColor, numDecimals, yAxisType);
-            var user2Added = TryAddSeries(series, userName2, userData2, Colors.OpposingSeriesColor, numDecimals, yAxisType);
-            if (!user1Added && !user2Added)
-            {
-                return;
-            }
-
-            var id = title.Replace(" ", string.Empty, StringComparison.Ordinal).Replace("'", string.Empty, StringComparison.Ordinal) + "Graph";
-            graphs.Add(new GraphViewModel
-            {
-                Id = id,
-                Data = new GraphData
-                {
-                    Chart = new Chart
-                    {
-                        Type = ChartType.Line,
-                    },
-                    Title = new Title
-                    {
-                        Text = title,
-                    },
-                    XAxis = new Axis
-                    {
-                        TickInterval = 24 * 3600 * 1000, // one day
-                        Type = AxisType.Datetime,
-                        TickWidth = 0,
-                        GridLineWidth = 1,
-                        Labels = new Labels
-                        {
-                            Align = Align.Left,
-                            X = 3,
-                            Y = -3,
-                            Format = "{value:%m/%d}",
-                        },
-                    },
-                    YAxis = new Axis
-                    {
-                        Labels = new Labels
-                        {
-                            Align = Align.Left,
-                            X = 3,
-                            Y = 16,
-                            Format = "{value:,." + numDecimals + "f}",
-                        },
-                        ShowFirstLabel = false,
-                        Type = yAxisType,
-                    },
-                    Legend = new Legend
-                    {
-                        Enabled = false,
-                    },
-                    Series = series,
-                },
-            });
-        }
-
-        private void TryAddGraph(
-            List<GraphViewModel> graphs,
-            string title,
-            string userName1,
-            IDictionary<DateTime, BigInteger> userData1,
-            string userName2,
-            IDictionary<DateTime, BigInteger> userData2,
             IUserSettings userSettings,
             int numDecimals = 0)
         {

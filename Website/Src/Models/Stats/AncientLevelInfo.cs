@@ -4,7 +4,7 @@
 
 namespace ClickerHeroesTrackerWebsite.Models.Stats
 {
-    using System.Numerics;
+    using System;
 
     /// <summary>
     /// A class that represents the effective level for an ancient.
@@ -16,25 +16,25 @@ namespace ClickerHeroesTrackerWebsite.Models.Stats
         /// </summary>
         /// <param name="ancientLevel">The base ancient level</param>
         /// <param name="itemLevel">The ancient levels added by items</param>
-        public AncientLevelInfo(BigInteger ancientLevel, BigInteger itemLevel)
+        public AncientLevelInfo(double ancientLevel, double itemLevel)
         {
-            this.AncientLevel = ancientLevel;
+            this.AncientLevel = Math.Floor(ancientLevel);
             this.ItemLevel = itemLevel;
         }
 
         /// <summary>
         /// Gets the base ancient level
         /// </summary>
-        public BigInteger AncientLevel { get; }
+        public double AncientLevel { get; }
 
         /// <summary>
         /// Gets the ancient levels added by items
         /// </summary>
-        public BigInteger ItemLevel { get; }
+        public double ItemLevel { get; }
 
         /// <summary>
-        /// Gets the effective level of the ancient.
+        /// Gets the effective level of the ancient. The game always rounds down so we will too.
         /// </summary>
-        public BigInteger EffectiveLevel => this.AncientLevel + this.ItemLevel;
+        public double EffectiveLevel => Math.Floor(this.AncientLevel + this.ItemLevel);
     }
 }
