@@ -7,6 +7,7 @@ namespace ClickerHeroesTrackerWebsite.Models.Dashboard
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Numerics;
     using System.Security.Claims;
     using ClickerHeroesTrackerWebsite.Models.Dashboard.Graph;
     using ClickerHeroesTrackerWebsite.Models.Game;
@@ -104,14 +105,14 @@ namespace ClickerHeroesTrackerWebsite.Models.Dashboard
                                 .Select(datum => new Point
                                 {
                                     X = datum.Key.ToJavascriptTime(),
-                                    Y = datum.Value,
+                                    Y = datum.Value.ToString("F0"),
                                 })
                                 .Concat(new[]
                                 {
                                     new Point
                                     {
                                         X = DateTime.UtcNow.ToJavascriptTime(),
-                                        Y = dataSeries.Last().Value,
+                                        Y = dataSeries.Last().Value.ToString("F0"),
                                     },
                                 })
                                 .ToList(),
@@ -168,6 +169,17 @@ namespace ClickerHeroesTrackerWebsite.Models.Dashboard
             return userSettings.UseLogarithmicGraphScale
                 && data.Values.Max() - data.Values.Min() > userSettings.LogarithmicGraphScaleThreshold
                 && !data.Values.Any(datum => datum == 0)
+                ? AxisType.Logarithmic
+                : AxisType.Linear;
+        }
+
+        private static AxisType GetYAxisType(
+            IDictionary<DateTime, BigInteger> data,
+            IUserSettings userSettings)
+        {
+            return userSettings.UseLogarithmicGraphScale
+                && data.Values.Max() - data.Values.Min() > userSettings.LogarithmicGraphScaleThreshold
+                && !data.Values.Any(datum => datum.IsZero)
                 ? AxisType.Logarithmic
                 : AxisType.Linear;
         }

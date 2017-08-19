@@ -4,6 +4,7 @@
 
 namespace ClickerHeroesTrackerWebsite.Models.SaveData
 {
+    using ClickerHeroesTrackerWebsite.Utility;
     using Newtonsoft.Json;
 
     /// <summary>
@@ -22,12 +23,14 @@ namespace ClickerHeroesTrackerWebsite.Models.SaveData
         /// Gets or sets the outsider level.
         /// </summary>
         [JsonProperty(PropertyName = "level")]
-        public double Level { get; set; }
+        [JsonConverter(typeof(LongFloorConverter))]
+        public long Level { get; set; }
 
         /// <summary>
         /// Gets or sets the ancient souls spent on this outsider.
         /// </summary>
         [JsonProperty(PropertyName = "spentAncientSouls")]
-        public double SpentAncientSouls { get; set; }
+        [JsonConverter(typeof(LongFloorConverter))]
+        public long SpentAncientSouls { get; set; }
     }
 }

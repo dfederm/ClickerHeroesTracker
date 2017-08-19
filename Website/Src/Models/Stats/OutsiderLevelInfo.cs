@@ -13,7 +13,7 @@ namespace ClickerHeroesTrackerWebsite.Models.Stats
         /// Initializes a new instance of the <see cref="OutsiderLevelInfo"/> class.
         /// </summary>
         /// <param name="outsiderLevel">The outsider level</param>
-        public OutsiderLevelInfo(string name, double level)
+        public OutsiderLevelInfo(string name, long level)
         {
             this.Name = name;
             this.Level = level;
@@ -27,6 +27,6 @@ namespace ClickerHeroesTrackerWebsite.Models.Stats
         /// <summary>
         /// Gets the outsider level
         /// </summary>
-        public double Level { get; }
+        public long Level { get; }
     }
 }

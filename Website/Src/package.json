@@ -7,6 +7,7 @@
   "devDependencies": {
     "@types/applicationinsights-js": "^1.0.4",
     "@types/bootstrap": "^3.3.35",
+    "@types/decimal.js": "0.0.30",
     "@types/highcharts": "^5.0.2",
     "@types/jquery": "^3.2.11",
     "@types/jquery.validation": "^1.16.3",

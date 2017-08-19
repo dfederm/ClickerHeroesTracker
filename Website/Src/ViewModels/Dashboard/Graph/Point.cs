@@ -15,13 +15,11 @@ namespace ClickerHeroesTrackerWebsite.Models.Dashboard.Graph
         /// <summary>
         /// Gets or sets the x value of the point. For datetime axes, the X value is the timestamp in milliseconds since 1970.
         /// </summary>
-        public double X { get; set; }
+        public long X { get; set; }
 
         /// <summary>
         /// Gets or sets y value of the point.
         /// </summary>
-        public double Y { get; set; }
-
-        public string YFormat { get; set; }
+        public string Y { get; set; }
     }
 }
