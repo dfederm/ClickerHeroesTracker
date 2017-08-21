@@ -65,7 +65,7 @@ namespace ClickerHeroesTrackerWebsite.Models.Settings
         {
             get
             {
-                return this.GetValue(4, Enum.TryParse, PlayStyle.Idle);
+                return this.GetValue(4, Enum.TryParse, PlayStyle.Hybrid);
             }
 
             set
@@ -130,7 +130,7 @@ namespace ClickerHeroesTrackerWebsite.Models.Settings
         {
             get
             {
-                return this.GetValue(9, bool.TryParse, false);
+                return this.GetValue(9, bool.TryParse, true);
             }
 
             set
@@ -156,7 +156,7 @@ namespace ClickerHeroesTrackerWebsite.Models.Settings
         {
             get
             {
-                return this.GetValue(11, int.TryParse, 10);
+                return this.GetValue(11, int.TryParse, 2);
             }
 
             set
