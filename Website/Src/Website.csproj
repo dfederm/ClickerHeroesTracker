@@ -38,8 +38,8 @@
     <PackageReference Include="OpenIddict" Version="2.0.0-*" />
     <PackageReference Include="OpenIddict.EntityFrameworkCore" Version="2.0.0-*" />
     <PackageReference Include="OpenIddict.Mvc" Version="2.0.0-*" />
-    <PackageReference Include="Sendgrid" Version="9.7.0" />
-    <PackageReference Include="WindowsAzure.Storage" Version="8.2.1" />
+    <PackageReference Include="Sendgrid" Version="9.8.0" />
+    <PackageReference Include="WindowsAzure.Storage" Version="8.3.0" />
   </ItemGroup>
 
   <!-- View compilation happens automatically at publish time, but we want to also run it at build time -->

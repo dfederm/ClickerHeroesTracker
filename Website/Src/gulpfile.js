@@ -21,7 +21,14 @@ paths.cssDir = paths.webroot + "css/";
 paths.cssFiles = paths.cssDir + "**/*.css";
 paths.cssMinFiles = paths.cssDir + "**/*.min.css";
 
-paths.webClientDist = ["../../WebClient/dist/**/*.*", "!../../WebClient/dist/**/*.spec.js"];
+paths.dataDir = paths.webroot + "data/";
+paths.libDir = paths.webroot + "lib/";
+
+paths.webClient = {
+    data: ["../../WebClient/dist/data/**/*.*"],
+    js: ["../../WebClient/dist/js/**/*.*", "!../../WebClient/dist/js/**/*.spec.js"],
+    lib: ["../../WebClient/dist/lib/**/*.*"],
+};
 
 gulp.task("clean:js", function (cb)
 {
@@ -83,17 +90,30 @@ gulp.task("css", function ()
         .pipe(gulp.dest(paths.cssDir));
 });
 
-gulp.task("copy", function ()
-{
-    return gulp.src(paths.webClientDist)
-        .pipe(gulp.dest(paths.webroot));
+gulp.task("copy:data", function () {
+    return gulp.src(paths.webClient.data)
+        .pipe(gulp.dest(paths.dataDir));
 });
+
+gulp.task("copy:js", function () {
+    return gulp.src(paths.webClient.js)
+        .pipe(gulp.dest(paths.jsDir));
+});
+
+gulp.task("copy:lib", function () {
+    return gulp.src(paths.webClient.lib)
+        .pipe(gulp.dest(paths.libDir));
+});
+
+gulp.task("copy", ["copy:data", "copy:js", "copy:lib"]);
 
 gulp.task("build", ["js", "css", "copy"]);
 
 gulp.task("watch", function ()
 {
-    gulp.watch(paths.webClientDist, ["copy"]);
+    gulp.watch(paths.webClient.data, ["copy:data"]);
+    gulp.watch(paths.webClient.js, ["copy:js"]);
+    gulp.watch(paths.webClient.lib, ["copy:lib"]);
     gulp.watch(paths.tsFiles, ["js"]);
     gulp.watch([paths.cssFiles, "!" + paths.cssMinFiles], ["css"]);
 });

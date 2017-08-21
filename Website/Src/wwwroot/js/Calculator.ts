@@ -259,14 +259,14 @@ namespace Calculator
                 availableSouls = availableSouls.plus(stats["pendingSouls"] || new Decimal(0));
             }
 
-            let baseLevel = stats["ancient" + primaryAncient];
+            let baseLevel = getCurrentAncientLevel(stats, primaryAncient);
             let left = baseLevel.times(-1);
             let right: decimal.Decimal;
             let mid: decimal.Decimal;
             if (availableSouls.greaterThan(0))
             {
                 // Ancient cost discount multiplier
-                let multiplier = Decimal.pow(0.95, stats["outsiderChorgorloth"]);
+                let multiplier = Decimal.pow(0.95, stats["outsiderChorgorloth"] || new Decimal(0));
 
                 /*
                   If all hs were to be spent on Siya (or Frags), we would have the following cost equation,
