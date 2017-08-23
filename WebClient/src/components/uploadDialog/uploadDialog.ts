@@ -53,7 +53,11 @@ export class UploadDialogComponent
         this.uploadService.create(this.encodedSaveData, this.addToProgress, this.playStyle)
             .then(uploadId =>
             {
-                this.router.navigate(["/upload", uploadId]);
+                return this.router.navigate(["/upload", uploadId]);
+            })
+            .then(() =>
+            {
+                this.activeModal.close();
             })
             .catch((error: Response) =>
             {
