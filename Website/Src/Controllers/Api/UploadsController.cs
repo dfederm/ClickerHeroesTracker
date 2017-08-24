@@ -130,7 +130,8 @@ namespace ClickerHeroesTrackerWebsite.Controllers.Api
                         };
                     }
 
-                    upload.TimeSubmitted = Convert.ToDateTime(reader["UploadTime"]);
+                    // The DateTime is a datetime2 which has no timezone so comes out as DateTimeKind.Unknown. Se need to specify the kind so it gets serialized correctly.
+                    upload.TimeSubmitted = DateTime.SpecifyKind(Convert.ToDateTime(reader["UploadTime"]), DateTimeKind.Utc);
 
                     uploadContent = reader["UploadContent"].ToString();
                     playStyle = reader["PlayStyle"].ToString().SafeParseEnum<PlayStyle>();
@@ -461,7 +462,9 @@ namespace ClickerHeroesTrackerWebsite.Controllers.Api
                     uploads.Add(new Upload
                     {
                         Id = Convert.ToInt32(reader["Id"]),
-                        TimeSubmitted = Convert.ToDateTime(reader["UploadTime"]),
+
+                        // The DateTime is a datetime2 which has no timezone so comes out as DateTimeKind.Unknown. Se need to specify the kind so it gets serialized correctly.
+                        TimeSubmitted = DateTime.SpecifyKind(Convert.ToDateTime(reader["UploadTime"]), DateTimeKind.Utc),
                     });
                 }
 
