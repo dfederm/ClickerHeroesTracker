@@ -100,7 +100,9 @@ namespace ClickerHeroesTrackerWebsite.Models.Dashboard
 
                 while (reader.Read())
                 {
-                    var uploadTime = Convert.ToDateTime(reader["UploadTime"]);
+                    // The DateTime is a datetime2 which has no timezone so comes out as DateTimeKind.Unknown. Se need to specify the kind so it gets serialized correctly.
+                    var uploadTime = DateTime.SpecifyKind(Convert.ToDateTime(reader["UploadTime"]), DateTimeKind.Utc);
+
                     this.TitanDamageData.AddOrUpdate(uploadTime, reader["TitanDamage"].ToString().ToBigInteger());
                     this.SoulsSpentData.AddOrUpdate(uploadTime, reader["SoulsSpent"].ToString().ToBigInteger());
                     this.HeroSoulsSacrificedData.AddOrUpdate(uploadTime, reader["HeroSoulsSacrificed"].ToString().ToBigInteger());
@@ -121,7 +123,8 @@ namespace ClickerHeroesTrackerWebsite.Models.Dashboard
                 this.AncientLevelData = new SortedDictionary<string, IDictionary<DateTime, BigInteger>>(StringComparer.OrdinalIgnoreCase);
                 while (reader.Read())
                 {
-                    var uploadTime = Convert.ToDateTime(reader["UploadTime"]);
+                    // The DateTime is a datetime2 which has no timezone so comes out as DateTimeKind.Unknown. Se need to specify the kind so it gets serialized correctly.
+                    var uploadTime = DateTime.SpecifyKind(Convert.ToDateTime(reader["UploadTime"]), DateTimeKind.Utc);
                     var ancientId = Convert.ToInt32(reader["AncientId"]);
                     var level = reader["Level"].ToString().ToBigInteger();
 
@@ -148,7 +151,8 @@ namespace ClickerHeroesTrackerWebsite.Models.Dashboard
                 this.OutsiderLevelData = new SortedDictionary<string, IDictionary<DateTime, double>>(StringComparer.OrdinalIgnoreCase);
                 while (reader.Read())
                 {
-                    var uploadTime = Convert.ToDateTime(reader["UploadTime"]);
+                    // The DateTime is a datetime2 which has no timezone so comes out as DateTimeKind.Unknown. Se need to specify the kind so it gets serialized correctly.
+                    var uploadTime = DateTime.SpecifyKind(Convert.ToDateTime(reader["UploadTime"]), DateTimeKind.Utc);
                     var outsiderId = Convert.ToInt32(reader["OutsiderId"]);
                     var level = Convert.ToDouble(reader["Level"]);
 
