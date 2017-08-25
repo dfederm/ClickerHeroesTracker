@@ -14,7 +14,48 @@
     - By default, in memory stores are used.
     - To use the Azure Storage Emulator set `Storage:ConnectionString` to `"UseDevelopmentStorage=true;"` by uncommenting it out in `appsettings.json`.
 
-# Admin user
+## Building
+Today there is a main website and a new Angular app. The main website serves as both the API and the MVC application, but we are transitioning to the Angular app for the UI.
+
+Because of the temporary duplication, you'll need to build both in the short term.
+
+### Web Client
+The Angular app is known as the webclient, rooted at the `WebClient` folder. Visual Studio Code is recommended to work with this project.
+
+First run `npm install` initially to download the packages.
+
+Use one of the following commands depending on what you're trying to do:
+* `npm run clean` - Cleans the `dist` dir
+* `npm run build` - Builds the project for production and puts it in the `dist` dir
+* `npm run watch` - Builds the project and watches for file changes for incremental builds as you go. This is recommended during normal development.
+* `npm run test` - Runs all unit tests. Note that building first is not required as we compile on the fly.
+* `npm run test-watch` - Runs tests in a browser which you can refresh to re-run and debug as needed.
+
+Other useful tools:
+* `build` produces a `/logs/stats/report.html` which visualizes the bundles. The raw `stats.json` file can also be used to feed into other visualization tools. The bundles are as follows:
+    * `app` is the main app code
+    * `data` is a bundle of json files. This is in a separate bundle since the data shoudl not change often.
+    * `vendor` is most the 3rd party libraries
+    * `polyfill` is the polyfill scripts
+* `test` produces a code coverage report under `/logs/coverage/html/index.html`. This can be used to drill into code coverage. A cobertura report is also produced for the VSTS build.
+
+### Website
+The Website is both the API and the MVC application. Visual Studio is recommended to work with this project.
+
+First run `bower install` and `npm install` initially to download the frontend packages. Then simply building the solution in Visual Studio should be sufficient.
+
+The gulp commands to use are:
+* `clean` - Cleans the generated frontend files
+* `build` - Builds the frontend assets. This should automatically run when building the solution.
+* `watch` - Incrementally builds the frontend assets. This should automatically start when opening the solution.
+* `copy` - Copies the Web Client's `dist` dir to the `wwwroot` so the Website can serve the Web Client.
+
+## Starting the service
+After building both the Web Client and Website, start the Website as you normally would in Visual Studio. For the best experience, use the "web" profile, but IIS Express should also work just fine.
+
+In steady state, you should have the relevant `watch` commands running in both the Web Client and Website when working in the UI.
+
+## Create an Admin user
 To make a user a site admin:
 1. Create a user via registration normally, or use an existing one.
 1. Get the user id from the database. In this example, suppose it's `71584f37-4165-4cd6-90af-0762ea996b6e`
@@ -32,7 +73,7 @@ To make a user a site admin:
 
 1. You may need to log out and back in for the change to take effect. You should see an Admin link in the navbar if you were successful.
 
-# Using the API
+## Using the API
 It sometimes can be easier during development to directly hit the API instead of using the website, especially for automation tasks like database setup or cleanup.
 
 ## Authentication

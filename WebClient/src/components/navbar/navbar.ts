@@ -15,7 +15,7 @@ declare global
 
 @Component({
     selector: "navbar",
-    templateUrl: "./js/components/navbar/navbar.html",
+    templateUrl: "./navbar.html",
 })
 export class NavbarComponent implements OnInit
 {

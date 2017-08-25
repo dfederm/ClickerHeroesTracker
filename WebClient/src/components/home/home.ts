@@ -3,7 +3,7 @@ import { UploadDialogComponent } from "../uploadDialog/uploadDialog";
 
 @Component({
     selector: "home",
-    templateUrl: "./js/components/home/home.html",
+    templateUrl: "./home.html",
 })
 export class HomeComponent
 {
