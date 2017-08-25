@@ -24,7 +24,7 @@ namespace ClickerHeroesTrackerWebsite.Controllers
 
         public ActionResult Beta()
         {
-            return this.View();
+            return this.File("/index.html", "text/html");
         }
     }
 }

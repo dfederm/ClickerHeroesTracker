@@ -5,7 +5,7 @@ import { AuthenticationService } from "../../services/authenticationService/auth
 
 @Component({
     selector: "logInDialog",
-    templateUrl: "./js/components/logInDialog/logInDialog.html",
+    templateUrl: "./logInDialog.html",
 })
 export class LogInDialogComponent
 {
@@ -18,7 +18,7 @@ export class LogInDialogComponent
     constructor(
         private authenticationService: AuthenticationService,
         public activeModal: NgbActiveModal,
-    ) {}
+    ) { }
 
     public logIn(): void
     {

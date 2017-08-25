@@ -9,7 +9,7 @@ import { UploadService } from "../../services/uploadService/uploadService";
 
 @Component({
     selector: "upload",
-    templateUrl: "./js/components/uploadDialog/uploadDialog.html",
+    templateUrl: "./uploadDialog.html",
 })
 export class UploadDialogComponent
 {

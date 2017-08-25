@@ -1,5 +1,5 @@
 import { Pipe, PipeTransform } from "@angular/core";
-import * as Decimal from "decimal.js";
+import Decimal from "decimal.js";
 
 // Some shenanigans to wire up toFormat, which doesn't have typings.
 // tslint:disable:no-require-imports

@@ -2,15 +2,15 @@ import { Component } from "@angular/core";
 import { ActivatedRoute, Router, Params } from "@angular/router";
 import { UploadService, IUpload } from "../../services/uploadService/uploadService";
 import { AuthenticationService } from "../../services/authenticationService/authenticationService";
-import * as Decimal from "decimal.js";
+import Decimal from "decimal.js";
 
 import "rxjs/add/operator/switchMap";
 
 // tslint:disable-next-line:no-require-imports no-var-requires
-const gameData: IGameData = require("../../../data/GameData.json");
+const gameData: IGameData = require("../../../../Website/src/wwwroot/data/GameData.json");
 
 // tslint:disable-next-line:no-require-imports no-var-requires
-const optimalOutsiderLevels: [number, number, number, number, number][] = require("../../../data/OptimalOutsiderLevels.json");
+const optimalOutsiderLevels: [number, number, number, number, number][] = require("../../../../Website/src/wwwroot/data/OptimalOutsiderLevels.json");
 
 interface IGameData
 {
@@ -40,8 +40,8 @@ interface IOutsiderViewModel
 
 @Component({
     selector: "upload",
-    templateUrl: "./js/components/upload/upload.html",
-    styleUrls: ["./js/components/upload/upload.css"],
+    templateUrl: "./upload.html",
+    styleUrls: ["./upload.css"],
 })
 export class UploadComponent
 {

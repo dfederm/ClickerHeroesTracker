@@ -10,7 +10,7 @@ interface IChangelogSectionViewModel
 
 @Component({
     selector: "changelog",
-    templateUrl: "./js/components/changelog/changelog.html",
+    templateUrl: "./changelog.html",
 })
 export class ChangelogComponent implements OnInit
 {
