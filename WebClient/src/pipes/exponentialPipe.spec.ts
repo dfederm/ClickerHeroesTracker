@@ -1,6 +1,6 @@
 import { NO_ERRORS_SCHEMA, Component } from "@angular/core";
 import { ComponentFixture, TestBed, async } from "@angular/core/testing";
-import * as Decimal from "decimal.js";
+import Decimal from "decimal.js";
 
 import { ExponentialPipe } from "./exponentialPipe";
 

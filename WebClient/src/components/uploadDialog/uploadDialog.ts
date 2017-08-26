@@ -9,7 +9,7 @@ import { UploadService } from "../../services/uploadService/uploadService";
 
 @Component({
     selector: "upload",
-    templateUrl: "./js/components/uploadDialog/uploadDialog.html",
+    templateUrl: "./uploadDialog.html",
 })
 export class UploadDialogComponent
 {
@@ -53,7 +53,11 @@ export class UploadDialogComponent
         this.uploadService.create(this.encodedSaveData, this.addToProgress, this.playStyle)
             .then(uploadId =>
             {
-                this.router.navigate(["/upload", uploadId]);
+                return this.router.navigate(["/upload", uploadId]);
+            })
+            .then(() =>
+            {
+                this.activeModal.close();
             })
             .catch((error: Response) =>
             {

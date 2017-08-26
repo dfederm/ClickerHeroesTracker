@@ -1,64 +1,21 @@
-// /*global jasmine, __karma__, window*/
-Error.stackTraceLimit = 0; // "No stacktrace"" is usually best for app testing.
+Error.stackTraceLimit = Infinity;
 
-// Uncomment to get full stacktrace output. Sometimes helpful, usually not.
-// Error.stackTraceLimit = Infinity; //
+require('core-js/es6');
+require('core-js/es7/reflect');
 
-jasmine.DEFAULT_TIMEOUT_INTERVAL = 1000;
+require('zone.js/dist/zone');
+require('zone.js/dist/long-stack-trace-zone');
+require('zone.js/dist/proxy');
+require('zone.js/dist/sync-test');
+require('zone.js/dist/jasmine-patch');
+require('zone.js/dist/async-test');
+require('zone.js/dist/fake-async-test');
 
-__karma__.loaded = function () { };
+var appContext = require.context('./src', true, /\.spec\.ts/);
 
-function isSpecFile(path)
-{
-  return /\.spec\.(.*\.)?js$/.test(path);
-}
+appContext.keys().forEach(appContext);
 
-var allSpecFiles = Object.keys(window.__karma__.files).filter(isSpecFile);
+var testing = require('@angular/core/testing');
+var browser = require('@angular/platform-browser-dynamic/testing');
 
-System.config({
-  baseURL: 'base/',
-  // Map the angular testing umd bundles
-  map: {
-    '@angular/core/testing': 'lib/@angular/core/bundles/core-testing.umd.js',
-    '@angular/common/testing': 'lib/@angular/common/bundles/common-testing.umd.js',
-    '@angular/compiler/testing': 'lib/@angular/compiler/bundles/compiler-testing.umd.js',
-    '@angular/platform-browser/testing': 'lib/@angular/platform-browser/bundles/platform-browser-testing.umd.js',
-    '@angular/platform-browser-dynamic/testing': 'lib/@angular/platform-browser-dynamic/bundles/platform-browser-dynamic-testing.umd.js',
-    '@angular/http/testing': 'lib/@angular/http/bundles/http-testing.umd.js',
-    '@angular/router/testing': 'lib/@angular/router/bundles/router-testing.umd.js',
-    '@angular/forms/testing': 'lib/@angular/forms/bundles/forms-testing.umd.js',
-  },
-});
-
-System.import('js/systemjs.config.js')
-  .then(initTestBed)
-  .then(initTesting);
-
-function initTestBed()
-{
-  return Promise.all([
-    System.import('@angular/core/testing'),
-    System.import('@angular/platform-browser-dynamic/testing')
-  ])
-    .then(function (providers)
-    {
-      var coreTesting = providers[0];
-      var browserTesting = providers[1];
-
-      coreTesting.TestBed.initTestEnvironment(
-        browserTesting.BrowserDynamicTestingModule,
-        browserTesting.platformBrowserDynamicTesting());
-    })
-}
-
-// Import all spec files and start karma
-function initTesting()
-{
-  return Promise.all(
-    allSpecFiles.map(function (moduleName)
-    {
-      return System.import(moduleName);
-    })
-  )
-    .then(__karma__.start, __karma__.error);
-}
+testing.TestBed.initTestEnvironment(browser.BrowserDynamicTestingModule, browser.platformBrowserDynamicTesting());

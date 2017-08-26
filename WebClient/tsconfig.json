@@ -13,7 +13,10 @@
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
     "noUnusedLocals": true,
-    "noUnusedParameters": true
+    "noUnusedParameters": true,
+    "typeRoots": [
+      "./node_modules/@types/"
+    ]
   },
   "exclude": [
     "node_modules/*",

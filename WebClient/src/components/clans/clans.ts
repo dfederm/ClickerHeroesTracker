@@ -3,8 +3,8 @@ import { ClanService, IGuildMember, IMessage, ILeaderboardClan, ILeaderboardSumm
 
 @Component({
     selector: "clans",
-    templateUrl: "./js/components/clans/clans.html",
-    styleUrls: ["./js/components/clans/clans.css"],
+    templateUrl: "./clans.html",
+    styleUrls: ["./clans.css"],
 })
 export class ClansComponent implements OnInit
 {
