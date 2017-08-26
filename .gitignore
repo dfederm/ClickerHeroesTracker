@@ -19,23 +19,21 @@ node_modules/
 # generated assets from the WebClient
 dist/
 
+# WebClient logs
+logs/
+
+# WebClient-generated index.html
+**/wwwroot/*.html
+
 # bower and npm package dir
 **/wwwroot/lib/*
 
 # generated js
-**/wwwroot/js/**/*.js
-**/wwwroot/js/**/*.js.map
+**/wwwroot/**/*.js
+**/wwwroot/**/*.js.map
 
 # generated css
 **/wwwroot/css/*.min.css
-
-# html and css files copied from the WebClient
-**/wwwroot/js/**/*.html
-**/wwwroot/js/**/*.css
-
-# JS test reports
-**/wwwroot/test-results.xml
-**/wwwroot/coverage/
 
 # in-memory database used on dev machines
 cht.db

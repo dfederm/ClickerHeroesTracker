@@ -7,6 +7,7 @@ import { NgbModule } from "@ng-bootstrap/ng-bootstrap";
 import { ClipboardModule } from "ngx-clipboard/dist";
 import { TimeAgoPipe } from "time-ago-pipe";
 import { AdsenseModule } from "ng2-adsense";
+import { ApplicationInsightsModule, AppInsightsService } from "@markpieszak/ng-application-insights";
 
 import { AppComponent } from "./components/app/app";
 import { HomeComponent } from "./components/home/home";
@@ -51,6 +52,8 @@ const routes: Routes =
     NgbModule.forRoot(),
     ClipboardModule,
     AdsenseModule.forRoot(),
+    // Make sure this matches the API settings as well. Is there a better way to do this?
+    ApplicationInsightsModule.forRoot({ instrumentationKey: "99fba640-790d-484f-83c4-3c97450d8698" }),
   ],
   declarations:
   [
@@ -82,6 +85,7 @@ const routes: Routes =
     AuthenticationService,
     UploadService,
     ClanService,
+    AppInsightsService,
   ],
   bootstrap: [AppComponent],
 })

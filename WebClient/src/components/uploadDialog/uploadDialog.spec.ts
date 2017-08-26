@@ -22,35 +22,35 @@ describe("UploadDialogComponent", () =>
     {
         isLoggedIn = new BehaviorSubject(false);
         let authenticationService =
-        {
-            isLoggedIn: (): Observable<boolean> => isLoggedIn,
-        };
+            {
+                isLoggedIn: (): Observable<boolean> => isLoggedIn,
+            };
         let uploadService =
-        {
-            create: (): void => void 0,
-        };
+            {
+                create: (): void => void 0,
+            };
         let activeModal = { close: (): void => void 0 };
         let router = { navigate: (): void => void 0 };
 
         TestBed.configureTestingModule(
-        {
-            imports: [ FormsModule ],
-            declarations: [ UploadDialogComponent ],
-            providers:
-            [
-                { provide: AuthenticationService, useValue: authenticationService },
-                { provide: UploadService, useValue: uploadService },
-                { provide: NgbActiveModal, useValue: activeModal },
-                { provide: Router, useValue: router },
-            ],
-            schemas: [ NO_ERRORS_SCHEMA ],
-        })
-        .compileComponents()
-        .then(() =>
-        {
-            fixture = TestBed.createComponent(UploadDialogComponent);
-            component = fixture.componentInstance;
-        });
+            {
+                imports: [FormsModule],
+                declarations: [UploadDialogComponent],
+                providers:
+                [
+                    { provide: AuthenticationService, useValue: authenticationService },
+                    { provide: UploadService, useValue: uploadService },
+                    { provide: NgbActiveModal, useValue: activeModal },
+                    { provide: Router, useValue: router },
+                ],
+                schemas: [NO_ERRORS_SCHEMA],
+            })
+            .compileComponents()
+            .then(() =>
+            {
+                fixture = TestBed.createComponent(UploadDialogComponent);
+                component = fixture.componentInstance;
+            });
     }));
 
     it("should display the modal header", () =>
@@ -76,7 +76,8 @@ describe("UploadDialogComponent", () =>
         it("should display the form elements with 'add to progress' when the user is logged in", async(() =>
         {
             setIsLoggedIn(true)
-                .then(() => {
+                .then(() =>
+                {
                     expect(encodedSaveData).not.toBeNull();
                     expect(playStyles.length).toEqual(3);
                     expect(addToProgress).not.toBeNull();
@@ -88,7 +89,8 @@ describe("UploadDialogComponent", () =>
         it("should display the form elements without 'add to progress' when the user is not logged in", async(() =>
         {
             setIsLoggedIn(false)
-                .then(() => {
+                .then(() =>
+                {
                     expect(encodedSaveData).not.toBeNull();
                     expect(playStyles.length).toEqual(3);
                     expect(addToProgress).toBeNull();
@@ -100,7 +102,8 @@ describe("UploadDialogComponent", () =>
         it("should show an error with empty save data", async(() =>
         {
             setIsLoggedIn(false)
-                .then(() => {
+                .then(() =>
+                {
                     button.nativeElement.click();
 
                     expect(component.errorMessage).toBeTruthy();
@@ -110,12 +113,16 @@ describe("UploadDialogComponent", () =>
         it("should upload correct save data when user is not logged in", async(() =>
         {
             setIsLoggedIn(false)
-                .then(() => {
+                .then(() =>
+                {
                     let uploadService = TestBed.get(UploadService) as UploadService;
                     spyOn(uploadService, "create").and.returnValue(Promise.resolve<number>(123));
 
                     let router = TestBed.get(Router) as Router;
                     spyOn(router, "navigate");
+
+                    let activeModal = TestBed.get(NgbActiveModal) as NgbActiveModal;
+                    spyOn(activeModal, "close");
 
                     setInputValue(encodedSaveData, "someEncodedSaveData");
                     playStyles[1].nativeElement.click();
@@ -130,6 +137,7 @@ describe("UploadDialogComponent", () =>
 
                         expect(component.errorMessage).toBeFalsy();
                         expect(router.navigate).toHaveBeenCalledWith(["/upload", 123]);
+                        expect(activeModal.close).toHaveBeenCalled();
                     });
                 });
         }));
@@ -137,12 +145,16 @@ describe("UploadDialogComponent", () =>
         it("should upload correct save data when user is logged in", async(() =>
         {
             setIsLoggedIn(true)
-                .then(() => {
+                .then(() =>
+                {
                     let uploadService = TestBed.get(UploadService) as UploadService;
                     spyOn(uploadService, "create").and.returnValue(Promise.resolve<number>(123));
 
                     let router = TestBed.get(Router) as Router;
                     spyOn(router, "navigate");
+
+                    let activeModal = TestBed.get(NgbActiveModal) as NgbActiveModal;
+                    spyOn(activeModal, "close");
 
                     setInputValue(encodedSaveData, "someEncodedSaveData");
                     playStyles[1].nativeElement.click();
@@ -157,6 +169,7 @@ describe("UploadDialogComponent", () =>
 
                         expect(component.errorMessage).toBeFalsy();
                         expect(router.navigate).toHaveBeenCalledWith(["/upload", 123]);
+                        expect(activeModal.close).toHaveBeenCalled();
                     });
                 });
         }));
@@ -164,12 +177,16 @@ describe("UploadDialogComponent", () =>
         it("should show an error when uploadService fails", async(() =>
         {
             setIsLoggedIn(true)
-                .then(() => {
+                .then(() =>
+                {
                     let uploadService = TestBed.get(UploadService) as UploadService;
                     spyOn(uploadService, "create").and.returnValue(Promise.reject(new Response(new ResponseOptions({ status: 500 }))));
 
                     let router = TestBed.get(Router) as Router;
                     spyOn(router, "navigate");
+
+                    let activeModal = TestBed.get(NgbActiveModal) as NgbActiveModal;
+                    spyOn(activeModal, "close");
 
                     setInputValue(encodedSaveData, "someEncodedSaveData");
                     playStyles[1].nativeElement.click();
@@ -182,6 +199,7 @@ describe("UploadDialogComponent", () =>
                     {
                         expect(component.errorMessage).toBeTruthy();
                         expect(router.navigate).not.toHaveBeenCalled();
+                        expect(activeModal.close).not.toHaveBeenCalled();
                     });
                 });
         }));

@@ -10,7 +10,7 @@ interface IUploadViewModel
 
 @Component({
     selector: "uploadsTable",
-    templateUrl: "./js/components/uploadsTable/uploadsTable.html",
+    templateUrl: "./uploadsTable.html",
 })
 export class UploadsTableComponent implements OnInit
 {

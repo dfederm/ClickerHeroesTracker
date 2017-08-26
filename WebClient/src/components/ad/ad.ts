@@ -4,7 +4,7 @@ import { Subscription } from "rxjs/Subscription";
 
 @Component({
     selector: "ad",
-    templateUrl: "./js/components/ad/ad.html",
+    templateUrl: "./ad.html",
 })
 export class AdComponent implements OnInit, OnDestroy
 {
