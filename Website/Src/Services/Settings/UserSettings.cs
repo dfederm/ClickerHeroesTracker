@@ -8,6 +8,7 @@ namespace ClickerHeroesTrackerWebsite.Models.Settings
     using System.Collections.Generic;
     using System.Text;
     using ClickerHeroesTrackerWebsite.Services.Database;
+    using Microsoft.AspNetCore.Http;
 
     internal sealed class UserSettings : IUserSettings
     {
@@ -17,20 +18,25 @@ namespace ClickerHeroesTrackerWebsite.Models.Settings
 
         private readonly IDatabaseCommandFactory databaseCommandFactory;
 
+        private readonly HttpRequest httpRequest;
+
         private readonly string userId;
 
         public UserSettings(
             IDatabaseCommandFactory databaseCommandFactory,
+            HttpRequest httpRequest,
             string userId)
         {
             this.databaseCommandFactory = databaseCommandFactory;
+            this.httpRequest = httpRequest;
             this.userId = userId;
 
             this.Fill();
         }
 
-        public UserSettings()
+        public UserSettings(HttpRequest httpRequest)
         {
+            this.httpRequest = httpRequest;
         }
 
         private delegate bool TryParse<T>(string rawValue, out T value);
@@ -165,6 +171,27 @@ namespace ClickerHeroesTrackerWebsite.Models.Settings
             }
         }
 
+        public bool PreferDarkTheme
+        {
+            get
+            {
+                bool defaultValue;
+                string defaultValueString;
+                if (!this.httpRequest.Cookies.TryGetValue("PreferDarkTheme", out defaultValueString)
+                    || !bool.TryParse(defaultValueString, out defaultValue))
+                {
+                    defaultValue = false;
+                }
+
+                return this.GetValue(12, bool.TryParse, defaultValue);
+            }
+
+            set
+            {
+                this.SetValue(12, value.ToString());
+            }
+        }
+
         internal void FlushChanges()
         {
             if (this.userId == null)
@@ -251,9 +278,9 @@ namespace ClickerHeroesTrackerWebsite.Models.Settings
                 { "@UserId", this.userId },
             };
             const string GetUserSettingsCommandText = @"
-	            SELECT SettingId, SettingValue
-	            FROM UserSettings
-	            WHERE UserId = @UserId";
+                SELECT SettingId, SettingValue
+                FROM UserSettings
+                WHERE UserId = @UserId";
             using (var command = this.databaseCommandFactory.Create(
                 GetUserSettingsCommandText,
                 parameters))

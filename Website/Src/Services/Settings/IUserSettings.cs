@@ -58,5 +58,10 @@ namespace ClickerHeroesTrackerWebsite.Models.Settings
         /// Gets or sets the hybrid idle:active ratio
         /// </summary>
         int HybridRatio { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether a dark theme is preferred.
+        /// </summary>
+        bool PreferDarkTheme { get; set; }
     }
 }

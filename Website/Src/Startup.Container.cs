@@ -22,6 +22,7 @@ namespace ClickerHeroesTrackerWebsite
     using Microsoft.AspNetCore.Builder;
     using Microsoft.AspNetCore.DataProtection;
     using Microsoft.AspNetCore.Hosting;
+    using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.Identity;
     using Microsoft.AspNetCore.Mvc.Formatters;
     using Microsoft.EntityFrameworkCore;
@@ -211,6 +212,9 @@ namespace ClickerHeroesTrackerWebsite
             services.AddScoped<ICounterProvider, CounterProvider>();
             services.AddScoped<IDatabaseCommandFactory, DatabaseCommandFactory>();
             services.AddScoped<IUserSettingsProvider, UserSettingsProvider>();
+            services.AddScoped(_ => new HttpContextAccessor().HttpContext);
+            services.AddScoped(c => c.GetRequiredService<HttpContext>().Request);
+            services.AddScoped(c => c.GetRequiredService<HttpContext>().Response);
 
             // Configuration
             services.Configure<DatabaseSettings>(options => this.Configuration.GetSection("Database").Bind(options));
