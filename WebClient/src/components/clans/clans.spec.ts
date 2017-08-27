@@ -7,8 +7,7 @@ import { TimeAgoPipe } from "time-ago-pipe";
 import { ClansComponent } from "./clans";
 import { ClanService, ILeaderboardClan, IClanData, ILeaderboardSummaryListResponse } from "../../services/clanService/clanService";
 
-describe("ClansComponent", () =>
-{
+describe("ClansComponent", () => {
     let component: ClansComponent;
     let fixture: ComponentFixture<ClansComponent>;
 
@@ -28,55 +27,47 @@ describe("ClansComponent", () =>
     let userClanIndex = clans.findIndex(_ => _.isUserClan);
     let userClan = clans[userClanIndex];
 
-    let clanData: IClanData =
-        {
-            clanName: userClan.name,
-            currentRaidLevel: userClan.currentRaidLevel,
-            guildMembers:
-            [
-                { uid: "userId0", nickname: "user0", highestZone: 0 },
-                { uid: "userId1", nickname: "user1", highestZone: 1 },
-                { uid: "userId2", nickname: "user2", highestZone: 2 },
-            ],
-            messages:
-            [
-                { username: "user0", date: "2017-01-01T00:00:00", content: "message0" },
-                { username: null, date: "2017-01-02T00:00:00", content: "message1" },
-                { username: "user2", date: "2017-01-03T00:00:00", content: "message2" },
-            ],
-        };
+    let clanData: IClanData = {
+        clanName: userClan.name,
+        currentRaidLevel: userClan.currentRaidLevel,
+        guildMembers:
+        [
+            { uid: "userId0", nickname: "user0", highestZone: 0 },
+            { uid: "userId1", nickname: "user1", highestZone: 1 },
+            { uid: "userId2", nickname: "user2", highestZone: 2 },
+        ],
+        messages:
+        [
+            { username: "user0", date: "2017-01-01T00:00:00", content: "message0" },
+            { username: null, date: "2017-01-02T00:00:00", content: "message1" },
+            { username: "user2", date: "2017-01-03T00:00:00", content: "message2" },
+        ],
+    };
 
-    beforeEach(done =>
-    {
-        let clanService =
-            {
-                getClan(): Promise<IClanData>
-                {
-                    return Promise.resolve(clanData);
-                },
-                getUserClan(): Promise<ILeaderboardClan>
-                {
-                    return Promise.resolve(userClan);
-                },
-                getLeaderboard(page: number, count: number): Promise<ILeaderboardSummaryListResponse>
-                {
-                    let leaderboardSummaryListResponse: ILeaderboardSummaryListResponse =
-                        {
-                            pagination:
-                            {
-                                count: clans.length,
-                                next: "someNext",
-                                previous: "somePrevious",
-                            },
-                            leaderboardClans: clans.slice((page - 1) * count, page * count),
-                        };
-                    return Promise.resolve(leaderboardSummaryListResponse);
-                },
-                sendMessage(): Promise<void>
-                {
-                    return Promise.resolve();
-                },
-            };
+    beforeEach(done => {
+        let clanService = {
+            getClan(): Promise<IClanData> {
+                return Promise.resolve(clanData);
+            },
+            getUserClan(): Promise<ILeaderboardClan> {
+                return Promise.resolve(userClan);
+            },
+            getLeaderboard(page: number, count: number): Promise<ILeaderboardSummaryListResponse> {
+                let leaderboardSummaryListResponse: ILeaderboardSummaryListResponse = {
+                    pagination:
+                    {
+                        count: clans.length,
+                        next: "someNext",
+                        previous: "somePrevious",
+                    },
+                    leaderboardClans: clans.slice((page - 1) * count, page * count),
+                };
+                return Promise.resolve(leaderboardSummaryListResponse);
+            },
+            sendMessage(): Promise<void> {
+                return Promise.resolve();
+            },
+        };
 
         TestBed.configureTestingModule(
             {
@@ -95,8 +86,7 @@ describe("ClansComponent", () =>
                 schemas: [NO_ERRORS_SCHEMA],
             })
             .compileComponents()
-            .then(() =>
-            {
+            .then(() => {
                 fixture = TestBed.createComponent(ClansComponent);
                 component = fixture.componentInstance;
             })
@@ -104,14 +94,12 @@ describe("ClansComponent", () =>
             .catch(done.fail);
     });
 
-    it("should display clan information", done =>
-    {
+    it("should display clan information", done => {
         let timeAgoPipe = TestBed.get(TimeAgoPipe) as TimeAgoPipe;
 
         fixture.detectChanges();
         fixture.whenStable()
-            .then(() =>
-            {
+            .then(() => {
                 fixture.detectChanges();
 
                 let containers = fixture.debugElement.queryAll(By.css(".col-lg-6"));
@@ -124,8 +112,7 @@ describe("ClansComponent", () =>
 
                 let userRows = clanInformation.query(By.css("table tbody")).children;
                 expect(userRows.length).toEqual(clanData.guildMembers.length);
-                for (let i = 0; i < userRows.length; i++)
-                {
+                for (let i = 0; i < userRows.length; i++) {
                     let userRow = userRows[i];
                     let guildMember = clanData.guildMembers[i];
 
@@ -137,8 +124,7 @@ describe("ClansComponent", () =>
 
                 let messages = clanInformation.queryAll(By.css(".clan-message"));
                 expect(messages.length).toEqual(clanData.messages.length);
-                for (let i = 0; i < messages.length; i++)
-                {
+                for (let i = 0; i < messages.length; i++) {
                     let messageElement = messages[i];
                     let message = clanData.messages[i];
 
@@ -147,13 +133,10 @@ describe("ClansComponent", () =>
 
                     let metadataElement = messageElementsPieces[0].children;
                     expect(metadataElement[0].nativeElement.textContent.trim()).toEqual("(" + timeAgoPipe.transform(message.date) + ")");
-                    if (message.username)
-                    {
+                    if (message.username) {
                         expect(metadataElement[1].nativeElement.classList.contains("text-muted")).toBe(false);
                         expect(metadataElement[1].nativeElement.textContent.trim()).toEqual(message.username);
-                    }
-                    else
-                    {
+                    } else {
                         expect(metadataElement[1].nativeElement.classList.contains("text-muted")).toBe(true);
                         expect(metadataElement[1].nativeElement.textContent.trim()).toEqual("(Unknown)");
                     }
@@ -165,15 +148,13 @@ describe("ClansComponent", () =>
             .catch(done.fail);
     });
 
-    it("should display an error when clanService.getClan errors", done =>
-    {
+    it("should display an error when clanService.getClan errors", done => {
         let clanService = TestBed.get(ClanService);
         spyOn(clanService, "getClan").and.returnValue(Promise.reject("someReason"));
 
         fixture.detectChanges();
         fixture.whenStable()
-            .then(() =>
-            {
+            .then(() => {
                 fixture.detectChanges();
 
                 let error = fixture.debugElement.query(By.css("p"));
@@ -183,15 +164,13 @@ describe("ClansComponent", () =>
             .catch(done.fail);
     });
 
-    it("should display an error when the user is not in a clan", done =>
-    {
+    it("should display an error when the user is not in a clan", done => {
         let clanService = TestBed.get(ClanService);
         spyOn(clanService, "getClan").and.returnValue(Promise.resolve(null));
 
         fixture.detectChanges();
         fixture.whenStable()
-            .then(() =>
-            {
+            .then(() => {
                 fixture.detectChanges();
 
                 let error = fixture.debugElement.query(By.css("p"));
@@ -201,8 +180,7 @@ describe("ClansComponent", () =>
             .catch(done.fail);
     });
 
-    it("should send messages", done =>
-    {
+    it("should send messages", done => {
         let clanService = TestBed.get(ClanService) as ClanService;
 
         let form: DebugElement;
@@ -211,14 +189,12 @@ describe("ClansComponent", () =>
         // The first stabilization is for the initial population of clan data
         fixture.detectChanges();
         fixture.whenStable()
-            .then(() =>
-            {
+            .then(() => {
                 // We need a second stabilization round for binding ngModel since it's async and we added it to the DOM *after* the initial stabilization.
                 fixture.detectChanges();
                 return fixture.whenStable();
             })
-            .then(() =>
-            {
+            .then(() => {
                 let containers = fixture.debugElement.queryAll(By.css(".col-lg-6"));
                 expect(containers.length).toEqual(2);
 
@@ -241,16 +217,14 @@ describe("ClansComponent", () =>
                 spyOn(clanService, "getClan");
                 return fixture.whenStable();
             })
-            .then(() =>
-            {
+            .then(() => {
                 expect(clanService.getClan).toHaveBeenCalled();
             })
             .then(done)
             .catch(done.fail);
     });
 
-    it("should show an error message when sending a message fails", done =>
-    {
+    it("should show an error message when sending a message fails", done => {
         let clanService = TestBed.get(ClanService) as ClanService;
 
         let form: DebugElement;
@@ -259,14 +233,12 @@ describe("ClansComponent", () =>
         // The first stabilization is for the initial population of clan data
         fixture.detectChanges();
         fixture.whenStable()
-            .then(() =>
-            {
+            .then(() => {
                 // We need a second stabilization round for binding ngModel since it's async and we added it to the DOM *after* the initial stabilization.
                 fixture.detectChanges();
                 return fixture.whenStable();
             })
-            .then(() =>
-            {
+            .then(() => {
                 let containers = fixture.debugElement.queryAll(By.css(".col-lg-6"));
                 expect(containers.length).toEqual(2);
 
@@ -287,8 +259,7 @@ describe("ClansComponent", () =>
 
                 return fixture.whenStable();
             })
-            .then(() =>
-            {
+            .then(() => {
                 fixture.detectChanges();
                 let error = fixture.debugElement.query(By.css("p"));
                 expect(error.nativeElement.textContent.trim()).toEqual("There was a problem sending your message. Please try again.");
@@ -297,32 +268,28 @@ describe("ClansComponent", () =>
             .catch(done.fail);
     });
 
-    it("should display clan leaderboard when the user's clan is ranked lower", done =>
-    {
+    it("should display clan leaderboard when the user's clan is ranked lower", done => {
         component.leaderboardCount = 3;
         verifyLeaderboard(1)
             .then(done)
             .catch(done.fail);
     });
 
-    it("should update the leaderboard when the user's clan is within the current page", done =>
-    {
+    it("should update the leaderboard when the user's clan is within the current page", done => {
         component.leaderboardCount = 3;
         verifyLeaderboard(2)
             .then(done)
             .catch(done.fail);
     });
 
-    it("should display clan leaderboard when the user's clan is ranked higher", done =>
-    {
+    it("should display clan leaderboard when the user's clan is ranked higher", done => {
         component.leaderboardCount = 3;
         verifyLeaderboard(3)
             .then(done)
             .catch(done.fail);
     });
 
-    it("should update the leaderboard when the page changes", done =>
-    {
+    it("should update the leaderboard when the page changes", done => {
         component.leaderboardCount = 3;
         verifyLeaderboard(1)
             .then(() => verifyLeaderboard(2))
@@ -330,15 +297,13 @@ describe("ClansComponent", () =>
             .catch(done.fail);
     });
 
-    it("should display error when clanService.getLeaderboard errors", done =>
-    {
+    it("should display error when clanService.getLeaderboard errors", done => {
         let clanService = TestBed.get(ClanService);
         spyOn(clanService, "getLeaderboard").and.returnValue(Promise.reject("someReason"));
 
         fixture.detectChanges();
         fixture.whenStable()
-            .then(() =>
-            {
+            .then(() => {
                 fixture.detectChanges();
 
                 let containers = fixture.debugElement.queryAll(By.css(".col-lg-6"));
@@ -353,8 +318,7 @@ describe("ClansComponent", () =>
             .catch(done.fail);
     });
 
-    function setInputValue(element: DebugElement, value: string): void
-    {
+    function setInputValue(element: DebugElement, value: string): void {
         element.nativeElement.value = value;
 
         // Tell Angular
@@ -363,13 +327,11 @@ describe("ClansComponent", () =>
         element.nativeElement.dispatchEvent(evt);
     }
 
-    function verifyLeaderboard(page: number): Promise<void>
-    {
+    function verifyLeaderboard(page: number): Promise<void> {
         component.leaderboardPage = page;
 
         fixture.detectChanges();
-        return fixture.whenStable().then(() =>
-        {
+        return fixture.whenStable().then(() => {
             fixture.detectChanges();
 
             let containers = fixture.debugElement.queryAll(By.css(".col-lg-6"));
@@ -383,19 +345,16 @@ describe("ClansComponent", () =>
             let expectedClanEnd = page * component.leaderboardCount;
             let expectedClans = clans.slice(expectedClanStart, expectedClanEnd);
 
-            if (expectedClanStart > userClanIndex)
-            {
+            if (expectedClanStart > userClanIndex) {
                 expectedClans.unshift(userClan);
             }
 
-            if (expectedClanEnd <= userClanIndex)
-            {
+            if (expectedClanEnd <= userClanIndex) {
                 expectedClans.push(userClan);
             }
 
             expect(clanRows.length).toEqual(expectedClans.length);
-            for (let i = 0; i < clanRows.length; i++)
-            {
+            for (let i = 0; i < clanRows.length; i++) {
                 let clanRow = clanRows[i];
                 let clan = expectedClans[i];
 
@@ -411,13 +370,13 @@ describe("ClansComponent", () =>
 
             let pagination = fixture.debugElement.query(By.css("ngb-pagination"));
             expect(pagination).not.toBeNull();
-            expect(pagination.properties["collectionSize"]).toEqual(clans.length);
-            expect(pagination.properties["page"]).toEqual(page);
-            expect(pagination.properties["pageSize"]).toEqual(component.leaderboardCount);
-            expect(pagination.properties["maxSize"]).toEqual(5);
-            expect(pagination.properties["rotate"]).toEqual(true);
-            expect(pagination.properties["ellipses"]).toEqual(false);
-            expect(pagination.properties["boundaryLinks"]).toEqual(true);
+            expect(pagination.properties.collectionSize).toEqual(clans.length);
+            expect(pagination.properties.page).toEqual(page);
+            expect(pagination.properties.pageSize).toEqual(component.leaderboardCount);
+            expect(pagination.properties.maxSize).toEqual(5);
+            expect(pagination.properties.rotate).toEqual(true);
+            expect(pagination.properties.ellipses).toEqual(false);
+            expect(pagination.properties.boundaryLinks).toEqual(true);
         });
     }
 });

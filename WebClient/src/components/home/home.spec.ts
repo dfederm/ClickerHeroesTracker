@@ -4,28 +4,24 @@ import { By } from "@angular/platform-browser";
 
 import { HomeComponent } from "./home";
 
-describe("HomeComponent", () =>
-{
+describe("HomeComponent", () => {
     let component: HomeComponent;
     let fixture: ComponentFixture<HomeComponent>;
 
-    beforeEach(async(() =>
-    {
+    beforeEach(async(() => {
         TestBed.configureTestingModule(
-        {
-            declarations: [ HomeComponent ],
-            schemas:      [ NO_ERRORS_SCHEMA ],
-        })
-        .compileComponents()
-        .then(() =>
-        {
-            fixture = TestBed.createComponent(HomeComponent);
-            component = fixture.componentInstance;
-        });
+            {
+                declarations: [HomeComponent],
+                schemas: [NO_ERRORS_SCHEMA],
+            })
+            .compileComponents()
+            .then(() => {
+                fixture = TestBed.createComponent(HomeComponent);
+                component = fixture.componentInstance;
+            });
     }));
 
-    it("should display the jumbotron", () =>
-    {
+    it("should display the jumbotron", () => {
         fixture.detectChanges();
 
         let jumbotron = fixture.debugElement.query(By.css(".jumbotron"));
@@ -37,11 +33,10 @@ describe("HomeComponent", () =>
 
         let uploadLink = jumbotron.query(By.css("a"));
         expect(uploadLink).not.toBeNull();
-        expect(uploadLink.properties["openDialog"]).toEqual(component.UploadDialogComponent);
+        expect(uploadLink.properties.openDialog).toEqual(component.UploadDialogComponent);
     });
 
-    it("should display the short changelog", () =>
-    {
+    it("should display the short changelog", () => {
         fixture.detectChanges();
 
         let changelogContainer = fixture.debugElement.query(By.css(".col-md-4"));

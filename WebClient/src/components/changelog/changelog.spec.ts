@@ -5,13 +5,11 @@ import { DatePipe } from "@angular/common";
 import { ChangelogComponent } from "./changelog";
 import { NewsService, ISiteNewsEntryListResponse } from "../../services/newsService/newsService";
 
-describe("ChangelogComponent", () =>
-{
+describe("ChangelogComponent", () => {
     let component: ChangelogComponent;
     let fixture: ComponentFixture<ChangelogComponent>;
 
-    beforeEach(async(() =>
-    {
+    beforeEach(async(() => {
         let newsService = { getNews: (): void => void 0 };
 
         TestBed.configureTestingModule(
@@ -24,24 +22,21 @@ describe("ChangelogComponent", () =>
                 ],
             })
             .compileComponents()
-            .then(() =>
-            {
+            .then(() => {
                 fixture = TestBed.createComponent(ChangelogComponent);
                 component = fixture.componentInstance;
             });
     }));
 
-    it("should display all sections of news entries when isFull=true", async(() =>
-    {
-        let siteNewsEntryListResponse: ISiteNewsEntryListResponse =
+    it("should display all sections of news entries when isFull=true", async(() => {
+        let siteNewsEntryListResponse: ISiteNewsEntryListResponse = {
+            entries:
             {
-                entries:
-                {
-                    "2017-01-01": ["1.0", "1.1"],
-                    "2017-01-02": ["2.0", "2.1"],
-                    "2017-01-03": ["3.0", "3.1"],
-                },
-            };
+                "2017-01-01": ["1.0", "1.1"],
+                "2017-01-02": ["2.0", "2.1"],
+                "2017-01-03": ["3.0", "3.1"],
+            },
+        };
         let newsService = TestBed.get(NewsService);
         spyOn(newsService, "getNews").and.returnValue(Promise.resolve(siteNewsEntryListResponse));
 
@@ -50,15 +45,13 @@ describe("ChangelogComponent", () =>
         let datePipe = TestBed.get(DatePipe) as DatePipe;
 
         fixture.detectChanges();
-        fixture.whenStable().then(() =>
-        {
+        fixture.whenStable().then(() => {
             fixture.detectChanges();
 
             let sections = fixture.debugElement.queryAll(By.css("div"));
             expect(sections.length).toEqual(3);
 
-            for (let i = 0; i < sections.length; i++)
-            {
+            for (let i = 0; i < sections.length; i++) {
                 // The sections are rendered in reverse order
                 let expectedDate = sections.length - i;
 
@@ -68,8 +61,7 @@ describe("ChangelogComponent", () =>
                 let list = sections[i].query(By.css("ul"));
                 let listItems = list.queryAll(By.css("li"));
                 expect(listItems.length).toEqual(2);
-                for (let j = 0; j < listItems.length; j++)
-                {
+                for (let j = 0; j < listItems.length; j++) {
                     let listItem: HTMLElement = listItems[j].nativeElement;
                     expect(listItem.textContent).toEqual(`${expectedDate}.${j}`);
                 }
@@ -77,25 +69,22 @@ describe("ChangelogComponent", () =>
         });
     }));
 
-    it("should display one section of 3 news entries when isFull=false", async(() =>
-    {
-        let siteNewsEntryListResponse: ISiteNewsEntryListResponse =
+    it("should display one section of 3 news entries when isFull=false", async(() => {
+        let siteNewsEntryListResponse: ISiteNewsEntryListResponse = {
+            entries:
             {
-                entries:
-                {
-                    "2017-01-01": ["1.0", "1.1"],
-                    "2017-01-02": ["2.0", "2.1"],
-                    "2017-01-03": ["3.0", "3.1"],
-                },
-            };
+                "2017-01-01": ["1.0", "1.1"],
+                "2017-01-02": ["2.0", "2.1"],
+                "2017-01-03": ["3.0", "3.1"],
+            },
+        };
         let newsService = TestBed.get(NewsService);
         spyOn(newsService, "getNews").and.returnValue(Promise.resolve(siteNewsEntryListResponse));
 
         component.isFull = false;
         fixture.detectChanges();
 
-        fixture.whenStable().then(() =>
-        {
+        fixture.whenStable().then(() => {
             fixture.detectChanges();
 
             let sections = fixture.debugElement.queryAll(By.css("div"));
@@ -115,15 +104,13 @@ describe("ChangelogComponent", () =>
         });
     }));
 
-    it("should display an error when the news service errors", async(() =>
-    {
+    it("should display an error when the news service errors", async(() => {
         let newsService = TestBed.get(NewsService);
         spyOn(newsService, "getNews").and.returnValue(Promise.reject("someReason"));
 
         fixture.detectChanges();
 
-        fixture.whenStable().then(() =>
-        {
+        fixture.whenStable().then(() => {
             fixture.detectChanges();
 
             let error = fixture.debugElement.query(By.css("p"));

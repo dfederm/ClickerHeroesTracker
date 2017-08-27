@@ -8,25 +8,22 @@ import { BehaviorSubject } from "rxjs/BehaviorSubject";
 import { UploadService, IUploadSummaryListResponse, IUpload } from "./uploadService";
 import { AuthenticationService } from "../authenticationService/authenticationService";
 
-declare global
-{
+// tslint:disable-next-line:no-namespace
+declare global {
     // tslint:disable-next-line:interface-name - We don't own this interface name, just extending it
-    interface Window
-    {
+    interface Window {
         appInsights: Microsoft.ApplicationInsights.IAppInsights;
     }
 }
 
-describe("UploadService", () =>
-{
+describe("UploadService", () => {
     let uploadService: UploadService;
     let authenticationService: AuthenticationService;
     let backend: MockBackend;
     let lastConnection: MockConnection;
     let isLoggedIn: BehaviorSubject<boolean>;
 
-    beforeEach(() =>
-    {
+    beforeEach(() => {
         isLoggedIn = new BehaviorSubject(false);
         authenticationService = jasmine.createSpyObj("authenticationService", ["isLoggedIn", "getAuthHeaders"]);
         (authenticationService.isLoggedIn as jasmine.Spy).and.returnValue(isLoggedIn);
@@ -49,16 +46,13 @@ describe("UploadService", () =>
         window.appInsights = jasmine.createSpyObj("appInsights", ["trackEvent"]);
     });
 
-    afterEach(() =>
-    {
+    afterEach(() => {
         lastConnection = null;
         backend.verifyNoPendingRequests();
     });
 
-    describe("getUploads", () =>
-    {
-        it("should make an api call", fakeAsync(() =>
-        {
+    describe("getUploads", () => {
+        it("should make an api call", fakeAsync(() => {
             uploadService.getUploads(1, 2);
             tick();
 
@@ -68,8 +62,7 @@ describe("UploadService", () =>
             expect(authenticationService.getAuthHeaders).toHaveBeenCalled();
         }));
 
-        it("should return some uploads", fakeAsync(() =>
-        {
+        it("should return some uploads", fakeAsync(() => {
             let response: IUploadSummaryListResponse;
             uploadService.getUploads(1, 2)
                 .then((r: IUploadSummaryListResponse) => response = r);
@@ -83,8 +76,7 @@ describe("UploadService", () =>
             expect(authenticationService.getAuthHeaders).toHaveBeenCalled();
         }));
 
-        it("should handle errors from authenticationService.getAuthHeaders", fakeAsync(() =>
-        {
+        it("should handle errors from authenticationService.getAuthHeaders", fakeAsync(() => {
             (authenticationService.getAuthHeaders as jasmine.Spy).and.callFake(() => Promise.reject("someError"));
 
             isLoggedIn.next(true);
@@ -103,8 +95,7 @@ describe("UploadService", () =>
             expect(appInsights.trackEvent).toHaveBeenCalled();
         }));
 
-        it("should handle http errors", fakeAsync(() =>
-        {
+        it("should handle http errors", fakeAsync(() => {
             let response: IUploadSummaryListResponse;
             let error: string;
             uploadService.getUploads(1, 1)
@@ -122,10 +113,8 @@ describe("UploadService", () =>
         }));
     });
 
-    describe("get", () =>
-    {
-        it("should make the correct api call when the use is not logged in", fakeAsync(() =>
-        {
+    describe("get", () => {
+        it("should make the correct api call when the use is not logged in", fakeAsync(() => {
             isLoggedIn.next(false);
             tick();
 
@@ -138,8 +127,7 @@ describe("UploadService", () =>
             expect(authenticationService.getAuthHeaders).not.toHaveBeenCalled();
         }));
 
-        it("should make the correct api call when the use is logged in", fakeAsync(() =>
-        {
+        it("should make the correct api call when the use is logged in", fakeAsync(() => {
             isLoggedIn.next(true);
             tick();
 
@@ -152,8 +140,7 @@ describe("UploadService", () =>
             expect(authenticationService.getAuthHeaders).toHaveBeenCalled();
         }));
 
-        it("should return an upload", fakeAsync(() =>
-        {
+        it("should return an upload", fakeAsync(() => {
             let upload: IUpload;
             uploadService.get(123)
                 .then((r: IUpload) => upload = r);
@@ -166,8 +153,7 @@ describe("UploadService", () =>
             expect(upload).toEqual(expectedUpload, "should return the expected upload");
         }));
 
-        it("should handle errors from authenticationService.getAuthHeaders", fakeAsync(() =>
-        {
+        it("should handle errors from authenticationService.getAuthHeaders", fakeAsync(() => {
             (authenticationService.getAuthHeaders as jasmine.Spy).and.callFake(() => Promise.reject("someError"));
 
             isLoggedIn.next(true);
@@ -186,8 +172,7 @@ describe("UploadService", () =>
             expect(appInsights.trackEvent).toHaveBeenCalled();
         }));
 
-        it("should handle http errors", fakeAsync(() =>
-        {
+        it("should handle http errors", fakeAsync(() => {
             let upload: IUpload;
             let error: string;
             uploadService.get(123)
@@ -204,10 +189,8 @@ describe("UploadService", () =>
         }));
     });
 
-    describe("create", () =>
-    {
-        it("should make the correct api call when the use is not logged in", fakeAsync(() =>
-        {
+    describe("create", () => {
+        it("should make the correct api call when the use is not logged in", fakeAsync(() => {
             isLoggedIn.next(false);
             tick();
 
@@ -221,8 +204,7 @@ describe("UploadService", () =>
             expect(authenticationService.getAuthHeaders).not.toHaveBeenCalled();
         }));
 
-        it("should make the correct api call when the use is logged in", fakeAsync(() =>
-        {
+        it("should make the correct api call when the use is logged in", fakeAsync(() => {
             isLoggedIn.next(true);
             tick();
 
@@ -236,8 +218,7 @@ describe("UploadService", () =>
             expect(authenticationService.getAuthHeaders).toHaveBeenCalled();
         }));
 
-        it("should handle errors from authenticationService.getAuthHeaders", fakeAsync(() =>
-        {
+        it("should handle errors from authenticationService.getAuthHeaders", fakeAsync(() => {
             (authenticationService.getAuthHeaders as jasmine.Spy).and.callFake(() => Promise.reject("someError"));
 
             isLoggedIn.next(true);
@@ -256,8 +237,7 @@ describe("UploadService", () =>
             expect(appInsights.trackEvent).toHaveBeenCalled();
         }));
 
-        it("should handle http errors", fakeAsync(() =>
-        {
+        it("should handle http errors", fakeAsync(() => {
             isLoggedIn.next(true);
             tick();
 
@@ -279,10 +259,8 @@ describe("UploadService", () =>
         }));
     });
 
-    describe("delete", () =>
-    {
-        it("should make an api call", fakeAsync(() =>
-        {
+    describe("delete", () => {
+        it("should make an api call", fakeAsync(() => {
             uploadService.delete(123);
             tick();
 
@@ -292,8 +270,7 @@ describe("UploadService", () =>
             expect(authenticationService.getAuthHeaders).toHaveBeenCalled();
         }));
 
-        it("should handle errors from authenticationService.getAuthHeaders", fakeAsync(() =>
-        {
+        it("should handle errors from authenticationService.getAuthHeaders", fakeAsync(() => {
             (authenticationService.getAuthHeaders as jasmine.Spy).and.callFake(() => Promise.reject("someError"));
 
             isLoggedIn.next(true);
@@ -312,8 +289,7 @@ describe("UploadService", () =>
             expect(appInsights.trackEvent).toHaveBeenCalled();
         }));
 
-        it("should handle http errors", fakeAsync(() =>
-        {
+        it("should handle http errors", fakeAsync(() => {
             let succeeded = false;
             let error: string;
             uploadService.delete(123)

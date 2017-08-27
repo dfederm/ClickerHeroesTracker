@@ -12,23 +12,19 @@ import { UploadDialogComponent } from "./uploadDialog";
 import { AuthenticationService } from "../../services/authenticationService/authenticationService";
 import { UploadService } from "../../services/uploadService/uploadService";
 
-describe("UploadDialogComponent", () =>
-{
+describe("UploadDialogComponent", () => {
     let component: UploadDialogComponent;
     let fixture: ComponentFixture<UploadDialogComponent>;
     let isLoggedIn: BehaviorSubject<boolean>;
 
-    beforeEach(async(() =>
-    {
+    beforeEach(async(() => {
         isLoggedIn = new BehaviorSubject(false);
-        let authenticationService =
-            {
-                isLoggedIn: (): Observable<boolean> => isLoggedIn,
-            };
-        let uploadService =
-            {
-                create: (): void => void 0,
-            };
+        let authenticationService = {
+            isLoggedIn: (): Observable<boolean> => isLoggedIn,
+        };
+        let uploadService = {
+            create: (): void => void 0,
+        };
         let activeModal = { close: (): void => void 0 };
         let router = { navigate: (): void => void 0 };
 
@@ -46,15 +42,13 @@ describe("UploadDialogComponent", () =>
                 schemas: [NO_ERRORS_SCHEMA],
             })
             .compileComponents()
-            .then(() =>
-            {
+            .then(() => {
                 fixture = TestBed.createComponent(UploadDialogComponent);
                 component = fixture.componentInstance;
             });
     }));
 
-    it("should display the modal header", () =>
-    {
+    it("should display the modal header", () => {
         fixture.detectChanges();
 
         let header = fixture.debugElement.query(By.css(".modal-header"));
@@ -65,19 +59,16 @@ describe("UploadDialogComponent", () =>
         expect(title.nativeElement.textContent).toEqual("Upload your save");
     });
 
-    describe("upload", () =>
-    {
+    describe("upload", () => {
         let encodedSaveData: DebugElement;
         let playStyles: DebugElement[];
         let addToProgress: DebugElement;
         let warningMessage: DebugElement;
         let button: DebugElement;
 
-        it("should display the form elements with 'add to progress' when the user is logged in", async(() =>
-        {
+        it("should display the form elements with 'add to progress' when the user is logged in", async(() => {
             setIsLoggedIn(true)
-                .then(() =>
-                {
+                .then(() => {
                     expect(encodedSaveData).not.toBeNull();
                     expect(playStyles.length).toEqual(3);
                     expect(addToProgress).not.toBeNull();
@@ -86,11 +77,9 @@ describe("UploadDialogComponent", () =>
                 });
         }));
 
-        it("should display the form elements without 'add to progress' when the user is not logged in", async(() =>
-        {
+        it("should display the form elements without 'add to progress' when the user is not logged in", async(() => {
             setIsLoggedIn(false)
-                .then(() =>
-                {
+                .then(() => {
                     expect(encodedSaveData).not.toBeNull();
                     expect(playStyles.length).toEqual(3);
                     expect(addToProgress).toBeNull();
@@ -99,22 +88,18 @@ describe("UploadDialogComponent", () =>
                 });
         }));
 
-        it("should show an error with empty save data", async(() =>
-        {
+        it("should show an error with empty save data", async(() => {
             setIsLoggedIn(false)
-                .then(() =>
-                {
+                .then(() => {
                     button.nativeElement.click();
 
                     expect(component.errorMessage).toBeTruthy();
                 });
         }));
 
-        it("should upload correct save data when user is not logged in", async(() =>
-        {
+        it("should upload correct save data when user is not logged in", async(() => {
             setIsLoggedIn(false)
-                .then(() =>
-                {
+                .then(() => {
                     let uploadService = TestBed.get(UploadService) as UploadService;
                     spyOn(uploadService, "create").and.returnValue(Promise.resolve<number>(123));
 
@@ -131,8 +116,7 @@ describe("UploadDialogComponent", () =>
 
                     // Wait for stability from the uploadService promise
                     fixture.detectChanges();
-                    fixture.whenStable().then(() =>
-                    {
+                    fixture.whenStable().then(() => {
                         expect(uploadService.create).toHaveBeenCalledWith("someEncodedSaveData", true, "Hybrid");
 
                         expect(component.errorMessage).toBeFalsy();
@@ -142,11 +126,9 @@ describe("UploadDialogComponent", () =>
                 });
         }));
 
-        it("should upload correct save data when user is logged in", async(() =>
-        {
+        it("should upload correct save data when user is logged in", async(() => {
             setIsLoggedIn(true)
-                .then(() =>
-                {
+                .then(() => {
                     let uploadService = TestBed.get(UploadService) as UploadService;
                     spyOn(uploadService, "create").and.returnValue(Promise.resolve<number>(123));
 
@@ -163,8 +145,7 @@ describe("UploadDialogComponent", () =>
 
                     // Wait for stability from the uploadService promise
                     fixture.detectChanges();
-                    fixture.whenStable().then(() =>
-                    {
+                    fixture.whenStable().then(() => {
                         expect(uploadService.create).toHaveBeenCalledWith("someEncodedSaveData", true, "Hybrid");
 
                         expect(component.errorMessage).toBeFalsy();
@@ -174,11 +155,9 @@ describe("UploadDialogComponent", () =>
                 });
         }));
 
-        it("should show an error when uploadService fails", async(() =>
-        {
+        it("should show an error when uploadService fails", async(() => {
             setIsLoggedIn(true)
-                .then(() =>
-                {
+                .then(() => {
                     let uploadService = TestBed.get(UploadService) as UploadService;
                     spyOn(uploadService, "create").and.returnValue(Promise.reject(new Response(new ResponseOptions({ status: 500 }))));
 
@@ -195,8 +174,7 @@ describe("UploadDialogComponent", () =>
 
                     // Wait for stability from the uploadService promise
                     fixture.detectChanges();
-                    fixture.whenStable().then(() =>
-                    {
+                    fixture.whenStable().then(() => {
                         expect(component.errorMessage).toBeTruthy();
                         expect(router.navigate).not.toHaveBeenCalled();
                         expect(activeModal.close).not.toHaveBeenCalled();
@@ -204,13 +182,11 @@ describe("UploadDialogComponent", () =>
                 });
         }));
 
-        function setIsLoggedIn(value: boolean): Promise<void>
-        {
+        function setIsLoggedIn(value: boolean): Promise<void> {
             isLoggedIn.next(value);
             fixture.detectChanges();
             return fixture.whenStable()
-                .then(() =>
-                {
+                .then(() => {
                     fixture.detectChanges();
 
                     let body = fixture.debugElement.query(By.css(".modal-body"));
@@ -229,8 +205,7 @@ describe("UploadDialogComponent", () =>
     });
 });
 
-function setInputValue(element: DebugElement, value: string): void
-{
+function setInputValue(element: DebugElement, value: string): void {
     element.nativeElement.value = value;
 
     // Tell Angular

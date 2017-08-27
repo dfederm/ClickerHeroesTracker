@@ -6,8 +6,7 @@ import "rxjs/add/operator/toPromise";
 import { AuthenticationService } from "../../services/authenticationService/authenticationService";
 import { IPaginationMetadata } from "../pagination";
 
-export interface IGuildMember
-{
+export interface IGuildMember {
     highestZone: number;
 
     nickname: string;
@@ -15,19 +14,17 @@ export interface IGuildMember
     uid: string;
 }
 
-export interface IClanData
-{
+export interface IClanData {
     clanName: string;
 
     currentRaidLevel: number;
 
-    guildMembers: Array<IGuildMember>;
+    guildMembers: IGuildMember[];
 
-    messages: Array<IMessage>;
+    messages: IMessage[];
 }
 
-export interface IMessage
-{
+export interface IMessage {
     date: string;
 
     username: string;
@@ -35,15 +32,13 @@ export interface IMessage
     content: string;
 }
 
-export interface ILeaderboardSummaryListResponse
-{
+export interface ILeaderboardSummaryListResponse {
     pagination: IPaginationMetadata;
 
     leaderboardClans: ILeaderboardClan[];
 }
 
-export interface ILeaderboardClan
-{
+export interface ILeaderboardClan {
     name: string;
 
     currentRaidLevel: number;
@@ -55,43 +50,36 @@ export interface ILeaderboardClan
     isUserClan: boolean;
 }
 
-export interface ISendMessageResponse
-{
+export interface ISendMessageResponse {
     success: boolean;
     reason?: string;
 }
 
 @Injectable()
-export class ClanService
-{
+export class ClanService {
     constructor(
         private authenticationService: AuthenticationService,
         private http: Http,
     ) { }
 
     // TODO: this is really the user's clan.
-    public getClan(): Promise<IClanData>
-    {
+    public getClan(): Promise<IClanData> {
         return this.authenticationService.getAuthHeaders()
-            .then(headers =>
-            {
-                let options = new RequestOptions({ headers: headers });
+            .then(headers => {
+                let options = new RequestOptions({ headers });
                 return this.http
                     .get("/api/clans", options)
                     .toPromise();
             })
-            .then(response =>
-            {
-                if (response.status === 204)
-                {
+            .then(response => {
+                if (response.status === 204) {
                     // This means the user is not part of a clan.
                     return null;
                 }
 
                 return response.json() as IClanData;
             })
-            .catch(error =>
-            {
+            .catch(error => {
                 let errorMessage = error.message || error.toString();
                 appInsights.trackEvent("ClanService.getClan.error", { message: errorMessage });
                 return Promise.reject(errorMessage);
@@ -99,63 +87,52 @@ export class ClanService
     }
 
     // TODO this should be combined with the call above.
-    public getUserClan(): Promise<ILeaderboardClan>
-    {
+    public getUserClan(): Promise<ILeaderboardClan> {
         return this.authenticationService.getAuthHeaders()
-            .then(headers =>
-            {
-                let options = new RequestOptions({ headers: headers });
+            .then(headers => {
+                let options = new RequestOptions({ headers });
                 return this.http
                     .get("/api/clans/userClan", options)
                     .toPromise();
             })
-            .then(response =>
-            {
-                if (response.status === 204)
-                {
+            .then(response => {
+                if (response.status === 204) {
                     // This means the user is not part of a clan.
                     return null;
                 }
 
                 return response.json() as ILeaderboardClan;
             })
-            .catch(error =>
-            {
+            .catch(error => {
                 let errorMessage = error.message || error.toString();
                 appInsights.trackEvent("ClanService.getUserClan.error", { message: errorMessage });
                 return Promise.reject(errorMessage);
             });
     }
 
-    public getLeaderboard(page: number, count: number): Promise<ILeaderboardSummaryListResponse>
-    {
+    public getLeaderboard(page: number, count: number): Promise<ILeaderboardSummaryListResponse> {
         return this.authenticationService.getAuthHeaders()
-            .then(headers =>
-            {
-                let options = new RequestOptions({ headers: headers });
+            .then(headers => {
+                let options = new RequestOptions({ headers });
                 return this.http
                     .get("/api/clans/leaderboard?page=" + page + "&count=" + count, options)
                     .toPromise();
             })
-            .then(response =>
-            {
+            .then(response => {
                 return response.json() as ILeaderboardSummaryListResponse;
             })
-            .catch(error =>
-            {
+            .catch(error => {
                 let errorMessage = error.message || error.toString();
                 appInsights.trackEvent("ClanService.getLeaderboard.error", { message: errorMessage });
                 return Promise.reject(errorMessage);
             });
     }
 
-    public sendMessage(message: string, clanName: string): Promise<void>
-    {
+    public sendMessage(message: string, clanName: string): Promise<void> {
         return this.authenticationService.getAuthHeaders()
-            .then(headers =>
-            {
+            .then(headers => {
                 headers.append("Content-Type", "application/x-www-form-urlencoded");
-                let options = new RequestOptions({ headers: headers });
+                let options = new RequestOptions({ headers });
                 let params = new URLSearchParams();
                 params.append("message", message);
                 params.append("clanName", clanName);
@@ -163,18 +140,15 @@ export class ClanService
                     .post("/api/clans/messages", params.toString(), options)
                     .toPromise();
             })
-            .then(response =>
-            {
+            .then(response => {
                 let sendMessageResponse = response.json() as ISendMessageResponse;
-                if (!sendMessageResponse.success)
-                {
+                if (!sendMessageResponse.success) {
                     return Promise.reject(sendMessageResponse.reason);
                 }
 
                 return Promise.resolve();
             })
-            .catch(error =>
-            {
+            .catch(error => {
                 let errorMessage = error.message || error.toString();
                 appInsights.trackEvent("ClanService.getLeaderboard.error", { message: errorMessage });
                 return Promise.reject(errorMessage);

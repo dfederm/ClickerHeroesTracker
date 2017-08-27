@@ -7,13 +7,11 @@ import { BehaviorSubject } from "rxjs/BehaviorSubject";
 import { NavbarComponent } from "./navbar";
 import { AuthenticationService } from "../../services/authenticationService/authenticationService";
 
-describe("NavbarComponent", () =>
-{
+describe("NavbarComponent", () => {
     let component: NavbarComponent;
     let fixture: ComponentFixture<NavbarComponent>;
 
-    beforeEach(async(() =>
-    {
+    beforeEach(async(() => {
         let authenticationService = { isLoggedIn: (): void => void 0, logOut: (): void => void 0 };
         let modalService = { open: (): void => void 0 };
 
@@ -28,21 +26,18 @@ describe("NavbarComponent", () =>
                 schemas: [NO_ERRORS_SCHEMA],
             })
             .compileComponents()
-            .then(() =>
-            {
+            .then(() => {
                 fixture = TestBed.createComponent(NavbarComponent);
                 component = fixture.componentInstance;
             });
     }));
 
-    it("should display the anonymous nav bar when the user is not logged in", async(() =>
-    {
+    it("should display the anonymous nav bar when the user is not logged in", async(() => {
         let authenticationService = TestBed.get(AuthenticationService) as AuthenticationService;
         spyOn(authenticationService, "isLoggedIn").and.returnValue(new BehaviorSubject(false));
 
         fixture.detectChanges();
-        fixture.whenStable().then(() =>
-        {
+        fixture.whenStable().then(() => {
             fixture.detectChanges();
 
             let navItems = fixture.debugElement.queryAll(By.css(".nav-item"));
@@ -57,38 +52,32 @@ describe("NavbarComponent", () =>
                     { text: "Register" },
                     { text: "Log in", dialog: component.LogInDialogComponent },
                 ];
-            for (let i = 0; i < navItems.length; i++)
-            {
+            for (let i = 0; i < navItems.length; i++) {
                 let link = navItems[i].query(By.css(".nav-link"));
                 expect(link).not.toBeNull();
 
                 let expectations = expectedLinks[i];
-                if (expectations.text)
-                {
+                if (expectations.text) {
                     expect(link.nativeElement.innerText).toEqual(expectations.text);
                 }
 
-                if (expectations.url)
-                {
+                if (expectations.url) {
                     expect(link.attributes.routerLink).toEqual(expectations.url);
                 }
 
-                if (expectations.dialog)
-                {
+                if (expectations.dialog) {
                     expect(link.properties.openDialog).toEqual(expectations.dialog);
                 }
             }
         });
     }));
 
-    it("should display the authenticated nav bar when the user is logged in", async(() =>
-    {
+    it("should display the authenticated nav bar when the user is logged in", async(() => {
         let authenticationService = TestBed.get(AuthenticationService) as AuthenticationService;
         spyOn(authenticationService, "isLoggedIn").and.returnValue(new BehaviorSubject(true));
 
         fixture.detectChanges();
-        fixture.whenStable().then(() =>
-        {
+        fixture.whenStable().then(() => {
             fixture.detectChanges();
 
             let navItems = fixture.debugElement.queryAll(By.css(".nav-item"));
@@ -105,71 +94,60 @@ describe("NavbarComponent", () =>
                     { text: "Hello User!" },
                     { text: "Log off", hasClickHandler: true },
                 ];
-            for (let i = 0; i < navItems.length; i++)
-            {
+            for (let i = 0; i < navItems.length; i++) {
                 let link = navItems[i].query(By.css(".nav-link"));
                 expect(link).not.toBeNull();
 
                 let expectations = expectedLinks[i];
-                if (expectations.text)
-                {
+                if (expectations.text) {
                     expect(link.nativeElement.innerText).toEqual(expectations.text);
                 }
 
-                if (expectations.url)
-                {
+                if (expectations.url) {
                     expect(link.attributes.routerLink).toEqual(expectations.url);
                 }
 
-                if (expectations.hasClickHandler)
-                {
+                if (expectations.hasClickHandler) {
                     expect(link.listeners).not.toBeNull();
                     expect(link.listeners.length).toEqual(1);
                     expect(link.listeners[0].name).toEqual("click");
                 }
 
-                if (expectations.dialog)
-                {
+                if (expectations.dialog) {
                     expect(link.properties.openDialog).toEqual(expectations.dialog);
                 }
             }
         });
     }));
 
-    it("should update isLoggedIn when the authenticationService updates", async(() =>
-    {
+    it("should update isLoggedIn when the authenticationService updates", async(() => {
         let isLoggedIn = new BehaviorSubject(false);
         let authenticationService = TestBed.get(AuthenticationService) as AuthenticationService;
         spyOn(authenticationService, "isLoggedIn").and.returnValue(isLoggedIn);
 
         fixture.detectChanges();
         fixture.whenStable()
-            .then(() =>
-            {
+            .then(() => {
                 expect(component.isLoggedIn).toEqual(false);
                 isLoggedIn.next(true);
                 return fixture.whenStable();
             })
-            .then(() =>
-            {
+            .then(() => {
                 expect(component.isLoggedIn).toEqual(true);
                 isLoggedIn.next(true);
                 return fixture.whenStable();
             })
-            .then(() =>
-            {
+            .then(() => {
                 expect(component.isLoggedIn).toEqual(true);
                 isLoggedIn.next(false);
                 return fixture.whenStable();
             })
-            .then(() =>
-            {
+            .then(() => {
                 expect(component.isLoggedIn).toEqual(false);
             });
     }));
 
-    it("should be able to collape and expand the navbar", () =>
-    {
+    it("should be able to collape and expand the navbar", () => {
         let authenticationService = TestBed.get(AuthenticationService) as AuthenticationService;
         spyOn(authenticationService, "isLoggedIn").and.returnValue(new BehaviorSubject(false));
 
@@ -192,8 +170,7 @@ describe("NavbarComponent", () =>
         expect(component.isCollapsed).toEqual(false);
     });
 
-    it("should log out after clicking the log out button", () =>
-    {
+    it("should log out after clicking the log out button", () => {
         let authenticationService = TestBed.get(AuthenticationService) as AuthenticationService;
         spyOn(authenticationService, "isLoggedIn").and.returnValue(new BehaviorSubject(true));
 

@@ -4,28 +4,24 @@ import { By } from "@angular/platform-browser";
 
 import { NewsComponent } from "./news";
 
-describe("NewsComponent", () =>
-{
+describe("NewsComponent", () => {
     let component: NewsComponent;
     let fixture: ComponentFixture<NewsComponent>;
 
-    beforeEach(async(() =>
-    {
+    beforeEach(async(() => {
         TestBed.configureTestingModule(
-        {
-            declarations: [ NewsComponent ],
-            schemas: [ NO_ERRORS_SCHEMA ],
-        })
-        .compileComponents()
-        .then(() =>
-        {
-            fixture = TestBed.createComponent(NewsComponent);
-            component = fixture.componentInstance;
-        });
+            {
+                declarations: [NewsComponent],
+                schemas: [NO_ERRORS_SCHEMA],
+            })
+            .compileComponents()
+            .then(() => {
+                fixture = TestBed.createComponent(NewsComponent);
+                component = fixture.componentInstance;
+            });
     }));
 
-    it("should display the full changelog", () =>
-    {
+    it("should display the full changelog", () => {
         fixture.detectChanges();
 
         let changelogContainer = fixture.debugElement.query(By.css(".container"));
@@ -33,6 +29,6 @@ describe("NewsComponent", () =>
 
         let changelog = changelogContainer.query(By.css("changelog"));
         expect(changelog).not.toBeNull();
-        expect(changelog.properties["isFull"]).toEqual(true);
+        expect(changelog.properties.isFull).toEqual(true);
     });
 });

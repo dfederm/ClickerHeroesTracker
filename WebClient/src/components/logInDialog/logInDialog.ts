@@ -7,28 +7,24 @@ import { AuthenticationService } from "../../services/authenticationService/auth
     selector: "logInDialog",
     templateUrl: "./logInDialog.html",
 })
-export class LogInDialogComponent
-{
-    public isError: boolean = false;
+export class LogInDialogComponent {
+    public isError = false;
 
-    public username: string = "";
+    public username = "";
 
-    public password: string = "";
+    public password = "";
 
     constructor(
         private authenticationService: AuthenticationService,
         public activeModal: NgbActiveModal,
     ) { }
 
-    public logIn(): void
-    {
+    public logIn(): void {
         this.authenticationService.logIn(this.username, this.password)
-            .then(() =>
-            {
+            .then(() => {
                 this.activeModal.close();
             })
-            .catch(() =>
-            {
+            .catch(() => {
                 this.isError = true;
             });
     }

@@ -7,24 +7,21 @@ import { MockBackend, MockConnection } from "@angular/http/testing";
 import { ClanService, ISendMessageResponse, ILeaderboardClan, IClanData, ILeaderboardSummaryListResponse } from "./clanService";
 import { AuthenticationService } from "../authenticationService/authenticationService";
 
-declare global
-{
+// tslint:disable-next-line:no-namespace
+declare global {
     // tslint:disable-next-line:interface-name - We don't own this interface name, just extending it
-    interface Window
-    {
+    interface Window {
         appInsights: Microsoft.ApplicationInsights.IAppInsights;
     }
 }
 
-describe("ClanService", () =>
-{
+describe("ClanService", () => {
     let clanService: ClanService;
     let authenticationService: AuthenticationService;
     let backend: MockBackend;
     let lastConnection: MockConnection;
 
-    beforeEach(() =>
-    {
+    beforeEach(() => {
         authenticationService = jasmine.createSpyObj("authenticationService", ["getAuthHeaders"]);
         (authenticationService.getAuthHeaders as jasmine.Spy).and.returnValue(Promise.resolve(new Headers()));
 
@@ -45,16 +42,13 @@ describe("ClanService", () =>
         window.appInsights = jasmine.createSpyObj("appInsights", ["trackEvent"]);
     });
 
-    afterEach(() =>
-    {
+    afterEach(() => {
         lastConnection = null;
         backend.verifyNoPendingRequests();
     });
 
-    describe("getClan", () =>
-    {
-        it("should make an api call", fakeAsync(() =>
-        {
+    describe("getClan", () => {
+        it("should make an api call", fakeAsync(() => {
             clanService.getClan();
             tick();
 
@@ -64,8 +58,7 @@ describe("ClanService", () =>
             expect(authenticationService.getAuthHeaders).toHaveBeenCalled();
         }));
 
-        it("should return clan information", fakeAsync(() =>
-        {
+        it("should return clan information", fakeAsync(() => {
             let response: IClanData;
             clanService.getClan()
                 .then((r: IClanData) => response = r);
@@ -79,8 +72,7 @@ describe("ClanService", () =>
             expect(authenticationService.getAuthHeaders).toHaveBeenCalled();
         }));
 
-        it("should return null when the user isn't in a clan", fakeAsync(() =>
-        {
+        it("should return null when the user isn't in a clan", fakeAsync(() => {
             let response: IClanData;
             clanService.getClan()
                 .then((r: IClanData) => response = r);
@@ -93,8 +85,7 @@ describe("ClanService", () =>
             expect(authenticationService.getAuthHeaders).toHaveBeenCalled();
         }));
 
-        it("should handle errors from authenticationService.getAuthHeaders", fakeAsync(() =>
-        {
+        it("should handle errors from authenticationService.getAuthHeaders", fakeAsync(() => {
             (authenticationService.getAuthHeaders as jasmine.Spy).and.callFake(() => Promise.reject("someError"));
 
             tick();
@@ -112,8 +103,7 @@ describe("ClanService", () =>
             expect(appInsights.trackEvent).toHaveBeenCalled();
         }));
 
-        it("should handle http errors", fakeAsync(() =>
-        {
+        it("should handle http errors", fakeAsync(() => {
             let response: IClanData;
             let error: string;
             clanService.getClan()
@@ -131,10 +121,8 @@ describe("ClanService", () =>
         }));
     });
 
-    describe("getUserClan", () =>
-    {
-        it("should make an api call", fakeAsync(() =>
-        {
+    describe("getUserClan", () => {
+        it("should make an api call", fakeAsync(() => {
             clanService.getUserClan();
             tick();
 
@@ -144,8 +132,7 @@ describe("ClanService", () =>
             expect(authenticationService.getAuthHeaders).toHaveBeenCalled();
         }));
 
-        it("should return the user's clan leaderboard data", fakeAsync(() =>
-        {
+        it("should return the user's clan leaderboard data", fakeAsync(() => {
             let response: ILeaderboardClan;
             clanService.getUserClan()
                 .then((r: ILeaderboardClan) => response = r);
@@ -159,8 +146,7 @@ describe("ClanService", () =>
             expect(authenticationService.getAuthHeaders).toHaveBeenCalled();
         }));
 
-        it("should return null when the user isn't in a clan", fakeAsync(() =>
-        {
+        it("should return null when the user isn't in a clan", fakeAsync(() => {
             let response: ILeaderboardClan;
             clanService.getUserClan()
                 .then((r: ILeaderboardClan) => response = r);
@@ -173,8 +159,7 @@ describe("ClanService", () =>
             expect(authenticationService.getAuthHeaders).toHaveBeenCalled();
         }));
 
-        it("should handle errors from authenticationService.getAuthHeaders", fakeAsync(() =>
-        {
+        it("should handle errors from authenticationService.getAuthHeaders", fakeAsync(() => {
             (authenticationService.getAuthHeaders as jasmine.Spy).and.callFake(() => Promise.reject("someError"));
 
             tick();
@@ -192,8 +177,7 @@ describe("ClanService", () =>
             expect(appInsights.trackEvent).toHaveBeenCalled();
         }));
 
-        it("should handle http errors", fakeAsync(() =>
-        {
+        it("should handle http errors", fakeAsync(() => {
             let response: ILeaderboardClan;
             let error: string;
             clanService.getUserClan()
@@ -211,10 +195,8 @@ describe("ClanService", () =>
         }));
     });
 
-    describe("getLeaderboard", () =>
-    {
-        it("should make an api call", fakeAsync(() =>
-        {
+    describe("getLeaderboard", () => {
+        it("should make an api call", fakeAsync(() => {
             clanService.getLeaderboard(1, 2);
             tick();
 
@@ -224,8 +206,7 @@ describe("ClanService", () =>
             expect(authenticationService.getAuthHeaders).toHaveBeenCalled();
         }));
 
-        it("should return the leaderboard data", fakeAsync(() =>
-        {
+        it("should return the leaderboard data", fakeAsync(() => {
             let response: ILeaderboardSummaryListResponse;
             clanService.getLeaderboard(1, 2)
                 .then((r: ILeaderboardSummaryListResponse) => response = r);
@@ -239,8 +220,7 @@ describe("ClanService", () =>
             expect(authenticationService.getAuthHeaders).toHaveBeenCalled();
         }));
 
-        it("should handle errors from authenticationService.getAuthHeaders", fakeAsync(() =>
-        {
+        it("should handle errors from authenticationService.getAuthHeaders", fakeAsync(() => {
             (authenticationService.getAuthHeaders as jasmine.Spy).and.callFake(() => Promise.reject("someError"));
 
             tick();
@@ -258,8 +238,7 @@ describe("ClanService", () =>
             expect(appInsights.trackEvent).toHaveBeenCalled();
         }));
 
-        it("should handle http errors", fakeAsync(() =>
-        {
+        it("should handle http errors", fakeAsync(() => {
             let response: ILeaderboardSummaryListResponse;
             let error: string;
             clanService.getLeaderboard(1, 2)
@@ -277,10 +256,8 @@ describe("ClanService", () =>
         }));
     });
 
-    describe("sendMessage", () =>
-    {
-        it("should make an api call", fakeAsync(() =>
-        {
+    describe("sendMessage", () => {
+        it("should make an api call", fakeAsync(() => {
             clanService.sendMessage("someMessage", "someClanName");
             tick();
 
@@ -291,8 +268,7 @@ describe("ClanService", () =>
             expect(authenticationService.getAuthHeaders).toHaveBeenCalled();
         }));
 
-        it("should handle when the api returns a success response", fakeAsync(() =>
-        {
+        it("should handle when the api returns a success response", fakeAsync(() => {
             let succeeded = false;
             clanService.sendMessage("someMessage", "someClanName")
                 .then(() => succeeded = true);
@@ -306,8 +282,7 @@ describe("ClanService", () =>
             expect(authenticationService.getAuthHeaders).toHaveBeenCalled();
         }));
 
-        it("should handle when the api returns a failed response", fakeAsync(() =>
-        {
+        it("should handle when the api returns a failed response", fakeAsync(() => {
             let succeeded = false;
             let error: string;
             clanService.sendMessage("someMessage", "someClanName")
@@ -324,8 +299,7 @@ describe("ClanService", () =>
             expect(authenticationService.getAuthHeaders).toHaveBeenCalled();
         }));
 
-        it("should handle errors from authenticationService.getAuthHeaders", fakeAsync(() =>
-        {
+        it("should handle errors from authenticationService.getAuthHeaders", fakeAsync(() => {
             (authenticationService.getAuthHeaders as jasmine.Spy).and.callFake(() => Promise.reject("someError"));
 
             tick();
@@ -343,8 +317,7 @@ describe("ClanService", () =>
             expect(appInsights.trackEvent).toHaveBeenCalled();
         }));
 
-        it("should handle http errors", fakeAsync(() =>
-        {
+        it("should handle http errors", fakeAsync(() => {
             let succeeded = false;
             let error: string;
             clanService.sendMessage("someMessage", "someClanName")

@@ -4,11 +4,10 @@ import { AuthenticationService } from "../../services/authenticationService/auth
 import { LogInDialogComponent } from "../logInDialog/logInDialog";
 import { UploadDialogComponent } from "../uploadDialog/uploadDialog";
 
-declare global
-{
+// tslint:disable-next-line:no-namespace
+declare global {
     // tslint:disable-next-line:interface-name - We don't own this interface name, just extending it
-    interface Window
-    {
+    interface Window {
         adsbygoogle: object[];
     }
 }
@@ -17,9 +16,8 @@ declare global
     selector: "navbar",
     templateUrl: "./navbar.html",
 })
-export class NavbarComponent implements OnInit
-{
-    public isCollapsed: boolean = true;
+export class NavbarComponent implements OnInit {
+    public isCollapsed = true;
 
     public isLoggedIn: boolean;
 
@@ -30,15 +28,13 @@ export class NavbarComponent implements OnInit
         private authenticationService: AuthenticationService,
     ) { }
 
-    public ngOnInit(): void
-    {
+    public ngOnInit(): void {
         this.authenticationService
             .isLoggedIn()
             .subscribe(isLoggedIn => this.isLoggedIn = isLoggedIn);
     }
 
-    public logOut(): void
-    {
+    public logOut(): void {
         this.authenticationService.logOut();
     }
 }

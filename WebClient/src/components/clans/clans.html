@@ -12,7 +12,7 @@
         </div>
         <div *ngIf="isInClan && !isClanInformationError"
              class="col-lg-6">
-            <h3>{{clanName}}</h3>
+            <h3>{{ clanName }}</h3>
             <table class="table table-responsive table-striped">
                 <thead>
                     <tr>
@@ -22,8 +22,8 @@
                 </thead>
                 <tbody>
                     <tr *ngFor="let guildMember of guildMembers">
-                        <td>{{guildMember.nickname}}</td>
-                        <td>{{guildMember.highestZone}}</td>
+                        <td>{{ guildMember.nickname }}</td>
+                        <td>{{ guildMember.highestZone }}</td>
                     </tr>
                 </tbody>
             </table>
@@ -49,10 +49,10 @@
                             ({{ message.date | timeAgo }})
                         </span>
                         <span [ngClass]="{'text-muted' : !message.username}">
-                            {{message.username || "(Unknown)"}}
+                            {{ message.username || "(Unknown)" }}
                         </span>
                     </p>
-                    <p class="clan-message-content">{{message.content}}</p>
+                    <p class="clan-message-content">{{ message.content }}</p>
                 </div>
             </div>
         </div>
@@ -74,10 +74,10 @@
                 <tbody>
                     <tr *ngFor="let clan of clans"
                         [ngClass]="{'table-success' : clan.isUserClan}">
-                        <td>{{clan.rank}}</td>
-                        <td>{{clan.name}}</td>
-                        <td>{{clan.memberCount}}</td>
-                        <td>{{clan.currentRaidLevel}}</td>
+                        <td>{{ clan.rank }}</td>
+                        <td>{{ clan.name }}</td>
+                        <td>{{ clan.memberCount }}</td>
+                        <td>{{ clan.currentRaidLevel }}</td>
                     </tr>
                 </tbody>
             </table>
