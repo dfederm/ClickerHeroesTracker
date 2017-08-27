@@ -2,7 +2,7 @@
     <h2>Calculator</h2>
     <p *ngIf="errorMessage"
        class="alert alert-danger">
-        {{errorMessage}}
+        {{ errorMessage }}
     </p>
     <div class="row">
         <div class="col-md-6">
@@ -10,16 +10,16 @@
                 <li>
                     <label>User:</label>
                     <span [ngClass]="{'text-muted' : !userName}">
-                        {{userName || "(Anonymous)"}}
+                        {{ userName || "(Anonymous)" }}
                     </span>
                 </li>
                 <li>
                     <label>Upload Time:</label>
-                    <span>{{uploadTime | date:'short'}}</span>
+                    <span>{{ uploadTime | date:'short' }}</span>
                 </li>
                 <li>
                     <label>Play Style:</label>
-                    <span>{{playStyle | titlecase}}</span>
+                    <span>{{ playStyle | titlecase }}</span>
                 </li>
             </ul>
         </div>
@@ -70,7 +70,7 @@
                  class="form-group">
                 <label class="form-check-label">
                     <input class="form-check-input" name="useSoulsFromAscension" [(ngModel)]="useSoulsFromAscension" type="checkbox">
-                    <span>Include souls from ascension (+{{pendingSouls | exponential}})</span>
+                    <span>Include souls from ascension (+{{ pendingSouls | exponential }})</span>
                 </label>
             </div>
             <table class="table">
@@ -85,7 +85,7 @@
                 <tbody>
                     <tr *ngFor="let ancient of ancients">
                         <td>
-                            {{ancient.name}}:
+                            {{ ancient.name }}:
                             <a href="/Manage"
                                class="text-muted"
                                *ngIf="ancient.name == 'Solomon' && transcendentPower.isZero()"
@@ -96,7 +96,7 @@
                         </td>
 
                         <td class="text-right">
-                            {{ancient.ancientLevel | exponential}}
+                            {{ ancient.ancientLevel | exponential }}
                             <span *ngIf="!ancient.itemLevel.isZero()"
                                   placement="bottom"
                                   ngbTooltip="Effective Level: {{ancient.effectiveLevel | exponential}}">
@@ -105,7 +105,7 @@
                         </td>
 
                         <td class="text-right">
-                            {{ancient.isBase ? "N/A" : ancient.suggestedLevel !== undefined ? (ancient.suggestedLevel | exponential) : "-"}}
+                            {{ ancient.isBase ? "N/A" : ancient.suggestedLevel !== undefined ? (ancient.suggestedLevel | exponential) : "-" }}
                             <span *ngIf="ancient.isBase"
                                   class="text-muted"
                                   placement="bottom"
@@ -119,7 +119,7 @@
                             [cbContent]="ancient.diffCopyValue"
                             placement="right"
                             ngbTooltip="{{ancient.diffValue !== undefined ? 'Click to copy to clipboard' : ''}}">
-                            {{ancient.diffValue !== undefined && !ancient.isBase ? (ancient.diffValue | exponential) : "-"}}
+                            {{ ancient.diffValue !== undefined && !ancient.isBase ? (ancient.diffValue | exponential) : "-" }}
                         </td>
                     </tr>
                 </tbody>
@@ -153,9 +153,9 @@
                 </thead>
                 <tbody>
                     <tr *ngFor="let outsider of outsiders">
-                        <td>{{outsider.name}}:</td>
-                        <td class="text-right">{{outsider.currentLevel | exponential}}</td>
-                        <td class="text-right">{{outsider.suggestedLevel !== undefined ? (outsider.suggestedLevel | exponential) : "-"}}</td>
+                        <td>{{ outsider.name }}:</td>
+                        <td class="text-right">{{ outsider.currentLevel | exponential }}</td>
+                        <td class="text-right">{{ outsider.suggestedLevel !== undefined ? (outsider.suggestedLevel | exponential) : "-" }}</td>
                     </tr>
                 </tbody>
             </table>
@@ -164,51 +164,51 @@
                 <tbody>
                     <tr>
                         <td>Hero Souls Spent</td>
-                        <td>{{heroSoulsSpent | exponential}}</td>
+                        <td>{{ heroSoulsSpent | exponential }}</td>
                     </tr>
                     <tr>
                         <td>Hero Souls Sacrificed</td>
-                        <td>{{heroSoulsSacrificed | exponential}}</td>
+                        <td>{{ heroSoulsSacrificed | exponential }}</td>
                     </tr>
                     <tr>
                         <td>Ancient Souls Earned</td>
-                        <td>{{totalAncientSouls | exponential}}</td>
+                        <td>{{ totalAncientSouls | exponential }}</td>
                     </tr>
                     <tr>
                         <td>Transcendent Power</td>
-                        <td>{{(transcendentPower ? transcendentPower.toNumber() : 0) | percent}}</td>
+                        <td>{{ (transcendentPower ? transcendentPower.toNumber() : 0) | percent }}</td>
                     </tr>
                     <tr>
                         <td>Max Transcendent Primal Reward</td>
-                        <td>{{maxTranscendentPrimalReward | exponential}}</td>
+                        <td>{{ maxTranscendentPrimalReward | exponential }}</td>
                     </tr>
                     <tr>
                         <td>Transcendent Primal Cap Zone</td>
-                        <td>{{bossLevelToTranscendentPrimalCap | exponential}}</td>
+                        <td>{{ bossLevelToTranscendentPrimalCap | exponential }}</td>
                     </tr>
                     <tr>
                         <td>Titan Damage</td>
-                        <td>{{titanDamage | exponential}}</td>
+                        <td>{{ titanDamage | exponential }}</td>
                     </tr>
                     <tr>
                         <td>Highest Zone</td>
-                        <td>{{highestZoneThisTranscension | exponential}}</td>
+                        <td>{{ highestZoneThisTranscension | exponential }}</td>
                     </tr>
                     <tr>
                         <td>Highest Zone (Lifetime)</td>
-                        <td>{{highestZoneLifetime | exponential}}</td>
+                        <td>{{ highestZoneLifetime | exponential }}</td>
                     </tr>
                     <tr>
                         <td>Ascensions</td>
-                        <td>{{ascensionsThisTranscension | exponential}}</td>
+                        <td>{{ ascensionsThisTranscension | exponential }}</td>
                     </tr>
                     <tr>
                         <td>Ascensions (Lifetime)</td>
-                        <td>{{ascensionsLifetime | exponential}}</td>
+                        <td>{{ ascensionsLifetime | exponential }}</td>
                     </tr>
                     <tr>
                         <td>Rubies</td>
-                        <td>{{rubies | exponential}}</td>
+                        <td>{{ rubies | exponential }}</td>
                     </tr>
                 </tbody>
             </table>

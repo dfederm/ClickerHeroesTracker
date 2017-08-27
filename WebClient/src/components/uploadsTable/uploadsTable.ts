@@ -2,8 +2,7 @@ import { Component, OnInit, Input } from "@angular/core";
 
 import { UploadService, IUploadSummaryListResponse } from "../../services/uploadService/uploadService";
 
-interface IUploadViewModel
-{
+interface IUploadViewModel {
     id: number;
     uploadTime: Date;
 }
@@ -12,8 +11,7 @@ interface IUploadViewModel
     selector: "uploadsTable",
     templateUrl: "./uploadsTable.html",
 })
-export class UploadsTableComponent implements OnInit
-{
+export class UploadsTableComponent implements OnInit {
     public uploads: IUploadViewModel[];
     public isError: boolean;
     public totalUploads: number;
@@ -26,36 +24,30 @@ export class UploadsTableComponent implements OnInit
 
     private _page = 1;
 
-    public get page(): number
-    {
+    public get page(): number {
         return this._page;
     }
 
-    public set page(page: number)
-    {
+    public set page(page: number) {
         this._page = page;
         this.populateUploads();
     }
 
     constructor(private uploadService: UploadService) { }
 
-    public ngOnInit(): void
-    {
+    public ngOnInit(): void {
         this.populateUploads();
     }
 
-    private populateUploads(): void
-    {
+    private populateUploads(): void {
         this.uploadService
             .getUploads(this.page, this.count)
             .then(response => this.handleData(response))
             .catch(() => this.isError = true);
     }
 
-    private handleData(response: IUploadSummaryListResponse): void
-    {
-        if (!response || !response.uploads)
-        {
+    private handleData(response: IUploadSummaryListResponse): void {
+        if (!response || !response.uploads) {
             this.isError = true;
             return;
         }
@@ -63,16 +55,14 @@ export class UploadsTableComponent implements OnInit
         this.uploads = [];
 
         let uploads = response.uploads;
-        for (let upload of uploads)
-        {
+        for (let upload of uploads) {
             this.uploads.push({
                 id: upload.id,
                 uploadTime: new Date(upload.timeSubmitted),
             });
         }
 
-        if (response.pagination)
-        {
+        if (response.pagination) {
             this.totalUploads = response.pagination.count;
         }
     }

@@ -5,8 +5,7 @@ import { NgbModal } from "@ng-bootstrap/ng-bootstrap";
 
 import { OpenDialogDirective } from "./openDialog";
 
-describe("OpenDialogDirective", () =>
-{
+describe("OpenDialogDirective", () => {
     let link: DebugElement;
     let fixture: ComponentFixture<MockComponent>;
     let $event: MouseEvent;
@@ -16,32 +15,31 @@ describe("OpenDialogDirective", () =>
     })
     class MockDialogComponent { }
 
+    // tslint:disable-next-line:max-classes-per-file - Allow multiple mock classes in a file
     @Component({
         template: "<a [openDialog]=\"MockDialogComponent\"></a>",
     })
-    class MockComponent
-    {
+    class MockComponent {
         public MockDialogComponent = MockDialogComponent;
     }
 
-    beforeEach(async(() =>
-    {
+    beforeEach(async(() => {
         let modalService = { open: (): void => void 0 };
         fixture = TestBed.configureTestingModule(
-        {
-            declarations:
-            [
-                OpenDialogDirective,
-                MockComponent,
-                MockDialogComponent,
-            ],
-            providers:
-            [
-                { provide: NgbModal, useValue: modalService },
-            ],
-            schemas: [ NO_ERRORS_SCHEMA ],
-        })
-        .createComponent(MockComponent);
+            {
+                declarations:
+                [
+                    OpenDialogDirective,
+                    MockComponent,
+                    MockDialogComponent,
+                ],
+                providers:
+                [
+                    { provide: NgbModal, useValue: modalService },
+                ],
+                schemas: [NO_ERRORS_SCHEMA],
+            })
+            .createComponent(MockComponent);
 
         // Initial binding
         fixture.detectChanges();
@@ -53,27 +51,23 @@ describe("OpenDialogDirective", () =>
         $event = event;
     }));
 
-    it("should add an href attribute", () =>
-    {
+    it("should add an href attribute", () => {
         expect((link.nativeElement as HTMLAnchorElement).href).toBeTruthy();
     });
 
-    it("should prevent the default click behavior", () =>
-    {
+    it("should prevent the default click behavior", () => {
         link.triggerEventHandler("click", $event);
 
         expect($event.preventDefault).toHaveBeenCalled();
     });
 
-    it("should reset the focus off the clicked element", () =>
-    {
+    it("should reset the focus off the clicked element", () => {
         link.triggerEventHandler("click", $event);
 
         expect(($event.target as HTMLElement).blur).toHaveBeenCalled();
     });
 
-    it("should open a dialog", () =>
-    {
+    it("should open a dialog", () => {
         let modalService = TestBed.get(NgbModal) as NgbModal;
         spyOn(modalService, "open");
 

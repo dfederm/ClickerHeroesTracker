@@ -4,33 +4,29 @@ import { By } from "@angular/platform-browser";
 
 import { UploadsComponent } from "./uploads";
 
-describe("UploadsComponent", () =>
-{
+describe("UploadsComponent", () => {
     let component: UploadsComponent;
     let fixture: ComponentFixture<UploadsComponent>;
 
-    beforeEach(async(() =>
-    {
+    beforeEach(async(() => {
         TestBed.configureTestingModule(
-        {
-            declarations: [ UploadsComponent ],
-            schemas: [ NO_ERRORS_SCHEMA ],
-        })
-        .compileComponents()
-        .then(() =>
-        {
-            fixture = TestBed.createComponent(UploadsComponent);
-            component = fixture.componentInstance;
-        });
+            {
+                declarations: [UploadsComponent],
+                schemas: [NO_ERRORS_SCHEMA],
+            })
+            .compileComponents()
+            .then(() => {
+                fixture = TestBed.createComponent(UploadsComponent);
+                component = fixture.componentInstance;
+            });
     }));
 
-    it("should display a paginated upload table", () =>
-    {
+    it("should display a paginated upload table", () => {
         fixture.detectChanges();
 
         let uploadsTable = fixture.debugElement.query(By.css("uploadsTable"));
         expect(uploadsTable).not.toBeNull();
-        expect(uploadsTable.properties["count"]).toEqual(20);
-        expect(uploadsTable.properties["paginate"]).toEqual(true);
+        expect(uploadsTable.properties.count).toEqual(20);
+        expect(uploadsTable.properties.paginate).toEqual(true);
     });
 });

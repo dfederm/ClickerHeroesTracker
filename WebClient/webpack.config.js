@@ -7,8 +7,7 @@ const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPl
 
 // Get npm lifecycle event to identify the environment
 var ENV = process.env.npm_lifecycle_event;
-if (ENV == 'build')
-{
+if (ENV == 'build') {
   ENV = 'prod';
 }
 
@@ -16,25 +15,20 @@ var isTestWatch = ENV === 'test-watch';
 var isTest = ENV === 'test' || isTestWatch;
 var isProd = ENV === 'prod';
 
-module.exports = () =>
-{
+module.exports = () => {
   var config = {};
 
-  if (isProd)
-  {
+  if (isProd) {
     config.devtool = 'source-map';
   }
-  else if (isTest)
-  {
+  else if (isTest) {
     config.devtool = 'inline-source-map';
   }
-  else
-  {
+  else {
     config.devtool = 'cheap-module-eval-source-map';
   }
 
-  if (!isTest)
-  {
+  if (!isTest) {
     config.entry = {
       'data': './src/data.ts',
       'polyfills': './src/polyfills.ts',
@@ -65,6 +59,8 @@ module.exports = () =>
           tsConfigFile: path.resolve('./tsconfig.json'),
           emitErrors: true,
           failOnHint: true,
+          typeCheck: true,
+          fix: true,
         }
       },
       {
@@ -95,8 +91,7 @@ module.exports = () =>
     ]
   };
 
-  if (isTest && !isTestWatch)
-  {
+  if (isTest && !isTestWatch) {
     config.module.rules.push(
       {
         test: /\.ts$/,
@@ -127,8 +122,7 @@ module.exports = () =>
     ),
   ];
 
-  if (!isTest)
-  {
+  if (!isTest) {
     config.plugins.push(
       // Creates hierarchy to keep code from one bundle out of others. See: https://angular.io/guide/webpack#commonschunkplugin
       new webpack.optimize.CommonsChunkPlugin({
@@ -153,8 +147,7 @@ module.exports = () =>
     );
   }
 
-  if (isProd)
-  {
+  if (isProd) {
     config.plugins.push(
       // Only emit files when there are no errors
       new webpack.NoEmitOnErrorsPlugin(),

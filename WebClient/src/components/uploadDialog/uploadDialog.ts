@@ -1,4 +1,4 @@
-import { Component } from "@angular/core";
+import { Component, OnInit } from "@angular/core";
 import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
 import { Response } from "@angular/http";
 import { Router } from "@angular/router";
@@ -11,20 +11,19 @@ import { UploadService } from "../../services/uploadService/uploadService";
     selector: "upload",
     templateUrl: "./uploadDialog.html",
 })
-export class UploadDialogComponent
-{
+export class UploadDialogComponent implements OnInit {
     public errorMessage: string;
 
     public isLoggedIn: boolean;
 
     public playStyles: string[] = ["Idle", "Hybrid", "Active"];
 
-    public encodedSaveData: string = "";
+    public encodedSaveData = "";
 
     // TODO: set based on user settings
-    public playStyle: string = "Idle";
+    public playStyle = "Idle";
 
-    public addToProgress: boolean = true;
+    public addToProgress = true;
 
     public LogInDialogComponent = LogInDialogComponent;
 
@@ -35,32 +34,26 @@ export class UploadDialogComponent
         private router: Router,
     ) { }
 
-    public ngOnInit(): void
-    {
+    public ngOnInit(): void {
         this.authenticationService
             .isLoggedIn()
             .subscribe(isLoggedIn => this.isLoggedIn = isLoggedIn);
     }
 
-    public upload(): void
-    {
-        if (!this.encodedSaveData)
-        {
+    public upload(): void {
+        if (!this.encodedSaveData) {
             this.errorMessage = "Save data is required";
             return;
         }
 
         this.uploadService.create(this.encodedSaveData, this.addToProgress, this.playStyle)
-            .then(uploadId =>
-            {
+            .then(uploadId => {
                 return this.router.navigate(["/upload", uploadId]);
             })
-            .then(() =>
-            {
+            .then(() => {
                 this.activeModal.close();
             })
-            .catch((error: Response) =>
-            {
+            .catch((error: Response) => {
                 this.errorMessage = error.status >= 400 && error.status < 500
                     ? "The uploaded save was not valid"
                     : "An unknown error occurred";

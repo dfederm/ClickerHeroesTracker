@@ -4,23 +4,20 @@ import Decimal from "decimal.js";
 
 import { ExponentialPipe } from "./exponentialPipe";
 
-describe("ExponentialPipe", () =>
-{
+describe("ExponentialPipe", () => {
     // TODO mock this out
     const scientificNotationThreshold = 100000;
 
     let fixture: ComponentFixture<MockComponent>;
 
     @Component({
-        template: "{{value | exponential}}",
+        template: "{{ value | exponential }}",
     })
-    class MockComponent
-    {
+    class MockComponent {
         public value: number | decimal.Decimal;
     }
 
-    beforeEach(async(() =>
-    {
+    beforeEach(async(() => {
         fixture = TestBed.configureTestingModule(
             {
                 declarations:
@@ -36,40 +33,35 @@ describe("ExponentialPipe", () =>
         fixture.detectChanges();
     }));
 
-    it("should display '0' when the value is undefined", () =>
-    {
+    it("should display '0' when the value is undefined", () => {
         fixture.componentInstance.value = undefined;
         fixture.detectChanges();
 
         expect((fixture.nativeElement as HTMLElement).textContent).toEqual("0");
     });
 
-    it("should display the full number when it is below the scientific notation threshold and scientific notation is on", () =>
-    {
+    it("should display the full number when it is below the scientific notation threshold and scientific notation is on", () => {
         fixture.componentInstance.value = scientificNotationThreshold;
         fixture.detectChanges();
 
         expect((fixture.nativeElement as HTMLElement).textContent).toEqual(fixture.componentInstance.value.toLocaleString());
     });
 
-    it("should display a formatted number when it is above the scientific notation threshold and scientific notation is on", () =>
-    {
+    it("should display a formatted number when it is above the scientific notation threshold and scientific notation is on", () => {
         fixture.componentInstance.value = scientificNotationThreshold + 1;
         fixture.detectChanges();
 
         expect((fixture.nativeElement as HTMLElement).textContent).toEqual(fixture.componentInstance.value.toExponential(3));
     });
 
-    it("should display the full Decimal when it is below the scientific notation threshold and scientific notation is on", () =>
-    {
+    it("should display the full Decimal when it is below the scientific notation threshold and scientific notation is on", () => {
         fixture.componentInstance.value = new Decimal(scientificNotationThreshold);
         fixture.detectChanges();
 
         expect((fixture.nativeElement as HTMLElement).textContent).toEqual(fixture.componentInstance.value.toFormat());
     });
 
-    it("should display a formatted Decimal when it is above the scientific notation threshold and scientific notation is on", () =>
-    {
+    it("should display a formatted Decimal when it is above the scientific notation threshold and scientific notation is on", () => {
         fixture.componentInstance.value = new Decimal(scientificNotationThreshold + 1);
         fixture.detectChanges();
 

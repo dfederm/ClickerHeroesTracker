@@ -7,13 +7,11 @@ import { DebugElement } from "@angular/core";
 import { LogInDialogComponent } from "./logInDialog";
 import { AuthenticationService } from "../../services/authenticationService/authenticationService";
 
-describe("LogInDialogComponent", () =>
-{
+describe("LogInDialogComponent", () => {
     let component: LogInDialogComponent;
     let fixture: ComponentFixture<LogInDialogComponent>;
 
-    beforeEach(async(() =>
-    {
+    beforeEach(async(() => {
         let authenticationService = { logIn: (): void => void 0 };
         let activeModal = { close: (): void => void 0 };
 
@@ -28,15 +26,13 @@ describe("LogInDialogComponent", () =>
                 ],
             })
             .compileComponents()
-            .then(() =>
-            {
+            .then(() => {
                 fixture = TestBed.createComponent(LogInDialogComponent);
                 component = fixture.componentInstance;
             });
     }));
 
-    it("should display the modal header", () =>
-    {
+    it("should display the modal header", () => {
         fixture.detectChanges();
 
         let header = fixture.debugElement.query(By.css(".modal-header"));
@@ -47,8 +43,7 @@ describe("LogInDialogComponent", () =>
         expect(title.nativeElement.textContent).toEqual("Log in");
     });
 
-    it("should close the dialog when logging in with proper credentials", async(() =>
-    {
+    it("should close the dialog when logging in with proper credentials", async(() => {
         let authenticationService = TestBed.get(AuthenticationService) as AuthenticationService;
         spyOn(authenticationService, "logIn").and.returnValue(Promise.resolve());
 
@@ -57,8 +52,7 @@ describe("LogInDialogComponent", () =>
 
         // Wait for stability since ngModel is async
         fixture.detectChanges();
-        fixture.whenStable().then(() =>
-        {
+        fixture.whenStable().then(() => {
             let body = fixture.debugElement.query(By.css(".modal-body"));
             expect(body).not.toBeNull();
 
@@ -79,8 +73,7 @@ describe("LogInDialogComponent", () =>
 
             // Wait for stability from the authenticationService call
             fixture.detectChanges();
-            fixture.whenStable().then(() =>
-            {
+            fixture.whenStable().then(() => {
                 fixture.detectChanges();
 
                 expect(authenticationService.logIn).toHaveBeenCalledWith("someUsername", "somePassword");
@@ -93,8 +86,7 @@ describe("LogInDialogComponent", () =>
         });
     }));
 
-    it("should show an error when logging in with incorrect credentials", async(() =>
-    {
+    it("should show an error when logging in with incorrect credentials", async(() => {
         let authenticationService = TestBed.get(AuthenticationService) as AuthenticationService;
         spyOn(authenticationService, "logIn").and.returnValue(Promise.reject(""));
 
@@ -103,8 +95,7 @@ describe("LogInDialogComponent", () =>
 
         // Wait for stability since ngModel is async
         fixture.detectChanges();
-        fixture.whenStable().then(() =>
-        {
+        fixture.whenStable().then(() => {
             let body = fixture.debugElement.query(By.css(".modal-body"));
             expect(body).not.toBeNull();
 
@@ -125,8 +116,7 @@ describe("LogInDialogComponent", () =>
 
             // Wait for stability from the authenticationService call
             fixture.detectChanges();
-            fixture.whenStable().then(() =>
-            {
+            fixture.whenStable().then(() => {
                 fixture.detectChanges();
 
                 expect(authenticationService.logIn).toHaveBeenCalledWith("someUsername", "somePassword");
@@ -138,8 +128,7 @@ describe("LogInDialogComponent", () =>
         });
     }));
 
-    function setInputValue(element: DebugElement, value: string): void
-    {
+    function setInputValue(element: DebugElement, value: string): void {
         element.nativeElement.value = value;
 
         // Tell Angular

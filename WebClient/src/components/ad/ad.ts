@@ -6,8 +6,7 @@ import { Subscription } from "rxjs/Subscription";
     selector: "ad",
     templateUrl: "./ad.html",
 })
-export class AdComponent implements OnInit, OnDestroy
-{
+export class AdComponent implements OnInit, OnDestroy {
     public rerender = false;
 
     private subscription: Subscription;
@@ -17,12 +16,9 @@ export class AdComponent implements OnInit, OnDestroy
         private cdRef: ChangeDetectorRef,
     ) { }
 
-    public ngOnInit(): void
-    {
-        this.subscription = this.router.events.subscribe((event) =>
-        {
-            if (event instanceof NavigationEnd)
-            {
+    public ngOnInit(): void {
+        this.subscription = this.router.events.subscribe((event) => {
+            if (event instanceof NavigationEnd) {
                 this.rerender = true;
                 this.cdRef.detectChanges();
                 this.rerender = false;
@@ -30,10 +26,8 @@ export class AdComponent implements OnInit, OnDestroy
         });
     }
 
-    public ngOnDestroy(): void
-    {
-        if (this.subscription)
-        {
+    public ngOnDestroy(): void {
+        if (this.subscription) {
             this.subscription.unsubscribe();
             this.subscription = null;
         }
