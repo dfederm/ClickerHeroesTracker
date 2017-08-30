@@ -7,7 +7,6 @@ namespace ClickerHeroesTrackerWebsite.Models.Settings
     using System;
     using System.Collections.Generic;
     using ClickerHeroesTrackerWebsite.Services.Database;
-    using Microsoft.AspNetCore.Http;
 
     /// <summary>
     /// An <see cref="IUserSettingsProvider"/> implementation which uses a database as the backing store.
