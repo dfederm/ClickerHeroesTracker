@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html>
 
 <head>
@@ -9,17 +9,8 @@
   <title>Clicker Heroes Tracker</title>
 
   <link rel="stylesheet"
-        href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/css/bootstrap.min.css"
-        integrity="sha384-/Y6pD6FV/Vv2HJnA6t+vslU6fwYXjCFtcEpHbNJ0lyAFsXTsjBbfaDjzALeQsN6M"
-        crossorigin="anonymous">
-
-  <!-- Site-wide css which we should probably move to its own css file -->
-  <style type="text/css">
-    body {
-      /* Move down content because we have a fixed navbar */
-      padding-top: 3.5rem;
-    }
-  </style>
+        href=""
+        id="bootstrapStylesheet" />
 
   <!-- Google ads -->
   <script async
@@ -27,11 +18,28 @@
 </head>
 
 <body>
+  <!-- test -->
   <app>
     <div style="text-align: center">
       <img src="/images/spin.svg" />
     </div>
   </app>
+
+  <script type="text/javascript">
+    var preferDarkTheme = false;
+    var match = document.cookie.match(new RegExp('PreferDarkTheme=([^;]+)'));
+    if (match) {
+      preferDarkTheme = match[1].toLowerCase() == "true";
+    }
+    
+    var cssEl = document.getElementById("bootstrapStylesheet");
+    if (preferDarkTheme) {
+      cssEl.setAttribute("href", "https://cdnjs.cloudflare.com/ajax/libs/bootswatch/4.0.0-alpha.6/slate/bootstrap.min.css");
+    }
+    else {
+      cssEl.setAttribute("href", "https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.0.0-alpha.6/css/bootstrap.min.css");
+    }
+  </script>
 </body>
 
 </html>

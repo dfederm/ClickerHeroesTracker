@@ -116,6 +116,7 @@ namespace ClickerHeroesTrackerWebsite.Controllers
             userSettings.UseScientificNotation = indexViewModel.UseScientificNotation;
             userSettings.UseEffectiveLevelForSuggestions = indexViewModel.UseEffectiveLevelForSuggestions;
             userSettings.UseLogarithmicGraphScale = indexViewModel.UseLogarithmicGraphScale;
+            userSettings.PreferDarkTheme = indexViewModel.PreferDarkTheme;
 
             if (indexViewModel.ScientificNotationThreshold.HasValue)
             {
@@ -147,6 +148,7 @@ namespace ClickerHeroesTrackerWebsite.Controllers
                 userSettings.HybridRatio = 10;
             }
 
+            this.userSettingsProvider.FlushChanges();
             return await this.GetIndexResult(user, userSettings);
         }
 
@@ -343,6 +345,7 @@ namespace ClickerHeroesTrackerWebsite.Controllers
                 UseLogarithmicGraphScale = userSettings.UseLogarithmicGraphScale,
                 LogarithmicGraphScaleThreshold = userSettings.LogarithmicGraphScaleThreshold,
                 HybridRatio = userSettings.HybridRatio,
+                PreferDarkTheme = userSettings.PreferDarkTheme,
             };
 
             return this.View(model);

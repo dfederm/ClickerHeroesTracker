@@ -153,16 +153,12 @@
         </dl>
         <dl class="dl-horizontal">
             <dt>
-                <label asp-for="BackgroundSettings" class="control-label"></label>
+                <label asp-for="PreferDarkTheme" class="control-label"></label>
             </dt>
-            <dd>
-                <label class="radio-inline">
-                    <input type="radio" asp-for="BackgroundSettings" value="Light" />
-                    Light
-                </label>
-                <label class="radio-inline">
-                    <input type="radio" asp-for="BackgroundSettings" value="Dark" />
-                    Dark
+            <dd class="checkbox">
+                <label asp-for="PreferDarkTheme">
+                    <input type="checkbox" asp-for="PreferDarkTheme" />
+                    Prefer a dark background for the site.
                 </label>
             </dd>
         </dl>

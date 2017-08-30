@@ -83,5 +83,11 @@ namespace ClickerHeroesTrackerWebsite.Models
         /// </summary>
         [Display(Name = "Hybrid Ratio")]
         public int? HybridRatio { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating whethere to use a dark theme or not.
+        /// </summary>
+        [Display(Name = "Prefer dark theme")]
+        public bool PreferDarkTheme { get; set; }
     }
 }

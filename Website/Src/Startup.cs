@@ -46,9 +46,6 @@ namespace ClickerHeroesTrackerWebsite
             // Instrument the user as soon as they're auth'd.
             app.UseMiddleware<UserInstrumentationMiddleware>();
 
-            // Flush any changes to user settings
-            app.UseMiddleware<UserSettingsFlushingMiddleware>();
-
             app.UseMvc(routes =>
             {
                 routes.MapRoute(
