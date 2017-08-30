@@ -5,6 +5,22 @@
 namespace ClickerHeroesTrackerWebsite.Models.Settings
 {
     /// <summary>
+    /// The type of site theme
+    /// </summary>
+    public enum SiteThemeType
+    {
+        /// <summary>
+        /// Default light theme.
+        /// </summary>
+        Light,
+
+        /// <summary>
+        /// Dark theme for contrast.
+        /// </summary>
+        Dark,
+    }
+
+    /// <summary>
     /// The user's persistent site settings
     /// </summary>
     public interface IUserSettings
@@ -58,5 +74,10 @@ namespace ClickerHeroesTrackerWebsite.Models.Settings
         /// Gets or sets the hybrid idle:active ratio
         /// </summary>
         int HybridRatio { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating the theme type.
+        /// </summary>
+        SiteThemeType Theme { get; set; }
     }
 }

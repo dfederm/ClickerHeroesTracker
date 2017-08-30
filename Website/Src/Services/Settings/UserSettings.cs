@@ -165,6 +165,19 @@ namespace ClickerHeroesTrackerWebsite.Models.Settings
             }
         }
 
+        public SiteThemeType Theme
+        {
+            get
+            {
+                return this.GetValue(12, Enum.TryParse<SiteThemeType>, SiteThemeType.Light);
+            }
+
+            set
+            {
+                this.SetValue(12, value.ToString());
+            }
+        }
+
         internal void FlushChanges()
         {
             if (this.userId == null)
@@ -251,9 +264,9 @@ namespace ClickerHeroesTrackerWebsite.Models.Settings
                 { "@UserId", this.userId },
             };
             const string GetUserSettingsCommandText = @"
-	            SELECT SettingId, SettingValue
-	            FROM UserSettings
-	            WHERE UserId = @UserId";
+                SELECT SettingId, SettingValue
+                FROM UserSettings
+                WHERE UserId = @UserId";
             using (var command = this.databaseCommandFactory.Create(
                 GetUserSettingsCommandText,
                 parameters))

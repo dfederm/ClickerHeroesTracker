@@ -34,7 +34,7 @@ Use one of the following commands depending on what you're trying to do:
 Other useful tools:
 * `build` produces a `/logs/stats/report.html` which visualizes the bundles. The raw `stats.json` file can also be used to feed into other visualization tools. The bundles are as follows:
     * `app` is the main app code
-    * `data` is a bundle of json files. This is in a separate bundle since the data shoudl not change often.
+    * `data` is a bundle of json files. This is in a separate bundle since the data should not change often.
     * `vendor` is most the 3rd party libraries
     * `polyfill` is the polyfill scripts
 * `test` produces a code coverage report under `/logs/coverage/html/index.html`. This can be used to drill into code coverage. A cobertura report is also produced for the VSTS build.

@@ -1,5 +1,4 @@
-﻿@using System.Security.Claims
-@using Microsoft.ApplicationInsights.AspNetCore
+﻿@using Microsoft.ApplicationInsights.AspNetCore
 @using ClickerHeroesTrackerWebsite.Models.Settings
 
 @inject JavaScriptSnippet JavaScriptSnippet
@@ -8,6 +7,16 @@
 @inject SignInManager<ApplicationUser> SignInManager
 @inject UserManager<ApplicationUser> UserManager
 
+@{
+    var userSettingsObject = UserSettingsProvider.Get(UserManager.GetUserId(User));
+    var themeLocalUrl = "~/lib/bootstrap/dist/css/bootstrap";
+    string themeCdnUrl = "https://maxcdn.bootstrapcdn.com/bootswatch/3.3.7/bootstrap.min.css";
+    if (userSettingsObject.Theme == SiteThemeType.Dark)
+    {
+        themeCdnUrl = "https://maxcdn.bootstrapcdn.com/bootswatch/3.3.7/slate/bootstrap.min.css";
+        themeLocalUrl = "~/lib/bootswatch-dark/css/bootstrap";
+    }
+}
 <!DOCTYPE html>
 <html>
 <head>
@@ -16,12 +25,12 @@
     <title>@ViewBag.Title - Clicker Heroes Tracker</title>
 
     <environment names="Development,Buddy">
-        <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.css" />
+        <link rel="stylesheet" href='@Url.Content(themeLocalUrl + ".css")' />
         <link rel="stylesheet" href="~/css/site.css" />
     </environment>
     <environment names="Staging,Production">
-        <link rel="stylesheet" href="https://ajax.aspnetcdn.com/ajax/bootstrap/3.3.5/css/bootstrap.min.css"
-              asp-fallback-href="~/lib/bootstrap/dist/css/bootstrap.min.css"
+        <link rel="stylesheet" href="@themeCdnUrl"
+              asp-fallback-href='@Url.Content(themeLocalUrl + ".min.css")'
               asp-fallback-test-class="sr-only" asp-fallback-test-property="position" asp-fallback-test-value="absolute" />
         <link rel="stylesheet" href="~/css/site.min.css" asp-append-version="true" />
     </environment>
@@ -114,7 +123,7 @@
     </environment>
 
     <script type="text/javascript">
-        var userSettings = @Json.Serialize(UserSettingsProvider.Get(UserManager.GetUserId(User)));
+        var userSettings = @Json.Serialize(userSettingsObject);
     </script>
 
     @await RenderSectionAsync("scripts", required: false)

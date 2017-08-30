@@ -1,4 +1,4 @@
-﻿@using System.Text;
+﻿@using ClickerHeroesTrackerWebsite.Models.Settings;
 
 @inject IContentManager ContentManager
 
@@ -10,6 +10,13 @@
     // Wire up tooltips
     ContentManager.RegisterRawScript("$('[data-toggle=\"tooltip\"]').tooltip();");
 }
+
+<script type="text/javascript">
+    if (typeof (Storage) !== "undefined") {
+        // Code for localStorage/sessionStorage.
+        localStorage.setItem("@nameof(SiteThemeType)", "@Model.Theme");
+    }
+</script>
 
 <h2>@ViewBag.Title.</h2>
 <p class="text-success">@ViewBag.StatusMessage</p>
@@ -149,6 +156,19 @@
             <dd>
                 <input type="number" asp-for="LogarithmicGraphScaleThreshold" class="form-control" />
                 <span asp-validation-for="LogarithmicGraphScaleThreshold" class="text-danger"></span>
+            </dd>
+        </dl>
+        <dl class="dl-horizontal">
+            <dt>
+                <label asp-for="Theme" class="control-label"></label>
+            </dt>
+            <dd>
+                @foreach (var siteTheme in Enum.GetNames(typeof(SiteThemeType)))
+                {
+                    <label class="radio-inline">
+                        <input type="radio" asp-for="Theme" value="@siteTheme" /> @siteTheme
+                    </label>
+                }
             </dd>
         </dl>
         <dl class="dl-horizontal">
