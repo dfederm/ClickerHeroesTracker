@@ -6,6 +6,7 @@ namespace ClickerHeroesTrackerWebsite.Models
 {
     using System.Collections.Generic;
     using System.ComponentModel.DataAnnotations;
+    using ClickerHeroesTrackerWebsite.Models.Settings;
     using Microsoft.AspNetCore.Identity;
 
     /// <summary>
@@ -85,9 +86,9 @@ namespace ClickerHeroesTrackerWebsite.Models
         public int? HybridRatio { get; set; }
 
         /// <summary>
-        /// Gets or sets a value indicating whethere to use a dark theme or not.
+        /// Gets or sets the site theme type..
         /// </summary>
-        [Display(Name = "Prefer dark theme")]
-        public bool PreferDarkTheme { get; set; }
+        [Display(Name = "Site theme")]
+        public SiteThemeType Theme { get; set; }
     }
 }

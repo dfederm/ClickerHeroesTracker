@@ -116,7 +116,7 @@ namespace ClickerHeroesTrackerWebsite.Controllers
             userSettings.UseScientificNotation = indexViewModel.UseScientificNotation;
             userSettings.UseEffectiveLevelForSuggestions = indexViewModel.UseEffectiveLevelForSuggestions;
             userSettings.UseLogarithmicGraphScale = indexViewModel.UseLogarithmicGraphScale;
-            userSettings.PreferDarkTheme = indexViewModel.PreferDarkTheme;
+            userSettings.Theme = indexViewModel.Theme;
 
             if (indexViewModel.ScientificNotationThreshold.HasValue)
             {
@@ -345,7 +345,7 @@ namespace ClickerHeroesTrackerWebsite.Controllers
                 UseLogarithmicGraphScale = userSettings.UseLogarithmicGraphScale,
                 LogarithmicGraphScaleThreshold = userSettings.LogarithmicGraphScaleThreshold,
                 HybridRatio = userSettings.HybridRatio,
-                PreferDarkTheme = userSettings.PreferDarkTheme,
+                Theme = userSettings.Theme,
             };
 
             return this.View(model);

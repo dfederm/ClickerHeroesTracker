@@ -18,28 +18,11 @@
 </head>
 
 <body>
-  <!-- test -->
   <app>
     <div style="text-align: center">
       <img src="/images/spin.svg" />
     </div>
   </app>
-
-  <script type="text/javascript">
-    var preferDarkTheme = false;
-    var match = document.cookie.match(new RegExp('PreferDarkTheme=([^;]+)'));
-    if (match) {
-      preferDarkTheme = match[1].toLowerCase() == "true";
-    }
-    
-    var cssEl = document.getElementById("bootstrapStylesheet");
-    if (preferDarkTheme) {
-      cssEl.setAttribute("href", "https://cdnjs.cloudflare.com/ajax/libs/bootswatch/4.0.0-alpha.6/slate/bootstrap.min.css");
-    }
-    else {
-      cssEl.setAttribute("href", "https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.0.0-alpha.6/css/bootstrap.min.css");
-    }
-  </script>
 </body>
 
 </html>

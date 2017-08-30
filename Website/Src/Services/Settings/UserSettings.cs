@@ -8,7 +8,6 @@ namespace ClickerHeroesTrackerWebsite.Models.Settings
     using System.Collections.Generic;
     using System.Text;
     using ClickerHeroesTrackerWebsite.Services.Database;
-    using Microsoft.AspNetCore.Http;
 
     internal sealed class UserSettings : IUserSettings
     {
@@ -18,30 +17,20 @@ namespace ClickerHeroesTrackerWebsite.Models.Settings
 
         private readonly IDatabaseCommandFactory databaseCommandFactory;
 
-        private readonly HttpRequest httpRequest;
-
-        private readonly HttpResponse httpResponse;
-
         private readonly string userId;
 
         public UserSettings(
             IDatabaseCommandFactory databaseCommandFactory,
-            HttpRequest httpRequest,
-            HttpResponse httpResponse,
             string userId)
         {
             this.databaseCommandFactory = databaseCommandFactory;
-            this.httpRequest = httpRequest;
-            this.httpResponse = httpResponse;
             this.userId = userId;
 
             this.Fill();
         }
 
-        public UserSettings(HttpRequest httpRequest, HttpResponse httpResponse)
+        public UserSettings()
         {
-            this.httpRequest = httpRequest;
-            this.httpResponse = httpResponse;
         }
 
         private delegate bool TryParse<T>(string rawValue, out T value);
@@ -176,19 +165,11 @@ namespace ClickerHeroesTrackerWebsite.Models.Settings
             }
         }
 
-        public bool PreferDarkTheme
+        public SiteThemeType Theme
         {
             get
             {
-                bool defaultValue;
-                string defaultValueString;
-                if (!this.httpRequest.Cookies.TryGetValue(nameof(this.PreferDarkTheme), out defaultValueString)
-                    || !bool.TryParse(defaultValueString, out defaultValue))
-                {
-                    defaultValue = false;
-                }
-
-                return this.GetValue(12, bool.TryParse, defaultValue);
+                return this.GetValue(12, Enum.TryParse<SiteThemeType>, SiteThemeType.Light);
             }
 
             set
@@ -274,8 +255,6 @@ namespace ClickerHeroesTrackerWebsite.Models.Settings
             }
 
             this.dirtySettings.Clear();
-
-            this.httpResponse.Cookies.Append(nameof(this.PreferDarkTheme), this.PreferDarkTheme.ToString());
         }
 
         private void Fill()

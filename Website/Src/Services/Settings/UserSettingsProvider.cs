@@ -18,18 +18,12 @@ namespace ClickerHeroesTrackerWebsite.Models.Settings
 
         private readonly IDatabaseCommandFactory databaseCommandFactory;
 
-        private readonly HttpRequest httpRequest;
-
-        private readonly HttpResponse httpResponse;
-
         /// <summary>
         /// Initializes a new instance of the <see cref="UserSettingsProvider"/> class.
         /// </summary>
-        public UserSettingsProvider(IDatabaseCommandFactory databaseCommandFactory, HttpRequest httpRequest, HttpResponse httpResponse)
+        public UserSettingsProvider(IDatabaseCommandFactory databaseCommandFactory)
         {
             this.databaseCommandFactory = databaseCommandFactory;
-            this.httpRequest = httpRequest;
-            this.httpResponse = httpResponse;
         }
 
         /// <inheritdoc/>
@@ -38,14 +32,14 @@ namespace ClickerHeroesTrackerWebsite.Models.Settings
             // If the user isn't logged in, use the default settings
             if (string.IsNullOrEmpty(userId))
             {
-                return new UserSettings(this.httpRequest, this.httpResponse);
+                return new UserSettings();
             }
 
             // Use a cache to avoid hitting the database every time
             UserSettings settings;
             if (!this.cache.TryGetValue(userId, out settings))
             {
-                settings = new UserSettings(this.databaseCommandFactory, this.httpRequest, this.httpResponse, userId);
+                settings = new UserSettings(this.databaseCommandFactory, userId);
                 this.cache.Add(userId, settings);
             }
 
