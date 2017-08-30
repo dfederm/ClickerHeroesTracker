@@ -6,13 +6,10 @@ import "core-js/es7/reflect";
 
 require("zone.js/dist/zone");
 
-if (process.env.ENV === "prod")
-{
+if (process.env.ENV === "prod") {
     // Production
-}
-else
-{
+} else {
     // Development and test
-    Error["stackTraceLimit"] = Infinity;
+    Error.stackTraceLimit = Infinity;
     require("zone.js/dist/long-stack-trace-zone");
 }

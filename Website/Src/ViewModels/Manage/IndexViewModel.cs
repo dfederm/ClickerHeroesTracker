@@ -6,6 +6,7 @@ namespace ClickerHeroesTrackerWebsite.Models
 {
     using System.Collections.Generic;
     using System.ComponentModel.DataAnnotations;
+    using ClickerHeroesTrackerWebsite.Models.Settings;
     using Microsoft.AspNetCore.Identity;
 
     /// <summary>
@@ -83,5 +84,11 @@ namespace ClickerHeroesTrackerWebsite.Models
         /// </summary>
         [Display(Name = "Hybrid Ratio")]
         public int? HybridRatio { get; set; }
+
+        /// <summary>
+        /// Gets or sets the site theme type..
+        /// </summary>
+        [Display(Name = "Site theme")]
+        public SiteThemeType Theme { get; set; }
     }
 }

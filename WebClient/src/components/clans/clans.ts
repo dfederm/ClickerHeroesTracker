@@ -6,8 +6,7 @@ import { ClanService, IGuildMember, IMessage, ILeaderboardClan, ILeaderboardSumm
     templateUrl: "./clans.html",
     styleUrls: ["./clans.css"],
 })
-export class ClansComponent implements OnInit
-{
+export class ClansComponent implements OnInit {
     public isClanInformationError = false;
 
     public isLeaderboardError = false;
@@ -36,24 +35,20 @@ export class ClansComponent implements OnInit
 
     constructor(private clanService: ClanService) { }
 
-    public get leaderboardPage(): number
-    {
+    public get leaderboardPage(): number {
         return this._leaderboardPage;
     }
 
-    public set leaderboardPage(leaderboardPage: number)
-    {
+    public set leaderboardPage(leaderboardPage: number) {
         this._leaderboardPage = leaderboardPage;
         this.getLeaderboard()
             .then(response => this.updateLeaderboard(response))
-            .catch(() =>
-            {
+            .catch(() => {
                 this.isLeaderboardError = true;
             });
     }
 
-    public ngOnInit(): void
-    {
+    public ngOnInit(): void {
         this.getClanInformation();
 
         // The leaderboard depends on the user clan, so kick them off in parallel but don't process until they're both done.
@@ -62,39 +57,31 @@ export class ClansComponent implements OnInit
             this.clanService.getUserClan(),
             this.getLeaderboard(),
         ])
-            .then(results =>
-            {
+            .then(results => {
                 this.userClan = results[0];
                 this.updateLeaderboard(results[1]);
             })
-            .catch(() =>
-            {
+            .catch(() => {
                 this.isLeaderboardError = true;
             });
     }
 
-    public sendMessage(): void
-    {
+    public sendMessage(): void {
         this.isMessageSendError = false;
         this.clanService.sendMessage(this.newMessage, this.clanName)
-            .then(() =>
-            {
+            .then(() => {
                 this.newMessage = "";
                 return this.getClanInformation();
             })
-            .catch(() =>
-            {
+            .catch(() => {
                 this.isMessageSendError = true;
             });
     }
 
-    private getClanInformation(): Promise<void>
-    {
+    private getClanInformation(): Promise<void> {
         return this.clanService.getClan()
-            .then(response =>
-            {
-                if (response == null)
-                {
+            .then(response => {
+                if (response == null) {
                     return;
                 }
 
@@ -103,21 +90,17 @@ export class ClansComponent implements OnInit
                 this.guildMembers = response.guildMembers;
                 this.messages = response.messages;
             })
-            .catch(() =>
-            {
+            .catch(() => {
                 this.isClanInformationError = true;
             });
     }
 
-    private getLeaderboard(): Promise<ILeaderboardSummaryListResponse>
-    {
+    private getLeaderboard(): Promise<ILeaderboardSummaryListResponse> {
         return this.clanService.getLeaderboard(this.leaderboardPage, this.leaderboardCount);
     }
 
-    private updateLeaderboard(response: ILeaderboardSummaryListResponse): void
-    {
-        if (!response || !response.leaderboardClans)
-        {
+    private updateLeaderboard(response: ILeaderboardSummaryListResponse): void {
+        if (!response || !response.leaderboardClans) {
             this.isLeaderboardError = true;
             return;
         }
@@ -125,15 +108,13 @@ export class ClansComponent implements OnInit
         this.clans = response.leaderboardClans;
 
         // Only add the user clan if it's not in the results
-        if (this.userClan && !this.clans.find(clan => clan.isUserClan))
-        {
+        if (this.userClan && !this.clans.find(clan => clan.isUserClan)) {
             this.clans.push(this.userClan);
         }
 
         this.clans = this.clans.sort((a, b) => a.rank - b.rank);
 
-        if (response.pagination)
-        {
+        if (response.pagination) {
             this.totalClans = response.pagination.count;
         }
     }

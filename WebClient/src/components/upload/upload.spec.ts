@@ -12,17 +12,15 @@ import { ExponentialPipe } from "../../pipes/exponentialPipe";
 import { AuthenticationService } from "../../services/authenticationService/authenticationService";
 import { UploadService, IUpload } from "../../services/uploadService/uploadService";
 
-declare global
-{
+// tslint:disable-next-line:no-namespace
+declare global {
     // tslint:disable-next-line:interface-name - We don't own this interface name, just extending it
-    interface Window
-    {
+    interface Window {
         appInsights: Microsoft.ApplicationInsights.IAppInsights;
     }
 }
 
-describe("UploadComponent", () =>
-{
+describe("UploadComponent", () => {
     let component: UploadComponent;
     let fixture: ComponentFixture<UploadComponent>;
     let isLoggedIn: BehaviorSubject<boolean>;
@@ -34,54 +32,41 @@ describe("UploadComponent", () =>
     let uploadServiceDeleteResolve: () => Promise<void>;
     let uploadServiceDeleteReject: () => Promise<void>;
 
-    beforeEach(async(() =>
-    {
+    beforeEach(async(() => {
         isLoggedIn = new BehaviorSubject(false);
-        let authenticationService =
-            {
-                isLoggedIn: (): Observable<boolean> => isLoggedIn,
-            };
-        let uploadService =
-            {
-                get: (): Promise<IUpload> => new Promise<IUpload>((resolve, reject) =>
-                {
-                    uploadServiceGetResolve = (upload) =>
-                    {
-                        resolve(upload);
-                        return fixture.whenStable().then(() =>
-                        {
-                            fixture.detectChanges();
-                        });
-                    };
-                    uploadServiceGetReject = () =>
-                    {
-                        reject();
-                        return fixture.whenStable().then(() =>
-                        {
-                            fixture.detectChanges();
-                        });
-                    };
-                }),
-                delete: (): Promise<void> => new Promise<void>((resolve, reject) =>
-                {
-                    uploadServiceDeleteResolve = () =>
-                    {
-                        resolve();
-                        return fixture.whenStable().then(() =>
-                        {
-                            fixture.detectChanges();
-                        });
-                    };
-                    uploadServiceDeleteReject = () =>
-                    {
-                        reject();
-                        return fixture.whenStable().then(() =>
-                        {
-                            fixture.detectChanges();
-                        });
-                    };
-                }),
-            };
+        let authenticationService = {
+            isLoggedIn: (): Observable<boolean> => isLoggedIn,
+        };
+        let uploadService = {
+            get: (): Promise<IUpload> => new Promise<IUpload>((resolve, reject) => {
+                uploadServiceGetResolve = (upload) => {
+                    resolve(upload);
+                    return fixture.whenStable().then(() => {
+                        fixture.detectChanges();
+                    });
+                };
+                uploadServiceGetReject = () => {
+                    reject();
+                    return fixture.whenStable().then(() => {
+                        fixture.detectChanges();
+                    });
+                };
+            }),
+            delete: (): Promise<void> => new Promise<void>((resolve, reject) => {
+                uploadServiceDeleteResolve = () => {
+                    resolve();
+                    return fixture.whenStable().then(() => {
+                        fixture.detectChanges();
+                    });
+                };
+                uploadServiceDeleteReject = () => {
+                    reject();
+                    return fixture.whenStable().then(() => {
+                        fixture.detectChanges();
+                    });
+                };
+            }),
+        };
         let router = { navigate: (): void => void 0 };
         routeParams = new BehaviorSubject({ id: 123 });
         let route = { params: routeParams };
@@ -106,8 +91,7 @@ describe("UploadComponent", () =>
                 schemas: [NO_ERRORS_SCHEMA],
             })
             .compileComponents()
-            .then(() =>
-            {
+            .then(() => {
                 fixture = TestBed.createComponent(UploadComponent);
                 component = fixture.componentInstance;
 
@@ -119,13 +103,10 @@ describe("UploadComponent", () =>
         window.appInsights = jasmine.createSpyObj("appInsights", ["trackEvent", "startTrackEvent", "stopTrackEvent"]);
     }));
 
-    describe("Error message", () =>
-    {
-        it("should show an error when the upload service fails", async(() =>
-        {
+    describe("Error message", () => {
+        it("should show an error when the upload service fails", async(() => {
             uploadServiceGetReject()
-                .then(() =>
-                {
+                .then(() => {
                     fixture.detectChanges();
 
                     let errorMessage = fixture.debugElement.query(By.css(".alert-danger"));
@@ -133,12 +114,10 @@ describe("UploadComponent", () =>
                 });
         }));
 
-        it("should not show an error when the upload service succeeds", async(() =>
-        {
+        it("should not show an error when the upload service succeeds", async(() => {
             let upload = getUpload();
             uploadServiceGetResolve(upload)
-                .then(() =>
-                {
+                .then(() => {
                     fixture.detectChanges();
 
                     let errorMessage = fixture.debugElement.query(By.css(".alert-danger"));
@@ -147,10 +126,8 @@ describe("UploadComponent", () =>
         }));
     });
 
-    describe("Upload summary data", () =>
-    {
-        it("should initially display placeholder data", async(() =>
-        {
+    describe("Upload summary data", () => {
+        it("should initially display placeholder data", async(() => {
             let errorMessage = fixture.debugElement.query(By.css(".alert-danger"));
             expect(errorMessage).toBeNull("Error message found");
 
@@ -174,15 +151,13 @@ describe("UploadComponent", () =>
             expect(getNormalizedTextContent(playStyleValueElement)).toEqual("");
         }));
 
-        it("should display anonymous data", async(() =>
-        {
+        it("should display anonymous data", async(() => {
             let datePipe = TestBed.get(DatePipe) as DatePipe;
 
             let upload = getUpload();
             delete upload.user;
             uploadServiceGetResolve(upload)
-                .then(() =>
-                {
+                .then(() => {
                     fixture.detectChanges();
 
                     let errorMessage = fixture.debugElement.query(By.css(".alert-danger"));
@@ -209,14 +184,12 @@ describe("UploadComponent", () =>
                 });
         }));
 
-        it("should display public data", async(() =>
-        {
+        it("should display public data", async(() => {
             let datePipe = TestBed.get(DatePipe) as DatePipe;
 
             let upload = getUpload();
             uploadServiceGetResolve(upload)
-                .then(() =>
-                {
+                .then(() => {
                     fixture.detectChanges();
 
                     let errorMessage = fixture.debugElement.query(By.css(".alert-danger"));
@@ -244,14 +217,11 @@ describe("UploadComponent", () =>
         }));
     });
 
-    describe("View Save Data button", () =>
-    {
-        it("should display when there is upload content", async(() =>
-        {
+    describe("View Save Data button", () => {
+        it("should display when there is upload content", async(() => {
             let upload = getUpload();
             uploadServiceGetResolve(upload)
-                .then(() =>
-                {
+                .then(() => {
                     fixture.detectChanges();
 
                     let errorMessage = fixture.debugElement.query(By.css(".alert-danger"));
@@ -259,10 +229,8 @@ describe("UploadComponent", () =>
 
                     let buttons = fixture.debugElement.queryAll(By.css(".col-md-6.pull-right button"));
                     let found = false;
-                    for (let i = 0; i < buttons.length; i++)
-                    {
-                        if (getNormalizedTextContent(buttons[i]) === "View Save Data")
-                        {
+                    for (let i = 0; i < buttons.length; i++) {
+                        if (getNormalizedTextContent(buttons[i]) === "View Save Data") {
                             found = true;
                         }
                     }
@@ -271,13 +239,11 @@ describe("UploadComponent", () =>
                 });
         }));
 
-        it("should not display when there is no upload content", async(() =>
-        {
+        it("should not display when there is no upload content", async(() => {
             let upload = getUpload();
             delete upload.uploadContent;
             uploadServiceGetResolve(upload)
-                .then(() =>
-                {
+                .then(() => {
                     fixture.detectChanges();
 
                     let errorMessage = fixture.debugElement.query(By.css(".alert-danger"));
@@ -285,10 +251,8 @@ describe("UploadComponent", () =>
 
                     let buttons = fixture.debugElement.queryAll(By.css(".col-md-6.pull-right button"));
                     let found = false;
-                    for (let i = 0; i < buttons.length; i++)
-                    {
-                        if (getNormalizedTextContent(buttons[i]) === "View Save Data")
-                        {
+                    for (let i = 0; i < buttons.length; i++) {
+                        if (getNormalizedTextContent(buttons[i]) === "View Save Data") {
                             found = true;
                         }
                     }
@@ -298,14 +262,11 @@ describe("UploadComponent", () =>
         }));
     });
 
-    describe("Delete button", () =>
-    {
-        it("should display when there is upload content", async(() =>
-        {
+    describe("Delete button", () => {
+        it("should display when there is upload content", async(() => {
             let upload = getUpload();
             uploadServiceGetResolve(upload)
-                .then(() =>
-                {
+                .then(() => {
                     fixture.detectChanges();
 
                     let errorMessage = fixture.debugElement.query(By.css(".alert-danger"));
@@ -313,10 +274,8 @@ describe("UploadComponent", () =>
 
                     let buttons = fixture.debugElement.queryAll(By.css(".col-md-6.pull-right button"));
                     let deleteButton: DebugElement;
-                    for (let i = 0; i < buttons.length; i++)
-                    {
-                        if (getNormalizedTextContent(buttons[i]) === "Delete")
-                        {
+                    for (let i = 0; i < buttons.length; i++) {
+                        if (getNormalizedTextContent(buttons[i]) === "Delete") {
                             deleteButton = buttons[i];
                         }
                     }
@@ -325,15 +284,13 @@ describe("UploadComponent", () =>
                 });
         }));
 
-        it("should delete the upload when clicked", async(() =>
-        {
+        it("should delete the upload when clicked", async(() => {
             let router = TestBed.get(Router) as Router;
             spyOn(router, "navigate");
 
             let upload = getUpload();
             uploadServiceGetResolve(upload)
-                .then(() =>
-                {
+                .then(() => {
                     fixture.detectChanges();
 
                     let errorMessage = fixture.debugElement.query(By.css(".alert-danger"));
@@ -341,10 +298,8 @@ describe("UploadComponent", () =>
 
                     let buttons = fixture.debugElement.queryAll(By.css(".col-md-6.pull-right button"));
                     let deleteButton: DebugElement;
-                    for (let i = 0; i < buttons.length; i++)
-                    {
-                        if (getNormalizedTextContent(buttons[i]) === "Delete")
-                        {
+                    for (let i = 0; i < buttons.length; i++) {
+                        if (getNormalizedTextContent(buttons[i]) === "Delete") {
                             deleteButton = buttons[i];
                         }
                     }
@@ -353,8 +308,7 @@ describe("UploadComponent", () =>
 
                     deleteButton.nativeElement.click();
                     uploadServiceDeleteResolve()
-                        .then(() =>
-                        {
+                        .then(() => {
                             fixture.detectChanges();
 
                             expect(router.navigate).toHaveBeenCalledWith(["/dashboard"]);
@@ -365,15 +319,13 @@ describe("UploadComponent", () =>
                 });
         }));
 
-        it("should show an error when the upload service fails to delete the upload", async(() =>
-        {
+        it("should show an error when the upload service fails to delete the upload", async(() => {
             let router = TestBed.get(Router) as Router;
             spyOn(router, "navigate");
 
             let upload = getUpload();
             uploadServiceGetResolve(upload)
-                .then(() =>
-                {
+                .then(() => {
                     fixture.detectChanges();
 
                     let errorMessage = fixture.debugElement.query(By.css(".alert-danger"));
@@ -381,10 +333,8 @@ describe("UploadComponent", () =>
 
                     let buttons = fixture.debugElement.queryAll(By.css(".col-md-6.pull-right button"));
                     let deleteButton: DebugElement;
-                    for (let i = 0; i < buttons.length; i++)
-                    {
-                        if (getNormalizedTextContent(buttons[i]) === "Delete")
-                        {
+                    for (let i = 0; i < buttons.length; i++) {
+                        if (getNormalizedTextContent(buttons[i]) === "Delete") {
                             deleteButton = buttons[i];
                         }
                     }
@@ -393,8 +343,7 @@ describe("UploadComponent", () =>
 
                     deleteButton.nativeElement.click();
                     uploadServiceDeleteReject()
-                        .then(() =>
-                        {
+                        .then(() => {
                             fixture.detectChanges();
 
                             expect(router.navigate).not.toHaveBeenCalled();
@@ -405,13 +354,11 @@ describe("UploadComponent", () =>
                 });
         }));
 
-        it("should not display when there is no upload content", async(() =>
-        {
+        it("should not display when there is no upload content", async(() => {
             let upload = getUpload();
             delete upload.uploadContent;
             uploadServiceGetResolve(upload)
-                .then(() =>
-                {
+                .then(() => {
                     fixture.detectChanges();
 
                     let errorMessage = fixture.debugElement.query(By.css(".alert-danger"));
@@ -419,10 +366,8 @@ describe("UploadComponent", () =>
 
                     let buttons = fixture.debugElement.queryAll(By.css(".col-md-6.pull-right button"));
                     let deleteButton: DebugElement;
-                    for (let i = 0; i < buttons.length; i++)
-                    {
-                        if (getNormalizedTextContent(buttons[i]) === "Delete")
-                        {
+                    for (let i = 0; i < buttons.length; i++) {
+                        if (getNormalizedTextContent(buttons[i]) === "Delete") {
                             deleteButton = buttons[i];
                         }
                     }
@@ -432,14 +377,11 @@ describe("UploadComponent", () =>
         }));
     });
 
-    describe("Suggestion Types", () =>
-    {
-        it("should default to available souls including souls from ascension", async(() =>
-        {
+    describe("Suggestion Types", () => {
+        it("should default to available souls including souls from ascension", async(() => {
             let upload = getUpload();
             uploadServiceGetResolve(upload)
-                .then(() =>
-                {
+                .then(() => {
                     fixture.detectChanges();
 
                     let errorMessage = fixture.debugElement.query(By.css(".alert-danger"));
@@ -456,12 +398,10 @@ describe("UploadComponent", () =>
                 });
         }));
 
-        it("should hide souls from ascension after selecting the Rules of Thumb", async(() =>
-        {
+        it("should hide souls from ascension after selecting the Rules of Thumb", async(() => {
             let upload = getUpload();
             uploadServiceGetResolve(upload)
-                .then(() =>
-                {
+                .then(() => {
                     fixture.detectChanges();
 
                     let errorMessage = fixture.debugElement.query(By.css(".alert-danger"));
@@ -478,12 +418,10 @@ describe("UploadComponent", () =>
                 });
         }));
 
-        it("should re-show souls from ascension after selecting Available Souls", async(() =>
-        {
+        it("should re-show souls from ascension after selecting Available Souls", async(() => {
             let upload = getUpload();
             uploadServiceGetResolve(upload)
-                .then(() =>
-                {
+                .then(() => {
                     fixture.detectChanges();
 
                     let errorMessage = fixture.debugElement.query(By.css(".alert-danger"));
@@ -504,14 +442,11 @@ describe("UploadComponent", () =>
         }));
     });
 
-    describe("Ancient Levels", () =>
-    {
-        it("should display data based on hybrid playstyle and Available Souls using souls from ascension", async(() =>
-        {
+    describe("Ancient Levels", () => {
+        it("should display data based on hybrid playstyle and Available Souls using souls from ascension", async(() => {
             let upload = getUpload();
             uploadServiceGetResolve(upload)
-                .then(() =>
-                {
+                .then(() => {
                     fixture.detectChanges();
 
                     let expectedValues: { name: string, suggested?: number, hasEffectiveLevel?: boolean }[] =
@@ -548,12 +483,10 @@ describe("UploadComponent", () =>
                 });
         }));
 
-        it("should display data based on hybrid playstyle and Available Souls without using souls from ascension", async(() =>
-        {
+        it("should display data based on hybrid playstyle and Available Souls without using souls from ascension", async(() => {
             let upload = getUpload();
             uploadServiceGetResolve(upload)
-                .then(() =>
-                {
+                .then(() => {
                     fixture.detectChanges();
 
                     // Don't use souls from ascension
@@ -595,12 +528,10 @@ describe("UploadComponent", () =>
                 });
         }));
 
-        it("should display data based on hybrid playstyle and the Rules of Thumb", async(() =>
-        {
+        it("should display data based on hybrid playstyle and the Rules of Thumb", async(() => {
             let upload = getUpload();
             uploadServiceGetResolve(upload)
-                .then(() =>
-                {
+                .then(() => {
                     fixture.detectChanges();
 
                     // Use rules of thumb
@@ -642,13 +573,11 @@ describe("UploadComponent", () =>
                 });
         }));
 
-        it("should display data based on idle playstyle and Available Souls without using souls from ascension", async(() =>
-        {
+        it("should display data based on idle playstyle and Available Souls without using souls from ascension", async(() => {
             let upload = getUpload();
             upload.playStyle = "idle";
             uploadServiceGetResolve(upload)
-                .then(() =>
-                {
+                .then(() => {
                     fixture.detectChanges();
 
                     // Don't use souls from ascension
@@ -690,13 +619,11 @@ describe("UploadComponent", () =>
                 });
         }));
 
-        it("should display data based on idle playstyle and the Rules of Thumb", async(() =>
-        {
+        it("should display data based on idle playstyle and the Rules of Thumb", async(() => {
             let upload = getUpload();
             upload.playStyle = "idle";
             uploadServiceGetResolve(upload)
-                .then(() =>
-                {
+                .then(() => {
                     fixture.detectChanges();
 
                     // Use rules of thumb
@@ -738,13 +665,11 @@ describe("UploadComponent", () =>
                 });
         }));
 
-        it("should display data based on active playstyle and Available Souls without using souls from ascension", async(() =>
-        {
+        it("should display data based on active playstyle and Available Souls without using souls from ascension", async(() => {
             let upload = getUpload();
             upload.playStyle = "active";
             uploadServiceGetResolve(upload)
-                .then(() =>
-                {
+                .then(() => {
                     fixture.detectChanges();
 
                     // Don't use souls from ascension
@@ -786,13 +711,11 @@ describe("UploadComponent", () =>
                 });
         }));
 
-        it("should display data based on active playstyle and the Rules of Thumb", async(() =>
-        {
+        it("should display data based on active playstyle and the Rules of Thumb", async(() => {
             let upload = getUpload();
             upload.playStyle = "active";
             uploadServiceGetResolve(upload)
-                .then(() =>
-                {
+                .then(() => {
                     fixture.detectChanges();
 
                     // Use rules of thumb
@@ -834,8 +757,7 @@ describe("UploadComponent", () =>
                 });
         }));
 
-        function verify(upload: IUpload, expectedValues: { name: string, suggested?: number, hasEffectiveLevel?: boolean, isPrimary?: boolean }[]): void
-        {
+        function verify(upload: IUpload, expectedValues: { name: string, suggested?: number, hasEffectiveLevel?: boolean, isPrimary?: boolean }[]): void {
             let exponentialPipe = TestBed.get(ExponentialPipe) as ExponentialPipe;
 
             let errorMessage = fixture.debugElement.query(By.css(".alert-danger"));
@@ -847,8 +769,7 @@ describe("UploadComponent", () =>
             let rows = tables[0].queryAll(By.css("tbody tr"));
             expect(rows.length).toEqual(expectedValues.length);
 
-            for (let i = 0; i < rows.length; i++)
-            {
+            for (let i = 0; i < rows.length; i++) {
                 let cells = rows[i].children;
                 let expected = expectedValues[i];
 
@@ -856,8 +777,7 @@ describe("UploadComponent", () =>
                 expect(getNormalizedTextContent(cells[0])).toEqual(expectedName);
 
                 let expectedCurrentLevel = exponentialPipe.transform(+upload.stats["ancient" + expected.name]);
-                if (expected.hasEffectiveLevel)
-                {
+                if (expected.hasEffectiveLevel) {
                     expectedCurrentLevel += " (*)";
                 }
                 expect(getNormalizedTextContent(cells[1])).toEqual(expectedCurrentLevel);
@@ -877,14 +797,11 @@ describe("UploadComponent", () =>
         }
     });
 
-    describe("Outsider Levels", () =>
-    {
-        it("should display data", async(() =>
-        {
+    describe("Outsider Levels", () => {
+        it("should display data", async(() => {
             let upload = getUpload();
             uploadServiceGetResolve(upload)
-                .then(() =>
-                {
+                .then(() => {
                     fixture.detectChanges();
 
                     let expectedValues: { name: string, suggested?: number }[] =
@@ -905,8 +822,7 @@ describe("UploadComponent", () =>
                     let rows = tables[1].queryAll(By.css("tbody tr"));
                     expect(rows.length).toEqual(expectedValues.length);
 
-                    for (let i = 0; i < rows.length; i++)
-                    {
+                    for (let i = 0; i < rows.length; i++) {
                         let cells = rows[i].children;
                         let expected = expectedValues[i];
 
@@ -923,17 +839,14 @@ describe("UploadComponent", () =>
         }));
     });
 
-    describe("Miscellaneous Stats", () =>
-    {
-        it("should display data", async(() =>
-        {
+    describe("Miscellaneous Stats", () => {
+        it("should display data", async(() => {
             let exponentialPipe = TestBed.get(ExponentialPipe) as ExponentialPipe;
             let percentPipe = TestBed.get(PercentPipe) as PercentPipe;
 
             let upload = getUpload();
             uploadServiceGetResolve(upload)
-                .then(() =>
-                {
+                .then(() => {
                     fixture.detectChanges();
 
                     let expectedValues: { name: string, stat: string, value: number, type: "exponential" | "percent" }[] =
@@ -961,8 +874,7 @@ describe("UploadComponent", () =>
                     let rows = tables[2].queryAll(By.css("tbody tr"));
                     expect(rows.length).toEqual(expectedValues.length);
 
-                    for (let i = 0; i < rows.length; i++)
-                    {
+                    for (let i = 0; i < rows.length; i++) {
                         let cells = rows[i].children;
                         let expected = expectedValues[i];
 
@@ -971,8 +883,7 @@ describe("UploadComponent", () =>
 
                         let expectedValue = upload.stats[expected.stat];
                         let expectedFormattedValue: string;
-                        switch (expected.type)
-                        {
+                        switch (expected.type) {
                             case "exponential":
                                 {
                                     expectedFormattedValue = exponentialPipe.transform(+expectedValue);
@@ -995,8 +906,7 @@ describe("UploadComponent", () =>
         }));
     });
 
-    function getUpload(): IUpload
-    {
+    function getUpload(): IUpload {
         // Based on the real upload 355734
         return {
             id: 355734,
@@ -1064,8 +974,7 @@ describe("UploadComponent", () =>
         };
     }
 
-    function getNormalizedTextContent(element: DebugElement): string
-    {
+    function getNormalizedTextContent(element: DebugElement): string {
         let nativeElement: HTMLElement = element.nativeElement;
         return nativeElement.textContent.trim().replace(/\s\s+/g, " ");
     }

@@ -4,33 +4,29 @@ import { By } from "@angular/platform-browser";
 
 import { DashboardComponent } from "./dashboard";
 
-describe("DashboardComponent", () =>
-{
+describe("DashboardComponent", () => {
     let component: DashboardComponent;
     let fixture: ComponentFixture<DashboardComponent>;
 
-    beforeEach(async(() =>
-    {
+    beforeEach(async(() => {
         TestBed.configureTestingModule(
-        {
-            declarations: [ DashboardComponent ],
-            schemas: [ NO_ERRORS_SCHEMA ],
-        })
-        .compileComponents()
-        .then(() =>
-        {
-            fixture = TestBed.createComponent(DashboardComponent);
-            component = fixture.componentInstance;
-        });
+            {
+                declarations: [DashboardComponent],
+                schemas: [NO_ERRORS_SCHEMA],
+            })
+            .compileComponents()
+            .then(() => {
+                fixture = TestBed.createComponent(DashboardComponent);
+                component = fixture.componentInstance;
+            });
     }));
 
-    it("should display an upload table without pagination", () =>
-    {
+    it("should display an upload table without pagination", () => {
         fixture.detectChanges();
 
         let uploadsTable = fixture.debugElement.query(By.css("uploadsTable"));
         expect(uploadsTable).not.toBeNull();
-        expect(uploadsTable.properties["count"]).toEqual(10);
-        expect(uploadsTable.properties["paginate"]).toBeFalsy();
+        expect(uploadsTable.properties.count).toEqual(10);
+        expect(uploadsTable.properties.paginate).toBeFalsy();
     });
 });

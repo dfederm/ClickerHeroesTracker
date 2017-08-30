@@ -3,24 +3,20 @@ import { Http } from "@angular/http";
 
 import "rxjs/add/operator/toPromise";
 
-export interface ISiteNewsEntryListResponse
-{
+export interface ISiteNewsEntryListResponse {
     entries: { [date: string]: string[] };
 }
 
 @Injectable()
-export class NewsService
-{
+export class NewsService {
     constructor(private http: Http) { }
 
-    public getNews(): Promise<ISiteNewsEntryListResponse>
-    {
+    public getNews(): Promise<ISiteNewsEntryListResponse> {
         return this.http
             .get("/api/news")
             .toPromise()
             .then(response => response.json() as ISiteNewsEntryListResponse)
-            .catch(error =>
-            {
+            .catch(error => {
                 let errorMessage = error.message || error.toString();
                 appInsights.trackEvent("NewsService.getNews.error", { message: errorMessage });
                 return Promise.reject(errorMessage);

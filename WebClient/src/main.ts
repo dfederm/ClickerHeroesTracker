@@ -3,8 +3,7 @@ import { enableProdMode } from "@angular/core";
 
 import { AppModule } from "./app.module";
 
-if (process.env.ENV === "prod")
-{
+if (process.env.ENV === "prod") {
     enableProdMode();
 }
 

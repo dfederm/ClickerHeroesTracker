@@ -6,14 +6,12 @@ import { MockBackend, MockConnection } from "@angular/http/testing";
 
 import { AuthenticationService, IAuthTokenModel } from "./authenticationService";
 
-describe("AuthenticationService", () =>
-{
+describe("AuthenticationService", () => {
     let injector: ReflectiveInjector;
     let backend: MockBackend;
     let lastConnection: MockConnection = null;
 
-    beforeEach(() =>
-    {
+    beforeEach(() => {
         injector = ReflectiveInjector.resolveAndCreate(
             [
                 { provide: ConnectionBackend, useClass: MockBackend },
@@ -30,16 +28,13 @@ describe("AuthenticationService", () =>
         backend.connections.subscribe((connection: MockConnection) => lastConnection = connection);
     });
 
-    afterEach(() =>
-    {
+    afterEach(() => {
         lastConnection = null;
         backend.verifyNoPendingRequests();
     });
 
-    describe("initialization", () =>
-    {
-        it("should not be logged in initially when local storage is empty", fakeAsync(() =>
-        {
+    describe("initialization", () => {
+        it("should not be logged in initially when local storage is empty", fakeAsync(() => {
             (localStorage.getItem as jasmine.Spy).and.returnValue(null);
 
             let authenticationService = injector.get(AuthenticationService) as AuthenticationService;
@@ -53,8 +48,7 @@ describe("AuthenticationService", () =>
             expect(lastConnection).toBeNull();
         }));
 
-        it("should be logged in initially and refresh the token when local storage is populated with a valid token", fakeAsync(() =>
-        {
+        it("should be logged in initially and refresh the token when local storage is populated with a valid token", fakeAsync(() => {
             let tokens = createCachedAuthModel();
             (localStorage.getItem as jasmine.Spy).and.returnValue(JSON.stringify(tokens));
 
@@ -87,8 +81,7 @@ describe("AuthenticationService", () =>
             discardPeriodicTasks();
         }));
 
-        it("should be logged out initially but logged in eventually once the token is refreshed when local storage is populated with an expired token", fakeAsync(() =>
-        {
+        it("should be logged out initially but logged in eventually once the token is refreshed when local storage is populated with an expired token", fakeAsync(() => {
             let tokens = createCachedAuthModel();
             tokens.expiration_date = 0;
             (localStorage.getItem as jasmine.Spy).and.returnValue(JSON.stringify(tokens));
@@ -123,31 +116,26 @@ describe("AuthenticationService", () =>
         }));
     });
 
-    describe("getAuthHeaders", () =>
-    {
-        it("should reject when not logged in", fakeAsync(() =>
-        {
+    describe("getAuthHeaders", () => {
+        it("should reject when not logged in", fakeAsync(() => {
             (localStorage.getItem as jasmine.Spy).and.returnValue(null);
 
             let authenticationService = injector.get(AuthenticationService) as AuthenticationService;
             authenticationService.getAuthHeaders()
                 .then(fail)
-                .catch(error =>
-                {
+                .catch(error => {
                     expect(error).toEqual("NotLoggedIn");
                 });
             tick();
         }));
 
-        it("should get auth headers when logged in", fakeAsync(() =>
-        {
+        it("should get auth headers when logged in", fakeAsync(() => {
             let tokens = createCachedAuthModel();
             (localStorage.getItem as jasmine.Spy).and.returnValue(JSON.stringify(tokens));
 
             let authenticationService = injector.get(AuthenticationService) as AuthenticationService;
             authenticationService.getAuthHeaders()
-                .then(headers =>
-                {
+                .then(headers => {
                     expect(headers.keys().length).toEqual(1);
                     expect(headers.get("Authorization")).toEqual("someTokenType someAccessToken");
                 });
@@ -155,18 +143,15 @@ describe("AuthenticationService", () =>
         }));
     });
 
-    describe("logIn", () =>
-    {
-        it("should reject with an unsuccessful log in", fakeAsync(() =>
-        {
+    describe("logIn", () => {
+        it("should reject with an unsuccessful log in", fakeAsync(() => {
             let logInSuccessful = false;
             let error: Error;
             let isLoggedInLog: boolean[] = [];
 
             let authenticationService = injector.get(AuthenticationService) as AuthenticationService;
             authenticationService.isLoggedIn()
-                .subscribe(isLoggedIn =>
-                {
+                .subscribe(isLoggedIn => {
                     isLoggedInLog.push(isLoggedIn);
                 });
             authenticationService.logIn("someUsername", "somePassword")
@@ -187,16 +172,14 @@ describe("AuthenticationService", () =>
             expect(isLoggedInLog).toEqual([false]);
         }));
 
-        it("should resolve with a successful log in and refresh the new token", fakeAsync(() =>
-        {
+        it("should resolve with a successful log in and refresh the new token", fakeAsync(() => {
             let logInSuccessful = false;
             let error: Error;
             let isLoggedInLog: boolean[] = [];
 
             let authenticationService = injector.get(AuthenticationService) as AuthenticationService;
             authenticationService.isLoggedIn()
-                .subscribe(isLoggedIn =>
-                {
+                .subscribe(isLoggedIn => {
                     isLoggedInLog.push(isLoggedIn);
                 });
             authenticationService.logIn("someUsername", "somePassword")
@@ -245,10 +228,8 @@ describe("AuthenticationService", () =>
         }));
     });
 
-    describe("logOut", () =>
-    {
-        it("should successfully log out", fakeAsync(() =>
-        {
+    describe("logOut", () => {
+        it("should successfully log out", fakeAsync(() => {
             let isLoggedInLog: boolean[] = [];
 
             let tokens = createCachedAuthModel();
@@ -256,8 +237,7 @@ describe("AuthenticationService", () =>
 
             let authenticationService = injector.get(AuthenticationService) as AuthenticationService;
             authenticationService.isLoggedIn()
-                .subscribe(isLoggedIn =>
-                {
+                .subscribe(isLoggedIn => {
                     isLoggedInLog.push(isLoggedIn);
                 });
             authenticationService.logOut();
@@ -266,8 +246,7 @@ describe("AuthenticationService", () =>
             expect(isLoggedInLog).toEqual([true, false]);
         }));
 
-        it("should stop the token refresh interval after logging out", fakeAsync(() =>
-        {
+        it("should stop the token refresh interval after logging out", fakeAsync(() => {
             let isLoggedInLog: boolean[] = [];
 
             let tokens = createCachedAuthModel();
@@ -275,8 +254,7 @@ describe("AuthenticationService", () =>
 
             let authenticationService = injector.get(AuthenticationService) as AuthenticationService;
             authenticationService.isLoggedIn()
-                .subscribe(isLoggedIn =>
-                {
+                .subscribe(isLoggedIn => {
                     isLoggedInLog.push(isLoggedIn);
                 });
 
@@ -313,8 +291,7 @@ describe("AuthenticationService", () =>
         }));
     });
 
-    function createCachedAuthModel(): IAuthTokenModel
-    {
+    function createCachedAuthModel(): IAuthTokenModel {
         return {
             token_type: "someTokenType",
             access_token: "someAccessToken",
@@ -325,8 +302,7 @@ describe("AuthenticationService", () =>
         };
     }
 
-    function createResponseAuthModel(num?: number): IAuthTokenModel
-    {
+    function createResponseAuthModel(num?: number): IAuthTokenModel {
         return {
             token_type: "someNewTokenType" + (num === undefined ? "" : num.toString()),
             access_token: "someNewAccessToken" + (num === undefined ? "" : num.toString()),

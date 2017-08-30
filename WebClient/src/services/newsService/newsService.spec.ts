@@ -6,25 +6,21 @@ import { MockBackend, MockConnection } from "@angular/http/testing";
 
 import { NewsService, ISiteNewsEntryListResponse } from "./newsService";
 
-declare global
-{
+// tslint:disable-next-line:no-namespace
+declare global {
     // tslint:disable-next-line:interface-name - We don't own this interface name, just extending it
-    interface Window
-    {
+    interface Window {
         appInsights: Microsoft.ApplicationInsights.IAppInsights;
     }
 }
 
-describe("NewsService", () =>
-{
+describe("NewsService", () => {
     let newsService: NewsService;
     let backend: MockBackend;
     let lastConnection: MockConnection;
 
-    describe("getNews", () =>
-    {
-        beforeEach(() =>
-        {
+    describe("getNews", () => {
+        beforeEach(() => {
             let injector = ReflectiveInjector.resolveAndCreate(
                 [
                     { provide: ConnectionBackend, useClass: MockBackend },
@@ -41,21 +37,18 @@ describe("NewsService", () =>
             window.appInsights = jasmine.createSpyObj("appInsights", ["trackEvent"]);
         });
 
-        afterAll(() =>
-        {
+        afterAll(() => {
             lastConnection = null;
             backend.verifyNoPendingRequests();
         });
 
-        it("should make an api call", () =>
-        {
+        it("should make an api call", () => {
             newsService.getNews();
             expect(lastConnection).toBeDefined("no http service connection made");
             expect(lastConnection.request.url).toEqual("/api/news", "url invalid");
         });
 
-        it("should return some news", fakeAsync(() =>
-        {
+        it("should return some news", fakeAsync(() => {
             let response: ISiteNewsEntryListResponse;
             newsService.getNews()
                 .then((r: ISiteNewsEntryListResponse) => response = r);
@@ -67,8 +60,7 @@ describe("NewsService", () =>
             expect(response).toEqual(expectedResponse, "should return the expected response");
         }));
 
-        it("should handle errors", fakeAsync(() =>
-        {
+        it("should handle errors", fakeAsync(() => {
             let response: ISiteNewsEntryListResponse;
             let error: string;
             newsService.getNews()

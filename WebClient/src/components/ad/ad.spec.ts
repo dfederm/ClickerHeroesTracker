@@ -6,19 +6,18 @@ import { Subject } from "rxjs/Subject";
 
 import { AdComponent } from "./ad";
 
-describe("AdComponent", () =>
-{
+describe("AdComponent", () => {
     let component: AdComponent;
     let fixture: ComponentFixture<AdComponent>;
     let navigationEvents: Subject<NavigationEvent>;
     let timesRendered: number;
 
     @Component({
+        // tslint:disable-next-line:component-selector - We're mocking out a 3rd party component
         selector: "ng2-adsense",
-        template: "{{renderNumber}}",
+        template: "{{ renderNumber }}",
     })
-    class MockAdComponent
-    {
+    class MockAdComponent {
         @Input()
         public adClient: string;
 
@@ -27,15 +26,13 @@ describe("AdComponent", () =>
 
         public renderNumber: number;
 
-        constructor()
-        {
+        constructor() {
             timesRendered++;
             this.renderNumber = timesRendered;
         }
     }
 
-    beforeEach(done =>
-    {
+    beforeEach(done => {
         timesRendered = 0;
         navigationEvents = new Subject();
         let router = {
@@ -56,8 +53,7 @@ describe("AdComponent", () =>
                 ],
             })
             .compileComponents()
-            .then(() =>
-            {
+            .then(() => {
                 fixture = TestBed.createComponent(AdComponent);
                 component = fixture.componentInstance;
             })
@@ -65,13 +61,11 @@ describe("AdComponent", () =>
             .catch(done.fail);
     });
 
-    it("should display an ad", () =>
-    {
+    it("should display an ad", () => {
         verifyAd(1);
     });
 
-    it("should reload the ad on navigation", () =>
-    {
+    it("should reload the ad on navigation", () => {
         verifyAd(1);
 
         let event = new NavigationEnd(1, "someUrl", "someUrlAfterRedirects");
@@ -80,8 +74,7 @@ describe("AdComponent", () =>
         verifyAd(2);
     });
 
-    it("should not reload the ad on an unrelated navigation event", () =>
-    {
+    it("should not reload the ad on an unrelated navigation event", () => {
         verifyAd(1);
 
         let event = new NavigationCancel(1, "someUrl", "someReason");
@@ -90,8 +83,7 @@ describe("AdComponent", () =>
         verifyAd(1);
     });
 
-    function verifyAd(expectedTimesRendered: number): void
-    {
+    function verifyAd(expectedTimesRendered: number): void {
         fixture.detectChanges();
 
         let ad = fixture.debugElement.query(By.css("ng2-adsense"));

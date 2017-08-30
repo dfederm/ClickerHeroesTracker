@@ -5,7 +5,6 @@ import { UploadDialogComponent } from "../uploadDialog/uploadDialog";
     selector: "home",
     templateUrl: "./home.html",
 })
-export class HomeComponent
-{
+export class HomeComponent {
     public UploadDialogComponent = UploadDialogComponent;
 }
