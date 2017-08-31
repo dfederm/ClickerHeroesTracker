@@ -59,6 +59,16 @@ namespace ClickerHeroesTrackerWebsite
                     defaults: new { controller = "Home", action = "Beta" });
             });
 
+            app.UseSwagger(c =>
+            {
+                c.PreSerializeFilters.Add((swagger, httpReq) => swagger.Host = httpReq.Host.Value);
+            });
+
+            app.UseSwaggerUI(c =>
+            {
+                c.SwaggerEndpoint("/swagger/v1/swagger.json", "V1 Docs");
+            });
+
             this.EnsureDatabaseCreated(app);
 
             // Warm up the game data parsing

@@ -35,6 +35,7 @@ namespace ClickerHeroesTrackerWebsite
     using Newtonsoft.Json;
     using Newtonsoft.Json.Converters;
     using Newtonsoft.Json.Serialization;
+    using Swashbuckle.AspNetCore.Swagger;
     using Website.Services.SiteNews;
 
     /// <summary>
@@ -186,6 +187,21 @@ namespace ClickerHeroesTrackerWebsite
 
             // Allow IOptions<T> to be available through DI
             services.AddOptions();
+
+            services.AddSwaggerGen(options =>
+            {
+                options.SwaggerDoc(
+                    "v1",
+                    new Info
+                    {
+                        Title = "ClickerHeroesTracker API",
+                        Version = "v1",
+                        Description = "Api for Clicker Heroes",
+                        TermsOfService = "None",
+                    });
+
+                options.DescribeAllEnumsAsStrings();
+            });
 
             // Container controlled registrations
             if (storageAccount != null)

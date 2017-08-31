@@ -9,14 +9,12 @@ namespace ClickerHeroesTrackerWebsite.Controllers.Api
     using System.Linq;
     using System.Net.Http;
     using System.Threading.Tasks;
-    using AspNet.Security.OAuth.Validation;
     using ClickerHeroesTrackerWebsite.Models;
     using ClickerHeroesTrackerWebsite.Models.Api;
     using ClickerHeroesTrackerWebsite.Models.Api.Clans;
     using ClickerHeroesTrackerWebsite.Models.SaveData;
     using ClickerHeroesTrackerWebsite.Services.Database;
     using ClickerHeroesTrackerWebsite.Utility;
-    using Microsoft.AspNetCore.Authentication.Cookies;
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Identity;
     using Microsoft.AspNetCore.Mvc;
@@ -275,17 +273,17 @@ namespace ClickerHeroesTrackerWebsite.Controllers.Api
             }
         }
 
-        public IList<LeaderboardClan> FetchLeaderboard(int page, int count, string clanName)
+        private IList<LeaderboardClan> FetchLeaderboard(int page, int count, string clanName)
         {
             var clans = new List<LeaderboardClan>();
             var offset = (page - 1) * count;
 
             const string getLeaderboardDataCommandText = @"
-	            SELECT Name, CurrentRaidLevel, MemberCount
+                SELECT Name, CurrentRaidLevel, MemberCount
                 FROM Clans
                 ORDER BY CurrentRaidLevel DESC
                     OFFSET @Offset ROWS
-		            FETCH NEXT @Count ROWS ONLY;";
+                    FETCH NEXT @Count ROWS ONLY;";
             var parameters = new Dictionary<string, object>
             {
                 { "@Offset", offset },
@@ -314,7 +312,7 @@ namespace ClickerHeroesTrackerWebsite.Controllers.Api
             return clans;
         }
 
-        public SavedGame GetLatestSave(string userId)
+        private SavedGame GetLatestSave(string userId)
         {
             var userIdParameters = new Dictionary<string, object>
             {
@@ -322,7 +320,7 @@ namespace ClickerHeroesTrackerWebsite.Controllers.Api
             };
 
             const string getUploadDataCommandText = @"
-	            SELECT TOP(1) UploadContent
+                SELECT TOP(1) UploadContent
                 FROM Uploads
                 WHERE UserId = @UserId
                 ORDER BY UploadTime DESC";
@@ -344,8 +342,8 @@ namespace ClickerHeroesTrackerWebsite.Controllers.Api
         private PaginationMetadata FetchPagination(int page, int count)
         {
             const string GetLeaderboardCountCommandText = @"
-	            SELECT COUNT(*) AS TotalClans
-		        FROM Clans";
+                SELECT COUNT(*) AS TotalClans
+                FROM Clans";
 
             using (var command = this.databaseCommandFactory.Create(GetLeaderboardCountCommandText))
             using (var reader = command.ExecuteReader())
