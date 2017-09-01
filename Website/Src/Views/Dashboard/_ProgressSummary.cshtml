@@ -1,20 +1,15 @@
-﻿@using ClickerHeroesTrackerWebsite.Models.Dashboard.Graph
+﻿@inject IContentManager ContentManager
 
-@model GraphData
+@{
+    ContentManager.RegisterScript("ProgressSummary");
+}
 
 <div class="clearfix">
     <h4 class="pull-left">Progress summary:</h4>
     <h5 class="pull-right">@Html.ActionLink("See all", "Progress")</h5>
 </div>
 
-@if (Model != null)
-{
-    @Html.Partial("_GraphScripts")
-    @Html.Partial("_Graph", new GraphViewModel { Id = "progressSumary", Data = Model })
-}
-else
-{
-    <div class="text-warning">
-        No uploads in the last week!
-    </div>
-}
+@Html.Partial("_GraphScripts")
+
+<div id="progressSummary">
+</div>

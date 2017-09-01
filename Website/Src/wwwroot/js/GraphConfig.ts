@@ -25,50 +25,43 @@ namespace GraphConfig
             : value.toLocaleString();
     });
 
-    $(() => {
-        for (let id in graphs)
+    export function renderGraph(graphElement: JQuery<HTMLElement>, graph: Highcharts.Options): void
+    {
+        let isLogarithmic = (graph.yAxis as Highcharts.AxisOptions).type === "logarithmic";
+        let hasFiniteValues = true;
+
+        for (let i = 0; i < graph.series.length; i++)
         {
-            let graph = graphs[id];
-            let isLogarithmic = (graph.yAxis as Highcharts.AxisOptions).type === "logarithmic";
-            let hasFiniteValues = true;
-
-            for (let i = 0; i < graph.series.length; i++)
+            let series = graph.series[i];
+            for (let j = 0; j < series.data.length; j++)
             {
-                let series = graph.series[i];
-                for (let j = 0; j < series.data.length; j++)
+                let point = series.data[j] as [string, number];
+                let value = point[1];
+
+                hasFiniteValues = hasFiniteValues && isFinite(value);
+
+                // If we're using a log scale, hack around the inability to plot a 0 value by changing it to 0.1 (1e-1) or "one below" 1 (1e0).
+                if (isLogarithmic && value === 0)
                 {
-                    let point = series.data[j] as [string, string | number];
-                    let value = new Decimal(point[1]);
-                    let numberValue = value.toNumber();
-
-                    hasFiniteValues = hasFiniteValues && isFinite(numberValue);
-
-                    // If we're using a log scale, hack around the inability to plot a 0 value by changing it to 0.1 (1e-1) or "one below" 1 (1e0).
-                    if (isLogarithmic && numberValue === 0)
-                    {
-                        numberValue = 0.1;
-                    }
-
-                    point[1] = numberValue;
+                    value = 0.1;
                 }
-            }
 
-            let graphElement = $("#" + id);
-            if (hasFiniteValues)
-            {
-                graphElement.highcharts(graph);
-            }
-            else
-            {
-                graphElement.css("text-align", "center");
-                graphElement.html(`
-                    <p style="color:#333333;font-size:18px;padding-bottom: 100px">${graph.title.text}</p>
-                    <p>This graph contains values which are currently too large to graph.</p>
-                    <p>This will be <a href="https://github.com/dfederm/ClickerHeroesTracker/issues/113" target="_blank">fixed</a> soon.</p>
-                `);
+                point[1] = value;
             }
         }
-    });
 
-    // ContentManager.RegisterRawScript("$(function(){$('#" + Model.Id + "').highcharts(" + Model.Data.ToJsonString() + ");});");
+        if (hasFiniteValues)
+        {
+            graphElement.highcharts(graph);
+        }
+        else
+        {
+            graphElement.css("text-align", "center");
+            graphElement.html(`
+                <p style="color:#333333;font-size:18px;padding-bottom: 100px">${graph.title.text}</p>
+                <p>This graph contains values which are currently too large to graph.</p>
+                <p>This will be <a href="https://github.com/dfederm/ClickerHeroesTracker/issues/113" target="_blank">fixed</a> soon.</p>
+            `);
+        }
+    }
 }

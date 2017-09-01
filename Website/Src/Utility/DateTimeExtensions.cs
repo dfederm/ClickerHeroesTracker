@@ -10,18 +10,6 @@ namespace ClickerHeroesTrackerWebsite.Utility
     {
         private static DateTime javascriptEpoch = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
 
-        public static long ToJavascriptTime(this DateTime datetime)
-        {
-            var totalMilliseconds = (long)datetime
-                .Subtract(javascriptEpoch)
-                .TotalMilliseconds;
-
-            // Truncate to seconds
-            totalMilliseconds -= totalMilliseconds % 1000;
-
-            return totalMilliseconds;
-        }
-
         public static DateTime UnixTimeStampToDateTime(this double unixTimeStamp)
         {
             // Unix timestamp is seconds past epoch

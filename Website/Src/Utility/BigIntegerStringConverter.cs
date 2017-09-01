@@ -23,7 +23,7 @@ namespace ClickerHeroesTrackerWebsite.Utility
 
         public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
         {
-            writer.WriteRawValue(value.ToString());
+            writer.WriteValue(((BigInteger)value).ToTransportableString());
         }
     }
 }

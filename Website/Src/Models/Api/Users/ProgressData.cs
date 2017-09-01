@@ -2,16 +2,15 @@
 // Copyright (c) Clicker Heroes Tracker. All rights reserved.
 // </copyright>
 
-namespace ClickerHeroesTrackerWebsite.Models.Dashboard
+namespace ClickerHeroesTrackerWebsite.Models.Api.Users
 {
     using System;
     using System.Collections.Generic;
-    using System.Globalization;
-    using System.Numerics;
     using ClickerHeroesTrackerWebsite.Models.Game;
     using ClickerHeroesTrackerWebsite.Services.Database;
     using ClickerHeroesTrackerWebsite.Utility;
     using Microsoft.ApplicationInsights;
+    using Newtonsoft.Json;
 
     /// <summary>
     /// An aggregation of progress data for a user.
@@ -26,9 +25,13 @@ namespace ClickerHeroesTrackerWebsite.Models.Dashboard
             TelemetryClient telemetryClient,
             IDatabaseCommandFactory databaseCommandFactory,
             string userId,
-            DateTime? startTime,
-            DateTime? endTime)
+            DateTime startTime,
+            DateTime endTime)
         {
+            // SQL's datetime2 has no timezone so we need to explicitly convert to UTC
+            startTime = startTime.ToUniversalTime();
+            endTime = endTime.ToUniversalTime();
+
             var parameters = new Dictionary<string, object>
             {
                 { "@UserId", userId },
@@ -54,9 +57,9 @@ namespace ClickerHeroesTrackerWebsite.Models.Dashboard
 
                 -- Computed Stats
                 SELECT #ScopedUploads.UploadTime,
-                       ComputedStats.TitanDamage,
-                       ComputedStats.SoulsSpent,
-                       ComputedStats.HeroSoulsSacrificed,
+                       RTRIM(ComputedStats.TitanDamage) AS TitanDamage,
+                       RTRIM(ComputedStats.SoulsSpent) AS SoulsSpent,
+                       RTRIM(ComputedStats.HeroSoulsSacrificed) AS HeroSoulsSacrificed,
                        ComputedStats.TotalAncientSouls,
                        ComputedStats.TranscendentPower,
                        ComputedStats.Rubies,
@@ -69,7 +72,7 @@ namespace ClickerHeroesTrackerWebsite.Models.Dashboard
                 ON ComputedStats.UploadId = #ScopedUploads.Id;
 
                 -- Ancient Levels
-                SELECT #ScopedUploads.UploadTime, AncientLevels.AncientId, AncientLevels.Level
+                SELECT #ScopedUploads.UploadTime, AncientLevels.AncientId, RTRIM(AncientLevels.Level) AS Level
                 FROM AncientLevels
                 INNER JOIN #ScopedUploads
                 ON AncientLevels.UploadId = #ScopedUploads.Id;
@@ -87,32 +90,32 @@ namespace ClickerHeroesTrackerWebsite.Models.Dashboard
                 parameters))
             using (var reader = command.ExecuteReader())
             {
-                this.TitanDamageData = new SortedDictionary<DateTime, BigInteger>();
-                this.SoulsSpentData = new SortedDictionary<DateTime, BigInteger>();
-                this.HeroSoulsSacrificedData = new SortedDictionary<DateTime, BigInteger>();
-                this.TotalAncientSoulsData = new SortedDictionary<DateTime, double>();
-                this.TranscendentPowerData = new SortedDictionary<DateTime, double>();
-                this.RubiesData = new SortedDictionary<DateTime, double>();
-                this.HighestZoneThisTranscensionData = new SortedDictionary<DateTime, double>();
-                this.HighestZoneLifetimeData = new SortedDictionary<DateTime, double>();
-                this.AscensionsThisTranscensionData = new SortedDictionary<DateTime, double>();
-                this.AscensionsLifetimeData = new SortedDictionary<DateTime, double>();
+                this.TitanDamageData = new SortedDictionary<DateTime, string>();
+                this.SoulsSpentData = new SortedDictionary<DateTime, string>();
+                this.HeroSoulsSacrificedData = new SortedDictionary<DateTime, string>();
+                this.TotalAncientSoulsData = new SortedDictionary<DateTime, string>();
+                this.TranscendentPowerData = new SortedDictionary<DateTime, string>();
+                this.RubiesData = new SortedDictionary<DateTime, string>();
+                this.HighestZoneThisTranscensionData = new SortedDictionary<DateTime, string>();
+                this.HighestZoneLifetimeData = new SortedDictionary<DateTime, string>();
+                this.AscensionsThisTranscensionData = new SortedDictionary<DateTime, string>();
+                this.AscensionsLifetimeData = new SortedDictionary<DateTime, string>();
 
                 while (reader.Read())
                 {
                     // The DateTime is a datetime2 which has no timezone so comes out as DateTimeKind.Unknown. Se need to specify the kind so it gets serialized correctly.
                     var uploadTime = DateTime.SpecifyKind(Convert.ToDateTime(reader["UploadTime"]), DateTimeKind.Utc);
 
-                    this.TitanDamageData.AddOrUpdate(uploadTime, reader["TitanDamage"].ToString().ToBigInteger());
-                    this.SoulsSpentData.AddOrUpdate(uploadTime, reader["SoulsSpent"].ToString().ToBigInteger());
-                    this.HeroSoulsSacrificedData.AddOrUpdate(uploadTime, reader["HeroSoulsSacrificed"].ToString().ToBigInteger());
-                    this.TotalAncientSoulsData.AddOrUpdate(uploadTime, Convert.ToDouble(reader["TotalAncientSouls"]));
-                    this.TranscendentPowerData.AddOrUpdate(uploadTime, 100 * Convert.ToDouble(reader["TranscendentPower"]));
-                    this.RubiesData.AddOrUpdate(uploadTime, Convert.ToDouble(reader["Rubies"]));
-                    this.HighestZoneThisTranscensionData.AddOrUpdate(uploadTime, Convert.ToDouble(reader["HighestZoneThisTranscension"]));
-                    this.HighestZoneLifetimeData.AddOrUpdate(uploadTime, Convert.ToDouble(reader["HighestZoneLifetime"]));
-                    this.AscensionsThisTranscensionData.AddOrUpdate(uploadTime, Convert.ToDouble(reader["AscensionsThisTranscension"]));
-                    this.AscensionsLifetimeData.AddOrUpdate(uploadTime, Convert.ToDouble(reader["AscensionsLifetime"]));
+                    this.TitanDamageData.AddOrUpdate(uploadTime, reader["TitanDamage"].ToString());
+                    this.SoulsSpentData.AddOrUpdate(uploadTime, reader["SoulsSpent"].ToString());
+                    this.HeroSoulsSacrificedData.AddOrUpdate(uploadTime, reader["HeroSoulsSacrificed"].ToString());
+                    this.TotalAncientSoulsData.AddOrUpdate(uploadTime, reader["TotalAncientSouls"].ToString());
+                    this.TranscendentPowerData.AddOrUpdate(uploadTime, (100 * Convert.ToDouble(reader["TranscendentPower"])).ToString());
+                    this.RubiesData.AddOrUpdate(uploadTime, reader["Rubies"].ToString());
+                    this.HighestZoneThisTranscensionData.AddOrUpdate(uploadTime, reader["HighestZoneThisTranscension"].ToString());
+                    this.HighestZoneLifetimeData.AddOrUpdate(uploadTime, reader["HighestZoneLifetime"].ToString());
+                    this.AscensionsThisTranscensionData.AddOrUpdate(uploadTime, reader["AscensionsThisTranscension"].ToString());
+                    this.AscensionsLifetimeData.AddOrUpdate(uploadTime, reader["AscensionsLifetime"].ToString());
                 }
 
                 if (!reader.NextResult())
@@ -120,13 +123,13 @@ namespace ClickerHeroesTrackerWebsite.Models.Dashboard
                     return;
                 }
 
-                this.AncientLevelData = new SortedDictionary<string, IDictionary<DateTime, BigInteger>>(StringComparer.OrdinalIgnoreCase);
+                this.AncientLevelData = new SortedDictionary<string, IDictionary<DateTime, string>>(StringComparer.OrdinalIgnoreCase);
                 while (reader.Read())
                 {
                     // The DateTime is a datetime2 which has no timezone so comes out as DateTimeKind.Unknown. Se need to specify the kind so it gets serialized correctly.
                     var uploadTime = DateTime.SpecifyKind(Convert.ToDateTime(reader["UploadTime"]), DateTimeKind.Utc);
                     var ancientId = Convert.ToInt32(reader["AncientId"]);
-                    var level = reader["Level"].ToString().ToBigInteger();
+                    var level = reader["Level"].ToString();
 
                     if (!gameData.Ancients.TryGetValue(ancientId, out var ancient))
                     {
@@ -136,7 +139,7 @@ namespace ClickerHeroesTrackerWebsite.Models.Dashboard
 
                     if (!this.AncientLevelData.TryGetValue(ancient.Name, out var levelData))
                     {
-                        levelData = new SortedDictionary<DateTime, BigInteger>();
+                        levelData = new SortedDictionary<DateTime, string>();
                         this.AncientLevelData.Add(ancient.Name, levelData);
                     }
 
@@ -148,13 +151,13 @@ namespace ClickerHeroesTrackerWebsite.Models.Dashboard
                     return;
                 }
 
-                this.OutsiderLevelData = new SortedDictionary<string, IDictionary<DateTime, double>>(StringComparer.OrdinalIgnoreCase);
+                this.OutsiderLevelData = new SortedDictionary<string, IDictionary<DateTime, string>>(StringComparer.OrdinalIgnoreCase);
                 while (reader.Read())
                 {
                     // The DateTime is a datetime2 which has no timezone so comes out as DateTimeKind.Unknown. Se need to specify the kind so it gets serialized correctly.
                     var uploadTime = DateTime.SpecifyKind(Convert.ToDateTime(reader["UploadTime"]), DateTimeKind.Utc);
                     var outsiderId = Convert.ToInt32(reader["OutsiderId"]);
-                    var level = Convert.ToDouble(reader["Level"]);
+                    var level = reader["Level"].ToString();
 
                     if (!gameData.Outsiders.TryGetValue(outsiderId, out var outsider))
                     {
@@ -164,7 +167,7 @@ namespace ClickerHeroesTrackerWebsite.Models.Dashboard
 
                     if (!this.OutsiderLevelData.TryGetValue(outsider.Name, out var levelData))
                     {
-                        levelData = new SortedDictionary<DateTime, double>();
+                        levelData = new SortedDictionary<DateTime, string>();
                         this.OutsiderLevelData.Add(outsider.Name, levelData);
                     }
 
@@ -175,30 +178,31 @@ namespace ClickerHeroesTrackerWebsite.Models.Dashboard
             this.IsValid = true;
         }
 
+        [JsonIgnore]
         public bool IsValid { get; }
 
-        public IDictionary<DateTime, BigInteger> TitanDamageData { get; }
+        public IDictionary<DateTime, string> TitanDamageData { get; }
 
-        public IDictionary<DateTime, BigInteger> SoulsSpentData { get; }
+        public IDictionary<DateTime, string> SoulsSpentData { get; }
 
-        public IDictionary<DateTime, BigInteger> HeroSoulsSacrificedData { get; }
+        public IDictionary<DateTime, string> HeroSoulsSacrificedData { get; }
 
-        public IDictionary<DateTime, double> TotalAncientSoulsData { get; }
+        public IDictionary<DateTime, string> TotalAncientSoulsData { get; }
 
-        public IDictionary<DateTime, double> TranscendentPowerData { get; }
+        public IDictionary<DateTime, string> TranscendentPowerData { get; }
 
-        public IDictionary<DateTime, double> RubiesData { get; }
+        public IDictionary<DateTime, string> RubiesData { get; }
 
-        public IDictionary<DateTime, double> HighestZoneThisTranscensionData { get; }
+        public IDictionary<DateTime, string> HighestZoneThisTranscensionData { get; }
 
-        public IDictionary<DateTime, double> HighestZoneLifetimeData { get; }
+        public IDictionary<DateTime, string> HighestZoneLifetimeData { get; }
 
-        public IDictionary<DateTime, double> AscensionsThisTranscensionData { get; }
+        public IDictionary<DateTime, string> AscensionsThisTranscensionData { get; }
 
-        public IDictionary<DateTime, double> AscensionsLifetimeData { get; }
+        public IDictionary<DateTime, string> AscensionsLifetimeData { get; }
 
-        public IDictionary<string, IDictionary<DateTime, BigInteger>> AncientLevelData { get; }
+        public IDictionary<string, IDictionary<DateTime, string>> AncientLevelData { get; }
 
-        public IDictionary<string, IDictionary<DateTime, double>> OutsiderLevelData { get; }
+        public IDictionary<string, IDictionary<DateTime, string>> OutsiderLevelData { get; }
     }
 }

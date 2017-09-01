@@ -1,14 +1,27 @@
-﻿@using System.Collections.Specialized
-@using System.Text
-@using ClickerHeroesTrackerWebsite.Models.Dashboard.Graph
-
-@model GraphRangeSelectorViewModel
+﻿@using System.Text
 
 <ul class="list-inline">
     <li>
-        @foreach (var range in GraphRangeSelectorViewModel.Ranges)
+        @{
+            var currentRange = Context.Request.Query["range"].ToString();
+            if (string.IsNullOrEmpty(currentRange))
+            {
+                currentRange = "1w";
+            }
+
+            var ranges = new[] {
+                "1d",
+                "3d",
+                "1w",
+                "1m",
+                "3m",
+                "1y",
+            };
+        }
+
+        @foreach (var range in ranges)
         {
-            var disabledClass = range.Equals(Model.CurrentRange, StringComparison.OrdinalIgnoreCase) ? "disabled" : null;
+            var disabledClass = range.Equals(currentRange, StringComparison.OrdinalIgnoreCase) ? "disabled" : null;
 
             var sb = new StringBuilder();
             var sawRange = false;
