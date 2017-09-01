@@ -25,9 +25,33 @@ paths.dataDir = paths.webroot + "data/";
 paths.libDir = paths.webroot + "lib/";
 
 paths.webClient = "../../WebClient/dist/*.*";
+paths.webClientFiles = [
+    paths.webroot + "app*.js",
+    paths.webroot + "app*.js.map",
+    paths.webroot + "data*.js",
+    paths.webroot + "data*.js.map",
+    paths.webroot + "polyfill*.js",
+    paths.webroot + "polyfill*.js.map",
+    paths.webroot + "vendor*.js",
+    paths.webroot + "vendor*.js.map",
+    paths.webroot + "index.html"
+];
 
-gulp.task("clean:js", function (cb)
-{
+gulp.task("clean:webClient", function (cb) {
+    var numCleaned = 0;
+    var tryCallback = function () {
+        numCleaned++;
+        if (numCleaned === paths.webClientFiles.length) {
+            cb();
+        }
+    };
+
+    for (var i = 0; i < paths.webClientFiles.length; i++) {
+        rimraf(paths.webClientFiles[i], tryCallback);
+    }
+});
+
+gulp.task("clean:js", function (cb) {
     rimraf(paths.jsFiles, cb);
 });
 
@@ -41,7 +65,7 @@ gulp.task("clean:html", function (cb)
     rimraf(paths.htmlFiles, cb);
 });
 
-gulp.task("clean", ["clean:js", "clean:css", "clean:html"]);
+gulp.task("clean", ["clean:js", "clean:css", "clean:html", "clean:webClient"]);
 
 gulp.task("tslint", function ()
 {
@@ -86,7 +110,7 @@ gulp.task("css", function ()
         .pipe(gulp.dest(paths.cssDir));
 });
 
-gulp.task("copy", function () {
+gulp.task("copy", ["clean:webClient"], function () {
     return gulp.src(paths.webClient)
         .pipe(gulp.dest(paths.webroot));
 });

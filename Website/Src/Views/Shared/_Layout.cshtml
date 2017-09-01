@@ -124,6 +124,7 @@
 
     <script type="text/javascript">
         var userSettings = @Json.Serialize(userSettingsObject);
+        var userName = "@UserManager.GetUserName(User)";
     </script>
 
     @await RenderSectionAsync("scripts", required: false)
