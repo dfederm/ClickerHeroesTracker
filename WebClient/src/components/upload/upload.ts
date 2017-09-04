@@ -184,62 +184,63 @@ export class UploadComponent implements OnInit {
         return name.replace(/[^\w]/gi, "");
     }
 
+    // tslint:disable-next-line:cyclomatic-complexity
     private handleData(upload: IUpload): void {
         this.errorMessage = null;
         this.uploadId = upload.id;
 
-        if (upload.user) {
-            this.userName = upload.user.name;
-        }
+        this.userName = upload.user
+            ? upload.user.name
+            : null;
 
         this.uploadTime = upload.timeSubmitted;
         this.playStyle = upload.playStyle;
         this.uploadContent = upload.uploadContent;
 
+        let stats: { [key: string]: decimal.Decimal } = {};
         if (upload.stats) {
-            let stats: { [key: string]: decimal.Decimal } = {};
             for (let statType in upload.stats) {
                 stats[statType] = new Decimal(upload.stats[statType]);
             }
-
-            for (let i = 0; i < this.ancients.length; i++) {
-                let ancient = this.ancients[i];
-                let ancientName = UploadComponent.normalizeName(ancient.name);
-                ancient.ancientLevel = stats["ancient" + ancientName] || new Decimal(0);
-                ancient.itemLevel = stats["item" + ancientName] || new Decimal(0);
-                ancient.effectiveLevel = ancient.ancientLevel.plus(ancient.itemLevel).floor();
-            }
-
-            for (let i = 0; i < this.outsiders.length; i++) {
-                let outsider = this.outsiders[i];
-                let outsiderName = UploadComponent.normalizeName(outsider.name);
-                outsider.currentLevel = stats["outsider" + outsiderName] || new Decimal(0);
-            }
-
-            this.pendingSouls = stats.pendingSouls;
-            this.heroSouls = stats.heroSouls;
-            this.heroSoulsSpent = stats.heroSoulsSpent;
-            this.heroSoulsSacrificed = stats.heroSoulsSacrificed;
-            this.totalAncientSouls = stats.totalAncientSouls;
-            this.transcendentPower = stats.transcendentPower;
-            this.maxTranscendentPrimalReward = stats.maxTranscendentPrimalReward;
-            this.bossLevelToTranscendentPrimalCap = stats.bossLevelToTranscendentPrimalCap;
-            this.titanDamage = stats.titanDamage;
-            this.highestZoneThisTranscension = stats.highestZoneThisTranscension;
-            this.highestZoneLifetime = stats.highestZoneLifetime;
-            this.ascensionsThisTranscension = stats.ascensionsThisTranscension;
-            this.ascensionsLifetime = stats.ascensionsLifetime;
-            this.rubies = stats.rubies;
-
-            // Ancient cost discount multiplier
-            const chorgorloth = this.outsidersByName["Chor'gorloth"];
-            const chorgorlothLevel = chorgorloth ? chorgorloth.currentLevel : 0;
-            this.ancientCostMultiplier = Decimal.pow(0.95, chorgorlothLevel);
-
-            this.hydrateAncientSuggestions();
-
-            this.calculateOutsiderSuggestions();
         }
+
+        for (let i = 0; i < this.ancients.length; i++) {
+            let ancient = this.ancients[i];
+            let ancientName = UploadComponent.normalizeName(ancient.name);
+            ancient.ancientLevel = stats["ancient" + ancientName] || new Decimal(0);
+            ancient.itemLevel = stats["item" + ancientName] || new Decimal(0);
+            ancient.effectiveLevel = ancient.ancientLevel.plus(ancient.itemLevel).floor();
+        }
+
+        for (let i = 0; i < this.outsiders.length; i++) {
+            let outsider = this.outsiders[i];
+            let outsiderName = UploadComponent.normalizeName(outsider.name);
+            outsider.currentLevel = stats["outsider" + outsiderName] || new Decimal(0);
+        }
+
+        this.pendingSouls = stats.pendingSouls || new Decimal(0);
+        this.heroSouls = stats.heroSouls || new Decimal(0);
+        this.heroSoulsSpent = stats.heroSoulsSpent || new Decimal(0);
+        this.heroSoulsSacrificed = stats.heroSoulsSacrificed || new Decimal(0);
+        this.totalAncientSouls = stats.totalAncientSouls || new Decimal(0);
+        this.transcendentPower = stats.transcendentPower || new Decimal(0);
+        this.maxTranscendentPrimalReward = stats.maxTranscendentPrimalReward || new Decimal(0);
+        this.bossLevelToTranscendentPrimalCap = stats.bossLevelToTranscendentPrimalCap || new Decimal(0);
+        this.titanDamage = stats.titanDamage || new Decimal(0);
+        this.highestZoneThisTranscension = stats.highestZoneThisTranscension || new Decimal(0);
+        this.highestZoneLifetime = stats.highestZoneLifetime || new Decimal(0);
+        this.ascensionsThisTranscension = stats.ascensionsThisTranscension || new Decimal(0);
+        this.ascensionsLifetime = stats.ascensionsLifetime || new Decimal(0);
+        this.rubies = stats.rubies || new Decimal(0);
+
+        // Ancient cost discount multiplier
+        const chorgorloth = this.outsidersByName["Chor'gorloth"];
+        const chorgorlothLevel = chorgorloth ? chorgorloth.currentLevel : 0;
+        this.ancientCostMultiplier = Decimal.pow(0.95, chorgorlothLevel);
+
+        this.hydrateAncientSuggestions();
+
+        this.calculateOutsiderSuggestions();
     }
 
     private handleError(errorMessage: string): void {
@@ -398,9 +399,11 @@ export class UploadComponent implements OnInit {
         suggestedLevels.Kumawakamaru = lnPrimary.times(2.844).minus(lnAlpha.times(1.422)).minus(new Decimal(1).div(4).plus(currentKumaLevel.times(-0.01).exp()).ln().times(1.422)).minus(7.014);
         suggestedLevels.Mammon = suggestedLevels.Mimzee = currentPrimaryAncientLevel.times(0.926);
         suggestedLevels.Morgulis = currentPrimaryAncientLevel.pow(2);
-        suggestedLevels.Solomon = this.transcendentPower.isZero()
-            ? this.getPreTranscendentSuggestedSolomonLevel(currentPrimaryAncientLevel, this.playStyle)
-            : currentPrimaryAncientLevel.pow(0.8).dividedBy(alpha.pow(0.4));
+        suggestedLevels.Solomon = currentPrimaryAncientLevel.isZero()
+            ? new Decimal(0)
+            : this.transcendentPower.isZero()
+                ? this.getPreTranscendentSuggestedSolomonLevel(currentPrimaryAncientLevel, this.playStyle)
+                : currentPrimaryAncientLevel.pow(0.8).dividedBy(alpha.pow(0.4));
 
         // Math per play style
         switch (this.playStyle) {
@@ -431,9 +434,6 @@ export class UploadComponent implements OnInit {
 
     private calculateOutsiderSuggestions(): void {
         let ancientSouls = this.totalAncientSouls;
-        if (ancientSouls.isZero()) {
-            return;
-        }
 
         this.showLowAncientSoulWarning = false;
         this.showMissingSimulationWarning = false;
@@ -444,9 +444,11 @@ export class UploadComponent implements OnInit {
         let suggestedBorb = new Decimal(0);
         let suggestedPony = new Decimal(0);
 
-        // Less ancient souls than the simulation data supported. We can try to guess though.
-        // Our guess just alternates leveling Xyl and Pony until Xylk hits 7 and then dump into Pony unti lit matches the 30 AS simulation data.
-        if (ancientSouls.lessThan(30)) {
+        if (ancientSouls.isZero()) {
+            // If the user has no ancient souls, all the suggestions should remain 0.
+        } else if (ancientSouls.lessThan(30)) {
+            // Less ancient souls than the simulation data supported. We can try to guess though.
+            // Our guess just alternates leveling Xyl and Pony until Xylk hits 7 and then dump into Pony unti lit matches the 30 AS simulation data.
             this.showLowAncientSoulWarning = true;
             appInsights.trackEvent("LowAncientSouls", { ancientSouls: ancientSouls.toString() });
             if (ancientSouls.lessThan(14)) {
