@@ -15,3 +15,4 @@ import "ng2-adsense";
 import "decimal.js";
 import "toFormat";
 import "@markpieszak/ng-application-insights";
+import "ng2-charts";

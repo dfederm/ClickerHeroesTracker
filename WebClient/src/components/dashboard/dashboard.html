@@ -10,6 +10,29 @@
         </div>
         <div class="col-md-6">
             <h4>Progress Summary:</h4>
+            <h5>
+                <a *ngIf="userName"
+                   routerLink="/users/{{userName}}/progress">
+                    See all
+                </a>
+            </h5>
+            <p *ngIf="isProgressError"
+               class="text-danger">
+                Oops! Something went wrong while fetching progress
+            </p>
+            <p *ngIf="!progress && !isProgressError"
+               class="text-warning">
+                No uploads in the last week!
+            </p>
+            <!-- Height is intedned to be 400px, but for some reason the chart is 1.7x what we specify, so use 235 -->
+            <canvas baseChart
+                    *ngIf="progress"
+                    height="235"
+                    [chartType]="'line'"
+                    [datasets]="progress.datasets"
+                    [colors]="progress.colors"
+                    [options]="progress.options">
+            </canvas>
         </div>
         <!-- @if (Model.Follows.Count > 0) -->
         <div class="col-md-6">
