@@ -88,7 +88,7 @@
                             {{ ancient.name }}:
                             <a href="/Manage"
                                class="text-muted"
-                               *ngIf="ancient.name == 'Solomon' && transcendentPower.isZero()"
+                               *ngIf="ancient.name == 'Solomon' && (!transcendentPower || transcendentPower.isZero())"
                                placement="right"
                                ngbTooltip="{{isLoggedIn ? 'This is using your settings for the Solomon formula preference. You can change this on your settings page.' : 'By default we use the &quot;Ln&quot; Solomon formula. You may change this by logging in and changing your settings.'}}">
                                 (?)
