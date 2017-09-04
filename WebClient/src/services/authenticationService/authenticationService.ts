@@ -102,7 +102,7 @@ export class AuthenticationService {
                     return Promise.reject("Invalid token response");
                 }
 
-                newTokens.expiration_date = new Date().getTime() + newTokens.expires_in * 1000;
+                newTokens.expiration_date = Date.now() + newTokens.expires_in * 1000;
 
                 this.storeToken(newTokens);
                 this.tokens.next(newTokens);

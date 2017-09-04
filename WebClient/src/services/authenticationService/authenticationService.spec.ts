@@ -24,6 +24,9 @@ describe("AuthenticationService", () => {
         spyOn(localStorage, "setItem");
         spyOn(localStorage, "removeItem");
 
+        let now = Date.now();
+        spyOn(Date, "now").and.callFake(() => now);
+
         backend = injector.get(ConnectionBackend) as MockBackend;
         backend.connections.subscribe((connection: MockConnection) => lastConnection = connection);
     });
@@ -68,7 +71,7 @@ describe("AuthenticationService", () => {
 
             let newTokens = createResponseAuthModel();
             lastConnection.mockRespond(new Response(new ResponseOptions({ body: JSON.stringify(newTokens) })));
-            newTokens.expiration_date = new Date().getTime() + newTokens.expires_in * 1000;
+            newTokens.expiration_date = Date.now() + newTokens.expires_in * 1000;
 
             // Still logged in after the token refresh
             tick();
@@ -102,7 +105,7 @@ describe("AuthenticationService", () => {
 
             let newTokens = createResponseAuthModel();
             lastConnection.mockRespond(new Response(new ResponseOptions({ body: JSON.stringify(newTokens) })));
-            newTokens.expiration_date = new Date().getTime() + newTokens.expires_in * 1000;
+            newTokens.expiration_date = Date.now() + newTokens.expires_in * 1000;
 
             // Logged in after the token refresh
             tick();
@@ -194,7 +197,7 @@ describe("AuthenticationService", () => {
             let tokens = createResponseAuthModel(1);
             lastConnection.mockRespond(new Response(new ResponseOptions({ body: JSON.stringify(tokens) })));
             lastConnection = null;
-            tokens.expiration_date = new Date().getTime() + tokens.expires_in * 1000;
+            tokens.expiration_date = Date.now() + tokens.expires_in * 1000;
 
             // Don't tick enough to trigger the refresh interval
             tick(1);
@@ -216,7 +219,7 @@ describe("AuthenticationService", () => {
 
             let refreshedTokens = createResponseAuthModel(2);
             lastConnection.mockRespond(new Response(new ResponseOptions({ body: JSON.stringify(refreshedTokens) })));
-            refreshedTokens.expiration_date = new Date().getTime() + refreshedTokens.expires_in * 1000;
+            refreshedTokens.expiration_date = Date.now() + refreshedTokens.expires_in * 1000;
             tick();
 
             expect(localStorage.setItem).toHaveBeenCalledWith("auth-tokens", JSON.stringify(refreshedTokens));
@@ -269,7 +272,7 @@ describe("AuthenticationService", () => {
             let refreshedTokens = createResponseAuthModel(2);
             lastConnection.mockRespond(new Response(new ResponseOptions({ body: JSON.stringify(refreshedTokens) })));
             lastConnection = null;
-            refreshedTokens.expiration_date = new Date().getTime() + refreshedTokens.expires_in * 1000;
+            refreshedTokens.expiration_date = Date.now() + refreshedTokens.expires_in * 1000;
             tick();
 
             expect(isLoggedInLog).toEqual([true, true]);
@@ -298,7 +301,7 @@ describe("AuthenticationService", () => {
             refresh_token: "someRefreshToken",
             id_token: "someIdToken",
             expires_in: 3600,
-            expiration_date: new Date().getTime() + 3600,
+            expiration_date: Date.now() + 3600,
         };
     }
 

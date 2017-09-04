@@ -8,6 +8,7 @@ import { ClipboardModule } from "ngx-clipboard/dist";
 import { TimeAgoPipe } from "time-ago-pipe";
 import { AdsenseModule } from "ng2-adsense";
 import { ApplicationInsightsModule, AppInsightsService } from "@markpieszak/ng-application-insights";
+import { ChartsModule } from "ng2-charts";
 
 import { AppComponent } from "./components/app/app";
 import { HomeComponent } from "./components/home/home";
@@ -22,6 +23,7 @@ import { UploadsTableComponent } from "./components/uploadsTable/uploadsTable";
 import { UploadsComponent } from "./components/uploads/uploads";
 import { UploadComponent } from "./components/upload/upload";
 import { ClansComponent } from "./components/clans/clans";
+import { UserProgressComponent } from "./components/userProgress/userProgress";
 
 import { OpenDialogDirective } from "./directives/openDialog/openDialog";
 
@@ -31,6 +33,7 @@ import { NewsService } from "./services/newsService/newsService";
 import { AuthenticationService } from "./services/authenticationService/authenticationService";
 import { UploadService } from "./services/uploadService/uploadService";
 import { ClanService } from "./services/clanService/clanService";
+import { UserService } from "./services/userService/userService";
 
 const routes: Routes =
   [
@@ -40,6 +43,7 @@ const routes: Routes =
     { path: "uploads", component: UploadsComponent },
     { path: "upload/:id", component: UploadComponent },
     { path: "clans", component: ClansComponent },
+    { path: "users/:userName/progress", component: UserProgressComponent },
   ];
 
 @NgModule({
@@ -54,6 +58,7 @@ const routes: Routes =
     AdsenseModule.forRoot(),
     // Make sure this matches the API settings as well. Is there a better way to do this?
     ApplicationInsightsModule.forRoot({ instrumentationKey: "99fba640-790d-484f-83c4-3c97450d8698" }),
+    ChartsModule,
   ],
   declarations:
   [
@@ -73,6 +78,7 @@ const routes: Routes =
     ExponentialPipe,
     ClansComponent,
     TimeAgoPipe,
+    UserProgressComponent,
   ],
   entryComponents:
   [
@@ -86,6 +92,7 @@ const routes: Routes =
     UploadService,
     ClanService,
     AppInsightsService,
+    UserService,
   ],
   bootstrap: [AppComponent],
 })
