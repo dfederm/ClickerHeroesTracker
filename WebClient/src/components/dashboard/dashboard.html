@@ -34,9 +34,26 @@
                     [options]="progress.options">
             </canvas>
         </div>
-        <!-- @if (Model.Follows.Count > 0) -->
         <div class="col-md-6">
             <h4>Following:</h4>
+            <p *ngIf="isFollowsError"
+               class="text-danger">
+                Oops! Something went wrong while fetching followed users
+            </p>
+            <p *ngIf="(!follows || !follows.length) && !isFollowsError">
+                You are currently not following any users. This feature is coming soon.
+            </p>
+            <table *ngIf="follows && follows.length"
+                   class="table">
+                <tbody>
+                    <tr *ngFor="let follow of follows">
+                        <td>{{ follow }}</td>
+                        <td class="text-right">
+                            <a routerLink="/users/{{userName}}/compare/{{follow}}">Compare</a>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
         </div>
     </div>
 </div>

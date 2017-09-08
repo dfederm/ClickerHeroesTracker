@@ -5,7 +5,7 @@ import Decimal from "decimal.js";
 
 import { DashboardComponent } from "./dashboard";
 import { UploadService, IUploadSummaryListResponse, IUpload } from "../../services/uploadService/uploadService";
-import { UserService, IProgressData } from "../../services/userService/userService";
+import { UserService, IProgressData, IFollowsData } from "../../services/userService/userService";
 import { ChartDataSets, ChartOptions, ChartPoint } from "chart.js";
 
 describe("DashboardComponent", () => {
@@ -52,6 +52,14 @@ describe("DashboardComponent", () => {
         outsiderLevelData: undefined,
     };
 
+    let followsData: IFollowsData = {
+        follows: [
+            "followedUser1",
+            "followedUser2",
+            "followedUser3",
+        ],
+    };
+
     beforeEach(done => {
         let uploadService = {
             getUploads(): Promise<IUploadSummaryListResponse> {
@@ -65,6 +73,9 @@ describe("DashboardComponent", () => {
         let userService = {
             getProgress(): Promise<IProgressData> {
                 return Promise.resolve(progress);
+            },
+            getFollows(): Promise<IFollowsData> {
+                return Promise.resolve(followsData);
             },
         };
 
@@ -90,7 +101,12 @@ describe("DashboardComponent", () => {
         it("should display without pagination", () => {
             fixture.detectChanges();
 
-            let uploadsTable = fixture.debugElement.query(By.css("uploadsTable"));
+            let containers = fixture.debugElement.queryAll(By.css(".col-md-6"));
+            expect(containers.length).toEqual(3);
+
+            let uploadsContainer = containers[0];
+
+            let uploadsTable = uploadsContainer.query(By.css("uploadsTable"));
             expect(uploadsTable).not.toBeNull();
             expect(uploadsTable.properties.count).toEqual(10);
             expect(uploadsTable.properties.paginate).toBeFalsy();
@@ -104,13 +120,18 @@ describe("DashboardComponent", () => {
                 .then(() => {
                     fixture.detectChanges();
 
-                    let error = fixture.debugElement.query(By.css(".text-danger"));
+                    let containers = fixture.debugElement.queryAll(By.css(".col-md-6"));
+                    expect(containers.length).toEqual(3);
+
+                    let progressContainer = containers[1];
+
+                    let error = progressContainer.query(By.css(".text-danger"));
                     expect(error).toBeNull();
 
-                    let warning = fixture.debugElement.query(By.css(".text-warning"));
+                    let warning = progressContainer.query(By.css(".text-warning"));
                     expect(warning).toBeNull();
 
-                    let chart = fixture.debugElement.query(By.css("canvas"));
+                    let chart = progressContainer.query(By.css("canvas"));
                     expect(chart).not.toBeNull();
                     expect(chart.attributes.baseChart).toBeDefined();
                     expect(chart.attributes.height).toEqual("235");
@@ -157,13 +178,18 @@ describe("DashboardComponent", () => {
                 .then(() => {
                     fixture.detectChanges();
 
-                    let error = fixture.debugElement.query(By.css(".text-danger"));
+                    let containers = fixture.debugElement.queryAll(By.css(".col-md-6"));
+                    expect(containers.length).toEqual(3);
+
+                    let progressContainer = containers[1];
+
+                    let error = progressContainer.query(By.css(".text-danger"));
                     expect(error).toBeNull();
 
-                    let warning = fixture.debugElement.query(By.css(".text-warning"));
+                    let warning = progressContainer.query(By.css(".text-warning"));
                     expect(warning).toBeNull();
 
-                    let chart = fixture.debugElement.query(By.css("canvas"));
+                    let chart = progressContainer.query(By.css("canvas"));
                     expect(chart).not.toBeNull();
                     expect(chart.attributes.baseChart).toBeDefined();
                     expect(chart.attributes.height).toEqual("235");
@@ -206,13 +232,18 @@ describe("DashboardComponent", () => {
                 .then(() => {
                     fixture.detectChanges();
 
-                    let chart = fixture.debugElement.query(By.css("canvas"));
+                    let containers = fixture.debugElement.queryAll(By.css(".col-md-6"));
+                    expect(containers.length).toEqual(3);
+
+                    let progressContainer = containers[1];
+
+                    let chart = progressContainer.query(By.css("canvas"));
                     expect(chart).toBeNull();
 
-                    let error = fixture.debugElement.query(By.css(".text-danger"));
+                    let error = progressContainer.query(By.css(".text-danger"));
                     expect(error).not.toBeNull();
 
-                    let warning = fixture.debugElement.query(By.css(".text-warning"));
+                    let warning = progressContainer.query(By.css(".text-warning"));
                     expect(warning).toBeNull();
                 })
                 .then(done)
@@ -228,13 +259,18 @@ describe("DashboardComponent", () => {
                 .then(() => {
                     fixture.detectChanges();
 
-                    let chart = fixture.debugElement.query(By.css("canvas"));
+                    let containers = fixture.debugElement.queryAll(By.css(".col-md-6"));
+                    expect(containers.length).toEqual(3);
+
+                    let progressContainer = containers[1];
+
+                    let chart = progressContainer.query(By.css("canvas"));
                     expect(chart).toBeNull();
 
-                    let error = fixture.debugElement.query(By.css(".text-danger"));
+                    let error = progressContainer.query(By.css(".text-danger"));
                     expect(error).not.toBeNull();
 
-                    let warning = fixture.debugElement.query(By.css(".text-warning"));
+                    let warning = progressContainer.query(By.css(".text-warning"));
                     expect(warning).toBeNull();
                 })
                 .then(done)
@@ -250,13 +286,18 @@ describe("DashboardComponent", () => {
                 .then(() => {
                     fixture.detectChanges();
 
-                    let chart = fixture.debugElement.query(By.css("canvas"));
+                    let containers = fixture.debugElement.queryAll(By.css(".col-md-6"));
+                    expect(containers.length).toEqual(3);
+
+                    let progressContainer = containers[1];
+
+                    let chart = progressContainer.query(By.css("canvas"));
                     expect(chart).toBeNull();
 
-                    let error = fixture.debugElement.query(By.css(".text-danger"));
+                    let error = progressContainer.query(By.css(".text-danger"));
                     expect(error).not.toBeNull();
 
-                    let warning = fixture.debugElement.query(By.css(".text-warning"));
+                    let warning = progressContainer.query(By.css(".text-warning"));
                     expect(warning).toBeNull();
                 })
                 .then(done)
@@ -272,14 +313,117 @@ describe("DashboardComponent", () => {
                 .then(() => {
                     fixture.detectChanges();
 
-                    let chart = fixture.debugElement.query(By.css("canvas"));
+                    let containers = fixture.debugElement.queryAll(By.css(".col-md-6"));
+                    expect(containers.length).toEqual(3);
+
+                    let progressContainer = containers[1];
+
+                    let chart = progressContainer.query(By.css("canvas"));
                     expect(chart).toBeNull();
 
-                    let error = fixture.debugElement.query(By.css(".text-danger"));
+                    let error = progressContainer.query(By.css(".text-danger"));
                     expect(error).toBeNull();
 
-                    let warning = fixture.debugElement.query(By.css(".text-warning"));
+                    let warning = progressContainer.query(By.css(".text-warning"));
                     expect(warning).not.toBeNull();
+                })
+                .then(done)
+                .catch(done.fail);
+        });
+    });
+
+    describe("Follows", () => {
+        it("should display the table", done => {
+            fixture.detectChanges();
+            fixture.whenStable()
+                .then(() => {
+                    fixture.detectChanges();
+
+                    let containers = fixture.debugElement.queryAll(By.css(".col-md-6"));
+                    expect(containers.length).toEqual(3);
+
+                    let followsContainer = containers[2];
+
+                    let error = followsContainer.query(By.css(".text-danger"));
+                    expect(error).toBeNull();
+
+                    let noData = followsContainer.query(By.css("p:not(.text-danger)"));
+                    expect(noData).toBeNull();
+
+                    let table = followsContainer.query(By.css("table"));
+                    expect(table).not.toBeNull();
+
+                    let rows = table.query(By.css("tbody")).children;
+                    expect(rows.length).toEqual(followsData.follows.length);
+
+                    for (let i = 0; i < rows.length; i++) {
+                        let expectedFollow = followsData.follows[i];
+
+                        let cells = rows[i].children;
+                        expect(cells.length).toEqual(2);
+
+                        let followCell = cells[0];
+                        expect(followCell.nativeElement.textContent.trim()).toEqual(expectedFollow);
+
+                        let compareCell = cells[1];
+                        let link = compareCell.query(By.css("a"));
+                        expect(link.properties.routerLink).toEqual(`/users/${upload.user.name}/compare/${expectedFollow}`);
+                        expect(link.nativeElement.textContent.trim()).toEqual("Compare");
+                    }
+                })
+                .then(done)
+                .catch(done.fail);
+        });
+
+        it("should show an error when userService.getFollows fails", done => {
+            let userService = TestBed.get(UserService);
+            spyOn(userService, "getFollows").and.returnValue(Promise.reject("someReason"));
+
+            fixture.detectChanges();
+            fixture.whenStable()
+                .then(() => {
+                    fixture.detectChanges();
+
+                    let containers = fixture.debugElement.queryAll(By.css(".col-md-6"));
+                    expect(containers.length).toEqual(3);
+
+                    let followsContainer = containers[2];
+
+                    let table = followsContainer.query(By.css("table"));
+                    expect(table).toBeNull();
+
+                    let noData = followsContainer.query(By.css("p:not(.text-danger)"));
+                    expect(noData).toBeNull();
+
+                    let error = followsContainer.query(By.css(".text-danger"));
+                    expect(error).not.toBeNull();
+                })
+                .then(done)
+                .catch(done.fail);
+        });
+
+        it("should show a message when there is no data", done => {
+            let userService = TestBed.get(UserService);
+            spyOn(userService, "getFollows").and.returnValue(Promise.resolve({}));
+
+            fixture.detectChanges();
+            fixture.whenStable()
+                .then(() => {
+                    fixture.detectChanges();
+
+                    let containers = fixture.debugElement.queryAll(By.css(".col-md-6"));
+                    expect(containers.length).toEqual(3);
+
+                    let followsContainer = containers[2];
+
+                    let table = followsContainer.query(By.css("table"));
+                    expect(table).toBeNull();
+
+                    let error = followsContainer.query(By.css(".text-danger"));
+                    expect(error).toBeNull();
+
+                    let noData = followsContainer.query(By.css("p:not(.text-danger)"));
+                    expect(noData).not.toBeNull();
                 })
                 .then(done)
                 .catch(done.fail);

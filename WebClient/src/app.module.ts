@@ -24,6 +24,7 @@ import { UploadsComponent } from "./components/uploads/uploads";
 import { UploadComponent } from "./components/upload/upload";
 import { ClansComponent } from "./components/clans/clans";
 import { UserProgressComponent } from "./components/userProgress/userProgress";
+import { UserCompareComponent } from "./components/userCompare/userCompare";
 
 import { OpenDialogDirective } from "./directives/openDialog/openDialog";
 
@@ -44,6 +45,7 @@ const routes: Routes =
     { path: "upload/:id", component: UploadComponent },
     { path: "clans", component: ClansComponent },
     { path: "users/:userName/progress", component: UserProgressComponent },
+    { path: "users/:userName/compare/:compareUserName", component: UserCompareComponent },
   ];
 
 @NgModule({
@@ -79,6 +81,7 @@ const routes: Routes =
     ClansComponent,
     TimeAgoPipe,
     UserProgressComponent,
+    UserCompareComponent,
   ],
   entryComponents:
   [

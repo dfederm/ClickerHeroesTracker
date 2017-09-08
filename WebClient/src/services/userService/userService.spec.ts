@@ -5,7 +5,7 @@ import { Response, ResponseOptions, RequestMethod } from "@angular/http";
 import { MockBackend, MockConnection } from "@angular/http/testing";
 import { BehaviorSubject } from "rxjs/BehaviorSubject";
 
-import { UserService, IProgressData } from "./userService";
+import { UserService, IProgressData, IFollowsData } from "./userService";
 import { AuthenticationService } from "../authenticationService/authenticationService";
 
 // tslint:disable-next-line:no-namespace
@@ -24,10 +24,6 @@ describe("UserService", () => {
     let isLoggedIn: BehaviorSubject<boolean>;
 
     let userName = "someUserName";
-    let startString = "2017-01-01T00:00:00.000Z";
-    let startDate = new Date(startString);
-    let endString = "2017-01-02T00:00:00.000Z";
-    let endDate = new Date(endString);
 
     beforeEach(() => {
         isLoggedIn = new BehaviorSubject(false);
@@ -58,6 +54,11 @@ describe("UserService", () => {
     });
 
     describe("getProgress", () => {
+        let startString = "2017-01-01T00:00:00.000Z";
+        let startDate = new Date(startString);
+        let endString = "2017-01-02T00:00:00.000Z";
+        let endDate = new Date(endString);
+
         it("should make the correct api call when the use is not logged in", fakeAsync(() => {
             isLoggedIn.next(false);
             tick();
@@ -84,7 +85,7 @@ describe("UserService", () => {
             expect(authenticationService.getAuthHeaders).toHaveBeenCalled();
         }));
 
-        it("should return an upload", fakeAsync(() => {
+        it("should return user progress", fakeAsync(() => {
             let progress: IProgressData;
             userService.getProgress(userName, startDate, endDate)
                 .then((r: IProgressData) => progress = r);
@@ -141,6 +142,84 @@ describe("UserService", () => {
             tick();
 
             expect(progress).toBeUndefined();
+            expect(error).toEqual("someError");
+            expect(appInsights.trackEvent).toHaveBeenCalled();
+        }));
+    });
+
+    describe("getFollows", () => {
+        it("should make the correct api call when the use is not logged in", fakeAsync(() => {
+            isLoggedIn.next(false);
+            tick();
+
+            userService.getFollows(userName);
+            tick();
+
+            expect(lastConnection).toBeDefined("no http service connection made");
+            expect(lastConnection.request.method).toEqual(RequestMethod.Get, "method invalid");
+            expect(lastConnection.request.url).toEqual(`/api/users/${userName}/follows`, "url invalid");
+            expect(authenticationService.getAuthHeaders).not.toHaveBeenCalled();
+        }));
+
+        it("should make the correct api call when the use is logged in", fakeAsync(() => {
+            isLoggedIn.next(true);
+            tick();
+
+            userService.getFollows(userName);
+            tick();
+
+            expect(lastConnection).toBeDefined("no http service connection made");
+            expect(lastConnection.request.method).toEqual(RequestMethod.Get, "method invalid");
+            expect(lastConnection.request.url).toEqual(`/api/users/${userName}/follows`, "url invalid");
+            expect(authenticationService.getAuthHeaders).toHaveBeenCalled();
+        }));
+
+        it("should return follow data", fakeAsync(() => {
+            let follows: IFollowsData;
+            userService.getFollows(userName)
+                .then((r: IFollowsData) => follows = r);
+            tick();
+
+            let expectedResponse: IFollowsData = {
+                follows: [],
+            };
+            lastConnection.mockRespond(new Response(new ResponseOptions({ body: JSON.stringify(expectedResponse) })));
+            tick();
+
+            expect(follows).toEqual(expectedResponse, "should return the expected response");
+        }));
+
+        it("should handle errors from authenticationService.getAuthHeaders", fakeAsync(() => {
+            (authenticationService.getAuthHeaders as jasmine.Spy).and.callFake(() => Promise.reject("someError"));
+
+            isLoggedIn.next(true);
+            tick();
+
+            let follows: IFollowsData;
+            let error: string;
+            userService.getFollows(userName)
+                .then((r: IFollowsData) => follows = r)
+                .catch((e: string) => error = e);
+            tick();
+
+            expect(follows).toBeUndefined();
+            expect(error).toEqual("someError");
+            expect(authenticationService.getAuthHeaders).toHaveBeenCalled();
+            expect(appInsights.trackEvent).toHaveBeenCalled();
+        }));
+
+        it("should handle http errors", fakeAsync(() => {
+            let follows: IFollowsData;
+            let error: string;
+            userService.getFollows(userName)
+                .then((r: IFollowsData) => follows = r)
+                .catch((e: string) => error = e);
+            tick();
+
+            lastConnection.mockError(new Error("someError"));
+            tick();
+
+            expect(follows).toBeUndefined();
             expect(error).toEqual("someError");
             expect(appInsights.trackEvent).toHaveBeenCalled();
         }));

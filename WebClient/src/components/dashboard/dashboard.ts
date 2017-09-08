@@ -1,7 +1,7 @@
 import { Component, OnInit } from "@angular/core";
 
 import { UploadService } from "../../services/uploadService/uploadService";
-import { UserService, IProgressData } from "../../services/userService/userService";
+import { UserService, IProgressData, IFollowsData } from "../../services/userService/userService";
 
 import Decimal from "decimal.js";
 import { ChartDataSets, ChartOptions, ChartTooltipItem } from "chart.js";
@@ -24,9 +24,13 @@ interface IProgressViewModel {
   templateUrl: "./dashboard.html",
 })
 export class DashboardComponent implements OnInit {
-  public isProgressError: boolean;
   public userName: string;
+
+  public isProgressError: boolean;
   public progress: IProgressViewModel;
+
+  public isFollowsError: boolean;
+  public follows: string[];
 
   // TODO get the user's real settings
   private userSettings =
@@ -72,16 +76,23 @@ export class DashboardComponent implements OnInit {
           && upload.user
           && upload.user.name) {
           this.userName = upload.user.name;
-          return this.userService.getProgress(this.userName, start, end);
-        }
 
-        return null;
+          this.userService.getProgress(this.userName, start, end)
+            .then(progress => this.handleProgressData(progress))
+            .catch(() => this.isProgressError = true);
+
+          this.userService.getFollows(this.userName)
+            .then(follows => this.handleFollowsData(follows))
+            .catch(() => this.isFollowsError = true);
+        }
       })
-      .then(progress => this.handleData(progress))
-      .catch(() => this.isProgressError = true);
+      .catch(() => {
+        this.isProgressError = true;
+        this.isFollowsError = true;
+      });
   }
 
-  private handleData(progress: IProgressData): void {
+  private handleProgressData(progress: IProgressData): void {
     if (progress && Object.keys(progress.soulsSpentData).length === 0) {
       // No data
       return;
@@ -186,5 +197,14 @@ export class DashboardComponent implements OnInit {
         },
       },
     };
+  }
+
+  private handleFollowsData(data: IFollowsData): void {
+    if (!data || !data.follows || !data.follows.length) {
+      // No data
+      return;
+    }
+
+    this.follows = data.follows;
   }
 }
