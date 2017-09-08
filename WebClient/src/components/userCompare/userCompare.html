@@ -1,0 +1,33 @@
+<div class="container">
+    <h2>{{ userName }} vs {{ compareUserName }}</h2>
+    <p *ngIf="isError"
+       class="text-danger">
+        Oops! Something went wrong while fetching progress
+    </p>
+    <p *ngIf="charts && !charts.length"
+       class="text-warning">
+        This user has no uploaded data for that time period
+    </p>
+    <div class="btn-group">
+        <button *ngFor="let dateRange of dateRanges"
+                class="btn btn-primary"
+                [ngClass]="{'disabled': currentDateRange === dateRange}"
+                (click)="currentDateRange = dateRange">
+            {{ dateRange }}
+        </button>
+    </div>
+
+    <div class="row">
+        <div *ngFor="let chart of charts"
+             class="col-md-{{chart.isProminent ? '6' : '4'}}">
+            <!-- Height is intedned to be 400px, but for some reason the chart is 1.7x what we specify, so use 235 -->
+            <canvas baseChart
+                    height="235"
+                    [chartType]="'line'"
+                    [datasets]="chart.datasets"
+                    [colors]="chart.colors"
+                    [options]="chart.options">
+            </canvas>
+        </div>
+    </div>
+</div>

@@ -1,16 +1,7 @@
-﻿@inject UserManager<ApplicationUser> UserManager
-
-@model IList<string>
+﻿@inject IContentManager ContentManager
+@{
+    ContentManager.RegisterScript("Follows");
+}
 
 <h4>Following:</h4>
-<table class="table">
-    @foreach (var userName in Model)
-    {
-        <tr>
-            <td>@userName</td>
-            <td class="text-right">
-                <a href="/dashboard/compare?userName1=@UserManager.GetUserName(User)&userName2=@userName">Compare</a>
-            </td>
-        </tr>
-    }
-</table>
+<div id="follows"></div>

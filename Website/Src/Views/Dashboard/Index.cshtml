@@ -1,8 +1,4 @@
-﻿@using ClickerHeroesTrackerWebsite.Models.Dashboard
-
-@inject IContentManager ContentManager
-
-@model DashboardViewModel
+﻿@inject IContentManager ContentManager
 
 @{
     ViewBag.Title = "Dashboard";
@@ -41,11 +37,8 @@
         @Html.Partial("_ProgressSummary")
     </div>
 </div>
-@if (Model.Follows.Count > 0)
-{
-    <div class="row">
-        <div class="col-md-6">
-            @Html.Partial("_Follows", Model.Follows)
-        </div>
+<div class="row">
+    <div class="col-md-6">
+        @Html.Partial("_Follows")
     </div>
-}
+</div>

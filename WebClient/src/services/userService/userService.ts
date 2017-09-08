@@ -31,6 +31,10 @@ export interface IProgressData {
     outsiderLevelData: { [outsider: string]: { [date: string]: string } };
 }
 
+export interface IFollowsData {
+    follows: string[];
+}
+
 @Injectable()
 export class UserService {
     private isLoggedIn: boolean;
@@ -63,6 +67,25 @@ export class UserService {
             .catch(error => {
                 let errorMessage = error.message || error.toString();
                 appInsights.trackEvent("UserService.getProgress.error", { message: errorMessage });
+                return Promise.reject(errorMessage);
+            });
+    }
+
+    public getFollows(userName: string): Promise<IFollowsData> {
+        let headersPromise = this.isLoggedIn
+            ? this.authenticationService.getAuthHeaders()
+            : Promise.resolve(new Headers());
+        return headersPromise
+            .then(headers => {
+                let options = new RequestOptions({ headers });
+                return this.http
+                    .get(`/api/users/${userName}/follows`, options)
+                    .toPromise();
+            })
+            .then(response => response.json() as IFollowsData)
+            .catch(error => {
+                let errorMessage = error.message || error.toString();
+                appInsights.trackEvent("UserService.getFollows.error", { message: errorMessage });
                 return Promise.reject(errorMessage);
             });
     }

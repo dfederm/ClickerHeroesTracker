@@ -5,6 +5,7 @@
 namespace Website.Controllers.Api
 {
     using System;
+    using System.Collections.Generic;
     using System.Threading.Tasks;
     using ClickerHeroesTrackerWebsite.Models;
     using ClickerHeroesTrackerWebsite.Models.Api.Users;
@@ -15,6 +16,7 @@ namespace Website.Controllers.Api
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Identity;
     using Microsoft.AspNetCore.Mvc;
+    using Website.Models.Api.Users;
 
     [Route("api/users")]
     [Authorize]
@@ -120,6 +122,65 @@ namespace Website.Controllers.Api
             {
                 return this.StatusCode(500);
             }
+
+            return this.Ok(data);
+        }
+
+        [Route("{userName}/follows")]
+        [HttpGet]
+        public async Task<IActionResult> Follows(string userName)
+        {
+            if (string.IsNullOrEmpty(userName))
+            {
+                return this.BadRequest();
+            }
+
+            var user = await this.userManager.FindByNameAsync(userName);
+            if (user == null)
+            {
+                return this.NotFound();
+            }
+
+            var userId = await this.userManager.GetUserIdAsync(user);
+            if (string.IsNullOrEmpty(userId))
+            {
+                return this.NotFound();
+            }
+
+            var currentUserId = this.userManager.GetUserId(this.User);
+            if (!userId.Equals(currentUserId, StringComparison.OrdinalIgnoreCase)
+                && !this.User.IsInRole("Admin"))
+            {
+                return this.Forbid();
+            }
+
+            var follows = new List<string>();
+            var parameters = new Dictionary<string, object>
+            {
+                { "@UserId", userId },
+            };
+            const string GetUserFollowsCommandText = @"
+	            SELECT UserName
+	            FROM UserFollows
+	            INNER JOIN AspNetUsers
+	            ON UserFollows.FollowUserId = AspNetUsers.Id
+	            WHERE UserId = @UserId
+	            ORDER BY UserName ASC";
+            using (var command = this.databaseCommandFactory.Create(
+                GetUserFollowsCommandText,
+                parameters))
+            using (var reader = command.ExecuteReader())
+            {
+                while (reader.Read())
+                {
+                    follows.Add(reader["UserName"].ToString());
+                }
+            }
+
+            var data = new FollowsData
+            {
+                Follows = follows,
+            };
 
             return this.Ok(data);
         }
