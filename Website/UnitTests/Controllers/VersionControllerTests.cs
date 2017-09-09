@@ -4,6 +4,7 @@
 
 namespace ClickerHeroesTrackerWebsite.Tests.Controllers
 {
+    using System.Collections.Generic;
     using ClickerHeroesTrackerWebsite.Configuration;
     using ClickerHeroesTrackerWebsite.Controllers;
     using Microsoft.AspNetCore.Hosting;
@@ -19,6 +20,14 @@ namespace ClickerHeroesTrackerWebsite.Tests.Controllers
             var mockBuildInfoProvider = new Mock<IBuildInfoProvider>(MockBehavior.Strict);
             mockBuildInfoProvider.SetupGet(_ => _.Changelist).Returns("SomeChangelist").Verifiable();
             mockBuildInfoProvider.SetupGet(_ => _.BuildId).Returns("SomeBuildId").Verifiable();
+
+            var webclient = new Dictionary<string, string>
+            {
+                { "bundle0", "version0" },
+                { "bundle1", "version1" },
+                { "bundle2", "version2" },
+            };
+            mockBuildInfoProvider.SetupGet(_ => _.Webclient).Returns(webclient).Verifiable();
 
             var mockHostingEnvironment = new Mock<IHostingEnvironment>(MockBehavior.Strict);
             mockHostingEnvironment.SetupGet(_ => _.EnvironmentName).Returns("SomeEnvironmentName").Verifiable();
@@ -36,6 +45,7 @@ namespace ClickerHeroesTrackerWebsite.Tests.Controllers
             Assert.Equal("SomeEnvironmentName", model.Environment);
             Assert.Equal("SomeChangelist", model.Changelist);
             Assert.Equal("SomeBuildId", model.BuildId);
+            Assert.Equal(webclient, model.Webclient);
 
             mockBuildInfoProvider.Verify();
             mockHostingEnvironment.Verify();

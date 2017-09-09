@@ -4,6 +4,8 @@
 
 namespace ClickerHeroesTrackerWebsite.Configuration
 {
+    using System.Collections.Generic;
+
     /// <summary>
     /// Provides information about the currently running environment
     /// </summary>
@@ -18,5 +20,10 @@ namespace ClickerHeroesTrackerWebsite.Configuration
         /// Gets the build id of the running service.
         /// </summary>
         string BuildId { get; }
+
+        /// <summary>
+        /// Gets a mapping of each Webclient file to its version.
+        /// </summary>
+        IDictionary<string, string> Webclient { get; }
     }
 }

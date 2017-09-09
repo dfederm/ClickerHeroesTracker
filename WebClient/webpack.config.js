@@ -1,9 +1,11 @@
-var webpack = require('webpack');
-var path = require('path');
+const webpack = require('webpack');
+const path = require('path');
 
 // Webpack Plugins
-var HtmlWebpackPlugin = require('html-webpack-plugin');
+const CleanWebpackPlugin = require('clean-webpack-plugin');
+const HtmlWebpackPlugin = require('html-webpack-plugin');
 const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
+const ManifestPlugin = require('webpack-manifest-plugin');
 
 // Get npm lifecycle event to identify the environment
 var ENV = process.env.npm_lifecycle_event;
@@ -39,8 +41,8 @@ module.exports = () => {
     config.output = {
       path: path.resolve('./dist'),
       publicPath: '/',
-      filename: isProd ? '[name].[hash].js' : '[name].js',
-      chunkFilename: isProd ? '[id].[hash].chunk.js' : '[id].chunk.js'
+      filename: isProd ? '[name].[chunkhash].js' : '[name].js',
+      chunkFilename: isProd ? '[id].[chunkhash].chunk.js' : '[id].chunk.js'
     };
   }
 
@@ -124,14 +126,20 @@ module.exports = () => {
 
   if (!isTest) {
     config.plugins.push(
+      new CleanWebpackPlugin(['dist']),
+
       // Creates hierarchy to keep code from one bundle out of others. See: https://angular.io/guide/webpack#commonschunkplugin
       new webpack.optimize.CommonsChunkPlugin({
-        name: ['app', 'data', 'vendor', 'polyfills']
+        name: ['app', 'data', 'vendor', 'polyfills', 'runtime']
       }),
 
       new HtmlWebpackPlugin({
         template: 'src/index.html'
       }),
+
+      new webpack.HashedModuleIdsPlugin(),
+
+      new ManifestPlugin(),
 
       new BundleAnalyzerPlugin({
         analyzerMode: 'static',
