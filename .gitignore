@@ -10,6 +10,9 @@
 [Bb]in/
 [Oo]bj/
 
+# MSTest test Results
+[Tt]est[Rr]esult*/
+
 # Visual Studio Publish settings
 PublishProfiles/
 
@@ -22,8 +25,9 @@ dist/
 # WebClient logs
 logs/
 
-# WebClient-generated index.html
-**/wwwroot/*.html
+# WebClient-generated
+**/wwwroot/index.html
+**/wwwroot/manifest.json
 
 # bower and npm package dir
 **/wwwroot/lib/*

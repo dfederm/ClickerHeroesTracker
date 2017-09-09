@@ -4,6 +4,8 @@
 
 namespace ClickerHeroesTrackerWebsite.Configuration
 {
+    using System;
+    using System.Collections.Generic;
     using System.IO;
     using Microsoft.AspNetCore.Hosting;
     using Newtonsoft.Json;
@@ -33,6 +35,42 @@ namespace ClickerHeroesTrackerWebsite.Configuration
                 this.Changelist = (string)buildInfo["changelist"];
                 this.BuildId = (string)buildInfo["buildId"];
             }
+
+            var webclientManifestFile = Path.Combine(hostingEnvironment.WebRootPath, @"manifest.json");
+            if (!File.Exists(webclientManifestFile))
+            {
+                throw new InvalidDataException("Could not find Webclient manifest file: " + webclientManifestFile);
+            }
+
+            var webClient = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+            using (var reader = new JsonTextReader(new StreamReader(webclientManifestFile)))
+            {
+                var serializer = new JsonSerializer();
+                var manifest = serializer.Deserialize<Dictionary<string, string>>(reader);
+
+                foreach (var pair in manifest)
+                {
+                    var name = pair.Key;
+                    var file = pair.Value;
+
+                    if (name.EndsWith(".map", StringComparison.OrdinalIgnoreCase))
+                    {
+                        // We don't care about the map files
+                        continue;
+                    }
+
+                    // each entry looks like "app.js": "app.5efeb981068fadf86ea1.js", but we want them to look like "app": "5efeb981068fadf86ea1".
+                    var bundleName = Path.GetFileNameWithoutExtension(name);
+                    var hashLength = file.Length - name.Length - 1;
+                    var hash = hashLength > 0
+                        ? file.Substring(bundleName.Length + 1, hashLength)
+                        : string.Empty;
+
+                    webClient.Add(bundleName, hash);
+                }
+            }
+
+            this.Webclient = webClient;
         }
 
         /// <inheritdoc/>
@@ -40,5 +78,7 @@ namespace ClickerHeroesTrackerWebsite.Configuration
 
         /// <inheritdoc/>
         public string BuildId { get; }
+
+        public IDictionary<string, string> Webclient { get; }
     }
 }

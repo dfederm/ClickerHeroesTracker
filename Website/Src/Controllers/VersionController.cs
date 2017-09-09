@@ -42,6 +42,7 @@ namespace ClickerHeroesTrackerWebsite.Controllers
                 Environment = this.hostingEnvironment.EnvironmentName,
                 Changelist = this.buildInfoProvider.Changelist,
                 BuildId = this.buildInfoProvider.BuildId,
+                Webclient = this.buildInfoProvider.Webclient,
             };
 
             return this.Ok(model);

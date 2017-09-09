@@ -32,9 +32,12 @@ paths.webClientFiles = [
     paths.webroot + "data*.js.map",
     paths.webroot + "polyfill*.js",
     paths.webroot + "polyfill*.js.map",
+    paths.webroot + "runtime*.js",
+    paths.webroot + "runtime*.js.map",
     paths.webroot + "vendor*.js",
     paths.webroot + "vendor*.js.map",
-    paths.webroot + "index.html"
+    paths.webroot + "index.html",
+    paths.webroot + "manifest.json",
 ];
 
 gulp.task("clean:webClient", function (cb) {
