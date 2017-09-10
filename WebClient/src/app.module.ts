@@ -25,6 +25,7 @@ import { UploadComponent } from "./components/upload/upload";
 import { ClansComponent } from "./components/clans/clans";
 import { UserProgressComponent } from "./components/userProgress/userProgress";
 import { UserCompareComponent } from "./components/userCompare/userCompare";
+import { BannerComponent } from "./components/banner/banner";
 
 import { OpenDialogDirective } from "./directives/openDialog/openDialog";
 
@@ -35,6 +36,7 @@ import { AuthenticationService } from "./services/authenticationService/authenti
 import { UploadService } from "./services/uploadService/uploadService";
 import { ClanService } from "./services/clanService/clanService";
 import { UserService } from "./services/userService/userService";
+import { VersionService } from "./services/versionService/versionService";
 
 const routes: Routes =
   [
@@ -82,6 +84,7 @@ const routes: Routes =
     TimeAgoPipe,
     UserProgressComponent,
     UserCompareComponent,
+    BannerComponent,
   ],
   entryComponents:
   [
@@ -96,6 +99,7 @@ const routes: Routes =
     ClanService,
     AppInsightsService,
     UserService,
+    VersionService,
   ],
   bootstrap: [AppComponent],
 })

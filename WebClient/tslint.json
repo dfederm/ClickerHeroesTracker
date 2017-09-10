@@ -83,7 +83,10 @@
     "no-empty-interface": true,
     "no-eval": true,
     "no-for-in-array": true,
-    "no-inferrable-types": true,
+    "no-inferrable-types": [
+      true,
+      "ignore-params"
+    ],
     "no-internal-module": true,
     "no-invalid-this": true,
     "no-misused-new": true,
