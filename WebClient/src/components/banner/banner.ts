@@ -40,7 +40,8 @@ export class BannerComponent implements OnInit, OnDestroy {
         }
     }
 
-    public reload(): void {
+    public reload($event: MouseEvent): void {
+        $event.preventDefault();
         location.reload();
     }
 }
