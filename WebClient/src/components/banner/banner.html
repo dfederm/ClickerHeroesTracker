@@ -1,0 +1,7 @@
+<ngb-alert *ngIf="showReloadBanner"
+           [type]="'info'"
+           [dismissible]="false">
+    The site has an update!
+    <a href="#"
+       (click)="reload()">Refresh</a>
+</ngb-alert>
