@@ -146,7 +146,7 @@ describe("AuthenticationService", () => {
         }));
     });
 
-    describe("logIn", () => {
+    describe("logInWithPassword", () => {
         it("should reject with an unsuccessful log in", fakeAsync(() => {
             let logInSuccessful = false;
             let error: Error;
@@ -157,7 +157,7 @@ describe("AuthenticationService", () => {
                 .subscribe(isLoggedIn => {
                     isLoggedInLog.push(isLoggedIn);
                 });
-            authenticationService.logIn("someUsername", "somePassword")
+            authenticationService.logInWithPassword("someUsername", "somePassword")
                 .then(() => logInSuccessful = true)
                 .catch(e => error = e);
 
@@ -185,7 +185,7 @@ describe("AuthenticationService", () => {
                 .subscribe(isLoggedIn => {
                     isLoggedInLog.push(isLoggedIn);
                 });
-            authenticationService.logIn("someUsername", "somePassword")
+            authenticationService.logInWithPassword("someUsername", "somePassword")
                 .then(() => logInSuccessful = true)
                 .catch(e => error = e);
 
@@ -193,6 +193,91 @@ describe("AuthenticationService", () => {
             expect(lastConnection.request.method).toEqual(RequestMethod.Post, "method invalid");
             expect(lastConnection.request.url).toEqual("/api/auth/token", "url invalid");
             expect(lastConnection.request.text()).toEqual("grant_type=password&username=someUsername&password=somePassword&scope=openid%20offline_access", "request body invalid");
+
+            let tokens = createResponseAuthModel(1);
+            lastConnection.mockRespond(new Response(new ResponseOptions({ body: JSON.stringify(tokens) })));
+            lastConnection = null;
+            tokens.expiration_date = Date.now() + tokens.expires_in * 1000;
+
+            // Don't tick enough to trigger the refresh interval
+            tick(1);
+
+            expect(logInSuccessful).toEqual(true);
+            expect(localStorage.setItem).toHaveBeenCalledWith("auth-tokens", JSON.stringify(tokens));
+            expect(error).toBeUndefined();
+            expect(isLoggedInLog).toEqual([false, true]);
+
+            (localStorage.setItem as jasmine.Spy).calls.reset();
+
+            // Let the refresh interval tick
+            tick(tokens.expires_in / 2 * 1000);
+
+            expect(lastConnection).not.toBeNull("no http service connection made");
+            expect(lastConnection.request.method).toEqual(RequestMethod.Post, "method invalid");
+            expect(lastConnection.request.url).toEqual("/api/auth/token", "url invalid");
+            expect(lastConnection.request.text()).toEqual("grant_type=refresh_token&refresh_token=someNewRefreshToken1&scope=openid%20offline_access", "request body invalid");
+
+            let refreshedTokens = createResponseAuthModel(2);
+            lastConnection.mockRespond(new Response(new ResponseOptions({ body: JSON.stringify(refreshedTokens) })));
+            refreshedTokens.expiration_date = Date.now() + refreshedTokens.expires_in * 1000;
+            tick();
+
+            expect(localStorage.setItem).toHaveBeenCalledWith("auth-tokens", JSON.stringify(refreshedTokens));
+            expect(error).toBeUndefined();
+            expect(isLoggedInLog).toEqual([false, true, true]);
+
+            // An interval was started, so abandon it.
+            discardPeriodicTasks();
+        }));
+    });
+
+    describe("logInWithAssertion", () => {
+        it("should reject with an unsuccessful log in", fakeAsync(() => {
+            let logInSuccessful = false;
+            let error: Error;
+            let isLoggedInLog: boolean[] = [];
+
+            let authenticationService = injector.get(AuthenticationService) as AuthenticationService;
+            authenticationService.isLoggedIn()
+                .subscribe(isLoggedIn => {
+                    isLoggedInLog.push(isLoggedIn);
+                });
+            authenticationService.logInWithAssertion("someGrantType", "someAssertion")
+                .then(() => logInSuccessful = true)
+                .catch(e => error = e);
+
+            expect(lastConnection).not.toBeNull("no http service connection made");
+            expect(lastConnection.request.method).toEqual(RequestMethod.Post, "method invalid");
+            expect(lastConnection.request.url).toEqual("/api/auth/token", "url invalid");
+            expect(lastConnection.request.text()).toEqual("grant_type=someGrantType&assertion=someAssertion&scope=openid%20offline_access", "request body invalid");
+
+            lastConnection.mockError(new Error("someError"));
+            tick();
+
+            expect(logInSuccessful).toEqual(false);
+            expect(localStorage.setItem).not.toHaveBeenCalled();
+            expect(error).toBeDefined();
+            expect(isLoggedInLog).toEqual([false]);
+        }));
+
+        it("should resolve with a successful log in and refresh the new token", fakeAsync(() => {
+            let logInSuccessful = false;
+            let error: Error;
+            let isLoggedInLog: boolean[] = [];
+
+            let authenticationService = injector.get(AuthenticationService) as AuthenticationService;
+            authenticationService.isLoggedIn()
+                .subscribe(isLoggedIn => {
+                    isLoggedInLog.push(isLoggedIn);
+                });
+            authenticationService.logInWithAssertion("someGrantType", "someAssertion")
+                .then(() => logInSuccessful = true)
+                .catch(e => error = e);
+
+            expect(lastConnection).not.toBeNull("no http service connection made");
+            expect(lastConnection.request.method).toEqual(RequestMethod.Post, "method invalid");
+            expect(lastConnection.request.url).toEqual("/api/auth/token", "url invalid");
+            expect(lastConnection.request.text()).toEqual("grant_type=someGrantType&assertion=someAssertion&scope=openid%20offline_access", "request body invalid");
 
             let tokens = createResponseAuthModel(1);
             lastConnection.mockRespond(new Response(new ResponseOptions({ body: JSON.stringify(tokens) })));

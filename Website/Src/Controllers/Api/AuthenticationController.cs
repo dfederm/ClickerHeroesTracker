@@ -16,6 +16,7 @@ namespace ClickerHeroesTrackerWebsite.Controllers.Api
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.Extensions.Options;
     using OpenIddict.Core;
+    using Website.Services.Authentication;
 
     [Route("api/auth")]
     public class AuthenticationController : Controller
@@ -32,15 +33,18 @@ namespace ClickerHeroesTrackerWebsite.Controllers.Api
         private readonly IOptions<IdentityOptions> identityOptions;
         private readonly SignInManager<ApplicationUser> signInManager;
         private readonly UserManager<ApplicationUser> userManager;
+        private readonly IAssertionGrantHandlerProvider assertionGrantHandlerProvider;
 
         public AuthenticationController(
             IOptions<IdentityOptions> identityOptions,
             SignInManager<ApplicationUser> signInManager,
-            UserManager<ApplicationUser> userManager)
+            UserManager<ApplicationUser> userManager,
+            IAssertionGrantHandlerProvider assertionGrantHandlerProvider)
         {
             this.identityOptions = identityOptions;
             this.signInManager = signInManager;
             this.userManager = userManager;
+            this.assertionGrantHandlerProvider = assertionGrantHandlerProvider;
         }
 
         [HttpPost("token")]
@@ -70,12 +74,10 @@ namespace ClickerHeroesTrackerWebsite.Controllers.Api
                     });
                 }
 
-                // Create a new authentication ticket.
-                var ticket = await this.CreateTicketAsync(request, user);
-
-                return this.SignIn(ticket.Principal, ticket.Properties, ticket.AuthenticationScheme);
+                return await this.SignInAsync(request, user);
             }
-            else if (request.IsRefreshTokenGrantType())
+
+            if (request.IsRefreshTokenGrantType())
             {
                 // Retrieve the claims principal stored in the refresh token.
                 var result = await this.HttpContext.AuthenticateAsync(OpenIdConnectServerDefaults.AuthenticationScheme);
@@ -101,11 +103,55 @@ namespace ClickerHeroesTrackerWebsite.Controllers.Api
                     });
                 }
 
-                // Create a new authentication ticket, but reuse the properties stored
-                // in the refresh token, including the scopes originally granted.
-                var ticket = await this.CreateTicketAsync(request, user, result.Properties);
+                // Reuse the properties stored in the refresh token, including the scopes originally granted.
+                return await this.SignInAsync(request, user, result.Properties);
+            }
 
-                return this.SignIn(ticket.Principal, ticket.Properties, ticket.AuthenticationScheme);
+            var assertionGrantHandler = this.assertionGrantHandlerProvider.GetHandler(request.GrantType);
+            if (assertionGrantHandler != null)
+            {
+                // Reject the request if the "assertion" parameter is missing.
+                if (string.IsNullOrEmpty(request.Assertion))
+                {
+                    return this.BadRequest(new OpenIdConnectResponse
+                    {
+                        Error = OpenIdConnectConstants.Errors.InvalidRequest,
+                        ErrorDescription = "The mandatory 'assertion' parameter was missing.",
+                    });
+                }
+
+                var result = await assertionGrantHandler.ValidateAsync(request.Assertion);
+                if (!result.IsSuccessful)
+                {
+                    return this.BadRequest(new OpenIdConnectResponse
+                    {
+                        Error = OpenIdConnectConstants.Errors.InvalidGrant,
+                        ErrorDescription = result.Error,
+                    });
+                }
+
+                // Find the user associated with this external log in
+                var user = await this.userManager.FindByLoginAsync(assertionGrantHandler.Name, result.ExternalUserId);
+                if (user == null)
+                {
+                    // If the user does not have an account, then ask the user to create an account.
+                    return this.BadRequest(new OpenIdConnectResponse
+                    {
+                        Error = OpenIdConnectConstants.Errors.AccountSelectionRequired,
+                    });
+                }
+
+                // Ensure the user is still allowed to sign in.
+                if (!await this.signInManager.CanSignInAsync(user))
+                {
+                    return this.BadRequest(new OpenIdConnectResponse
+                    {
+                        Error = OpenIdConnectConstants.Errors.InvalidGrant,
+                        ErrorDescription = "The user is no longer allowed to sign in.",
+                    });
+                }
+
+                return await this.SignInAsync(request, user);
             }
 
             return this.BadRequest(new OpenIdConnectResponse
@@ -115,7 +161,7 @@ namespace ClickerHeroesTrackerWebsite.Controllers.Api
             });
         }
 
-        private async Task<AuthenticationTicket> CreateTicketAsync(OpenIdConnectRequest request, ApplicationUser user, AuthenticationProperties properties = null)
+        private async Task<IActionResult> SignInAsync(OpenIdConnectRequest request, ApplicationUser user, AuthenticationProperties properties = null)
         {
             // Create a new ClaimsPrincipal containing the claims that
             // will be used to create an id_token, a token or a code.
@@ -162,7 +208,7 @@ namespace ClickerHeroesTrackerWebsite.Controllers.Api
                 claim.SetDestinations(destinations);
             }
 
-            return ticket;
+            return this.SignIn(ticket.Principal, ticket.Properties, ticket.AuthenticationScheme);
         }
     }
 }

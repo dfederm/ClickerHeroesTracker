@@ -7,13 +7,14 @@ namespace ClickerHeroesTrackerWebsite
     using AspNet.Security.OAuth.Validation;
     using ClickerHeroesTrackerWebsite.Services.Authentication;
     using Microsoft.AspNetCore.Authentication;
-    using Microsoft.AspNetCore.Authentication.Cookies;
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Builder;
     using Microsoft.AspNetCore.Hosting;
     using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.Identity;
+    using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
+    using Website.Models.Authentication;
 
     /// <summary>
     /// Configure authentication
@@ -27,47 +28,43 @@ namespace ClickerHeroesTrackerWebsite
             authenticationBuilder.AddCookie(options => options.LoginPath = new PathString("/Account/Login"));
             authenticationBuilder.AddOAuthValidation();
 
-            var microsoftClientId = this.Configuration["Authentication:Microsoft:ClientId"];
-            var microsoftClientSecret = this.Configuration["Authentication:Microsoft:ClientSecret"];
-            if (!string.IsNullOrEmpty(microsoftClientId) && !string.IsNullOrEmpty(microsoftClientSecret))
+            // We can't access this via DI since we're still setting up the container, so manually create and bind the settings object.
+            var authenticationSettings = new AuthenticationSettings();
+            this.Configuration.GetSection("Authentication").Bind(authenticationSettings);
+
+            var microsoftAuthenticationSettings = authenticationSettings.Microsoft;
+            if (microsoftAuthenticationSettings != null
+                && !string.IsNullOrEmpty(microsoftAuthenticationSettings.ClientId)
+                && !string.IsNullOrEmpty(microsoftAuthenticationSettings.ClientSecret))
             {
                 authenticationBuilder.AddMicrosoftAccount(options =>
                 {
-                    options.ClientId = microsoftClientId;
-                    options.ClientSecret = microsoftClientSecret;
+                    options.ClientId = microsoftAuthenticationSettings.ClientId;
+                    options.ClientSecret = microsoftAuthenticationSettings.ClientSecret;
                 });
             }
 
-            var facebookAppId = this.Configuration["Authentication:Facebook:AppId"];
-            var facebookAppSecret = this.Configuration["Authentication:Facebook:AppSecret"];
-            if (!string.IsNullOrEmpty(facebookAppId) && !string.IsNullOrEmpty(facebookAppSecret))
+            var facebookAuthenticationSettings = authenticationSettings.Facebook;
+            if (facebookAuthenticationSettings != null
+                && !string.IsNullOrEmpty(facebookAuthenticationSettings.AppId)
+                && !string.IsNullOrEmpty(facebookAuthenticationSettings.AppSecret))
             {
                 authenticationBuilder.AddFacebook(options =>
                 {
-                    options.AppId = facebookAppId;
-                    options.AppSecret = facebookAppSecret;
+                    options.AppId = facebookAuthenticationSettings.AppId;
+                    options.AppSecret = facebookAuthenticationSettings.AppSecret;
                 });
             }
 
-            var googleClientId = this.Configuration["Authentication:Google:ClientId"];
-            var googleClientSecret = this.Configuration["Authentication:Google:ClientSecret"];
-            if (!string.IsNullOrEmpty(googleClientId) && !string.IsNullOrEmpty(googleClientSecret))
+            var googleAuthenticationSettings = authenticationSettings.Google;
+            if (googleAuthenticationSettings != null
+                && !string.IsNullOrEmpty(googleAuthenticationSettings.ClientId)
+                && !string.IsNullOrEmpty(googleAuthenticationSettings.ClientSecret))
             {
                 authenticationBuilder.AddGoogle(options =>
                 {
-                    options.ClientId = googleClientId;
-                    options.ClientSecret = googleClientSecret;
-                });
-            }
-
-            var twitterConsumerKey = this.Configuration["Authentication:Twitter:ConsumerKey"];
-            var twitterConsumerSecret = this.Configuration["Authentication:Twitter:ConsumerSecret"];
-            if (!string.IsNullOrEmpty(twitterConsumerKey) && !string.IsNullOrEmpty(twitterConsumerSecret))
-            {
-                authenticationBuilder.AddTwitter(options =>
-                {
-                    options.ConsumerKey = twitterConsumerKey;
-                    options.ConsumerSecret = twitterConsumerSecret;
+                    options.ClientId = googleAuthenticationSettings.ClientId;
+                    options.ClientSecret = googleAuthenticationSettings.ClientSecret;
                 });
             }
 
