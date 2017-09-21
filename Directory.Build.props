@@ -11,8 +11,8 @@
     <CodeAnalysisRuleSet>$(MSBuildThisFileDirectory)\build\CodeAnalysis.ruleset</CodeAnalysisRuleSet>
     <!-- Required for Analyzers to work -->
     <Features>IOperation</Features>
-    <!-- Temporary workaround for "dotnet restore" hang. See: https://github.com/NuGet/Home/issues/5583#issuecomment-316227772 -->
-    <SetLinkMetadataAutomatically>false</SetLinkMetadataAutomatically>
+    <!-- Enable Code Coverage. This is a temporary workaround for https://github.com/Microsoft/vstest/issues/800 -->
+    <DebugType>Full</DebugType>
   </PropertyGroup>
 
   <ItemGroup>

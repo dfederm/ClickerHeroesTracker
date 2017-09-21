@@ -29,7 +29,7 @@ export class AuthenticationService {
         let currentTokens = this.retrieveTokens();
 
         // If the current token is expired at startup, pretend like the user is not logged in until the refresh below happens.
-        let isTokenValid = currentTokens && currentTokens.expiration_date > new Date().getTime();
+        let isTokenValid = currentTokens && currentTokens.expiration_date > Date.now();
         this.tokens = new BehaviorSubject(isTokenValid ? currentTokens : null);
 
         // If the user was already logged in, always try and refresh the token.
@@ -40,11 +40,19 @@ export class AuthenticationService {
         }
     }
 
-    public logIn(username: string, password: string): Promise<void> {
+    public logInWithPassword(username: string, password: string): Promise<void> {
         let params = new URLSearchParams();
         params.append("grant_type", "password");
         params.append("username", username);
         params.append("password", password);
+        return this.getTokens(params)
+            .then(() => this.scheduleRefresh());
+    }
+
+    public logInWithAssertion(grantType: string, assertion: string): Promise<void> {
+        let params = new URLSearchParams();
+        params.append("grant_type", grantType);
+        params.append("assertion", assertion);
         return this.getTokens(params)
             .then(() => this.scheduleRefresh());
     }

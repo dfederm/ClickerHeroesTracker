@@ -7,6 +7,7 @@ namespace ClickerHeroesTrackerWebsite
     using System;
     using System.IO;
     using System.Linq;
+    using System.Net.Http;
     using AspNet.Security.OpenIdConnect.Primitives;
     using ClickerHeroesTrackerWebsite.Configuration;
     using ClickerHeroesTrackerWebsite.Instrumentation;
@@ -35,6 +36,8 @@ namespace ClickerHeroesTrackerWebsite
     using Newtonsoft.Json;
     using Newtonsoft.Json.Converters;
     using Newtonsoft.Json.Serialization;
+    using Website.Models.Authentication;
+    using Website.Services.Authentication;
     using Website.Services.SiteNews;
 
     /// <summary>
@@ -139,7 +142,10 @@ namespace ClickerHeroesTrackerWebsite
 
                 // Allow client applications to use the grant_type=password flow.
                 options.AllowPasswordFlow()
-                    .AllowRefreshTokenFlow();
+                    .AllowRefreshTokenFlow()
+                    .AllowCustomFlow(GoogleAssertionGrantHandler.GrantType)
+                    .AllowCustomFlow(FacebookAssertionGrantHandler.GrantType)
+                    .AllowCustomFlow(MicrosoftAssertionGrantHandler.GrantType);
 
                 // Allow Http on devbox
                 if (this.Environment.IsDevelopment())
@@ -147,6 +153,17 @@ namespace ClickerHeroesTrackerWebsite
                     options.DisableHttpsRequirement();
                 }
             });
+
+            services.Configure((AssertionGrantOptions options) =>
+            {
+                options.AddAssertionGrantType<GoogleAssertionGrantHandler>(GoogleAssertionGrantHandler.GrantType);
+                options.AddAssertionGrantType<FacebookAssertionGrantHandler>(FacebookAssertionGrantHandler.GrantType);
+                options.AddAssertionGrantType<MicrosoftAssertionGrantHandler>(MicrosoftAssertionGrantHandler.GrantType);
+            });
+
+            services.AddSingleton<GoogleAssertionGrantHandler>();
+            services.AddSingleton<FacebookAssertionGrantHandler>();
+            services.AddSingleton<MicrosoftAssertionGrantHandler>();
 
             this.ConfigureAuthentication(services);
 
@@ -202,6 +219,8 @@ namespace ClickerHeroesTrackerWebsite
             }
 
             services.AddSingleton<GameData>(_ => GameData.Parse(Path.Combine(this.Environment.WebRootPath, @"data\GameData.json")));
+            services.AddSingleton<HttpClient>(_ => new HttpClient());
+            services.AddSingleton<IAssertionGrantHandlerProvider, AssertionGrantHandlerProvider>();
             services.AddSingleton<IBuildInfoProvider>(buildInfoProvider);
             services.AddSingleton<IEmailSender, EmailSender>();
             services.AddSingleton<IOptions<PasswordHasherOptions>, PasswordHasherOptionsAccessor>();
@@ -213,6 +232,7 @@ namespace ClickerHeroesTrackerWebsite
             services.AddScoped<IUserSettingsProvider, UserSettingsProvider>();
 
             // Configuration
+            services.Configure<AuthenticationSettings>(options => this.Configuration.GetSection("Authentication").Bind(options));
             services.Configure<DatabaseSettings>(options => this.Configuration.GetSection("Database").Bind(options));
             services.Configure<EmailSenderSettings>(options => this.Configuration.GetSection("EmailSender").Bind(options));
         }

@@ -10,7 +10,7 @@
 @{
     var userSettingsObject = UserSettingsProvider.Get(UserManager.GetUserId(User));
     var themeLocalUrl = "~/lib/bootstrap/dist/css/bootstrap";
-    string themeCdnUrl = "https://maxcdn.bootstrapcdn.com/bootswatch/3.3.7/bootstrap.min.css";
+    string themeCdnUrl = "https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css";
     if (userSettingsObject.Theme == SiteThemeType.Dark)
     {
         themeCdnUrl = "https://maxcdn.bootstrapcdn.com/bootswatch/3.3.7/slate/bootstrap.min.css";

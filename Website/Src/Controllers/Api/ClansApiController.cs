@@ -9,14 +9,12 @@ namespace ClickerHeroesTrackerWebsite.Controllers.Api
     using System.Linq;
     using System.Net.Http;
     using System.Threading.Tasks;
-    using AspNet.Security.OAuth.Validation;
     using ClickerHeroesTrackerWebsite.Models;
     using ClickerHeroesTrackerWebsite.Models.Api;
     using ClickerHeroesTrackerWebsite.Models.Api.Clans;
     using ClickerHeroesTrackerWebsite.Models.SaveData;
     using ClickerHeroesTrackerWebsite.Services.Database;
     using ClickerHeroesTrackerWebsite.Utility;
-    using Microsoft.AspNetCore.Authentication.Cookies;
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Identity;
     using Microsoft.AspNetCore.Mvc;
@@ -34,12 +32,16 @@ namespace ClickerHeroesTrackerWebsite.Controllers.Api
 
         private readonly UserManager<ApplicationUser> userManager;
 
+        private readonly HttpClient httpClient;
+
         public ClansApiController(
             IDatabaseCommandFactory databaseCommandFactory,
-            UserManager<ApplicationUser> userManager)
+            UserManager<ApplicationUser> userManager,
+            HttpClient httpClient)
         {
             this.databaseCommandFactory = databaseCommandFactory;
             this.userManager = userManager;
+            this.httpClient = httpClient;
         }
 
         [Route("")]
@@ -54,105 +56,102 @@ namespace ClickerHeroesTrackerWebsite.Controllers.Api
                 return this.NotFound();
             }
 
-            using (var client = new HttpClient())
+            Clan clan = await this.GetClanInfomation(savedGame);
+
+            if (clan?.Guild == null)
             {
-                Clan clan = await this.GetClanInfomation(client, savedGame);
-
-                if (clan?.Guild == null)
-                {
-                    return this.NoContent();
-                }
-
-                HashSet<string> guildMemberIds = new HashSet<string>();
-                foreach (var x in clan.Guild.MemberUids)
-                {
-                    if (x.Value == MemberType.Member)
-                    {
-                        guildMemberIds.Add(x.Key);
-                    }
-                }
-
-                var filteredGuildMembers = clan.GuildMembers
-                    .Where(kvp => guildMemberIds.Contains(kvp.Value.Uid))
-                    .OrderByDescending(kvp => kvp.Value.HighestZone);
-                List<GuildMember> reindexedGuildMembers = new List<GuildMember>();
-                foreach (var x in filteredGuildMembers)
-                {
-                    reindexedGuildMembers.Add(x.Value);
-                }
-
-                ClanData clanData = new ClanData()
-                {
-                    ClanName = clan.Guild.Name,
-                    CurrentRaidLevel = clan.Guild.CurrentRaidLevel,
-                    GuildMembers = reindexedGuildMembers,
-                };
-
-                var mesagesValues = new Dictionary<string, string>
-                {
-                   { "uid", savedGame.UniqueId },
-                   { "passwordHash", savedGame.PasswordHash },
-                   { "guildName", clan.Guild.Name },
-                };
-
-                var messagesUrl = BaseUrl + "/clans/getGuildMessages.php";
-                var content = new FormUrlEncodedContent(mesagesValues);
-
-                var messagesResponse = await client.PostAsync(messagesUrl, content);
-
-                var messagesResponseString = await messagesResponse.Content.ReadAsStringAsync();
-
-                MessageResponse messages = JsonConvert.DeserializeObject<MessageResponse>(messagesResponseString);
-                List<Message> messageList = new List<Message>();
-                foreach (var mess in messages.Result.Messages)
-                {
-                    Message message = new Message();
-                    string[] messageSplit = mess.Value.Split(MessageDelimeter, 2);
-                    message.Content = messageSplit[1];
-                    double timestamp = Convert.ToDouble(mess.Key);
-                    message.Date = timestamp.UnixTimeStampToDateTime();
-                    GuildMember member = clan.GuildMembers.Values.FirstOrDefault(t => string.Equals(t.Uid, messageSplit[0], StringComparison.OrdinalIgnoreCase));
-                    message.Username = member?.Nickname;
-
-                    messageList.Add(message);
-                }
-
-                var count = messageList.Count - 15;
-                if (count > 0)
-                {
-                    // remove that number of items from the start of the list
-                    messageList.RemoveRange(0, count);
-                }
-
-                messageList.Reverse();
-                clanData.Messages = messageList;
-
-                using (var command = this.databaseCommandFactory.Create())
-                {
-                    // Insert Clan
-                    command.CommandText = @"
-                        IF EXISTS (SELECT * FROM Clans WHERE Name = @Name)
-                        BEGIN
-                            UPDATE Clans
-                            SET CurrentRaidLevel=@CurrentRaidLevel,MemberCount=@MemberCount
-                            WHERE Name=@Name
-                        END
-                        ELSE
-                        BEGIN
-                            INSERT INTO Clans(Name, CurrentRaidLevel,MemberCount)
-                            VALUES(@Name, @CurrentRaidLevel, @MemberCount);
-                        END";
-                    command.Parameters = new Dictionary<string, object>
-                    {
-                        { "@Name", clan.Guild.Name },
-                        { "@CurrentRaidLevel", clan.Guild.CurrentRaidLevel },
-                        { "@MemberCount", reindexedGuildMembers.Count },
-                    };
-                    command.ExecuteNonQuery();
-                }
-
-                return this.Ok(clanData);
+                return this.NoContent();
             }
+
+            HashSet<string> guildMemberIds = new HashSet<string>();
+            foreach (var x in clan.Guild.MemberUids)
+            {
+                if (x.Value == MemberType.Member)
+                {
+                    guildMemberIds.Add(x.Key);
+                }
+            }
+
+            var filteredGuildMembers = clan.GuildMembers
+                .Where(kvp => guildMemberIds.Contains(kvp.Value.Uid))
+                .OrderByDescending(kvp => kvp.Value.HighestZone);
+            List<GuildMember> reindexedGuildMembers = new List<GuildMember>();
+            foreach (var x in filteredGuildMembers)
+            {
+                reindexedGuildMembers.Add(x.Value);
+            }
+
+            ClanData clanData = new ClanData()
+            {
+                ClanName = clan.Guild.Name,
+                CurrentRaidLevel = clan.Guild.CurrentRaidLevel,
+                GuildMembers = reindexedGuildMembers,
+            };
+
+            var mesagesValues = new Dictionary<string, string>
+            {
+                { "uid", savedGame.UniqueId },
+                { "passwordHash", savedGame.PasswordHash },
+                { "guildName", clan.Guild.Name },
+            };
+
+            var messagesUrl = BaseUrl + "/clans/getGuildMessages.php";
+            var content = new FormUrlEncodedContent(mesagesValues);
+
+            var messagesResponse = await this.httpClient.PostAsync(messagesUrl, content);
+
+            var messagesResponseString = await messagesResponse.Content.ReadAsStringAsync();
+
+            MessageResponse messages = JsonConvert.DeserializeObject<MessageResponse>(messagesResponseString);
+            List<Message> messageList = new List<Message>();
+            foreach (var mess in messages.Result.Messages)
+            {
+                Message message = new Message();
+                string[] messageSplit = mess.Value.Split(MessageDelimeter, 2);
+                message.Content = messageSplit[1];
+                double timestamp = Convert.ToDouble(mess.Key);
+                message.Date = timestamp.UnixTimeStampToDateTime();
+                GuildMember member = clan.GuildMembers.Values.FirstOrDefault(t => string.Equals(t.Uid, messageSplit[0], StringComparison.OrdinalIgnoreCase));
+                message.Username = member?.Nickname;
+
+                messageList.Add(message);
+            }
+
+            var count = messageList.Count - 15;
+            if (count > 0)
+            {
+                // remove that number of items from the start of the list
+                messageList.RemoveRange(0, count);
+            }
+
+            messageList.Reverse();
+            clanData.Messages = messageList;
+
+            using (var command = this.databaseCommandFactory.Create())
+            {
+                // Insert Clan
+                command.CommandText = @"
+                    IF EXISTS (SELECT * FROM Clans WHERE Name = @Name)
+                    BEGIN
+                        UPDATE Clans
+                        SET CurrentRaidLevel=@CurrentRaidLevel,MemberCount=@MemberCount
+                        WHERE Name=@Name
+                    END
+                    ELSE
+                    BEGIN
+                        INSERT INTO Clans(Name, CurrentRaidLevel,MemberCount)
+                        VALUES(@Name, @CurrentRaidLevel, @MemberCount);
+                    END";
+                command.Parameters = new Dictionary<string, object>
+                {
+                    { "@Name", clan.Guild.Name },
+                    { "@CurrentRaidLevel", clan.Guild.CurrentRaidLevel },
+                    { "@MemberCount", reindexedGuildMembers.Count },
+                };
+                command.ExecuteNonQuery();
+            }
+
+            return this.Ok(clanData);
         }
 
         [Route("messages")]
@@ -167,23 +166,20 @@ namespace ClickerHeroesTrackerWebsite.Controllers.Api
                 return this.NotFound();
             }
 
-            using (var client = new HttpClient())
+            var guildValues = new Dictionary<string, string>
             {
-                var guildValues = new Dictionary<string, string>
-                {
-                    { "guildName", clanName },
-                    { "message", message },
-                    { "uid", savedGame.UniqueId },
-                    { "passwordHash", savedGame.PasswordHash },
-                };
+                { "guildName", clanName },
+                { "message", message },
+                { "uid", savedGame.UniqueId },
+                { "passwordHash", savedGame.PasswordHash },
+            };
 
-                var content = new FormUrlEncodedContent(guildValues);
+            var content = new FormUrlEncodedContent(guildValues);
 
-                var response = await client.PostAsync(BaseUrl + "/clans/sendGuildMessage.php", content);
+            var response = await this.httpClient.PostAsync(BaseUrl + "/clans/sendGuildMessage.php", content);
 
-                var responseString = await response.Content.ReadAsStringAsync();
-                return this.Ok(responseString);
-            }
+            var responseString = await response.Content.ReadAsStringAsync();
+            return this.Ok(responseString);
         }
 
         [Route("leaderboard")]
@@ -210,11 +206,8 @@ namespace ClickerHeroesTrackerWebsite.Controllers.Api
 
             if (savedGame?.UniqueId != null)
             {
-                using (var client = new HttpClient())
-                {
-                    Clan clan = await this.GetClanInfomation(client, savedGame);
-                    clanName = clan?.Guild?.Name ?? string.Empty;
-                }
+                Clan clan = await this.GetClanInfomation(savedGame);
+                clanName = clan?.Guild?.Name ?? string.Empty;
             }
 
             var model = new LeaderboardSummaryListResponse()
@@ -238,41 +231,38 @@ namespace ClickerHeroesTrackerWebsite.Controllers.Api
                 return this.NoContent();
             }
 
-            using (var client = new HttpClient())
+            Clan clan = await this.GetClanInfomation(savedGame);
+
+            if (clan?.Guild == null)
             {
-                Clan clan = await this.GetClanInfomation(client, savedGame);
-
-                if (clan?.Guild == null)
-                {
-                    return this.NoContent();
-                }
-
-                const string GetLeaderboardDataCommandText = @"
-                    WITH NumberedRows
-                    AS
-                    (SELECT Name, CurrentRaidLevel, MemberCount, ROW_NUMBER() OVER (ORDER BY CurrentRaidLevel DESC) AS RowNumber
-                    FROM Clans)
-                    SELECT Name, CurrentRaidLevel, MemberCount, RowNumber FROM NumberedRows WHERE Name = @Name";
-                var parameters = new Dictionary<string, object>
-                {
-                    { "@Name", clan.Guild.Name },
-                };
-                var leaderboardClan = new LeaderboardClan();
-                using (var command = this.databaseCommandFactory.Create(GetLeaderboardDataCommandText, parameters))
-                using (var reader = command.ExecuteReader())
-                {
-                    if (reader.Read())
-                    {
-                        leaderboardClan.Name = reader["Name"].ToString();
-                        leaderboardClan.CurrentRaidLevel = Convert.ToInt32(reader["CurrentRaidLevel"]);
-                        leaderboardClan.MemberCount = Convert.ToInt32(reader["MemberCount"]);
-                        leaderboardClan.Rank = Convert.ToInt32(reader["RowNumber"]);
-                        leaderboardClan.IsUserClan = true;
-                    }
-                }
-
-                return this.Ok(leaderboardClan);
+                return this.NoContent();
             }
+
+            const string GetLeaderboardDataCommandText = @"
+                WITH NumberedRows
+                AS
+                (SELECT Name, CurrentRaidLevel, MemberCount, ROW_NUMBER() OVER (ORDER BY CurrentRaidLevel DESC) AS RowNumber
+                FROM Clans)
+                SELECT Name, CurrentRaidLevel, MemberCount, RowNumber FROM NumberedRows WHERE Name = @Name";
+            var parameters = new Dictionary<string, object>
+            {
+                { "@Name", clan.Guild.Name },
+            };
+            var leaderboardClan = new LeaderboardClan();
+            using (var command = this.databaseCommandFactory.Create(GetLeaderboardDataCommandText, parameters))
+            using (var reader = command.ExecuteReader())
+            {
+                if (reader.Read())
+                {
+                    leaderboardClan.Name = reader["Name"].ToString();
+                    leaderboardClan.CurrentRaidLevel = Convert.ToInt32(reader["CurrentRaidLevel"]);
+                    leaderboardClan.MemberCount = Convert.ToInt32(reader["MemberCount"]);
+                    leaderboardClan.Rank = Convert.ToInt32(reader["RowNumber"]);
+                    leaderboardClan.IsUserClan = true;
+                }
+            }
+
+            return this.Ok(leaderboardClan);
         }
 
         public IList<LeaderboardClan> FetchLeaderboard(int page, int count, string clanName)
@@ -387,7 +377,7 @@ namespace ClickerHeroesTrackerWebsite.Controllers.Api
             }
         }
 
-        private async Task<Clan> GetClanInfomation(HttpClient client, SavedGame savedGame)
+        private async Task<Clan> GetClanInfomation(SavedGame savedGame)
         {
             var guildValues = new Dictionary<string, string>
                 {
@@ -397,7 +387,7 @@ namespace ClickerHeroesTrackerWebsite.Controllers.Api
 
             var content = new FormUrlEncodedContent(guildValues);
 
-            var response = await client.PostAsync(BaseUrl + "/clans/getGuildInfo.php", content);
+            var response = await this.httpClient.PostAsync(BaseUrl + "/clans/getGuildInfo.php", content);
 
             var responseString = await response.Content.ReadAsStringAsync();
 
