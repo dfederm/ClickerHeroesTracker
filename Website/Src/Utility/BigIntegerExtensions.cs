@@ -8,7 +8,7 @@ namespace ClickerHeroesTrackerWebsite.Utility
     using System.Globalization;
     using System.Numerics;
 
-    internal static class BigIntegerExtensions
+    public static class BigIntegerExtensions
     {
         /// <summary>
         /// Serialize a <see cref="BigInteger"/> to a string that can be used to transport it or store in system which don't support <see cref="BigInteger"/>.

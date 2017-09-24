@@ -6,6 +6,7 @@ namespace Website.Controllers.Api
 {
     using System;
     using System.Collections.Generic;
+    using System.Text.RegularExpressions;
     using System.Threading.Tasks;
     using ClickerHeroesTrackerWebsite.Models;
     using ClickerHeroesTrackerWebsite.Models.Api.Users;
@@ -22,6 +23,8 @@ namespace Website.Controllers.Api
     [Authorize]
     public class UserController : Controller
     {
+        private static Regex userNameRegex = new Regex("\\w+", RegexOptions.Compiled);
+
         private readonly GameData gameData;
 
         private readonly TelemetryClient telemetryClient;
@@ -44,6 +47,29 @@ namespace Website.Controllers.Api
             this.databaseCommandFactory = databaseCommandFactory;
             this.userSettingsProvider = userSettingsProvider;
             this.userManager = userManager;
+        }
+
+        [Route("")]
+        [HttpPost]
+        [AllowAnonymous]
+        public async Task<IActionResult> Create([FromBody] CreateUserRequest createUser)
+        {
+            if (this.ModelState.IsValid)
+            {
+                var user = new ApplicationUser { UserName = createUser.UserName, Email = createUser.Email };
+                var result = await this.userManager.CreateAsync(user, createUser.Password);
+                if (result.Succeeded)
+                {
+                    return this.Ok();
+                }
+
+                foreach (var error in result.Errors)
+                {
+                    this.ModelState.AddModelError(string.Empty, error.Description);
+                }
+            }
+
+            return this.BadRequest(this.ModelState);
         }
 
         [Route("{userName}/progress")]

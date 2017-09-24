@@ -1,7 +1,7 @@
 import { NO_ERRORS_SCHEMA, Component, DebugElement } from "@angular/core";
 import { ComponentFixture, TestBed, async } from "@angular/core/testing";
 import { By } from "@angular/platform-browser";
-import { NgbModal } from "@ng-bootstrap/ng-bootstrap";
+import { NgbModal, NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
 
 import { OpenDialogDirective } from "./openDialog";
 
@@ -17,14 +17,16 @@ describe("OpenDialogDirective", () => {
 
     // tslint:disable-next-line:max-classes-per-file - Allow multiple mock classes in a file
     @Component({
-        template: "<a [openDialog]=\"MockDialogComponent\"></a>",
+        template: "<a [openDialog]=\"MockDialogComponent\" [dismissCurrentDialog]=\"dismissCurrentDialog\" ></a>",
     })
     class MockComponent {
         public MockDialogComponent = MockDialogComponent;
+        public dismissCurrentDialog: boolean;
     }
 
     beforeEach(async(() => {
         let modalService = { open: (): void => void 0 };
+        let activeModal = { dismiss: (): void => void 0 };
         fixture = TestBed.configureTestingModule(
             {
                 declarations:
@@ -36,6 +38,7 @@ describe("OpenDialogDirective", () => {
                 providers:
                 [
                     { provide: NgbModal, useValue: modalService },
+                    { provide: NgbActiveModal, useValue: activeModal },
                 ],
                 schemas: [NO_ERRORS_SCHEMA],
             })
@@ -71,8 +74,42 @@ describe("OpenDialogDirective", () => {
         let modalService = TestBed.get(NgbModal) as NgbModal;
         spyOn(modalService, "open");
 
+        let activeModal = TestBed.get(NgbActiveModal) as NgbActiveModal;
+        spyOn(activeModal, "dismiss");
+
         link.triggerEventHandler("click", $event);
 
         expect(modalService.open).toHaveBeenCalledWith(MockDialogComponent);
+        expect(activeModal.dismiss).not.toHaveBeenCalled();
+    });
+
+    it("should close the active dialog when dismissCurrentDialog is true", () => {
+        let modalService = TestBed.get(NgbModal) as NgbModal;
+        spyOn(modalService, "open");
+
+        let activeModal = TestBed.get(NgbActiveModal) as NgbActiveModal;
+        spyOn(activeModal, "dismiss");
+
+        fixture.componentInstance.dismissCurrentDialog = true;
+        fixture.detectChanges();
+        link.triggerEventHandler("click", $event);
+
+        expect(modalService.open).toHaveBeenCalledWith(MockDialogComponent);
+        expect(activeModal.dismiss).toHaveBeenCalled();
+    });
+
+    it("should not close the active dialog when dismissCurrentDialog is false", () => {
+        let modalService = TestBed.get(NgbModal) as NgbModal;
+        spyOn(modalService, "open");
+
+        let activeModal = TestBed.get(NgbActiveModal) as NgbActiveModal;
+        spyOn(activeModal, "dismiss");
+
+        fixture.componentInstance.dismissCurrentDialog = false;
+        fixture.detectChanges();
+        link.triggerEventHandler("click", $event);
+
+        expect(modalService.open).toHaveBeenCalledWith(MockDialogComponent);
+        expect(activeModal.dismiss).not.toHaveBeenCalled();
     });
 });

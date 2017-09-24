@@ -4,6 +4,7 @@ import { Response } from "@angular/http";
 import { Router } from "@angular/router";
 
 import { LogInDialogComponent } from "../logInDialog/logInDialog";
+import { RegisterDialogComponent } from "../registerDialog/registerDialog";
 import { AuthenticationService } from "../../services/authenticationService/authenticationService";
 import { UploadService } from "../../services/uploadService/uploadService";
 
@@ -26,6 +27,8 @@ export class UploadDialogComponent implements OnInit {
     public addToProgress = true;
 
     public LogInDialogComponent = LogInDialogComponent;
+
+    public RegisterDialogComponent = RegisterDialogComponent;
 
     constructor(
         private authenticationService: AuthenticationService,

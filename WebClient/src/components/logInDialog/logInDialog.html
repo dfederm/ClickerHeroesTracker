@@ -31,7 +31,8 @@
         <button type="submit"
                 class="btn btn-primary">Log in</button>
         <p>
-            <a>Register as a new user?</a>
+            <a [openDialog]="RegisterDialogComponent"
+               [dismissCurrentDialog]="true">Register as a new user?</a>
         </p>
         <p>
             <a>Forgot your password?</a>

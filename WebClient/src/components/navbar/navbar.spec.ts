@@ -49,7 +49,7 @@ describe("NavbarComponent", () => {
                     { text: "Upload", dialog: component.UploadDialogComponent },
                     { text: "What's New", url: "/news" },
                     { text: "Feedback" },
-                    { text: "Register" },
+                    { text: "Register", dialog: component.RegisterDialogComponent },
                     { text: "Log in", dialog: component.LogInDialogComponent },
                 ];
             for (let i = 0; i < navItems.length; i++) {

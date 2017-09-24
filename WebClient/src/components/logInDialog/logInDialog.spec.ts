@@ -2,7 +2,7 @@ import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { By } from "@angular/platform-browser";
 import { FormsModule } from "@angular/forms";
 import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
-import { DebugElement } from "@angular/core";
+import { DebugElement, NO_ERRORS_SCHEMA } from "@angular/core";
 import { UserAgentApplication } from "msalx";
 
 import { LogInDialogComponent } from "./logInDialog";
@@ -52,6 +52,7 @@ describe("LogInDialogComponent", () => {
                     { provide: AuthenticationService, useValue: authenticationService },
                     { provide: NgbActiveModal, useValue: activeModal },
                 ],
+                schemas: [NO_ERRORS_SCHEMA],
             })
             .compileComponents()
             .then(() => {

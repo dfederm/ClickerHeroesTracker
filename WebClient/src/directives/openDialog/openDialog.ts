@@ -1,5 +1,5 @@
-import { Directive, ElementRef, HostListener, Input } from "@angular/core";
-import { NgbModal } from "@ng-bootstrap/ng-bootstrap";
+import { Directive, ElementRef, HostListener, Input, Optional } from "@angular/core";
+import { NgbModal, NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
 
 @Directive({
     selector: "[openDialog]",
@@ -8,9 +8,14 @@ export class OpenDialogDirective {
     @Input()
     public openDialog: string;
 
+    @Input()
+    public dismissCurrentDialog: boolean;
+
     constructor(
         element: ElementRef,
-        private modalService: NgbModal) {
+        private modalService: NgbModal,
+        @Optional() private activeModal: NgbActiveModal,
+    ) {
         (element.nativeElement as HTMLAnchorElement).href = "#";
     }
 
@@ -18,6 +23,11 @@ export class OpenDialogDirective {
     public onClick($event: MouseEvent): void {
         $event.preventDefault();
         ($event.target as HTMLElement).blur();
+
+        if (this.activeModal && this.dismissCurrentDialog) {
+            this.activeModal.dismiss();
+        }
+
         this.modalService.open(this.openDialog);
     }
 }
