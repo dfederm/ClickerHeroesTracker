@@ -3,6 +3,7 @@ import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
 import { UserAgentApplication } from "msalx";
 
 import { AuthenticationService } from "../../services/authenticationService/authenticationService";
+import { RegisterDialogComponent } from "../registerDialog/registerDialog";
 
 @Component({
     selector: "logInDialog",
@@ -19,6 +20,8 @@ export class LogInDialogComponent implements OnInit {
     public username = "";
 
     public password = "";
+
+    public RegisterDialogComponent = RegisterDialogComponent;
 
     constructor(
         private authenticationService: AuthenticationService,

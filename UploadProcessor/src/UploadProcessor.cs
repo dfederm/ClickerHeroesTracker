@@ -17,6 +17,7 @@ namespace ClickerHeroesTracker.UploadProcessor
     using ClickerHeroesTrackerWebsite.Models.Stats;
     using ClickerHeroesTrackerWebsite.Services.Database;
     using ClickerHeroesTrackerWebsite.Services.UploadProcessing;
+    using ClickerHeroesTrackerWebsite.Utility;
     using Microsoft.ApplicationInsights;
     using Microsoft.Extensions.Options;
     using Microsoft.WindowsAzure.Storage.Queue;
@@ -192,7 +193,7 @@ namespace ClickerHeroesTracker.UploadProcessor
                     /* Build a query that looks like this:
                         MERGE INTO AncientLevels WITH (HOLDLOCK)
                         USING
-                            (VALUES (123, 1, 100), (123, 2, 100), ... )
+                            (VALUES (123, 1, '100'), (123, 2, '100'), ... )
                                 AS Input(UploadId, AncientId, Level)
                             ON AncientLevels.UploadId = Input.UploadId
                             AND AncientLevels.AncientId = Input.AncientId
@@ -224,9 +225,9 @@ namespace ClickerHeroesTracker.UploadProcessor
                             ancientLevelsCommandText.Append(uploadId);
                             ancientLevelsCommandText.Append(",");
                             ancientLevelsCommandText.Append(pair.Key);
-                            ancientLevelsCommandText.Append(",");
-                            ancientLevelsCommandText.Append(pair.Value.AncientLevel);
-                            ancientLevelsCommandText.Append(")");
+                            ancientLevelsCommandText.Append(",'");
+                            ancientLevelsCommandText.Append(pair.Value.AncientLevel.ToTransportableString());
+                            ancientLevelsCommandText.Append("')");
 
                             isFirst = false;
                         }
@@ -380,9 +381,9 @@ namespace ClickerHeroesTracker.UploadProcessor
                     var computedStatsCommandParameters = new Dictionary<string, object>
                     {
                         { "@UploadId", uploadId },
-                        { "@TitanDamage", miscellaneousStatsModel.TitanDamage },
-                        { "@SoulsSpent", miscellaneousStatsModel.HeroSoulsSpent },
-                        { "@HeroSoulsSacrificed", miscellaneousStatsModel.HeroSoulsSacrificed },
+                        { "@TitanDamage", miscellaneousStatsModel.TitanDamage.ToTransportableString() },
+                        { "@SoulsSpent", miscellaneousStatsModel.HeroSoulsSpent.ToTransportableString() },
+                        { "@HeroSoulsSacrificed", miscellaneousStatsModel.HeroSoulsSacrificed.ToTransportableString() },
                         { "@TotalAncientSouls", miscellaneousStatsModel.TotalAncientSouls },
                         { "@TranscendentPower", miscellaneousStatsModel.TranscendentPower },
                         { "@Rubies", miscellaneousStatsModel.Rubies },
@@ -390,7 +391,7 @@ namespace ClickerHeroesTracker.UploadProcessor
                         { "@HighestZoneLifetime", miscellaneousStatsModel.HighestZoneLifetime },
                         { "@AscensionsThisTranscension", miscellaneousStatsModel.AscensionsThisTranscension },
                         { "@AscensionsLifetime", miscellaneousStatsModel.AscensionsLifetime },
-                        { "@MaxTranscendentPrimalReward", miscellaneousStatsModel.MaxTranscendentPrimalReward },
+                        { "@MaxTranscendentPrimalReward", miscellaneousStatsModel.MaxTranscendentPrimalReward.ToTransportableString() },
                         { "@BossLevelToTranscendentPrimalCap", miscellaneousStatsModel.BossLevelToTranscendentPrimalCap },
                     };
 

@@ -53,7 +53,11 @@ namespace ClickerHeroesTrackerWebsite.Controllers.Api
         {
             if (request.IsPasswordGrantType())
             {
-                var user = await this.userManager.FindByNameAsync(request.Username);
+                // Allow the user to log in with their email address too.
+                // We already check that usernames are only "word" chars (\w+), so this check is sufficient.
+                var user = request.Username.Contains("@")
+                    ? await this.userManager.FindByEmailAsync(request.Username)
+                    : await this.userManager.FindByNameAsync(request.Username);
                 if (user == null)
                 {
                     return this.BadRequest(new OpenIdConnectResponse

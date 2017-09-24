@@ -9,12 +9,32 @@ namespace ClickerHeroesTrackerWebsite.Tests.Mocks
     using System.Threading.Tasks;
     using ClickerHeroesTrackerWebsite.Models;
     using Microsoft.AspNetCore.Identity;
+    using Microsoft.Extensions.Logging;
+    using Moq;
 
-    internal sealed class MockUserManager : UserManager<ApplicationUser>
+    public class MockUserManager : UserManager<ApplicationUser>
     {
         public MockUserManager()
             : base(new MockUserStore(), null, null, null, null, null, null, null, null)
         {
+        }
+
+        public static Mock<UserManager<ApplicationUser>> CreateMock()
+        {
+            var mockUserStore = new Mock<IUserStore<ApplicationUser>>();
+            var mockUserManager = new Mock<UserManager<ApplicationUser>>(
+                MockBehavior.Strict,
+                mockUserStore.Object,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null);
+            mockUserManager.SetupProperty(_ => _.Logger);
+            return mockUserManager;
         }
 
         private sealed class MockUserStore : IUserStore<ApplicationUser>

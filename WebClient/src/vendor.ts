@@ -17,3 +17,4 @@ import "toFormat";
 import "@markpieszak/ng-application-insights";
 import "ng2-charts";
 import "msalx";
+import "angular-compare-validator";

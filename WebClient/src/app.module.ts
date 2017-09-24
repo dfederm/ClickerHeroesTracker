@@ -9,6 +9,7 @@ import { TimeAgoPipe } from "time-ago-pipe";
 import { AdsenseModule } from "ng2-adsense";
 import { ApplicationInsightsModule, AppInsightsService } from "@markpieszak/ng-application-insights";
 import { ChartsModule } from "ng2-charts";
+import { CompareValidatorDirective } from "angular-compare-validator";
 
 import { AppComponent } from "./components/app/app";
 import { HomeComponent } from "./components/home/home";
@@ -26,6 +27,7 @@ import { ClansComponent } from "./components/clans/clans";
 import { UserProgressComponent } from "./components/userProgress/userProgress";
 import { UserCompareComponent } from "./components/userCompare/userCompare";
 import { BannerComponent } from "./components/banner/banner";
+import { RegisterDialogComponent } from "./components/registerDialog/registerDialog";
 
 import { OpenDialogDirective } from "./directives/openDialog/openDialog";
 
@@ -85,11 +87,14 @@ const routes: Routes =
     UserProgressComponent,
     UserCompareComponent,
     BannerComponent,
+    RegisterDialogComponent,
+    CompareValidatorDirective,
   ],
   entryComponents:
   [
     LogInDialogComponent,
     UploadDialogComponent,
+    RegisterDialogComponent,
   ],
   providers:
   [

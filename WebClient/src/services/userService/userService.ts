@@ -5,6 +5,19 @@ import "rxjs/add/operator/toPromise";
 
 import { AuthenticationService } from "../../services/authenticationService/authenticationService";
 
+export interface ICreateUserRequest {
+    userName: string;
+
+    email: string;
+
+    password: string;
+}
+
+// This actually pretty generic, so if it's used elsewhere consider moving it somewhere more generic
+export interface IValidationErrorResponse {
+    [field: string]: string[];
+}
+
 export interface IProgressData {
     titanDamageData: { [date: string]: string };
 
@@ -46,6 +59,44 @@ export class UserService {
         this.authenticationService
             .isLoggedIn()
             .subscribe(isLoggedIn => this.isLoggedIn = isLoggedIn);
+    }
+
+    public create(userName: string, email: string, password: string): Promise<void> {
+        let headers = new Headers();
+        headers.append("Content-Type", "application/json");
+        let options = new RequestOptions({ headers });
+
+        let body: ICreateUserRequest = {
+            userName,
+            email,
+            password,
+        };
+
+        return this.http
+            .post("/api/users", body, options)
+            .toPromise()
+            .then(() => void 0)
+            .catch(error => {
+                let errors: string[] = [];
+
+                let validationErrorResponse: IValidationErrorResponse;
+                try {
+                    validationErrorResponse = error.json();
+                } catch (error) {
+                    // It must not have been json
+                }
+
+                if (validationErrorResponse) {
+                    for (let field in validationErrorResponse) {
+                        errors.push(...validationErrorResponse[field]);
+                    }
+                } else {
+                    errors.push(error.message || error.toString());
+                }
+
+                appInsights.trackEvent("UserService.create.error", { message: errors.join(";") });
+                return Promise.reject(errors);
+            });
     }
 
     public getProgress(userName: string, start: Date, end: Date): Promise<IProgressData> {

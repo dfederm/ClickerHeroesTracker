@@ -1,6 +1,7 @@
 import { Component, OnInit } from "@angular/core";
 
 import { AuthenticationService } from "../../services/authenticationService/authenticationService";
+import { RegisterDialogComponent } from "../registerDialog/registerDialog";
 import { LogInDialogComponent } from "../logInDialog/logInDialog";
 import { UploadDialogComponent } from "../uploadDialog/uploadDialog";
 
@@ -21,6 +22,7 @@ export class NavbarComponent implements OnInit {
 
     public isLoggedIn: boolean;
 
+    public RegisterDialogComponent = RegisterDialogComponent;
     public LogInDialogComponent = LogInDialogComponent;
     public UploadDialogComponent = UploadDialogComponent;
 
