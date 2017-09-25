@@ -31,19 +31,9 @@ namespace ClickerHeroesTrackerWebsite.Models.Settings
         bool AreUploadsPublic { get; set; }
 
         /// <summary>
-        /// Gets or sets a value indicating whether the reduced solomon formula (Log) as opposed to the more optimal one (Ln).
-        /// </summary>
-        bool UseReducedSolomonFormula { get; set; }
-
-        /// <summary>
         /// Gets or sets the user's play style.
         /// </summary>
         PlayStyle PlayStyle { get; set; }
-
-        /// <summary>
-        /// Gets or sets a value indicating whether the user wants to see experimental stats
-        /// </summary>
-        bool UseExperimentalStats { get; set; }
 
         /// <summary>
         /// Gets or sets a value indicating whether the user wants to see numbers in scientific notation
