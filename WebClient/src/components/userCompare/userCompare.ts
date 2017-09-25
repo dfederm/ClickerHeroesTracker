@@ -40,9 +40,7 @@ export class UserCompareComponent implements OnInit {
         playStyle: "hybrid",
         scientificNotationThreshold: 100000,
         useEffectiveLevelForSuggestions: false,
-        useExperimentalStats: true,
         useLogarithmicGraphScale: true,
-        useReducedSolomonFormula: false,
         useScientificNotation: true,
     };
 

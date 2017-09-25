@@ -48,19 +48,6 @@ namespace ClickerHeroesTrackerWebsite.Models.Settings
             }
         }
 
-        public bool UseReducedSolomonFormula
-        {
-            get
-            {
-                return this.GetValue(3, bool.TryParse, false);
-            }
-
-            set
-            {
-                this.SetValue(3, value.ToString());
-            }
-        }
-
         public PlayStyle PlayStyle
         {
             get
@@ -71,19 +58,6 @@ namespace ClickerHeroesTrackerWebsite.Models.Settings
             set
             {
                 this.SetValue(4, value.ToString());
-            }
-        }
-
-        public bool UseExperimentalStats
-        {
-            get
-            {
-                return this.GetValue(5, bool.TryParse, false);
-            }
-
-            set
-            {
-                this.SetValue(5, value.ToString());
             }
         }
 

@@ -2,11 +2,7 @@
 {
     areUploadsPublic: boolean;
 
-    useReducedSolomonFormula: boolean;
-
     playStyle: string;
-
-    useExperimentalStats: boolean;
 
     useScientificNotation: boolean;
 

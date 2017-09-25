@@ -31,22 +31,10 @@ namespace ClickerHeroesTrackerWebsite.Models
         public bool AreUploadsPublic { get; set; }
 
         /// <summary>
-        /// Gets or sets the user's preferred solomon formula (Log or Ln).
-        /// </summary>
-        [Display(Name = "Pre-transcendant Solomon formula")]
-        public string SolomonFormula { get; set; }
-
-        /// <summary>
         /// Gets or sets the user's preferred play style.
         /// </summary>
         [Display(Name = "Play Style")]
         public string PlayStyle { get; set; }
-
-        /// <summary>
-        /// Gets or sets a value indicating whether the user wants to see experimental stats
-        /// </summary>
-        [Display(Name = "Experimental stats")]
-        public bool UseExperimentalStats { get; set; }
 
         /// <summary>
         /// Gets or sets a value indicating whether the user wants to see numbers in scientific notation

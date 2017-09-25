@@ -110,9 +110,7 @@ namespace ClickerHeroesTrackerWebsite.Controllers
             var userSettings = this.userSettingsProvider.Get(user.Id);
 
             userSettings.AreUploadsPublic = indexViewModel.AreUploadsPublic;
-            userSettings.UseReducedSolomonFormula = indexViewModel.SolomonFormula.Equals("Log", StringComparison.OrdinalIgnoreCase);
             userSettings.PlayStyle = indexViewModel.PlayStyle.SafeParseEnum<PlayStyle>();
-            userSettings.UseExperimentalStats = indexViewModel.UseExperimentalStats;
             userSettings.UseScientificNotation = indexViewModel.UseScientificNotation;
             userSettings.UseEffectiveLevelForSuggestions = indexViewModel.UseEffectiveLevelForSuggestions;
             userSettings.UseLogarithmicGraphScale = indexViewModel.UseLogarithmicGraphScale;
@@ -336,9 +334,7 @@ namespace ClickerHeroesTrackerWebsite.Controllers
                 HasPassword = await this.userManager.HasPasswordAsync(user),
                 Logins = await this.userManager.GetLoginsAsync(user),
                 AreUploadsPublic = userSettings.AreUploadsPublic,
-                SolomonFormula = userSettings.UseReducedSolomonFormula ? "Log" : "Ln",
                 PlayStyle = userSettings.PlayStyle.ToString(),
-                UseExperimentalStats = userSettings.UseExperimentalStats,
                 UseScientificNotation = userSettings.UseScientificNotation,
                 ScientificNotationThreshold = userSettings.ScientificNotationThreshold,
                 UseEffectiveLevelForSuggestions = userSettings.UseEffectiveLevelForSuggestions,

@@ -56,21 +56,6 @@
         </dl>
         <dl class="dl-horizontal">
             <dt>
-                <label asp-for="SolomonFormula" class="control-label"></label>
-            </dt>
-            <dd>
-                <label class="radio-inline">
-                    <input type="radio" asp-for="SolomonFormula" value="Ln" />
-                    Ln <a href="#" class="text-muted" data-toggle="tooltip" data-placement="right" title="This formula is for optimal efficiency, but some consider it more boring as it causes you to dump many levels into Solomon">(?)</a>
-                </label>
-                <label class="radio-inline">
-                    <input type="radio" asp-for="SolomonFormula" value="Log" />
-                    Log <a href="#" class="text-muted" data-toggle="tooltip" data-placement="right" title="This formula favors Solomon a little less. It's less efficient than the Ln formula, but some consider it more exciting as you will spend less time dumping levels into Solomon">(?)</a>
-                </label>
-            </dd>
-        </dl>
-        <dl class="dl-horizontal">
-            <dt>
                 <label asp-for="PlayStyle" class="control-label"></label>
                 <a href="https://www.reddit.com/r/ClickerHeroes/wiki/introduction#wiki_types_of_playstyle_builds" target="_blank" class="text-muted" data-toggle="tooltip" data-placement="bottom" title="This is how you play the game. Click for details on Idle and Active. Hybrid is basically Idle but using all cooldowns before ascending.">(?)</a>
             </dt>
@@ -91,18 +76,6 @@
             <dd>
                 <input type="number" asp-for="HybridRatio" class="form-control" />
                 <span asp-validation-for="HybridRatio" class="text-danger"></span>
-            </dd>
-        </dl>
-        <dl class="dl-horizontal">
-            <dt>
-                <label asp-for="UseExperimentalStats" class="control-label"></label>
-                <a href="#" class="text-muted" data-toggle="tooltip" data-placement="bottom" title="">(?)</a>
-            </dt>
-            <dd class="checkbox">
-                <label asp-for="UseExperimentalStats">
-                    <input type="checkbox" asp-for="UseExperimentalStats" />
-                    Show experimental stats which may not be fully fleshed out and data availability may be spotty. Consider these &quot;beta&quot; features
-                </label>
             </dd>
         </dl>
         <dl class="dl-horizontal">
