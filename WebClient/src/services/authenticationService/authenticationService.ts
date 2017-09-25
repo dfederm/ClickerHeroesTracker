@@ -49,10 +49,15 @@ export class AuthenticationService {
             .then(() => this.scheduleRefresh());
     }
 
-    public logInWithAssertion(grantType: string, assertion: string): Promise<void> {
+    public logInWithAssertion(grantType: string, assertion: string, username?: string): Promise<void> {
         let params = new URLSearchParams();
         params.append("grant_type", grantType);
         params.append("assertion", assertion);
+
+        if (username) {
+            params.append("username", username);
+        }
+
         return this.getTokens(params)
             .then(() => this.scheduleRefresh());
     }

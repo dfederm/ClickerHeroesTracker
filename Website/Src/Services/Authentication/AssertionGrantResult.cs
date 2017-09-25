@@ -8,13 +8,17 @@ namespace Website.Services.Authentication
     {
         public string ExternalUserId { get; set; }
 
+        public string ExternalUserEmail { get; set; }
+
         public string Error { get; set; }
 
         public bool IsSuccessful
         {
             get
             {
-                return string.IsNullOrEmpty(this.Error) && !string.IsNullOrEmpty(this.ExternalUserId);
+                return string.IsNullOrEmpty(this.Error)
+                    && !string.IsNullOrEmpty(this.ExternalUserId)
+                    && !string.IsNullOrEmpty(this.ExternalUserEmail);
             }
         }
     }

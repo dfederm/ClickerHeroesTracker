@@ -20,6 +20,7 @@ namespace UnitTests.Services.Authentication
     {
         private const string ClientId = "SomeClientId";
         private const string ExternalUserId = "SomeExternalUserId";
+        private const string ExternalUserEmail = "SomeExternalUserEmail";
         private const string ConfigurationEndpoint = "https://login.microsoftonline.com/common/v2.0/.well-known/openid-configuration";
 
         // Taken from http://self-issued.info/docs/draft-ietf-jose-json-web-key.html#rfc.appendix.A.2
@@ -60,7 +61,7 @@ namespace UnitTests.Services.Authentication
             var tokenHandler = new JwtSecurityTokenHandler();
             var token = new JwtSecurityToken(
                 audience: ClientId,
-                claims: new[] { new Claim("sub", ExternalUserId) },
+                claims: new[] { new Claim("sub", ExternalUserId), new Claim("email", ExternalUserEmail) },
                 notBefore: DateTime.UtcNow,
                 expires: DateTime.UtcNow + TimeSpan.FromHours(1),
                 signingCredentials: new SigningCredentials(jsonWebKey, jsonWebKey.Alg));
@@ -71,6 +72,7 @@ namespace UnitTests.Services.Authentication
             Assert.NotNull(result);
             Assert.True(result.IsSuccessful);
             Assert.Equal(ExternalUserId, result.ExternalUserId);
+            Assert.Equal(ExternalUserEmail, result.ExternalUserEmail);
 
             httpClient.VerifyNoOutstandingRequests();
         }
@@ -97,7 +99,7 @@ namespace UnitTests.Services.Authentication
             var tokenHandler = new JwtSecurityTokenHandler();
             var token = new JwtSecurityToken(
                 audience: "SomeOtherClientId",
-                claims: new[] { new Claim("sub", ExternalUserId) },
+                claims: new[] { new Claim("sub", ExternalUserId), new Claim("email", ExternalUserEmail) },
                 notBefore: DateTime.UtcNow,
                 expires: DateTime.UtcNow + TimeSpan.FromHours(1),
                 signingCredentials: new SigningCredentials(jsonWebKey, jsonWebKey.Alg));

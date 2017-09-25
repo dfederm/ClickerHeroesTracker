@@ -314,6 +314,16 @@ describe("AuthenticationService", () => {
             // An interval was started, so abandon it.
             discardPeriodicTasks();
         }));
+
+        it("should add the username when provided", fakeAsync(() => {
+            let authenticationService = injector.get(AuthenticationService) as AuthenticationService;
+            authenticationService.logInWithAssertion("someGrantType", "someAssertion", "someUsername");
+
+            expect(lastConnection).not.toBeNull("no http service connection made");
+            expect(lastConnection.request.method).toEqual(RequestMethod.Post, "method invalid");
+            expect(lastConnection.request.url).toEqual("/api/auth/token", "url invalid");
+            expect(lastConnection.request.text()).toEqual("grant_type=someGrantType&assertion=someAssertion&username=someUsername&scope=openid%20offline_access", "request body invalid");
+        }));
     });
 
     describe("logOut", () => {

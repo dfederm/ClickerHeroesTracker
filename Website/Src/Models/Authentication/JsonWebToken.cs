@@ -30,5 +30,10 @@ namespace Website.Models.Authentication
         /// Gets or sets the expiration time on or after which the JWT MUST NOT be accepted for processing.
         /// </summary>
         public string Exp { get; set; }
+
+        /// <summary>
+        /// Gets or sets the email address.
+        /// </summary>
+        public string Email { get; set; }
     }
 }

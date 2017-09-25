@@ -57,7 +57,7 @@ namespace Website.Services.Authentication
                 return new AssertionGrantResult { Error = "The token was for the wrong audience" };
             }
 
-            return new AssertionGrantResult { ExternalUserId = googleToken.Sub };
+            return new AssertionGrantResult { ExternalUserId = googleToken.Sub, ExternalUserEmail = googleToken.Email };
         }
     }
 }

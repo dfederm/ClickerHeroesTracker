@@ -16,6 +16,7 @@ namespace UnitTests.Services.Authentication
     {
         private const string ClientId = "SomeClientId";
         private const string ExternalUserId = "SomeExternalUserId";
+        private const string ExternalUserEmail = "SomeExternalUserEmail";
         private const string Assertion = "SomeAssertion";
         private const string ValidationEndpoint = "https://www.googleapis.com/oauth2/v3/tokeninfo?id_token=" + Assertion;
 
@@ -36,6 +37,7 @@ namespace UnitTests.Services.Authentication
             {
                 Aud = ClientId,
                 Sub = ExternalUserId,
+                Email = ExternalUserEmail,
             });
 
             var handler = new GoogleAssertionGrantHandler(options, httpClient);
@@ -44,6 +46,7 @@ namespace UnitTests.Services.Authentication
             Assert.NotNull(result);
             Assert.True(result.IsSuccessful);
             Assert.Equal(ExternalUserId, result.ExternalUserId);
+            Assert.Equal(ExternalUserEmail, result.ExternalUserEmail);
 
             httpClient.VerifyNoOutstandingRequests();
         }

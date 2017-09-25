@@ -28,6 +28,7 @@ import { UserProgressComponent } from "./components/userProgress/userProgress";
 import { UserCompareComponent } from "./components/userCompare/userCompare";
 import { BannerComponent } from "./components/banner/banner";
 import { RegisterDialogComponent } from "./components/registerDialog/registerDialog";
+import { ExternalLoginsComponent } from "./components/externalLogins/externalLogins";
 
 import { OpenDialogDirective } from "./directives/openDialog/openDialog";
 
@@ -89,6 +90,7 @@ const routes: Routes =
     BannerComponent,
     RegisterDialogComponent,
     CompareValidatorDirective,
+    ExternalLoginsComponent,
   ],
   entryComponents:
   [
