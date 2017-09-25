@@ -1,0 +1,48 @@
+<div *ngIf="error"
+     class="alert alert-danger">
+    {{ error }}
+</div>
+<div *ngIf="!needUsername">
+    <button class="btn btn-primary"
+            (click)="googleLogIn()">Google</button>
+    <button class="btn btn-primary"
+            (click)="facebookLogIn()">Facebook</button>
+    <button class="btn btn-primary"
+            (click)="microsoftLogIn()">Microsoft</button>
+</div>
+<div *ngIf="needUsername">
+    <p>
+        You've successfully logged in with <strong>{{ provider }}</strong>. Please pick a user name for this site
+    </p>
+    <p>
+        Already have an account? First log in with your password and then go to your settings to add a social login
+    </p>
+    <form (ngSubmit)="chooseUserName()"
+          #registerForm="ngForm">
+        <div class="form-group"
+             [class.has-danger]="!(formUsername.valid || formUsername.pristine)">
+            <label for="username">Username</label>
+            <input type="text"
+                   class="form-control"
+                   [class.form-control-danger]="!(formUsername.valid || formUsername.pristine)"
+                   id="username"
+                   name="username"
+                   [(ngModel)]="username"
+                   #formUsername="ngModel"
+                   required
+                   minlength="5" />
+            <div *ngIf="formUsername.invalid && (formUsername.dirty || formUsername.touched)"
+                 class="alert alert-danger">
+                <div *ngIf="formUsername.errors.required">
+                    Username is required
+                </div>
+                <div *ngIf="formUsername.errors.minlength">
+                    Username must be at least 5 characters long
+                </div>
+            </div>
+        </div>
+        <button type="submit"
+                [disabled]="!registerForm.form.valid"
+                class="btn btn-primary">Register</button>
+    </form>
+</div>

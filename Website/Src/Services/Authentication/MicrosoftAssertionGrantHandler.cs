@@ -6,6 +6,7 @@ namespace Website.Services.Authentication
 {
     using System;
     using System.IdentityModel.Tokens.Jwt;
+    using System.Linq;
     using System.Net.Http;
     using System.Threading.Tasks;
     using Microsoft.Extensions.Options;
@@ -57,7 +58,8 @@ namespace Website.Services.Authentication
                     var jwtToken = validatedToken as JwtSecurityToken;
                     if (jwtToken != null && !string.IsNullOrEmpty(jwtToken.Subject))
                     {
-                        return new AssertionGrantResult { ExternalUserId = jwtToken.Subject };
+                        var email = jwtToken.Claims.FirstOrDefault(claim => claim.Type.Equals("email", StringComparison.OrdinalIgnoreCase))?.Value;
+                        return new AssertionGrantResult { ExternalUserId = jwtToken.Subject, ExternalUserEmail = email };
                     }
                 }
             }

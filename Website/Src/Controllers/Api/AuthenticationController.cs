@@ -124,34 +124,62 @@ namespace ClickerHeroesTrackerWebsite.Controllers.Api
                     });
                 }
 
-                var result = await assertionGrantHandler.ValidateAsync(request.Assertion);
-                if (!result.IsSuccessful)
+                var validationResult = await assertionGrantHandler.ValidateAsync(request.Assertion);
+                if (!validationResult.IsSuccessful)
                 {
                     return this.BadRequest(new OpenIdConnectResponse
                     {
                         Error = OpenIdConnectConstants.Errors.InvalidGrant,
-                        ErrorDescription = result.Error,
+                        ErrorDescription = validationResult.Error,
                     });
                 }
 
                 // Find the user associated with this external log in
-                var user = await this.userManager.FindByLoginAsync(assertionGrantHandler.Name, result.ExternalUserId);
+                var user = await this.userManager.FindByLoginAsync(assertionGrantHandler.Name, validationResult.ExternalUserId);
                 if (user == null)
                 {
-                    // If the user does not have an account, then ask the user to create an account.
-                    return this.BadRequest(new OpenIdConnectResponse
+                    if (string.IsNullOrEmpty(request.Username))
                     {
-                        Error = OpenIdConnectConstants.Errors.AccountSelectionRequired,
-                    });
+                        // If the user does not have an account, then ask the user to create an account.
+                        return this.BadRequest(new OpenIdConnectResponse
+                        {
+                            Error = OpenIdConnectConstants.Errors.AccountSelectionRequired,
+                        });
+                    }
+                    else
+                    {
+                        // They provided a user name, so try to implicitly create an account for them
+                        user = new ApplicationUser { UserName = request.Username, Email = validationResult.ExternalUserEmail };
+                        var creationResult = await this.userManager.CreateAsync(user);
+                        if (!creationResult.Succeeded)
+                        {
+                            return this.BadRequest(new OpenIdConnectResponse
+                            {
+                                Error = OpenIdConnectConstants.Errors.InvalidGrant,
+                                ErrorDescription = string.Join(" ", creationResult.Errors.Select(error => error.Description)),
+                            });
+                        }
+
+                        var login = new UserLoginInfo(assertionGrantHandler.Name, validationResult.ExternalUserId, assertionGrantHandler.Name);
+                        var addLoginResult = await this.userManager.AddLoginAsync(user, login);
+                        if (!addLoginResult.Succeeded)
+                        {
+                            return this.BadRequest(new OpenIdConnectResponse
+                            {
+                                Error = OpenIdConnectConstants.Errors.InvalidGrant,
+                                ErrorDescription = string.Join(" ", creationResult.Errors.Select(error => error.Description)),
+                            });
+                        }
+                    }
                 }
 
-                // Ensure the user is still allowed to sign in.
+                // Ensure the user is allowed to sign in.
                 if (!await this.signInManager.CanSignInAsync(user))
                 {
                     return this.BadRequest(new OpenIdConnectResponse
                     {
                         Error = OpenIdConnectConstants.Errors.InvalidGrant,
-                        ErrorDescription = "The user is no longer allowed to sign in.",
+                        ErrorDescription = "The user is not allowed to sign in.",
                     });
                 }
 

@@ -133,31 +133,6 @@ namespace ClickerHeroesTrackerWebsite.Controllers
         }
 
         /// <summary>
-        /// GET: /Account/ConfirmEmail
-        /// </summary>
-        /// <param name="userId">The user id</param>
-        /// <param name="code">The confirmation code sent to the user</param>
-        /// <returns>A view with the status</returns>
-        [HttpGet]
-        [AllowAnonymous]
-        public async Task<IActionResult> ConfirmEmail(string userId, string code)
-        {
-            if (userId == null || code == null)
-            {
-                return this.View("Error");
-            }
-
-            var user = await this.userManager.FindByIdAsync(userId);
-            if (user == null)
-            {
-                return this.View("Error");
-            }
-
-            var result = await this.userManager.ConfirmEmailAsync(user, code);
-            return this.View(result.Succeeded ? "ConfirmEmail" : "Error");
-        }
-
-        /// <summary>
         /// GET: /Account/ForgotPassword
         /// </summary>
         /// <returns>The forgot password view</returns>

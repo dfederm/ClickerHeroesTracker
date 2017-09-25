@@ -16,9 +16,10 @@ namespace UnitTests.Services.Authentication
     {
         private const string AppId = "SomeAppId";
         private const string ExternalUserId = "SomeExternalUserId";
+        private const string ExternalUserEmail = "SomeExternalUserEmail";
         private const string Assertion = "SomeAssertion";
         private const string AppEndpoint = "https://graph.facebook.com/app/?access_token=" + Assertion;
-        private const string UserEndpoint = "https://graph.facebook.com/me?fields=id&access_token=" + Assertion;
+        private const string UserEndpoint = "https://graph.facebook.com/me?fields=id,email&access_token=" + Assertion;
 
         [Fact]
         public async Task ValidateAsync_Success()
@@ -34,7 +35,7 @@ namespace UnitTests.Services.Authentication
 
             var httpClient = new MockHttpClient();
             httpClient.AddMockResponse(AppEndpoint, new FacebookApp { Id = AppId });
-            httpClient.AddMockResponse(UserEndpoint, new FacebookUser { Id = ExternalUserId });
+            httpClient.AddMockResponse(UserEndpoint, new FacebookUser { Id = ExternalUserId, Email = ExternalUserEmail });
 
             var handler = new FacebookAssertionGrantHandler(options, httpClient);
             var result = await handler.ValidateAsync(Assertion);
@@ -42,6 +43,7 @@ namespace UnitTests.Services.Authentication
             Assert.NotNull(result);
             Assert.True(result.IsSuccessful);
             Assert.Equal(ExternalUserId, result.ExternalUserId);
+            Assert.Equal(ExternalUserEmail, result.ExternalUserEmail);
 
             httpClient.VerifyNoOutstandingRequests();
         }

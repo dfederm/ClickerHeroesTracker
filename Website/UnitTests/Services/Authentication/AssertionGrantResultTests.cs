@@ -9,38 +9,25 @@ namespace UnitTests.Services.Authentication
 
     public sealed class AssertionGrantResultTests
     {
-        [Fact]
-        public void IsSuccessful_ExternalUserIdOnly()
+        [Theory]
+        [InlineData(false, null, null, null)]
+        [InlineData(false, null, "SomeExternalUserEmail", null)]
+        [InlineData(false, null, null, "SomeError")]
+        [InlineData(false, null, "SomeExternalUserEmail", "SomeError")]
+        [InlineData(false, "SomeExternalUserId", null, null)]
+        [InlineData(true, "SomeExternalUserId", "SomeExternalUserEmail", null)]
+        [InlineData(false, "SomeExternalUserId", null, "SomeError")]
+        [InlineData(false, "SomeExternalUserId", "SomeExternalUserEmail", "SomeError")]
+        public void IsSuccessful(bool isSuccessful, string externalUserId, string externalUserEmail, string error)
         {
             var result = new AssertionGrantResult
             {
-                ExternalUserId = "SomeExternalUserId",
+                ExternalUserId = externalUserId,
+                ExternalUserEmail = externalUserEmail,
+                Error = error,
             };
 
-            Assert.True(result.IsSuccessful);
-        }
-
-        [Fact]
-        public void IsSuccessful_ErrorOnly()
-        {
-            var result = new AssertionGrantResult
-            {
-                Error = "SomeError",
-            };
-
-            Assert.False(result.IsSuccessful);
-        }
-
-        [Fact]
-        public void IsSuccessful_BothSet()
-        {
-            var result = new AssertionGrantResult
-            {
-                ExternalUserId = "SomeExternalUserId",
-                Error = "SomeError",
-            };
-
-            Assert.False(result.IsSuccessful);
+            Assert.Equal(isSuccessful, result.IsSuccessful);
         }
     }
 }

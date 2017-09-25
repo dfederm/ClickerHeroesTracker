@@ -56,7 +56,7 @@ namespace Website.Services.Authentication
 
             // Get the facebook user id. We also have it on the client already but we can't trust clients to tell us who they are.
             FacebookUser facebookUser;
-            var userEndpoint = "https://graph.facebook.com/me?fields=id&access_token=" + assertion;
+            var userEndpoint = "https://graph.facebook.com/me?fields=id,email&access_token=" + assertion;
             using (var response = await this.httpClient.GetAsync(userEndpoint))
             {
                 if (response.StatusCode != HttpStatusCode.OK)
@@ -77,7 +77,7 @@ namespace Website.Services.Authentication
                 return new AssertionGrantResult { Error = "The token does not belong to a valid user" };
             }
 
-            return new AssertionGrantResult { ExternalUserId = facebookUser.Id };
+            return new AssertionGrantResult { ExternalUserId = facebookUser.Id, ExternalUserEmail = facebookUser.Email };
         }
     }
 }
