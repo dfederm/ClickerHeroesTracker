@@ -3,7 +3,6 @@ import { ActivatedRoute, Router, Params } from "@angular/router";
 import { FormsModule } from "@angular/forms";
 import { NO_ERRORS_SCHEMA, DebugElement } from "@angular/core";
 import { By } from "@angular/platform-browser";
-import { Observable } from "rxjs/Observable";
 import { BehaviorSubject } from "rxjs/BehaviorSubject";
 import { DatePipe, PercentPipe } from "@angular/common";
 
@@ -23,7 +22,6 @@ declare global {
 describe("UploadComponent", () => {
     let component: UploadComponent;
     let fixture: ComponentFixture<UploadComponent>;
-    let isLoggedIn: BehaviorSubject<boolean>;
     let routeParams: BehaviorSubject<Params>;
 
     let uploadServiceGetResolve: (upload: IUpload) => Promise<void>;
@@ -33,10 +31,8 @@ describe("UploadComponent", () => {
     let uploadServiceDeleteReject: () => Promise<void>;
 
     beforeEach(async(() => {
-        isLoggedIn = new BehaviorSubject(false);
-        let authenticationService = {
-            isLoggedIn: (): Observable<boolean> => isLoggedIn,
-        };
+        let userInfo = new BehaviorSubject({ isLoggedIn: false });
+        let authenticationService = { userInfo: () => userInfo };
         let uploadService = {
             get: (): Promise<IUpload> => new Promise<IUpload>((resolve, reject) => {
                 uploadServiceGetResolve = (upload) => {

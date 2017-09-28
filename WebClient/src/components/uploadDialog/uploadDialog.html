@@ -29,14 +29,14 @@
                 </label>
             </div>
         </fieldset>
-        <div *ngIf="isLoggedIn"
+        <div *ngIf="userInfo.isLoggedIn"
              class="form-group">
             <label class="form-check-label">
                 <input class="form-check-input" id="addToProgress" name="addToProgress" [(ngModel)]="addToProgress" type="checkbox">
                 Add this upload to my progress
             </label>
         </div>
-        <div *ngIf="!isLoggedIn"
+        <div *ngIf="!userInfo.isLoggedIn"
              class="alert alert-warning">
             Progress can only be tracked over time for logged in users. Please <a [openDialog]="LogInDialogComponent"
                class="alert-link">Log in</a> or <a [openDialog]="RegisterDialogComponent"

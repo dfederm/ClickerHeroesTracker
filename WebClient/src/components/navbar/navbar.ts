@@ -1,17 +1,9 @@
 import { Component, OnInit } from "@angular/core";
 
-import { AuthenticationService } from "../../services/authenticationService/authenticationService";
+import { AuthenticationService, IUserInfo } from "../../services/authenticationService/authenticationService";
 import { RegisterDialogComponent } from "../registerDialog/registerDialog";
 import { LogInDialogComponent } from "../logInDialog/logInDialog";
 import { UploadDialogComponent } from "../uploadDialog/uploadDialog";
-
-// tslint:disable-next-line:no-namespace
-declare global {
-    // tslint:disable-next-line:interface-name - We don't own this interface name, just extending it
-    interface Window {
-        adsbygoogle: object[];
-    }
-}
 
 @Component({
     selector: "navbar",
@@ -20,7 +12,7 @@ declare global {
 export class NavbarComponent implements OnInit {
     public isCollapsed = true;
 
-    public isLoggedIn: boolean;
+    public userInfo: IUserInfo;
 
     public RegisterDialogComponent = RegisterDialogComponent;
     public LogInDialogComponent = LogInDialogComponent;
@@ -32,8 +24,8 @@ export class NavbarComponent implements OnInit {
 
     public ngOnInit(): void {
         this.authenticationService
-            .isLoggedIn()
-            .subscribe(isLoggedIn => this.isLoggedIn = isLoggedIn);
+            .userInfo()
+            .subscribe(userInfo => this.userInfo = userInfo);
     }
 
     public logOut(): void {

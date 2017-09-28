@@ -5,14 +5,25 @@ import { NgbModal } from "@ng-bootstrap/ng-bootstrap";
 import { BehaviorSubject } from "rxjs/BehaviorSubject";
 
 import { NavbarComponent } from "./navbar";
-import { AuthenticationService } from "../../services/authenticationService/authenticationService";
+import { AuthenticationService, IUserInfo } from "../../services/authenticationService/authenticationService";
 
 describe("NavbarComponent", () => {
     let component: NavbarComponent;
     let fixture: ComponentFixture<NavbarComponent>;
 
+    const loggedInUser: IUserInfo = {
+        isLoggedIn: true,
+        id: "someId",
+        username: "someUsername",
+        email: "someEmail",
+    };
+
+    const notLoggedInUser: IUserInfo = {
+        isLoggedIn: false,
+    };
+
     beforeEach(async(() => {
-        let authenticationService = { isLoggedIn: (): void => void 0, logOut: (): void => void 0 };
+        let authenticationService = { userInfo: (): void => void 0, logOut: (): void => void 0 };
         let modalService = { open: (): void => void 0 };
 
         TestBed.configureTestingModule(
@@ -34,7 +45,7 @@ describe("NavbarComponent", () => {
 
     it("should display the anonymous nav bar when the user is not logged in", async(() => {
         let authenticationService = TestBed.get(AuthenticationService) as AuthenticationService;
-        spyOn(authenticationService, "isLoggedIn").and.returnValue(new BehaviorSubject(false));
+        spyOn(authenticationService, "userInfo").and.returnValue(new BehaviorSubject(notLoggedInUser));
 
         fixture.detectChanges();
         fixture.whenStable().then(() => {
@@ -74,7 +85,7 @@ describe("NavbarComponent", () => {
 
     it("should display the authenticated nav bar when the user is logged in", async(() => {
         let authenticationService = TestBed.get(AuthenticationService) as AuthenticationService;
-        spyOn(authenticationService, "isLoggedIn").and.returnValue(new BehaviorSubject(true));
+        spyOn(authenticationService, "userInfo").and.returnValue(new BehaviorSubject(loggedInUser));
 
         fixture.detectChanges();
         fixture.whenStable().then(() => {
@@ -120,36 +131,36 @@ describe("NavbarComponent", () => {
         });
     }));
 
-    it("should update isLoggedIn when the authenticationService updates", async(() => {
-        let isLoggedIn = new BehaviorSubject(false);
+    it("should update userInfo when the authenticationService updates", async(() => {
+        let userInfo = new BehaviorSubject(notLoggedInUser);
         let authenticationService = TestBed.get(AuthenticationService) as AuthenticationService;
-        spyOn(authenticationService, "isLoggedIn").and.returnValue(isLoggedIn);
+        spyOn(authenticationService, "userInfo").and.returnValue(userInfo);
 
         fixture.detectChanges();
         fixture.whenStable()
             .then(() => {
-                expect(component.isLoggedIn).toEqual(false);
-                isLoggedIn.next(true);
+                expect(component.userInfo).toEqual(notLoggedInUser);
+                userInfo.next(loggedInUser);
                 return fixture.whenStable();
             })
             .then(() => {
-                expect(component.isLoggedIn).toEqual(true);
-                isLoggedIn.next(true);
+                expect(component.userInfo).toEqual(loggedInUser);
+                userInfo.next(loggedInUser);
                 return fixture.whenStable();
             })
             .then(() => {
-                expect(component.isLoggedIn).toEqual(true);
-                isLoggedIn.next(false);
+                expect(component.userInfo).toEqual(loggedInUser);
+                userInfo.next(notLoggedInUser);
                 return fixture.whenStable();
             })
             .then(() => {
-                expect(component.isLoggedIn).toEqual(false);
+                expect(component.userInfo).toEqual(notLoggedInUser);
             });
     }));
 
     it("should be able to collape and expand the navbar", () => {
         let authenticationService = TestBed.get(AuthenticationService) as AuthenticationService;
-        spyOn(authenticationService, "isLoggedIn").and.returnValue(new BehaviorSubject(false));
+        spyOn(authenticationService, "userInfo").and.returnValue(new BehaviorSubject(notLoggedInUser));
 
         let toggler = fixture.debugElement.query(By.css(".navbar-toggler"));
 
@@ -172,7 +183,7 @@ describe("NavbarComponent", () => {
 
     it("should log out after clicking the log out button", () => {
         let authenticationService = TestBed.get(AuthenticationService) as AuthenticationService;
-        spyOn(authenticationService, "isLoggedIn").and.returnValue(new BehaviorSubject(true));
+        spyOn(authenticationService, "userInfo").and.returnValue(new BehaviorSubject(loggedInUser));
 
         fixture.detectChanges();
 

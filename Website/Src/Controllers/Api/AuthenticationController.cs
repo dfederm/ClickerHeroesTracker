@@ -6,6 +6,7 @@ namespace ClickerHeroesTrackerWebsite.Controllers.Api
 {
     using System.Collections.Generic;
     using System.Linq;
+    using System.Security.Claims;
     using System.Threading.Tasks;
     using AspNet.Security.OpenIdConnect.Extensions;
     using AspNet.Security.OpenIdConnect.Primitives;
@@ -198,6 +199,10 @@ namespace ClickerHeroesTrackerWebsite.Controllers.Api
             // Create a new ClaimsPrincipal containing the claims that
             // will be used to create an id_token, a token or a code.
             var principal = await this.signInManager.CreateUserPrincipalAsync(user);
+
+            // Add email claim as SignInManager weirdly doesn't add it even though it's right there.
+            var identity = (ClaimsIdentity)principal.Identity;
+            identity.AddClaim(OpenIdConnectConstants.Claims.Email, user.Email);
 
             // Create a new authentication ticket holding the user identity.
             var ticket = new AuthenticationTicket(principal, properties, OpenIdConnectServerDefaults.AuthenticationScheme);

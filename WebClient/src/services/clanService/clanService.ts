@@ -64,13 +64,11 @@ export class ClanService {
 
     // TODO: this is really the user's clan.
     public getClan(): Promise<IClanData> {
-        return this.authenticationService.getAuthHeaders()
-            .then(headers => {
-                let options = new RequestOptions({ headers });
-                return this.http
-                    .get("/api/clans", options)
-                    .toPromise();
-            })
+        let headers = this.authenticationService.getAuthHeaders();
+        let options = new RequestOptions({ headers });
+        return this.http
+            .get("/api/clans", options)
+            .toPromise()
             .then(response => {
                 if (response.status === 204) {
                     // This means the user is not part of a clan.
@@ -88,13 +86,11 @@ export class ClanService {
 
     // TODO this should be combined with the call above.
     public getUserClan(): Promise<ILeaderboardClan> {
-        return this.authenticationService.getAuthHeaders()
-            .then(headers => {
-                let options = new RequestOptions({ headers });
-                return this.http
-                    .get("/api/clans/userClan", options)
-                    .toPromise();
-            })
+        let headers = this.authenticationService.getAuthHeaders();
+        let options = new RequestOptions({ headers });
+        return this.http
+            .get("/api/clans/userClan", options)
+            .toPromise()
             .then(response => {
                 if (response.status === 204) {
                     // This means the user is not part of a clan.
@@ -111,13 +107,11 @@ export class ClanService {
     }
 
     public getLeaderboard(page: number, count: number): Promise<ILeaderboardSummaryListResponse> {
-        return this.authenticationService.getAuthHeaders()
-            .then(headers => {
-                let options = new RequestOptions({ headers });
-                return this.http
-                    .get("/api/clans/leaderboard?page=" + page + "&count=" + count, options)
-                    .toPromise();
-            })
+        let headers = this.authenticationService.getAuthHeaders();
+        let options = new RequestOptions({ headers });
+        return this.http
+            .get("/api/clans/leaderboard?page=" + page + "&count=" + count, options)
+            .toPromise()
             .then(response => {
                 return response.json() as ILeaderboardSummaryListResponse;
             })
@@ -129,17 +123,15 @@ export class ClanService {
     }
 
     public sendMessage(message: string, clanName: string): Promise<void> {
-        return this.authenticationService.getAuthHeaders()
-            .then(headers => {
-                headers.append("Content-Type", "application/x-www-form-urlencoded");
-                let options = new RequestOptions({ headers });
-                let params = new URLSearchParams();
-                params.append("message", message);
-                params.append("clanName", clanName);
-                return this.http
-                    .post("/api/clans/messages", params.toString(), options)
-                    .toPromise();
-            })
+        let headers = this.authenticationService.getAuthHeaders();
+        headers.append("Content-Type", "application/x-www-form-urlencoded");
+        let options = new RequestOptions({ headers });
+        let params = new URLSearchParams();
+        params.append("message", message);
+        params.append("clanName", clanName);
+        return this.http
+            .post("/api/clans/messages", params.toString(), options)
+            .toPromise()
             .then(response => {
                 let sendMessageResponse = response.json() as ISendMessageResponse;
                 if (!sendMessageResponse.success) {
