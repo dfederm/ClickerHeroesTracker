@@ -1,7 +1,7 @@
 import { Component, OnInit } from "@angular/core";
 
-import { UploadService } from "../../services/uploadService/uploadService";
 import { UserService, IProgressData, IFollowsData } from "../../services/userService/userService";
+import { AuthenticationService, IUserInfo } from "../../services/authenticationService/authenticationService";
 
 import Decimal from "decimal.js";
 import { ChartDataSets, ChartOptions, ChartTooltipItem } from "chart.js";
@@ -46,48 +46,42 @@ export class DashboardComponent implements OnInit {
   };
 
   constructor(
-    private uploadService: UploadService,
+    private authenticationService: AuthenticationService,
     private userService: UserService,
   ) { }
 
   public ngOnInit(): void {
-    // This is a pretty big hack. We don't have the right APIs to get the curret user info, so just get their first upload and get their user name from that.
-    this.uploadService
-      .getUploads(1, 1)
-      .then(uploadsResponse => {
-        return uploadsResponse
-          && uploadsResponse.uploads
-          && uploadsResponse.uploads.length
-          && uploadsResponse.uploads[0]
-          && uploadsResponse.uploads[0].id
-          ? this.uploadService.get(uploadsResponse.uploads[0].id)
-          : null;
-      })
-      .then(upload => {
-        // Show the last week's worth
-        let now = Date.now();
-        let end = new Date(now);
-        let start = new Date(now);
-        start.setDate(start.getDate() - 7);
+    this.authenticationService
+      .userInfo()
+      .subscribe(userInfo => this.handleUserInfo(userInfo));
+  }
 
-        if (upload
-          && upload.user
-          && upload.user.name) {
-          this.userName = upload.user.name;
+  private handleUserInfo(userInfo: IUserInfo): void {
+    this.isProgressError = false;
+    this.isFollowsError = false;
+    this.progress = null;
+    this.follows = null;
 
-          this.userService.getProgress(this.userName, start, end)
-            .then(progress => this.handleProgressData(progress))
-            .catch(() => this.isProgressError = true);
+    if (userInfo.isLoggedIn && userInfo.username) {
+      this.userName = userInfo.username;
 
-          this.userService.getFollows(this.userName)
-            .then(follows => this.handleFollowsData(follows))
-            .catch(() => this.isFollowsError = true);
-        }
-      })
-      .catch(() => {
-        this.isProgressError = true;
-        this.isFollowsError = true;
-      });
+      // Show the last week's worth
+      let now = Date.now();
+      let end = new Date(now);
+      let start = new Date(now);
+      start.setDate(start.getDate() - 7);
+
+      this.userService.getProgress(this.userName, start, end)
+        .then(progress => this.handleProgressData(progress))
+        .catch(() => this.isProgressError = true);
+
+      this.userService.getFollows(this.userName)
+        .then(follows => this.handleFollowsData(follows))
+        .catch(() => this.isFollowsError = true);
+    } else {
+      this.isProgressError = true;
+      this.isFollowsError = true;
+    }
   }
 
   private handleProgressData(progress: IProgressData): void {

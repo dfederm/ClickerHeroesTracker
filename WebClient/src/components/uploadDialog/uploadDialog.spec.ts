@@ -5,23 +5,31 @@ import { FormsModule } from "@angular/forms";
 import { NO_ERRORS_SCHEMA, DebugElement } from "@angular/core";
 import { Response, ResponseOptions } from "@angular/http";
 import { Router } from "@angular/router";
-import { Observable } from "rxjs/Observable";
 import { BehaviorSubject } from "rxjs/BehaviorSubject";
 
 import { UploadDialogComponent } from "./uploadDialog";
-import { AuthenticationService } from "../../services/authenticationService/authenticationService";
+import { AuthenticationService, IUserInfo } from "../../services/authenticationService/authenticationService";
 import { UploadService } from "../../services/uploadService/uploadService";
 
 describe("UploadDialogComponent", () => {
     let component: UploadDialogComponent;
     let fixture: ComponentFixture<UploadDialogComponent>;
-    let isLoggedIn: BehaviorSubject<boolean>;
+    let userInfo: BehaviorSubject<IUserInfo>;
+
+    const loggedInUser: IUserInfo = {
+        isLoggedIn: true,
+        id: "someId",
+        username: "someUsername",
+        email: "someEmail",
+    };
+
+    const notLoggedInUser: IUserInfo = {
+        isLoggedIn: false,
+    };
 
     beforeEach(async(() => {
-        isLoggedIn = new BehaviorSubject(false);
-        let authenticationService = {
-            isLoggedIn: (): Observable<boolean> => isLoggedIn,
-        };
+        userInfo = new BehaviorSubject(notLoggedInUser);
+        let authenticationService = { userInfo: () => userInfo };
         let uploadService = {
             create: (): void => void 0,
         };
@@ -67,7 +75,7 @@ describe("UploadDialogComponent", () => {
         let button: DebugElement;
 
         it("should display the form elements with 'add to progress' when the user is logged in", async(() => {
-            setIsLoggedIn(true)
+            setUserInfo(loggedInUser)
                 .then(() => {
                     expect(encodedSaveData).not.toBeNull();
                     expect(playStyles.length).toEqual(3);
@@ -78,7 +86,7 @@ describe("UploadDialogComponent", () => {
         }));
 
         it("should display the form elements without 'add to progress' when the user is not logged in", async(() => {
-            setIsLoggedIn(false)
+            setUserInfo(notLoggedInUser)
                 .then(() => {
                     expect(encodedSaveData).not.toBeNull();
                     expect(playStyles.length).toEqual(3);
@@ -89,7 +97,7 @@ describe("UploadDialogComponent", () => {
         }));
 
         it("should show an error with empty save data", async(() => {
-            setIsLoggedIn(false)
+            setUserInfo(notLoggedInUser)
                 .then(() => {
                     button.nativeElement.click();
 
@@ -98,7 +106,7 @@ describe("UploadDialogComponent", () => {
         }));
 
         it("should upload correct save data when user is not logged in", async(() => {
-            setIsLoggedIn(false)
+            setUserInfo(notLoggedInUser)
                 .then(() => {
                     let uploadService = TestBed.get(UploadService) as UploadService;
                     spyOn(uploadService, "create").and.returnValue(Promise.resolve<number>(123));
@@ -127,7 +135,7 @@ describe("UploadDialogComponent", () => {
         }));
 
         it("should upload correct save data when user is logged in", async(() => {
-            setIsLoggedIn(true)
+            setUserInfo(loggedInUser)
                 .then(() => {
                     let uploadService = TestBed.get(UploadService) as UploadService;
                     spyOn(uploadService, "create").and.returnValue(Promise.resolve<number>(123));
@@ -156,7 +164,7 @@ describe("UploadDialogComponent", () => {
         }));
 
         it("should show an error when uploadService fails", async(() => {
-            setIsLoggedIn(true)
+            setUserInfo(loggedInUser)
                 .then(() => {
                     let uploadService = TestBed.get(UploadService) as UploadService;
                     spyOn(uploadService, "create").and.returnValue(Promise.reject(new Response(new ResponseOptions({ status: 500 }))));
@@ -182,8 +190,8 @@ describe("UploadDialogComponent", () => {
                 });
         }));
 
-        function setIsLoggedIn(value: boolean): Promise<void> {
-            isLoggedIn.next(value);
+        function setUserInfo(value: IUserInfo): Promise<void> {
+            userInfo.next(value);
             fixture.detectChanges();
             return fixture.whenStable()
                 .then(() => {

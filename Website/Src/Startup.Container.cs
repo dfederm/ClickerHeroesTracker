@@ -147,6 +147,10 @@ namespace ClickerHeroesTrackerWebsite
                     .AllowCustomFlow(FacebookAssertionGrantHandler.GrantType)
                     .AllowCustomFlow(MicrosoftAssertionGrantHandler.GrantType);
 
+                // When rolling tokens are enabled, immediately
+                // redeem the refresh token to prevent future reuse.
+                options.UseRollingTokens();
+
                 // Allow Http on devbox
                 if (this.Environment.IsDevelopment())
                 {

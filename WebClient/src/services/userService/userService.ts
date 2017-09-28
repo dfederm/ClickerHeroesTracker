@@ -50,15 +50,10 @@ export interface IFollowsData {
 
 @Injectable()
 export class UserService {
-    private isLoggedIn: boolean;
-
     constructor(
         private authenticationService: AuthenticationService,
         private http: Http,
     ) {
-        this.authenticationService
-            .isLoggedIn()
-            .subscribe(isLoggedIn => this.isLoggedIn = isLoggedIn);
     }
 
     public create(userName: string, email: string, password: string): Promise<void> {
@@ -100,20 +95,15 @@ export class UserService {
     }
 
     public getProgress(userName: string, start: Date, end: Date): Promise<IProgressData> {
-        let headersPromise = this.isLoggedIn
-            ? this.authenticationService.getAuthHeaders()
-            : Promise.resolve(new Headers());
-        return headersPromise
-            .then(headers => {
-                let params = new URLSearchParams();
-                params.append("start", start.toISOString());
-                params.append("end", end.toISOString());
+        let params = new URLSearchParams();
+        params.append("start", start.toISOString());
+        params.append("end", end.toISOString());
 
-                let options = new RequestOptions({ headers });
-                return this.http
-                    .get(`/api/users/${userName}/progress?${params.toString()}`, options)
-                    .toPromise();
-            })
+        let headers = this.authenticationService.getAuthHeaders();
+        let options = new RequestOptions({ headers });
+        return this.http
+            .get(`/api/users/${userName}/progress?${params.toString()}`, options)
+            .toPromise()
             .then(response => response.json() as IProgressData)
             .catch(error => {
                 let errorMessage = error.message || error.toString();
@@ -123,16 +113,11 @@ export class UserService {
     }
 
     public getFollows(userName: string): Promise<IFollowsData> {
-        let headersPromise = this.isLoggedIn
-            ? this.authenticationService.getAuthHeaders()
-            : Promise.resolve(new Headers());
-        return headersPromise
-            .then(headers => {
-                let options = new RequestOptions({ headers });
-                return this.http
-                    .get(`/api/users/${userName}/follows`, options)
-                    .toPromise();
-            })
+        let headers = this.authenticationService.getAuthHeaders();
+        let options = new RequestOptions({ headers });
+        return this.http
+            .get(`/api/users/${userName}/follows`, options)
+            .toPromise()
             .then(response => response.json() as IFollowsData)
             .catch(error => {
                 let errorMessage = error.message || error.toString();

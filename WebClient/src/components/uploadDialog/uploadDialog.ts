@@ -5,7 +5,7 @@ import { Router } from "@angular/router";
 
 import { LogInDialogComponent } from "../logInDialog/logInDialog";
 import { RegisterDialogComponent } from "../registerDialog/registerDialog";
-import { AuthenticationService } from "../../services/authenticationService/authenticationService";
+import { AuthenticationService, IUserInfo } from "../../services/authenticationService/authenticationService";
 import { UploadService } from "../../services/uploadService/uploadService";
 
 @Component({
@@ -15,7 +15,7 @@ import { UploadService } from "../../services/uploadService/uploadService";
 export class UploadDialogComponent implements OnInit {
     public errorMessage: string;
 
-    public isLoggedIn: boolean;
+    public userInfo: IUserInfo;
 
     public playStyles: string[] = ["Idle", "Hybrid", "Active"];
 
@@ -39,8 +39,8 @@ export class UploadDialogComponent implements OnInit {
 
     public ngOnInit(): void {
         this.authenticationService
-            .isLoggedIn()
-            .subscribe(isLoggedIn => this.isLoggedIn = isLoggedIn);
+            .userInfo()
+            .subscribe(userInfo => this.userInfo = userInfo);
     }
 
     public upload(): void {

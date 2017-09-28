@@ -3,6 +3,7 @@ import { Http, Headers, RequestOptions, URLSearchParams } from "@angular/http";
 import { Observable } from "rxjs/Observable";
 import { BehaviorSubject } from "rxjs/BehaviorSubject";
 import { Subscription } from "rxjs/Subscription";
+import * as JwtDecode from "jwt-decode";
 
 import "rxjs/add/operator/toPromise";
 import "rxjs/add/operator/map";
@@ -17,24 +18,31 @@ export interface IAuthTokenModel {
     expiration_date?: number;
 }
 
+export interface IUserInfo {
+    isLoggedIn: boolean;
+    id?: string;
+    username?: string;
+    email?: string;
+}
+
 @Injectable()
 export class AuthenticationService {
     private static readonly tokensKey: string = "auth-tokens";
 
-    private tokens: BehaviorSubject<IAuthTokenModel>;
+    private currentTokens: IAuthTokenModel;
+
+    private userInfoSubject: BehaviorSubject<IUserInfo>;
 
     private refreshSubscription: Subscription;
 
     constructor(private http: Http) {
-        let currentTokens = this.retrieveTokens();
-
-        // If the current token is expired at startup, pretend like the user is not logged in until the refresh below happens.
-        let isTokenValid = currentTokens && currentTokens.expiration_date > Date.now();
-        this.tokens = new BehaviorSubject(isTokenValid ? currentTokens : null);
+        let tokensString = localStorage.getItem(AuthenticationService.tokensKey);
+        this.currentTokens = tokensString == null ? null : JSON.parse(tokensString);
+        this.userInfoSubject = new BehaviorSubject(this.getUserInfo());
 
         // If the user was already logged in, always try and refresh the token.
-        if (currentTokens) {
-            this.refreshTokens(currentTokens)
+        if (this.currentTokens) {
+            this.refreshTokens()
                 .then(() => this.scheduleRefresh())
                 .catch(() => this.logOut());
         }
@@ -45,7 +53,7 @@ export class AuthenticationService {
         params.append("grant_type", "password");
         params.append("username", username);
         params.append("password", password);
-        return this.getTokens(params)
+        return this.fetchTokens(params)
             .then(() => this.scheduleRefresh());
     }
 
@@ -58,13 +66,14 @@ export class AuthenticationService {
             params.append("username", username);
         }
 
-        return this.getTokens(params)
+        return this.fetchTokens(params)
             .then(() => this.scheduleRefresh());
     }
 
     public logOut(): void {
-        this.removeToken();
-        this.tokens.next(null);
+        localStorage.removeItem(AuthenticationService.tokensKey);
+        this.currentTokens = null;
+        this.userInfoSubject.next(this.getUserInfo());
 
         if (this.refreshSubscription) {
             this.refreshSubscription.unsubscribe();
@@ -72,69 +81,75 @@ export class AuthenticationService {
         }
     }
 
-    public isLoggedIn(): Observable<boolean> {
-        return this.tokens
-            .map(tokens => tokens != null);
+    public userInfo(): Observable<IUserInfo> {
+        return this.userInfoSubject;
     }
 
-    public getAuthHeaders(): Promise<Headers> {
-        let currentTokens = this.tokens.getValue();
-        if (!currentTokens) {
-            return Promise.reject("NotLoggedIn");
+    public getAuthHeaders(): Headers {
+        let headers = new Headers();
+
+        if (this.currentTokens) {
+            headers.append("Authorization", `${this.currentTokens.token_type} ${this.currentTokens.access_token}`);
         }
 
-        let headers = new Headers();
-        headers.append("Authorization", `${currentTokens.token_type} ${currentTokens.access_token}`);
-        return Promise.resolve(headers);
+        return headers;
     }
 
-    private storeToken(tokens: IAuthTokenModel): void {
-        localStorage.setItem(AuthenticationService.tokensKey, JSON.stringify(tokens));
-    }
-
-    private retrieveTokens(): IAuthTokenModel {
-        const tokensString = localStorage.getItem(AuthenticationService.tokensKey);
-        return tokensString == null ? null : JSON.parse(tokensString);
-    }
-
-    private removeToken(): void {
-        localStorage.removeItem(AuthenticationService.tokensKey);
-    }
-
-    private getTokens(params: URLSearchParams): Promise<void> {
+    private fetchTokens(params: URLSearchParams): Promise<void> {
         let headers = new Headers({ "Content-Type": "application/x-www-form-urlencoded" });
         let options = new RequestOptions({ headers });
-        params.append("scope", "openid offline_access");
+        params.append("scope", "openid offline_access profile email roles");
         return this.http.post("/api/auth/token", params.toString(), options)
             .toPromise()
             .then(response => {
-                let newTokens: IAuthTokenModel = response.json();
-                if (!newTokens
-                    || !newTokens.token_type
-                    || !newTokens.access_token) {
+                let tokens: IAuthTokenModel = response.json();
+                if (!tokens
+                    || !tokens.token_type
+                    || !tokens.access_token
+                    || !tokens.id_token) {
                     return Promise.reject("Invalid token response");
                 }
 
-                newTokens.expiration_date = Date.now() + newTokens.expires_in * 1000;
+                tokens.expiration_date = Date.now() + tokens.expires_in * 1000;
 
-                this.storeToken(newTokens);
-                this.tokens.next(newTokens);
+                localStorage.setItem(AuthenticationService.tokensKey, JSON.stringify(tokens));
+                this.currentTokens = Object.assign(this.currentTokens || {}, tokens); // Merge them in in case a new refresh token was not issued
+                this.userInfoSubject.next(this.getUserInfo());
+
                 return Promise.resolve();
             });
     }
 
-    private refreshTokens(currentTokens: IAuthTokenModel): Promise<void> {
+    private refreshTokens(): Promise<void> {
         let params = new URLSearchParams();
         params.append("grant_type", "refresh_token");
-        params.append("refresh_token", currentTokens.refresh_token);
-        return this.getTokens(params);
+        params.append("refresh_token", this.currentTokens.refresh_token);
+        return this.fetchTokens(params);
     }
 
     private scheduleRefresh(): void {
         // Refresh every half the total expiration time. This assumes the expire duration doesn't change over time.
-        this.refreshSubscription = Observable.interval(this.tokens.getValue().expires_in / 2 * 1000)
-            // Make sure to get the current tokens when refreshing, not the ones from above
-            .map(() => this.refreshTokens(this.tokens.getValue()))
+        this.refreshSubscription = Observable.interval(this.currentTokens.expires_in / 2 * 1000)
+            .map(() => this.refreshTokens())
             .subscribe();
+    }
+
+    private getUserInfo(): IUserInfo {
+        if (this.currentTokens
+            && this.currentTokens.id_token
+            && this.currentTokens.expiration_date > Date.now()
+        ) {
+            let claims: { [claim: string]: string } = JwtDecode(this.currentTokens.id_token);
+            return {
+                isLoggedIn: true,
+                id: claims.sub,
+                username: claims.name,
+                email: claims.email,
+            };
+        } else {
+            return {
+                isLoggedIn: false,
+            };
+        }
     }
 }

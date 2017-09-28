@@ -1,7 +1,7 @@
 import { Component, OnInit } from "@angular/core";
 import { ActivatedRoute, Router, Params } from "@angular/router";
 import { UploadService, IUpload } from "../../services/uploadService/uploadService";
-import { AuthenticationService } from "../../services/authenticationService/authenticationService";
+import { AuthenticationService, IUserInfo } from "../../services/authenticationService/authenticationService";
 import Decimal from "decimal.js";
 
 import "rxjs/add/operator/switchMap";
@@ -43,7 +43,7 @@ interface IOutsiderViewModel {
 export class UploadComponent implements OnInit {
     private static exponentialRegex = /^(\d+(\.\d+)?)e\+?(\d+)$/i;
 
-    public isLoggedIn: boolean;
+    public userInfo: IUserInfo;
     public errorMessage: string;
 
     public userName: string;
@@ -163,8 +163,8 @@ export class UploadComponent implements OnInit {
 
     public ngOnInit(): void {
         this.authenticationService
-            .isLoggedIn()
-            .subscribe(isLoggedIn => this.isLoggedIn = isLoggedIn);
+            .userInfo()
+            .subscribe(userInfo => this.userInfo = userInfo);
 
         this.route.params
             .switchMap((params: Params) => this.uploadService.get(+params.id))

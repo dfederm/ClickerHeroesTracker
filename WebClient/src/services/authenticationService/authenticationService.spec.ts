@@ -4,12 +4,16 @@ import { BaseRequestOptions, ConnectionBackend, Http, RequestOptions } from "@an
 import { Response, ResponseOptions, RequestMethod } from "@angular/http";
 import { MockBackend, MockConnection } from "@angular/http/testing";
 
-import { AuthenticationService, IAuthTokenModel } from "./authenticationService";
+import { AuthenticationService, IAuthTokenModel, IUserInfo } from "./authenticationService";
 
 describe("AuthenticationService", () => {
     let injector: ReflectiveInjector;
     let backend: MockBackend;
     let lastConnection: MockConnection = null;
+
+    const notLoggedInUser: IUserInfo = {
+        isLoggedIn: false,
+    };
 
     beforeEach(() => {
         injector = ReflectiveInjector.resolveAndCreate(
@@ -42,8 +46,8 @@ describe("AuthenticationService", () => {
 
             let authenticationService = injector.get(AuthenticationService) as AuthenticationService;
 
-            authenticationService.isLoggedIn()
-                .subscribe(isLoggedIn => expect(isLoggedIn).toEqual(false));
+            authenticationService.userInfo()
+                .subscribe(userInfo => expect(userInfo).toEqual(notLoggedInUser));
             tick();
 
             expect(localStorage.getItem).toHaveBeenCalledWith("auth-tokens");
@@ -54,20 +58,21 @@ describe("AuthenticationService", () => {
         it("should be logged in initially and refresh the token when local storage is populated with a valid token", fakeAsync(() => {
             let tokens = createCachedAuthModel();
             (localStorage.getItem as jasmine.Spy).and.returnValue(JSON.stringify(tokens));
+            let expectedUserInfo = createResponseUserInfo();
 
             let authenticationService = injector.get(AuthenticationService) as AuthenticationService;
 
             expect(lastConnection).not.toBeNull("no http service connection made");
             expect(lastConnection.request.method).toEqual(RequestMethod.Post, "method invalid");
             expect(lastConnection.request.url).toEqual("/api/auth/token", "url invalid");
-            expect(lastConnection.request.text()).toEqual("grant_type=refresh_token&refresh_token=someRefreshToken&scope=openid%20offline_access", "request body invalid");
+            expect(lastConnection.request.text()).toEqual("grant_type=refresh_token&refresh_token=someRefreshToken&scope=openid%20offline_access%20profile%20email%20roles", "request body invalid");
 
-            let isLoggedIn = false;
-            authenticationService.isLoggedIn().subscribe(_ => isLoggedIn = _);
+            let actualUserInfo: IUserInfo;
+            authenticationService.userInfo().subscribe(_ => actualUserInfo = _);
 
             // Immediately logged in
             tick();
-            expect(isLoggedIn).toEqual(true);
+            expect(actualUserInfo).toEqual(createCachedUserInfo());
 
             let newTokens = createResponseAuthModel();
             lastConnection.mockRespond(new Response(new ResponseOptions({ body: JSON.stringify(newTokens) })));
@@ -75,7 +80,7 @@ describe("AuthenticationService", () => {
 
             // Still logged in after the token refresh
             tick();
-            expect(isLoggedIn).toEqual(true);
+            expect(actualUserInfo).toEqual(expectedUserInfo);
 
             expect(localStorage.getItem).toHaveBeenCalledWith("auth-tokens");
             expect(localStorage.setItem).toHaveBeenCalledWith("auth-tokens", JSON.stringify(newTokens));
@@ -88,20 +93,21 @@ describe("AuthenticationService", () => {
             let tokens = createCachedAuthModel();
             tokens.expiration_date = 0;
             (localStorage.getItem as jasmine.Spy).and.returnValue(JSON.stringify(tokens));
+            let expectedUserInfo = createResponseUserInfo();
 
             let authenticationService = injector.get(AuthenticationService) as AuthenticationService;
 
             expect(lastConnection).not.toBeNull("no http service connection made");
             expect(lastConnection.request.method).toEqual(RequestMethod.Post, "method invalid");
             expect(lastConnection.request.url).toEqual("/api/auth/token", "url invalid");
-            expect(lastConnection.request.text()).toEqual("grant_type=refresh_token&refresh_token=someRefreshToken&scope=openid%20offline_access", "request body invalid");
+            expect(lastConnection.request.text()).toEqual("grant_type=refresh_token&refresh_token=someRefreshToken&scope=openid%20offline_access%20profile%20email%20roles", "request body invalid");
 
-            let isLoggedIn = false;
-            authenticationService.isLoggedIn().subscribe(_ => isLoggedIn = _);
+            let actualUserInfo: IUserInfo;
+            authenticationService.userInfo().subscribe(_ => actualUserInfo = _);
 
             // Immediately not logged in
             tick();
-            expect(isLoggedIn).toEqual(false);
+            expect(actualUserInfo).toEqual(notLoggedInUser);
 
             let newTokens = createResponseAuthModel();
             lastConnection.mockRespond(new Response(new ResponseOptions({ body: JSON.stringify(newTokens) })));
@@ -109,7 +115,7 @@ describe("AuthenticationService", () => {
 
             // Logged in after the token refresh
             tick();
-            expect(isLoggedIn).toEqual(true);
+            expect(actualUserInfo).toEqual(expectedUserInfo);
 
             expect(localStorage.getItem).toHaveBeenCalledWith("auth-tokens");
             expect(localStorage.setItem).toHaveBeenCalledWith("auth-tokens", JSON.stringify(newTokens));
@@ -120,42 +126,35 @@ describe("AuthenticationService", () => {
     });
 
     describe("getAuthHeaders", () => {
-        it("should reject when not logged in", fakeAsync(() => {
+        it("should return empty headers when not logged in", () => {
             (localStorage.getItem as jasmine.Spy).and.returnValue(null);
 
             let authenticationService = injector.get(AuthenticationService) as AuthenticationService;
-            authenticationService.getAuthHeaders()
-                .then(fail)
-                .catch(error => {
-                    expect(error).toEqual("NotLoggedIn");
-                });
-            tick();
-        }));
+            let headers = authenticationService.getAuthHeaders();
+            expect(headers.keys().length).toEqual(0);
+        });
 
-        it("should get auth headers when logged in", fakeAsync(() => {
+        it("should get auth headers when logged in", () => {
             let tokens = createCachedAuthModel();
             (localStorage.getItem as jasmine.Spy).and.returnValue(JSON.stringify(tokens));
 
             let authenticationService = injector.get(AuthenticationService) as AuthenticationService;
-            authenticationService.getAuthHeaders()
-                .then(headers => {
-                    expect(headers.keys().length).toEqual(1);
-                    expect(headers.get("Authorization")).toEqual("someTokenType someAccessToken");
-                });
-            tick();
-        }));
+            let headers = authenticationService.getAuthHeaders();
+            expect(headers.keys().length).toEqual(1);
+            expect(headers.get("Authorization")).toEqual("someTokenType someAccessToken");
+        });
     });
 
     describe("logInWithPassword", () => {
         it("should reject with an unsuccessful log in", fakeAsync(() => {
             let logInSuccessful = false;
             let error: Error;
-            let isLoggedInLog: boolean[] = [];
+            let userInfoLog: IUserInfo[] = [];
 
             let authenticationService = injector.get(AuthenticationService) as AuthenticationService;
-            authenticationService.isLoggedIn()
-                .subscribe(isLoggedIn => {
-                    isLoggedInLog.push(isLoggedIn);
+            authenticationService.userInfo()
+                .subscribe(userInfo => {
+                    userInfoLog.push(userInfo);
                 });
             authenticationService.logInWithPassword("someUsername", "somePassword")
                 .then(() => logInSuccessful = true)
@@ -164,7 +163,7 @@ describe("AuthenticationService", () => {
             expect(lastConnection).not.toBeNull("no http service connection made");
             expect(lastConnection.request.method).toEqual(RequestMethod.Post, "method invalid");
             expect(lastConnection.request.url).toEqual("/api/auth/token", "url invalid");
-            expect(lastConnection.request.text()).toEqual("grant_type=password&username=someUsername&password=somePassword&scope=openid%20offline_access", "request body invalid");
+            expect(lastConnection.request.text()).toEqual("grant_type=password&username=someUsername&password=somePassword&scope=openid%20offline_access%20profile%20email%20roles", "request body invalid");
 
             lastConnection.mockError(new Error("someError"));
             tick();
@@ -172,19 +171,17 @@ describe("AuthenticationService", () => {
             expect(logInSuccessful).toEqual(false);
             expect(localStorage.setItem).not.toHaveBeenCalled();
             expect(error).toBeDefined();
-            expect(isLoggedInLog).toEqual([false]);
+            expect(userInfoLog).toEqual([notLoggedInUser]);
         }));
 
         it("should resolve with a successful log in and refresh the new token", fakeAsync(() => {
             let logInSuccessful = false;
             let error: Error;
-            let isLoggedInLog: boolean[] = [];
+            let userInfoLog: IUserInfo[] = [];
 
             let authenticationService = injector.get(AuthenticationService) as AuthenticationService;
-            authenticationService.isLoggedIn()
-                .subscribe(isLoggedIn => {
-                    isLoggedInLog.push(isLoggedIn);
-                });
+            authenticationService.userInfo()
+                .subscribe(_ => userInfoLog.push(_));
             authenticationService.logInWithPassword("someUsername", "somePassword")
                 .then(() => logInSuccessful = true)
                 .catch(e => error = e);
@@ -192,9 +189,10 @@ describe("AuthenticationService", () => {
             expect(lastConnection).not.toBeNull("no http service connection made");
             expect(lastConnection.request.method).toEqual(RequestMethod.Post, "method invalid");
             expect(lastConnection.request.url).toEqual("/api/auth/token", "url invalid");
-            expect(lastConnection.request.text()).toEqual("grant_type=password&username=someUsername&password=somePassword&scope=openid%20offline_access", "request body invalid");
+            expect(lastConnection.request.text()).toEqual("grant_type=password&username=someUsername&password=somePassword&scope=openid%20offline_access%20profile%20email%20roles", "request body invalid");
 
             let tokens = createResponseAuthModel(1);
+            let userInfo = createResponseUserInfo(1);
             lastConnection.mockRespond(new Response(new ResponseOptions({ body: JSON.stringify(tokens) })));
             lastConnection = null;
             tokens.expiration_date = Date.now() + tokens.expires_in * 1000;
@@ -205,7 +203,7 @@ describe("AuthenticationService", () => {
             expect(logInSuccessful).toEqual(true);
             expect(localStorage.setItem).toHaveBeenCalledWith("auth-tokens", JSON.stringify(tokens));
             expect(error).toBeUndefined();
-            expect(isLoggedInLog).toEqual([false, true]);
+            expect(userInfoLog).toEqual([notLoggedInUser, userInfo]);
 
             (localStorage.setItem as jasmine.Spy).calls.reset();
 
@@ -215,16 +213,17 @@ describe("AuthenticationService", () => {
             expect(lastConnection).not.toBeNull("no http service connection made");
             expect(lastConnection.request.method).toEqual(RequestMethod.Post, "method invalid");
             expect(lastConnection.request.url).toEqual("/api/auth/token", "url invalid");
-            expect(lastConnection.request.text()).toEqual("grant_type=refresh_token&refresh_token=someNewRefreshToken1&scope=openid%20offline_access", "request body invalid");
+            expect(lastConnection.request.text()).toEqual("grant_type=refresh_token&refresh_token=someNewRefreshToken1&scope=openid%20offline_access%20profile%20email%20roles", "request body invalid");
 
             let refreshedTokens = createResponseAuthModel(2);
+            let refreshedUserInfo = createResponseUserInfo(2);
             lastConnection.mockRespond(new Response(new ResponseOptions({ body: JSON.stringify(refreshedTokens) })));
             refreshedTokens.expiration_date = Date.now() + refreshedTokens.expires_in * 1000;
             tick();
 
             expect(localStorage.setItem).toHaveBeenCalledWith("auth-tokens", JSON.stringify(refreshedTokens));
             expect(error).toBeUndefined();
-            expect(isLoggedInLog).toEqual([false, true, true]);
+            expect(userInfoLog).toEqual([notLoggedInUser, userInfo, refreshedUserInfo]);
 
             // An interval was started, so abandon it.
             discardPeriodicTasks();
@@ -235,12 +234,12 @@ describe("AuthenticationService", () => {
         it("should reject with an unsuccessful log in", fakeAsync(() => {
             let logInSuccessful = false;
             let error: Error;
-            let isLoggedInLog: boolean[] = [];
+            let userInfoLog: IUserInfo[] = [];
 
             let authenticationService = injector.get(AuthenticationService) as AuthenticationService;
-            authenticationService.isLoggedIn()
-                .subscribe(isLoggedIn => {
-                    isLoggedInLog.push(isLoggedIn);
+            authenticationService.userInfo()
+                .subscribe(userInfo => {
+                    userInfoLog.push(userInfo);
                 });
             authenticationService.logInWithAssertion("someGrantType", "someAssertion")
                 .then(() => logInSuccessful = true)
@@ -249,7 +248,7 @@ describe("AuthenticationService", () => {
             expect(lastConnection).not.toBeNull("no http service connection made");
             expect(lastConnection.request.method).toEqual(RequestMethod.Post, "method invalid");
             expect(lastConnection.request.url).toEqual("/api/auth/token", "url invalid");
-            expect(lastConnection.request.text()).toEqual("grant_type=someGrantType&assertion=someAssertion&scope=openid%20offline_access", "request body invalid");
+            expect(lastConnection.request.text()).toEqual("grant_type=someGrantType&assertion=someAssertion&scope=openid%20offline_access%20profile%20email%20roles", "request body invalid");
 
             lastConnection.mockError(new Error("someError"));
             tick();
@@ -257,19 +256,17 @@ describe("AuthenticationService", () => {
             expect(logInSuccessful).toEqual(false);
             expect(localStorage.setItem).not.toHaveBeenCalled();
             expect(error).toBeDefined();
-            expect(isLoggedInLog).toEqual([false]);
+            expect(userInfoLog).toEqual([notLoggedInUser]);
         }));
 
         it("should resolve with a successful log in and refresh the new token", fakeAsync(() => {
             let logInSuccessful = false;
             let error: Error;
-            let isLoggedInLog: boolean[] = [];
+            let userInfoLog: IUserInfo[] = [];
 
             let authenticationService = injector.get(AuthenticationService) as AuthenticationService;
-            authenticationService.isLoggedIn()
-                .subscribe(isLoggedIn => {
-                    isLoggedInLog.push(isLoggedIn);
-                });
+            authenticationService.userInfo()
+                .subscribe(_ => userInfoLog.push(_));
             authenticationService.logInWithAssertion("someGrantType", "someAssertion")
                 .then(() => logInSuccessful = true)
                 .catch(e => error = e);
@@ -277,9 +274,10 @@ describe("AuthenticationService", () => {
             expect(lastConnection).not.toBeNull("no http service connection made");
             expect(lastConnection.request.method).toEqual(RequestMethod.Post, "method invalid");
             expect(lastConnection.request.url).toEqual("/api/auth/token", "url invalid");
-            expect(lastConnection.request.text()).toEqual("grant_type=someGrantType&assertion=someAssertion&scope=openid%20offline_access", "request body invalid");
+            expect(lastConnection.request.text()).toEqual("grant_type=someGrantType&assertion=someAssertion&scope=openid%20offline_access%20profile%20email%20roles", "request body invalid");
 
             let tokens = createResponseAuthModel(1);
+            let userInfo = createResponseUserInfo(1);
             lastConnection.mockRespond(new Response(new ResponseOptions({ body: JSON.stringify(tokens) })));
             lastConnection = null;
             tokens.expiration_date = Date.now() + tokens.expires_in * 1000;
@@ -290,7 +288,7 @@ describe("AuthenticationService", () => {
             expect(logInSuccessful).toEqual(true);
             expect(localStorage.setItem).toHaveBeenCalledWith("auth-tokens", JSON.stringify(tokens));
             expect(error).toBeUndefined();
-            expect(isLoggedInLog).toEqual([false, true]);
+            expect(userInfoLog).toEqual([notLoggedInUser, userInfo]);
 
             (localStorage.setItem as jasmine.Spy).calls.reset();
 
@@ -300,16 +298,17 @@ describe("AuthenticationService", () => {
             expect(lastConnection).not.toBeNull("no http service connection made");
             expect(lastConnection.request.method).toEqual(RequestMethod.Post, "method invalid");
             expect(lastConnection.request.url).toEqual("/api/auth/token", "url invalid");
-            expect(lastConnection.request.text()).toEqual("grant_type=refresh_token&refresh_token=someNewRefreshToken1&scope=openid%20offline_access", "request body invalid");
+            expect(lastConnection.request.text()).toEqual("grant_type=refresh_token&refresh_token=someNewRefreshToken1&scope=openid%20offline_access%20profile%20email%20roles", "request body invalid");
 
             let refreshedTokens = createResponseAuthModel(2);
+            let refreshedUserInfo = createResponseUserInfo(2);
             lastConnection.mockRespond(new Response(new ResponseOptions({ body: JSON.stringify(refreshedTokens) })));
             refreshedTokens.expiration_date = Date.now() + refreshedTokens.expires_in * 1000;
             tick();
 
             expect(localStorage.setItem).toHaveBeenCalledWith("auth-tokens", JSON.stringify(refreshedTokens));
             expect(error).toBeUndefined();
-            expect(isLoggedInLog).toEqual([false, true, true]);
+            expect(userInfoLog).toEqual([notLoggedInUser, userInfo, refreshedUserInfo]);
 
             // An interval was started, so abandon it.
             discardPeriodicTasks();
@@ -322,39 +321,37 @@ describe("AuthenticationService", () => {
             expect(lastConnection).not.toBeNull("no http service connection made");
             expect(lastConnection.request.method).toEqual(RequestMethod.Post, "method invalid");
             expect(lastConnection.request.url).toEqual("/api/auth/token", "url invalid");
-            expect(lastConnection.request.text()).toEqual("grant_type=someGrantType&assertion=someAssertion&username=someUsername&scope=openid%20offline_access", "request body invalid");
+            expect(lastConnection.request.text()).toEqual("grant_type=someGrantType&assertion=someAssertion&username=someUsername&scope=openid%20offline_access%20profile%20email%20roles", "request body invalid");
         }));
     });
 
     describe("logOut", () => {
         it("should successfully log out", fakeAsync(() => {
-            let isLoggedInLog: boolean[] = [];
+            let userInfoLog: IUserInfo[] = [];
 
             let tokens = createCachedAuthModel();
             (localStorage.getItem as jasmine.Spy).and.returnValue(JSON.stringify(tokens));
+            let userInfo = createCachedUserInfo();
 
             let authenticationService = injector.get(AuthenticationService) as AuthenticationService;
-            authenticationService.isLoggedIn()
-                .subscribe(isLoggedIn => {
-                    isLoggedInLog.push(isLoggedIn);
-                });
+            authenticationService.userInfo()
+                .subscribe(_ => userInfoLog.push(_));
             authenticationService.logOut();
 
             expect(localStorage.removeItem).toHaveBeenCalledWith("auth-tokens");
-            expect(isLoggedInLog).toEqual([true, false]);
+            expect(userInfoLog).toEqual([userInfo, notLoggedInUser]);
         }));
 
         it("should stop the token refresh interval after logging out", fakeAsync(() => {
-            let isLoggedInLog: boolean[] = [];
+            let userInfoLog: IUserInfo[] = [];
 
             let tokens = createCachedAuthModel();
             (localStorage.getItem as jasmine.Spy).and.returnValue(JSON.stringify(tokens));
+            let userInfo = createCachedUserInfo();
 
             let authenticationService = injector.get(AuthenticationService) as AuthenticationService;
-            authenticationService.isLoggedIn()
-                .subscribe(isLoggedIn => {
-                    isLoggedInLog.push(isLoggedIn);
-                });
+            authenticationService.userInfo()
+                .subscribe(_ => userInfoLog.push(_));
 
             // Let the refresh interval tick
             tick(tokens.expires_in / 2 * 1000);
@@ -362,22 +359,23 @@ describe("AuthenticationService", () => {
             expect(lastConnection).not.toBeNull("no http service connection made");
             expect(lastConnection.request.method).toEqual(RequestMethod.Post, "method invalid");
             expect(lastConnection.request.url).toEqual("/api/auth/token", "url invalid");
-            expect(lastConnection.request.text()).toEqual("grant_type=refresh_token&refresh_token=someRefreshToken&scope=openid%20offline_access", "request body invalid");
+            expect(lastConnection.request.text()).toEqual("grant_type=refresh_token&refresh_token=someRefreshToken&scope=openid%20offline_access%20profile%20email%20roles", "request body invalid");
 
             let refreshedTokens = createResponseAuthModel(2);
+            let refreshedUserInfo = createResponseUserInfo(2);
             lastConnection.mockRespond(new Response(new ResponseOptions({ body: JSON.stringify(refreshedTokens) })));
             lastConnection = null;
             refreshedTokens.expiration_date = Date.now() + refreshedTokens.expires_in * 1000;
             tick();
 
-            expect(isLoggedInLog).toEqual([true, true]);
+            expect(userInfoLog).toEqual([userInfo, refreshedUserInfo]);
             expect(localStorage.setItem).toHaveBeenCalledWith("auth-tokens", JSON.stringify(refreshedTokens));
             (localStorage.setItem as jasmine.Spy).calls.reset();
 
             authenticationService.logOut();
 
             expect(localStorage.removeItem).toHaveBeenCalledWith("auth-tokens");
-            expect(isLoggedInLog).toEqual([true, true, false]);
+            expect(userInfoLog).toEqual([userInfo, refreshedUserInfo, notLoggedInUser]);
 
             // Let the refresh interval tick again
             tick(tokens.expires_in / 2 * 1000);
@@ -385,7 +383,7 @@ describe("AuthenticationService", () => {
             // And nothing changed
             expect(lastConnection).toBeNull();
             expect(localStorage.setItem).not.toHaveBeenCalled();
-            expect(isLoggedInLog).toEqual([true, true, false]);
+            expect(userInfoLog).toEqual([userInfo, refreshedUserInfo, notLoggedInUser]);
         }));
     });
 
@@ -394,9 +392,18 @@ describe("AuthenticationService", () => {
             token_type: "someTokenType",
             access_token: "someAccessToken",
             refresh_token: "someRefreshToken",
-            id_token: "someIdToken",
+            id_token: createIdToken("some"),
             expires_in: 3600,
             expiration_date: Date.now() + 3600,
+        };
+    }
+
+    function createCachedUserInfo(): IUserInfo {
+        return {
+            isLoggedIn: true,
+            id: "someId",
+            username: "someUsername",
+            email: "someEmail",
         };
     }
 
@@ -405,8 +412,27 @@ describe("AuthenticationService", () => {
             token_type: "someNewTokenType" + (num === undefined ? "" : num.toString()),
             access_token: "someNewAccessToken" + (num === undefined ? "" : num.toString()),
             refresh_token: "someNewRefreshToken" + (num === undefined ? "" : num.toString()),
-            id_token: "someNewIdToken" + (num === undefined ? "" : num.toString()),
+            id_token: createIdToken("someNew", num),
             expires_in: 3600,
         };
+    }
+
+    function createResponseUserInfo(num?: number): IUserInfo {
+        return {
+            isLoggedIn: true,
+            id: "someNewId" + (num === undefined ? "" : num.toString()),
+            username: "someNewUsername" + (num === undefined ? "" : num.toString()),
+            email: "someNewEmail" + (num === undefined ? "" : num.toString()),
+        };
+    }
+
+    function createIdToken(prefix: string, num?: number): string {
+        let claims = {
+            sub: prefix + "Id" + (num === undefined ? "" : num.toString()),
+            name: prefix + "Username" + (num === undefined ? "" : num.toString()),
+            email: prefix + "Email" + (num === undefined ? "" : num.toString()),
+        };
+
+        return "." + btoa(JSON.stringify(claims)) + ".";
     }
 });

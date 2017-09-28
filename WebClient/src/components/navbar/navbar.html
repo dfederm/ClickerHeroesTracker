@@ -10,7 +10,7 @@
     <div class="collapse navbar-collapse"
          [ngbCollapse]="isCollapsed">
         <ul class="navbar-nav mr-auto">
-            <li *ngIf="isLoggedIn"
+            <li *ngIf="userInfo.isLoggedIn"
                 class="nav-item">
                 <a class="nav-link"
                    routerLink="/dashboard"
@@ -20,7 +20,7 @@
                 <a class="nav-link"
                    [openDialog]="UploadDialogComponent">Upload</a>
             </li>
-            <li *ngIf="isLoggedIn"
+            <li *ngIf="userInfo.isLoggedIn"
                 class="nav-item">
                 <a class="nav-link"
                    routerLink="/clans"
@@ -35,7 +35,7 @@
                 <a class="nav-link">Feedback</a>
             </li>
         </ul>
-        <ul *ngIf="isLoggedIn"
+        <ul *ngIf="userInfo.isLoggedIn"
             class="navbar-nav">
             <li class="nav-item">
                 <a class="nav-link">Hello User!</a>
@@ -45,7 +45,7 @@
                    (click)="logOut()">Log off</a>
             </li>
         </ul>
-        <ul *ngIf="!isLoggedIn"
+        <ul *ngIf="!userInfo.isLoggedIn"
             class="navbar-nav">
             <li class="nav-item">
                 <a class="nav-link"
