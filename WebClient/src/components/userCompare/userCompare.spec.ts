@@ -8,6 +8,7 @@ import Decimal from "decimal.js";
 import { UserCompareComponent } from "./userCompare";
 import { UserService, IProgressData } from "../../services/userService/userService";
 import { ChartDataSets, ChartPoint, ChartOptions } from "chart.js";
+import { SettingsService, IUserSettings } from "../../services/settingsService/settingsService";
 
 describe("UserCompareComponent", () => {
     let component: UserCompareComponent;
@@ -79,6 +80,20 @@ describe("UserCompareComponent", () => {
         { title: "Ancient2", isLogarithmic: false, data1: userProgress.ancientLevelData.ancient2, data2: compareProgress.ancientLevelData.ancient2 },
     ];
 
+    let settings: IUserSettings = {
+        areUploadsPublic: true,
+        playStyle: "hybrid",
+        useScientificNotation: true,
+        scientificNotationThreshold: 1000000,
+        useEffectiveLevelForSuggestions: false,
+        useLogarithmicGraphScale: true,
+        logarithmicGraphScaleThreshold: 1000000,
+        hybridRatio: 2,
+        theme: "light",
+    };
+
+    let settingsSubject = new BehaviorSubject(settings);
+
     beforeEach(async(() => {
         let userService = {
             getProgress(userName: string): Promise<IProgressData> {
@@ -92,6 +107,8 @@ describe("UserCompareComponent", () => {
             },
         };
 
+        let settingsService = { settings: () => settingsSubject };
+
         routeParams = new BehaviorSubject({ userName: "someUserName", compareUserName: "someOtherUserName" });
         let route = { params: routeParams };
         TestBed.configureTestingModule(
@@ -100,6 +117,7 @@ describe("UserCompareComponent", () => {
                 providers: [
                     { provide: ActivatedRoute, useValue: route },
                     { provide: UserService, useValue: userService },
+                    { provide: SettingsService, useValue: settingsService },
                 ],
                 schemas: [NO_ERRORS_SCHEMA],
             })

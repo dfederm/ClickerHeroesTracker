@@ -1,7 +1,7 @@
 import { ComponentFixture, TestBed, async } from "@angular/core/testing";
 import { ActivatedRoute, Router, Params } from "@angular/router";
 import { FormsModule } from "@angular/forms";
-import { NO_ERRORS_SCHEMA, DebugElement } from "@angular/core";
+import { NO_ERRORS_SCHEMA, DebugElement, ChangeDetectorRef } from "@angular/core";
 import { By } from "@angular/platform-browser";
 import { BehaviorSubject } from "rxjs/BehaviorSubject";
 import { DatePipe, PercentPipe } from "@angular/common";
@@ -10,6 +10,7 @@ import { UploadComponent } from "./upload";
 import { ExponentialPipe } from "../../pipes/exponentialPipe";
 import { AuthenticationService } from "../../services/authenticationService/authenticationService";
 import { UploadService, IUpload } from "../../services/uploadService/uploadService";
+import { SettingsService, IUserSettings } from "../../services/settingsService/settingsService";
 
 // tslint:disable-next-line:no-namespace
 declare global {
@@ -29,6 +30,20 @@ describe("UploadComponent", () => {
 
     let uploadServiceDeleteResolve: () => Promise<void>;
     let uploadServiceDeleteReject: () => Promise<void>;
+
+    let settings: IUserSettings = {
+        areUploadsPublic: true,
+        playStyle: "hybrid",
+        useScientificNotation: true,
+        scientificNotationThreshold: 1000000,
+        useEffectiveLevelForSuggestions: false,
+        useLogarithmicGraphScale: true,
+        logarithmicGraphScaleThreshold: 1000000,
+        hybridRatio: 1,
+        theme: "light",
+    };
+
+    let settingsSubject = new BehaviorSubject(settings);
 
     beforeEach(async(() => {
         let userInfo = new BehaviorSubject({ isLoggedIn: false });
@@ -66,6 +81,8 @@ describe("UploadComponent", () => {
         let router = { navigate: (): void => void 0 };
         routeParams = new BehaviorSubject({ id: 123 });
         let route = { params: routeParams };
+        let settingsService = { settings: () => settingsSubject };
+        let changeDetectorRef = { markForCheck: (): void => void 0 };
         TestBed.configureTestingModule(
             {
                 imports: [FormsModule],
@@ -80,6 +97,8 @@ describe("UploadComponent", () => {
                     { provide: ActivatedRoute, useValue: route },
                     { provide: Router, useValue: router },
                     { provide: UploadService, useValue: uploadService },
+                    { provide: SettingsService, useValue: settingsService },
+                    { provide: ChangeDetectorRef, useValue: changeDetectorRef },
                     DatePipe,
                     PercentPipe,
                     ExponentialPipe,

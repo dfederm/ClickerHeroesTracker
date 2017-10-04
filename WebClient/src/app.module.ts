@@ -40,6 +40,7 @@ import { UploadService } from "./services/uploadService/uploadService";
 import { ClanService } from "./services/clanService/clanService";
 import { UserService } from "./services/userService/userService";
 import { VersionService } from "./services/versionService/versionService";
+import { SettingsService } from "./services/settingsService/settingsService";
 
 const routes: Routes =
   [
@@ -107,6 +108,7 @@ const routes: Routes =
     AppInsightsService,
     UserService,
     VersionService,
+    SettingsService,
   ],
   bootstrap: [AppComponent],
 })

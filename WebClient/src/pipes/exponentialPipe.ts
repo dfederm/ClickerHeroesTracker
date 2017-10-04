@@ -1,6 +1,7 @@
-import { Pipe, PipeTransform } from "@angular/core";
+import { Pipe, PipeTransform, ChangeDetectorRef } from "@angular/core";
 // tslint:disable-next-line:import-name - The module is named "decimal.js"
 import Decimal from "decimal.js";
+import { SettingsService, IUserSettings } from "../services/settingsService/settingsService";
 
 // Some shenanigans to wire up toFormat, which doesn't have typings.
 // tslint:disable:no-require-imports
@@ -11,18 +12,19 @@ require("toFormat")(Decimal);
 
 @Pipe({ name: "exponential" })
 export class ExponentialPipe implements PipeTransform {
-    // TODO get the user's real settings
-    private userSettings =
-    {
-        areUploadsPublic: true,
-        hybridRatio: 1,
-        logarithmicGraphScaleThreshold: 1000000,
-        playStyle: "hybrid",
-        scientificNotationThreshold: 100000,
-        useEffectiveLevelForSuggestions: false,
-        useLogarithmicGraphScale: true,
-        useScientificNotation: true,
-    };
+    private settings: IUserSettings;
+
+    constructor(
+        settingsService: SettingsService,
+        changeDetectorRef: ChangeDetectorRef,
+    ) {
+        settingsService
+            .settings()
+            .subscribe(settings => {
+                this.settings = settings;
+                changeDetectorRef.markForCheck();
+            });
+    }
 
     public transform(value: number | decimal.Decimal): string {
         if (!value) {
@@ -30,14 +32,14 @@ export class ExponentialPipe implements PipeTransform {
         }
 
         if (typeof value === "number") {
-            const useScientificNotation = this.userSettings.useScientificNotation && Math.abs(value) > this.userSettings.scientificNotationThreshold;
+            const useScientificNotation = this.settings && this.settings.useScientificNotation && Math.abs(value) > this.settings.scientificNotationThreshold;
             return useScientificNotation
                 ? value.toExponential(3)
                 : value.toLocaleString();
         }
 
         if (value instanceof Decimal) {
-            const useScientificNotation = this.userSettings.useScientificNotation && value.abs().greaterThan(this.userSettings.scientificNotationThreshold);
+            const useScientificNotation = this.settings && this.settings.useScientificNotation && value.abs().greaterThan(this.settings.scientificNotationThreshold);
             return useScientificNotation
                 ? value.toExponential(3)
                 : value.toFormat();

@@ -210,5 +210,38 @@ namespace Website.Controllers.Api
 
             return this.Ok(data);
         }
+
+        [Route("{userName}/settings")]
+        [HttpGet]
+        public async Task<IActionResult> Settings(string userName)
+        {
+            if (string.IsNullOrEmpty(userName))
+            {
+                return this.BadRequest();
+            }
+
+            var user = await this.userManager.FindByNameAsync(userName);
+            if (user == null)
+            {
+                return this.NotFound();
+            }
+
+            var userId = await this.userManager.GetUserIdAsync(user);
+            if (string.IsNullOrEmpty(userId))
+            {
+                return this.NotFound();
+            }
+
+            var currentUserId = this.userManager.GetUserId(this.User);
+            if (!userId.Equals(currentUserId, StringComparison.OrdinalIgnoreCase)
+                && !this.User.IsInRole("Admin"))
+            {
+                return this.Forbid();
+            }
+
+            var userSettings = this.userSettingsProvider.Get(userId);
+
+            return this.Ok(userSettings);
+        }
     }
 }

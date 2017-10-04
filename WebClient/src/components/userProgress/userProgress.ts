@@ -4,6 +4,7 @@ import { UserService, IProgressData } from "../../services/userService/userServi
 
 import Decimal from "decimal.js";
 import { ChartDataSets, ChartOptions, ChartTooltipItem } from "chart.js";
+import { SettingsService, IUserSettings } from "../../services/settingsService/settingsService";
 
 interface IChartViewModel {
     isProminent: boolean;
@@ -30,22 +31,12 @@ export class UserProgressComponent implements OnInit {
     public dateRanges: string[];
     public charts: IChartViewModel[];
 
-    // TODO get the user's real settings
-    private userSettings =
-    {
-        areUploadsPublic: true,
-        hybridRatio: 1,
-        logarithmicGraphScaleThreshold: 1000000,
-        playStyle: "hybrid",
-        scientificNotationThreshold: 100000,
-        useEffectiveLevelForSuggestions: false,
-        useLogarithmicGraphScale: true,
-        useScientificNotation: true,
-    };
+    private settings: IUserSettings;
 
     constructor(
         private route: ActivatedRoute,
         private userService: UserService,
+        private settingsService: SettingsService,
     ) { }
 
     public get currentDateRange(): string {
@@ -75,6 +66,13 @@ export class UserProgressComponent implements OnInit {
                 this.fetchData();
             },
             () => this.isError = true);
+
+        this.settingsService
+            .settings()
+            .subscribe(settings => {
+                this.settings = settings;
+                this.fetchData();
+            });
     }
 
     private fetchData(): void {
@@ -177,7 +175,7 @@ export class UserProgressComponent implements OnInit {
             decimalData.push({ x: time, y: value });
         }
 
-        let isLogarithmic = (this.userSettings.useLogarithmicGraphScale && max.minus(min).greaterThan(this.userSettings.logarithmicGraphScaleThreshold)) || requiresDecimal;
+        let isLogarithmic = (this.settings.useLogarithmicGraphScale && max.minus(min).greaterThan(this.settings.logarithmicGraphScaleThreshold)) || requiresDecimal;
 
         let seriesData: { x: number, y: number }[] = [];
         for (let i = 0; i < decimalData.length; i++) {

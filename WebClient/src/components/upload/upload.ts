@@ -5,6 +5,7 @@ import { AuthenticationService, IUserInfo } from "../../services/authenticationS
 import Decimal from "decimal.js";
 
 import "rxjs/add/operator/switchMap";
+import { SettingsService, IUserSettings } from "../../services/settingsService/settingsService";
 
 // tslint:disable-next-line:no-require-imports no-var-requires
 const gameData: IGameData = require("../../../../Website/src/wwwroot/data/GameData.json");
@@ -91,19 +92,6 @@ export class UploadComponent implements OnInit {
     // Each formula gets the sum of the cost of the ancient from 1 to N.
     private ancientCostFormulas = this.getAncientCostFormulas();
 
-    // TODO get the user's real settings
-    private userSettings =
-    {
-        areUploadsPublic: true,
-        hybridRatio: 1,
-        logarithmicGraphScaleThreshold: 1000000,
-        playStyle: "hybrid",
-        scientificNotationThreshold: 100000,
-        useEffectiveLevelForSuggestions: false,
-        useLogarithmicGraphScale: true,
-        useScientificNotation: true,
-    };
-
     private _suggestionType = "AvailableSouls";
     private _useSoulsFromAscension = true;
 
@@ -114,11 +102,15 @@ export class UploadComponent implements OnInit {
     private heroSouls: decimal.Decimal;
     private ancientCostMultiplier: decimal.Decimal;
 
+    private upload: IUpload;
+    private settings: IUserSettings;
+
     constructor(
         private authenticationService: AuthenticationService,
         private route: ActivatedRoute,
         private router: Router,
         private uploadService: UploadService,
+        private settingsService: SettingsService,
     ) {
         for (const id in gameData.ancients) {
             const ancientDefinition = gameData.ancients[id];
@@ -166,9 +158,13 @@ export class UploadComponent implements OnInit {
             .userInfo()
             .subscribe(userInfo => this.userInfo = userInfo);
 
+        this.settingsService
+            .settings()
+            .subscribe(settings => this.handleSettings(settings));
+
         this.route.params
             .switchMap((params: Params) => this.uploadService.get(+params.id))
-            .subscribe(upload => this.handleData(upload), () => this.handleError("There was a problem getting that upload"));
+            .subscribe(upload => this.handleUpload(upload), () => this.handleError("There was a problem getting that upload"));
     }
 
     public deleteUpload(): void {
@@ -182,23 +178,38 @@ export class UploadComponent implements OnInit {
         return name.replace(/[^\w]/gi, "");
     }
 
-    // tslint:disable-next-line:cyclomatic-complexity
-    private handleData(upload: IUpload): void {
-        this.errorMessage = null;
-        this.uploadId = upload.id;
+    private handleSettings(settings: IUserSettings): void {
+        this.settings = settings;
+        this.refresh();
+    }
 
-        this.userName = upload.user
-            ? upload.user.name
+    private handleUpload(upload: IUpload): void {
+        this.upload = upload;
+        this.refresh();
+    }
+
+    // tslint:disable-next-line:cyclomatic-complexity
+    private refresh(): void {
+        // Only render when we have both
+        if (!this.settings || !this.upload) {
+            return;
+        }
+
+        this.errorMessage = null;
+        this.uploadId = this.upload.id;
+
+        this.userName = this.upload.user
+            ? this.upload.user.name
             : null;
 
-        this.uploadTime = upload.timeSubmitted;
-        this.playStyle = upload.playStyle;
-        this.uploadContent = upload.uploadContent;
+        this.uploadTime = this.upload.timeSubmitted;
+        this.playStyle = this.upload.playStyle;
+        this.uploadContent = this.upload.uploadContent;
 
         let stats: { [key: string]: decimal.Decimal } = {};
-        if (upload.stats) {
-            for (let statType in upload.stats) {
-                stats[statType] = new Decimal(upload.stats[statType]);
+        if (this.upload.stats) {
+            for (let statType in this.upload.stats) {
+                stats[statType] = new Decimal(this.upload.stats[statType]);
             }
         }
 
@@ -410,7 +421,7 @@ export class UploadComponent implements OnInit {
                 suggestedLevels.Nogardnit = suggestedLevels.Libertas.pow(0.8);
                 break;
             case "hybrid":
-                const hybridRatioReciprocal = 1 / this.userSettings.hybridRatio;
+                const hybridRatioReciprocal = 1 / this.settings.hybridRatio;
                 suggestedLevels.Bhaal = suggestedLevels.Fragsworth = currentPrimaryAncientLevel.times(hybridRatioReciprocal);
                 suggestedLevels.Juggernaut = suggestedLevels.Fragsworth.pow(0.8);
                 suggestedLevels.Libertas = suggestedLevels.Mammon;
@@ -507,7 +518,7 @@ export class UploadComponent implements OnInit {
     private getAncientLevel(ancientName: string): decimal.Decimal {
         let ancient = this.ancientsByName[ancientName];
         return ancient
-            ? this.userSettings.useEffectiveLevelForSuggestions
+            ? this.settings.useEffectiveLevelForSuggestions
                 ? ancient.effectiveLevel
                 : ancient.ancientLevel
             : new Decimal(0);
