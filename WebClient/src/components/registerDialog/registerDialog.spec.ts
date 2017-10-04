@@ -1,7 +1,7 @@
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { FormsModule } from "@angular/forms";
 import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
-import { CompareValidatorDirective } from "angular-compare-validator";
+import { CompareValidatorModule } from "angular-compare-validator";
 
 import { RegisterDialogComponent } from "./registerDialog";
 import { AuthenticationService } from "../../services/authenticationService/authenticationService";
@@ -24,10 +24,12 @@ describe("RegisterDialogComponent", () => {
 
         TestBed.configureTestingModule(
             {
-                imports: [FormsModule],
+                imports: [
+                    FormsModule,
+                    CompareValidatorModule,
+                ],
                 declarations: [
                     RegisterDialogComponent,
-                    CompareValidatorDirective,
                 ],
                 providers:
                 [

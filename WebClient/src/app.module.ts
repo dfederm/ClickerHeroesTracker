@@ -9,7 +9,7 @@ import { TimeAgoPipe } from "time-ago-pipe";
 import { AdsenseModule } from "ng2-adsense";
 import { ApplicationInsightsModule, AppInsightsService } from "@markpieszak/ng-application-insights";
 import { ChartsModule } from "ng2-charts";
-import { CompareValidatorDirective } from "angular-compare-validator";
+import { CompareValidatorModule } from "angular-compare-validator";
 
 import { AppComponent } from "./components/app/app";
 import { HomeComponent } from "./components/home/home";
@@ -67,6 +67,7 @@ const routes: Routes =
     // Make sure this matches the API settings as well. Is there a better way to do this?
     ApplicationInsightsModule.forRoot({ instrumentationKey: "99fba640-790d-484f-83c4-3c97450d8698" }),
     ChartsModule,
+    CompareValidatorModule,
   ],
   declarations:
   [
@@ -90,7 +91,6 @@ const routes: Routes =
     UserCompareComponent,
     BannerComponent,
     RegisterDialogComponent,
-    CompareValidatorDirective,
     ExternalLoginsComponent,
   ],
   entryComponents:
