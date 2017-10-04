@@ -8,6 +8,7 @@ import { BehaviorSubject } from "rxjs/BehaviorSubject";
 import { DashboardComponent } from "./dashboard";
 import { UserService, IProgressData, IFollowsData } from "../../services/userService/userService";
 import { AuthenticationService, IUserInfo } from "../../services/authenticationService/authenticationService";
+import { SettingsService, IUserSettings } from "../../services/settingsService/settingsService";
 
 describe("DashboardComponent", () => {
     let component: DashboardComponent;
@@ -25,6 +26,20 @@ describe("DashboardComponent", () => {
     };
 
     let userInfo = new BehaviorSubject(loggedInUser);
+
+    let settings: IUserSettings = {
+        areUploadsPublic: true,
+        playStyle: "hybrid",
+        useScientificNotation: true,
+        scientificNotationThreshold: 1000000,
+        useEffectiveLevelForSuggestions: false,
+        useLogarithmicGraphScale: true,
+        logarithmicGraphScaleThreshold: 1000000,
+        hybridRatio: 2,
+        theme: "light",
+    };
+
+    let settingsSubject = new BehaviorSubject(settings);
 
     let progress: IProgressData = {
         soulsSpentData: {
@@ -61,6 +76,7 @@ describe("DashboardComponent", () => {
             getProgress: () => Promise.resolve(progress),
             getFollows: () => Promise.resolve(followsData),
         };
+        let settingsService = { settings: () => settingsSubject };
 
         TestBed.configureTestingModule(
             {
@@ -68,6 +84,7 @@ describe("DashboardComponent", () => {
                 providers: [
                     { provide: AuthenticationService, useValue: authenticationService },
                     { provide: UserService, useValue: userService },
+                    { provide: SettingsService, useValue: settingsService },
                 ],
                 schemas: [NO_ERRORS_SCHEMA],
             })

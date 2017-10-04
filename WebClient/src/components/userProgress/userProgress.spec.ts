@@ -8,6 +8,7 @@ import Decimal from "decimal.js";
 import { UserProgressComponent } from "./userProgress";
 import { UserService, IProgressData } from "../../services/userService/userService";
 import { ChartDataSets, ChartPoint, ChartOptions } from "chart.js";
+import { SettingsService, IUserSettings } from "../../services/settingsService/settingsService";
 
 describe("UserProgressComponent", () => {
     let component: UserProgressComponent;
@@ -56,12 +57,28 @@ describe("UserProgressComponent", () => {
         { title: "Ancient2", isLogarithmic: false, data: progress.ancientLevelData.ancient2 },
     ];
 
+    let settings: IUserSettings = {
+        areUploadsPublic: true,
+        playStyle: "hybrid",
+        useScientificNotation: true,
+        scientificNotationThreshold: 1000000,
+        useEffectiveLevelForSuggestions: false,
+        useLogarithmicGraphScale: true,
+        logarithmicGraphScaleThreshold: 1000000,
+        hybridRatio: 2,
+        theme: "light",
+    };
+
+    let settingsSubject = new BehaviorSubject(settings);
+
     beforeEach(async(() => {
         let userService = {
             getProgress(): Promise<IProgressData> {
                 return Promise.resolve(progress);
             },
         };
+
+        let settingsService = { settings: () => settingsSubject };
 
         routeParams = new BehaviorSubject({ userName: "someUserName" });
         let route = { params: routeParams };
@@ -71,6 +88,7 @@ describe("UserProgressComponent", () => {
                 providers: [
                     { provide: ActivatedRoute, useValue: route },
                     { provide: UserService, useValue: userService },
+                    { provide: SettingsService, useValue: settingsService },
                 ],
                 schemas: [NO_ERRORS_SCHEMA],
             })

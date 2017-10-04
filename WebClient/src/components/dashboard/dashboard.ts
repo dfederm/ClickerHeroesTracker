@@ -2,6 +2,7 @@ import { Component, OnInit } from "@angular/core";
 
 import { UserService, IProgressData, IFollowsData } from "../../services/userService/userService";
 import { AuthenticationService, IUserInfo } from "../../services/authenticationService/authenticationService";
+import { SettingsService, IUserSettings } from "../../services/settingsService/settingsService";
 
 import Decimal from "decimal.js";
 import { ChartDataSets, ChartOptions, ChartTooltipItem } from "chart.js";
@@ -32,28 +33,22 @@ export class DashboardComponent implements OnInit {
   public isFollowsError: boolean;
   public follows: string[];
 
-  // TODO get the user's real settings
-  private userSettings =
-  {
-    areUploadsPublic: true,
-    hybridRatio: 1,
-    logarithmicGraphScaleThreshold: 1000000,
-    playStyle: "hybrid",
-    scientificNotationThreshold: 100000,
-    useEffectiveLevelForSuggestions: false,
-    useLogarithmicGraphScale: true,
-    useScientificNotation: true,
-  };
+  private settings: IUserSettings;
 
   constructor(
     private authenticationService: AuthenticationService,
     private userService: UserService,
+    private settingsService: SettingsService,
   ) { }
 
   public ngOnInit(): void {
     this.authenticationService
       .userInfo()
       .subscribe(userInfo => this.handleUserInfo(userInfo));
+
+    this.settingsService
+      .settings()
+      .subscribe(settings => this.handleSettings(settings));
   }
 
   private handleUserInfo(userInfo: IUserInfo): void {
@@ -64,24 +59,37 @@ export class DashboardComponent implements OnInit {
 
     if (userInfo.isLoggedIn && userInfo.username) {
       this.userName = userInfo.username;
-
-      // Show the last week's worth
-      let now = Date.now();
-      let end = new Date(now);
-      let start = new Date(now);
-      start.setDate(start.getDate() - 7);
-
-      this.userService.getProgress(this.userName, start, end)
-        .then(progress => this.handleProgressData(progress))
-        .catch(() => this.isProgressError = true);
-
-      this.userService.getFollows(this.userName)
-        .then(follows => this.handleFollowsData(follows))
-        .catch(() => this.isFollowsError = true);
+      this.refresh();
     } else {
       this.isProgressError = true;
       this.isFollowsError = true;
     }
+  }
+
+  private handleSettings(settings: IUserSettings): void {
+    this.settings = settings;
+    this.refresh();
+  }
+
+  private refresh(): void {
+    // Ensure we have some value for each
+    if (!this.userName || !this.settings) {
+      return;
+    }
+
+    // Show the last week's worth
+    let now = Date.now();
+    let end = new Date(now);
+    let start = new Date(now);
+    start.setDate(start.getDate() - 7);
+
+    this.userService.getProgress(this.userName, start, end)
+      .then(progress => this.handleProgressData(progress))
+      .catch(() => this.isProgressError = true);
+
+    this.userService.getFollows(this.userName)
+      .then(follows => this.handleFollowsData(follows))
+      .catch(() => this.isFollowsError = true);
   }
 
   private handleProgressData(progress: IProgressData): void {
@@ -114,7 +122,7 @@ export class DashboardComponent implements OnInit {
       decimalData.push({ x: time, y: value });
     }
 
-    let isLogarithmic = (this.userSettings.useLogarithmicGraphScale && max.minus(min).greaterThan(this.userSettings.logarithmicGraphScaleThreshold)) || requiresDecimal;
+    let isLogarithmic = (this.settings.useLogarithmicGraphScale && max.minus(min).greaterThan(this.settings.logarithmicGraphScaleThreshold)) || requiresDecimal;
 
     let seriesData: { x: number, y: number }[] = [];
     for (let i = 0; i < decimalData.length; i++) {

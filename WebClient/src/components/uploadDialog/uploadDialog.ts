@@ -7,6 +7,7 @@ import { LogInDialogComponent } from "../logInDialog/logInDialog";
 import { RegisterDialogComponent } from "../registerDialog/registerDialog";
 import { AuthenticationService, IUserInfo } from "../../services/authenticationService/authenticationService";
 import { UploadService } from "../../services/uploadService/uploadService";
+import { SettingsService, PlayStyle } from "../../services/settingsService/settingsService";
 
 @Component({
     selector: "upload",
@@ -17,12 +18,11 @@ export class UploadDialogComponent implements OnInit {
 
     public userInfo: IUserInfo;
 
-    public playStyles: string[] = ["Idle", "Hybrid", "Active"];
+    public playStyles: PlayStyle[] = ["idle", "hybrid", "active"];
 
     public encodedSaveData = "";
 
-    // TODO: set based on user settings
-    public playStyle = "Idle";
+    public playStyle: PlayStyle = "idle";
 
     public addToProgress = true;
 
@@ -35,12 +35,17 @@ export class UploadDialogComponent implements OnInit {
         private uploadService: UploadService,
         public activeModal: NgbActiveModal,
         private router: Router,
+        private settingsService: SettingsService,
     ) { }
 
     public ngOnInit(): void {
         this.authenticationService
             .userInfo()
             .subscribe(userInfo => this.userInfo = userInfo);
+
+        this.settingsService
+            .settings()
+            .subscribe(settings => this.playStyle = settings.playStyle);
     }
 
     public upload(): void {

@@ -1,6 +1,7 @@
 import { Component, OnInit } from "@angular/core";
 import { ActivatedRoute, Params } from "@angular/router";
 import { UserService, IProgressData } from "../../services/userService/userService";
+import { SettingsService, IUserSettings } from "../../services/settingsService/settingsService";
 
 import Decimal from "decimal.js";
 import { ChartDataSets, ChartOptions, ChartTooltipItem } from "chart.js";
@@ -31,22 +32,12 @@ export class UserCompareComponent implements OnInit {
     public dateRanges: string[];
     public charts: IChartViewModel[];
 
-    // TODO get the user's real settings
-    private userSettings =
-    {
-        areUploadsPublic: true,
-        hybridRatio: 1,
-        logarithmicGraphScaleThreshold: 1000000,
-        playStyle: "hybrid",
-        scientificNotationThreshold: 100000,
-        useEffectiveLevelForSuggestions: false,
-        useLogarithmicGraphScale: true,
-        useScientificNotation: true,
-    };
+    private settings: IUserSettings;
 
     constructor(
         private route: ActivatedRoute,
         private userService: UserService,
+        private settingsService: SettingsService,
     ) { }
 
     public get currentDateRange(): string {
@@ -77,6 +68,13 @@ export class UserCompareComponent implements OnInit {
                 this.fetchData();
             },
             () => this.isError = true);
+
+        this.settingsService
+            .settings()
+            .subscribe(settings => {
+                this.settings = settings;
+                this.fetchData();
+            });
     }
 
     private fetchData(): void {
@@ -201,7 +199,7 @@ export class UserCompareComponent implements OnInit {
             decimalData2.push({ x: time, y: value });
         }
 
-        let isLogarithmic = (this.userSettings.useLogarithmicGraphScale && max.minus(min).greaterThan(this.userSettings.logarithmicGraphScaleThreshold)) || requiresDecimal;
+        let isLogarithmic = (this.settings.useLogarithmicGraphScale && max.minus(min).greaterThan(this.settings.logarithmicGraphScaleThreshold)) || requiresDecimal;
 
         let seriesData1: { x: number, y: number }[] = [];
         for (let i = 0; i < decimalData1.length; i++) {

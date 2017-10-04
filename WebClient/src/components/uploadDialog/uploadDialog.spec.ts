@@ -10,6 +10,7 @@ import { BehaviorSubject } from "rxjs/BehaviorSubject";
 import { UploadDialogComponent } from "./uploadDialog";
 import { AuthenticationService, IUserInfo } from "../../services/authenticationService/authenticationService";
 import { UploadService } from "../../services/uploadService/uploadService";
+import { SettingsService, IUserSettings } from "../../services/settingsService/settingsService";
 
 describe("UploadDialogComponent", () => {
     let component: UploadDialogComponent;
@@ -27,12 +28,27 @@ describe("UploadDialogComponent", () => {
         isLoggedIn: false,
     };
 
+    let settings: IUserSettings = {
+        areUploadsPublic: true,
+        playStyle: "hybrid",
+        useScientificNotation: true,
+        scientificNotationThreshold: 1000000,
+        useEffectiveLevelForSuggestions: false,
+        useLogarithmicGraphScale: true,
+        logarithmicGraphScaleThreshold: 1000000,
+        hybridRatio: 2,
+        theme: "light",
+    };
+
+    let settingsSubject = new BehaviorSubject(settings);
+
     beforeEach(async(() => {
         userInfo = new BehaviorSubject(notLoggedInUser);
         let authenticationService = { userInfo: () => userInfo };
         let uploadService = {
             create: (): void => void 0,
         };
+        let settingsService = { settings: () => settingsSubject };
         let activeModal = { close: (): void => void 0 };
         let router = { navigate: (): void => void 0 };
 
@@ -44,6 +60,7 @@ describe("UploadDialogComponent", () => {
                 [
                     { provide: AuthenticationService, useValue: authenticationService },
                     { provide: UploadService, useValue: uploadService },
+                    { provide: SettingsService, useValue: settingsService },
                     { provide: NgbActiveModal, useValue: activeModal },
                     { provide: Router, useValue: router },
                 ],
@@ -125,7 +142,7 @@ describe("UploadDialogComponent", () => {
                     // Wait for stability from the uploadService promise
                     fixture.detectChanges();
                     fixture.whenStable().then(() => {
-                        expect(uploadService.create).toHaveBeenCalledWith("someEncodedSaveData", true, "Hybrid");
+                        expect(uploadService.create).toHaveBeenCalledWith("someEncodedSaveData", true, "hybrid");
 
                         expect(component.errorMessage).toBeFalsy();
                         expect(router.navigate).toHaveBeenCalledWith(["/upload", 123]);
@@ -154,7 +171,7 @@ describe("UploadDialogComponent", () => {
                     // Wait for stability from the uploadService promise
                     fixture.detectChanges();
                     fixture.whenStable().then(() => {
-                        expect(uploadService.create).toHaveBeenCalledWith("someEncodedSaveData", true, "Hybrid");
+                        expect(uploadService.create).toHaveBeenCalledWith("someEncodedSaveData", true, "hybrid");
 
                         expect(component.errorMessage).toBeFalsy();
                         expect(router.navigate).toHaveBeenCalledWith(["/upload", 123]);
