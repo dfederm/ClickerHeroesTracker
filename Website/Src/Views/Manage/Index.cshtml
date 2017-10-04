@@ -11,13 +11,6 @@
     ContentManager.RegisterRawScript("$('[data-toggle=\"tooltip\"]').tooltip();");
 }
 
-<script type="text/javascript">
-    if (typeof (Storage) !== "undefined") {
-        // Code for localStorage/sessionStorage.
-        localStorage.setItem("@nameof(SiteThemeType)", "@Model.Theme");
-    }
-</script>
-
 <h2>@ViewBag.Title.</h2>
 <p class="text-success">@ViewBag.StatusMessage</p>
 
