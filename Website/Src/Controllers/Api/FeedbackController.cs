@@ -2,25 +2,27 @@
 // Copyright (c) Clicker Heroes Tracker. All rights reserved.
 // </copyright>
 
-namespace ClickerHeroesTrackerWebsite.Controllers
+namespace Website.Controllers.Api
 {
     using System.Collections.Generic;
     using System.Threading.Tasks;
     using ClickerHeroesTrackerWebsite.Models;
-    using ClickerHeroesTrackerWebsite.Models.Feedback;
     using ClickerHeroesTrackerWebsite.Services.Email;
     using Microsoft.ApplicationInsights;
+    using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Identity;
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.Extensions.Options;
     using Newtonsoft.Json;
     using SendGrid;
     using SendGrid.Helpers.Mail;
+    using Website.Models.Api.Feedback;
 
     /// <summary>
     /// This controller handles processing feedback.
     /// </summary>
-    [Route("feedback")]
+    [Route("api/feedback")]
+    [Authorize]
     public class FeedbackController : Controller
     {
         private readonly UserManager<ApplicationUser> userManager;
@@ -48,6 +50,7 @@ namespace ClickerHeroesTrackerWebsite.Controllers
         /// <returns>An empty response with a status code representing the result</returns>
         [Route("")]
         [HttpPost]
+        [AllowAnonymous]
         public async Task<IActionResult> Submit(FeedbackRequest feedback)
         {
             string email = null;

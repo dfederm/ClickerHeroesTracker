@@ -29,6 +29,7 @@ import { UserCompareComponent } from "./components/userCompare/userCompare";
 import { BannerComponent } from "./components/banner/banner";
 import { RegisterDialogComponent } from "./components/registerDialog/registerDialog";
 import { ExternalLoginsComponent } from "./components/externalLogins/externalLogins";
+import { FeedbackDialogComponent } from "./components/feedbackDialog/feedbackDialog";
 
 import { OpenDialogDirective } from "./directives/openDialog/openDialog";
 
@@ -41,6 +42,7 @@ import { ClanService } from "./services/clanService/clanService";
 import { UserService } from "./services/userService/userService";
 import { VersionService } from "./services/versionService/versionService";
 import { SettingsService } from "./services/settingsService/settingsService";
+import { FeedbackService } from "./services/feedbackService/feedbackService";
 
 const routes: Routes =
   [
@@ -92,12 +94,14 @@ const routes: Routes =
     BannerComponent,
     RegisterDialogComponent,
     ExternalLoginsComponent,
+    FeedbackDialogComponent,
   ],
   entryComponents:
   [
     LogInDialogComponent,
     UploadDialogComponent,
     RegisterDialogComponent,
+    FeedbackDialogComponent,
   ],
   providers:
   [
@@ -109,6 +113,7 @@ const routes: Routes =
     UserService,
     VersionService,
     SettingsService,
+    FeedbackService,
   ],
   bootstrap: [AppComponent],
 })

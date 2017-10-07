@@ -32,7 +32,8 @@
                    routerLinkActive="active">What's New</a>
             </li>
             <li class="nav-item">
-                <a class="nav-link">Feedback</a>
+                <a class="nav-link"
+                   [openDialog]="FeedbackDialogComponent">Feedback</a>
             </li>
         </ul>
         <ul *ngIf="userInfo.isLoggedIn"

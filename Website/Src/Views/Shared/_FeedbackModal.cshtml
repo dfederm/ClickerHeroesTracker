@@ -1,5 +1,4 @@
-﻿@using System.Security.Claims;
-@using ClickerHeroesTrackerWebsite.Services.Authentication;
+﻿@using ClickerHeroesTrackerWebsite.Services.Authentication;
 
 @inject IContentManager ContentManager
 @inject SignInManager<ApplicationUser> SignInManager
@@ -8,7 +7,7 @@
 @{ ContentManager.RegisterScript("Feedback"); }
 
 <div id="feedbackModal" class="modal fade">
-    <form id="feedbackForm" action="/feedback" method="post" role="form">
+    <form id="feedbackForm" action="/api/feedback" method="post" role="form">
         <div class="modal-dialog modal-md">
             <div class="modal-content">
                 <div class="modal-header">
