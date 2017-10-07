@@ -2,10 +2,10 @@
 // Copyright (c) Clicker Heroes Tracker. All rights reserved.
 // </copyright>
 
-namespace ClickerHeroesTrackerWebsite.Models.Feedback
+namespace Website.Models.Api.Feedback
 {
     /// <summary>
-    /// Represents user-subbmitted feedback
+    /// Represents user-submitted feedback
     /// </summary>
     public class FeedbackRequest
     {

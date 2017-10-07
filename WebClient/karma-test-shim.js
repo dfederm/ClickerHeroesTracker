@@ -19,3 +19,6 @@ var testing = require('@angular/core/testing');
 var browser = require('@angular/platform-browser-dynamic/testing');
 
 testing.TestBed.initTestEnvironment(browser.BrowserDynamicTestingModule, browser.platformBrowserDynamicTesting());
+
+// Prevent crashes when pretty printing DebugElements
+jasmine.MAX_PRETTY_PRINT_DEPTH = 5;

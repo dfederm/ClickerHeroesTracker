@@ -1,0 +1,58 @@
+<div class="modal-header">
+    <h4 class="modal-title">Feedback</h4>
+    <button type="button"
+            class="close"
+            (click)="activeModal.dismiss()">
+        &times;
+    </button>
+</div>
+<div class="modal-body">
+    <div *ngIf="errorMessage"
+         class="alert alert-danger">
+        {{ errorMessage }}
+    </div>
+    <form (ngSubmit)="submit()"
+          #feedbackForm="ngForm">
+        <div class="form-group"
+             [class.has-danger]="!(formComments.valid || formComments.pristine)">
+            <label for="comments">Please leave comments, questions, suggestions, or bug reports</label>
+            <textarea class="form-control"
+                      [class.form-control-danger]="!(formComments.valid || formComments.pristine)"
+                      rows="4"
+                      id="comments"
+                      name="comments"
+                      [(ngModel)]="comments"
+                      #formComments="ngModel"
+                      required></textarea>
+            <div *ngIf="formComments.invalid && (formComments.dirty || formComments.touched)"
+                 class="alert alert-danger">
+                Comments are required
+            </div>
+        </div>
+        <div *ngIf="!userInfo.isLoggedIn"
+             class="form-group"
+             [class.has-danger]="!(formEmail.valid || formEmail.pristine)">
+            <label for="email">Email</label>
+            <input type="email"
+                   class="form-control"
+                   [class.form-control-danger]="!(formEmail.valid || formEmail.pristine)"
+                   id="email"
+                   name="email"
+                   [(ngModel)]="email"
+                   #formEmail="ngModel"
+                   required
+                   email />
+            <div *ngIf="formEmail.invalid && (formEmail.dirty || formEmail.touched)"
+                 class="alert alert-danger">
+                Must be a valid email address
+            </div>
+            <small class="form-text text-muted">
+                To allow Clicker Heroes Tracker to follow up with you using regarding this feedback, either log in or provide your email
+                address.
+            </small>
+        </div>
+        <button type="submit"
+                [disabled]="!feedbackForm.form.valid"
+                class="btn btn-primary">Submit</button>
+    </form>
+</div>

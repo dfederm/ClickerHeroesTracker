@@ -59,7 +59,7 @@ describe("NavbarComponent", () => {
                 [
                     { text: "Upload", dialog: component.UploadDialogComponent },
                     { text: "What's New", url: "/news" },
-                    { text: "Feedback" },
+                    { text: "Feedback", dialog: component.FeedbackDialogComponent },
                     { text: "Register", dialog: component.RegisterDialogComponent },
                     { text: "Log in", dialog: component.LogInDialogComponent },
                 ];
@@ -101,7 +101,7 @@ describe("NavbarComponent", () => {
                     { text: "Upload", dialog: component.UploadDialogComponent },
                     { text: "Clans", url: "/clans" },
                     { text: "What's New", url: "/news" },
-                    { text: "Feedback" },
+                    { text: "Feedback", dialog: component.FeedbackDialogComponent },
                     { text: "Hello User!" },
                     { text: "Log off", hasClickHandler: true },
                 ];
