@@ -35,7 +35,8 @@
                [dismissCurrentDialog]="true">Register as a new user?</a>
         </p>
         <p>
-            <a>Forgot your password?</a>
+            <a [openDialog]="ResetPasswordDialogComponent"
+               [dismissCurrentDialog]="true">Forgot your password?</a>
         </p>
     </form>
     <h4 class="pt-2 pb-2">Use another service to log in</h4>
