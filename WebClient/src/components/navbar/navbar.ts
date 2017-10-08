@@ -38,7 +38,8 @@ export class NavbarComponent implements OnInit {
         });
     }
 
-    public logOut(): void {
+    public logOut($event: MouseEvent): void {
+        $event.preventDefault();
         this.authenticationService.logOut();
     }
 }

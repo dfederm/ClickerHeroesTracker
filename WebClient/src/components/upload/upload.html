@@ -25,18 +25,71 @@
         </div>
         <div class="col-md-6 pull-right">
             <button *ngIf="uploadContent"
-                    class="btn btn-secondary">
+                    class="btn btn-secondary"
+                    (click)="openModal(viewSaveDataModal)">
                 View Save Data
             </button>
-            <!-- Assume if you can see the raw upload that you own it and can delete. -->
-            <button *ngIf="uploadContent"
+            <ng-template #viewSaveDataModal
+                         let-c="close"
+                         let-d="dismiss">
+                <div class="modal-header">
+                    <h4 class="modal-title">Save Data</h4>
+                    <button type="button"
+                            class="close"
+                            (click)="d()">
+                        &times;
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <p>This is the raw content previously uploaded.</p>
+                        <textarea class="form-control"
+                                  rows="2"
+                                  #uploadContextInput
+                                  readonly>{{ uploadContent }}</textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button"
+                            class="btn btn-secondary"
+                            (click)="d()">Close</button>
+                    <button type="button"
+                            class="btn btn-primary"
+                            [ngxClipboard]="uploadContextInput"
+                            (cbOnSuccess)="c()">Copy to Clipboard</button>
+                </div>
+            </ng-template>
+
+            <button *ngIf="userId && userInfo && userId === userInfo.id"
                     class="btn btn-danger"
-                    (click)="deleteUpload()">
+                    (click)="openModal(deleteUploadModal)">
                 Delete
             </button>
-            <button class="btn btn-secondary">
-                Share
-            </button>
+            <ng-template #deleteUploadModal
+                         let-c="close"
+                         let-d="dismiss">
+                <div class="modal-header">
+                    <h4 class="modal-title">Delete Upload</h4>
+                    <button type="button"
+                            class="close"
+                            (click)="d()">
+                        &times;
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <p>Are you sure?
+                        <span class="text-danger">This cannot be undone!</span>
+                    </p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button"
+                            class="btn btn-secondary"
+                            (click)="d()">Cancel</button>
+                    <button type="button"
+                            class="btn btn-danger"
+                            (click)="deleteUpload(c)">Delete</button>
+                </div>
+            </ng-template>
         </div>
     </div>
     <div class="row">

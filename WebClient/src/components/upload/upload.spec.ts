@@ -6,10 +6,11 @@ import { By } from "@angular/platform-browser";
 import { BehaviorSubject } from "rxjs/BehaviorSubject";
 import { DatePipe, PercentPipe } from "@angular/common";
 import { AppInsightsService } from "@markpieszak/ng-application-insights";
+import { NgbModal } from "@ng-bootstrap/ng-bootstrap";
 
 import { UploadComponent } from "./upload";
 import { ExponentialPipe } from "../../pipes/exponentialPipe";
-import { AuthenticationService } from "../../services/authenticationService/authenticationService";
+import { AuthenticationService, IUserInfo } from "../../services/authenticationService/authenticationService";
 import { UploadService, IUpload } from "../../services/uploadService/uploadService";
 import { SettingsService, IUserSettings } from "../../services/settingsService/settingsService";
 
@@ -18,6 +19,7 @@ describe("UploadComponent", () => {
     let fixture: ComponentFixture<UploadComponent>;
     let routeParams: BehaviorSubject<Params>;
     let appInsights: AppInsightsService;
+    let userInfoSubject: BehaviorSubject<IUserInfo>;
 
     let uploadServiceGetResolve: (upload: IUpload) => Promise<void>;
     let uploadServiceGetReject: () => Promise<void>;
@@ -40,8 +42,8 @@ describe("UploadComponent", () => {
     let settingsSubject = new BehaviorSubject(settings);
 
     beforeEach(async(() => {
-        let userInfo = new BehaviorSubject({ isLoggedIn: false });
-        let authenticationService = { userInfo: () => userInfo };
+        userInfoSubject = new BehaviorSubject({ isLoggedIn: false });
+        let authenticationService = { userInfo: () => userInfoSubject };
         let uploadService = {
             get: (): Promise<IUpload> => new Promise<IUpload>((resolve, reject) => {
                 uploadServiceGetResolve = (upload) => {
@@ -78,6 +80,7 @@ describe("UploadComponent", () => {
         let settingsService = { settings: () => settingsSubject };
         let changeDetectorRef = { markForCheck: (): void => void 0 };
         appInsights = jasmine.createSpyObj("appInsights", ["trackEvent", "startTrackEvent", "stopTrackEvent"]);
+        let modalService = { open: (): void => void 0 };
         TestBed.configureTestingModule(
             {
                 imports: [FormsModule],
@@ -95,6 +98,7 @@ describe("UploadComponent", () => {
                     { provide: SettingsService, useValue: settingsService },
                     { provide: ChangeDetectorRef, useValue: changeDetectorRef },
                     { provide: AppInsightsService, useValue: appInsights },
+                    { provide: NgbModal, useValue: modalService },
                     DatePipe,
                     PercentPipe,
                     ExponentialPipe,
@@ -268,11 +272,44 @@ describe("UploadComponent", () => {
                     expect(found).toEqual(false, "Unexpectedly found the 'View Save Data' button");
                 });
         }));
+
+        it("should show the modal when clicked", async(() => {
+            let modalService = TestBed.get(NgbModal) as NgbModal;
+            spyOn(modalService, "open").and.returnValue({ result: Promise.resolve() });
+
+            let upload = getUpload();
+            uploadServiceGetResolve(upload)
+                .then(() => {
+                    fixture.detectChanges();
+
+                    let errorMessage = fixture.debugElement.query(By.css(".alert-danger"));
+                    expect(errorMessage).toBeNull("Error message found");
+
+                    let buttons = fixture.debugElement.queryAll(By.css(".col-md-6.pull-right button"));
+                    let viewSaveDataButton: DebugElement;
+                    for (let i = 0; i < buttons.length; i++) {
+                        if (getNormalizedTextContent(buttons[i]) === "View Save Data") {
+                            viewSaveDataButton = buttons[i];
+                        }
+                    }
+
+                    expect(viewSaveDataButton).toBeDefined("Could not find the 'View Save Data' button");
+
+                    viewSaveDataButton.nativeElement.click();
+                    expect(modalService.open).toHaveBeenCalled();
+                });
+        }));
     });
 
     describe("Delete button", () => {
-        it("should display when there is upload content", async(() => {
+        it("should display when it's the user's upload", async(() => {
             let upload = getUpload();
+            userInfoSubject.next({
+                isLoggedIn: true,
+                id: upload.user.id,
+                username: upload.user.name,
+                email: "someEmail",
+            });
             uploadServiceGetResolve(upload)
                 .then(() => {
                     fixture.detectChanges();
@@ -292,11 +329,17 @@ describe("UploadComponent", () => {
                 });
         }));
 
-        it("should delete the upload when clicked", async(() => {
-            let router = TestBed.get(Router) as Router;
-            spyOn(router, "navigate");
+        it("should show the modal when clicked", async(() => {
+            let modalService = TestBed.get(NgbModal) as NgbModal;
+            spyOn(modalService, "open").and.returnValue({ result: Promise.resolve() });
 
             let upload = getUpload();
+            userInfoSubject.next({
+                isLoggedIn: true,
+                id: upload.user.id,
+                username: upload.user.name,
+                email: "someEmail",
+            });
             uploadServiceGetResolve(upload)
                 .then(() => {
                     fixture.detectChanges();
@@ -315,11 +358,32 @@ describe("UploadComponent", () => {
                     expect(deleteButton).toBeDefined("Could not find the 'Delete' button");
 
                     deleteButton.nativeElement.click();
+                    expect(modalService.open).toHaveBeenCalled();
+                });
+        }));
+
+        it("should delete the upload when confirmed", async(() => {
+            let router = TestBed.get(Router) as Router;
+            spyOn(router, "navigate").and.returnValue(Promise.resolve());
+
+            let upload = getUpload();
+            uploadServiceGetResolve(upload)
+                .then(() => {
+                    fixture.detectChanges();
+
+                    let errorMessage = fixture.debugElement.query(By.css(".alert-danger"));
+                    expect(errorMessage).toBeNull("Error message found");
+
+                    let closeModal = jasmine.createSpy("closeModal");
+                    component.deleteUpload(closeModal);
+
                     uploadServiceDeleteResolve()
+                        .then(() => fixture.whenStable()) // Not sure why the navigation promise needs yet another wait for stability
                         .then(() => {
                             fixture.detectChanges();
 
                             expect(router.navigate).toHaveBeenCalledWith(["/dashboard"]);
+                            expect(closeModal).toHaveBeenCalled();
 
                             errorMessage = fixture.debugElement.query(By.css(".alert-danger"));
                             expect(errorMessage).toBeNull("Error message found");
@@ -339,22 +403,16 @@ describe("UploadComponent", () => {
                     let errorMessage = fixture.debugElement.query(By.css(".alert-danger"));
                     expect(errorMessage).toBeNull("Error message found");
 
-                    let buttons = fixture.debugElement.queryAll(By.css(".col-md-6.pull-right button"));
-                    let deleteButton: DebugElement;
-                    for (let i = 0; i < buttons.length; i++) {
-                        if (getNormalizedTextContent(buttons[i]) === "Delete") {
-                            deleteButton = buttons[i];
-                        }
-                    }
+                    let closeModal = jasmine.createSpy("closeModal");
+                    component.deleteUpload(closeModal);
 
-                    expect(deleteButton).toBeDefined("Could not find the 'Delete' button");
-
-                    deleteButton.nativeElement.click();
                     uploadServiceDeleteReject()
+                        .then(() => fixture.whenStable()) // Not sure why the navigation promise needs yet another wait for stability
                         .then(() => {
                             fixture.detectChanges();
 
                             expect(router.navigate).not.toHaveBeenCalled();
+                            expect(closeModal).toHaveBeenCalled();
 
                             errorMessage = fixture.debugElement.query(By.css(".alert-danger"));
                             expect(errorMessage).not.toBeNull("Error message not found");
@@ -362,9 +420,14 @@ describe("UploadComponent", () => {
                 });
         }));
 
-        it("should not display when there is no upload content", async(() => {
+        it("should not display when it's not the user's upload", async(() => {
             let upload = getUpload();
-            delete upload.uploadContent;
+            userInfoSubject.next({
+                isLoggedIn: true,
+                id: "someOtherUserId",
+                username: "someOtherUsername",
+                email: "someOtherEmail",
+            });
             uploadServiceGetResolve(upload)
                 .then(() => {
                     fixture.detectChanges();

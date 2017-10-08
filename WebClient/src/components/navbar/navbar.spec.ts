@@ -113,7 +113,7 @@ describe("NavbarComponent", () => {
                     { text: "Clans", url: "/clans" },
                     { text: "What's New", url: "/news" },
                     { text: "Feedback", dialog: component.FeedbackDialogComponent },
-                    { text: "Hello User!" },
+                    { text: "Hello someUsername!" },
                     { text: "Log off", hasClickHandler: true },
                 ];
             for (let i = 0; i < navItems.length; i++) {
