@@ -1,4 +1,5 @@
 import { Component, OnInit } from "@angular/core";
+import { Router, NavigationEnd } from "@angular/router";
 
 import { AuthenticationService, IUserInfo } from "../../services/authenticationService/authenticationService";
 import { RegisterDialogComponent } from "../registerDialog/registerDialog";
@@ -22,12 +23,19 @@ export class NavbarComponent implements OnInit {
 
     constructor(
         private authenticationService: AuthenticationService,
+        private router: Router,
     ) { }
 
     public ngOnInit(): void {
         this.authenticationService
             .userInfo()
             .subscribe(userInfo => this.userInfo = userInfo);
+
+        this.router.events.subscribe((event) => {
+            if (event instanceof NavigationEnd) {
+                this.isCollapsed = true;
+            }
+        });
     }
 
     public logOut(): void {

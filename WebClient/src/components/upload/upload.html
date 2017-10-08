@@ -46,34 +46,51 @@
                 Based on the
                 <a href="https://redd.it/4naohc"
                    target="_blank">
-                   Math by /u/sugima
+                    Math by /u/sugima
                 </a>.
             </p>
             <fieldset class="form-group">
                 <legend class="col-form-legend">Suggestion Type</legend>
                 <div class="form-check form-check-inline">
                     <label class="form-check-label">
-                        <input class="form-check-input" type="radio" name="suggestionType" [(ngModel)]="suggestionType" [value]="'AvailableSouls'">
+                        <input class="form-check-input"
+                               type="radio"
+                               name="suggestionType"
+                               [(ngModel)]="suggestionType"
+                               [value]="'AvailableSouls'">
                         <span>Available Souls</span>
-                        <span class="text-muted" data-toggle="tooltip" data-placement="bottom" title="This mode suggests what to buy based on the souls you currently have available">(?)</span>
+                        <span class="text-muted"
+                              data-toggle="tooltip"
+                              data-placement="bottom"
+                              title="This mode suggests what to buy based on the souls you currently have available">(?)</span>
                     </label>
                 </div>
                 <div class="form-check form-check-inline">
                     <label class="form-check-label">
-                        <input class="form-check-input" type="radio" name="suggestionType" [(ngModel)]="suggestionType" [value]="'RulesOfThumb'">
+                        <input class="form-check-input"
+                               type="radio"
+                               name="suggestionType"
+                               [(ngModel)]="suggestionType"
+                               [value]="'RulesOfThumb'">
                         <span>Rules of Thumb</span>
-                        <span class="text-muted" data-toggle="tooltip" data-placement="bottom" title="This shows the optimal levels based on your primary ancient's level. It does not take into account what you can afford currently">(?)</span>
+                        <span class="text-muted"
+                              data-toggle="tooltip"
+                              data-placement="bottom"
+                              title="This shows the optimal levels based on your primary ancient's level. It does not take into account what you can afford currently">(?)</span>
                     </label>
                 </div>
             </fieldset>
             <div *ngIf="suggestionType == 'AvailableSouls'"
                  class="form-group">
                 <label class="form-check-label">
-                    <input class="form-check-input" name="useSoulsFromAscension" [(ngModel)]="useSoulsFromAscension" type="checkbox">
+                    <input class="form-check-input"
+                           name="useSoulsFromAscension"
+                           [(ngModel)]="useSoulsFromAscension"
+                           type="checkbox">
                     <span>Include souls from ascension (+{{ pendingSouls | exponential }})</span>
                 </label>
             </div>
-            <table class="table">
+            <table class="table table-sm">
                 <thead>
                     <tr>
                         <th>Ancient</th>
@@ -143,7 +160,7 @@
                 The simulation data is missing data for high level ancients. The suggestions below show the closest result that exists but
                 you may have some AS left over to spend based on your own judgement.
             </p>
-            <table class="table">
+            <table class="table table-sm">
                 <thead>
                     <tr>
                         <th>Outsider</th>
@@ -160,7 +177,7 @@
                 </tbody>
             </table>
             <h4>Miscellaneous stats:</h4>
-            <table class="table">
+            <table class="table table-sm">
                 <tbody>
                     <tr>
                         <td>Hero Souls Spent</td>
