@@ -3,6 +3,8 @@ import { ComponentFixture, TestBed, async } from "@angular/core/testing";
 import { By } from "@angular/platform-browser";
 import { NgbModal } from "@ng-bootstrap/ng-bootstrap";
 import { BehaviorSubject } from "rxjs/BehaviorSubject";
+import { Router, Event as NavigationEvent, NavigationEnd, NavigationCancel } from "@angular/router";
+import { Subject } from "rxjs/Subject";
 
 import { NavbarComponent } from "./navbar";
 import { AuthenticationService, IUserInfo } from "../../services/authenticationService/authenticationService";
@@ -10,6 +12,7 @@ import { AuthenticationService, IUserInfo } from "../../services/authenticationS
 describe("NavbarComponent", () => {
     let component: NavbarComponent;
     let fixture: ComponentFixture<NavbarComponent>;
+    let navigationEvents: Subject<NavigationEvent>;
 
     const loggedInUser: IUserInfo = {
         isLoggedIn: true,
@@ -26,12 +29,20 @@ describe("NavbarComponent", () => {
         let authenticationService = { userInfo: (): void => void 0, logOut: (): void => void 0 };
         let modalService = { open: (): void => void 0 };
 
+        navigationEvents = new Subject();
+        let router = {
+            events: {
+                subscribe: navigationEvents.subscribe.bind(navigationEvents),
+            },
+        };
+
         TestBed.configureTestingModule(
             {
                 declarations: [NavbarComponent],
                 providers:
                 [
                     { provide: AuthenticationService, useValue: authenticationService },
+                    { provide: Router, useValue: router },
                     { provide: NgbModal, useValue: modalService },
                 ],
                 schemas: [NO_ERRORS_SCHEMA],
@@ -177,6 +188,48 @@ describe("NavbarComponent", () => {
         expect(component.isCollapsed).toEqual(true);
 
         toggler.nativeElement.click();
+        fixture.detectChanges();
+        expect(component.isCollapsed).toEqual(false);
+    });
+
+    it("should collape the navbar on navigation", () => {
+        let authenticationService = TestBed.get(AuthenticationService) as AuthenticationService;
+        spyOn(authenticationService, "userInfo").and.returnValue(new BehaviorSubject(notLoggedInUser));
+
+        let toggler = fixture.debugElement.query(By.css(".navbar-toggler"));
+
+        // Initial state
+        fixture.detectChanges();
+        expect(component.isCollapsed).toEqual(true);
+
+        toggler.nativeElement.click();
+        fixture.detectChanges();
+        expect(component.isCollapsed).toEqual(false);
+
+        let event = new NavigationEnd(1, "someUrl", "someUrlAfterRedirects");
+        navigationEvents.next(event);
+
+        fixture.detectChanges();
+        expect(component.isCollapsed).toEqual(true);
+    });
+
+    it("should not collape the navbar on unrelated navigation event", () => {
+        let authenticationService = TestBed.get(AuthenticationService) as AuthenticationService;
+        spyOn(authenticationService, "userInfo").and.returnValue(new BehaviorSubject(notLoggedInUser));
+
+        let toggler = fixture.debugElement.query(By.css(".navbar-toggler"));
+
+        // Initial state
+        fixture.detectChanges();
+        expect(component.isCollapsed).toEqual(true);
+
+        toggler.nativeElement.click();
+        fixture.detectChanges();
+        expect(component.isCollapsed).toEqual(false);
+
+        let event = new NavigationCancel(1, "someUrl", "someReason");
+        navigationEvents.next(event);
+
         fixture.detectChanges();
         expect(component.isCollapsed).toEqual(false);
     });
