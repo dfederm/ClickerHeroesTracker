@@ -1,5 +1,6 @@
 import { Injectable } from "@angular/core";
 import { Http, RequestOptions } from "@angular/http";
+import { AppInsightsService } from "@markpieszak/ng-application-insights";
 
 import "rxjs/add/operator/toPromise";
 
@@ -60,6 +61,7 @@ export class ClanService {
     constructor(
         private authenticationService: AuthenticationService,
         private http: Http,
+        private appInsights: AppInsightsService,
     ) { }
 
     // TODO: this is really the user's clan.
@@ -79,7 +81,7 @@ export class ClanService {
             })
             .catch(error => {
                 let errorMessage = error.message || error.toString();
-                appInsights.trackEvent("ClanService.getClan.error", { message: errorMessage });
+                this.appInsights.trackEvent("ClanService.getClan.error", { message: errorMessage });
                 return Promise.reject(errorMessage);
             });
     }
@@ -101,7 +103,7 @@ export class ClanService {
             })
             .catch(error => {
                 let errorMessage = error.message || error.toString();
-                appInsights.trackEvent("ClanService.getUserClan.error", { message: errorMessage });
+                this.appInsights.trackEvent("ClanService.getUserClan.error", { message: errorMessage });
                 return Promise.reject(errorMessage);
             });
     }
@@ -117,7 +119,7 @@ export class ClanService {
             })
             .catch(error => {
                 let errorMessage = error.message || error.toString();
-                appInsights.trackEvent("ClanService.getLeaderboard.error", { message: errorMessage });
+                this.appInsights.trackEvent("ClanService.getLeaderboard.error", { message: errorMessage });
                 return Promise.reject(errorMessage);
             });
     }
@@ -142,7 +144,7 @@ export class ClanService {
             })
             .catch(error => {
                 let errorMessage = error.message || error.toString();
-                appInsights.trackEvent("ClanService.getLeaderboard.error", { message: errorMessage });
+                this.appInsights.trackEvent("ClanService.getLeaderboard.error", { message: errorMessage });
                 return Promise.reject(errorMessage);
             });
     }

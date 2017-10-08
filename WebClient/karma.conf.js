@@ -41,7 +41,7 @@ module.exports = function (config) {
         emitWarning: false,
         // thresholds for all files
         global: {
-          statements: 90,
+          statements: 95,
         },
         // thresholds per file
         each: {

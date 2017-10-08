@@ -4,21 +4,15 @@ import { BaseRequestOptions, ConnectionBackend, Http, RequestOptions } from "@an
 import { Response, ResponseOptions, RequestMethod } from "@angular/http";
 import { MockBackend, MockConnection } from "@angular/http/testing";
 import { BehaviorSubject } from "rxjs/BehaviorSubject";
+import { AppInsightsService } from "@markpieszak/ng-application-insights";
 
 import { UploadService, IUploadSummaryListResponse, IUpload } from "./uploadService";
 import { AuthenticationService, IUserInfo } from "../authenticationService/authenticationService";
 
-// tslint:disable-next-line:no-namespace
-declare global {
-    // tslint:disable-next-line:interface-name - We don't own this interface name, just extending it
-    interface Window {
-        appInsights: Microsoft.ApplicationInsights.IAppInsights;
-    }
-}
-
 describe("UploadService", () => {
     let uploadService: UploadService;
     let authenticationService: AuthenticationService;
+    let appInsights: AppInsightsService;
     let backend: MockBackend;
     let lastConnection: MockConnection;
     let userInfo: BehaviorSubject<IUserInfo>;
@@ -40,6 +34,8 @@ describe("UploadService", () => {
         (authenticationService.userInfo as jasmine.Spy).and.returnValue(userInfo);
         (authenticationService.getAuthHeaders as jasmine.Spy).and.returnValue(new Headers());
 
+        appInsights = jasmine.createSpyObj("appInsights", ["trackEvent"]);
+
         let injector = ReflectiveInjector.resolveAndCreate(
             [
                 UploadService,
@@ -47,14 +43,12 @@ describe("UploadService", () => {
                 { provide: RequestOptions, useClass: BaseRequestOptions },
                 Http,
                 { provide: AuthenticationService, useValue: authenticationService },
+                { provide: AppInsightsService, useValue: appInsights },
             ]);
 
         uploadService = injector.get(UploadService) as UploadService;
         backend = injector.get(ConnectionBackend) as MockBackend;
         backend.connections.subscribe((connection: MockConnection) => lastConnection = connection);
-
-        // Mock the global variable. We should figure out a better way to both inject this in the product and mock this in tests.
-        window.appInsights = jasmine.createSpyObj("appInsights", ["trackEvent"]);
     });
 
     afterEach(() => {

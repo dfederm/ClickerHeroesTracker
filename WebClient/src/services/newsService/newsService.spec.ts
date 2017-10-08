@@ -3,38 +3,32 @@ import { fakeAsync, tick } from "@angular/core/testing";
 import { BaseRequestOptions, ConnectionBackend, Http, RequestOptions } from "@angular/http";
 import { Response, ResponseOptions } from "@angular/http";
 import { MockBackend, MockConnection } from "@angular/http/testing";
+import { AppInsightsService } from "@markpieszak/ng-application-insights";
 
 import { NewsService, ISiteNewsEntryListResponse } from "./newsService";
 
-// tslint:disable-next-line:no-namespace
-declare global {
-    // tslint:disable-next-line:interface-name - We don't own this interface name, just extending it
-    interface Window {
-        appInsights: Microsoft.ApplicationInsights.IAppInsights;
-    }
-}
-
 describe("NewsService", () => {
     let newsService: NewsService;
+    let appInsights: AppInsightsService;
     let backend: MockBackend;
     let lastConnection: MockConnection;
 
     describe("getNews", () => {
         beforeEach(() => {
+            appInsights = jasmine.createSpyObj("appInsights", ["trackEvent"]);
+
             let injector = ReflectiveInjector.resolveAndCreate(
                 [
                     { provide: ConnectionBackend, useClass: MockBackend },
                     { provide: RequestOptions, useClass: BaseRequestOptions },
                     Http,
                     NewsService,
+                    { provide: AppInsightsService, useValue: appInsights },
                 ]);
 
             newsService = injector.get(NewsService) as NewsService;
             backend = injector.get(ConnectionBackend) as MockBackend;
             backend.connections.subscribe((connection: MockConnection) => lastConnection = connection);
-
-            // Mock the global variable. We should figure out a better way to both inject this in the product and mock this in tests.
-            window.appInsights = jasmine.createSpyObj("appInsights", ["trackEvent"]);
         });
 
         afterAll(() => {

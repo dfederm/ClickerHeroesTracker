@@ -1,5 +1,6 @@
 import { Injectable } from "@angular/core";
 import { Http, RequestOptions } from "@angular/http";
+import { AppInsightsService } from "@markpieszak/ng-application-insights";
 
 import "rxjs/add/operator/toPromise";
 
@@ -39,6 +40,7 @@ export class UploadService {
     constructor(
         private authenticationService: AuthenticationService,
         private http: Http,
+        private appInsights: AppInsightsService,
     ) {
         this.authenticationService
             .userInfo()
@@ -54,7 +56,7 @@ export class UploadService {
             .then(response => response.json() as IUploadSummaryListResponse)
             .catch(error => {
                 let errorMessage = error.message || error.toString();
-                appInsights.trackEvent("UploadService.getUploads.error", { message: errorMessage });
+                this.appInsights.trackEvent("UploadService.getUploads.error", { message: errorMessage });
                 return Promise.reject(errorMessage);
             });
     }
@@ -68,7 +70,7 @@ export class UploadService {
             .then(response => response.json() as IUpload)
             .catch(error => {
                 let errorMessage = error.message || error.toString();
-                appInsights.trackEvent("UploadService.get.error", { message: errorMessage });
+                this.appInsights.trackEvent("UploadService.get.error", { message: errorMessage });
                 return Promise.reject(errorMessage);
             });
     }
@@ -87,7 +89,7 @@ export class UploadService {
             .then(result => parseInt(result.text()))
             .catch(error => {
                 let errorMessage = error.message || error.toString();
-                appInsights.trackEvent("UploadService.create.error", { message: errorMessage });
+                this.appInsights.trackEvent("UploadService.create.error", { message: errorMessage });
                 return Promise.reject(error);
             });
     }
@@ -101,7 +103,7 @@ export class UploadService {
             .then(() => void 0)
             .catch(error => {
                 let errorMessage = error.message || error.toString();
-                appInsights.trackEvent("UploadService.delete.error", { message: errorMessage });
+                this.appInsights.trackEvent("UploadService.delete.error", { message: errorMessage });
                 return Promise.reject(errorMessage);
             });
     }

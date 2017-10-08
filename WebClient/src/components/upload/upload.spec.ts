@@ -5,6 +5,7 @@ import { NO_ERRORS_SCHEMA, DebugElement, ChangeDetectorRef } from "@angular/core
 import { By } from "@angular/platform-browser";
 import { BehaviorSubject } from "rxjs/BehaviorSubject";
 import { DatePipe, PercentPipe } from "@angular/common";
+import { AppInsightsService } from "@markpieszak/ng-application-insights";
 
 import { UploadComponent } from "./upload";
 import { ExponentialPipe } from "../../pipes/exponentialPipe";
@@ -12,18 +13,11 @@ import { AuthenticationService } from "../../services/authenticationService/auth
 import { UploadService, IUpload } from "../../services/uploadService/uploadService";
 import { SettingsService, IUserSettings } from "../../services/settingsService/settingsService";
 
-// tslint:disable-next-line:no-namespace
-declare global {
-    // tslint:disable-next-line:interface-name - We don't own this interface name, just extending it
-    interface Window {
-        appInsights: Microsoft.ApplicationInsights.IAppInsights;
-    }
-}
-
 describe("UploadComponent", () => {
     let component: UploadComponent;
     let fixture: ComponentFixture<UploadComponent>;
     let routeParams: BehaviorSubject<Params>;
+    let appInsights: AppInsightsService;
 
     let uploadServiceGetResolve: (upload: IUpload) => Promise<void>;
     let uploadServiceGetReject: () => Promise<void>;
@@ -83,6 +77,7 @@ describe("UploadComponent", () => {
         let route = { params: routeParams };
         let settingsService = { settings: () => settingsSubject };
         let changeDetectorRef = { markForCheck: (): void => void 0 };
+        appInsights = jasmine.createSpyObj("appInsights", ["trackEvent", "startTrackEvent", "stopTrackEvent"]);
         TestBed.configureTestingModule(
             {
                 imports: [FormsModule],
@@ -99,6 +94,7 @@ describe("UploadComponent", () => {
                     { provide: UploadService, useValue: uploadService },
                     { provide: SettingsService, useValue: settingsService },
                     { provide: ChangeDetectorRef, useValue: changeDetectorRef },
+                    { provide: AppInsightsService, useValue: appInsights },
                     DatePipe,
                     PercentPipe,
                     ExponentialPipe,
@@ -113,9 +109,6 @@ describe("UploadComponent", () => {
                 // Initial bindings
                 fixture.detectChanges();
             });
-
-        // Mock the global variable. We should figure out a better way to both inject this in the product and mock this in tests.
-        window.appInsights = jasmine.createSpyObj("appInsights", ["trackEvent", "startTrackEvent", "stopTrackEvent"]);
     }));
 
     describe("Error message", () => {

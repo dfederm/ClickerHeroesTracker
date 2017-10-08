@@ -1,5 +1,6 @@
 import { Injectable } from "@angular/core";
 import { Http, RequestOptions } from "@angular/http";
+import { AppInsightsService } from "@markpieszak/ng-application-insights";
 
 import "rxjs/add/operator/toPromise";
 
@@ -10,6 +11,7 @@ export class FeedbackService {
     constructor(
         private authenticationService: AuthenticationService,
         private http: Http,
+        private appInsights: AppInsightsService,
     ) { }
 
     public send(comments: string, email: string): Promise<void> {
@@ -25,7 +27,7 @@ export class FeedbackService {
             .then(() => void 0)
             .catch(error => {
                 let errorMessage = error.message || error.toString();
-                appInsights.trackEvent("FeedbackService.send.error", { message: errorMessage });
+                this.appInsights.trackEvent("FeedbackService.send.error", { message: errorMessage });
                 return Promise.reject(error);
             });
     }

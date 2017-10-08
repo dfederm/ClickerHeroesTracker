@@ -1,5 +1,6 @@
 import { Injectable } from "@angular/core";
 import { Http } from "@angular/http";
+import { AppInsightsService } from "@markpieszak/ng-application-insights";
 
 import "rxjs/add/operator/toPromise";
 
@@ -9,7 +10,10 @@ export interface ISiteNewsEntryListResponse {
 
 @Injectable()
 export class NewsService {
-    constructor(private http: Http) { }
+    constructor(
+        private http: Http,
+        private appInsights: AppInsightsService,
+    ) { }
 
     public getNews(): Promise<ISiteNewsEntryListResponse> {
         return this.http
@@ -18,7 +22,7 @@ export class NewsService {
             .then(response => response.json() as ISiteNewsEntryListResponse)
             .catch(error => {
                 let errorMessage = error.message || error.toString();
-                appInsights.trackEvent("NewsService.getNews.error", { message: errorMessage });
+                this.appInsights.trackEvent("NewsService.getNews.error", { message: errorMessage });
                 return Promise.reject(errorMessage);
             });
     }

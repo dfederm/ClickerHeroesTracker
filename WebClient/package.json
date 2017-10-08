@@ -40,7 +40,6 @@
     "zone.js": "^0.8.18"
   },
   "devDependencies": {
-    "@types/applicationinsights-js": "^1.0.4",
     "@types/chart.js": "^2.6.7",
     "@types/decimal.js": "0.0.31",
     "@types/fb": "0.0.22",
