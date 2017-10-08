@@ -4,6 +4,7 @@ import { UploadService, IUpload } from "../../services/uploadService/uploadServi
 import { AuthenticationService, IUserInfo } from "../../services/authenticationService/authenticationService";
 import Decimal from "decimal.js";
 import { AppInsightsService } from "@markpieszak/ng-application-insights";
+import { NgbModal } from "@ng-bootstrap/ng-bootstrap";
 
 import "rxjs/add/operator/switchMap";
 import { SettingsService, IUserSettings } from "../../services/settingsService/settingsService";
@@ -48,6 +49,7 @@ export class UploadComponent implements OnInit {
     public userInfo: IUserInfo;
     public errorMessage: string;
 
+    public userId: string;
     public userName: string;
     public uploadTime: string;
     public playStyle: string;
@@ -113,6 +115,7 @@ export class UploadComponent implements OnInit {
         private uploadService: UploadService,
         private settingsService: SettingsService,
         private appInsights: AppInsightsService,
+        private modalService: NgbModal,
     ) {
         for (const id in gameData.ancients) {
             const ancientDefinition = gameData.ancients[id];
@@ -169,11 +172,24 @@ export class UploadComponent implements OnInit {
             .subscribe(upload => this.handleUpload(upload), () => this.handleError("There was a problem getting that upload"));
     }
 
-    public deleteUpload(): void {
+    public openModal(modal: {}): void {
         this.errorMessage = null;
+        this.modalService
+            .open(modal)
+            .result
+            .then(() => {
+                // Noop on close as the modal is expected to handle its own stuff.
+            })
+            .catch(() => {
+                // Noop on dismissal
+            });
+    }
+
+    public deleteUpload(closeModal: () => void): void {
         this.uploadService.delete(this.uploadId)
             .then(() => this.router.navigate(["/dashboard"]))
-            .catch(() => this.handleError("There was a problem deleting that upload"));
+            .catch(() => this.handleError("There was a problem deleting that upload"))
+            .then(closeModal);
     }
 
     private static normalizeName(name: string): string {
@@ -200,9 +216,13 @@ export class UploadComponent implements OnInit {
         this.errorMessage = null;
         this.uploadId = this.upload.id;
 
-        this.userName = this.upload.user
-            ? this.upload.user.name
-            : null;
+        if (this.upload.user) {
+            this.userId = this.upload.user.id;
+            this.userName = this.upload.user.name;
+        } else {
+            this.userId = null;
+            this.userName = null;
+        }
 
         this.uploadTime = this.upload.timeSubmitted;
         this.playStyle = this.upload.playStyle;
