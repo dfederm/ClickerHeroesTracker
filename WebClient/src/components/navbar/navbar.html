@@ -13,7 +13,7 @@
             <li *ngIf="userInfo.isLoggedIn"
                 class="nav-item">
                 <a class="nav-link"
-                   routerLink="/dashboard"
+                   routerLink="/users/{{ userInfo.username }}"
                    routerLinkActive="active">Dashboard</a>
             </li>
             <li class="nav-item">

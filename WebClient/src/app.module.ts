@@ -19,9 +19,9 @@ import { AdComponent } from "./components/ad/ad";
 import { NavbarComponent } from "./components/navbar/navbar";
 import { LogInDialogComponent } from "./components/logInDialog/logInDialog";
 import { UploadDialogComponent } from "./components/uploadDialog/uploadDialog";
-import { DashboardComponent } from "./components/dashboard/dashboard";
+import { UserComponent } from "./components/user/user";
 import { UploadsTableComponent } from "./components/uploadsTable/uploadsTable";
-import { UploadsComponent } from "./components/uploads/uploads";
+import { UserUploadsComponent } from "./components/userUploads/userUploads";
 import { UploadComponent } from "./components/upload/upload";
 import { ClansComponent } from "./components/clans/clans";
 import { UserProgressComponent } from "./components/userProgress/userProgress";
@@ -49,10 +49,10 @@ const routes: Routes =
   [
     { path: "", pathMatch: "full", component: HomeComponent },
     { path: "news", component: NewsComponent },
-    { path: "dashboard", component: DashboardComponent },
-    { path: "uploads", component: UploadsComponent },
-    { path: "upload/:id", component: UploadComponent },
+    { path: "uploads/:id", component: UploadComponent },
     { path: "clans", component: ClansComponent },
+    { path: "users/:userName", component: UserComponent },
+    { path: "users/:userName/uploads", component: UserUploadsComponent },
     { path: "users/:userName/progress", component: UserProgressComponent },
     { path: "users/:userName/compare/:compareUserName", component: UserCompareComponent },
   ];
@@ -83,9 +83,9 @@ const routes: Routes =
     LogInDialogComponent,
     UploadDialogComponent,
     OpenDialogDirective,
-    DashboardComponent,
+    UserComponent,
     UploadsTableComponent,
-    UploadsComponent,
+    UserUploadsComponent,
     UploadComponent,
     ExponentialPipe,
     ClansComponent,

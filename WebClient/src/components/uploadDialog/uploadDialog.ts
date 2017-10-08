@@ -56,7 +56,7 @@ export class UploadDialogComponent implements OnInit {
 
         this.uploadService.create(this.encodedSaveData, this.addToProgress, this.playStyle)
             .then(uploadId => {
-                return this.router.navigate(["/upload", uploadId]);
+                return this.router.navigate(["/uploads", uploadId]);
             })
             .then(() => {
                 this.activeModal.close();
