@@ -145,7 +145,7 @@ describe("UploadDialogComponent", () => {
                         expect(uploadService.create).toHaveBeenCalledWith("someEncodedSaveData", true, "hybrid");
 
                         expect(component.errorMessage).toBeFalsy();
-                        expect(router.navigate).toHaveBeenCalledWith(["/upload", 123]);
+                        expect(router.navigate).toHaveBeenCalledWith(["/uploads", 123]);
                         expect(activeModal.close).toHaveBeenCalled();
                     });
                 });
@@ -174,7 +174,7 @@ describe("UploadDialogComponent", () => {
                         expect(uploadService.create).toHaveBeenCalledWith("someEncodedSaveData", true, "hybrid");
 
                         expect(component.errorMessage).toBeFalsy();
-                        expect(router.navigate).toHaveBeenCalledWith(["/upload", 123]);
+                        expect(router.navigate).toHaveBeenCalledWith(["/uploads", 123]);
                         expect(activeModal.close).toHaveBeenCalled();
                     });
                 });

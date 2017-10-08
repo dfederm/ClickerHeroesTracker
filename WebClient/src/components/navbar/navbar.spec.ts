@@ -108,7 +108,7 @@ describe("NavbarComponent", () => {
 
             let expectedLinks: { text: string, url?: string, hasClickHandler?: boolean, dialog?: Type<{}> }[] =
                 [
-                    { text: "Dashboard", url: "/dashboard" },
+                    { text: "Dashboard", url: "/users/someUsername" },
                     { text: "Upload", dialog: component.UploadDialogComponent },
                     { text: "Clans", url: "/clans" },
                     { text: "What's New", url: "/news" },
@@ -126,7 +126,8 @@ describe("NavbarComponent", () => {
                 }
 
                 if (expectations.url) {
-                    expect(link.attributes.routerLink).toEqual(expectations.url);
+                    // It may be either an attribute or property depending on whether it's static.
+                    expect(link.attributes.routerLink || link.properties.routerLink).toEqual(expectations.url);
                 }
 
                 if (expectations.hasClickHandler) {

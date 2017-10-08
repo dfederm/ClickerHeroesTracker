@@ -56,6 +56,7 @@ describe("UploadsTableComponent", () => {
     }));
 
     it("should display a table without pagination when paginate=false", async(() => {
+        component.userName = "someUserName";
         component.count = 3;
         component.paginate = false;
 
@@ -63,6 +64,7 @@ describe("UploadsTableComponent", () => {
     }));
 
     it("should display a table with pagination when paginate=true", async(() => {
+        component.userName = "someUserName";
         component.count = 3;
         component.paginate = true;
 
@@ -70,6 +72,7 @@ describe("UploadsTableComponent", () => {
     }));
 
     it("should update the table when the page updates", async(() => {
+        component.userName = "someUserName";
         component.count = 3;
         component.paginate = true;
 
@@ -80,9 +83,34 @@ describe("UploadsTableComponent", () => {
             });
     }));
 
-    it("should display an error when the news service errors", async(() => {
+    it("should update the table when the userName updates", async(() => {
+        component.userName = "someUserName";
+        component.count = 3;
+        component.paginate = true;
+
+        verifyTable(1)
+            .then(() => {
+                component.userName = "someOtherUserName";
+                verifyTable(1);
+            });
+    }));
+
+    it("should display an error when the upload service errors", async(() => {
         let uploadService = TestBed.get(UploadService);
         spyOn(uploadService, "getUploads").and.returnValue(Promise.reject("someReason"));
+
+        fixture.detectChanges();
+        fixture.whenStable().then(() => {
+            fixture.detectChanges();
+
+            let error = fixture.debugElement.query(By.css("p"));
+            expect(error.nativeElement.textContent.trim()).toEqual("There was a problem getting your uploads");
+        });
+    }));
+
+    it("should display an error when the upload service returns an invalid response", async(() => {
+        let uploadService = TestBed.get(UploadService);
+        spyOn(uploadService, "getUploads").and.returnValue(Promise.resolve({}));
 
         fixture.detectChanges();
         fixture.whenStable().then(() => {
@@ -114,7 +142,7 @@ describe("UploadsTableComponent", () => {
 
                 let viewCell = cells[1];
                 let link = viewCell.query(By.css("a"));
-                expect(link.properties.routerLink).toEqual(`/upload/${expectedUpload.id}`);
+                expect(link.properties.routerLink).toEqual(`/uploads/${expectedUpload.id}`);
             }
 
             let pagination = fixture.debugElement.query(By.css("ngb-pagination"));

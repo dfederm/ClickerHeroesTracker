@@ -1,11 +1,11 @@
 import { Component, OnInit } from "@angular/core";
 
 import { UserService, IProgressData, IFollowsData } from "../../services/userService/userService";
-import { AuthenticationService, IUserInfo } from "../../services/authenticationService/authenticationService";
 import { SettingsService, IUserSettings } from "../../services/settingsService/settingsService";
 
 import Decimal from "decimal.js";
 import { ChartDataSets, ChartOptions, ChartTooltipItem } from "chart.js";
+import { ActivatedRoute } from "@angular/router";
 
 interface IProgressViewModel {
   datasets: ChartDataSets[];
@@ -21,10 +21,10 @@ interface IProgressViewModel {
 }
 
 @Component({
-  selector: "dashboard",
-  templateUrl: "./dashboard.html",
+  selector: "user",
+  templateUrl: "./user.html",
 })
-export class DashboardComponent implements OnInit {
+export class UserComponent implements OnInit {
   public userName: string;
 
   public isProgressError: boolean;
@@ -36,34 +36,29 @@ export class DashboardComponent implements OnInit {
   private settings: IUserSettings;
 
   constructor(
-    private authenticationService: AuthenticationService,
     private userService: UserService,
     private settingsService: SettingsService,
+    private route: ActivatedRoute,
   ) { }
 
   public ngOnInit(): void {
-    this.authenticationService
-      .userInfo()
-      .subscribe(userInfo => this.handleUserInfo(userInfo));
+    this.route
+      .params
+      .subscribe(params => this.handleUser(params.userName));
 
     this.settingsService
       .settings()
       .subscribe(settings => this.handleSettings(settings));
   }
 
-  private handleUserInfo(userInfo: IUserInfo): void {
+  private handleUser(userName: string): void {
     this.isProgressError = false;
     this.isFollowsError = false;
     this.progress = null;
     this.follows = null;
 
-    if (userInfo.isLoggedIn && userInfo.username) {
-      this.userName = userInfo.username;
-      this.refresh();
-    } else {
-      this.isProgressError = true;
-      this.isFollowsError = true;
-    }
+    this.userName = userName;
+    this.refresh();
   }
 
   private handleSettings(settings: IUserSettings): void {

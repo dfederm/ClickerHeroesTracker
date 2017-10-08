@@ -5,27 +5,18 @@ import Decimal from "decimal.js";
 import { ChartDataSets, ChartOptions, ChartPoint } from "chart.js";
 import { BehaviorSubject } from "rxjs/BehaviorSubject";
 
-import { DashboardComponent } from "./dashboard";
+import { UserComponent } from "./user";
 import { UserService, IProgressData, IFollowsData } from "../../services/userService/userService";
-import { AuthenticationService, IUserInfo } from "../../services/authenticationService/authenticationService";
 import { SettingsService, IUserSettings } from "../../services/settingsService/settingsService";
+import { ActivatedRoute } from "@angular/router";
 
-describe("DashboardComponent", () => {
-    let component: DashboardComponent;
-    let fixture: ComponentFixture<DashboardComponent>;
+describe("UserComponent", () => {
+    let component: UserComponent;
+    let fixture: ComponentFixture<UserComponent>;
 
-    const loggedInUser: IUserInfo = {
-        isLoggedIn: true,
-        id: "someId",
-        username: "someUsername",
-        email: "someEmail",
-    };
+    const userName = "someUserName";
 
-    const notLoggedInUser: IUserInfo = {
-        isLoggedIn: false,
-    };
-
-    let userInfo = new BehaviorSubject(loggedInUser);
+    let routeParams = new BehaviorSubject({ userName });
 
     let settings: IUserSettings = {
         areUploadsPublic: true,
@@ -71,7 +62,7 @@ describe("DashboardComponent", () => {
     };
 
     beforeEach(done => {
-        let authenticationService = { userInfo: () => userInfo };
+        let route = { params: routeParams };
         let userService = {
             getProgress: () => Promise.resolve(progress),
             getFollows: () => Promise.resolve(followsData),
@@ -80,9 +71,9 @@ describe("DashboardComponent", () => {
 
         TestBed.configureTestingModule(
             {
-                declarations: [DashboardComponent],
+                declarations: [UserComponent],
                 providers: [
-                    { provide: AuthenticationService, useValue: authenticationService },
+                    { provide: ActivatedRoute, useValue: route },
                     { provide: UserService, useValue: userService },
                     { provide: SettingsService, useValue: settingsService },
                 ],
@@ -90,7 +81,7 @@ describe("DashboardComponent", () => {
             })
             .compileComponents()
             .then(() => {
-                fixture = TestBed.createComponent(DashboardComponent);
+                fixture = TestBed.createComponent(UserComponent);
                 component = fixture.componentInstance;
             })
             .then(done)
@@ -108,6 +99,7 @@ describe("DashboardComponent", () => {
 
             let uploadsTable = uploadsContainer.query(By.css("uploadsTable"));
             expect(uploadsTable).not.toBeNull();
+            expect(uploadsTable.properties.userName).toEqual(userName);
             expect(uploadsTable.properties.count).toEqual(10);
             expect(uploadsTable.properties.paginate).toBeFalsy();
         });
@@ -223,33 +215,6 @@ describe("DashboardComponent", () => {
                 .catch(done.fail);
         });
 
-        it("should show an error when the user is not logged in", done => {
-            let authenticationService = TestBed.get(AuthenticationService) as AuthenticationService;
-            spyOn(authenticationService, "userInfo").and.returnValue(new BehaviorSubject(notLoggedInUser));
-
-            fixture.detectChanges();
-            fixture.whenStable()
-                .then(() => {
-                    fixture.detectChanges();
-
-                    let containers = fixture.debugElement.queryAll(By.css(".col-md-6"));
-                    expect(containers.length).toEqual(3);
-
-                    let progressContainer = containers[1];
-
-                    let chart = progressContainer.query(By.css("canvas"));
-                    expect(chart).toBeNull();
-
-                    let error = progressContainer.query(By.css(".text-danger"));
-                    expect(error).not.toBeNull();
-
-                    let warning = progressContainer.query(By.css(".text-warning"));
-                    expect(warning).toBeNull();
-                })
-                .then(done)
-                .catch(done.fail);
-        });
-
         it("should show an error when userService.getProgress fails", done => {
             let userService = TestBed.get(UserService);
             spyOn(userService, "getProgress").and.returnValue(Promise.reject("someReason"));
@@ -340,7 +305,7 @@ describe("DashboardComponent", () => {
 
                         let compareCell = cells[1];
                         let link = compareCell.query(By.css("a"));
-                        expect(link.properties.routerLink).toEqual(`/users/${loggedInUser.username}/compare/${expectedFollow}`);
+                        expect(link.properties.routerLink).toEqual(`/users/${userName}/compare/${expectedFollow}`);
                         expect(link.nativeElement.textContent.trim()).toEqual("Compare");
                     }
                 })

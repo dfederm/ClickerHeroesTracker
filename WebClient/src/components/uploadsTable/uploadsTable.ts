@@ -22,6 +22,7 @@ export class UploadsTableComponent implements OnInit {
     @Input()
     public paginate: boolean;
 
+    private _userName: string;
     private _page = 1;
 
     public get page(): number {
@@ -33,6 +34,16 @@ export class UploadsTableComponent implements OnInit {
         this.populateUploads();
     }
 
+    public get userName(): string {
+        return this._userName;
+    }
+
+    @Input()
+    public set userName(userName: string) {
+        this._userName = userName;
+        this.populateUploads();
+    }
+
     constructor(private uploadService: UploadService) { }
 
     public ngOnInit(): void {
@@ -40,6 +51,7 @@ export class UploadsTableComponent implements OnInit {
     }
 
     private populateUploads(): void {
+        // TODO #175 - Pass the user name
         this.uploadService
             .getUploads(this.page, this.count)
             .then(response => this.handleData(response))
