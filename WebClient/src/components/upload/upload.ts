@@ -3,6 +3,7 @@ import { ActivatedRoute, Router, Params } from "@angular/router";
 import { UploadService, IUpload } from "../../services/uploadService/uploadService";
 import { AuthenticationService, IUserInfo } from "../../services/authenticationService/authenticationService";
 import Decimal from "decimal.js";
+import { AppInsightsService } from "@markpieszak/ng-application-insights";
 
 import "rxjs/add/operator/switchMap";
 import { SettingsService, IUserSettings } from "../../services/settingsService/settingsService";
@@ -111,6 +112,7 @@ export class UploadComponent implements OnInit {
         private router: Router,
         private uploadService: UploadService,
         private settingsService: SettingsService,
+        private appInsights: AppInsightsService,
     ) {
         for (const id in gameData.ancients) {
             const ancientDefinition = gameData.ancients[id];
@@ -278,7 +280,7 @@ export class UploadComponent implements OnInit {
 
     private hydrateAncientSuggestions(): void {
         const availableSoulsSuggestionsLatency = "AncientSuggestions";
-        appInsights.startTrackEvent(availableSoulsSuggestionsLatency);
+        this.appInsights.startTrackEvent(availableSoulsSuggestionsLatency);
 
         const baseAncient = this.playStyle === "active"
             ? "Fragsworth"
@@ -364,7 +366,7 @@ export class UploadComponent implements OnInit {
             }
         }
 
-        appInsights.stopTrackEvent(
+        this.appInsights.stopTrackEvent(
             availableSoulsSuggestionsLatency,
             {
                 suggestionType: this.suggestionType,
@@ -459,7 +461,7 @@ export class UploadComponent implements OnInit {
             // Less ancient souls than the simulation data supported. We can try to guess though.
             // Our guess just alternates leveling Xyl and Pony until Xylk hits 7 and then dump into Pony unti lit matches the 30 AS simulation data.
             this.showLowAncientSoulWarning = true;
-            appInsights.trackEvent("LowAncientSouls", { ancientSouls: ancientSouls.toString() });
+            this.appInsights.trackEvent("LowAncientSouls", { ancientSouls: ancientSouls.toString() });
             if (ancientSouls.lessThan(14)) {
                 suggestedXyl = ancientSouls.dividedBy(2).ceil();
                 suggestedPony = ancientSouls.dividedBy(2).floor();
@@ -470,7 +472,7 @@ export class UploadComponent implements OnInit {
         } else {
             if (ancientSouls.greaterThan(210)) {
                 this.showMissingSimulationWarning = true;
-                appInsights.trackEvent("MissingSimulationData", { ancientSouls: ancientSouls.toString() });
+                this.appInsights.trackEvent("MissingSimulationData", { ancientSouls: ancientSouls.toString() });
                 if (ancientSouls.greaterThanOrEqualTo(1500)) {
                     ancientSouls = new Decimal(1500);
                 } else if (ancientSouls.greaterThanOrEqualTo(500)) {

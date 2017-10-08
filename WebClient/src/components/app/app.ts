@@ -1,32 +1,48 @@
 import { Component, OnInit } from "@angular/core";
-import { SettingsService } from "../../services/settingsService/settingsService";
+import { AppInsightsService } from "@markpieszak/ng-application-insights";
+import { SettingsService, IUserSettings } from "../../services/settingsService/settingsService";
+import { AuthenticationService, IUserInfo } from "../../services/authenticationService/authenticationService";
 
 @Component({
   selector: "app",
   templateUrl: "./app.html",
 })
 export class AppComponent implements OnInit {
-  constructor(private settingsService: SettingsService) { }
+  public static defaultTheme = "light";
+
+  public static themeCssUrls: { [theme: string]: string } = {
+    light: "https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.0.0-alpha.6/css/bootstrap.min.css",
+    dark: "https://cdnjs.cloudflare.com/ajax/libs/bootswatch/4.0.0-alpha.6/slate/bootstrap.min.css",
+  };
+
+  constructor(
+    private settingsService: SettingsService,
+    private authenticationService: AuthenticationService,
+    private appInsights: AppInsightsService,
+  ) { }
 
   public ngOnInit(): void {
     this.settingsService
       .settings()
-      .subscribe(settings => {
-        let cssUrl: string;
-        switch (settings.theme) {
-          case "dark": {
-            cssUrl = "https://cdnjs.cloudflare.com/ajax/libs/bootswatch/4.0.0-alpha.6/slate/bootstrap.min.css";
-            break;
-          }
-          case "light":
-          default: {
-            cssUrl = "https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.0.0-alpha.6/css/bootstrap.min.css";
-            break;
-          }
-        }
+      .subscribe(settings => this.handleSettings(settings));
 
-        // This needs to be in the <head> so it's not part of this component's template.
-        document.getElementById("bootstrapStylesheet").setAttribute("href", cssUrl);
-      });
+    this.authenticationService
+      .userInfo()
+      .subscribe(userInfo => this.handleUserInfo(userInfo));
+  }
+
+  private handleSettings(settings: IUserSettings): void {
+    let cssUrl = AppComponent.themeCssUrls[settings.theme] || AppComponent.themeCssUrls[AppComponent.defaultTheme];
+
+    // This needs to be in the <head> so it's not part of this component's template.
+    document.getElementById("bootstrapStylesheet").setAttribute("href", cssUrl);
+  }
+
+  private handleUserInfo(userInfo: IUserInfo): void {
+    if (userInfo.isLoggedIn) {
+      this.appInsights.setAuthenticatedUserContext(userInfo.username);
+    } else {
+      this.appInsights.clearAuthenticatedUserContext();
+    }
   }
 }

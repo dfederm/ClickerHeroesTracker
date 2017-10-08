@@ -1,5 +1,6 @@
 import { Injectable } from "@angular/core";
 import { Http, RequestOptions, Headers } from "@angular/http";
+import { AppInsightsService } from "@markpieszak/ng-application-insights";
 
 import "rxjs/add/operator/toPromise";
 
@@ -63,8 +64,8 @@ export class UserService {
     constructor(
         private authenticationService: AuthenticationService,
         private http: Http,
-    ) {
-    }
+        private appInsights: AppInsightsService,
+    ) { }
 
     public create(userName: string, email: string, password: string): Promise<void> {
         let headers = new Headers();
@@ -99,7 +100,7 @@ export class UserService {
                     errors.push(error.message || error.toString());
                 }
 
-                appInsights.trackEvent("UserService.create.error", { message: errors.join(";") });
+                this.appInsights.trackEvent("UserService.create.error", { message: errors.join(";") });
                 return Promise.reject(errors);
             });
     }
@@ -117,7 +118,7 @@ export class UserService {
             .then(response => response.json() as IProgressData)
             .catch(error => {
                 let errorMessage = error.message || error.toString();
-                appInsights.trackEvent("UserService.getProgress.error", { message: errorMessage });
+                this.appInsights.trackEvent("UserService.getProgress.error", { message: errorMessage });
                 return Promise.reject(errorMessage);
             });
     }
@@ -131,7 +132,7 @@ export class UserService {
             .then(response => response.json() as IFollowsData)
             .catch(error => {
                 let errorMessage = error.message || error.toString();
-                appInsights.trackEvent("UserService.getFollows.error", { message: errorMessage });
+                this.appInsights.trackEvent("UserService.getFollows.error", { message: errorMessage });
                 return Promise.reject(errorMessage);
             });
     }
@@ -163,7 +164,7 @@ export class UserService {
                     errors.push(error.message || error.toString());
                 }
 
-                appInsights.trackEvent("UserService.resetPassword.error", { message: errors.join(";") });
+                this.appInsights.trackEvent("UserService.resetPassword.error", { message: errors.join(";") });
                 return Promise.reject(errors);
             });
     }
@@ -199,7 +200,7 @@ export class UserService {
                     errors.push(error.message || error.toString());
                 }
 
-                appInsights.trackEvent("UserService.resetPasswordConfirmation.error", { message: errors.join(";") });
+                this.appInsights.trackEvent("UserService.resetPasswordConfirmation.error", { message: errors.join(";") });
                 return Promise.reject(errors);
             });
     }
