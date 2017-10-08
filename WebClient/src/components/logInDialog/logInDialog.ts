@@ -3,6 +3,7 @@ import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
 
 import { AuthenticationService } from "../../services/authenticationService/authenticationService";
 import { RegisterDialogComponent } from "../registerDialog/registerDialog";
+import { ResetPasswordDialogComponent } from "../resetPasswordDialog/resetPasswordDialog";
 
 @Component({
     selector: "logInDialog",
@@ -16,6 +17,8 @@ export class LogInDialogComponent {
     public password = "";
 
     public RegisterDialogComponent = RegisterDialogComponent;
+
+    public ResetPasswordDialogComponent = ResetPasswordDialogComponent;
 
     constructor(
         private authenticationService: AuthenticationService,

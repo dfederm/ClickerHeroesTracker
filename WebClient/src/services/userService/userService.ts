@@ -13,6 +13,16 @@ export interface ICreateUserRequest {
     password: string;
 }
 
+export interface IResetPasswordRequest {
+    email: string;
+}
+
+export interface IResetPasswordConfirmationRequest {
+    email: string;
+    password: string;
+    code: string;
+}
+
 // This actually pretty generic, so if it's used elsewhere consider moving it somewhere more generic
 export interface IValidationErrorResponse {
     [field: string]: string[];
@@ -123,6 +133,74 @@ export class UserService {
                 let errorMessage = error.message || error.toString();
                 appInsights.trackEvent("UserService.getFollows.error", { message: errorMessage });
                 return Promise.reject(errorMessage);
+            });
+    }
+
+    public resetPassword(email: string): Promise<void> {
+        let headers = new Headers();
+        headers.append("Content-Type", "application/json");
+        let options = new RequestOptions({ headers });
+        let body: IResetPasswordRequest = { email };
+        return this.http
+            .post("/api/users/resetpassword", body, options)
+            .toPromise()
+            .then(() => void 0)
+            .catch(error => {
+                let errors: string[] = [];
+
+                let validationErrorResponse: IValidationErrorResponse;
+                try {
+                    validationErrorResponse = error.json();
+                } catch (error) {
+                    // It must not have been json
+                }
+
+                if (validationErrorResponse) {
+                    for (let field in validationErrorResponse) {
+                        errors.push(...validationErrorResponse[field]);
+                    }
+                } else {
+                    errors.push(error.message || error.toString());
+                }
+
+                appInsights.trackEvent("UserService.resetPassword.error", { message: errors.join(";") });
+                return Promise.reject(errors);
+            });
+    }
+
+    public resetPasswordConfirmation(email: string, password: string, code: string): Promise<void> {
+        let headers = new Headers();
+        headers.append("Content-Type", "application/json");
+        let options = new RequestOptions({ headers });
+        let body: IResetPasswordConfirmationRequest = {
+            email,
+            password,
+            code,
+        };
+        return this.http
+            .post("/api/users/resetpasswordconfirmation", body, options)
+            .toPromise()
+            .then(() => void 0)
+            .catch(error => {
+                let errors: string[] = [];
+
+                let validationErrorResponse: IValidationErrorResponse;
+                try {
+                    validationErrorResponse = error.json();
+                } catch (error) {
+                    // It must not have been json
+                }
+
+                if (validationErrorResponse) {
+                    for (let field in validationErrorResponse) {
+                        errors.push(...validationErrorResponse[field]);
+                    }
+                } else {
+                    errors.push(error.message || error.toString());
+                }
+
+                appInsights.trackEvent("UserService.resetPasswordConfirmation.error", { message: errors.join(";") });
+                return Promise.reject(errors);
             });
     }
 }

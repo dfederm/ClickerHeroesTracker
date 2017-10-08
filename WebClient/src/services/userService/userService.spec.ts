@@ -26,9 +26,10 @@ describe("UserService", () => {
     let backend: MockBackend;
     let lastConnection: MockConnection;
 
-    let userName = "someUserName";
-    let email = "someEmail";
-    let password = "somePassword";
+    const userName = "someUserName";
+    const email = "someEmail";
+    const password = "somePassword";
+    const code = "someCode";
 
     beforeEach(() => {
         authenticationService = jasmine.createSpyObj("authenticationService", ["getAuthHeaders"]);
@@ -57,7 +58,7 @@ describe("UserService", () => {
     });
 
     describe("create", () => {
-        it("should make the correct api call when the use is not logged in", fakeAsync(() => {
+        it("should make the correct api call", fakeAsync(() => {
             userService.create(userName, email, password);
 
             expect(lastConnection).toBeDefined("no http service connection made");
@@ -209,6 +210,128 @@ describe("UserService", () => {
 
             expect(follows).toBeUndefined();
             expect(error).toEqual("someError");
+            expect(appInsights.trackEvent).toHaveBeenCalled();
+        }));
+    });
+
+    describe("resetPassword", () => {
+        it("should make the correct api call", fakeAsync(() => {
+            userService.resetPassword(email);
+
+            expect(lastConnection).toBeDefined("no http service connection made");
+            expect(lastConnection.request.method).toEqual(RequestMethod.Post, "method invalid");
+            expect(lastConnection.request.url).toEqual("/api/users/resetpassword", "url invalid");
+            expect(lastConnection.request.json()).toEqual({ email }, "request body invalid");
+        }));
+
+        it("should handle when the api returns a success response", fakeAsync(() => {
+            let succeeded = false;
+            let error: string;
+            userService.resetPassword(email)
+                .then(() => succeeded = true)
+                .catch((e: string) => error = e);
+
+            lastConnection.mockRespond(new Response(new ResponseOptions()));
+            tick();
+
+            expect(succeeded).toEqual(true);
+            expect(error).toBeUndefined();
+            expect(appInsights.trackEvent).not.toHaveBeenCalled();
+        }));
+
+        it("should handle http errors", fakeAsync(() => {
+            let succeeded = false;
+            let error: string;
+            userService.resetPassword(email)
+                .then(() => succeeded = true)
+                .catch((e: string) => error = e);
+
+            lastConnection.mockError(new Error("someError"));
+            tick();
+
+            expect(succeeded).toEqual(false);
+            expect(error).toEqual(["someError"]);
+            expect(appInsights.trackEvent).toHaveBeenCalled();
+        }));
+
+        it("should handle validation errors", fakeAsync(() => {
+            let succeeded = false;
+            let errors: string[];
+            userService.resetPassword(email)
+                .then(() => succeeded = true)
+                .catch((e: string[]) => errors = e);
+
+            let validationError: IValidationErrorResponse = {
+                field0: ["error0_0", "error0_1", "error0_2"],
+                field1: ["error1_0", "error1_1", "error1_2"],
+                field2: ["error2_0", "error2_1", "error2_2"],
+            };
+            lastConnection.mockError(new MockError(new ResponseOptions({ body: validationError })));
+            tick();
+
+            expect(succeeded).toEqual(false);
+            expect(errors).toEqual(["error0_0", "error0_1", "error0_2", "error1_0", "error1_1", "error1_2", "error2_0", "error2_1", "error2_2"]);
+            expect(appInsights.trackEvent).toHaveBeenCalled();
+        }));
+    });
+
+    describe("resetPasswordConfirmation", () => {
+        it("should make the correct api call", fakeAsync(() => {
+            userService.resetPasswordConfirmation(email, password, code);
+
+            expect(lastConnection).toBeDefined("no http service connection made");
+            expect(lastConnection.request.method).toEqual(RequestMethod.Post, "method invalid");
+            expect(lastConnection.request.url).toEqual("/api/users/resetpasswordconfirmation", "url invalid");
+            expect(lastConnection.request.json()).toEqual({ email, password, code }, "request body invalid");
+        }));
+
+        it("should handle when the api returns a success response", fakeAsync(() => {
+            let succeeded = false;
+            let error: string;
+            userService.resetPasswordConfirmation(email, password, code)
+                .then(() => succeeded = true)
+                .catch((e: string) => error = e);
+
+            lastConnection.mockRespond(new Response(new ResponseOptions()));
+            tick();
+
+            expect(succeeded).toEqual(true);
+            expect(error).toBeUndefined();
+            expect(appInsights.trackEvent).not.toHaveBeenCalled();
+        }));
+
+        it("should handle http errors", fakeAsync(() => {
+            let succeeded = false;
+            let error: string;
+            userService.resetPasswordConfirmation(email, password, code)
+                .then(() => succeeded = true)
+                .catch((e: string) => error = e);
+
+            lastConnection.mockError(new Error("someError"));
+            tick();
+
+            expect(succeeded).toEqual(false);
+            expect(error).toEqual(["someError"]);
+            expect(appInsights.trackEvent).toHaveBeenCalled();
+        }));
+
+        it("should handle validation errors", fakeAsync(() => {
+            let succeeded = false;
+            let errors: string[];
+            userService.resetPasswordConfirmation(email, password, code)
+                .then(() => succeeded = true)
+                .catch((e: string[]) => errors = e);
+
+            let validationError: IValidationErrorResponse = {
+                field0: ["error0_0", "error0_1", "error0_2"],
+                field1: ["error1_0", "error1_1", "error1_2"],
+                field2: ["error2_0", "error2_1", "error2_2"],
+            };
+            lastConnection.mockError(new MockError(new ResponseOptions({ body: validationError })));
+            tick();
+
+            expect(succeeded).toEqual(false);
+            expect(errors).toEqual(["error0_0", "error0_1", "error0_2", "error1_0", "error1_1", "error1_2", "error2_0", "error2_1", "error2_2"]);
             expect(appInsights.trackEvent).toHaveBeenCalled();
         }));
     });

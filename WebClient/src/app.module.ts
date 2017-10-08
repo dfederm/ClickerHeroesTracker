@@ -30,6 +30,7 @@ import { BannerComponent } from "./components/banner/banner";
 import { RegisterDialogComponent } from "./components/registerDialog/registerDialog";
 import { ExternalLoginsComponent } from "./components/externalLogins/externalLogins";
 import { FeedbackDialogComponent } from "./components/feedbackDialog/feedbackDialog";
+import { ResetPasswordDialogComponent } from "./components/resetPasswordDialog/resetPasswordDialog";
 
 import { OpenDialogDirective } from "./directives/openDialog/openDialog";
 
@@ -95,6 +96,7 @@ const routes: Routes =
     RegisterDialogComponent,
     ExternalLoginsComponent,
     FeedbackDialogComponent,
+    ResetPasswordDialogComponent,
   ],
   entryComponents:
   [
@@ -102,6 +104,7 @@ const routes: Routes =
     UploadDialogComponent,
     RegisterDialogComponent,
     FeedbackDialogComponent,
+    ResetPasswordDialogComponent,
   ],
   providers:
   [

@@ -13,6 +13,7 @@ namespace Website.Controllers.Api
     using ClickerHeroesTrackerWebsite.Models.Game;
     using ClickerHeroesTrackerWebsite.Models.Settings;
     using ClickerHeroesTrackerWebsite.Services.Database;
+    using ClickerHeroesTrackerWebsite.Services.Email;
     using Microsoft.ApplicationInsights;
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Identity;
@@ -35,18 +36,22 @@ namespace Website.Controllers.Api
 
         private readonly UserManager<ApplicationUser> userManager;
 
+        private readonly IEmailSender emailSender;
+
         public UserController(
             GameData gameData,
             TelemetryClient telemetryClient,
             IDatabaseCommandFactory databaseCommandFactory,
             IUserSettingsProvider userSettingsProvider,
-            UserManager<ApplicationUser> userManager)
+            UserManager<ApplicationUser> userManager,
+            IEmailSender emailSender)
         {
             this.gameData = gameData;
             this.telemetryClient = telemetryClient;
             this.databaseCommandFactory = databaseCommandFactory;
             this.userSettingsProvider = userSettingsProvider;
             this.userManager = userManager;
+            this.emailSender = emailSender;
         }
 
         [Route("")]
@@ -242,6 +247,63 @@ namespace Website.Controllers.Api
             var userSettings = this.userSettingsProvider.Get(userId);
 
             return this.Ok(userSettings);
+        }
+
+        [Route("resetpassword")]
+        [HttpPost]
+        [AllowAnonymous]
+        public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordRequest model)
+        {
+            if (!this.ModelState.IsValid)
+            {
+                return this.BadRequest(this.ModelState);
+            }
+
+            // Using email address since the username is public information
+            var user = await this.userManager.FindByEmailAsync(model.Email);
+            if (user == null)
+            {
+                // Don't reveal that the user does not exist
+                return this.Ok();
+            }
+
+            var code = await this.userManager.GeneratePasswordResetTokenAsync(user);
+            await this.emailSender.SendEmailAsync(
+                model.Email,
+                "Password Reset",
+                $"There was a request to reset your Clicker Heroes Tracker password. If this was not you, please ignore this email.<br /><br />To reset your password, please enter this verification code:<br /><br />{code}");
+
+            return this.Ok();
+        }
+
+        [Route("resetpasswordconfirmation")]
+        [HttpPost]
+        [AllowAnonymous]
+        public async Task<IActionResult> ResetPasswordConfirmation([FromBody] ResetPasswordConfirmationRequest model)
+        {
+            if (this.ModelState.IsValid)
+            {
+                // Using email address since the username is public information
+                var user = await this.userManager.FindByEmailAsync(model.Email);
+                if (user == null)
+                {
+                    // Don't reveal that the user does not exist
+                    return this.Ok();
+                }
+
+                var result = await this.userManager.ResetPasswordAsync(user, model.Code, model.Password);
+                if (result.Succeeded)
+                {
+                    return this.Ok();
+                }
+
+                foreach (var error in result.Errors)
+                {
+                    this.ModelState.AddModelError(string.Empty, error.Description);
+                }
+            }
+
+            return this.BadRequest(this.ModelState);
         }
     }
 }
