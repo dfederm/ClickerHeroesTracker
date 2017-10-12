@@ -12,23 +12,34 @@ namespace ClickerHeroesTrackerWebsite.Tests.Mocks
 
     internal static class MockDatabaseHelper
     {
-        public static Mock<IDataReader> CreateMockDataReader(
-            IDictionary<string, object> expectedData)
+        public static Mock<IDataReader> CreateMockDataReader()
+        {
+            return CreateMockDataReader(Array.Empty<IDictionary<string, object>>());
+        }
+
+        public static Mock<IDataReader> CreateMockDataReader(IDictionary<string, object> dataSet)
+        {
+            return CreateMockDataReader(new[] { dataSet });
+        }
+
+        public static Mock<IDataReader> CreateMockDataReader(IList<IDictionary<string, object>> dataSets)
         {
             var mockDataReader = new Mock<IDataReader>(MockBehavior.Strict);
-            mockDataReader.Setup(_ => _.Dispose()).Verifiable();
+            mockDataReader
+                .Setup(_ => _.Dispose())
+                .Verifiable();
 
-            if (expectedData != null)
+            int i = -1;
+            mockDataReader.Setup(_ => _.Read())
+                .Returns(() => ++i < dataSets.Count)
+                .Verifiable();
+
+            if (dataSets != null && dataSets.Count > 0)
             {
-                mockDataReader.Setup(_ => _.Read()).Returns(true).Verifiable();
-                foreach (var pair in expectedData)
-                {
-                    mockDataReader.Setup(_ => _[pair.Key]).Returns(pair.Value ?? DBNull.Value).Verifiable();
-                }
-            }
-            else
-            {
-                mockDataReader.Setup(_ => _.Read()).Returns(false).Verifiable();
+                mockDataReader
+                    .Setup(_ => _[It.IsAny<string>()])
+                    .Returns((string key) => dataSets[i].TryGetValue(key, out var value) ? value : DBNull.Value)
+                    .Verifiable();
             }
 
             return mockDataReader;
@@ -36,13 +47,22 @@ namespace ClickerHeroesTrackerWebsite.Tests.Mocks
 
         public static Mock<IDatabaseCommand> CreateMockDatabaseCommand(
             IDictionary<string, object> expectedParameters,
-            IDataReader dataReader)
+            IDataReader dataReader = null)
         {
             var mockDatabaseCommand = new Mock<IDatabaseCommand>(MockBehavior.Strict);
             mockDatabaseCommand.SetupSet(_ => _.CommandText = It.IsAny<string>()).Verifiable();
             mockDatabaseCommand.SetupSet(_ => _.Parameters = It.Is<IDictionary<string, object>>(parameters => DictionaryEquals(parameters, expectedParameters))).Verifiable();
-            mockDatabaseCommand.Setup(_ => _.ExecuteReader()).Returns(dataReader).Verifiable();
             mockDatabaseCommand.Setup(_ => _.Dispose()).Verifiable();
+
+            if (dataReader == null)
+            {
+                mockDatabaseCommand.Setup(_ => _.ExecuteNonQuery()).Verifiable();
+            }
+            else
+            {
+                mockDatabaseCommand.Setup(_ => _.ExecuteReader()).Returns(dataReader).Verifiable();
+            }
+
             return mockDatabaseCommand;
         }
 
@@ -55,8 +75,7 @@ namespace ClickerHeroesTrackerWebsite.Tests.Mocks
 
             foreach (var pair in dict1)
             {
-                object value;
-                if (dict2.TryGetValue(pair.Key, out value))
+                if (dict2.TryGetValue(pair.Key, out var value))
                 {
                     if (!value.Equals(pair.Value))
                     {

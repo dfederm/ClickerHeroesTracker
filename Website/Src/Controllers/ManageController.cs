@@ -15,6 +15,7 @@ namespace ClickerHeroesTrackerWebsite.Controllers
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Identity;
     using Microsoft.AspNetCore.Mvc;
+    using Website.Models.Api.Users;
 
     /// <summary>
     /// The manage controller allows users to manage their settings.
@@ -104,49 +105,35 @@ namespace ClickerHeroesTrackerWebsite.Controllers
         [ValidateAntiForgeryToken]
         public async Task<ActionResult> Index(IndexViewModel indexViewModel)
         {
-            this.ViewBag.StatusMessage = "Changes Saved";
+            var userSettings = new UserSettings
+            {
+                AreUploadsPublic = indexViewModel.AreUploadsPublic,
+                PlayStyle = indexViewModel.PlayStyle.SafeParseEnum<PlayStyle>(),
+                UseScientificNotation = indexViewModel.UseScientificNotation,
+                ScientificNotationThreshold = indexViewModel.ScientificNotationThreshold.HasValue
+                    ? indexViewModel.ScientificNotationThreshold
+                    : indexViewModel.UseScientificNotation
+                        ? new int?(1000000) // If they cleared the value, reset to the default.
+                        : null,
+                UseEffectiveLevelForSuggestions = indexViewModel.UseEffectiveLevelForSuggestions,
+                UseLogarithmicGraphScale = indexViewModel.UseLogarithmicGraphScale,
+                LogarithmicGraphScaleThreshold = indexViewModel.LogarithmicGraphScaleThreshold.HasValue
+                    ? indexViewModel.LogarithmicGraphScaleThreshold
+                    : indexViewModel.UseLogarithmicGraphScale
+                        ? new int?(1000000) // If they cleared the value, reset to the default.
+                        : null,
+                HybridRatio = indexViewModel.HybridRatio.HasValue
+                    ? indexViewModel.HybridRatio
+                    : indexViewModel.PlayStyle.SafeParseEnum<PlayStyle>() == PlayStyle.Hybrid
+                        ? new int?(2) // If they cleared the value, reset to the default.
+                        : null,
+                Theme = indexViewModel.Theme,
+            };
 
             var user = await this.userManager.GetUserAsync(this.User);
-            var userSettings = this.userSettingsProvider.Get(user.Id);
+            this.userSettingsProvider.Patch(user.Id, userSettings);
 
-            userSettings.AreUploadsPublic = indexViewModel.AreUploadsPublic;
-            userSettings.PlayStyle = indexViewModel.PlayStyle.SafeParseEnum<PlayStyle>();
-            userSettings.UseScientificNotation = indexViewModel.UseScientificNotation;
-            userSettings.UseEffectiveLevelForSuggestions = indexViewModel.UseEffectiveLevelForSuggestions;
-            userSettings.UseLogarithmicGraphScale = indexViewModel.UseLogarithmicGraphScale;
-            userSettings.Theme = indexViewModel.Theme;
-
-            if (indexViewModel.ScientificNotationThreshold.HasValue)
-            {
-                userSettings.ScientificNotationThreshold = indexViewModel.ScientificNotationThreshold.Value;
-            }
-            else if (userSettings.UseScientificNotation)
-            {
-                // If they cleared the value, reset to the default.
-                userSettings.ScientificNotationThreshold = 1000000;
-            }
-
-            if (indexViewModel.LogarithmicGraphScaleThreshold.HasValue)
-            {
-                userSettings.LogarithmicGraphScaleThreshold = indexViewModel.LogarithmicGraphScaleThreshold.Value;
-            }
-            else if (userSettings.UseLogarithmicGraphScale)
-            {
-                // If they cleared the value, reset to the default.
-                userSettings.LogarithmicGraphScaleThreshold = 1000000;
-            }
-
-            if (indexViewModel.HybridRatio.HasValue)
-            {
-                userSettings.HybridRatio = indexViewModel.HybridRatio.Value;
-            }
-            else if (userSettings.UseLogarithmicGraphScale)
-            {
-                // If they cleared the value, reset to the default.
-                userSettings.HybridRatio = 10;
-            }
-
-            this.userSettingsProvider.FlushChanges();
+            this.ViewBag.StatusMessage = "Changes Saved";
             return await this.GetIndexResult(user, userSettings);
         }
 
@@ -327,21 +314,21 @@ namespace ClickerHeroesTrackerWebsite.Controllers
             return this.RedirectToAction(nameof(this.ManageLogins), new { Message = message });
         }
 
-        private async Task<ActionResult> GetIndexResult(ApplicationUser user, IUserSettings userSettings)
+        private async Task<ActionResult> GetIndexResult(ApplicationUser user, UserSettings userSettings)
         {
             var model = new IndexViewModel
             {
                 HasPassword = await this.userManager.HasPasswordAsync(user),
                 Logins = await this.userManager.GetLoginsAsync(user),
-                AreUploadsPublic = userSettings.AreUploadsPublic,
-                PlayStyle = userSettings.PlayStyle.ToString(),
-                UseScientificNotation = userSettings.UseScientificNotation,
-                ScientificNotationThreshold = userSettings.ScientificNotationThreshold,
-                UseEffectiveLevelForSuggestions = userSettings.UseEffectiveLevelForSuggestions,
-                UseLogarithmicGraphScale = userSettings.UseLogarithmicGraphScale,
-                LogarithmicGraphScaleThreshold = userSettings.LogarithmicGraphScaleThreshold,
-                HybridRatio = userSettings.HybridRatio,
-                Theme = userSettings.Theme,
+                AreUploadsPublic = userSettings.AreUploadsPublic.GetValueOrDefault(true),
+                PlayStyle = userSettings.PlayStyle.GetValueOrDefault(PlayStyle.Hybrid).ToString(),
+                UseScientificNotation = userSettings.UseScientificNotation.GetValueOrDefault(true),
+                ScientificNotationThreshold = userSettings.ScientificNotationThreshold.GetValueOrDefault(1000000),
+                UseEffectiveLevelForSuggestions = userSettings.UseEffectiveLevelForSuggestions.GetValueOrDefault(false),
+                UseLogarithmicGraphScale = userSettings.UseLogarithmicGraphScale.GetValueOrDefault(true),
+                LogarithmicGraphScaleThreshold = userSettings.LogarithmicGraphScaleThreshold.GetValueOrDefault(1000000),
+                HybridRatio = userSettings.HybridRatio.GetValueOrDefault(2),
+                Theme = userSettings.Theme.GetValueOrDefault(SiteThemeType.Light),
             };
 
             return this.View(model);

@@ -11,7 +11,7 @@
     ContentManager.RegisterScript("AddUpload");
 
     var userSettings = UserSettingsProvider.Get(UserManager.GetUserId(User));
-    var userPlayStyle = userSettings.PlayStyle.ToString();
+    var userPlayStyle = userSettings.PlayStyle.GetValueOrDefault(PlayStyle.Hybrid).ToString();
 }
 
 <h2>@ViewBag.Title.</h2>

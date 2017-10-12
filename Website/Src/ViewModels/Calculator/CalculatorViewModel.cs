@@ -82,7 +82,7 @@ namespace ClickerHeroesTrackerWebsite.Models.Calculator
 
             var isUploadAnonymous = string.IsNullOrEmpty(uploadUserId);
             this.IsOwn = string.Equals(userId, uploadUserId, StringComparison.OrdinalIgnoreCase);
-            this.IsPublic = isUploadAnonymous || uploadUserSettings.AreUploadsPublic;
+            this.IsPublic = isUploadAnonymous || uploadUserSettings.AreUploadsPublic.GetValueOrDefault(true);
             this.IsPermitted = this.IsOwn || this.IsPublic || user.IsInRole("Admin");
 
             this.SuggestedAncientIds = suggestedAncientIds;

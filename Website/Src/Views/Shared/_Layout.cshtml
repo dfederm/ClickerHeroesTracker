@@ -1,5 +1,6 @@
 ﻿@using Microsoft.ApplicationInsights.AspNetCore
 @using ClickerHeroesTrackerWebsite.Models.Settings
+@using Website.Models.Api.Users;
 
 @inject JavaScriptSnippet JavaScriptSnippet
 @inject IContentManager ContentManager
@@ -123,8 +124,19 @@
     </environment>
 
     <script type="text/javascript">
-        var userSettings = @Json.Serialize(userSettingsObject);
         var userName = "@UserManager.GetUserName(User)";
+
+        var userSettings = Object.assign({
+            areUploadsPublic: true,
+            playStyle: "hybrid",
+            useScientificNotation: true,
+            scientificNotationThreshold: 1000000,
+            useEffectiveLevelForSuggestions: false,
+            useLogarithmicGraphScale: true,
+            logarithmicGraphScaleThreshold: 1000000,
+            hybridRatio: 2,
+            theme: "light",
+        }, @Json.Serialize(userSettingsObject));
     </script>
 
     @await RenderSectionAsync("scripts", required: false)

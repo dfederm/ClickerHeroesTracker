@@ -105,7 +105,7 @@ namespace Website.Controllers.Api
             var userSettings = this.userSettingsProvider.Get(userId);
             var currentUserId = this.userManager.GetUserId(this.User);
             if (!userId.Equals(currentUserId, StringComparison.OrdinalIgnoreCase)
-                && !userSettings.AreUploadsPublic
+                && !userSettings.AreUploadsPublic.GetValueOrDefault(true)
                 && !this.User.IsInRole("Admin"))
             {
                 return this.Forbid();
@@ -218,7 +218,7 @@ namespace Website.Controllers.Api
 
         [Route("{userName}/settings")]
         [HttpGet]
-        public async Task<IActionResult> Settings(string userName)
+        public async Task<IActionResult> GetSettings(string userName)
         {
             if (string.IsNullOrEmpty(userName))
             {
@@ -247,6 +247,44 @@ namespace Website.Controllers.Api
             var userSettings = this.userSettingsProvider.Get(userId);
 
             return this.Ok(userSettings);
+        }
+
+        [Route("{userName}/settings")]
+        [HttpPatch]
+        public async Task<IActionResult> PatchSettings(string userName, [FromBody] UserSettings model)
+        {
+            if (string.IsNullOrEmpty(userName))
+            {
+                return this.BadRequest();
+            }
+
+            if (model == null)
+            {
+                return this.BadRequest();
+            }
+
+            var user = await this.userManager.FindByNameAsync(userName);
+            if (user == null)
+            {
+                return this.NotFound();
+            }
+
+            var userId = await this.userManager.GetUserIdAsync(user);
+            if (string.IsNullOrEmpty(userId))
+            {
+                return this.NotFound();
+            }
+
+            var currentUserId = this.userManager.GetUserId(this.User);
+            if (!userId.Equals(currentUserId, StringComparison.OrdinalIgnoreCase)
+                && !this.User.IsInRole("Admin"))
+            {
+                return this.Forbid();
+            }
+
+            this.userSettingsProvider.Patch(userId, model);
+
+            return this.Ok();
         }
 
         [Route("resetpassword")]

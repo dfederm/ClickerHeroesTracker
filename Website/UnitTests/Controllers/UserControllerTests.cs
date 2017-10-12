@@ -139,7 +139,7 @@ namespace UnitTests.Controllers
         }
 
         [Fact]
-        public async Task Settings_Success()
+        public async Task GetSettings_Success()
         {
             const string UserName = "SomeUserName";
             const string UserId = "SomeUserId";
@@ -148,11 +148,11 @@ namespace UnitTests.Controllers
             var telemetryClient = new TelemetryClient();
             var mockDatabaseCommandFactory = new Mock<IDatabaseCommandFactory>(MockBehavior.Strict);
 
-            var mockUserSettings = new Mock<IUserSettings>(MockBehavior.Strict);
+            var userSettings = new UserSettings();
             var mockUserSettingsProvider = new Mock<IUserSettingsProvider>(MockBehavior.Strict);
             mockUserSettingsProvider
                 .Setup(_ => _.Get(UserId))
-                .Returns(mockUserSettings.Object);
+                .Returns(userSettings);
 
             var mockUser = new ApplicationUser();
             var mockCurrentUser = new Mock<ClaimsPrincipal>(MockBehavior.Strict);
@@ -181,15 +181,14 @@ namespace UnitTests.Controllers
                 mockEmailSender.Object);
             controller.ControllerContext = new ControllerContext { HttpContext = mockHttpContext.Object };
 
-            var result = await controller.Settings(UserName);
+            var result = await controller.GetSettings(UserName);
 
             Assert.NotNull(result);
             Assert.IsType<OkObjectResult>(result);
-            Assert.Equal(mockUserSettings.Object, ((OkObjectResult)result).Value);
+            Assert.Equal(userSettings, ((OkObjectResult)result).Value);
 
             mockDatabaseCommandFactory.VerifyAll();
             mockUserSettingsProvider.VerifyAll();
-            mockUserSettings.VerifyAll();
             mockCurrentUser.VerifyAll();
             mockHttpContext.VerifyAll();
             mockEmailSender.VerifyAll();
@@ -200,7 +199,7 @@ namespace UnitTests.Controllers
         }
 
         [Fact]
-        public async Task Settings_MissingUserName()
+        public async Task GetSettings_MissingUserName()
         {
             var gameData = MockGameData.RealData;
             var telemetryClient = new TelemetryClient();
@@ -217,7 +216,7 @@ namespace UnitTests.Controllers
                 mockUserManager.Object,
                 mockEmailSender.Object);
 
-            var result = await controller.Settings(null);
+            var result = await controller.GetSettings(null);
 
             Assert.NotNull(result);
             Assert.IsType<BadRequestResult>(result);
@@ -232,7 +231,7 @@ namespace UnitTests.Controllers
         }
 
         [Fact]
-        public async Task Settings_NotFoundUser()
+        public async Task GetSettings_NotFoundUser()
         {
             const string UserName = "SomeUserName";
 
@@ -256,7 +255,7 @@ namespace UnitTests.Controllers
                 mockUserManager.Object,
                 mockEmailSender.Object);
 
-            var result = await controller.Settings(UserName);
+            var result = await controller.GetSettings(UserName);
 
             Assert.NotNull(result);
             Assert.IsType<NotFoundResult>(result);
@@ -271,7 +270,7 @@ namespace UnitTests.Controllers
         }
 
         [Fact]
-        public async Task Settings_NotFoundUserId()
+        public async Task GetSettings_NotFoundUserId()
         {
             const string UserName = "SomeUserName";
 
@@ -299,7 +298,7 @@ namespace UnitTests.Controllers
                 mockUserManager.Object,
                 mockEmailSender.Object);
 
-            var result = await controller.Settings(UserName);
+            var result = await controller.GetSettings(UserName);
 
             Assert.NotNull(result);
             Assert.IsType<NotFoundResult>(result);
@@ -314,7 +313,7 @@ namespace UnitTests.Controllers
         }
 
         [Fact]
-        public async Task Settings_NotAllowed()
+        public async Task GetSettings_NotAllowed()
         {
             const string UserName = "SomeUserName";
             const string UserId = "SomeUserId";
@@ -354,7 +353,7 @@ namespace UnitTests.Controllers
                 mockEmailSender.Object);
             controller.ControllerContext = new ControllerContext { HttpContext = mockHttpContext.Object };
 
-            var result = await controller.Settings(UserName);
+            var result = await controller.GetSettings(UserName);
 
             Assert.NotNull(result);
             Assert.IsType<ForbidResult>(result);
@@ -371,7 +370,7 @@ namespace UnitTests.Controllers
         }
 
         [Fact]
-        public async Task Settings_AdminIsAlwaysAllowed()
+        public async Task GetSettings_AdminIsAlwaysAllowed()
         {
             const string UserName = "SomeUserName";
             const string UserId = "SomeUserId";
@@ -380,11 +379,11 @@ namespace UnitTests.Controllers
             var telemetryClient = new TelemetryClient();
             var mockDatabaseCommandFactory = new Mock<IDatabaseCommandFactory>(MockBehavior.Strict);
 
-            var mockUserSettings = new Mock<IUserSettings>(MockBehavior.Strict);
+            var userSettings = new UserSettings();
             var mockUserSettingsProvider = new Mock<IUserSettingsProvider>(MockBehavior.Strict);
             mockUserSettingsProvider
                 .Setup(_ => _.Get(UserId))
-                .Returns(mockUserSettings.Object);
+                .Returns(userSettings);
 
             var mockUser = new ApplicationUser();
             var mockCurrentUser = new Mock<ClaimsPrincipal>(MockBehavior.Strict);
@@ -416,15 +415,338 @@ namespace UnitTests.Controllers
                 mockEmailSender.Object);
             controller.ControllerContext = new ControllerContext { HttpContext = mockHttpContext.Object };
 
-            var result = await controller.Settings(UserName);
+            var result = await controller.GetSettings(UserName);
 
             Assert.NotNull(result);
             Assert.IsType<OkObjectResult>(result);
-            Assert.Equal(mockUserSettings.Object, ((OkObjectResult)result).Value);
+            Assert.Equal(userSettings, ((OkObjectResult)result).Value);
 
             mockDatabaseCommandFactory.VerifyAll();
             mockUserSettingsProvider.VerifyAll();
-            mockUserSettings.VerifyAll();
+            mockCurrentUser.VerifyAll();
+            mockHttpContext.VerifyAll();
+            mockEmailSender.VerifyAll();
+
+            // Workaround for a Moq bug. See: https://github.com/moq/moq4/issues/456#issuecomment-331692858
+            mockUserManager.Object.Logger = mockUserManager.Object.Logger;
+            mockUserManager.VerifyAll();
+        }
+
+        [Fact]
+        public async Task PatchSettings_Success()
+        {
+            const string UserName = "SomeUserName";
+            const string UserId = "SomeUserId";
+
+            var gameData = MockGameData.RealData;
+            var telemetryClient = new TelemetryClient();
+            var mockDatabaseCommandFactory = new Mock<IDatabaseCommandFactory>(MockBehavior.Strict);
+            var userSettings = new UserSettings();
+            var mockUserSettingsProvider = new Mock<IUserSettingsProvider>(MockBehavior.Strict);
+            mockUserSettingsProvider.Setup(_ => _.Patch(UserId, userSettings));
+
+            var mockUser = new ApplicationUser();
+            var mockCurrentUser = new Mock<ClaimsPrincipal>(MockBehavior.Strict);
+            var mockUserManager = MockUserManager.CreateMock();
+            mockUserManager
+                .Setup(_ => _.FindByNameAsync(UserName))
+                .Returns(Task.FromResult(mockUser));
+            mockUserManager
+                .Setup(_ => _.GetUserIdAsync(mockUser))
+                .Returns(Task.FromResult(UserId));
+            mockUserManager
+                .Setup(_ => _.GetUserId(mockCurrentUser.Object))
+                .Returns(UserId);
+
+            var mockHttpContext = new Mock<HttpContext>(MockBehavior.Strict);
+            mockHttpContext.SetupGet(_ => _.User).Returns(mockCurrentUser.Object).Verifiable();
+
+            var mockEmailSender = new Mock<IEmailSender>(MockBehavior.Strict);
+
+            var controller = new UserController(
+                gameData,
+                telemetryClient,
+                mockDatabaseCommandFactory.Object,
+                mockUserSettingsProvider.Object,
+                mockUserManager.Object,
+                mockEmailSender.Object);
+            controller.ControllerContext = new ControllerContext { HttpContext = mockHttpContext.Object };
+
+            var result = await controller.PatchSettings(UserName, userSettings);
+
+            Assert.NotNull(result);
+            Assert.IsType<OkResult>(result);
+
+            mockDatabaseCommandFactory.VerifyAll();
+            mockUserSettingsProvider.VerifyAll();
+            mockCurrentUser.VerifyAll();
+            mockHttpContext.VerifyAll();
+            mockEmailSender.VerifyAll();
+
+            // Workaround for a Moq bug. See: https://github.com/moq/moq4/issues/456#issuecomment-331692858
+            mockUserManager.Object.Logger = mockUserManager.Object.Logger;
+            mockUserManager.VerifyAll();
+        }
+
+        [Fact]
+        public async Task PatchSettings_MissingUserName()
+        {
+            var gameData = MockGameData.RealData;
+            var telemetryClient = new TelemetryClient();
+            var mockDatabaseCommandFactory = new Mock<IDatabaseCommandFactory>(MockBehavior.Strict);
+            var userSettings = new UserSettings();
+            var mockUserSettingsProvider = new Mock<IUserSettingsProvider>(MockBehavior.Strict);
+            var mockUserManager = MockUserManager.CreateMock();
+            var mockEmailSender = new Mock<IEmailSender>(MockBehavior.Strict);
+
+            var controller = new UserController(
+                gameData,
+                telemetryClient,
+                mockDatabaseCommandFactory.Object,
+                mockUserSettingsProvider.Object,
+                mockUserManager.Object,
+                mockEmailSender.Object);
+
+            var result = await controller.PatchSettings(null, userSettings);
+
+            Assert.NotNull(result);
+            Assert.IsType<BadRequestResult>(result);
+
+            mockDatabaseCommandFactory.VerifyAll();
+            mockUserSettingsProvider.VerifyAll();
+            mockEmailSender.VerifyAll();
+
+            // Workaround for a Moq bug. See: https://github.com/moq/moq4/issues/456#issuecomment-331692858
+            mockUserManager.Object.Logger = mockUserManager.Object.Logger;
+            mockUserManager.VerifyAll();
+        }
+
+        [Fact]
+        public async Task PatchSettings_MissingUserSettings()
+        {
+            const string UserName = "SomeUserName";
+
+            var gameData = MockGameData.RealData;
+            var telemetryClient = new TelemetryClient();
+            var mockDatabaseCommandFactory = new Mock<IDatabaseCommandFactory>(MockBehavior.Strict);
+            var mockUserSettingsProvider = new Mock<IUserSettingsProvider>(MockBehavior.Strict);
+            var mockUserManager = MockUserManager.CreateMock();
+            var mockEmailSender = new Mock<IEmailSender>(MockBehavior.Strict);
+
+            var controller = new UserController(
+                gameData,
+                telemetryClient,
+                mockDatabaseCommandFactory.Object,
+                mockUserSettingsProvider.Object,
+                mockUserManager.Object,
+                mockEmailSender.Object);
+
+            var result = await controller.PatchSettings(UserName, null);
+
+            Assert.NotNull(result);
+            Assert.IsType<BadRequestResult>(result);
+
+            mockDatabaseCommandFactory.VerifyAll();
+            mockUserSettingsProvider.VerifyAll();
+            mockEmailSender.VerifyAll();
+
+            // Workaround for a Moq bug. See: https://github.com/moq/moq4/issues/456#issuecomment-331692858
+            mockUserManager.Object.Logger = mockUserManager.Object.Logger;
+            mockUserManager.VerifyAll();
+        }
+
+        [Fact]
+        public async Task PatchSettings_NotFoundUser()
+        {
+            const string UserName = "SomeUserName";
+
+            var gameData = MockGameData.RealData;
+            var telemetryClient = new TelemetryClient();
+            var mockDatabaseCommandFactory = new Mock<IDatabaseCommandFactory>(MockBehavior.Strict);
+            var userSettings = new UserSettings();
+            var mockUserSettingsProvider = new Mock<IUserSettingsProvider>(MockBehavior.Strict);
+            var mockUser = new ApplicationUser();
+            var mockUserManager = MockUserManager.CreateMock();
+            mockUserManager
+                .Setup(_ => _.FindByNameAsync(UserName))
+                .Returns(Task.FromResult<ApplicationUser>(null));
+
+            var mockEmailSender = new Mock<IEmailSender>(MockBehavior.Strict);
+
+            var controller = new UserController(
+                gameData,
+                telemetryClient,
+                mockDatabaseCommandFactory.Object,
+                mockUserSettingsProvider.Object,
+                mockUserManager.Object,
+                mockEmailSender.Object);
+
+            var result = await controller.PatchSettings(UserName, userSettings);
+
+            Assert.NotNull(result);
+            Assert.IsType<NotFoundResult>(result);
+
+            mockDatabaseCommandFactory.VerifyAll();
+            mockUserSettingsProvider.VerifyAll();
+            mockEmailSender.VerifyAll();
+
+            // Workaround for a Moq bug. See: https://github.com/moq/moq4/issues/456#issuecomment-331692858
+            mockUserManager.Object.Logger = mockUserManager.Object.Logger;
+            mockUserManager.VerifyAll();
+        }
+
+        [Fact]
+        public async Task PatchSettings_NotFoundUserId()
+        {
+            const string UserName = "SomeUserName";
+
+            var gameData = MockGameData.RealData;
+            var telemetryClient = new TelemetryClient();
+            var mockDatabaseCommandFactory = new Mock<IDatabaseCommandFactory>(MockBehavior.Strict);
+            var userSettings = new UserSettings();
+            var mockUserSettingsProvider = new Mock<IUserSettingsProvider>(MockBehavior.Strict);
+
+            var mockUser = new ApplicationUser();
+            var mockUserManager = MockUserManager.CreateMock();
+            mockUserManager
+                .Setup(_ => _.FindByNameAsync(UserName))
+                .Returns(Task.FromResult(mockUser));
+            mockUserManager
+                .Setup(_ => _.GetUserIdAsync(mockUser))
+                .Returns(Task.FromResult<string>(null));
+
+            var mockEmailSender = new Mock<IEmailSender>(MockBehavior.Strict);
+
+            var controller = new UserController(
+                gameData,
+                telemetryClient,
+                mockDatabaseCommandFactory.Object,
+                mockUserSettingsProvider.Object,
+                mockUserManager.Object,
+                mockEmailSender.Object);
+
+            var result = await controller.PatchSettings(UserName, userSettings);
+
+            Assert.NotNull(result);
+            Assert.IsType<NotFoundResult>(result);
+
+            mockDatabaseCommandFactory.VerifyAll();
+            mockUserSettingsProvider.VerifyAll();
+            mockEmailSender.VerifyAll();
+
+            // Workaround for a Moq bug. See: https://github.com/moq/moq4/issues/456#issuecomment-331692858
+            mockUserManager.Object.Logger = mockUserManager.Object.Logger;
+            mockUserManager.VerifyAll();
+        }
+
+        [Fact]
+        public async Task PatchSettings_NotAllowed()
+        {
+            const string UserName = "SomeUserName";
+            const string UserId = "SomeUserId";
+
+            var gameData = MockGameData.RealData;
+            var telemetryClient = new TelemetryClient();
+            var mockDatabaseCommandFactory = new Mock<IDatabaseCommandFactory>(MockBehavior.Strict);
+            var userSettings = new UserSettings();
+            var mockUserSettingsProvider = new Mock<IUserSettingsProvider>(MockBehavior.Strict);
+
+            var mockUser = new ApplicationUser();
+            var mockCurrentUser = new Mock<ClaimsPrincipal>(MockBehavior.Strict);
+            mockCurrentUser
+                .Setup(_ => _.IsInRole("Admin"))
+                .Returns(false);
+            var mockUserManager = MockUserManager.CreateMock();
+            mockUserManager
+                .Setup(_ => _.FindByNameAsync(UserName))
+                .Returns(Task.FromResult(mockUser));
+            mockUserManager
+                .Setup(_ => _.GetUserIdAsync(mockUser))
+                .Returns(Task.FromResult(UserId));
+            mockUserManager
+                .Setup(_ => _.GetUserId(mockCurrentUser.Object))
+                .Returns("SomeOtherUserId");
+
+            var mockHttpContext = new Mock<HttpContext>(MockBehavior.Strict);
+            mockHttpContext.SetupGet(_ => _.User).Returns(mockCurrentUser.Object).Verifiable();
+
+            var mockEmailSender = new Mock<IEmailSender>(MockBehavior.Strict);
+
+            var controller = new UserController(
+                gameData,
+                telemetryClient,
+                mockDatabaseCommandFactory.Object,
+                mockUserSettingsProvider.Object,
+                mockUserManager.Object,
+                mockEmailSender.Object);
+            controller.ControllerContext = new ControllerContext { HttpContext = mockHttpContext.Object };
+
+            var result = await controller.PatchSettings(UserName, userSettings);
+
+            Assert.NotNull(result);
+            Assert.IsType<ForbidResult>(result);
+
+            mockDatabaseCommandFactory.VerifyAll();
+            mockUserSettingsProvider.VerifyAll();
+            mockCurrentUser.VerifyAll();
+            mockHttpContext.VerifyAll();
+            mockEmailSender.VerifyAll();
+
+            // Workaround for a Moq bug. See: https://github.com/moq/moq4/issues/456#issuecomment-331692858
+            mockUserManager.Object.Logger = mockUserManager.Object.Logger;
+            mockUserManager.VerifyAll();
+        }
+
+        [Fact]
+        public async Task PatchSettings_AdminIsAlwaysAllowed()
+        {
+            const string UserName = "SomeUserName";
+            const string UserId = "SomeUserId";
+
+            var gameData = MockGameData.RealData;
+            var telemetryClient = new TelemetryClient();
+            var mockDatabaseCommandFactory = new Mock<IDatabaseCommandFactory>(MockBehavior.Strict);
+            var userSettings = new UserSettings();
+            var mockUserSettingsProvider = new Mock<IUserSettingsProvider>(MockBehavior.Strict);
+            mockUserSettingsProvider.Setup(_ => _.Patch(UserId, userSettings));
+
+            var mockUser = new ApplicationUser();
+            var mockCurrentUser = new Mock<ClaimsPrincipal>(MockBehavior.Strict);
+            mockCurrentUser
+                .Setup(_ => _.IsInRole("Admin"))
+                .Returns(true);
+            var mockUserManager = MockUserManager.CreateMock();
+            mockUserManager
+                .Setup(_ => _.FindByNameAsync(UserName))
+                .Returns(Task.FromResult(mockUser));
+            mockUserManager
+                .Setup(_ => _.GetUserIdAsync(mockUser))
+                .Returns(Task.FromResult(UserId));
+            mockUserManager
+                .Setup(_ => _.GetUserId(mockCurrentUser.Object))
+                .Returns("SomeOtherUserId");
+
+            var mockHttpContext = new Mock<HttpContext>(MockBehavior.Strict);
+            mockHttpContext.SetupGet(_ => _.User).Returns(mockCurrentUser.Object).Verifiable();
+
+            var mockEmailSender = new Mock<IEmailSender>(MockBehavior.Strict);
+
+            var controller = new UserController(
+                gameData,
+                telemetryClient,
+                mockDatabaseCommandFactory.Object,
+                mockUserSettingsProvider.Object,
+                mockUserManager.Object,
+                mockEmailSender.Object);
+            controller.ControllerContext = new ControllerContext { HttpContext = mockHttpContext.Object };
+
+            var result = await controller.PatchSettings(UserName, userSettings);
+
+            Assert.NotNull(result);
+            Assert.IsType<OkResult>(result);
+
+            mockDatabaseCommandFactory.VerifyAll();
+            mockUserSettingsProvider.VerifyAll();
             mockCurrentUser.VerifyAll();
             mockHttpContext.VerifyAll();
             mockEmailSender.VerifyAll();
