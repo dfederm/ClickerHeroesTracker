@@ -147,7 +147,7 @@ namespace ClickerHeroesTrackerWebsite.Controllers.Api
             var isUploadAnonymous = upload.User == null;
             var isOwn = !isUploadAnonymous && string.Equals(userId, upload.User.Id, StringComparison.OrdinalIgnoreCase);
             var uploadUserSettings = isOwn ? userSettings : this.userSettingsProvider.Get(upload.User?.Id);
-            var isPublic = isUploadAnonymous || uploadUserSettings.AreUploadsPublic;
+            var isPublic = isUploadAnonymous || uploadUserSettings.AreUploadsPublic.GetValueOrDefault(true);
             var isPermitted = isOwn || isPublic || isAdmin;
 
             if (!isPermitted)
@@ -252,7 +252,7 @@ namespace ClickerHeroesTrackerWebsite.Controllers.Api
             else
             {
                 var userSettings = this.userSettingsProvider.Get(userId);
-                playStyle = userSettings.PlayStyle;
+                playStyle = userSettings.PlayStyle.GetValueOrDefault(PlayStyle.Hybrid);
             }
 
             var ancientLevels = new AncientLevelsModel(

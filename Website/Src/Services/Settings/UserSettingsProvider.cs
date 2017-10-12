@@ -6,7 +6,9 @@ namespace ClickerHeroesTrackerWebsite.Models.Settings
 {
     using System;
     using System.Collections.Generic;
+    using System.Text;
     using ClickerHeroesTrackerWebsite.Services.Database;
+    using Website.Models.Api.Users;
 
     /// <summary>
     /// An <see cref="IUserSettingsProvider"/> implementation which uses a database as the backing store.
@@ -26,7 +28,7 @@ namespace ClickerHeroesTrackerWebsite.Models.Settings
         }
 
         /// <inheritdoc/>
-        public IUserSettings Get(string userId)
+        public UserSettings Get(string userId)
         {
             // If the user isn't logged in, use the default settings
             if (string.IsNullOrEmpty(userId))
@@ -34,24 +36,170 @@ namespace ClickerHeroesTrackerWebsite.Models.Settings
                 return new UserSettings();
             }
 
-            // Use a cache to avoid hitting the database every time
-            UserSettings settings;
-            if (!this.cache.TryGetValue(userId, out settings))
+            // Use a cache to avoid hitting the database mu;tiple times in a request.
+            if (!this.cache.TryGetValue(userId, out var userSettings))
             {
-                settings = new UserSettings(this.databaseCommandFactory, userId);
-                this.cache.Add(userId, settings);
+                userSettings = new UserSettings();
+
+                var parameters = new Dictionary<string, object>
+                {
+                    { "@UserId", userId },
+                };
+                const string GetUserSettingsCommandText = @"
+                    SELECT SettingId, SettingValue
+                    FROM UserSettings
+                    WHERE UserId = @UserId";
+                using (var command = this.databaseCommandFactory.Create(
+                    GetUserSettingsCommandText,
+                    parameters))
+                using (var reader = command.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        var settingId = Convert.ToByte(reader["SettingId"]);
+                        var settingValue = reader["SettingValue"].ToString();
+
+                        switch (settingId)
+                        {
+                            case UserSettingsConstants.AreUploadsPublic:
+                                userSettings.AreUploadsPublic = bool.TryParse(settingValue, out var areUploadsPublic) ? new bool?(areUploadsPublic) : null;
+                                break;
+                            case UserSettingsConstants.PlayStyle:
+                                userSettings.PlayStyle = Enum.TryParse<PlayStyle>(settingValue, out var playStyle) ? new PlayStyle?(playStyle) : null;
+                                break;
+                            case UserSettingsConstants.UseScientificNotation:
+                                userSettings.UseScientificNotation = bool.TryParse(settingValue, out var useScientificNotation) ? new bool?(useScientificNotation) : null;
+                                break;
+                            case UserSettingsConstants.ScientificNotationThreshold:
+                                userSettings.ScientificNotationThreshold = int.TryParse(settingValue, out var scientificNotationThreshold) ? new int?(scientificNotationThreshold) : null;
+                                break;
+                            case UserSettingsConstants.UseEffectiveLevelForSuggestions:
+                                userSettings.UseEffectiveLevelForSuggestions = bool.TryParse(settingValue, out var useEffectiveLevelForSuggestions) ? new bool?(useEffectiveLevelForSuggestions) : null;
+                                break;
+                            case UserSettingsConstants.UseLogarithmicGraphScale:
+                                userSettings.UseLogarithmicGraphScale = bool.TryParse(settingValue, out var useLogarithmicGraphScale) ? new bool?(useLogarithmicGraphScale) : null;
+                                break;
+                            case UserSettingsConstants.LogarithmicGraphScaleThreshold:
+                                userSettings.LogarithmicGraphScaleThreshold = int.TryParse(settingValue, out var logarithmicGraphScaleThreshold) ? new int?(logarithmicGraphScaleThreshold) : null;
+                                break;
+                            case UserSettingsConstants.HybridRatio:
+                                userSettings.HybridRatio = int.TryParse(settingValue, out var hybridRatio) ? new int?(hybridRatio) : null;
+                                break;
+                            case UserSettingsConstants.Theme:
+                                userSettings.Theme = Enum.TryParse<SiteThemeType>(settingValue, out var theme) ? new SiteThemeType?(theme) : null;
+                                break;
+                        }
+                    }
+                }
+
+                this.cache.Add(userId, userSettings);
             }
 
-            return settings;
+            return userSettings;
         }
 
         /// <inheritdoc/>
-        public void FlushChanges()
+        public void Patch(string userId, UserSettings userSettings)
         {
-            foreach (var settings in this.cache.Values)
+            if (string.IsNullOrEmpty(userId))
             {
-                settings.FlushChanges();
+                throw new ArgumentNullException(nameof(userId));
             }
+
+            if (userSettings == null)
+            {
+                throw new ArgumentNullException(nameof(userSettings));
+            }
+
+            /* Build a query that looks like this:
+                MERGE INTO UserSettings WITH (HOLDLOCK)
+                USING
+                    (VALUES (@UserId, 1, @Value1), (@UserId, 2, @Value2), ... )
+                        AS Input(UserId, SettingId, SettingValue)
+                    ON UserSettings.UserId = Input.UserId
+                    AND UserSettings.SettingId = Input.SettingId
+                WHEN MATCHED THEN
+                    UPDATE
+                    SET
+                        SettingValue = Input.SettingValue
+                WHEN NOT MATCHED THEN
+                    INSERT (UserId, SettingId, SettingValue)
+                    VALUES (Input.UserId, Input.SettingId, Input.SettingValue);");
+            */
+            var setUserSettingsCommandText = new StringBuilder();
+            var parameters = new Dictionary<string, object>()
+            {
+                { "@UserId", userId },
+            };
+
+            var isFirst = true;
+
+            setUserSettingsCommandText.Append(@"
+                MERGE INTO UserSettings WITH (HOLDLOCK)
+                USING
+                    ( VALUES ");
+
+            void AppendSetting(byte settingId, string settingValue)
+            {
+                if (string.IsNullOrEmpty(settingValue))
+                {
+                    return;
+                }
+
+                if (!isFirst)
+                {
+                    setUserSettingsCommandText.Append(",");
+                }
+
+                // No need to sanitize settingId as it's just a number
+                setUserSettingsCommandText.Append("(@UserId,");
+                setUserSettingsCommandText.Append(settingId);
+                setUserSettingsCommandText.Append(",@Value");
+                setUserSettingsCommandText.Append(settingId);
+                setUserSettingsCommandText.Append(")");
+
+                parameters.Add("@Value" + settingId, settingValue);
+
+                isFirst = false;
+            }
+
+            AppendSetting(UserSettingsConstants.AreUploadsPublic, userSettings.AreUploadsPublic?.ToString());
+            AppendSetting(UserSettingsConstants.PlayStyle, userSettings.PlayStyle?.ToString());
+            AppendSetting(UserSettingsConstants.UseScientificNotation, userSettings.UseScientificNotation?.ToString());
+            AppendSetting(UserSettingsConstants.ScientificNotationThreshold, userSettings.ScientificNotationThreshold?.ToString());
+            AppendSetting(UserSettingsConstants.UseEffectiveLevelForSuggestions, userSettings.UseEffectiveLevelForSuggestions?.ToString());
+            AppendSetting(UserSettingsConstants.UseLogarithmicGraphScale, userSettings.UseLogarithmicGraphScale?.ToString());
+            AppendSetting(UserSettingsConstants.LogarithmicGraphScaleThreshold, userSettings.LogarithmicGraphScaleThreshold?.ToString());
+            AppendSetting(UserSettingsConstants.HybridRatio, userSettings.HybridRatio?.ToString());
+            AppendSetting(UserSettingsConstants.Theme, userSettings.Theme?.ToString());
+
+            // If no settings were appended, just short-circuit.
+            if (isFirst)
+            {
+                return;
+            }
+
+            setUserSettingsCommandText.Append(@"
+                    )
+                        AS Input(UserId, SettingId, SettingValue)
+                    ON UserSettings.UserId = Input.UserId
+                    AND UserSettings.SettingId = Input.SettingId
+                WHEN MATCHED THEN
+                    UPDATE
+                    SET
+                        SettingValue = Input.SettingValue
+                WHEN NOT MATCHED THEN
+                    INSERT (UserId, SettingId, SettingValue)
+                    VALUES (Input.UserId, Input.SettingId, Input.SettingValue);");
+            using (var command = this.databaseCommandFactory.Create(
+                setUserSettingsCommandText.ToString(),
+                parameters))
+            {
+                command.ExecuteNonQuery();
+            }
+
+            // Bust the cache.
+            this.cache.Remove(userId);
         }
     }
 }

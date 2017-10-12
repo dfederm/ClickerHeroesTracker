@@ -15,6 +15,7 @@ namespace ClickerHeroesTrackerWebsite.Tests.Controllers
     using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.Mvc;
     using Moq;
+    using Website.Models.Api.Users;
     using Xunit;
 
     public class CalculatorControllerTests
@@ -52,7 +53,7 @@ namespace ClickerHeroesTrackerWebsite.Tests.Controllers
         {
             var user = new ClaimsPrincipal();
 
-            var mockDataReader = MockDatabaseHelper.CreateMockDataReader(null);
+            var mockDataReader = MockDatabaseHelper.CreateMockDataReader();
             var mockDatabaseCommand = MockDatabaseHelper.CreateMockDatabaseCommand(new Dictionary<string, object> { { "@UploadId", 1 } }, mockDataReader.Object);
 
             var mockDatabaseCommandFactory = new Mock<IDatabaseCommandFactory>(MockBehavior.Strict);
@@ -118,14 +119,9 @@ namespace ClickerHeroesTrackerWebsite.Tests.Controllers
             var mockDatabaseCommandFactory = new Mock<IDatabaseCommandFactory>(MockBehavior.Strict);
             mockDatabaseCommandFactory.Setup(_ => _.Create()).Returns(mockDatabaseCommand.Object).Verifiable();
 
-            var mockUserSettings = new Mock<IUserSettings>(MockBehavior.Strict);
-            if (uploadUserId != null)
-            {
-                mockUserSettings.SetupGet(_ => _.AreUploadsPublic).Returns(isPublic).Verifiable();
-            }
-
+            var userSettings = new UserSettings { AreUploadsPublic = isPublic };
             var mockUserSettingsProvider = new Mock<IUserSettingsProvider>(MockBehavior.Strict);
-            mockUserSettingsProvider.Setup(_ => _.Get(uploadUserId ?? string.Empty)).Returns(mockUserSettings.Object).Verifiable();
+            mockUserSettingsProvider.Setup(_ => _.Get(uploadUserId ?? string.Empty)).Returns(userSettings).Verifiable();
 
             var userManager = new MockUserManager();
 
@@ -171,7 +167,6 @@ namespace ClickerHeroesTrackerWebsite.Tests.Controllers
             mockDataReader.Verify();
             mockDatabaseCommand.Verify();
             mockDatabaseCommandFactory.Verify();
-            mockUserSettings.Verify();
             mockUserSettingsProvider.Verify();
             mockHttpContext.Verify();
         }

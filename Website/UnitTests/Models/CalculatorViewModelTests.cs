@@ -13,6 +13,7 @@ namespace ClickerHeroesTrackerWebsite.Tests.Models
     using ClickerHeroesTrackerWebsite.Services.Database;
     using ClickerHeroesTrackerWebsite.Tests.Mocks;
     using Moq;
+    using Website.Models.Api.Users;
     using Xunit;
 
     public class CalculatorViewModelTests
@@ -36,11 +37,9 @@ namespace ClickerHeroesTrackerWebsite.Tests.Models
             var mockDatabaseCommandFactory = new Mock<IDatabaseCommandFactory>(MockBehavior.Strict);
             mockDatabaseCommandFactory.Setup(_ => _.Create()).Returns(mockDatabaseCommand.Object).Verifiable();
 
-            var mockUserSettings = new Mock<IUserSettings>(MockBehavior.Strict);
-            mockUserSettings.SetupGet(_ => _.AreUploadsPublic).Returns(false).Verifiable();
-
+            var userSettings = new UserSettings { AreUploadsPublic = false };
             var mockUserSettingsProvider = new Mock<IUserSettingsProvider>(MockBehavior.Strict);
-            mockUserSettingsProvider.Setup(_ => _.Get(UserId)).Returns(mockUserSettings.Object).Verifiable();
+            mockUserSettingsProvider.Setup(_ => _.Get(UserId)).Returns(userSettings).Verifiable();
 
             var userManager = new MockUserManager();
 
@@ -62,7 +61,6 @@ namespace ClickerHeroesTrackerWebsite.Tests.Models
             mockDataReader.Verify();
             mockDatabaseCommand.Verify();
             mockDatabaseCommandFactory.Verify();
-            mockUserSettings.Verify();
             mockUserSettingsProvider.Verify();
         }
     }
