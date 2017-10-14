@@ -15,8 +15,6 @@
     CONSTRAINT [FK_ComputedStats_ToUpload] FOREIGN KEY ([UploadId]) REFERENCES [dbo].[Uploads] ([Id])
 );
 
-
-GO
 CREATE CLUSTERED INDEX [UploadIdIndex]
     ON [dbo].[ComputedStats]([UploadId] ASC);
 

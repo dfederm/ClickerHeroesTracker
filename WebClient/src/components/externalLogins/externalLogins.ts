@@ -111,7 +111,11 @@ export class ExternalLoginsComponent implements OnInit {
         // See: https://github.com/AzureAD/microsoft-authentication-library-for-js/issues/129
         ExternalLoginsComponent.microsoftApp.loginPopup(["openid", "email"])
             .then(token => this.logIn("urn:ietf:params:oauth:grant-type:microsoft_identity_token", token))
-            .catch(() => {
+            .catch((error: string) => {
+                if (error && error.startsWith("user_cancelled:")) {
+                    return;
+                }
+
                 this.error = "There was a problem logging in with Microsoft";
             });
     }
