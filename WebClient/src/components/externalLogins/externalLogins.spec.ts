@@ -493,6 +493,38 @@ describe("ExternalLoginsComponent", () => {
                 .then(done)
                 .catch(done.fail);
         });
+
+        it("should not show an error when cancelled", done => {
+            let authenticationService = TestBed.get(AuthenticationService) as AuthenticationService;
+            spyOn(authenticationService, "logInWithAssertion");
+
+            let activeModal = TestBed.get(NgbActiveModal) as NgbActiveModal;
+            spyOn(activeModal, "close");
+
+            msal.loginPopup = jasmine.createSpy("loginPopup", () => Promise.reject("user_cancelled:User closed the popup window window and cancelled the flow")).and.callThrough();
+
+            let buttons = fixture.debugElement.queryAll(By.css("button"));
+            expect(buttons.length).toEqual(3);
+
+            let button = buttons[2];
+            expect(button).not.toBeNull();
+            button.nativeElement.click();
+
+            fixture.whenStable()
+                .then(() => {
+                    fixture.detectChanges();
+
+                    expect(msal.loginPopup).toHaveBeenCalledWith(["openid", "email"]);
+                    expect(authenticationService.logInWithAssertion).not.toHaveBeenCalled();
+                    expect(activeModal.close).not.toHaveBeenCalled();
+
+                    // No error
+                    let error = fixture.debugElement.query(By.css(".alert-danger"));
+                    expect(error).toBeNull();
+                })
+                .then(done)
+                .catch(done.fail);
+        });
     });
 
     describe("Choosing a user name", () => {
