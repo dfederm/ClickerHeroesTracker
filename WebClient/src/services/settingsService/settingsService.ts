@@ -53,6 +53,8 @@ export class SettingsService {
 
     private refreshSubscription: Subscription;
 
+    private numPendingPatches = 0;
+
     constructor(
         private authenticationService: AuthenticationService,
         private http: Http,
@@ -86,6 +88,30 @@ export class SettingsService {
             .distinctUntilChanged((x, y) => JSON.stringify(x) === JSON.stringify(y));
     }
 
+    public setSetting(setting: keyof IUserSettings, value: {}): Promise<void> {
+        // While the user is updating settings, cancel any refreshes for now
+        if (this.refreshSubscription) {
+            this.refreshSubscription.unsubscribe();
+            this.refreshSubscription = null;
+        }
+
+        this.numPendingPatches++;
+
+        // TODO: Handle if the user is not logged in
+        let headers = this.authenticationService.getAuthHeaders();
+        let options = new RequestOptions({ headers });
+        let body = { [setting]: value };
+        return this.http.patch(`/api/users/${this.userName}/settings`, body, options)
+            .toPromise()
+            .then(() => {
+                this.handlePatchCompleted();
+            })
+            .catch(error => {
+                this.handlePatchCompleted();
+                return Promise.reject(error);
+            });
+    }
+
     private fetchSettingsInitial(retryDelay: number = SettingsService.retryDelay): void {
         this.fetchSettings()
             .then(() => this.scheduleRefresh())
@@ -106,6 +132,12 @@ export class SettingsService {
         return this.http.get(`/api/users/${this.userName}/settings`, options)
             .toPromise()
             .then(response => {
+                // If the user is in the process of updating their settings, just ignore this response so it doesn't plow over the newly updated settings.
+                // Once the patch finishes, it will refresh again.
+                if (this.numPendingPatches !== 0) {
+                    return Promise.resolve();
+                }
+
                 let newSettings: IUserSettings = response.json();
                 if (!newSettings) {
                     return Promise.reject("Invalid settings response");
@@ -117,6 +149,17 @@ export class SettingsService {
                 this.settingsSubject.next(this.normalizeSettings(newSettings));
                 return Promise.resolve();
             });
+    }
+
+    private handlePatchCompleted(): void {
+        this.numPendingPatches--;
+
+        // In case there are multiple patches at once, only refresh the settings from the server and start refreshing again once they're all finished
+        if (this.numPendingPatches === 0) {
+            this.fetchSettings()
+                .catch(() => void 0) // Just swallow errors from the refresh
+                .then(() => this.scheduleRefresh());
+        }
     }
 
     // In case the settings are missing some values, fill in the defaults

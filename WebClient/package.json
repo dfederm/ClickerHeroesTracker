@@ -29,6 +29,7 @@
     "angular-compare-validator": "^0.1.2",
     "core-js": "^2.5.1",
     "decimal.js": "^7.3.0",
+    "jw-bootstrap-switch-ng2": "^1.0.4",
     "jwt-decode": "^2.2.0",
     "msalx": "^0.1.2",
     "ng2-adsense": "^4.0.12",

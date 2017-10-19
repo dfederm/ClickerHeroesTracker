@@ -6,6 +6,7 @@ import { RegisterDialogComponent } from "../registerDialog/registerDialog";
 import { LogInDialogComponent } from "../logInDialog/logInDialog";
 import { UploadDialogComponent } from "../uploadDialog/uploadDialog";
 import { FeedbackDialogComponent } from "../feedbackDialog/feedbackDialog";
+import { SettingsDialogComponent } from "../settingsDialog/settingsDialog";
 
 @Component({
     selector: "navbar",
@@ -20,6 +21,7 @@ export class NavbarComponent implements OnInit {
     public LogInDialogComponent = LogInDialogComponent;
     public UploadDialogComponent = UploadDialogComponent;
     public FeedbackDialogComponent = FeedbackDialogComponent;
+    public SettingsDialogComponent = SettingsDialogComponent;
 
     constructor(
         private authenticationService: AuthenticationService,

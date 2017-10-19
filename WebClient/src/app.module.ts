@@ -10,6 +10,7 @@ import { AdsenseModule } from "ng2-adsense";
 import { ApplicationInsightsModule, AppInsightsService } from "@markpieszak/ng-application-insights";
 import { ChartsModule } from "ng2-charts";
 import { CompareValidatorModule } from "angular-compare-validator";
+import { JWBootstrapSwitchModule } from "jw-bootstrap-switch-ng2";
 
 import { AppComponent } from "./components/app/app";
 import { HomeComponent } from "./components/home/home";
@@ -31,6 +32,7 @@ import { RegisterDialogComponent } from "./components/registerDialog/registerDia
 import { ExternalLoginsComponent } from "./components/externalLogins/externalLogins";
 import { FeedbackDialogComponent } from "./components/feedbackDialog/feedbackDialog";
 import { ResetPasswordDialogComponent } from "./components/resetPasswordDialog/resetPasswordDialog";
+import { SettingsDialogComponent } from "./components/settingsDialog/settingsDialog";
 
 import { OpenDialogDirective } from "./directives/openDialog/openDialog";
 
@@ -71,6 +73,7 @@ const routes: Routes =
     ApplicationInsightsModule.forRoot({ instrumentationKey: "99fba640-790d-484f-83c4-3c97450d8698" }),
     ChartsModule,
     CompareValidatorModule,
+    JWBootstrapSwitchModule,
   ],
   declarations:
   [
@@ -97,6 +100,7 @@ const routes: Routes =
     ExternalLoginsComponent,
     FeedbackDialogComponent,
     ResetPasswordDialogComponent,
+    SettingsDialogComponent,
   ],
   entryComponents:
   [
@@ -105,6 +109,7 @@ const routes: Routes =
     RegisterDialogComponent,
     FeedbackDialogComponent,
     ResetPasswordDialogComponent,
+    SettingsDialogComponent,
   ],
   providers:
   [

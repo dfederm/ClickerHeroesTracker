@@ -1,0 +1,159 @@
+<div class="modal-header">
+    <h4 class="modal-title">Settings</h4>
+    <button type="button"
+            class="close"
+            (click)="activeModal.dismiss()">
+        &times;
+    </button>
+</div>
+<div class="modal-body">
+    <div *ngIf="error"
+         class="alert alert-danger">
+        {{ error }}
+    </div>
+    <fieldset class="form-group">
+        <div class="row">
+            <div class="col-sm-8 col-form-label">
+                Play Style
+                <a href="https://www.reddit.com/r/ClickerHeroes/wiki/introduction#wiki_types_of_playstyle_builds"
+                   target="_blank"
+                   class="text-muted"
+                   placement="top"
+                   ngbTooltip="This is how you play the game. Click for details on Idle and Active. Hybrid is basically Idle but using all cooldowns before ascending.">(?)</a>
+            </div>
+            <div class="col-sm-4">
+                <select class="form-control"
+                        [(ngModel)]="settings.playStyle"
+                        (change)="setSetting('playStyle', settings.playStyle)"
+                        [disabled]="isSettingPending.playStyle">
+                    <option *ngFor="let p of playStyles"
+                            [ngValue]="p">{{ p | titlecase }}</option>
+                </select>
+            </div>
+        </div>
+    </fieldset>
+    <div *ngIf="settings.playStyle === 'hybrid'"
+         class="form-group row">
+        <label for="hybridRatio"
+               class="col-sm-8">
+            Hybrid Ratio
+            <a class="text-muted"
+               placement="top"
+               ngbTooltip="This is the ratio to use for leveling idle and active ancients.">(?)</a>
+        </label>
+        <div class="col-sm-4">
+            <input type="number"
+                   class="form-control"
+                   id="hybridRatio"
+                   name="hybridRatio"
+                   [(ngModel)]="settings.hybridRatio"
+                   (keyup.enter)="setSetting('hybridRatio', settings.hybridRatio)"
+                   (blur)="setSetting('hybridRatio', settings.hybridRatio)"
+                   [disabled]="isSettingPending.hybridRatio" />
+        </div>
+    </div>
+    <div class="form-group row">
+        <label for="useScientificNotation"
+               class="col-sm-8">
+            Use scientific notation
+        </label>
+        <div class="col-sm-4">
+            <bSwitch [(ngModel)]="settings.useScientificNotation"
+                     [switch-size]="'large'"
+                     [switch-disabled]="isSettingPending.useScientificNotation"
+                     (onChangeState)="setSetting('useScientificNotation', $event.currentValue)"></bSwitch>
+        </div>
+    </div>
+    <div *ngIf="settings.useScientificNotation"
+         class="form-group row">
+        <label for="scientificNotationThreshold"
+               class="col-sm-8">
+            Scientific notation threshold
+            <a class="text-muted"
+               placement="top"
+               ngbTooltip="The value at which to start showing numbers in scientific notation. Use &quot;0&quot; to always use it.">(?)</a>
+        </label>
+        <div class="col-sm-4">
+            <input type="number"
+                   class="form-control"
+                   id="scientificNotationThreshold"
+                   name="scientificNotationThreshold"
+                   [(ngModel)]="settings.scientificNotationThreshold"
+                   (keyup.enter)="setSetting('scientificNotationThreshold', settings.scientificNotationThreshold)"
+                   (blur)="setSetting('scientificNotationThreshold', settings.scientificNotationThreshold)"
+                   [disabled]="isSettingPending.scientificNotationThreshold" />
+        </div>
+    </div>
+    <div class="form-group row">
+        <label for="useLogarithmicGraphScale"
+               class="col-sm-8">
+            Use logarithmic scale for graphs
+        </label>
+        <div class="col-sm-4">
+            <bSwitch [(ngModel)]="settings.useLogarithmicGraphScale"
+                     [switch-size]="'large'"
+                     [switch-disabled]="isSettingPending.useLogarithmicGraphScale"
+                     (onChangeState)="setSetting('useLogarithmicGraphScale', $event.currentValue)"></bSwitch>
+        </div>
+    </div>
+    <div *ngIf="settings.useLogarithmicGraphScale"
+         class="form-group row">
+        <label for="logarithmicGraphScaleThreshold"
+               class="col-sm-8">
+            Logarithmic scale threshold
+            <a class="text-muted"
+               placement="top"
+               ngbTooltip="The range (max - min values) a graph must be to start using logarithmic scale. Use &quot;0&quot; to always use it.">(?)</a>
+        </label>
+        <div class="col-sm-4">
+            <input type="number"
+                   class="form-control"
+                   id="logarithmicGraphScaleThreshold"
+                   name="logarithmicGraphScaleThreshold"
+                   (keyup.enter)="setSetting('logarithmicGraphScaleThreshold', settings.logarithmicGraphScaleThreshold)"
+                   (blur)="setSetting('logarithmicGraphScaleThreshold', settings.logarithmicGraphScaleThreshold)"
+                   [(ngModel)]="settings.logarithmicGraphScaleThreshold"
+                   [disabled]="isSettingPending.logarithmicGraphScaleThreshold" />
+        </div>
+    </div>
+    <fieldset class="form-group">
+        <div class="row">
+            <div class="col-sm-8 col-form-label">
+                Site theme
+            </div>
+            <div class="col-sm-4">
+                <select class="form-control"
+                        [(ngModel)]="settings.theme"
+                        (change)="setSetting('theme', settings.theme)"
+                        [disabled]="isSettingPending.theme">
+                    <option *ngFor="let t of themes"
+                            [ngValue]="t">{{ t | titlecase }}</option>
+                </select>
+            </div>
+        </div>
+    </fieldset>
+    <div class="form-group row">
+        <label for="useEffectiveLevelForSuggestions"
+               class="col-sm-8">
+            Use the effective level (ancient + relic levels) for ancient suggestions
+        </label>
+        <div class="col-sm-4">
+            <bSwitch [(ngModel)]="settings.useEffectiveLevelForSuggestions"
+                     [switch-size]="'large'"
+                     [switch-disabled]="isSettingPending.useEffectiveLevelForSuggestions"
+                     (onChangeState)="setSetting('useEffectiveLevelForSuggestions', $event.currentValue)"></bSwitch>
+        </div>
+    </div>
+    <div class="form-group row">
+        <label for="areUploadsPublic"
+               class="col-sm-8">
+            Allow your profile, progress, and uploads to be viewed by others
+        </label>
+        <div class="col-sm-4">
+            <bSwitch [(ngModel)]="settings.areUploadsPublic"
+                     [switch-size]="'large'"
+                     [switch-disabled]="isSettingPending.areUploadsPublic"
+                     (onChangeState)="setSetting('areUploadsPublic', $event.currentValue)"></bSwitch>
+        </div>
+    </div>
+</div>
