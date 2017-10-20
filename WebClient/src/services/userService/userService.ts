@@ -14,6 +14,12 @@ export interface ICreateUserRequest {
     password: string;
 }
 
+export interface IChangePasswordRequest {
+    currentPassword: string;
+
+    newPassword: string;
+}
+
 export interface IResetPasswordRequest {
     email: string;
 }
@@ -134,6 +140,38 @@ export class UserService {
                 let errorMessage = error.message || error.toString();
                 this.appInsights.trackEvent("UserService.getFollows.error", { message: errorMessage });
                 return Promise.reject(errorMessage);
+            });
+    }
+
+    public changePassword(userName: string, currentPassword: string, newPassword: string): Promise<void> {
+        let headers = this.authenticationService.getAuthHeaders();
+        headers.append("Content-Type", "application/json");
+        let options = new RequestOptions({ headers });
+        let body: IChangePasswordRequest = { currentPassword, newPassword };
+        return this.http
+            .post(`/api/users/${userName}/changepassword`, body, options)
+            .toPromise()
+            .then(() => void 0)
+            .catch(error => {
+                let errors: string[] = [];
+
+                let validationErrorResponse: IValidationErrorResponse;
+                try {
+                    validationErrorResponse = error.json();
+                } catch (error) {
+                    // It must not have been json
+                }
+
+                if (validationErrorResponse) {
+                    for (let field in validationErrorResponse) {
+                        errors.push(...validationErrorResponse[field]);
+                    }
+                } else {
+                    errors.push(error.message || error.toString());
+                }
+
+                this.appInsights.trackEvent("UserService.changePassword.error", { message: errors.join(";") });
+                return Promise.reject(errors);
             });
     }
 

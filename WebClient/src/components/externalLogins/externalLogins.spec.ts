@@ -610,7 +610,7 @@ describe("ExternalLoginsComponent", () => {
         });
 
         describe("Form submission", () => {
-            it("should close the dialog when registering propertly", done => {
+            it("should close the dialog when registering properly", done => {
                 (authenticationService.logInWithAssertion as jasmine.Spy).and.returnValue(Promise.resolve());
 
                 let activeModal = TestBed.get(NgbActiveModal) as NgbActiveModal;

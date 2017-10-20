@@ -208,6 +208,70 @@ describe("UserService", () => {
         }));
     });
 
+    describe("changePassword", () => {
+        const currentPassword = "someCurrentPassword";
+        const newPassword = "someNewPassword";
+
+        it("should make the correct api call", fakeAsync(() => {
+            userService.changePassword(userName, currentPassword, newPassword);
+
+            expect(lastConnection).toBeDefined("no http service connection made");
+            expect(lastConnection.request.method).toEqual(RequestMethod.Post, "method invalid");
+            expect(lastConnection.request.url).toEqual(`/api/users/${userName}/changepassword`, "url invalid");
+            expect(lastConnection.request.json()).toEqual({ currentPassword, newPassword }, "request body invalid");
+        }));
+
+        it("should handle when the api returns a success response", fakeAsync(() => {
+            let succeeded = false;
+            let error: string;
+            userService.changePassword(userName, currentPassword, newPassword)
+                .then(() => succeeded = true)
+                .catch((e: string) => error = e);
+
+            lastConnection.mockRespond(new Response(new ResponseOptions()));
+            tick();
+
+            expect(succeeded).toEqual(true);
+            expect(error).toBeUndefined();
+            expect(appInsights.trackEvent).not.toHaveBeenCalled();
+        }));
+
+        it("should handle http errors", fakeAsync(() => {
+            let succeeded = false;
+            let error: string;
+            userService.changePassword(userName, currentPassword, newPassword)
+                .then(() => succeeded = true)
+                .catch((e: string) => error = e);
+
+            lastConnection.mockError(new Error("someError"));
+            tick();
+
+            expect(succeeded).toEqual(false);
+            expect(error).toEqual(["someError"]);
+            expect(appInsights.trackEvent).toHaveBeenCalled();
+        }));
+
+        it("should handle validation errors", fakeAsync(() => {
+            let succeeded = false;
+            let errors: string[];
+            userService.changePassword(userName, currentPassword, newPassword)
+                .then(() => succeeded = true)
+                .catch((e: string[]) => errors = e);
+
+            let validationError: IValidationErrorResponse = {
+                field0: ["error0_0", "error0_1", "error0_2"],
+                field1: ["error1_0", "error1_1", "error1_2"],
+                field2: ["error2_0", "error2_1", "error2_2"],
+            };
+            lastConnection.mockError(new MockError(new ResponseOptions({ body: validationError })));
+            tick();
+
+            expect(succeeded).toEqual(false);
+            expect(errors).toEqual(["error0_0", "error0_1", "error0_2", "error1_0", "error1_1", "error1_2", "error2_0", "error2_1", "error2_2"]);
+            expect(appInsights.trackEvent).toHaveBeenCalled();
+        }));
+    });
+
     describe("resetPassword", () => {
         it("should make the correct api call", fakeAsync(() => {
             userService.resetPassword(email);
