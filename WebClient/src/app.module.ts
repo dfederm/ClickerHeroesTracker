@@ -33,6 +33,7 @@ import { ExternalLoginsComponent } from "./components/externalLogins/externalLog
 import { FeedbackDialogComponent } from "./components/feedbackDialog/feedbackDialog";
 import { ResetPasswordDialogComponent } from "./components/resetPasswordDialog/resetPasswordDialog";
 import { SettingsDialogComponent } from "./components/settingsDialog/settingsDialog";
+import { ChangePasswordDialogComponent } from "./components/changePasswordDialog/changePasswordDialog";
 
 import { OpenDialogDirective } from "./directives/openDialog/openDialog";
 
@@ -101,6 +102,7 @@ const routes: Routes =
     FeedbackDialogComponent,
     ResetPasswordDialogComponent,
     SettingsDialogComponent,
+    ChangePasswordDialogComponent,
   ],
   entryComponents:
   [
@@ -110,6 +112,7 @@ const routes: Routes =
     FeedbackDialogComponent,
     ResetPasswordDialogComponent,
     SettingsDialogComponent,
+    ChangePasswordDialogComponent,
   ],
   providers:
   [

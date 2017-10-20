@@ -2,6 +2,7 @@ import { Component, OnInit } from "@angular/core";
 import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
 
 import { SettingsService, PlayStyle, Theme, IUserSettings } from "../../services/settingsService/settingsService";
+import { ChangePasswordDialogComponent } from "../changePasswordDialog/changePasswordDialog";
 
 @Component({
     selector: "settingsDialog",
@@ -17,6 +18,8 @@ export class SettingsDialogComponent implements OnInit {
     public playStyles: PlayStyle[] = ["idle", "hybrid", "active"];
 
     public themes: Theme[] = ["light", "dark"];
+
+    public ChangePasswordDialogComponent = ChangePasswordDialogComponent;
 
     constructor(
         private settingsService: SettingsService,

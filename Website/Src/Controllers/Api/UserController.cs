@@ -287,6 +287,53 @@ namespace Website.Controllers.Api
             return this.Ok();
         }
 
+        [Route("{userName}/changepassword")]
+        [HttpPost]
+        public async Task<IActionResult> ChangePassword(string userName, [FromBody] ChangePasswordRequest model)
+        {
+            if (string.IsNullOrEmpty(userName))
+            {
+                return this.BadRequest();
+            }
+
+            if (!this.ModelState.IsValid)
+            {
+                return this.BadRequest(this.ModelState);
+            }
+
+            var user = await this.userManager.FindByNameAsync(userName);
+            if (user == null)
+            {
+                return this.NotFound();
+            }
+
+            var userId = await this.userManager.GetUserIdAsync(user);
+            if (string.IsNullOrEmpty(userId))
+            {
+                return this.NotFound();
+            }
+
+            var currentUserId = this.userManager.GetUserId(this.User);
+            if (!userId.Equals(currentUserId, StringComparison.OrdinalIgnoreCase)
+                && !this.User.IsInRole("Admin"))
+            {
+                return this.Forbid();
+            }
+
+            var result = await this.userManager.ChangePasswordAsync(user, model.CurrentPassword, model.NewPassword);
+            if (!result.Succeeded)
+            {
+                foreach (var error in result.Errors)
+                {
+                    this.ModelState.AddModelError(string.Empty, error.Description);
+                }
+
+                return this.BadRequest(this.ModelState);
+            }
+
+            return this.Ok();
+        }
+
         [Route("resetpassword")]
         [HttpPost]
         [AllowAnonymous]

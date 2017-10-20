@@ -439,7 +439,7 @@ describe("RegisterDialogComponent", () => {
     });
 
     describe("Form submission", () => {
-        it("should close the dialog when registering propertly", done => {
+        it("should close the dialog when registering properly", done => {
             let userService = TestBed.get(UserService) as UserService;
             spyOn(userService, "create").and.returnValue(Promise.resolve());
 
