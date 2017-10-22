@@ -5,6 +5,7 @@ import { SettingsService, IUserSettings } from "../../services/settingsService/s
 
 import Decimal from "decimal.js";
 import { ChartDataSets, ChartOptions, ChartTooltipItem } from "chart.js";
+import { ExponentialPipe } from "../../pipes/exponentialPipe";
 
 interface IChartViewModel {
     isProminent: boolean;
@@ -273,9 +274,7 @@ export class UserCompareComponent implements OnInit {
                             let tooltipUser = tooltipItem.datasetIndex === 0
                                 ? this.userName
                                 : this.compareUserName;
-                            let tooltipValue = isLogarithmic
-                                ? Decimal.pow(10, tooltipItem.yLabel).toExponential(3)
-                                : Number(tooltipItem.yLabel).toExponential(3);
+                            let tooltipValue = this.formatNumber(tooltipItem.yLabel, isLogarithmic);
                             return `${tooltipUser}: ${tooltipValue}`;
                         },
                     },
@@ -297,9 +296,7 @@ export class UserCompareComponent implements OnInit {
                             type: "linear",
                             ticks: {
                                 callback: (value: number): string => {
-                                    return isLogarithmic
-                                        ? Decimal.pow(10, value).toExponential(3)
-                                        : value.toExponential(3);
+                                    return this.formatNumber(value, isLogarithmic);
                                 },
                             },
                         },
@@ -307,6 +304,13 @@ export class UserCompareComponent implements OnInit {
                 },
             },
         };
+    }
+
+    private formatNumber(value: string | number, isLogarithmic: boolean): string {
+        let num = isLogarithmic
+            ? Decimal.pow(10, value)
+            : Number(value);
+        return ExponentialPipe.formatNumber(num, this.settings);
     }
 
     private toTitleCase(srt: string): string {

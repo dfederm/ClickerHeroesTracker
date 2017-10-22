@@ -26,25 +26,29 @@ export class ExponentialPipe implements PipeTransform {
             });
     }
 
-    public transform(value: number | decimal.Decimal): string {
+    public static formatNumber(value: number | decimal.Decimal, settings: IUserSettings): string {
         if (!value) {
             value = 0;
         }
 
         if (typeof value === "number") {
-            const useScientificNotation = this.settings && this.settings.useScientificNotation && Math.abs(value) > this.settings.scientificNotationThreshold;
+            const useScientificNotation = settings && settings.useScientificNotation && Math.abs(value) > settings.scientificNotationThreshold;
             return useScientificNotation
                 ? value.toExponential(3)
                 : value.toLocaleString();
         }
 
         if (value instanceof Decimal) {
-            const useScientificNotation = this.settings && this.settings.useScientificNotation && value.abs().greaterThan(this.settings.scientificNotationThreshold);
+            const useScientificNotation = settings && settings.useScientificNotation && value.abs().greaterThan(settings.scientificNotationThreshold);
             return useScientificNotation
                 ? value.toExponential(3)
                 : value.toFormat();
         }
 
         throw new Error("Unexpected value passed to ExponentialPipe");
+    }
+
+    public transform(value: number | decimal.Decimal): string {
+        return ExponentialPipe.formatNumber(value, this.settings);
     }
 }

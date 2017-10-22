@@ -20,7 +20,7 @@
     <div class="row">
         <div *ngFor="let chart of charts"
              class="col-md-{{chart.isProminent ? '6' : '4'}}">
-            <!-- Height is intedned to be 400px, but for some reason the chart is 1.7x what we specify, so use 235 -->
+            <!-- Height is intended to be 400px, but for some reason the chart is 1.7x what we specify, so use 235 -->
             <canvas baseChart
                     height="235"
                     [chartType]="'line'"

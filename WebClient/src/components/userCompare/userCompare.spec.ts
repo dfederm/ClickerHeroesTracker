@@ -9,6 +9,7 @@ import { UserCompareComponent } from "./userCompare";
 import { UserService, IProgressData } from "../../services/userService/userService";
 import { ChartDataSets, ChartPoint, ChartOptions } from "chart.js";
 import { SettingsService, IUserSettings } from "../../services/settingsService/settingsService";
+import { ExponentialPipe } from "../../pipes/exponentialPipe";
 
 describe("UserCompareComponent", () => {
     let component: UserCompareComponent;
@@ -254,9 +255,10 @@ describe("UserCompareComponent", () => {
                                 : Number(rawExpectedValue);
                             expect(data1[j].y).toEqual(expectedValue);
 
-                            let expectedLabel = isLogarithmic
-                                ? Decimal.pow(10, expectedValue).toExponential(3)
-                                : Number(expectedValue).toExponential(3);
+                            let expectedLabelNum = isLogarithmic
+                                ? Decimal.pow(10, expectedValue)
+                                : Number(expectedValue);
+                            let expectedLabel = ExponentialPipe.formatNumber(expectedLabelNum, settings);
                             expect((options.tooltips.callbacks.label as Function)({ yLabel: expectedValue, datasetIndex: 0 })).toEqual("someUserName: " + expectedLabel);
                             expect(options.scales.yAxes[0].ticks.callback(expectedValue, null, null)).toEqual(expectedLabel);
                         }
@@ -277,9 +279,10 @@ describe("UserCompareComponent", () => {
                                 : Number(rawExpectedValue);
                             expect(data2[j].y).toEqual(expectedValue);
 
-                            let expectedLabel = isLogarithmic
-                                ? Decimal.pow(10, expectedValue).toExponential(3)
-                                : Number(expectedValue).toExponential(3);
+                            let expectedLabelNum = isLogarithmic
+                                ? Decimal.pow(10, expectedValue)
+                                : Number(expectedValue);
+                            let expectedLabel = ExponentialPipe.formatNumber(expectedLabelNum, settings);
                             expect((options.tooltips.callbacks.label as Function)({ yLabel: expectedValue, datasetIndex: 1 })).toEqual("someOtherUserName: " + expectedLabel);
                             expect(options.scales.yAxes[0].ticks.callback(expectedValue, null, null)).toEqual(expectedLabel);
                         }
