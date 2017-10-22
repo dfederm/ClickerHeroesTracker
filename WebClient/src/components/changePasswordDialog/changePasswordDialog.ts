@@ -2,7 +2,7 @@ import { Component, OnInit } from "@angular/core";
 import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
 
 import { AuthenticationService } from "../../services/authenticationService/authenticationService";
-import { UserService } from "../../services/userService/userService";
+import { UserService, IUserLogins } from "../../services/userService/userService";
 
 @Component({
     selector: "changePasswordDialog",
@@ -10,6 +10,8 @@ import { UserService } from "../../services/userService/userService";
 })
 export class ChangePasswordDialogComponent implements OnInit {
     public errors: string[];
+
+    public logins: IUserLogins;
 
     public currentPassword = "";
 
@@ -28,12 +30,24 @@ export class ChangePasswordDialogComponent implements OnInit {
     public ngOnInit(): void {
         this.authenticationService
             .userInfo()
-            .subscribe(userInfo => this.userName = userInfo.username);
+            .subscribe(userInfo => {
+                this.userName = userInfo.username;
+
+                this.userService
+                    .getLogins(this.userName)
+                    .then(logins => this.logins = logins)
+                    .catch(() => {
+                        this.errors = ["There was an unexpected error. Please try again in a bit."];
+                    });
+            });
     }
 
-    public changePassword(): void {
+    public submit(): void {
         this.errors = null;
-        this.userService.changePassword(this.userName, this.currentPassword, this.newPassword)
+        let passwordPromise = this.logins.hasPassword
+            ? this.userService.changePassword(this.userName, this.currentPassword, this.newPassword)
+            : this.userService.setPassword(this.userName, this.newPassword);
+        passwordPromise
             .then(() => {
                 this.activeModal.close();
             })

@@ -14,6 +14,10 @@ export interface ICreateUserRequest {
     password: string;
 }
 
+export interface ISetPasswordRequest {
+    newPassword: string;
+}
+
 export interface IChangePasswordRequest {
     currentPassword: string;
 
@@ -63,6 +67,11 @@ export interface IProgressData {
 
 export interface IFollowsData {
     follows: string[];
+}
+
+export interface IUserLogins {
+    hasPassword: boolean;
+    externalLogins: string[];
 }
 
 @Injectable()
@@ -140,6 +149,52 @@ export class UserService {
                 let errorMessage = error.message || error.toString();
                 this.appInsights.trackEvent("UserService.getFollows.error", { message: errorMessage });
                 return Promise.reject(errorMessage);
+            });
+    }
+
+    public getLogins(userName: string): Promise<IUserLogins> {
+        let headers = this.authenticationService.getAuthHeaders();
+        let options = new RequestOptions({ headers });
+        return this.http
+            .get(`/api/users/${userName}/logins`, options)
+            .toPromise()
+            .then(response => response.json() as IUserLogins)
+            .catch(error => {
+                let errorMessage = error.message || error.toString();
+                this.appInsights.trackEvent("UserService.getLogins.error", { message: errorMessage });
+                return Promise.reject(errorMessage);
+            });
+    }
+
+    public setPassword(userName: string, newPassword: string): Promise<void> {
+        let headers = this.authenticationService.getAuthHeaders();
+        headers.append("Content-Type", "application/json");
+        let options = new RequestOptions({ headers });
+        let body: ISetPasswordRequest = { newPassword };
+        return this.http
+            .post(`/api/users/${userName}/setpassword`, body, options)
+            .toPromise()
+            .then(() => void 0)
+            .catch(error => {
+                let errors: string[] = [];
+
+                let validationErrorResponse: IValidationErrorResponse;
+                try {
+                    validationErrorResponse = error.json();
+                } catch (error) {
+                    // It must not have been json
+                }
+
+                if (validationErrorResponse) {
+                    for (let field in validationErrorResponse) {
+                        errors.push(...validationErrorResponse[field]);
+                    }
+                } else {
+                    errors.push(error.message || error.toString());
+                }
+
+                this.appInsights.trackEvent("UserService.changePassword.error", { message: errors.join(";") });
+                return Promise.reject(errors);
             });
     }
 
