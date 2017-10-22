@@ -187,7 +187,7 @@ export class UploadComponent implements OnInit {
 
     public deleteUpload(closeModal: () => void): void {
         this.uploadService.delete(this.uploadId)
-            .then(() => this.router.navigate(["/dashboard"]))
+            .then(() => this.router.navigate([`/users/${this.userName}`]))
             .catch(() => this.handleError("There was a problem deleting that upload"))
             .then(closeModal);
     }

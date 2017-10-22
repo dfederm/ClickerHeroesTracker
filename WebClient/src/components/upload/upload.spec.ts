@@ -382,7 +382,7 @@ describe("UploadComponent", () => {
                         .then(() => {
                             fixture.detectChanges();
 
-                            expect(router.navigate).toHaveBeenCalledWith(["/dashboard"]);
+                            expect(router.navigate).toHaveBeenCalledWith([`/users/${upload.user.name}`]);
                             expect(closeModal).toHaveBeenCalled();
 
                             errorMessage = fixture.debugElement.query(By.css(".alert-danger"));

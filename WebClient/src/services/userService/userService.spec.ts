@@ -5,7 +5,7 @@ import { Response, ResponseOptions, RequestMethod } from "@angular/http";
 import { MockBackend, MockConnection } from "@angular/http/testing";
 import { AppInsightsService } from "@markpieszak/ng-application-insights";
 
-import { UserService, IProgressData, IFollowsData, IValidationErrorResponse } from "./userService";
+import { UserService, IProgressData, IFollowsData, IValidationErrorResponse, IUserLogins } from "./userService";
 import { AuthenticationService } from "../authenticationService/authenticationService";
 
 class MockError extends Response implements Error {
@@ -204,6 +204,110 @@ describe("UserService", () => {
 
             expect(follows).toBeUndefined();
             expect(error).toEqual("someError");
+            expect(appInsights.trackEvent).toHaveBeenCalled();
+        }));
+    });
+
+    describe("getLogins", () => {
+        it("should make the correct api call", fakeAsync(() => {
+            userService.getLogins(userName);
+
+            expect(lastConnection).toBeDefined("no http service connection made");
+            expect(lastConnection.request.method).toEqual(RequestMethod.Get, "method invalid");
+            expect(lastConnection.request.url).toEqual(`/api/users/${userName}/logins`, "url invalid");
+            expect(authenticationService.getAuthHeaders).toHaveBeenCalled();
+        }));
+
+        it("should return data", fakeAsync(() => {
+            let data: IUserLogins;
+            userService.getLogins(userName)
+                .then((d: IUserLogins) => data = d);
+
+            let expectedResponse: IUserLogins = {
+                hasPassword: true,
+                externalLogins: ["someExternalLogin0", "someExternalLogin1", "someExternalLogin2"],
+            };
+            lastConnection.mockRespond(new Response(new ResponseOptions({ body: JSON.stringify(expectedResponse) })));
+            tick();
+
+            expect(data).toEqual(expectedResponse, "should return the expected response");
+        }));
+
+        it("should handle http errors", fakeAsync(() => {
+            let follows: IUserLogins;
+            let error: string;
+            userService.getLogins(userName)
+                .then((r: IUserLogins) => follows = r)
+                .catch((e: string) => error = e);
+
+            lastConnection.mockError(new Error("someError"));
+            tick();
+
+            expect(follows).toBeUndefined();
+            expect(error).toEqual("someError");
+            expect(appInsights.trackEvent).toHaveBeenCalled();
+        }));
+    });
+
+    describe("setPassword", () => {
+        const newPassword = "someNewPassword";
+
+        it("should make the correct api call", fakeAsync(() => {
+            userService.setPassword(userName, newPassword);
+
+            expect(lastConnection).toBeDefined("no http service connection made");
+            expect(lastConnection.request.method).toEqual(RequestMethod.Post, "method invalid");
+            expect(lastConnection.request.url).toEqual(`/api/users/${userName}/setpassword`, "url invalid");
+            expect(lastConnection.request.json()).toEqual({ newPassword }, "request body invalid");
+        }));
+
+        it("should handle when the api returns a success response", fakeAsync(() => {
+            let succeeded = false;
+            let error: string;
+            userService.setPassword(userName, newPassword)
+                .then(() => succeeded = true)
+                .catch((e: string) => error = e);
+
+            lastConnection.mockRespond(new Response(new ResponseOptions()));
+            tick();
+
+            expect(succeeded).toEqual(true);
+            expect(error).toBeUndefined();
+            expect(appInsights.trackEvent).not.toHaveBeenCalled();
+        }));
+
+        it("should handle http errors", fakeAsync(() => {
+            let succeeded = false;
+            let error: string;
+            userService.setPassword(userName, newPassword)
+                .then(() => succeeded = true)
+                .catch((e: string) => error = e);
+
+            lastConnection.mockError(new Error("someError"));
+            tick();
+
+            expect(succeeded).toEqual(false);
+            expect(error).toEqual(["someError"]);
+            expect(appInsights.trackEvent).toHaveBeenCalled();
+        }));
+
+        it("should handle validation errors", fakeAsync(() => {
+            let succeeded = false;
+            let errors: string[];
+            userService.setPassword(userName, newPassword)
+                .then(() => succeeded = true)
+                .catch((e: string[]) => errors = e);
+
+            let validationError: IValidationErrorResponse = {
+                field0: ["error0_0", "error0_1", "error0_2"],
+                field1: ["error1_0", "error1_1", "error1_2"],
+                field2: ["error2_0", "error2_1", "error2_2"],
+            };
+            lastConnection.mockError(new MockError(new ResponseOptions({ body: validationError })));
+            tick();
+
+            expect(succeeded).toEqual(false);
+            expect(errors).toEqual(["error0_0", "error0_1", "error0_2", "error1_0", "error1_1", "error1_2", "error2_0", "error2_1", "error2_2"]);
             expect(appInsights.trackEvent).toHaveBeenCalled();
         }));
     });
