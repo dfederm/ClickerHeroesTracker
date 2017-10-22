@@ -6,6 +6,7 @@ namespace Website.Controllers.Api
 {
     using System;
     using System.Collections.Generic;
+    using System.Linq;
     using System.Text.RegularExpressions;
     using System.Threading.Tasks;
     using ClickerHeroesTrackerWebsite.Models;
@@ -285,6 +286,45 @@ namespace Website.Controllers.Api
             this.userSettingsProvider.Patch(userId, model);
 
             return this.Ok();
+        }
+
+        [Route("{userName}/logins")]
+        [HttpGet]
+        public async Task<IActionResult> GetLogins(string userName)
+        {
+            if (string.IsNullOrEmpty(userName))
+            {
+                return this.BadRequest();
+            }
+
+            var user = await this.userManager.FindByNameAsync(userName);
+            if (user == null)
+            {
+                return this.NotFound();
+            }
+
+            var userId = await this.userManager.GetUserIdAsync(user);
+            if (string.IsNullOrEmpty(userId))
+            {
+                return this.NotFound();
+            }
+
+            var currentUserId = this.userManager.GetUserId(this.User);
+            if (!userId.Equals(currentUserId, StringComparison.OrdinalIgnoreCase)
+                && !this.User.IsInRole("Admin"))
+            {
+                return this.Forbid();
+            }
+
+            var model = new UserLogins
+            {
+                HasPassword = await this.userManager.HasPasswordAsync(user),
+                ExternalLogins = (await this.userManager.GetLoginsAsync(user))
+                    .Select(loginInfo => loginInfo.LoginProvider)
+                    .ToList(),
+            };
+
+            return this.Ok(model);
         }
 
         [Route("{userName}/changepassword")]
