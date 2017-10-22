@@ -4,11 +4,4 @@
     ViewBag.Title = "What's New";
 }
 
-<div class="row">
-    <div class="col-md-6">
-        @await Html.PartialAsync("_Changelog", new ChangelogViewModel(true))
-    </div>
-    <div class="col-md-6">
-        @await Html.PartialAsync("_ComingSoon")
-    </div>
-</div>
+@await Html.PartialAsync("_Changelog", new ChangelogViewModel(true))
