@@ -5,6 +5,7 @@ import { UserService, IProgressData } from "../../services/userService/userServi
 import Decimal from "decimal.js";
 import { ChartDataSets, ChartOptions, ChartTooltipItem } from "chart.js";
 import { SettingsService, IUserSettings } from "../../services/settingsService/settingsService";
+import { ExponentialPipe } from "../../pipes/exponentialPipe";
 
 interface IChartViewModel {
     isProminent: boolean;
@@ -218,9 +219,7 @@ export class UserProgressComponent implements OnInit {
                             return new Date(tooltipItems[0].xLabel).toLocaleString();
                         },
                         label: (tooltipItem: ChartTooltipItem) => {
-                            return isLogarithmic
-                                ? Decimal.pow(10, tooltipItem.yLabel).toExponential(3)
-                                : Number(tooltipItem.yLabel).toExponential(3);
+                            return this.formatNumber(tooltipItem.yLabel, isLogarithmic);
                         },
                     },
                 },
@@ -241,9 +240,7 @@ export class UserProgressComponent implements OnInit {
                             type: "linear",
                             ticks: {
                                 callback: (value: number): string => {
-                                    return isLogarithmic
-                                        ? Decimal.pow(10, value).toExponential(3)
-                                        : value.toExponential(3);
+                                    return this.formatNumber(value, isLogarithmic);
                                 },
                             },
                         },
@@ -251,6 +248,13 @@ export class UserProgressComponent implements OnInit {
                 },
             },
         };
+    }
+
+    private formatNumber(value: string | number, isLogarithmic: boolean): string {
+        let num = isLogarithmic
+            ? Decimal.pow(10, value)
+            : Number(value);
+        return ExponentialPipe.formatNumber(num, this.settings);
     }
 
     private toTitleCase(srt: string): string {

@@ -242,7 +242,16 @@
     "use-output-property-decorator": true,
     "use-view-encapsulation": true,
     // tslint-microsoft-contrib rules: https://github.com/Microsoft/tslint-microsoft-contrib
-    "function-name": true,
+    "function-name": [
+      true,
+      {
+        "method-regex": "^[a-z][\\w\\d]+$",
+        "private-method-regex": "^[a-z][\\w\\d]+$",
+        "protected-method-regex": "^[a-z][\\w\\d]+$",
+        "static-method-regex": "^[a-z][\\w\\d]+$",
+        "function-regex": "^[a-z][\\w\\d]+$"
+      }
+    ],
     "no-banned-terms": true,
     "no-constant-condition": true,
     "no-control-regex": true,

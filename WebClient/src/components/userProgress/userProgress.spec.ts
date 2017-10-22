@@ -9,6 +9,7 @@ import { UserProgressComponent } from "./userProgress";
 import { UserService, IProgressData } from "../../services/userService/userService";
 import { ChartDataSets, ChartPoint, ChartOptions } from "chart.js";
 import { SettingsService, IUserSettings } from "../../services/settingsService/settingsService";
+import { ExponentialPipe } from "../../pipes/exponentialPipe";
 
 describe("UserProgressComponent", () => {
     let component: UserProgressComponent;
@@ -225,9 +226,10 @@ describe("UserProgressComponent", () => {
                                 : Number(rawExpectedValue);
                             expect(data[j].y).toEqual(expectedValue);
 
-                            let expectedLabel = isLogarithmic
-                                ? Decimal.pow(10, expectedValue).toExponential(3)
-                                : Number(expectedValue).toExponential(3);
+                            let expectedLabelNum = isLogarithmic
+                                ? Decimal.pow(10, expectedValue)
+                                : Number(expectedValue);
+                            let expectedLabel = ExponentialPipe.formatNumber(expectedLabelNum, settings);
                             expect((options.tooltips.callbacks.label as Function)({ yLabel: expectedValue })).toEqual(expectedLabel);
                             expect(options.scales.yAxes[0].ticks.callback(expectedValue, null, null)).toEqual(expectedLabel);
                         }
