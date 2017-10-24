@@ -13,7 +13,7 @@
         <div *ngIf="isInClan && !isClanInformationError"
              class="col-lg-6">
             <h3>{{ clanName }}</h3>
-            <table class="table table-responsive table-striped">
+            <table class="table table-sm table-striped">
                 <thead>
                     <tr>
                         <th>Name</th>
@@ -62,7 +62,7 @@
                 There was a problem getting your clan's data
             </p>
             <table *ngIf="!isLeaderboardError"
-                   class="table table-responsive table-striped">
+                   class="table table-sm table-striped">
                 <thead>
                     <tr>
                         <th>Rank</th>

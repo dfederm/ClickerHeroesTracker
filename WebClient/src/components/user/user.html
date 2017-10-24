@@ -45,7 +45,7 @@
                 You are currently not following any users. This feature is coming soon.
             </p>
             <table *ngIf="follows && follows.length"
-                   class="table">
+                   class="table table-sm table-striped">
                 <tbody>
                     <tr *ngFor="let follow of follows">
                         <td>{{ follow }}</td>

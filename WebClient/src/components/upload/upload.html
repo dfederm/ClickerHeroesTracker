@@ -113,9 +113,9 @@
                                [value]="'AvailableSouls'">
                         <span>Available Souls</span>
                         <span class="text-muted"
-                              data-toggle="tooltip"
-                              data-placement="bottom"
-                              title="This mode suggests what to buy based on the souls you currently have available">(?)</span>
+                              placement="right"
+                              container="body"
+                              ngbTooltip="This mode suggests what to buy based on the souls you currently have available">(?)</span>
                     </label>
                 </div>
                 <div class="form-check form-check-inline">
@@ -127,9 +127,9 @@
                                [value]="'RulesOfThumb'">
                         <span>Rules of Thumb</span>
                         <span class="text-muted"
-                              data-toggle="tooltip"
-                              data-placement="bottom"
-                              title="This shows the optimal levels based on your primary ancient's level. It does not take into account what you can afford currently">(?)</span>
+                              placement="right"
+                              container="body"
+                              ngbTooltip="This shows the optimal levels based on your primary ancient's level. It does not take into account what you can afford currently">(?)</span>
                     </label>
                 </div>
             </fieldset>
@@ -143,7 +143,7 @@
                     <span>Include souls from ascension (+{{ pendingSouls | exponential }})</span>
                 </label>
             </div>
-            <table class="table table-sm">
+            <table class="table table-sm table-striped">
                 <thead>
                     <tr>
                         <th>Ancient</th>
@@ -160,6 +160,7 @@
                                class="text-muted"
                                *ngIf="ancient.name == 'Solomon' && (!transcendentPower || transcendentPower.isZero())"
                                placement="right"
+                               container="body"
                                ngbTooltip="{{userInfo.isLoggedIn ? 'This is using your settings for the Solomon formula preference. You can change this on your settings page.' : 'By default we use the &quot;Ln&quot; Solomon formula. You may change this by logging in and changing your settings.'}}">
                                 (?)
                             </a>
@@ -168,7 +169,8 @@
                         <td class="text-right">
                             {{ ancient.ancientLevel | exponential }}
                             <span *ngIf="!ancient.itemLevel.isZero()"
-                                  placement="bottom"
+                                  placement="right"
+                                  container="body"
                                   ngbTooltip="Effective Level: {{ancient.effectiveLevel | exponential}}">
                                 (*)
                             </span>
@@ -178,16 +180,18 @@
                             {{ ancient.isBase ? "N/A" : ancient.suggestedLevel !== undefined ? (ancient.suggestedLevel | exponential) : "-" }}
                             <span *ngIf="ancient.isBase"
                                   class="text-muted"
-                                  placement="bottom"
+                                  placement="right"
+                                  container="body"
                                   ngbTooltip="The formulae are based on this ancient. If all suggestions are negative or zero, level this ancient.">
                                 (*)
                             </span>
                         </td>
                         <td class="text-right"
-                            [ngClass]="{'copiable' : ancient.diffCopyValue}"
+                            [ngClass]="{'copiable font-weight-bold' : ancient.diffCopyValue}"
                             ngxClipboard
                             [cbContent]="ancient.diffCopyValue"
                             placement="right"
+                            container="body"
                             ngbTooltip="{{ancient.diffValue !== undefined ? 'Click to copy to clipboard' : ''}}">
                             {{ ancient.diffValue !== undefined && !ancient.isBase ? (ancient.diffValue | exponential) : "-" }}
                         </td>
@@ -213,7 +217,7 @@
                 The simulation data is missing data for high level ancients. The suggestions below show the closest result that exists but
                 you may have some AS left over to spend based on your own judgement.
             </p>
-            <table class="table table-sm">
+            <table class="table table-sm table-striped">
                 <thead>
                     <tr>
                         <th>Outsider</th>
@@ -230,55 +234,55 @@
                 </tbody>
             </table>
             <h4>Miscellaneous stats:</h4>
-            <table class="table table-sm">
+            <table class="table table-sm table-striped">
                 <tbody>
                     <tr>
                         <td>Hero Souls Spent</td>
-                        <td>{{ heroSoulsSpent | exponential }}</td>
+                        <td class="text-right">{{ heroSoulsSpent | exponential }}</td>
                     </tr>
                     <tr>
                         <td>Hero Souls Sacrificed</td>
-                        <td>{{ heroSoulsSacrificed | exponential }}</td>
+                        <td class="text-right">{{ heroSoulsSacrificed | exponential }}</td>
                     </tr>
                     <tr>
                         <td>Ancient Souls Earned</td>
-                        <td>{{ totalAncientSouls | exponential }}</td>
+                        <td class="text-right">{{ totalAncientSouls | exponential }}</td>
                     </tr>
                     <tr>
                         <td>Transcendent Power</td>
-                        <td>{{ (transcendentPower ? transcendentPower.toNumber() : 0) | percent }}</td>
+                        <td class="text-right">{{ (transcendentPower ? transcendentPower.toNumber() : 0) | percent }}</td>
                     </tr>
                     <tr>
                         <td>Max Transcendent Primal Reward</td>
-                        <td>{{ maxTranscendentPrimalReward | exponential }}</td>
+                        <td class="text-right">{{ maxTranscendentPrimalReward | exponential }}</td>
                     </tr>
                     <tr>
                         <td>Transcendent Primal Cap Zone</td>
-                        <td>{{ bossLevelToTranscendentPrimalCap | exponential }}</td>
+                        <td class="text-right">{{ bossLevelToTranscendentPrimalCap | exponential }}</td>
                     </tr>
                     <tr>
                         <td>Titan Damage</td>
-                        <td>{{ titanDamage | exponential }}</td>
+                        <td class="text-right">{{ titanDamage | exponential }}</td>
                     </tr>
                     <tr>
                         <td>Highest Zone</td>
-                        <td>{{ highestZoneThisTranscension | exponential }}</td>
+                        <td class="text-right">{{ highestZoneThisTranscension | exponential }}</td>
                     </tr>
                     <tr>
                         <td>Highest Zone (Lifetime)</td>
-                        <td>{{ highestZoneLifetime | exponential }}</td>
+                        <td class="text-right">{{ highestZoneLifetime | exponential }}</td>
                     </tr>
                     <tr>
                         <td>Ascensions</td>
-                        <td>{{ ascensionsThisTranscension | exponential }}</td>
+                        <td class="text-right">{{ ascensionsThisTranscension | exponential }}</td>
                     </tr>
                     <tr>
                         <td>Ascensions (Lifetime)</td>
-                        <td>{{ ascensionsLifetime | exponential }}</td>
+                        <td class="text-right">{{ ascensionsLifetime | exponential }}</td>
                     </tr>
                     <tr>
                         <td>Rubies</td>
-                        <td>{{ rubies | exponential }}</td>
+                        <td class="text-right">{{ rubies | exponential }}</td>
                     </tr>
                 </tbody>
             </table>
