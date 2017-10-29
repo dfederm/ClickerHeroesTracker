@@ -6,6 +6,7 @@ namespace ClickerHeroesTrackerWebsite.Controllers.Api
 {
     using System;
     using System.Threading.Tasks;
+    using AspNet.Security.OAuth.Validation;
     using ClickerHeroesTrackerWebsite.Models.Api.SiteNews;
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Mvc;
@@ -52,7 +53,7 @@ namespace ClickerHeroesTrackerWebsite.Controllers.Api
         /// <returns>A status code representing the result</returns>
         [Route("")]
         [HttpPost]
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin", AuthenticationSchemes = OAuthValidationDefaults.AuthenticationScheme)]
         public async Task<IActionResult> Post(SiteNewsEntry entry)
         {
             if (entry == null
@@ -73,7 +74,7 @@ namespace ClickerHeroesTrackerWebsite.Controllers.Api
         /// <returns>A status code representing the result</returns>
         [Route("{date}")]
         [HttpDelete]
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin", AuthenticationSchemes = OAuthValidationDefaults.AuthenticationScheme)]
         public async Task Delete(DateTime date)
         {
             await this.siteNewsProvider.DeleteSiteNewsForDateAsync(date);

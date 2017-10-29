@@ -38,6 +38,13 @@
         </ul>
         <ul *ngIf="userInfo.isLoggedIn"
             class="navbar-nav">
+            <li *ngIf="userInfo.isAdmin"
+                class="nav-item">
+                <a class="nav-link"
+                   routerLink="/admin"
+                   routerLinkActive="active">Admin
+                </a>
+            </li>
             <li class="nav-item">
                 <a class="nav-link"
                    [openDialog]="SettingsDialogComponent">Settings</a>

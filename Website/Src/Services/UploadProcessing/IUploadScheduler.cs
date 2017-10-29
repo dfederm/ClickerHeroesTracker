@@ -6,6 +6,7 @@ namespace ClickerHeroesTrackerWebsite.Services.UploadProcessing
 {
     using System.Collections.Generic;
     using System.Threading.Tasks;
+    using Website.Services.UploadProcessing;
 
     /// <summary>
     /// Handles scheduling for upload processing
@@ -37,6 +38,6 @@ namespace ClickerHeroesTrackerWebsite.Services.UploadProcessing
         /// Retrieves queue names and number of items in them.
         /// </summary>
         /// <returns>Mapping of queue name and item count.</returns>
-        Task<IDictionary<string, int>> RetrieveQueueStatsAsync();
+        Task<IEnumerable<UploadQueueStats>> RetrieveQueueStatsAsync();
     }
 }

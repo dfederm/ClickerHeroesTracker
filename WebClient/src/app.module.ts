@@ -34,6 +34,7 @@ import { FeedbackDialogComponent } from "./components/feedbackDialog/feedbackDia
 import { ResetPasswordDialogComponent } from "./components/resetPasswordDialog/resetPasswordDialog";
 import { SettingsDialogComponent } from "./components/settingsDialog/settingsDialog";
 import { ChangePasswordDialogComponent } from "./components/changePasswordDialog/changePasswordDialog";
+import { AdminComponent } from "./components/admin/admin";
 
 import { OpenDialogDirective } from "./directives/openDialog/openDialog";
 
@@ -58,6 +59,7 @@ const routes: Routes =
     { path: "users/:userName/uploads", component: UserUploadsComponent },
     { path: "users/:userName/progress", component: UserProgressComponent },
     { path: "users/:userName/compare/:compareUserName", component: UserCompareComponent },
+    { path: "admin", component: AdminComponent },
   ];
 
 @NgModule({
@@ -103,6 +105,7 @@ const routes: Routes =
     ResetPasswordDialogComponent,
     SettingsDialogComponent,
     ChangePasswordDialogComponent,
+    AdminComponent,
   ],
   entryComponents:
   [
