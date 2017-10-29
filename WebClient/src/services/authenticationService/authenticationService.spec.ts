@@ -404,6 +404,7 @@ describe("AuthenticationService", () => {
             id: "someId",
             username: "someUsername",
             email: "someEmail",
+            isAdmin: false,
         };
     }
 
@@ -423,6 +424,7 @@ describe("AuthenticationService", () => {
             id: "someNewId" + (num === undefined ? "" : num.toString()),
             username: "someNewUsername" + (num === undefined ? "" : num.toString()),
             email: "someNewEmail" + (num === undefined ? "" : num.toString()),
+            isAdmin: false,
         };
     }
 

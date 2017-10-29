@@ -5,7 +5,9 @@
 namespace ClickerHeroesTrackerWebsite.Services.UploadProcessing
 {
     using System.Collections.Generic;
+    using System.Linq;
     using System.Threading.Tasks;
+    using Website.Services.UploadProcessing;
 
     /// <summary>
     /// Upload scheduler which does a no-op.
@@ -19,9 +21,9 @@ namespace ClickerHeroesTrackerWebsite.Services.UploadProcessing
         }
 
         /// <inheritdoc />
-        public Task<IDictionary<string, int>> RetrieveQueueStatsAsync()
+        public Task<IEnumerable<UploadQueueStats>> RetrieveQueueStatsAsync()
         {
-            return Task.FromResult((IDictionary<string, int>)new Dictionary<string, int>());
+            return Task.FromResult(Enumerable.Empty<UploadQueueStats>());
         }
 
         /// <inheritdoc />

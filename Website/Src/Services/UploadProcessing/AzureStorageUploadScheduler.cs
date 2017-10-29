@@ -11,6 +11,7 @@ namespace ClickerHeroesTrackerWebsite.Services.UploadProcessing
     using ClickerHeroesTrackerWebsite.Instrumentation;
     using Microsoft.WindowsAzure.Storage.Queue;
     using Newtonsoft.Json;
+    using Website.Services.UploadProcessing;
 
     /// <inheritdoc />
     public sealed class AzureStorageUploadScheduler : IUploadScheduler
@@ -64,14 +65,14 @@ namespace ClickerHeroesTrackerWebsite.Services.UploadProcessing
         }
 
         /// <inheritdoc />
-        public async Task<IDictionary<string, int>> RetrieveQueueStatsAsync()
+        public async Task<IEnumerable<UploadQueueStats>> RetrieveQueueStatsAsync()
         {
-            var queueStats = new Dictionary<string, int>();
+            var queueStats = new List<UploadQueueStats>(this.clients.Count);
             foreach (var queue in this.clients)
             {
                 await queue.Value.FetchAttributesAsync();
                 var numMessages = queue.Value.ApproximateMessageCount.GetValueOrDefault();
-                queueStats.Add(queue.Key.ToString(), numMessages);
+                queueStats.Add(new UploadQueueStats { Priority = queue.Key, NumMessages = numMessages });
             }
 
             return queueStats;

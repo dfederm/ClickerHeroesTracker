@@ -23,6 +23,7 @@ export interface IUserInfo {
     id?: string;
     username?: string;
     email?: string;
+    isAdmin?: boolean;
 }
 
 @Injectable()
@@ -145,6 +146,7 @@ export class AuthenticationService {
                 id: claims.sub,
                 username: claims.name,
                 email: claims.email,
+                isAdmin: claims.role === "Admin",
             };
         } else {
             return {
