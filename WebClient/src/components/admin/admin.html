@@ -8,6 +8,7 @@
                  class="alert alert-danger">
                 {{ recomputeError }}
             </div>
+            <ngx-loading [show]="(isLoadingQueues || isRecomputeLoading) && !recomputeError"></ngx-loading>
             <form (ngSubmit)="recompute()"
                   #recomputeForm="ngForm">
                 <div class="form-group">
@@ -44,6 +45,7 @@
                  class="alert alert-danger">
                 {{ clearQueueError }}
             </div>
+            <ngx-loading [show]="(isLoadingQueues || isClearQueueLoading) && !clearQueueError"></ngx-loading>
             <form (ngSubmit)="clearQueue()"
                   #clearQueueForm="ngForm">
                 <div class="form-group">
@@ -66,6 +68,7 @@
                  class="alert alert-danger">
                 {{ staleUploadError }}
             </div>
+            <ngx-loading [show]="isStaleUploadsLoading && !staleUploadError"></ngx-loading>
             <div *ngIf="staleUploadIds">
                 <p>{{ totalStaleUploads - deletedStaleUploads }} stale uploads</p>
                 <p>

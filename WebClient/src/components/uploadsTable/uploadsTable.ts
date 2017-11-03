@@ -14,6 +14,7 @@ interface IUploadViewModel {
 export class UploadsTableComponent implements OnInit {
     public uploads: IUploadViewModel[];
     public isError: boolean;
+    public isLoading: boolean;
     public totalUploads: number;
 
     @Input()
@@ -52,6 +53,7 @@ export class UploadsTableComponent implements OnInit {
 
     private populateUploads(): void {
         // TODO #175 - Pass the user name
+        this.isLoading = true;
         this.uploadService
             .getUploads(this.page, this.count)
             .then(response => this.handleData(response))
@@ -64,6 +66,7 @@ export class UploadsTableComponent implements OnInit {
             return;
         }
 
+        this.isLoading = false;
         this.uploads = [];
 
         let uploads = response.uploads;

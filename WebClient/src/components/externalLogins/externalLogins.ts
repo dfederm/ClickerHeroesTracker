@@ -32,6 +32,8 @@ export class ExternalLoginsComponent implements OnInit {
 
     public error: string;
 
+    public isLoading: boolean;
+
     public needUsername: boolean;
 
     public provider: string;
@@ -67,6 +69,7 @@ export class ExternalLoginsComponent implements OnInit {
 
     public ngOnInit(): void {
         if (this.isManageMode) {
+            this.isLoading = true;
             this.authenticationService
                 .userInfo()
                 .subscribe(userInfo => {
@@ -180,6 +183,7 @@ export class ExternalLoginsComponent implements OnInit {
     }
 
     public removeLogin(login: IExternalLogin): void {
+        this.isLoading = true;
         this.userService
             .removeLogin(this.username, login)
             .then(() => this.fetchLoginData())
@@ -193,8 +197,10 @@ export class ExternalLoginsComponent implements OnInit {
         this.grantType = grantType;
         this.assertion = assertion;
 
+        this.isLoading = true;
         return this.authenticationService.logInWithAssertion(grantType, assertion, this.isManageMode ? undefined : this.username)
             .then(() => {
+                this.isLoading = false;
                 if (this.isManageMode) {
                     return this.fetchLoginData();
                 } else {
@@ -220,9 +226,11 @@ export class ExternalLoginsComponent implements OnInit {
     }
 
     private fetchLoginData(): Promise<void> {
+        this.isLoading = true;
         return this.userService
             .getLogins(this.username)
             .then(logins => {
+                this.isLoading = false;
                 this.logins = logins;
 
                 let loginProviderNames: { [name: string]: boolean } = {};

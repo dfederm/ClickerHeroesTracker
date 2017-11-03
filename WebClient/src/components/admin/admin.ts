@@ -32,9 +32,13 @@ export interface IValidationErrorResponse {
 export class AdminComponent implements OnInit {
     public static numParallelDeletes = 10;
 
+    public isLoadingQueues: boolean;
+
     public queues: IUploadQueueStats[];
 
     public recomputeError: string;
+
+    public isRecomputeLoading: boolean;
 
     public recomputeUploadIds: string;
 
@@ -42,9 +46,13 @@ export class AdminComponent implements OnInit {
 
     public clearQueueError: string;
 
+    public isClearQueueLoading: boolean;
+
     public clearQueuePriority: string;
 
     public staleUploadError: string;
+
+    public isStaleUploadsLoading: boolean;
 
     public staleUploadIds: number[];
 
@@ -83,6 +91,7 @@ export class AdminComponent implements OnInit {
             uploadIds.push(uploadId);
         }
 
+        this.isRecomputeLoading = true;
         let headers = this.authenticationService.getAuthHeaders();
         headers.append("Content-Type", "application/json");
         let options = new RequestOptions({ headers });
@@ -93,7 +102,10 @@ export class AdminComponent implements OnInit {
         this.http
             .post("/api/admin/recompute", body, options)
             .toPromise()
-            .then(() => this.refreshQueueData())
+            .then(() => {
+                this.isRecomputeLoading = false;
+                this.refreshQueueData();
+            })
             .catch(error => {
                 let errors: string[] = [];
 
@@ -119,6 +131,7 @@ export class AdminComponent implements OnInit {
 
     public clearQueue(): void {
         this.clearQueueError = null;
+        this.isClearQueueLoading = true;
 
         let headers = this.authenticationService.getAuthHeaders();
         headers.append("Content-Type", "application/json");
@@ -129,7 +142,10 @@ export class AdminComponent implements OnInit {
         this.http
             .post("/api/admin/clearqueue", body, options)
             .toPromise()
-            .then(() => this.refreshQueueData())
+            .then(() => {
+                this.isClearQueueLoading = false;
+                this.refreshQueueData();
+            })
             .catch(error => {
                 let errors: string[] = [];
 
@@ -155,6 +171,7 @@ export class AdminComponent implements OnInit {
 
     public fetchStaleUploads(): void {
         this.staleUploadError = null;
+        this.isStaleUploadsLoading = true;
         this.staleUploadIds = [];
         this.deletedStaleUploads = 0;
         this.totalStaleUploads = 0;
@@ -164,6 +181,7 @@ export class AdminComponent implements OnInit {
         this.http.get("/api/admin/staleuploads", options)
             .toPromise()
             .then(response => {
+                this.isStaleUploadsLoading = false;
                 this.staleUploadIds = response.json();
                 this.totalStaleUploads = this.staleUploadIds.length;
             })
@@ -202,11 +220,13 @@ export class AdminComponent implements OnInit {
     }
 
     private refreshQueueData(): Promise<void> {
+        this.isLoadingQueues = true;
         let headers = this.authenticationService.getAuthHeaders();
         let options = new RequestOptions({ headers });
         return this.http.get("/api/admin/queues", options)
             .toPromise()
             .then(response => {
+                this.isLoadingQueues = false;
                 this.queues = response.json();
                 if (this.queues.length > 0) {
                     this.recomputePriority = this.queues[0].priority;

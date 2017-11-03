@@ -11,6 +11,7 @@
          class="alert alert-danger">
         {{ errorMessage }}
     </div>
+    <ngx-loading [show]="isLoading && !errorMessage"></ngx-loading>
     <form (ngSubmit)="submit()"
           #feedbackForm="ngForm">
         <div class="form-group"

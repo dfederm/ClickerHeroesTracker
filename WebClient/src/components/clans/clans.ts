@@ -9,7 +9,11 @@ import { ClanService, IGuildMember, IMessage, ILeaderboardClan, ILeaderboardSumm
 export class ClansComponent implements OnInit {
     public isClanInformationError = false;
 
+    public isClanInformationLoading: boolean;
+
     public isLeaderboardError = false;
+
+    public isLeaderboardLoading: boolean;
 
     public isMessageSendError = false;
 
@@ -68,6 +72,7 @@ export class ClansComponent implements OnInit {
 
     public sendMessage(): void {
         this.isMessageSendError = false;
+        this.isClanInformationLoading = true;
         this.clanService.sendMessage(this.newMessage, this.clanName)
             .then(() => {
                 this.newMessage = "";
@@ -79,8 +84,10 @@ export class ClansComponent implements OnInit {
     }
 
     private getClanInformation(): Promise<void> {
+        this.isClanInformationLoading = true;
         return this.clanService.getClan()
             .then(response => {
+                this.isClanInformationLoading = false;
                 if (response == null) {
                     return;
                 }
@@ -96,10 +103,12 @@ export class ClansComponent implements OnInit {
     }
 
     private getLeaderboard(): Promise<ILeaderboardSummaryListResponse> {
+        this.isLeaderboardLoading = true;
         return this.clanService.getLeaderboard(this.leaderboardPage, this.leaderboardCount);
     }
 
     private updateLeaderboard(response: ILeaderboardSummaryListResponse): void {
+        this.isLeaderboardLoading = false;
         if (!response || !response.leaderboardClans) {
             this.isLeaderboardError = true;
             return;

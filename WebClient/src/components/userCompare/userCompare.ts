@@ -27,6 +27,7 @@ interface IChartViewModel {
 })
 export class UserCompareComponent implements OnInit {
     public isError: boolean;
+    public isLoading: boolean;
     public userName: string;
     public compareUserName: string;
     public _currentDateRange: string;
@@ -109,6 +110,7 @@ export class UserCompareComponent implements OnInit {
                 break;
         }
 
+        this.isLoading = true;
         Promise.all([
             this.userService.getProgress(this.userName, start, end),
             this.userService.getProgress(this.compareUserName, start, end),
@@ -118,6 +120,7 @@ export class UserCompareComponent implements OnInit {
     }
 
     private handleData(progress1: IProgressData, progress2: IProgressData): void {
+        this.isLoading = false;
         if (!progress1 || !progress2) {
             this.charts = [];
             return;
@@ -226,6 +229,10 @@ export class UserCompareComponent implements OnInit {
                     ? value.log().toNumber()
                     : value.toNumber(),
             });
+        }
+
+        if (seriesData1.length === 0 && seriesData2.length === 0) {
+            return null;
         }
 
         return {

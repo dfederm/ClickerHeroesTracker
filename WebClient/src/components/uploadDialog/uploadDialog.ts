@@ -16,6 +16,8 @@ import { SettingsService, PlayStyle } from "../../services/settingsService/setti
 export class UploadDialogComponent implements OnInit {
     public errorMessage: string;
 
+    public isLoading: boolean;
+
     public userInfo: IUserInfo;
 
     public playStyles: PlayStyle[] = ["idle", "hybrid", "active"];
@@ -54,12 +56,14 @@ export class UploadDialogComponent implements OnInit {
             return;
         }
 
+        this.isLoading = true;
         this.uploadService.create(this.encodedSaveData, this.addToProgress, this.playStyle)
             .then(uploadId => {
                 return this.router.navigate(["/uploads", uploadId]);
             })
             .then(() => {
                 this.activeModal.close();
+                this.isLoading = false;
             })
             .catch((error: Response) => {
                 this.errorMessage = error.status >= 400 && error.status < 500

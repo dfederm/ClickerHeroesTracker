@@ -11,6 +11,8 @@ import { ChangePasswordDialogComponent } from "../changePasswordDialog/changePas
 export class SettingsDialogComponent implements OnInit {
     public error: string;
 
+    public isLoading: boolean;
+
     public settings: IUserSettings;
 
     public isSettingPending: { [setting: string]: boolean } = {};
@@ -27,9 +29,12 @@ export class SettingsDialogComponent implements OnInit {
     ) { }
 
     public ngOnInit(): void {
+        this.isLoading = true;
         this.settingsService
             .settings()
             .subscribe(settings => {
+                this.isLoading = false;
+
                 // Make a copy so the 2-way bindings don't mutate the actual settings object.
                 this.settings = JSON.parse(JSON.stringify(settings));
             });

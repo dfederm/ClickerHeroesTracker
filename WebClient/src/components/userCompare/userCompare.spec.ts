@@ -210,10 +210,10 @@ describe("UserCompareComponent", () => {
                 .then(() => {
                     fixture.detectChanges();
 
-                    let error = fixture.debugElement.query(By.css(".text-danger"));
+                    let error = fixture.debugElement.query(By.css(".alert-danger"));
                     expect(error).toBeNull();
 
-                    let warning = fixture.debugElement.query(By.css(".text-warning"));
+                    let warning = fixture.debugElement.query(By.css(".alert-warning"));
                     expect(warning).toBeNull();
 
                     let charts = fixture.debugElement.queryAll(By.css("canvas"));
@@ -304,10 +304,10 @@ describe("UserCompareComponent", () => {
                 .then(() => {
                     fixture.detectChanges();
 
-                    let error = fixture.debugElement.query(By.css(".text-danger"));
+                    let error = fixture.debugElement.query(By.css(".alert-danger"));
                     expect(error).not.toBeNull();
 
-                    let warning = fixture.debugElement.query(By.css(".text-warning"));
+                    let warning = fixture.debugElement.query(By.css(".alert-warning"));
                     expect(warning).toBeNull();
 
                     let charts = fixture.debugElement.queryAll(By.css("canvas"));
@@ -326,10 +326,10 @@ describe("UserCompareComponent", () => {
                 .then(() => {
                     fixture.detectChanges();
 
-                    let error = fixture.debugElement.query(By.css(".text-danger"));
+                    let error = fixture.debugElement.query(By.css(".alert-danger"));
                     expect(error).toBeNull();
 
-                    let warning = fixture.debugElement.query(By.css(".text-warning"));
+                    let warning = fixture.debugElement.query(By.css(".alert-warning"));
                     expect(warning).not.toBeNull();
 
                     let charts = fixture.debugElement.queryAll(By.css("canvas"));

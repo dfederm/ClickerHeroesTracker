@@ -11,6 +11,8 @@ import { FeedbackService } from "../../services/feedbackService/feedbackService"
 export class FeedbackDialogComponent implements OnInit {
     public errorMessage: string;
 
+    public isLoading: boolean;
+
     public userInfo: IUserInfo;
 
     public comments = "";
@@ -30,12 +32,14 @@ export class FeedbackDialogComponent implements OnInit {
     }
 
     public submit(): void {
+        this.isLoading = true;
         let email = this.userInfo.isLoggedIn
             ? this.userInfo.email
             : this.email;
 
         this.feedbackService.send(this.comments, email)
             .then(() => {
+                this.isLoading = false;
                 this.activeModal.close();
             })
             .catch(() => {

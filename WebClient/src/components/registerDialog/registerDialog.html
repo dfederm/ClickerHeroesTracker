@@ -13,6 +13,7 @@
             {{ error }}
         </div>
     </div>
+    <ngx-loading [show]="isLoading && !errors"></ngx-loading>
     <form (ngSubmit)="register()"
           #registerForm="ngForm">
         <div class="form-group"

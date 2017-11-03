@@ -11,6 +11,7 @@
          class="alert alert-danger">
         {{ error }}
     </div>
+    <ngx-loading [show]="isLoading && !error"></ngx-loading>
     <fieldset class="form-group">
         <div class="row">
             <div class="col-sm-8 col-form-label">

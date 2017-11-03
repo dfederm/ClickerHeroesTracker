@@ -312,7 +312,7 @@ describe("ClansComponent", () => {
                 let leaderboard = containers[1];
 
                 let error = leaderboard.query(By.css("p"));
-                expect(error.nativeElement.textContent.trim()).toEqual("There was a problem getting your clan's data");
+                expect(error.nativeElement.textContent.trim()).toEqual("There was a problem getting leaderboard data");
             })
             .then(done)
             .catch(done.fail);

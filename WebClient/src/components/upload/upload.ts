@@ -48,6 +48,7 @@ export class UploadComponent implements OnInit {
 
     public userInfo: IUserInfo;
     public errorMessage: string;
+    public isLoading: boolean;
 
     public userId: string;
     public userName: string;
@@ -168,7 +169,10 @@ export class UploadComponent implements OnInit {
             .subscribe(settings => this.handleSettings(settings));
 
         this.route.params
-            .switchMap((params: Params) => this.uploadService.get(+params.id))
+            .switchMap((params: Params) => {
+                this.isLoading = true;
+                return this.uploadService.get(+params.id);
+            })
             .subscribe(upload => this.handleUpload(upload), () => this.handleError("There was a problem getting that upload"));
     }
 
@@ -186,8 +190,12 @@ export class UploadComponent implements OnInit {
     }
 
     public deleteUpload(closeModal: () => void): void {
+        this.isLoading = true;
         this.uploadService.delete(this.uploadId)
-            .then(() => this.router.navigate([`/users/${this.userName}`]))
+            .then(() => {
+                this.isLoading = false;
+                this.router.navigate([`/users/${this.userName}`]);
+            })
             .catch(() => this.handleError("There was a problem deleting that upload"))
             .then(closeModal);
     }
@@ -204,6 +212,7 @@ export class UploadComponent implements OnInit {
     private handleUpload(upload: IUpload): void {
         this.upload = upload;
         this.refresh();
+        this.isLoading = false;
     }
 
     // tslint:disable-next-line:cyclomatic-complexity
@@ -275,6 +284,7 @@ export class UploadComponent implements OnInit {
     }
 
     private handleError(errorMessage: string): void {
+        this.isLoading = false;
         this.errorMessage = errorMessage;
     }
 

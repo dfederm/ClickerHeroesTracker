@@ -12,6 +12,8 @@ import { ResetPasswordDialogComponent } from "../resetPasswordDialog/resetPasswo
 export class LogInDialogComponent {
     public error: string;
 
+    public isLoading: boolean;
+
     public username = "";
 
     public password = "";
@@ -27,8 +29,10 @@ export class LogInDialogComponent {
 
     public logIn(): void {
         this.error = null;
+        this.isLoading = true;
         this.authenticationService.logInWithPassword(this.username, this.password)
             .then(() => {
+                this.isLoading = false;
                 this.activeModal.close();
             })
             .catch(() => {
