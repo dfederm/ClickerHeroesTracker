@@ -320,11 +320,58 @@ namespace Website.Controllers.Api
             {
                 HasPassword = await this.userManager.HasPasswordAsync(user),
                 ExternalLogins = (await this.userManager.GetLoginsAsync(user))
-                    .Select(loginInfo => loginInfo.LoginProvider)
+                    .Select(loginInfo => new ExternalLogin { ProviderName = loginInfo.LoginProvider, ExternalUserId = loginInfo.ProviderKey })
                     .ToList(),
             };
 
             return this.Ok(model);
+        }
+
+        [Route("{userName}/logins")]
+        [HttpDelete]
+        public async Task<IActionResult> RemoveLogin(string userName, [FromBody] ExternalLogin model)
+        {
+            if (string.IsNullOrEmpty(userName))
+            {
+                return this.BadRequest();
+            }
+
+            if (!this.ModelState.IsValid)
+            {
+                return this.BadRequest(this.ModelState);
+            }
+
+            var user = await this.userManager.FindByNameAsync(userName);
+            if (user == null)
+            {
+                return this.NotFound();
+            }
+
+            var userId = await this.userManager.GetUserIdAsync(user);
+            if (string.IsNullOrEmpty(userId))
+            {
+                return this.NotFound();
+            }
+
+            var currentUserId = this.userManager.GetUserId(this.User);
+            if (!userId.Equals(currentUserId, StringComparison.OrdinalIgnoreCase)
+                && !this.User.IsInRole("Admin"))
+            {
+                return this.Forbid();
+            }
+
+            var result = await this.userManager.RemoveLoginAsync(user, model.ProviderName, model.ExternalUserId);
+            if (!result.Succeeded)
+            {
+                foreach (var error in result.Errors)
+                {
+                    this.ModelState.AddModelError(string.Empty, error.Description);
+                }
+
+                return this.BadRequest(this.ModelState);
+            }
+
+            return this.Ok();
         }
 
         [Route("{userName}/setpassword")]

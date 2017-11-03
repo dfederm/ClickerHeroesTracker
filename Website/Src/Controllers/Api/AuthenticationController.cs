@@ -13,6 +13,7 @@ namespace ClickerHeroesTrackerWebsite.Controllers.Api
     using AspNet.Security.OpenIdConnect.Server;
     using ClickerHeroesTrackerWebsite.Models;
     using Microsoft.AspNetCore.Authentication;
+    using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Identity;
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.Extensions.Options;
@@ -50,6 +51,8 @@ namespace ClickerHeroesTrackerWebsite.Controllers.Api
 
         [HttpPost("token")]
         [Produces("application/json")]
+        [Authorize] // Authorize + AllowAnonymous to basically force authentication to work without requiring it. There's probably a better way for this to work...
+        [AllowAnonymous]
         public async Task<IActionResult> Exchange(OpenIdConnectRequest request)
         {
             if (request.IsPasswordGrantType())
@@ -139,15 +142,7 @@ namespace ClickerHeroesTrackerWebsite.Controllers.Api
                 var user = await this.userManager.FindByLoginAsync(assertionGrantHandler.Name, validationResult.ExternalUserId);
                 if (user == null)
                 {
-                    if (string.IsNullOrEmpty(request.Username))
-                    {
-                        // If the user does not have an account, then ask the user to create an account.
-                        return this.BadRequest(new OpenIdConnectResponse
-                        {
-                            Error = OpenIdConnectConstants.Errors.AccountSelectionRequired,
-                        });
-                    }
-                    else
+                    if (!string.IsNullOrEmpty(request.Username))
                     {
                         // They provided a user name, so try to implicitly create an account for them
                         user = new ApplicationUser { UserName = request.Username, Email = validationResult.ExternalUserEmail };
@@ -160,7 +155,17 @@ namespace ClickerHeroesTrackerWebsite.Controllers.Api
                                 ErrorDescription = string.Join(" ", creationResult.Errors.Select(error => error.Description)),
                             });
                         }
+                    }
 
+                    if (user == null)
+                    {
+                        // If the user is already logged in, use the current user
+                        user = await this.userManager.GetUserAsync(this.User);
+                    }
+
+                    // Add the login if we found a user
+                    if (user != null)
+                    {
                         var login = new UserLoginInfo(assertionGrantHandler.Name, validationResult.ExternalUserId, assertionGrantHandler.Name);
                         var addLoginResult = await this.userManager.AddLoginAsync(user, login);
                         if (!addLoginResult.Succeeded)
@@ -168,9 +173,17 @@ namespace ClickerHeroesTrackerWebsite.Controllers.Api
                             return this.BadRequest(new OpenIdConnectResponse
                             {
                                 Error = OpenIdConnectConstants.Errors.InvalidGrant,
-                                ErrorDescription = string.Join(" ", creationResult.Errors.Select(error => error.Description)),
+                                ErrorDescription = string.Join(" ", addLoginResult.Errors.Select(error => error.Description)),
                             });
                         }
+                    }
+                    else
+                    {
+                        // Ask the user to create an account.
+                        return this.BadRequest(new OpenIdConnectResponse
+                        {
+                            Error = OpenIdConnectConstants.Errors.AccountSelectionRequired,
+                        });
                     }
                 }
 

@@ -71,7 +71,12 @@ export interface IFollowsData {
 
 export interface IUserLogins {
     hasPassword: boolean;
-    externalLogins: string[];
+    externalLogins: IExternalLogin[];
+}
+
+export interface IExternalLogin {
+    providerName: string;
+    externalUserId: string;
 }
 
 @Injectable()
@@ -162,6 +167,20 @@ export class UserService {
             .catch(error => {
                 let errorMessage = error.message || error.toString();
                 this.appInsights.trackEvent("UserService.getLogins.error", { message: errorMessage });
+                return Promise.reject(errorMessage);
+            });
+    }
+
+    public removeLogin(userName: string, externalLogin: IExternalLogin): Promise<void> {
+        let headers = this.authenticationService.getAuthHeaders();
+        let options = new RequestOptions({ headers, body: externalLogin });
+        return this.http
+            .delete(`/api/users/${userName}/logins`, options)
+            .toPromise()
+            .then(() => void 0)
+            .catch(error => {
+                let errorMessage = error.message || error.toString();
+                this.appInsights.trackEvent("UserService.removeLogin.error", { message: errorMessage });
                 return Promise.reject(errorMessage);
             });
     }

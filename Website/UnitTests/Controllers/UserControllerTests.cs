@@ -728,10 +728,15 @@ namespace UnitTests.Controllers
                 .Setup(_ => _.HasPasswordAsync(mockUser))
                 .Returns(Task.FromResult(true));
 
-            var logins = new[] { "SomeLogin0", "SomeLogin1", "SomeLogin2" };
+            var logins = new List<ExternalLogin>
+            {
+                new ExternalLogin { ProviderName = "SomeProvider0", ExternalUserId = "SomeExternalUserId0" },
+                new ExternalLogin { ProviderName = "SomeProvider1", ExternalUserId = "SomeExternalUserId1" },
+                new ExternalLogin { ProviderName = "SomeProvider2", ExternalUserId = "SomeExternalUserId2" },
+            };
             mockUserManager
                 .Setup(_ => _.GetLoginsAsync(mockUser))
-                .Returns(Task.FromResult<IList<UserLoginInfo>>(logins.Select(login => new UserLoginInfo(login, "SomeProviderKey", "SomeDisplayName")).ToList()));
+                .Returns(Task.FromResult<IList<UserLoginInfo>>(logins.Select(login => new UserLoginInfo(login.ProviderName, login.ExternalUserId, login.ProviderName)).ToList()));
 
             var mockHttpContext = new Mock<HttpContext>(MockBehavior.Strict);
             mockHttpContext.SetupGet(_ => _.User).Returns(mockCurrentUser.Object).Verifiable();
@@ -754,7 +759,13 @@ namespace UnitTests.Controllers
 
             var model = ((OkObjectResult)result).Value as UserLogins;
             Assert.True(model.HasPassword);
-            Assert.Equal(logins, model.ExternalLogins);
+
+            Assert.Equal(logins.Count, model.ExternalLogins.Count);
+            for (var i = 0; i < model.ExternalLogins.Count; i++)
+            {
+                Assert.Equal(logins[i].ProviderName, model.ExternalLogins[i].ProviderName);
+                Assert.Equal(logins[i].ExternalUserId, model.ExternalLogins[i].ExternalUserId);
+            }
 
             mockDatabaseCommandFactory.VerifyAll();
             mockUserSettingsProvider.VerifyAll();
@@ -967,10 +978,15 @@ namespace UnitTests.Controllers
                 .Setup(_ => _.HasPasswordAsync(mockUser))
                 .Returns(Task.FromResult(true));
 
-            var logins = new[] { "SomeLogin0", "SomeLogin1", "SomeLogin2" };
+            var logins = new List<ExternalLogin>
+            {
+                new ExternalLogin { ProviderName = "SomeProvider0", ExternalUserId = "SomeExternalUserId0" },
+                new ExternalLogin { ProviderName = "SomeProvider1", ExternalUserId = "SomeExternalUserId1" },
+                new ExternalLogin { ProviderName = "SomeProvider2", ExternalUserId = "SomeExternalUserId2" },
+            };
             mockUserManager
                 .Setup(_ => _.GetLoginsAsync(mockUser))
-                .Returns(Task.FromResult<IList<UserLoginInfo>>(logins.Select(login => new UserLoginInfo(login, "SomeProviderKey", "SomeDisplayName")).ToList()));
+                .Returns(Task.FromResult<IList<UserLoginInfo>>(logins.Select(login => new UserLoginInfo(login.ProviderName, login.ExternalUserId, login.ProviderName)).ToList()));
 
             var mockHttpContext = new Mock<HttpContext>(MockBehavior.Strict);
             mockHttpContext.SetupGet(_ => _.User).Returns(mockCurrentUser.Object).Verifiable();
@@ -993,7 +1009,448 @@ namespace UnitTests.Controllers
 
             var model = ((OkObjectResult)result).Value as UserLogins;
             Assert.True(model.HasPassword);
-            Assert.Equal(logins, model.ExternalLogins);
+
+            Assert.Equal(logins.Count, model.ExternalLogins.Count);
+            for (var i = 0; i < model.ExternalLogins.Count; i++)
+            {
+                Assert.Equal(logins[i].ProviderName, model.ExternalLogins[i].ProviderName);
+                Assert.Equal(logins[i].ExternalUserId, model.ExternalLogins[i].ExternalUserId);
+            }
+
+            mockDatabaseCommandFactory.VerifyAll();
+            mockUserSettingsProvider.VerifyAll();
+            mockCurrentUser.VerifyAll();
+            mockHttpContext.VerifyAll();
+            mockEmailSender.VerifyAll();
+
+            // Workaround for a Moq bug. See: https://github.com/moq/moq4/issues/456#issuecomment-331692858
+            mockUserManager.Object.Logger = mockUserManager.Object.Logger;
+            mockUserManager.VerifyAll();
+        }
+
+        [Fact]
+        public async Task RemoveLogin_Success()
+        {
+            const string UserName = "SomeUserName";
+            const string UserId = "SomeUserId";
+            const string Provider = "SomeProvider";
+            const string ExternalUserId = "SomeExternalUserId";
+
+            var model = new ExternalLogin
+            {
+                ProviderName = Provider,
+                ExternalUserId = ExternalUserId,
+            };
+
+            var gameData = MockGameData.RealData;
+            var telemetryClient = new TelemetryClient();
+            var mockDatabaseCommandFactory = new Mock<IDatabaseCommandFactory>(MockBehavior.Strict);
+            var mockUserSettingsProvider = new Mock<IUserSettingsProvider>(MockBehavior.Strict);
+            var mockUser = new ApplicationUser();
+            var mockCurrentUser = new Mock<ClaimsPrincipal>(MockBehavior.Strict);
+            var mockUserManager = MockUserManager.CreateMock();
+            mockUserManager
+                .Setup(_ => _.FindByNameAsync(UserName))
+                .Returns(Task.FromResult(mockUser));
+            mockUserManager
+                .Setup(_ => _.GetUserIdAsync(mockUser))
+                .Returns(Task.FromResult(UserId));
+            mockUserManager
+                .Setup(_ => _.GetUserId(mockCurrentUser.Object))
+                .Returns(UserId);
+            mockUserManager
+                .Setup(_ => _.RemoveLoginAsync(mockUser, Provider, ExternalUserId))
+                .Returns(Task.FromResult(IdentityResult.Success));
+
+            var mockHttpContext = new Mock<HttpContext>(MockBehavior.Strict);
+            mockHttpContext.SetupGet(_ => _.User).Returns(mockCurrentUser.Object).Verifiable();
+
+            var mockEmailSender = new Mock<IEmailSender>(MockBehavior.Strict);
+
+            var controller = new UserController(
+                gameData,
+                telemetryClient,
+                mockDatabaseCommandFactory.Object,
+                mockUserSettingsProvider.Object,
+                mockUserManager.Object,
+                mockEmailSender.Object);
+            controller.ControllerContext = new ControllerContext { HttpContext = mockHttpContext.Object };
+
+            var result = await controller.RemoveLogin(UserName, model);
+
+            Assert.NotNull(result);
+            Assert.IsType<OkResult>(result);
+
+            mockDatabaseCommandFactory.VerifyAll();
+            mockUserSettingsProvider.VerifyAll();
+            mockCurrentUser.VerifyAll();
+            mockHttpContext.VerifyAll();
+            mockEmailSender.VerifyAll();
+
+            // Workaround for a Moq bug. See: https://github.com/moq/moq4/issues/456#issuecomment-331692858
+            mockUserManager.Object.Logger = mockUserManager.Object.Logger;
+            mockUserManager.VerifyAll();
+        }
+
+        [Fact]
+        public async Task RemoveLogin_MissingUserName()
+        {
+            const string Provider = "SomeProvider";
+            const string ExternalUserId = "SomeExternalUserId";
+
+            var model = new ExternalLogin
+            {
+                ProviderName = Provider,
+                ExternalUserId = ExternalUserId,
+            };
+
+            var gameData = MockGameData.RealData;
+            var telemetryClient = new TelemetryClient();
+            var mockDatabaseCommandFactory = new Mock<IDatabaseCommandFactory>(MockBehavior.Strict);
+            var mockUserSettingsProvider = new Mock<IUserSettingsProvider>(MockBehavior.Strict);
+            var mockUserManager = MockUserManager.CreateMock();
+            var mockEmailSender = new Mock<IEmailSender>(MockBehavior.Strict);
+
+            var controller = new UserController(
+                gameData,
+                telemetryClient,
+                mockDatabaseCommandFactory.Object,
+                mockUserSettingsProvider.Object,
+                mockUserManager.Object,
+                mockEmailSender.Object);
+
+            var result = await controller.RemoveLogin(null, model);
+
+            Assert.NotNull(result);
+            Assert.IsType<BadRequestResult>(result);
+
+            mockDatabaseCommandFactory.VerifyAll();
+            mockUserSettingsProvider.VerifyAll();
+            mockEmailSender.VerifyAll();
+
+            // Workaround for a Moq bug. See: https://github.com/moq/moq4/issues/456#issuecomment-331692858
+            mockUserManager.Object.Logger = mockUserManager.Object.Logger;
+            mockUserManager.VerifyAll();
+        }
+
+        [Fact]
+        public async Task RemoveLogin_InvalidModelState()
+        {
+            const string UserName = "SomeUserName";
+
+            var model = new ExternalLogin();
+            var gameData = MockGameData.RealData;
+            var telemetryClient = new TelemetryClient();
+            var mockDatabaseCommandFactory = new Mock<IDatabaseCommandFactory>(MockBehavior.Strict);
+            var mockUserSettingsProvider = new Mock<IUserSettingsProvider>(MockBehavior.Strict);
+            var mockUserManager = MockUserManager.CreateMock();
+            var mockEmailSender = new Mock<IEmailSender>(MockBehavior.Strict);
+
+            var controller = new UserController(
+                gameData,
+                telemetryClient,
+                mockDatabaseCommandFactory.Object,
+                mockUserSettingsProvider.Object,
+                mockUserManager.Object,
+                mockEmailSender.Object);
+            controller.ModelState.AddModelError("SomeKey", "SomeErrorMessage");
+            var result = await controller.RemoveLogin(UserName, model);
+
+            Assert.NotNull(result);
+            Assert.IsType<BadRequestObjectResult>(result);
+
+            mockDatabaseCommandFactory.VerifyAll();
+            mockUserSettingsProvider.VerifyAll();
+
+            // Workaround for a Moq bug. See: https://github.com/moq/moq4/issues/456#issuecomment-331692858
+            mockUserManager.Object.Logger = mockUserManager.Object.Logger;
+            mockUserManager.VerifyAll();
+        }
+
+        [Fact]
+        public async Task RemoveLogin_NotFoundUser()
+        {
+            const string UserName = "SomeUserName";
+            const string Provider = "SomeProvider";
+            const string ExternalUserId = "SomeExternalUserId";
+
+            var model = new ExternalLogin
+            {
+                ProviderName = Provider,
+                ExternalUserId = ExternalUserId,
+            };
+
+            var gameData = MockGameData.RealData;
+            var telemetryClient = new TelemetryClient();
+            var mockDatabaseCommandFactory = new Mock<IDatabaseCommandFactory>(MockBehavior.Strict);
+            var mockUserSettingsProvider = new Mock<IUserSettingsProvider>(MockBehavior.Strict);
+            var mockUser = new ApplicationUser();
+            var mockUserManager = MockUserManager.CreateMock();
+            mockUserManager
+                .Setup(_ => _.FindByNameAsync(UserName))
+                .Returns(Task.FromResult<ApplicationUser>(null));
+
+            var mockEmailSender = new Mock<IEmailSender>(MockBehavior.Strict);
+
+            var controller = new UserController(
+                gameData,
+                telemetryClient,
+                mockDatabaseCommandFactory.Object,
+                mockUserSettingsProvider.Object,
+                mockUserManager.Object,
+                mockEmailSender.Object);
+
+            var result = await controller.RemoveLogin(UserName, model);
+
+            Assert.NotNull(result);
+            Assert.IsType<NotFoundResult>(result);
+
+            mockDatabaseCommandFactory.VerifyAll();
+            mockUserSettingsProvider.VerifyAll();
+            mockEmailSender.VerifyAll();
+
+            // Workaround for a Moq bug. See: https://github.com/moq/moq4/issues/456#issuecomment-331692858
+            mockUserManager.Object.Logger = mockUserManager.Object.Logger;
+            mockUserManager.VerifyAll();
+        }
+
+        [Fact]
+        public async Task RemoveLogin_NotFoundUserId()
+        {
+            const string UserName = "SomeUserName";
+            const string Provider = "SomeProvider";
+            const string ExternalUserId = "SomeExternalUserId";
+
+            var model = new ExternalLogin
+            {
+                ProviderName = Provider,
+                ExternalUserId = ExternalUserId,
+            };
+
+            var gameData = MockGameData.RealData;
+            var telemetryClient = new TelemetryClient();
+            var mockDatabaseCommandFactory = new Mock<IDatabaseCommandFactory>(MockBehavior.Strict);
+            var mockUserSettingsProvider = new Mock<IUserSettingsProvider>(MockBehavior.Strict);
+
+            var mockUser = new ApplicationUser();
+            var mockUserManager = MockUserManager.CreateMock();
+            mockUserManager
+                .Setup(_ => _.FindByNameAsync(UserName))
+                .Returns(Task.FromResult(mockUser));
+            mockUserManager
+                .Setup(_ => _.GetUserIdAsync(mockUser))
+                .Returns(Task.FromResult<string>(null));
+
+            var mockEmailSender = new Mock<IEmailSender>(MockBehavior.Strict);
+
+            var controller = new UserController(
+                gameData,
+                telemetryClient,
+                mockDatabaseCommandFactory.Object,
+                mockUserSettingsProvider.Object,
+                mockUserManager.Object,
+                mockEmailSender.Object);
+
+            var result = await controller.RemoveLogin(UserName, model);
+
+            Assert.NotNull(result);
+            Assert.IsType<NotFoundResult>(result);
+
+            mockDatabaseCommandFactory.VerifyAll();
+            mockUserSettingsProvider.VerifyAll();
+            mockEmailSender.VerifyAll();
+
+            // Workaround for a Moq bug. See: https://github.com/moq/moq4/issues/456#issuecomment-331692858
+            mockUserManager.Object.Logger = mockUserManager.Object.Logger;
+            mockUserManager.VerifyAll();
+        }
+
+        [Fact]
+        public async Task RemoveLogin_NotAllowed()
+        {
+            const string UserName = "SomeUserName";
+            const string UserId = "SomeUserId";
+            const string Provider = "SomeProvider";
+            const string ExternalUserId = "SomeExternalUserId";
+
+            var model = new ExternalLogin
+            {
+                ProviderName = Provider,
+                ExternalUserId = ExternalUserId,
+            };
+
+            var gameData = MockGameData.RealData;
+            var telemetryClient = new TelemetryClient();
+            var mockDatabaseCommandFactory = new Mock<IDatabaseCommandFactory>(MockBehavior.Strict);
+            var mockUserSettingsProvider = new Mock<IUserSettingsProvider>(MockBehavior.Strict);
+
+            var mockUser = new ApplicationUser();
+            var mockCurrentUser = new Mock<ClaimsPrincipal>(MockBehavior.Strict);
+            mockCurrentUser
+                .Setup(_ => _.IsInRole("Admin"))
+                .Returns(false);
+            var mockUserManager = MockUserManager.CreateMock();
+            mockUserManager
+                .Setup(_ => _.FindByNameAsync(UserName))
+                .Returns(Task.FromResult(mockUser));
+            mockUserManager
+                .Setup(_ => _.GetUserIdAsync(mockUser))
+                .Returns(Task.FromResult(UserId));
+            mockUserManager
+                .Setup(_ => _.GetUserId(mockCurrentUser.Object))
+                .Returns("SomeOtherUserId");
+
+            var mockHttpContext = new Mock<HttpContext>(MockBehavior.Strict);
+            mockHttpContext.SetupGet(_ => _.User).Returns(mockCurrentUser.Object).Verifiable();
+
+            var mockEmailSender = new Mock<IEmailSender>(MockBehavior.Strict);
+
+            var controller = new UserController(
+                gameData,
+                telemetryClient,
+                mockDatabaseCommandFactory.Object,
+                mockUserSettingsProvider.Object,
+                mockUserManager.Object,
+                mockEmailSender.Object);
+            controller.ControllerContext = new ControllerContext { HttpContext = mockHttpContext.Object };
+
+            var result = await controller.RemoveLogin(UserName, model);
+
+            Assert.NotNull(result);
+            Assert.IsType<ForbidResult>(result);
+
+            mockDatabaseCommandFactory.VerifyAll();
+            mockUserSettingsProvider.VerifyAll();
+            mockCurrentUser.VerifyAll();
+            mockHttpContext.VerifyAll();
+            mockEmailSender.VerifyAll();
+
+            // Workaround for a Moq bug. See: https://github.com/moq/moq4/issues/456#issuecomment-331692858
+            mockUserManager.Object.Logger = mockUserManager.Object.Logger;
+            mockUserManager.VerifyAll();
+        }
+
+        [Fact]
+        public async Task RemoveLogin_AdminIsAlwaysAllowed()
+        {
+            const string UserName = "SomeUserName";
+            const string UserId = "SomeUserId";
+            const string Provider = "SomeProvider";
+            const string ExternalUserId = "SomeExternalUserId";
+
+            var model = new ExternalLogin
+            {
+                ProviderName = Provider,
+                ExternalUserId = ExternalUserId,
+            };
+
+            var gameData = MockGameData.RealData;
+            var telemetryClient = new TelemetryClient();
+            var mockDatabaseCommandFactory = new Mock<IDatabaseCommandFactory>(MockBehavior.Strict);
+            var mockUserSettingsProvider = new Mock<IUserSettingsProvider>(MockBehavior.Strict);
+
+            var mockUser = new ApplicationUser();
+            var mockCurrentUser = new Mock<ClaimsPrincipal>(MockBehavior.Strict);
+            mockCurrentUser
+                .Setup(_ => _.IsInRole("Admin"))
+                .Returns(true);
+            var mockUserManager = MockUserManager.CreateMock();
+            mockUserManager
+                .Setup(_ => _.FindByNameAsync(UserName))
+                .Returns(Task.FromResult(mockUser));
+            mockUserManager
+                .Setup(_ => _.GetUserIdAsync(mockUser))
+                .Returns(Task.FromResult(UserId));
+            mockUserManager
+                .Setup(_ => _.GetUserId(mockCurrentUser.Object))
+                .Returns("SomeOtherUserId");
+            mockUserManager
+                .Setup(_ => _.RemoveLoginAsync(mockUser, Provider, ExternalUserId))
+                .Returns(Task.FromResult(IdentityResult.Success));
+
+            var mockHttpContext = new Mock<HttpContext>(MockBehavior.Strict);
+            mockHttpContext.SetupGet(_ => _.User).Returns(mockCurrentUser.Object).Verifiable();
+
+            var mockEmailSender = new Mock<IEmailSender>(MockBehavior.Strict);
+
+            var controller = new UserController(
+                gameData,
+                telemetryClient,
+                mockDatabaseCommandFactory.Object,
+                mockUserSettingsProvider.Object,
+                mockUserManager.Object,
+                mockEmailSender.Object);
+            controller.ControllerContext = new ControllerContext { HttpContext = mockHttpContext.Object };
+
+            var result = await controller.RemoveLogin(UserName, model);
+
+            Assert.NotNull(result);
+            Assert.IsType<OkResult>(result);
+
+            mockDatabaseCommandFactory.VerifyAll();
+            mockUserSettingsProvider.VerifyAll();
+            mockCurrentUser.VerifyAll();
+            mockHttpContext.VerifyAll();
+            mockEmailSender.VerifyAll();
+
+            // Workaround for a Moq bug. See: https://github.com/moq/moq4/issues/456#issuecomment-331692858
+            mockUserManager.Object.Logger = mockUserManager.Object.Logger;
+            mockUserManager.VerifyAll();
+        }
+
+        [Fact]
+        public async Task RemoveLogin_RemoveLoginFails()
+        {
+            const string UserName = "SomeUserName";
+            const string UserId = "SomeUserId";
+            const string Provider = "SomeProvider";
+            const string ExternalUserId = "SomeExternalUserId";
+
+            var model = new ExternalLogin
+            {
+                ProviderName = Provider,
+                ExternalUserId = ExternalUserId,
+            };
+
+            var gameData = MockGameData.RealData;
+            var telemetryClient = new TelemetryClient();
+            var mockDatabaseCommandFactory = new Mock<IDatabaseCommandFactory>(MockBehavior.Strict);
+            var mockUserSettingsProvider = new Mock<IUserSettingsProvider>(MockBehavior.Strict);
+            var mockUser = new ApplicationUser();
+            var mockCurrentUser = new Mock<ClaimsPrincipal>(MockBehavior.Strict);
+            var mockUserManager = MockUserManager.CreateMock();
+            mockUserManager
+                .Setup(_ => _.FindByNameAsync(UserName))
+                .Returns(Task.FromResult(mockUser));
+            mockUserManager
+                .Setup(_ => _.GetUserIdAsync(mockUser))
+                .Returns(Task.FromResult(UserId));
+            mockUserManager
+                .Setup(_ => _.GetUserId(mockCurrentUser.Object))
+                .Returns(UserId);
+            mockUserManager
+                .Setup(_ => _.RemoveLoginAsync(mockUser, Provider, ExternalUserId))
+                .Returns(Task.FromResult(IdentityResult.Failed(new IdentityError { Description = "SomeDescription" })));
+
+            var mockHttpContext = new Mock<HttpContext>(MockBehavior.Strict);
+            mockHttpContext.SetupGet(_ => _.User).Returns(mockCurrentUser.Object).Verifiable();
+
+            var mockEmailSender = new Mock<IEmailSender>(MockBehavior.Strict);
+
+            var controller = new UserController(
+                gameData,
+                telemetryClient,
+                mockDatabaseCommandFactory.Object,
+                mockUserSettingsProvider.Object,
+                mockUserManager.Object,
+                mockEmailSender.Object);
+            controller.ControllerContext = new ControllerContext { HttpContext = mockHttpContext.Object };
+
+            var result = await controller.RemoveLogin(UserName, model);
+
+            Assert.NotNull(result);
+            Assert.IsType<BadRequestObjectResult>(result);
+            Assert.Equal(1, controller.ModelState.ErrorCount);
 
             mockDatabaseCommandFactory.VerifyAll();
             mockUserSettingsProvider.VerifyAll();

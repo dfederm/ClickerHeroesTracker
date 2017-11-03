@@ -3,10 +3,12 @@ import { By } from "@angular/platform-browser";
 import { FormsModule } from "@angular/forms";
 import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
 import { UserAgentApplication } from "msalx";
+import { DebugElement } from "@angular/core";
 
 import { ExternalLoginsComponent, IErrorResponse } from "./externalLogins";
-import { AuthenticationService } from "../../services/authenticationService/authenticationService";
-import { DebugElement } from "@angular/core";
+import { AuthenticationService, IUserInfo } from "../../services/authenticationService/authenticationService";
+import { UserService, IUserLogins } from "../../services/userService/userService";
+import { BehaviorSubject } from "rxjs";
 
 // tslint:disable-next-line:no-namespace
 declare global {
@@ -22,13 +24,28 @@ declare global {
 describe("ExternalLoginsComponent", () => {
     let component: ExternalLoginsComponent;
     let fixture: ComponentFixture<ExternalLoginsComponent>;
+    let userInfo: BehaviorSubject<IUserInfo>;
+
+    const loggedInUser: IUserInfo = {
+        isLoggedIn: true,
+        id: "someId",
+        username: "someUsername",
+        email: "someEmail",
+    };
 
     beforeEach(done => {
+        userInfo = new BehaviorSubject(loggedInUser);
+
         let authenticationService = {
             logInWithPassword: (): void => void 0,
             logInWithAssertion: (): void => void 0,
+            userInfo: () => userInfo,
         };
         let activeModal = { close: (): void => void 0 };
+        let userService = {
+            getLogins: (): void => void 0,
+            removeLogin: (): void => void 0,
+        };
 
         // Mock the global variables. We should figure out a better way to both inject this in the product and mock this in tests.
         window.gapi = { load: (): void => void 0 };
@@ -51,14 +68,13 @@ describe("ExternalLoginsComponent", () => {
                 [
                     { provide: AuthenticationService, useValue: authenticationService },
                     { provide: NgbActiveModal, useValue: activeModal },
+                    { provide: UserService, useValue: userService },
                 ],
             })
             .compileComponents()
             .then(() => {
                 fixture = TestBed.createComponent(ExternalLoginsComponent);
                 component = fixture.componentInstance;
-
-                fixture.detectChanges();
             })
             .then(done)
             .catch(done.fail);
@@ -74,6 +90,10 @@ describe("ExternalLoginsComponent", () => {
     });
 
     describe("Initialization", () => {
+        beforeEach(() => {
+            fixture.detectChanges();
+        });
+
         it("should load the external login sdks", () => {
             // Google
             expect(gapi.load).toHaveBeenCalledWith("auth2", jasmine.any(Function));
@@ -109,6 +129,10 @@ describe("ExternalLoginsComponent", () => {
     });
 
     describe("Logging in with Google", () => {
+        beforeEach(() => {
+            fixture.detectChanges();
+        });
+
         it("should close the dialog when successful", done => {
             let authenticationService = TestBed.get(AuthenticationService) as AuthenticationService;
             spyOn(authenticationService, "logInWithAssertion").and.returnValue(Promise.resolve());
@@ -253,6 +277,10 @@ describe("ExternalLoginsComponent", () => {
     });
 
     describe("Logging in with Facebook", () => {
+        beforeEach(() => {
+            fixture.detectChanges();
+        });
+
         it("should close the dialog when successful", done => {
             let authenticationService = TestBed.get(AuthenticationService) as AuthenticationService;
             spyOn(authenticationService, "logInWithAssertion").and.returnValue(Promise.resolve());
@@ -396,6 +424,10 @@ describe("ExternalLoginsComponent", () => {
     });
 
     describe("Logging in with Microsoft", () => {
+        beforeEach(() => {
+            fixture.detectChanges();
+        });
+
         it("should close the dialog when successful", done => {
             let authenticationService = TestBed.get(AuthenticationService) as AuthenticationService;
             spyOn(authenticationService, "logInWithAssertion").and.returnValue(Promise.resolve());
@@ -531,6 +563,8 @@ describe("ExternalLoginsComponent", () => {
         let authenticationService: AuthenticationService;
 
         beforeEach(done => {
+            fixture.detectChanges();
+
             authenticationService = TestBed.get(AuthenticationService) as AuthenticationService;
 
             let errorResponse: IErrorResponse = { error: "account_selection_required" };
@@ -717,5 +751,298 @@ describe("ExternalLoginsComponent", () => {
 
             return errors;
         }
+    });
+
+    describe("Manage mode", () => {
+        beforeEach(() => {
+            component.isManageMode = true;
+        });
+
+        it("should display list of registered logins", done => {
+            let logins: IUserLogins = {
+                hasPassword: true,
+                externalLogins: [
+                    {
+                        providerName: "someProviderName0",
+                        externalUserId: "someExternalUserId0",
+                    },
+                    {
+                        providerName: "someProviderName1",
+                        externalUserId: "someExternalUserId1",
+                    },
+                    {
+                        providerName: "someProviderName2",
+                        externalUserId: "someExternalUserId2",
+                    },
+                ],
+            };
+            let userService = TestBed.get(UserService) as UserService;
+            spyOn(userService, "getLogins").and.returnValue(Promise.resolve(logins));
+
+            fixture.detectChanges();
+
+            expect(userService.getLogins).toHaveBeenCalledWith(loggedInUser.username);
+
+            fixture.whenStable()
+                .then(() => {
+                    fixture.detectChanges();
+
+                    let loginsTable = fixture.debugElement.query(By.css("table"));
+                    expect(loginsTable).not.toBeNull();
+
+                    let loginsRows = loginsTable.queryAll(By.css("tr"));
+                    expect(loginsRows.length).toEqual(logins.externalLogins.length);
+
+                    // No error
+                    let error = fixture.debugElement.query(By.css(".alert-danger"));
+                    expect(error).toBeNull();
+                })
+                .then(done)
+                .catch(done.fail);
+        });
+
+        it("should show an error when fetching logins fails", done => {
+            let userService = TestBed.get(UserService) as UserService;
+            spyOn(userService, "getLogins").and.returnValue(Promise.reject(""));
+
+            fixture.detectChanges();
+
+            expect(userService.getLogins).toHaveBeenCalledWith(loggedInUser.username);
+
+            fixture.whenStable()
+                .then(() => {
+                    fixture.detectChanges();
+
+                    let loginsTable = fixture.debugElement.query(By.css("table"));
+                    expect(loginsTable).toBeNull();
+
+                    // Error
+                    let error = fixture.debugElement.query(By.css(".alert-danger"));
+                    expect(error).not.toBeNull();
+                })
+                .then(done)
+                .catch(done.fail);
+        });
+
+        it("should remove login", done => {
+            let logins: IUserLogins = {
+                hasPassword: true,
+                externalLogins: [
+                    {
+                        providerName: "someProviderName0",
+                        externalUserId: "someExternalUserId0",
+                    },
+                    {
+                        providerName: "someProviderName1",
+                        externalUserId: "someExternalUserId1",
+                    },
+                    {
+                        providerName: "someProviderName2",
+                        externalUserId: "someExternalUserId2",
+                    },
+                ],
+            };
+            let userService = TestBed.get(UserService) as UserService;
+            spyOn(userService, "getLogins").and.returnValue(Promise.resolve(logins));
+            spyOn(userService, "removeLogin").and.returnValue(Promise.resolve());
+
+            fixture.detectChanges();
+
+            expect(userService.getLogins).toHaveBeenCalledWith(loggedInUser.username);
+            (userService.getLogins as jasmine.Spy).calls.reset();
+
+            fixture.whenStable()
+                .then(() => {
+                    fixture.detectChanges();
+
+                    let loginsTable = fixture.debugElement.query(By.css("table"));
+                    expect(loginsTable).not.toBeNull();
+
+                    let loginsRows = loginsTable.queryAll(By.css("tr"));
+                    expect(loginsRows.length).toEqual(logins.externalLogins.length);
+
+                    let removeButton = loginsRows[1].query(By.css("button"));
+                    expect(removeButton).not.toBeNull();
+                    removeButton.nativeElement.click();
+
+                    expect(userService.removeLogin).toHaveBeenCalledWith(loggedInUser.username, logins.externalLogins[1]);
+
+                    return fixture.whenStable();
+                })
+                .then(() => {
+                    // Refreshes the data
+                    expect(userService.getLogins).toHaveBeenCalledWith(loggedInUser.username);
+
+                    // No error
+                    let error = fixture.debugElement.query(By.css(".alert-danger"));
+                    expect(error).toBeNull();
+                })
+                .then(done)
+                .catch(done.fail);
+        });
+
+        it("should show an error when remove login fails", done => {
+            let logins: IUserLogins = {
+                hasPassword: true,
+                externalLogins: [
+                    {
+                        providerName: "someProviderName0",
+                        externalUserId: "someExternalUserId0",
+                    },
+                    {
+                        providerName: "someProviderName1",
+                        externalUserId: "someExternalUserId1",
+                    },
+                    {
+                        providerName: "someProviderName2",
+                        externalUserId: "someExternalUserId2",
+                    },
+                ],
+            };
+            let userService = TestBed.get(UserService) as UserService;
+            spyOn(userService, "getLogins").and.returnValue(Promise.resolve(logins));
+            spyOn(userService, "removeLogin").and.returnValue(Promise.reject(""));
+
+            fixture.detectChanges();
+
+            expect(userService.getLogins).toHaveBeenCalledWith(loggedInUser.username);
+            (userService.getLogins as jasmine.Spy).calls.reset();
+
+            fixture.whenStable()
+                .then(() => {
+                    fixture.detectChanges();
+
+                    let loginsTable = fixture.debugElement.query(By.css("table"));
+                    expect(loginsTable).not.toBeNull();
+
+                    let loginsRows = loginsTable.queryAll(By.css("tr"));
+                    expect(loginsRows.length).toEqual(logins.externalLogins.length);
+
+                    let removeButton = loginsRows[1].query(By.css("button"));
+                    expect(removeButton).not.toBeNull();
+                    removeButton.nativeElement.click();
+
+                    expect(userService.removeLogin).toHaveBeenCalledWith(loggedInUser.username, logins.externalLogins[1]);
+
+                    return fixture.whenStable();
+                })
+                .then(() => {
+                    fixture.detectChanges();
+
+                    expect(userService.getLogins).not.toHaveBeenCalled();
+
+                    // Error
+                    let error = fixture.debugElement.query(By.css(".alert-danger"));
+                    expect(error).not.toBeNull();
+                })
+                .then(done)
+                .catch(done.fail);
+        });
+
+        it("should hide add buttons for registered logins", done => {
+            let authResponse = { id_token: "someIdToken" };
+            let logins: IUserLogins = {
+                hasPassword: true,
+                externalLogins: [
+                    {
+                        providerName: "someProviderName0",
+                        externalUserId: "someExternalUserId0",
+                    },
+                    {
+                        providerName: "someProviderName1",
+                        externalUserId: "someExternalUserId1",
+                    },
+                    {
+                        providerName: "someProviderName2",
+                        externalUserId: "someExternalUserId2",
+                    },
+                ],
+            };
+            let userService = TestBed.get(UserService) as UserService;
+            spyOn(userService, "getLogins").and.returnValue(Promise.resolve(logins));
+
+            let authenticationService = TestBed.get(AuthenticationService) as AuthenticationService;
+            spyOn(authenticationService, "logInWithAssertion").and.returnValue(Promise.resolve());
+
+            fixture.detectChanges();
+
+            expect(userService.getLogins).toHaveBeenCalledWith(loggedInUser.username);
+            (userService.getLogins as jasmine.Spy).calls.reset();
+
+            fixture.whenStable()
+                .then(() => {
+                    fixture.detectChanges();
+
+                    let buttons = fixture.debugElement.queryAll(By.css("button"));
+                    expect(buttons.length).not.toEqual(0);
+
+                    let button: DebugElement = null;
+                    for (let i = 0; i < buttons.length; i++) {
+                        if (buttons[i].nativeElement.textContent.trim() === "Google") {
+                            button = buttons[i];
+                        }
+                    }
+
+                    gapi.auth2.getAuthInstance = () => ({ signIn: () => Promise.resolve({ getAuthResponse: () => authResponse }) }) as {} as gapi.auth2.GoogleAuth;
+
+                    expect(button).toBeDefined();
+                    button.nativeElement.click();
+
+                    return fixture.whenStable();
+                })
+                .then(() => {
+                    expect(authenticationService.logInWithAssertion).toHaveBeenCalledWith("urn:ietf:params:oauth:grant-type:google_identity_token", authResponse.id_token, undefined);
+
+                    // Refreshes the data
+                    expect(userService.getLogins).toHaveBeenCalledWith(loggedInUser.username);
+
+                    // No error
+                    let error = fixture.debugElement.query(By.css(".alert-danger"));
+                    expect(error).toBeNull();
+                })
+                .then(done)
+                .catch(done.fail);
+        });
+
+        it("should refresh the login data when adding a new login", done => {
+            const providerName = "Google";
+            let logins: IUserLogins = {
+                hasPassword: true,
+                externalLogins: [
+                    {
+                        providerName,
+                        externalUserId: "someExternalUserId",
+                    },
+                ],
+            };
+            let userService = TestBed.get(UserService) as UserService;
+            spyOn(userService, "getLogins").and.returnValue(Promise.resolve(logins));
+
+            fixture.detectChanges();
+
+            expect(userService.getLogins).toHaveBeenCalledWith(loggedInUser.username);
+
+            fixture.whenStable()
+                .then(() => {
+                    fixture.detectChanges();
+
+                    let buttons = fixture.debugElement.queryAll(By.css("button"));
+                    expect(buttons.length).not.toEqual(0);
+
+                    for (let i = 0; i < buttons.length; i++) {
+                        if (buttons[i].nativeElement.textContent.trim() === providerName) {
+                            return Promise.reject(`Found add button for provider: ${providerName}`);
+                        }
+                    }
+
+                    // No error
+                    let error = fixture.debugElement.query(By.css(".alert-danger"));
+                    expect(error).toBeNull();
+
+                    return Promise.resolve();
+                })
+                .then(done)
+                .catch(done.fail);
+        });
     });
 });
