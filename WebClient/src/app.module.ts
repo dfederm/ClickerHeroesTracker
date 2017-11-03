@@ -11,6 +11,7 @@ import { ApplicationInsightsModule, AppInsightsService } from "@markpieszak/ng-a
 import { ChartsModule } from "ng2-charts";
 import { CompareValidatorModule } from "angular-compare-validator";
 import { JWBootstrapSwitchModule } from "jw-bootstrap-switch-ng2";
+import { LoadingModule } from "ngx-loading";
 
 import { AppComponent } from "./components/app/app";
 import { HomeComponent } from "./components/home/home";
@@ -77,6 +78,7 @@ const routes: Routes =
     ChartsModule,
     CompareValidatorModule,
     JWBootstrapSwitchModule,
+    LoadingModule,
   ],
   declarations:
   [

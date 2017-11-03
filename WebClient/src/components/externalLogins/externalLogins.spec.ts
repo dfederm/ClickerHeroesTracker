@@ -3,7 +3,7 @@ import { By } from "@angular/platform-browser";
 import { FormsModule } from "@angular/forms";
 import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
 import { UserAgentApplication } from "msalx";
-import { DebugElement } from "@angular/core";
+import { DebugElement, NO_ERRORS_SCHEMA } from "@angular/core";
 
 import { ExternalLoginsComponent, IErrorResponse } from "./externalLogins";
 import { AuthenticationService, IUserInfo } from "../../services/authenticationService/authenticationService";
@@ -70,6 +70,7 @@ describe("ExternalLoginsComponent", () => {
                     { provide: NgbActiveModal, useValue: activeModal },
                     { provide: UserService, useValue: userService },
                 ],
+                schemas: [NO_ERRORS_SCHEMA],
             })
             .compileComponents()
             .then(() => {

@@ -15,6 +15,12 @@ export class AppComponent implements OnInit {
     dark: "https://cdnjs.cloudflare.com/ajax/libs/bootswatch/4.0.0-alpha.6/slate/bootstrap.min.css",
   };
 
+  public isLoading: boolean;
+
+  private hasSettings: boolean;
+
+  private hasUserInfo: boolean;
+
   constructor(
     private settingsService: SettingsService,
     private authenticationService: AuthenticationService,
@@ -22,6 +28,8 @@ export class AppComponent implements OnInit {
   ) { }
 
   public ngOnInit(): void {
+    this.isLoading = true;
+
     this.settingsService
       .settings()
       .subscribe(settings => this.handleSettings(settings));
@@ -36,6 +44,9 @@ export class AppComponent implements OnInit {
 
     // This needs to be in the <head> so it's not part of this component's template.
     document.getElementById("bootstrapStylesheet").setAttribute("href", cssUrl);
+
+    this.hasSettings = true;
+    this.checkIfDoneLoading();
   }
 
   private handleUserInfo(userInfo: IUserInfo): void {
@@ -43,6 +54,15 @@ export class AppComponent implements OnInit {
       this.appInsights.setAuthenticatedUserContext(userInfo.username);
     } else {
       this.appInsights.clearAuthenticatedUserContext();
+    }
+
+    this.hasUserInfo = true;
+    this.checkIfDoneLoading();
+  }
+
+  private checkIfDoneLoading(): void {
+    if (this.hasSettings && this.handleUserInfo) {
+      this.isLoading = false;
     }
   }
 }

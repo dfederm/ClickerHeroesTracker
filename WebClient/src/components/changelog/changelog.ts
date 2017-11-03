@@ -14,6 +14,7 @@ interface IChangelogSectionViewModel {
 export class ChangelogComponent implements OnInit {
     public sections: IChangelogSectionViewModel[];
     public isError: boolean;
+    public isLoading: boolean;
 
     @Input()
     public isFull: boolean;
@@ -21,6 +22,7 @@ export class ChangelogComponent implements OnInit {
     constructor(private newsService: NewsService) { }
 
     public ngOnInit(): void {
+        this.isLoading = true;
         this.newsService
             .getNews()
             .then(response => this.handleData(response))
@@ -33,6 +35,7 @@ export class ChangelogComponent implements OnInit {
             return;
         }
 
+        this.isLoading = false;
         let entries = response.entries;
 
         const maxEntries = 3;

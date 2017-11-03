@@ -28,9 +28,11 @@ export class UserComponent implements OnInit {
   public userName: string;
 
   public isProgressError: boolean;
+  public isProgressLoading: boolean;
   public progress: IProgressViewModel;
 
   public isFollowsError: boolean;
+  public isFollowsLoading: boolean;
   public follows: string[];
 
   private settings: IUserSettings;
@@ -78,16 +80,19 @@ export class UserComponent implements OnInit {
     let start = new Date(now);
     start.setDate(start.getDate() - 7);
 
+    this.isProgressLoading = true;
     this.userService.getProgress(this.userName, start, end)
       .then(progress => this.handleProgressData(progress))
       .catch(() => this.isProgressError = true);
 
+    this.isFollowsLoading = true;
     this.userService.getFollows(this.userName)
       .then(follows => this.handleFollowsData(follows))
       .catch(() => this.isFollowsError = true);
   }
 
   private handleProgressData(progress: IProgressData): void {
+    this.isProgressLoading = false;
     if (progress && Object.keys(progress.soulsSpentData).length === 0) {
       // No data
       return;
@@ -195,6 +200,7 @@ export class UserComponent implements OnInit {
   }
 
   private handleFollowsData(data: IFollowsData): void {
+    this.isFollowsLoading = false;
     if (!data || !data.follows || !data.follows.length) {
       // No data
       return;

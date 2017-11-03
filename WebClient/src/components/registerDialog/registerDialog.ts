@@ -12,6 +12,8 @@ import { UserService } from "../../services/userService/userService";
 export class RegisterDialogComponent {
     public errors: string[];
 
+    public isLoading: boolean;
+
     public username = "";
 
     public email = "";
@@ -30,10 +32,12 @@ export class RegisterDialogComponent {
 
     public register(): void {
         this.errors = null;
+        this.isLoading = true;
         this.userService.create(this.username, this.email, this.password)
             .then(() => {
                 return this.authenticationService.logInWithPassword(this.username, this.password)
                     .then(() => {
+                        this.isLoading = false;
                         this.activeModal.close();
                     })
                     .catch(() => {

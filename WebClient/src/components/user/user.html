@@ -18,13 +18,14 @@
                 </a>
             </h5>
             <p *ngIf="isProgressError"
-               class="text-danger">
+               class="alert alert-danger">
                 Oops! Something went wrong while fetching progress
             </p>
-            <p *ngIf="!progress && !isProgressError"
-               class="text-warning">
+            <p *ngIf="!progress && !isProgressError && !isProgressLoading"
+               class="alert alert-warning">
                 No uploads in the last week!
             </p>
+            <ngx-loading [show]="isProgressLoading && !isProgressError"></ngx-loading>
             <!-- Height is intedned to be 400px, but for some reason the chart is 1.7x what we specify, so use 235 -->
             <canvas baseChart
                     *ngIf="progress"
@@ -38,12 +39,13 @@
         <div class="col-md-6">
             <h4>Following:</h4>
             <p *ngIf="isFollowsError"
-               class="text-danger">
+               class="alert alert-danger">
                 Oops! Something went wrong while fetching followed users
             </p>
             <p *ngIf="(!follows || !follows.length) && !isFollowsError">
                 You are currently not following any users. This feature is coming soon.
             </p>
+            <ngx-loading [show]="isFollowsLoading && !isFollowsError"></ngx-loading>
             <table *ngIf="follows && follows.length"
                    class="table table-sm table-striped">
                 <tbody>

@@ -117,10 +117,10 @@ describe("UserComponent", () => {
 
                     let progressContainer = containers[1];
 
-                    let error = progressContainer.query(By.css(".text-danger"));
+                    let error = progressContainer.query(By.css(".alert-danger"));
                     expect(error).toBeNull();
 
-                    let warning = progressContainer.query(By.css(".text-warning"));
+                    let warning = progressContainer.query(By.css(".alert-warning"));
                     expect(warning).toBeNull();
 
                     let chart = progressContainer.query(By.css("canvas"));
@@ -175,10 +175,10 @@ describe("UserComponent", () => {
 
                     let progressContainer = containers[1];
 
-                    let error = progressContainer.query(By.css(".text-danger"));
+                    let error = progressContainer.query(By.css(".alert-danger"));
                     expect(error).toBeNull();
 
-                    let warning = progressContainer.query(By.css(".text-warning"));
+                    let warning = progressContainer.query(By.css(".alert-warning"));
                     expect(warning).toBeNull();
 
                     let chart = progressContainer.query(By.css("canvas"));
@@ -232,10 +232,10 @@ describe("UserComponent", () => {
                     let chart = progressContainer.query(By.css("canvas"));
                     expect(chart).toBeNull();
 
-                    let error = progressContainer.query(By.css(".text-danger"));
+                    let error = progressContainer.query(By.css(".alert-danger"));
                     expect(error).not.toBeNull();
 
-                    let warning = progressContainer.query(By.css(".text-warning"));
+                    let warning = progressContainer.query(By.css(".alert-warning"));
                     expect(warning).toBeNull();
                 })
                 .then(done)
@@ -259,10 +259,10 @@ describe("UserComponent", () => {
                     let chart = progressContainer.query(By.css("canvas"));
                     expect(chart).toBeNull();
 
-                    let error = progressContainer.query(By.css(".text-danger"));
+                    let error = progressContainer.query(By.css(".alert-danger"));
                     expect(error).toBeNull();
 
-                    let warning = progressContainer.query(By.css(".text-warning"));
+                    let warning = progressContainer.query(By.css(".alert-warning"));
                     expect(warning).not.toBeNull();
                 })
                 .then(done)
@@ -282,10 +282,10 @@ describe("UserComponent", () => {
 
                     let followsContainer = containers[2];
 
-                    let error = followsContainer.query(By.css(".text-danger"));
+                    let error = followsContainer.query(By.css(".alert-danger"));
                     expect(error).toBeNull();
 
-                    let noData = followsContainer.query(By.css("p:not(.text-danger)"));
+                    let noData = followsContainer.query(By.css("p:not(.alert-danger)"));
                     expect(noData).toBeNull();
 
                     let table = followsContainer.query(By.css("table"));
@@ -330,10 +330,10 @@ describe("UserComponent", () => {
                     let table = followsContainer.query(By.css("table"));
                     expect(table).toBeNull();
 
-                    let noData = followsContainer.query(By.css("p:not(.text-danger)"));
+                    let noData = followsContainer.query(By.css("p:not(.alert-danger)"));
                     expect(noData).toBeNull();
 
-                    let error = followsContainer.query(By.css(".text-danger"));
+                    let error = followsContainer.query(By.css(".alert-danger"));
                     expect(error).not.toBeNull();
                 })
                 .then(done)
@@ -357,10 +357,10 @@ describe("UserComponent", () => {
                     let table = followsContainer.query(By.css("table"));
                     expect(table).toBeNull();
 
-                    let error = followsContainer.query(By.css(".text-danger"));
+                    let error = followsContainer.query(By.css(".alert-danger"));
                     expect(error).toBeNull();
 
-                    let noData = followsContainer.query(By.css("p:not(.text-danger)"));
+                    let noData = followsContainer.query(By.css("p:not(.alert-danger)"));
                     expect(noData).not.toBeNull();
                 })
                 .then(done)

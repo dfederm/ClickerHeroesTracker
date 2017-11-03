@@ -1,13 +1,5 @@
 <div class="container">
     <h2>{{ userName }}'s Progress</h2>
-    <p *ngIf="isError"
-       class="text-danger">
-        Oops! Something went wrong while fetching progress
-    </p>
-    <p *ngIf="charts && !charts.length"
-       class="text-warning">
-        This user has no uploaded data for that time period
-    </p>
     <div class="btn-group">
         <button *ngFor="let dateRange of dateRanges"
                 class="btn btn-primary"
@@ -16,6 +8,16 @@
             {{ dateRange }}
         </button>
     </div>
+
+    <p *ngIf="isError"
+       class="alert alert-danger">
+        Oops! Something went wrong while fetching progress
+    </p>
+    <p *ngIf="charts && !charts.length"
+       class="alert alert-warning">
+        This user has no uploaded data for that time period
+    </p>
+    <ngx-loading [show]="isLoading && !isError"></ngx-loading>
 
     <div class="row">
         <div *ngFor="let chart of charts"

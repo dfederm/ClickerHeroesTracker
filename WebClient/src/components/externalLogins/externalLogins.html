@@ -2,6 +2,7 @@
      class="alert alert-danger">
     {{ error }}
 </div>
+<ngx-loading [show]="isLoading && !error"></ngx-loading>
 <div *ngIf="!needUsername">
     <div *ngIf="isManageMode && logins && logins.externalLogins">
         <h5>Registered Logins</h5>

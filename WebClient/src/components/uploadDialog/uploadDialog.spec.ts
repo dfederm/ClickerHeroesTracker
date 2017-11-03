@@ -223,7 +223,7 @@ describe("UploadDialogComponent", () => {
                     encodedSaveData = form.query(By.css("#encodedSaveData"));
                     playStyles = form.queryAll(By.css("[name='playStyle']"));
                     addToProgress = form.query(By.css("#addToProgress"));
-                    warningMessage = form.query(By.css(".alert.alert-warning"));
+                    warningMessage = form.query(By.css(".alert-warning"));
                     button = form.query(By.css("button"));
                 });
         }

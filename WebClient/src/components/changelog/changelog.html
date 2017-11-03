@@ -1,6 +1,8 @@
-<p *ngIf="isError">
+<p *ngIf="isError"
+   class="alert alert-danger">
   There was a problem getting the site news
 </p>
+<ngx-loading [show]="isLoading && !isError"></ngx-loading>
 
 <div *ngFor="let section of sections">
   <h3 *ngIf="section.date">

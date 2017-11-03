@@ -1,6 +1,8 @@
-<p *ngIf="isError">
+<p *ngIf="isError"
+   class="alert alert-danger">
   There was a problem getting your uploads
 </p>
+<ngx-loading [show]="isLoading && !isError"></ngx-loading>
 
 <table class="table table-sm table-striped">
   <thead>

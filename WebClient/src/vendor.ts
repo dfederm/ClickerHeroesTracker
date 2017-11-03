@@ -20,3 +20,4 @@ import "msalx";
 import "angular-compare-validator";
 import "jwt-decode";
 import "jw-bootstrap-switch-ng2";
+import "ngx-loading";

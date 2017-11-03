@@ -1,6 +1,7 @@
 import { ComponentFixture, TestBed, async } from "@angular/core/testing";
 import { By } from "@angular/platform-browser";
 import { DatePipe } from "@angular/common";
+import { NO_ERRORS_SCHEMA } from "@angular/core";
 
 import { ChangelogComponent } from "./changelog";
 import { NewsService, ISiteNewsEntryListResponse } from "../../services/newsService/newsService";
@@ -20,6 +21,7 @@ describe("ChangelogComponent", () => {
                     { provide: NewsService, useValue: newsService },
                     DatePipe,
                 ],
+                schemas: [NO_ERRORS_SCHEMA],
             })
             .compileComponents()
             .then(() => {

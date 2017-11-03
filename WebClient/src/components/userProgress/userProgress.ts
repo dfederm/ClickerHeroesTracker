@@ -27,6 +27,7 @@ interface IChartViewModel {
 })
 export class UserProgressComponent implements OnInit {
     public isError: boolean;
+    public isLoading: boolean;
     public userName: string;
     public _currentDateRange: string;
     public dateRanges: string[];
@@ -107,12 +108,14 @@ export class UserProgressComponent implements OnInit {
                 break;
         }
 
+        this.isLoading = true;
         this.userService.getProgress(this.userName, start, end)
             .then(progress => this.handleData(progress))
             .catch(() => this.isError = true);
     }
 
     private handleData(progress: IProgressData): void {
+        this.isLoading = false;
         if (!progress) {
             this.charts = [];
             return;
@@ -189,6 +192,10 @@ export class UserProgressComponent implements OnInit {
                     ? value.log().toNumber()
                     : value.toNumber(),
             });
+        }
+
+        if (seriesData.length === 0) {
+            return null;
         }
 
         return {

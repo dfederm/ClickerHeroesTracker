@@ -1,19 +1,19 @@
 <div class="container">
     <h2>Clans</h2>
     <div class="row">
-        <div *ngIf="!isInClan || isClanInformationError"
-             class="col-lg-6">
-            <p *ngIf="isClanInformationError">
+        <div class="col-lg-6">
+            <ngx-loading [show]="isClanInformationLoading && !isClanInformationError"></ngx-loading>
+            <h3 *ngIf="isInClan && !isClanInformationError">{{ clanName }}</h3>
+            <p *ngIf="isClanInformationError"
+               class="alert alert-danger">
                 There was a problem getting your clan's data
             </p>
-            <p *ngIf="!isInClan && !isClanInformationError">
+            <p *ngIf="!isInClan && !isClanInformationError && !isClanInformationLoading"
+               class="alert alert-danger">
                 Please join a clan to view the clan's data
             </p>
-        </div>
-        <div *ngIf="isInClan && !isClanInformationError"
-             class="col-lg-6">
-            <h3>{{ clanName }}</h3>
-            <table class="table table-sm table-striped">
+            <table *ngIf="isInClan && !isClanInformationError"
+                   class="table table-sm table-striped">
                 <thead>
                     <tr>
                         <th>Name</th>
@@ -28,7 +28,8 @@
                 </tbody>
             </table>
             <div>
-                <p *ngIf="isMessageSendError">
+                <p *ngIf="isMessageSendError"
+                   class="alert alert-danger">
                     There was a problem sending your message. Please try again.
                 </p>
                 <form (ngSubmit)="sendMessage()"
@@ -58,9 +59,11 @@
         </div>
         <div class="col-lg-6">
             <h3>Clans Leaderboard</h3>
-            <p *ngIf="isLeaderboardError">
-                There was a problem getting your clan's data
+            <p *ngIf="isLeaderboardError"
+               class="alert alert-danger">
+                There was a problem getting leaderboard data
             </p>
+            <ngx-loading [show]="isLeaderboardLoading && !isLeaderboardError"></ngx-loading>
             <table *ngIf="!isLeaderboardError"
                    class="table table-sm table-striped">
                 <thead>

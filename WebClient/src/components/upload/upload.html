@@ -4,6 +4,7 @@
        class="alert alert-danger">
         {{ errorMessage }}
     </p>
+    <ngx-loading [show]="isLoading && !errorMessage"></ngx-loading>
     <div class="row">
         <div class="col-md-6">
             <ul class="list-inline">
@@ -77,8 +78,8 @@
                     </button>
                 </div>
                 <div class="modal-body">
-                    <p>Are you sure?
-                        <span class="text-danger">This cannot be undone!</span>
+                    <p class="alert alert-danger">
+                        Are you sure? This cannot be undone!
                     </p>
                 </div>
                 <div class="modal-footer">

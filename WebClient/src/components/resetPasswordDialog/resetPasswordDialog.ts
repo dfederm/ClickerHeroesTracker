@@ -11,6 +11,8 @@ import { UserService } from "../../services/userService/userService";
 export class ResetPasswordDialogComponent {
     public errors: string[];
 
+    public isLoading: boolean;
+
     public email = "";
 
     public code = "";
@@ -29,8 +31,10 @@ export class ResetPasswordDialogComponent {
 
     public sendCode(): void {
         this.errors = null;
+        this.isLoading = true;
         this.userService.resetPassword(this.email)
             .then(() => {
+                this.isLoading = false;
                 this.codeSent = true;
             })
             .catch((errors: string[]) => {
@@ -40,8 +44,10 @@ export class ResetPasswordDialogComponent {
 
     public resetPassword(): void {
         this.errors = null;
+        this.isLoading = true;
         this.userService.resetPasswordConfirmation(this.email, this.password, this.code)
             .then(() => {
+                this.isLoading = false;
                 this.activeModal.close();
                 this.modalService.open(LogInDialogComponent);
             })
