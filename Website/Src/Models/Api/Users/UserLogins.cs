@@ -10,6 +10,6 @@ namespace Website.Models.Api.Users
     {
         public bool HasPassword { get; set; }
 
-        public IList<string> ExternalLogins { get; set; }
+        public IList<ExternalLogin> ExternalLogins { get; set; }
     }
 }

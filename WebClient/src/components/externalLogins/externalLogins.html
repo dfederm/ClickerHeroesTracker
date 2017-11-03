@@ -3,16 +3,33 @@
     {{ error }}
 </div>
 <div *ngIf="!needUsername">
-    <button class="btn btn-primary"
-            (click)="googleLogIn()">Google</button>
-    <button class="btn btn-primary"
-            (click)="facebookLogIn()">Facebook</button>
-    <button class="btn btn-primary"
-            (click)="microsoftLogIn()">Microsoft</button>
+    <div *ngIf="isManageMode && logins && logins.externalLogins">
+        <h5>Registered Logins</h5>
+        <table class="table table-sm table-striped">
+            <tbody>
+                <tr *ngFor="let externalLogin of logins.externalLogins">
+                    <td>{{ externalLogin.providerName }}</td>
+                    <td class="text-right">
+                        <!-- Don't allow users to remove the only way they have to log in -->
+                        <button *ngIf="logins.hasPassword || logins.externalLogins > 1"
+                                class="btn btn-primary"
+                                (click)="removeLogin(externalLogin)">Remove</button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    <div *ngIf="addLogins && addLogins.length > 0">
+        <h5 *ngIf="isManageMode">Add another service to log in.</h5>
+        <button *ngFor="let addLogin of addLogins"
+                class="btn btn-primary"
+                (click)="addLogin.logIn()">{{ addLogin.name }}</button>
+    </div>
 </div>
 <div *ngIf="needUsername">
     <p>
-        You've successfully logged in with <strong>{{ provider }}</strong>. Please pick a user name for this site
+        You've successfully logged in with
+        <strong>{{ provider }}</strong>. Please pick a user name for this site
     </p>
     <p>
         Already have an account? First log in with your password and then go to your settings to add a social login

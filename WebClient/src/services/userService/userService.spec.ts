@@ -225,7 +225,11 @@ describe("UserService", () => {
 
             let expectedResponse: IUserLogins = {
                 hasPassword: true,
-                externalLogins: ["someExternalLogin0", "someExternalLogin1", "someExternalLogin2"],
+                externalLogins: [
+                    { providerName: "someProviderName0", externalUserId: "someExternalUserId0" },
+                    { providerName: "someProviderName1", externalUserId: "someExternalUserId1" },
+                    { providerName: "someProviderName2", externalUserId: "someExternalUserId2" },
+                ],
             };
             lastConnection.mockRespond(new Response(new ResponseOptions({ body: JSON.stringify(expectedResponse) })));
             tick();
@@ -244,6 +248,49 @@ describe("UserService", () => {
             tick();
 
             expect(follows).toBeUndefined();
+            expect(error).toEqual("someError");
+            expect(appInsights.trackEvent).toHaveBeenCalled();
+        }));
+    });
+
+    describe("removeLogin", () => {
+        const externalLogin = { providerName: "someProviderName", externalUserId: "someExternalUserId" };
+
+        it("should make the correct api call", fakeAsync(() => {
+            userService.removeLogin(userName, externalLogin);
+
+            expect(lastConnection).toBeDefined("no http service connection made");
+            expect(lastConnection.request.method).toEqual(RequestMethod.Delete, "method invalid");
+            expect(lastConnection.request.url).toEqual(`/api/users/${userName}/logins`, "url invalid");
+            expect(lastConnection.request.json()).toEqual(externalLogin, "request body invalid");
+        }));
+
+        it("should handle when the api returns a success response", fakeAsync(() => {
+            let succeeded = false;
+            let error: string;
+            userService.removeLogin(userName, externalLogin)
+                .then(() => succeeded = true)
+                .catch((e: string) => error = e);
+
+            lastConnection.mockRespond(new Response(new ResponseOptions()));
+            tick();
+
+            expect(succeeded).toEqual(true);
+            expect(error).toBeUndefined();
+            expect(appInsights.trackEvent).not.toHaveBeenCalled();
+        }));
+
+        it("should handle http errors", fakeAsync(() => {
+            let succeeded = false;
+            let error: string;
+            userService.removeLogin(userName, externalLogin)
+                .then(() => succeeded = true)
+                .catch((e: string) => error = e);
+
+            lastConnection.mockError(new Error("someError"));
+            tick();
+
+            expect(succeeded).toEqual(false);
             expect(error).toEqual("someError");
             expect(appInsights.trackEvent).toHaveBeenCalled();
         }));

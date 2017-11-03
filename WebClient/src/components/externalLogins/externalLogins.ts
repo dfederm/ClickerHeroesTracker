@@ -1,8 +1,14 @@
-import { Component, OnInit } from "@angular/core";
+import { Component, OnInit, Input } from "@angular/core";
 import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
 import { UserAgentApplication } from "msalx";
 
 import { AuthenticationService } from "../../services/authenticationService/authenticationService";
+import { UserService, IUserLogins, IExternalLogin } from "../../services/userService/userService";
+
+export interface ILoginButton {
+    name: string;
+    logIn(): void;
+}
 
 export interface IErrorResponse {
     error: string;
@@ -19,6 +25,11 @@ export class ExternalLoginsComponent implements OnInit {
 
     private static microsoftApp: UserAgentApplication;
 
+    @Input()
+    public isManageMode: boolean;
+
+    public logins: IUserLogins;
+
     public error: string;
 
     public needUsername: boolean;
@@ -27,16 +38,48 @@ export class ExternalLoginsComponent implements OnInit {
 
     public username: string;
 
+    public addLogins: ILoginButton[];
+
     private grantType: string;
 
     private assertion: string;
 
+    private allLogins: ILoginButton[] = [
+        {
+            name: "Google",
+            logIn: () => this.googleLogIn(),
+        },
+        {
+            name: "Facebook",
+            logIn: () => this.facebookLogIn(),
+        },
+        {
+            name: "Microsoft",
+            logIn: () => this.microsoftLogIn(),
+        },
+    ];
+
     constructor(
         private authenticationService: AuthenticationService,
         public activeModal: NgbActiveModal,
+        private userService: UserService,
     ) { }
 
     public ngOnInit(): void {
+        if (this.isManageMode) {
+            this.authenticationService
+                .userInfo()
+                .subscribe(userInfo => {
+                    this.username = userInfo.username;
+                    this.fetchLoginData()
+                        .catch(() => {
+                            this.error = "There was a problem fetching your login data";
+                        });
+                });
+        } else {
+            this.addLogins = this.allLogins;
+        }
+
         if (!gapi.auth2) {
             gapi.load("auth2", () => {
                 gapi.auth2.init({
@@ -69,8 +112,8 @@ export class ExternalLoginsComponent implements OnInit {
         this.error = null;
         this.provider = "Google";
 
-        gapi.auth2.getAuthInstance()
-            .signIn()
+        // Need to wrap the promise since the promise returned from gapi doesn't seem to play well with Angular change detection.
+        Promise.resolve(gapi.auth2.getAuthInstance().signIn())
             .then((user: gapi.auth2.GoogleUser) => this.logIn("urn:ietf:params:oauth:grant-type:google_identity_token", user.getAuthResponse().id_token))
             .catch((error: { error: string }) => {
                 if (error && error.error === "popup_closed_by_user") {
@@ -136,13 +179,29 @@ export class ExternalLoginsComponent implements OnInit {
             });
     }
 
+    public removeLogin(login: IExternalLogin): void {
+        this.userService
+            .removeLogin(this.username, login)
+            .then(() => this.fetchLoginData())
+            .catch(() => {
+                this.error = "There was a problem removing the login";
+            });
+    }
+
     private logIn(grantType: string, assertion: string): Promise<void> {
         // Save off for reuse in case the user has to select a username
         this.grantType = grantType;
         this.assertion = assertion;
 
-        return this.authenticationService.logInWithAssertion(grantType, assertion, this.username)
-            .then(() => this.activeModal.close())
+        return this.authenticationService.logInWithAssertion(grantType, assertion, this.isManageMode ? undefined : this.username)
+            .then(() => {
+                if (this.isManageMode) {
+                    return this.fetchLoginData();
+                } else {
+                    this.activeModal.close();
+                    return Promise.resolve();
+                }
+            })
             .catch(error => {
                 let errorResponse: IErrorResponse;
                 try {
@@ -157,6 +216,26 @@ export class ExternalLoginsComponent implements OnInit {
                 }
 
                 return Promise.reject(error);
+            });
+    }
+
+    private fetchLoginData(): Promise<void> {
+        return this.userService
+            .getLogins(this.username)
+            .then(logins => {
+                this.logins = logins;
+
+                let loginProviderNames: { [name: string]: boolean } = {};
+                for (let i = 0; i < this.logins.externalLogins.length; i++) {
+                    loginProviderNames[this.logins.externalLogins[i].providerName] = true;
+                }
+
+                this.addLogins = [];
+                for (let i = 0; i < this.allLogins.length; i++) {
+                    if (!loginProviderNames[this.allLogins[i].name]) {
+                        this.addLogins.push(this.allLogins[i]);
+                    }
+                }
             });
     }
 }

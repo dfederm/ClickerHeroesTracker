@@ -97,7 +97,9 @@ export class AuthenticationService {
     }
 
     private fetchTokens(params: URLSearchParams): Promise<void> {
-        let headers = new Headers({ "Content-Type": "application/x-www-form-urlencoded" });
+        let headers = this.getAuthHeaders();
+        headers.append("Content-Type", "application/x-www-form-urlencoded");
+
         let options = new RequestOptions({ headers });
         params.append("scope", "openid offline_access profile email roles");
         return this.http.post("/api/auth/token", params.toString(), options)
