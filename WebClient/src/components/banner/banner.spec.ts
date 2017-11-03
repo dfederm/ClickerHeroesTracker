@@ -7,7 +7,6 @@ import { BannerComponent } from "./banner";
 import { VersionService, IVersion } from "../../services/versionService/versionService";
 
 describe("BannerComponent", () => {
-    let component: BannerComponent;
     let fixture: ComponentFixture<BannerComponent>;
     let version: BehaviorSubject<IVersion>;
 
@@ -21,15 +20,14 @@ describe("BannerComponent", () => {
             {
                 declarations: [BannerComponent],
                 providers:
-                [
-                    { provide: VersionService, useValue: versionService },
-                ],
+                    [
+                        { provide: VersionService, useValue: versionService },
+                    ],
                 schemas: [NO_ERRORS_SCHEMA],
             })
             .compileComponents()
             .then(() => {
                 fixture = TestBed.createComponent(BannerComponent);
-                component = fixture.componentInstance;
 
                 fixture.detectChanges();
             })

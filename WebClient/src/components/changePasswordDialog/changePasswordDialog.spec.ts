@@ -11,7 +11,6 @@ import { AuthenticationService, IUserInfo } from "../../services/authenticationS
 import { UserService, IUserLogins } from "../../services/userService/userService";
 
 describe("ChangePasswordDialogComponent", () => {
-    let component: ChangePasswordDialogComponent;
     let fixture: ComponentFixture<ChangePasswordDialogComponent>;
 
     const loggedInUser: IUserInfo = {
@@ -49,17 +48,16 @@ describe("ChangePasswordDialogComponent", () => {
                 ],
                 declarations: [ChangePasswordDialogComponent],
                 providers:
-                [
-                    { provide: AuthenticationService, useValue: authenticationService },
-                    { provide: UserService, useValue: userService },
-                    { provide: NgbActiveModal, useValue: activeModal },
-                ],
+                    [
+                        { provide: AuthenticationService, useValue: authenticationService },
+                        { provide: UserService, useValue: userService },
+                        { provide: NgbActiveModal, useValue: activeModal },
+                    ],
                 schemas: [NO_ERRORS_SCHEMA],
             })
             .compileComponents()
             .then(() => {
                 fixture = TestBed.createComponent(ChangePasswordDialogComponent);
-                component = fixture.componentInstance;
             })
             .then(done)
             .catch(done.fail);

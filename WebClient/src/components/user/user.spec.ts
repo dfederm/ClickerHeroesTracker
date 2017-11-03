@@ -11,7 +11,6 @@ import { SettingsService, IUserSettings } from "../../services/settingsService/s
 import { ActivatedRoute } from "@angular/router";
 
 describe("UserComponent", () => {
-    let component: UserComponent;
     let fixture: ComponentFixture<UserComponent>;
 
     const userName = "someUserName";
@@ -82,7 +81,6 @@ describe("UserComponent", () => {
             .compileComponents()
             .then(() => {
                 fixture = TestBed.createComponent(UserComponent);
-                component = fixture.componentInstance;
             })
             .then(done)
             .catch(done.fail);

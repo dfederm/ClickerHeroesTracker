@@ -8,7 +8,6 @@ import { LogInDialogComponent } from "./logInDialog";
 import { AuthenticationService } from "../../services/authenticationService/authenticationService";
 
 describe("LogInDialogComponent", () => {
-    let component: LogInDialogComponent;
     let fixture: ComponentFixture<LogInDialogComponent>;
 
     beforeEach(done => {
@@ -22,16 +21,15 @@ describe("LogInDialogComponent", () => {
                 imports: [FormsModule],
                 declarations: [LogInDialogComponent],
                 providers:
-                [
-                    { provide: AuthenticationService, useValue: authenticationService },
-                    { provide: NgbActiveModal, useValue: activeModal },
-                ],
+                    [
+                        { provide: AuthenticationService, useValue: authenticationService },
+                        { provide: NgbActiveModal, useValue: activeModal },
+                    ],
                 schemas: [NO_ERRORS_SCHEMA],
             })
             .compileComponents()
             .then(() => {
                 fixture = TestBed.createComponent(LogInDialogComponent);
-                component = fixture.componentInstance;
 
                 fixture.detectChanges();
             })

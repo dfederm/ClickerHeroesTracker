@@ -8,7 +8,6 @@ import { SettingsService, IUserSettings } from "../../services/settingsService/s
 import { AuthenticationService, IUserInfo } from "../../services/authenticationService/authenticationService";
 
 describe("BannerComponent", () => {
-    let component: AppComponent;
     let fixture: ComponentFixture<AppComponent>;
 
     let settingsSubject = new Subject<IUserSettings>();
@@ -25,17 +24,16 @@ describe("BannerComponent", () => {
             {
                 declarations: [AppComponent],
                 providers:
-                [
-                    { provide: SettingsService, useValue: settingsService },
-                    { provide: AuthenticationService, useValue: authenticationService },
-                    { provide: AppInsightsService, useValue: appInsights },
-                ],
+                    [
+                        { provide: SettingsService, useValue: settingsService },
+                        { provide: AuthenticationService, useValue: authenticationService },
+                        { provide: AppInsightsService, useValue: appInsights },
+                    ],
                 schemas: [NO_ERRORS_SCHEMA],
             })
             .compileComponents()
             .then(() => {
                 fixture = TestBed.createComponent(AppComponent);
-                component = fixture.componentInstance;
 
                 fixture.detectChanges();
             })

@@ -41,17 +41,20 @@ namespace ClickerHeroesTrackerWebsite.Tests.Models
             var mockUserSettingsProvider = new Mock<IUserSettingsProvider>(MockBehavior.Strict);
             mockUserSettingsProvider.Setup(_ => _.Get(UserId)).Returns(userSettings).Verifiable();
 
-            var userManager = new MockUserManager();
-
             var identity = new ClaimsIdentity(new[] { new Claim(ClaimTypes.NameIdentifier, UserId) });
             var user = new ClaimsPrincipal(identity);
+
+            var mockUserManager = MockUserManager.CreateMock();
+            mockUserManager
+                .Setup(_ => _.GetUserId(user))
+                .Returns(UserId);
 
             var viewModel = new CalculatorViewModel(
                 mockDatabaseCommandFactory.Object,
                 mockUserSettingsProvider.Object,
                 1234,
                 user,
-                userManager);
+                mockUserManager.Object);
 
             Assert.True(viewModel.IsValid);
             Assert.False(viewModel.IsPublic);
@@ -62,6 +65,10 @@ namespace ClickerHeroesTrackerWebsite.Tests.Models
             mockDatabaseCommand.Verify();
             mockDatabaseCommandFactory.Verify();
             mockUserSettingsProvider.Verify();
+
+            // Workaround for a Moq bug. See: https://github.com/moq/moq4/issues/456#issuecomment-331692858
+            mockUserManager.Object.Logger = mockUserManager.Object.Logger;
+            mockUserManager.VerifyAll();
         }
     }
 }

@@ -46,21 +46,5 @@ namespace ClickerHeroesTrackerWebsite.IntegrationTests
             Assert.Contains("Hello Test User!", content, StringComparison.Ordinal);
             Assert.Contains("Log off", content, StringComparison.Ordinal);
         }
-
-        [Fact]
-        public async Task Navbar_Admin_BasicTest()
-        {
-            var request = new HttpRequestMessage(HttpMethod.Get, Path);
-            request.AuthenticateAdmin();
-
-            var response = await RequestManager.MakeRequest(request);
-            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-
-            // Admins should have a "Admin", "Welcome", and "Log out" links
-            var content = await response.Content.ReadAsStringAsync();
-            Assert.Contains("Admin", content, StringComparison.Ordinal);
-            Assert.Contains("Hello Test User!", content, StringComparison.Ordinal);
-            Assert.Contains("Log off", content, StringComparison.Ordinal);
-        }
     }
 }

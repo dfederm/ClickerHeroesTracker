@@ -10,9 +10,10 @@ import { AuthenticationService, IUserInfo } from "../../services/authenticationS
 export class AppComponent implements OnInit {
   public static defaultTheme = "light";
 
+  // TODO: Consider getting all themes from https://bootswatch.com/api/4.json
   public static themeCssUrls: { [theme: string]: string } = {
-    light: "https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.0.0-alpha.6/css/bootstrap.min.css",
-    dark: "https://cdnjs.cloudflare.com/ajax/libs/bootswatch/4.0.0-alpha.6/slate/bootstrap.min.css",
+    light: "https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/css/bootstrap.min.css",
+    dark: "https://bootswatch.com/slate/bootstrap.min.css",
   };
 
   public isLoading: boolean;
@@ -61,7 +62,7 @@ export class AppComponent implements OnInit {
   }
 
   private checkIfDoneLoading(): void {
-    if (this.hasSettings && this.handleUserInfo) {
+    if (this.hasSettings && this.hasUserInfo) {
       this.isLoading = false;
     }
   }

@@ -10,7 +10,6 @@ import { By } from "@angular/platform-browser";
 import { DebugElement, NO_ERRORS_SCHEMA } from "@angular/core";
 
 describe("RegisterDialogComponent", () => {
-    let component: RegisterDialogComponent;
     let fixture: ComponentFixture<RegisterDialogComponent>;
 
     beforeEach(done => {
@@ -32,17 +31,16 @@ describe("RegisterDialogComponent", () => {
                     RegisterDialogComponent,
                 ],
                 providers:
-                [
-                    { provide: AuthenticationService, useValue: authenticationService },
-                    { provide: UserService, useValue: userService },
-                    { provide: NgbActiveModal, useValue: activeModal },
-                ],
+                    [
+                        { provide: AuthenticationService, useValue: authenticationService },
+                        { provide: UserService, useValue: userService },
+                        { provide: NgbActiveModal, useValue: activeModal },
+                    ],
                 schemas: [NO_ERRORS_SCHEMA],
             })
             .compileComponents()
             .then(() => {
                 fixture = TestBed.createComponent(RegisterDialogComponent);
-                component = fixture.componentInstance;
 
                 fixture.detectChanges();
             })

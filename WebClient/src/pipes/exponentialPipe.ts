@@ -6,6 +6,7 @@ import { SettingsService, IUserSettings } from "../services/settingsService/sett
 // Some shenanigans to wire up toFormat, which doesn't have typings.
 // tslint:disable:no-require-imports
 // tslint:disable:no-var-requires
+// tslint:disable-next-line:no-implicit-dependencies - See https://github.com/palantir/tslint/issues/3446
 require("toFormat")(Decimal);
 // tslint:enable:no-require-imports
 // tslint:enable:no-var-requires
