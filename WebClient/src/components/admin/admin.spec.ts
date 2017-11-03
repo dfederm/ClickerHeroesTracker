@@ -16,7 +16,6 @@ class MockError extends Response implements Error {
 }
 
 describe("AdminComponent", () => {
-    let component: AdminComponent;
     let fixture: ComponentFixture<AdminComponent>;
     let backend: MockBackend;
     let lastConnection: MockConnection = null;
@@ -58,14 +57,14 @@ describe("AdminComponent", () => {
                     FormsModule,
                 ],
                 providers:
-                [
-                    { provide: AuthenticationService, useValue: authenticationService },
-                    { provide: AppInsightsService, useValue: appInsights },
-                    { provide: UploadService, useValue: uploadService },
-                    { provide: ConnectionBackend, useClass: MockBackend },
-                    { provide: RequestOptions, useClass: BaseRequestOptions },
-                    Http,
-                ],
+                    [
+                        { provide: AuthenticationService, useValue: authenticationService },
+                        { provide: AppInsightsService, useValue: appInsights },
+                        { provide: UploadService, useValue: uploadService },
+                        { provide: ConnectionBackend, useClass: MockBackend },
+                        { provide: RequestOptions, useClass: BaseRequestOptions },
+                        Http,
+                    ],
                 declarations: [AdminComponent],
                 schemas: [NO_ERRORS_SCHEMA],
             })
@@ -80,7 +79,6 @@ describe("AdminComponent", () => {
                     lastConnection = connection;
                 });
                 fixture = TestBed.createComponent(AdminComponent);
-                component = fixture.componentInstance;
             })
             .then(done)
             .catch(done.fail);

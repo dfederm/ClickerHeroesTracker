@@ -17,6 +17,7 @@
       "array"
     ],
     "arrow-return-shorthand": true,
+    "ban-comma-operator": true,
     "ban-types": true,
     "callable-types": true,
     "class-name": true,
@@ -77,6 +78,7 @@
     "no-construct": true,
     "no-debugger": true,
     "no-default-export": true,
+    "no-duplicate-switch-case": true,
     "no-duplicate-super": true,
     "no-duplicate-variable": true,
     "no-empty": true,
@@ -88,6 +90,7 @@
       "ignore-params"
     ],
     "no-internal-module": true,
+    "no-implicit-dependencies": true,
     "no-invalid-this": true,
     "no-misused-new": true,
     "no-namespace": true,
@@ -96,6 +99,7 @@
     "no-reference": true,
     "no-reference-import": true,
     "no-require-imports": true,
+    "no-return-await": true,
     "no-shadowed-variable": true,
     "no-sparse-arrays": true,
     "no-string-literal": true,
@@ -182,7 +186,6 @@
         "variable-declaration": "onespace"
       }
     ],
-    "typeof-compare": true,
     "unified-signatures": true,
     "use-isnan": true,
     "variable-name": [
@@ -222,19 +225,16 @@
       null,
       "camelCase"
     ],
-    "invoke-injectable": true,
-    "no-access-missing-member": true,
     "no-attribute-parameter-decorator": true,
     "no-forward-ref": true,
     "no-input-rename": true,
+    "no-output-on-prefix-name": true,
     "no-output-rename": true,
     "pipe-naming": [
       true,
       "camelCase"
     ],
-    "template-to-ng-template": true,
     "templates-no-negated-async": true,
-    "templates-use-public": true,
     "use-host-property-decorator": true,
     "use-input-property-decorator": true,
     "use-life-cycle-interface": true,

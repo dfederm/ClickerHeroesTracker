@@ -2,10 +2,10 @@ import { Injectable } from "@angular/core";
 import { Http } from "@angular/http";
 import { Observable } from "rxjs/Observable";
 import { BehaviorSubject } from "rxjs/BehaviorSubject";
+import { filter, distinctUntilChanged } from "rxjs/operators";
+import { interval } from "rxjs/observable/interval";
 
 import "rxjs/add/operator/toPromise";
-import "rxjs/add/operator/filter";
-import "rxjs/add/operator/distinctUntilChanged";
 
 export interface IVersion {
     environment: string;
@@ -36,9 +36,10 @@ export class VersionService {
     }
 
     public getVersion(): Observable<IVersion> {
-        return this.version
-            .filter(version => version != null)
-            .distinctUntilChanged((x, y) => JSON.stringify(x) === JSON.stringify(y));
+        return this.version.pipe(
+            filter(version => version != null),
+            distinctUntilChanged((x, y) => JSON.stringify(x) === JSON.stringify(y)),
+        );
     }
 
     private fetchVersionInitial(retryDelay: number = VersionService.retryDelay): void {
@@ -70,7 +71,7 @@ export class VersionService {
     }
 
     private scheduleRefresh(): void {
-        Observable.interval(VersionService.pollingInterval)
+        interval(VersionService.pollingInterval)
             .forEach(() => {
                 this.fetchVersion()
                     // Just swallow errors from polling

@@ -7,7 +7,6 @@ import { Subject } from "rxjs/Subject";
 import { AdComponent } from "./ad";
 
 describe("AdComponent", () => {
-    let component: AdComponent;
     let fixture: ComponentFixture<AdComponent>;
     let navigationEvents: Subject<NavigationEvent>;
     let timesRendered: number;
@@ -48,14 +47,13 @@ describe("AdComponent", () => {
                     MockAdComponent,
                 ],
                 providers:
-                [
-                    { provide: Router, useValue: router },
-                ],
+                    [
+                        { provide: Router, useValue: router },
+                    ],
             })
             .compileComponents()
             .then(() => {
                 fixture = TestBed.createComponent(AdComponent);
-                component = fixture.componentInstance;
             })
             .then(done)
             .catch(done.fail);

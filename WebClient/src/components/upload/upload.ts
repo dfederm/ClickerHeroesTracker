@@ -1,12 +1,12 @@
 import { Component, OnInit } from "@angular/core";
-import { ActivatedRoute, Router, Params } from "@angular/router";
+import { ActivatedRoute, Router } from "@angular/router";
 import { UploadService, IUpload } from "../../services/uploadService/uploadService";
 import { AuthenticationService, IUserInfo } from "../../services/authenticationService/authenticationService";
 import Decimal from "decimal.js";
 import { AppInsightsService } from "@markpieszak/ng-application-insights";
 import { NgbModal } from "@ng-bootstrap/ng-bootstrap";
+import { switchMap } from "rxjs/operators";
 
-import "rxjs/add/operator/switchMap";
 import { SettingsService, IUserSettings } from "../../services/settingsService/settingsService";
 
 // tslint:disable-next-line:no-require-imports no-var-requires
@@ -168,12 +168,12 @@ export class UploadComponent implements OnInit {
             .settings()
             .subscribe(settings => this.handleSettings(settings));
 
-        this.route.params
-            .switchMap((params: Params) => {
+        this.route.params.pipe(
+            switchMap(params => {
                 this.isLoading = true;
                 return this.uploadService.get(+params.id);
-            })
-            .subscribe(upload => this.handleUpload(upload), () => this.handleError("There was a problem getting that upload"));
+            }),
+        ).subscribe(upload => this.handleUpload(upload), () => this.handleError("There was a problem getting that upload"));
     }
 
     public openModal(modal: {}): void {

@@ -70,7 +70,7 @@ namespace ClickerHeroesTrackerWebsite.Models.Calculator
             {
                 if (reader.Read())
                 {
-                    uploadUserId = reader["UserId"].ToString();
+                    uploadUserId = reader["UserId"]?.ToString();
                 }
                 else
                 {

@@ -3,10 +3,10 @@ import { Http, RequestOptions } from "@angular/http";
 import { Observable } from "rxjs/Observable";
 import { BehaviorSubject } from "rxjs/BehaviorSubject";
 import { Subscription } from "rxjs/Subscription";
+import { map, distinctUntilChanged } from "rxjs/operators";
+import { interval } from "rxjs/observable/interval";
 
 import "rxjs/add/operator/toPromise";
-import "rxjs/add/operator/map";
-import "rxjs/add/observable/interval";
 
 import { AuthenticationService } from "../authenticationService/authenticationService";
 
@@ -84,8 +84,9 @@ export class SettingsService {
     }
 
     public settings(): Observable<IUserSettings> {
-        return this.settingsSubject
-            .distinctUntilChanged((x, y) => JSON.stringify(x) === JSON.stringify(y));
+        return this.settingsSubject.pipe(
+            distinctUntilChanged((x, y) => JSON.stringify(x) === JSON.stringify(y)),
+        );
     }
 
     public setSetting(setting: keyof IUserSettings, value: {}): Promise<void> {
@@ -168,12 +169,12 @@ export class SettingsService {
     }
 
     private scheduleRefresh(): void {
-        this.refreshSubscription = Observable.interval(SettingsService.syncInterval)
-            .map(() => {
+        this.refreshSubscription = interval(SettingsService.syncInterval).pipe(
+            map(() => {
                 this.fetchSettings()
                     // Just swallow errors from polling
                     .catch(() => void 0);
-            })
-            .subscribe();
+            }),
+        ).subscribe();
     }
 }

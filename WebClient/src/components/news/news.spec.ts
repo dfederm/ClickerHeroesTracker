@@ -5,7 +5,6 @@ import { By } from "@angular/platform-browser";
 import { NewsComponent } from "./news";
 
 describe("NewsComponent", () => {
-    let component: NewsComponent;
     let fixture: ComponentFixture<NewsComponent>;
 
     beforeEach(async(() => {
@@ -17,7 +16,6 @@ describe("NewsComponent", () => {
             .compileComponents()
             .then(() => {
                 fixture = TestBed.createComponent(NewsComponent);
-                component = fixture.componentInstance;
             });
     }));
 

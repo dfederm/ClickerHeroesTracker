@@ -7,7 +7,6 @@ import { BehaviorSubject } from "rxjs";
 import { UserUploadsComponent } from "./userUploads";
 
 describe("UserUploadsComponent", () => {
-    let component: UserUploadsComponent;
     let fixture: ComponentFixture<UserUploadsComponent>;
     let routeParams: BehaviorSubject<Params>;
 
@@ -28,7 +27,6 @@ describe("UserUploadsComponent", () => {
             .compileComponents()
             .then(() => {
                 fixture = TestBed.createComponent(UserUploadsComponent);
-                component = fixture.componentInstance;
             });
     }));
 

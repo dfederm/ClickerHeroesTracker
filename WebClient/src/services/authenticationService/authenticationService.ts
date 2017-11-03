@@ -4,10 +4,10 @@ import { Observable } from "rxjs/Observable";
 import { BehaviorSubject } from "rxjs/BehaviorSubject";
 import { Subscription } from "rxjs/Subscription";
 import * as JwtDecode from "jwt-decode";
+import { map } from "rxjs/operators";
+import { interval } from "rxjs/observable/interval";
 
 import "rxjs/add/operator/toPromise";
-import "rxjs/add/operator/map";
-import "rxjs/add/observable/interval";
 
 export interface IAuthTokenModel {
     access_token: string;
@@ -132,9 +132,9 @@ export class AuthenticationService {
 
     private scheduleRefresh(): void {
         // Refresh every half the total expiration time. This assumes the expire duration doesn't change over time.
-        this.refreshSubscription = Observable.interval(this.currentTokens.expires_in / 2 * 1000)
-            .map(() => this.refreshTokens())
-            .subscribe();
+        this.refreshSubscription = interval(this.currentTokens.expires_in / 2 * 1000).pipe(
+            map(() => this.refreshTokens()),
+        ).subscribe();
     }
 
     private getUserInfo(): IUserInfo {

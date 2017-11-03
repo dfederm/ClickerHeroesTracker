@@ -27,12 +27,12 @@ namespace ClickerHeroesTrackerWebsite.Tests.Controllers
 
             var mockUserSettingsProvider = new Mock<IUserSettingsProvider>(MockBehavior.Strict);
 
-            var userManager = new MockUserManager();
+            var mockUserManager = MockUserManager.CreateMock();
 
             var controller = new CalculatorController(
                 mockDatabaseCommandFactory.Object,
                 mockUserSettingsProvider.Object,
-                userManager);
+                mockUserManager.Object);
 
             var result = controller.View(null);
 
@@ -46,6 +46,10 @@ namespace ClickerHeroesTrackerWebsite.Tests.Controllers
 
             mockDatabaseCommandFactory.Verify();
             mockUserSettingsProvider.Verify();
+
+            // Workaround for a Moq bug. See: https://github.com/moq/moq4/issues/456#issuecomment-331692858
+            mockUserManager.Object.Logger = mockUserManager.Object.Logger;
+            mockUserManager.VerifyAll();
         }
 
         [Fact]
@@ -61,7 +65,10 @@ namespace ClickerHeroesTrackerWebsite.Tests.Controllers
 
             var mockUserSettingsProvider = new Mock<IUserSettingsProvider>(MockBehavior.Strict);
 
-            var userManager = new MockUserManager();
+            var mockUserManager = MockUserManager.CreateMock();
+            mockUserManager
+                .Setup(_ => _.GetUserId(user))
+                .Returns((string)null);
 
             var mockHttpContext = new Mock<HttpContext>(MockBehavior.Strict);
             mockHttpContext.SetupGet(_ => _.User).Returns(user).Verifiable();
@@ -70,7 +77,7 @@ namespace ClickerHeroesTrackerWebsite.Tests.Controllers
             var controller = new CalculatorController(
                 mockDatabaseCommandFactory.Object,
                 mockUserSettingsProvider.Object,
-                userManager);
+                mockUserManager.Object);
             controller.ControllerContext = new ControllerContext { HttpContext = mockHttpContext.Object };
 
             var result = controller.View(1);
@@ -89,6 +96,10 @@ namespace ClickerHeroesTrackerWebsite.Tests.Controllers
             mockDatabaseCommandFactory.Verify();
             mockUserSettingsProvider.Verify();
             mockHttpContext.Verify();
+
+            // Workaround for a Moq bug. See: https://github.com/moq/moq4/issues/456#issuecomment-331692858
+            mockUserManager.Object.Logger = mockUserManager.Object.Logger;
+            mockUserManager.VerifyAll();
         }
 
         [Theory]
@@ -121,9 +132,12 @@ namespace ClickerHeroesTrackerWebsite.Tests.Controllers
 
             var userSettings = new UserSettings { AreUploadsPublic = isPublic };
             var mockUserSettingsProvider = new Mock<IUserSettingsProvider>(MockBehavior.Strict);
-            mockUserSettingsProvider.Setup(_ => _.Get(uploadUserId ?? string.Empty)).Returns(userSettings).Verifiable();
+            mockUserSettingsProvider.Setup(_ => _.Get(uploadUserId)).Returns(userSettings).Verifiable();
 
-            var userManager = new MockUserManager();
+            var mockUserManager = MockUserManager.CreateMock();
+            mockUserManager
+                .Setup(_ => _.GetUserId(user))
+                .Returns(userId);
 
             var mockHttpContext = new Mock<HttpContext>(MockBehavior.Strict);
             mockHttpContext.SetupGet(_ => _.User).Returns(user).Verifiable();
@@ -132,7 +146,7 @@ namespace ClickerHeroesTrackerWebsite.Tests.Controllers
             var controller = new CalculatorController(
                 mockDatabaseCommandFactory.Object,
                 mockUserSettingsProvider.Object,
-                userManager);
+                mockUserManager.Object);
             controller.ControllerContext = new ControllerContext { HttpContext = mockHttpContext.Object };
 
             var result = controller.View(1);
@@ -169,6 +183,10 @@ namespace ClickerHeroesTrackerWebsite.Tests.Controllers
             mockDatabaseCommandFactory.Verify();
             mockUserSettingsProvider.Verify();
             mockHttpContext.Verify();
+
+            // Workaround for a Moq bug. See: https://github.com/moq/moq4/issues/456#issuecomment-331692858
+            mockUserManager.Object.Logger = mockUserManager.Object.Logger;
+            mockUserManager.VerifyAll();
         }
     }
 }

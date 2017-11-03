@@ -1,5 +1,6 @@
 const webpack = require('webpack');
 const path = require('path');
+const rxPaths = require('rxjs/_esm5/path-mapping');
 
 // Webpack Plugins
 const CleanWebpackPlugin = require('clean-webpack-plugin');
@@ -47,7 +48,9 @@ module.exports = () => {
   }
 
   config.resolve = {
-    extensions: ['.ts', '.js']
+    extensions: ['.ts', '.js'],
+    // Use the "alias" key to resolve to an ESM distribution. See https://github.com/ReactiveX/rxjs/blob/master/doc/lettable-operators.md#build-and-treeshaking
+    alias: rxPaths()
   };
 
   config.module = {
@@ -114,6 +117,8 @@ module.exports = () => {
         ENV: JSON.stringify(ENV)
       }
     }),
+
+    new webpack.optimize.ModuleConcatenationPlugin(),
 
     // Workaround for angular/angular#11580
     new webpack.ContextReplacementPlugin(
