@@ -50,7 +50,9 @@
                    class="table table-sm table-striped">
                 <tbody>
                     <tr *ngFor="let follow of follows">
-                        <td>{{ follow }}</td>
+                        <td>
+                            <a routerLink="/users/{{follow}}">{{ follow }}</a>
+                        </td>
                         <td class="text-right">
                             <a routerLink="/users/{{userName}}/compare/{{follow}}">Compare</a>
                         </td>

@@ -10,9 +10,10 @@
             <ul class="list-inline">
                 <li>
                     <label>User:</label>
-                    <span [ngClass]="{'text-muted' : !userName}">
-                        {{ userName || "(Anonymous)" }}
-                    </span>
+                    <a *ngIf="userName"
+                       routerLink="/users/{{userName}}">{{ userName }}</a>
+                    <span *ngIf="!userName"
+                          class="text-muted">(Anonymous)</span>
                 </li>
                 <li>
                     <label>Upload Time:</label>

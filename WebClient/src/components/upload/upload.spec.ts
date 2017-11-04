@@ -152,7 +152,7 @@ describe("UploadComponent", () => {
 
             let userNameItem = items[0];
             let userNameValueElement = userNameItem.query(By.css("span"));
-            expect(userNameValueElement.classes["text-muted"]).toEqual(true);
+            expect(userNameValueElement.nativeElement.classList.contains("text-muted")).toEqual(true);
             expect(getNormalizedTextContent(userNameValueElement)).toEqual("(Anonymous)");
 
             let uploadTimeItem = items[1];
@@ -184,7 +184,7 @@ describe("UploadComponent", () => {
 
                     let userNameItem = items[0];
                     let userNameValueElement = userNameItem.query(By.css("span"));
-                    expect(userNameValueElement.classes["text-muted"]).toEqual(true);
+                    expect(userNameValueElement.nativeElement.classList.contains("text-muted")).toEqual(true);
                     expect(getNormalizedTextContent(userNameValueElement)).toEqual("(Anonymous)");
 
                     let uploadTimeItem = items[1];
@@ -215,8 +215,9 @@ describe("UploadComponent", () => {
                     expect(items.length).toEqual(3);
 
                     let userNameItem = items[0];
-                    let userNameValueElement = userNameItem.query(By.css("span"));
-                    expect(userNameValueElement.classes["text-muted"]).toEqual(false);
+                    let userNameValueElement = userNameItem.query(By.css("a"));
+                    expect(userNameValueElement.properties.routerLink).toEqual(`/users/${upload.user.name}`);
+                    expect(userNameValueElement.nativeElement.classList.contains("text-muted")).toEqual(false);
                     expect(getNormalizedTextContent(userNameValueElement)).toEqual(upload.user.name);
 
                     let uploadTimeItem = items[1];
