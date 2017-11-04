@@ -2,7 +2,6 @@ import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { By } from "@angular/platform-browser";
 import { FormsModule } from "@angular/forms";
 import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
-import { UserAgentApplication } from "msalx";
 import { DebugElement, NO_ERRORS_SCHEMA } from "@angular/core";
 
 import { ExternalLoginsComponent, IErrorResponse } from "./externalLogins";
@@ -12,8 +11,6 @@ import { BehaviorSubject } from "rxjs";
 
 // tslint:disable-next-line:no-namespace
 declare global {
-    var msal: UserAgentApplication;
-
     // tslint:disable-next-line:interface-name - We don't own this interface name, just extending it
     interface Window {
         gapi: {};
@@ -65,11 +62,11 @@ describe("ExternalLoginsComponent", () => {
                 imports: [FormsModule],
                 declarations: [ExternalLoginsComponent],
                 providers:
-                [
-                    { provide: AuthenticationService, useValue: authenticationService },
-                    { provide: NgbActiveModal, useValue: activeModal },
-                    { provide: UserService, useValue: userService },
-                ],
+                    [
+                        { provide: AuthenticationService, useValue: authenticationService },
+                        { provide: NgbActiveModal, useValue: activeModal },
+                        { provide: UserService, useValue: userService },
+                    ],
                 schemas: [NO_ERRORS_SCHEMA],
             })
             .compileComponents()
@@ -83,11 +80,7 @@ describe("ExternalLoginsComponent", () => {
 
     afterEach(() => {
         // tslint:disable-next-line:no-any
-        (ExternalLoginsComponent as any).facebookInitialized = false;
-
-        // tslint:disable-next-line:no-any
-        (ExternalLoginsComponent as any).microsoftApp = undefined;
-        msal = undefined;
+        ExternalLoginsComponent.facebookInitialized = false;
     });
 
     describe("Initialization", () => {
@@ -104,11 +97,11 @@ describe("ExternalLoginsComponent", () => {
             expect(FB.init).toHaveBeenCalled();
 
             // Microsoft
-            expect(msal).toBeDefined();
+            expect(component.microsoftApp).toBeDefined();
         });
 
         it("should only load the external login sdks once", () => {
-            let originalMsal = msal;
+            let originalMicrosoftApp = component.microsoftApp;
 
             // Create a whole bunch of components to simulate the user opening and closing the dialog a bunch.
             for (let i = 0; i < 100; i++) {
@@ -125,7 +118,7 @@ describe("ExternalLoginsComponent", () => {
             expect(FB.init).toHaveBeenCalledTimes(1);
 
             // Microsoft
-            expect(msal).toBe(originalMsal);
+            expect(component.microsoftApp).toBe(originalMicrosoftApp);
         });
     });
 
@@ -437,7 +430,7 @@ describe("ExternalLoginsComponent", () => {
             spyOn(activeModal, "close");
 
             const token = "someToken";
-            msal.loginPopup = jasmine.createSpy("loginPopup", () => Promise.resolve(token)).and.callThrough();
+            spyOn(component.microsoftApp, "loginPopup").and.returnValue(Promise.resolve(token));
 
             let buttons = fixture.debugElement.queryAll(By.css("button"));
             expect(buttons.length).toEqual(3);
@@ -450,7 +443,7 @@ describe("ExternalLoginsComponent", () => {
                 .then(() => {
                     fixture.detectChanges();
 
-                    expect(msal.loginPopup).toHaveBeenCalledWith(["openid", "email"]);
+                    expect(component.microsoftApp.loginPopup).toHaveBeenCalledWith(["openid", "email"]);
                     expect(authenticationService.logInWithAssertion).toHaveBeenCalledWith("urn:ietf:params:oauth:grant-type:microsoft_identity_token", token, undefined);
                     expect(activeModal.close).toHaveBeenCalled();
 
@@ -469,7 +462,7 @@ describe("ExternalLoginsComponent", () => {
             let activeModal = TestBed.get(NgbActiveModal) as NgbActiveModal;
             spyOn(activeModal, "close");
 
-            msal.loginPopup = jasmine.createSpy("loginPopup", () => Promise.reject("")).and.callThrough();
+            spyOn(component.microsoftApp, "loginPopup").and.returnValue(Promise.reject(""));
 
             let buttons = fixture.debugElement.queryAll(By.css("button"));
             expect(buttons.length).toEqual(3);
@@ -482,7 +475,7 @@ describe("ExternalLoginsComponent", () => {
                 .then(() => {
                     fixture.detectChanges();
 
-                    expect(msal.loginPopup).toHaveBeenCalledWith(["openid", "email"]);
+                    expect(component.microsoftApp.loginPopup).toHaveBeenCalledWith(["openid", "email"]);
                     expect(authenticationService.logInWithAssertion).not.toHaveBeenCalled();
                     expect(activeModal.close).not.toHaveBeenCalled();
 
@@ -502,7 +495,7 @@ describe("ExternalLoginsComponent", () => {
             spyOn(activeModal, "close");
 
             const token = "someToken";
-            msal.loginPopup = jasmine.createSpy("loginPopup", () => Promise.resolve(token)).and.callThrough();
+            spyOn(component.microsoftApp, "loginPopup").and.returnValue(Promise.resolve(token));
 
             let buttons = fixture.debugElement.queryAll(By.css("button"));
             expect(buttons.length).toEqual(3);
@@ -515,7 +508,7 @@ describe("ExternalLoginsComponent", () => {
                 .then(() => {
                     fixture.detectChanges();
 
-                    expect(msal.loginPopup).toHaveBeenCalledWith(["openid", "email"]);
+                    expect(component.microsoftApp.loginPopup).toHaveBeenCalledWith(["openid", "email"]);
                     expect(authenticationService.logInWithAssertion).toHaveBeenCalledWith("urn:ietf:params:oauth:grant-type:microsoft_identity_token", token, undefined);
                     expect(activeModal.close).not.toHaveBeenCalled();
 
@@ -534,7 +527,7 @@ describe("ExternalLoginsComponent", () => {
             let activeModal = TestBed.get(NgbActiveModal) as NgbActiveModal;
             spyOn(activeModal, "close");
 
-            msal.loginPopup = jasmine.createSpy("loginPopup", () => Promise.reject("user_cancelled:User closed the popup window window and cancelled the flow")).and.callThrough();
+            spyOn(component.microsoftApp, "loginPopup").and.returnValue(Promise.reject("user_cancelled:User closed the popup window window and cancelled the flow"));
 
             let buttons = fixture.debugElement.queryAll(By.css("button"));
             expect(buttons.length).toEqual(3);
@@ -547,7 +540,7 @@ describe("ExternalLoginsComponent", () => {
                 .then(() => {
                     fixture.detectChanges();
 
-                    expect(msal.loginPopup).toHaveBeenCalledWith(["openid", "email"]);
+                    expect(component.microsoftApp.loginPopup).toHaveBeenCalledWith(["openid", "email"]);
                     expect(authenticationService.logInWithAssertion).not.toHaveBeenCalled();
                     expect(activeModal.close).not.toHaveBeenCalled();
 
@@ -572,7 +565,7 @@ describe("ExternalLoginsComponent", () => {
             spyOn(authenticationService, "logInWithAssertion").and.returnValue(Promise.reject({ json: () => errorResponse }));
 
             // Using Microsoft login since it's easy to mock, but they should all apply equally
-            msal.loginPopup = () => Promise.resolve("someToken");
+            spyOn(component.microsoftApp, "loginPopup").and.returnValue(Promise.resolve("someToken"));
 
             let buttons = fixture.debugElement.queryAll(By.css("button"));
             expect(buttons.length).toEqual(3);

@@ -16,7 +16,7 @@ import "decimal.js";
 import "toformat";
 import "@markpieszak/ng-application-insights";
 import "ng2-charts";
-import "msalx";
+import "msal";
 import "angular-compare-validator";
 import "jwt-decode";
 import "jw-bootstrap-switch-ng2";
