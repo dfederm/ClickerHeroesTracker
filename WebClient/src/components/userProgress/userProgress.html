@@ -1,5 +1,7 @@
 <div class="container">
-    <h2>{{ userName }}'s Progress</h2>
+    <h2>
+        <a routerLink="/users/{{userName}}">{{ userName }}</a>'s Progress
+    </h2>
     <div class="btn-group">
         <button *ngFor="let dateRange of dateRanges"
                 class="btn btn-primary"

@@ -1,5 +1,9 @@
 <div class="container">
-    <h2>{{ userName }} vs {{ compareUserName }}</h2>
+    <h2>
+        <a routerLink="/users/{{userName}}">{{ userName }}</a>
+        vs
+        <a routerLink="/users/{{compareUserName}}">{{ compareUserName }}</a>
+    </h2>
     <div class="btn-group">
         <button *ngFor="let dateRange of dateRanges"
                 class="btn btn-primary"
