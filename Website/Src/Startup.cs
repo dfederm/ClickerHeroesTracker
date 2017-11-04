@@ -43,9 +43,6 @@ namespace ClickerHeroesTrackerWebsite
 
             app.UseAuthentication();
 
-            // Instrument the user as soon as they're auth'd.
-            app.UseMiddleware<UserInstrumentationMiddleware>();
-
             app.UseMvc(routes =>
             {
                 routes.MapRoute(
