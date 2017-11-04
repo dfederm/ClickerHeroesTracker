@@ -1,6 +1,6 @@
 import { Component, OnInit, Input } from "@angular/core";
 import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
-import { UserAgentApplication } from "msalx";
+import { UserAgentApplication } from "msal";
 
 import { AuthenticationService } from "../../services/authenticationService/authenticationService";
 import { UserService, IUserLogins, IExternalLogin } from "../../services/userService/userService";
@@ -21,9 +21,9 @@ export interface IErrorResponse {
 })
 export class ExternalLoginsComponent implements OnInit {
     // Facebook doesn't give us a way to check if it's initialized, so we track it ourselves.
-    private static facebookInitialized = false;
+    public static facebookInitialized = false;
 
-    private static microsoftApp: UserAgentApplication;
+    public microsoftApp: UserAgentApplication;
 
     @Input()
     public isManageMode: boolean;
@@ -100,15 +100,10 @@ export class ExternalLoginsComponent implements OnInit {
             ExternalLoginsComponent.facebookInitialized = true;
         }
 
-        if (!ExternalLoginsComponent.microsoftApp) {
-            ExternalLoginsComponent.microsoftApp = new UserAgentApplication(
-                "4ecf3d26-e844-4855-9158-b8f6c0121b50",
-                null,
-                null,
-                {
-                    redirectUri: location.origin,
-                });
-        }
+        this.microsoftApp = new UserAgentApplication(
+            "4ecf3d26-e844-4855-9158-b8f6c0121b50",
+            null,
+            null);
     }
 
     public googleLogIn(): void {
@@ -155,7 +150,7 @@ export class ExternalLoginsComponent implements OnInit {
 
         // There is no signal when the user closes the popup. The promise just never resoles.
         // See: https://github.com/AzureAD/microsoft-authentication-library-for-js/issues/129
-        ExternalLoginsComponent.microsoftApp.loginPopup(["openid", "email"])
+        this.microsoftApp.loginPopup(["openid", "email"])
             .then(token => this.logIn("urn:ietf:params:oauth:grant-type:microsoft_identity_token", token))
             .catch((error: string) => {
                 if (error && error.startsWith("user_cancelled:")) {
@@ -209,6 +204,8 @@ export class ExternalLoginsComponent implements OnInit {
                 }
             })
             .catch(error => {
+                this.isLoading = false;
+
                 let errorResponse: IErrorResponse;
                 try {
                     errorResponse = error.json();
