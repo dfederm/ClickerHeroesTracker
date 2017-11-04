@@ -13,8 +13,7 @@ import "ngx-clipboard/dist";
 import "time-ago-pipe";
 import "ng2-adsense";
 import "decimal.js";
-// tslint:disable-next-line:no-implicit-dependencies - See https://github.com/palantir/tslint/issues/3446
-import "toFormat";
+import "toformat";
 import "@markpieszak/ng-application-insights";
 import "ng2-charts";
 import "msalx";
