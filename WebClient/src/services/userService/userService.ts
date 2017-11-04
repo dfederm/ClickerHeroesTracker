@@ -5,6 +5,7 @@ import { AppInsightsService } from "@markpieszak/ng-application-insights";
 import "rxjs/add/operator/toPromise";
 
 import { AuthenticationService } from "../../services/authenticationService/authenticationService";
+import { IPaginationMetadata, IUpload } from "../../models";
 
 export interface ICreateUserRequest {
     userName: string;
@@ -12,6 +13,12 @@ export interface ICreateUserRequest {
     email: string;
 
     password: string;
+}
+
+export interface IUploadSummaryListResponse {
+    pagination: IPaginationMetadata;
+
+    uploads: IUpload[];
 }
 
 export interface ISetPasswordRequest {
@@ -122,6 +129,20 @@ export class UserService {
 
                 this.appInsights.trackEvent("UserService.create.error", { message: errors.join(";") });
                 return Promise.reject(errors);
+            });
+    }
+
+    public getUploads(userName: string, page: number, count: number): Promise<IUploadSummaryListResponse> {
+        let headers = this.authenticationService.getAuthHeaders();
+        let options = new RequestOptions({ headers });
+        return this.http
+            .get(`/api/users/${userName}/uploads?page=${page}&count=${count}`, options)
+            .toPromise()
+            .then(response => response.json() as IUploadSummaryListResponse)
+            .catch(error => {
+                let errorMessage = error.message || error.toString();
+                this.appInsights.trackEvent("UploadService.getUploads.error", { message: errorMessage });
+                return Promise.reject(errorMessage);
             });
     }
 

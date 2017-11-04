@@ -5,7 +5,7 @@ import { AppInsightsService } from "@markpieszak/ng-application-insights";
 import "rxjs/add/operator/toPromise";
 
 import { AuthenticationService } from "../../services/authenticationService/authenticationService";
-import { IPaginationMetadata } from "../pagination";
+import { IPaginationMetadata } from "../../models";
 
 export interface IGuildMember {
     highestZone: number;

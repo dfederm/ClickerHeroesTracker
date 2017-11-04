@@ -6,8 +6,9 @@ import { MockBackend, MockConnection } from "@angular/http/testing";
 import { BehaviorSubject } from "rxjs/BehaviorSubject";
 import { AppInsightsService } from "@markpieszak/ng-application-insights";
 
-import { UploadService, IUploadSummaryListResponse, IUpload } from "./uploadService";
+import { UploadService } from "./uploadService";
 import { AuthenticationService, IUserInfo } from "../authenticationService/authenticationService";
+import { IUpload } from "../../models";
 
 describe("UploadService", () => {
     let uploadService: UploadService;
@@ -54,46 +55,6 @@ describe("UploadService", () => {
     afterEach(() => {
         lastConnection = null;
         backend.verifyNoPendingRequests();
-    });
-
-    describe("getUploads", () => {
-        it("should make an api call", fakeAsync(() => {
-            uploadService.getUploads(1, 2);
-
-            expect(lastConnection).toBeDefined("no http service connection made");
-            expect(lastConnection.request.method).toEqual(RequestMethod.Get, "method invalid");
-            expect(lastConnection.request.url).toEqual("/api/uploads?page=1&count=2", "url invalid");
-            expect(authenticationService.getAuthHeaders).toHaveBeenCalled();
-        }));
-
-        it("should return some uploads", fakeAsync(() => {
-            let response: IUploadSummaryListResponse;
-            uploadService.getUploads(1, 2)
-                .then((r: IUploadSummaryListResponse) => response = r);
-
-            let expectedResponse: IUploadSummaryListResponse = { pagination: { count: 0, next: "", previous: "" }, uploads: [] };
-            lastConnection.mockRespond(new Response(new ResponseOptions({ body: JSON.stringify(expectedResponse) })));
-            tick();
-
-            expect(response).toEqual(expectedResponse, "should return the expected response");
-            expect(authenticationService.getAuthHeaders).toHaveBeenCalled();
-        }));
-
-        it("should handle http errors", fakeAsync(() => {
-            let response: IUploadSummaryListResponse;
-            let error: string;
-            uploadService.getUploads(1, 1)
-                .then((r: IUploadSummaryListResponse) => response = r)
-                .catch((e: string) => error = e);
-
-            lastConnection.mockError(new Error("someError"));
-            tick();
-
-            expect(response).toBeUndefined();
-            expect(error).toEqual("someError");
-            expect(authenticationService.getAuthHeaders).toHaveBeenCalled();
-            expect(appInsights.trackEvent).toHaveBeenCalled();
-        }));
     });
 
     describe("get", () => {

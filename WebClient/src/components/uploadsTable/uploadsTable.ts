@@ -1,6 +1,6 @@
 import { Component, OnInit, Input } from "@angular/core";
 
-import { UploadService, IUploadSummaryListResponse } from "../../services/uploadService/uploadService";
+import { UserService, IUploadSummaryListResponse } from "../../services/userService/userService";
 
 interface IUploadViewModel {
     id: number;
@@ -45,17 +45,16 @@ export class UploadsTableComponent implements OnInit {
         this.populateUploads();
     }
 
-    constructor(private uploadService: UploadService) { }
+    constructor(private userService: UserService) { }
 
     public ngOnInit(): void {
         this.populateUploads();
     }
 
     private populateUploads(): void {
-        // TODO #175 - Pass the user name
         this.isLoading = true;
-        this.uploadService
-            .getUploads(this.page, this.count)
+        this.userService
+            .getUploads(this.userName, this.page, this.count)
             .then(response => this.handleData(response))
             .catch(() => this.isError = true);
     }

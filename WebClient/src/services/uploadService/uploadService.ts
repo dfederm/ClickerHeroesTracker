@@ -5,33 +5,7 @@ import { AppInsightsService } from "@markpieszak/ng-application-insights";
 import "rxjs/add/operator/toPromise";
 
 import { AuthenticationService, IUserInfo } from "../../services/authenticationService/authenticationService";
-import { IPaginationMetadata } from "../pagination";
-
-export interface IUpload {
-    id: number;
-
-    timeSubmitted: string;
-
-    playStyle: string;
-
-    user?: IUser;
-
-    uploadContent?: string;
-
-    stats?: { [key: string]: string };
-}
-
-export interface IUploadSummaryListResponse {
-    pagination: IPaginationMetadata;
-
-    uploads: IUpload[];
-}
-
-export interface IUser {
-    id: string;
-
-    name: string;
-}
+import { IUpload } from "../../models";
 
 @Injectable()
 export class UploadService {
@@ -45,20 +19,6 @@ export class UploadService {
         this.authenticationService
             .userInfo()
             .subscribe(userInfo => this.userInfo = userInfo);
-    }
-
-    public getUploads(page: number, count: number): Promise<IUploadSummaryListResponse> {
-        let headers = this.authenticationService.getAuthHeaders();
-        let options = new RequestOptions({ headers });
-        return this.http
-            .get("/api/uploads?page=" + page + "&count=" + count, options)
-            .toPromise()
-            .then(response => response.json() as IUploadSummaryListResponse)
-            .catch(error => {
-                let errorMessage = error.message || error.toString();
-                this.appInsights.trackEvent("UploadService.getUploads.error", { message: errorMessage });
-                return Promise.reject(errorMessage);
-            });
     }
 
     public get(id: number): Promise<IUpload> {

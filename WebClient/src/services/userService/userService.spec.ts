@@ -5,7 +5,7 @@ import { Response, ResponseOptions, RequestMethod } from "@angular/http";
 import { MockBackend, MockConnection } from "@angular/http/testing";
 import { AppInsightsService } from "@markpieszak/ng-application-insights";
 
-import { UserService, IProgressData, IFollowsData, IValidationErrorResponse, IUserLogins } from "./userService";
+import { UserService, IProgressData, IFollowsData, IValidationErrorResponse, IUserLogins, IUploadSummaryListResponse } from "./userService";
 import { AuthenticationService } from "../authenticationService/authenticationService";
 
 class MockError extends Response implements Error {
@@ -108,6 +108,49 @@ describe("UserService", () => {
 
             expect(succeeded).toEqual(false);
             expect(errors).toEqual(["error0_0", "error0_1", "error0_2", "error1_0", "error1_1", "error1_2", "error2_0", "error2_1", "error2_2"]);
+            expect(appInsights.trackEvent).toHaveBeenCalled();
+        }));
+    });
+
+    describe("getUploads", () => {
+        let page = 1;
+        let count = 2;
+
+        it("should make an api call", () => {
+            userService.getUploads(userName, page, count);
+
+            expect(lastConnection).toBeDefined("no http service connection made");
+            expect(lastConnection.request.method).toEqual(RequestMethod.Get, "method invalid");
+            expect(lastConnection.request.url).toEqual(`/api/users/${userName}/uploads?page=${page}&count=${count}`, "url invalid");
+            expect(authenticationService.getAuthHeaders).toHaveBeenCalled();
+        });
+
+        it("should return some uploads", fakeAsync(() => {
+            let response: IUploadSummaryListResponse;
+            userService.getUploads(userName, page, count)
+                .then((r: IUploadSummaryListResponse) => response = r);
+
+            let expectedResponse: IUploadSummaryListResponse = { pagination: { count: 0, next: "", previous: "" }, uploads: [] };
+            lastConnection.mockRespond(new Response(new ResponseOptions({ body: JSON.stringify(expectedResponse) })));
+            tick();
+
+            expect(response).toEqual(expectedResponse, "should return the expected response");
+            expect(authenticationService.getAuthHeaders).toHaveBeenCalled();
+        }));
+
+        it("should handle http errors", fakeAsync(() => {
+            let response: IUploadSummaryListResponse;
+            let error: string;
+            userService.getUploads(userName, page, count)
+                .then((r: IUploadSummaryListResponse) => response = r)
+                .catch((e: string) => error = e);
+
+            lastConnection.mockError(new Error("someError"));
+            tick();
+
+            expect(response).toBeUndefined();
+            expect(error).toEqual("someError");
+            expect(authenticationService.getAuthHeaders).toHaveBeenCalled();
             expect(appInsights.trackEvent).toHaveBeenCalled();
         }));
     });
