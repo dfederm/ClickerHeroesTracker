@@ -15,7 +15,7 @@ namespace UnitTests.Controllers
     using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.Mvc;
     using Moq;
-    using Website.Controllers.Api;
+    using Website.Controllers;
     using Website.Models.Api.Admin;
     using Website.Services.UploadProcessing;
     using Xunit;

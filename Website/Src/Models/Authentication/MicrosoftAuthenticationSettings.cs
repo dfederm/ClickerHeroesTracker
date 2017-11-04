@@ -7,7 +7,5 @@ namespace Website.Models.Authentication
     public sealed class MicrosoftAuthenticationSettings
     {
         public string ClientId { get; set; }
-
-        public string ClientSecret { get; set; }
     }
 }

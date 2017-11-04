@@ -18,6 +18,8 @@ var isTestWatch = ENV === 'test-watch';
 var isTest = ENV === 'test' || isTestWatch;
 var isProd = ENV === 'prod';
 
+var outputPath = path.resolve('../Website/src/wwwroot');
+
 module.exports = () => {
   var config = {};
 
@@ -40,7 +42,7 @@ module.exports = () => {
     };
 
     config.output = {
-      path: path.resolve('./dist'),
+      path: outputPath,
       publicPath: '/',
       filename: isProd ? '[name].[chunkhash].js' : '[name].js',
       chunkFilename: isProd ? '[id].[chunkhash].chunk.js' : '[id].chunk.js'
@@ -75,9 +77,9 @@ module.exports = () => {
           {
             loader: 'awesome-typescript-loader',
             options:
-            {
-              configFileName: path.resolve('./tsconfig.json')
-            }
+              {
+                configFileName: path.resolve('./tsconfig.json')
+              }
           },
           'angular2-template-loader'
         ]
@@ -132,7 +134,23 @@ module.exports = () => {
 
   if (!isTest) {
     config.plugins.push(
-      new CleanWebpackPlugin(['dist']),
+      new CleanWebpackPlugin([
+        'app*.js',
+        'app*.js.map',
+        'data*.js',
+        'data*.js.map',
+        'polyfill*.js',
+        'polyfill*.js.map',
+        'runtime*.js',
+        'runtime*.js.map',
+        'vendor*.js',
+        'vendor*.js.map',
+        'index.html',
+        'manifest.json',
+      ], {
+          root: outputPath,
+          allowExternal: true
+        }),
 
       // Creates hierarchy to keep code from one bundle out of others. See: https://angular.io/guide/webpack#commonschunkplugin
       new webpack.optimize.CommonsChunkPlugin({

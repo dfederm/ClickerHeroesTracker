@@ -18,7 +18,7 @@ namespace UnitTests.Controllers
     using Microsoft.AspNetCore.Identity;
     using Microsoft.AspNetCore.Mvc;
     using Moq;
-    using Website.Controllers.Api;
+    using Website.Controllers;
     using Website.Models.Api.Users;
     using Xunit;
 

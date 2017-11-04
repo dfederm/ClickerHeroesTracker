@@ -19,10 +19,5 @@ namespace ClickerHeroesTrackerWebsite.Utility
                 dictionay.Add(key, value);
             }
         }
-
-        public static TValue SafeGet<TKey, TValue>(this IDictionary<TKey, TValue> dictionay, TKey key)
-        {
-            return dictionay.TryGetValue(key, out var value) ? value : default(TValue);
-        }
     }
 }

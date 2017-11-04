@@ -36,7 +36,7 @@ namespace ClickerHeroesTrackerWebsite.Models.Settings
                 return new UserSettings();
             }
 
-            // Use a cache to avoid hitting the database mu;tiple times in a request.
+            // Use a cache to avoid hitting the database multiple times in a request.
             if (!this.cache.TryGetValue(userId, out var userSettings))
             {
                 userSettings = new UserSettings();
