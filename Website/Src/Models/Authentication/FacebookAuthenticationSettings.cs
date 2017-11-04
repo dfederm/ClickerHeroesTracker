@@ -7,7 +7,5 @@ namespace Website.Models.Authentication
     public sealed class FacebookAuthenticationSettings
     {
         public string AppId { get; set; }
-
-        public string AppSecret { get; set; }
     }
 }

@@ -4,9 +4,9 @@
 
 namespace ClickerHeroesTrackerWebsite
 {
+    using System;
     using ClickerHeroesTrackerWebsite.Instrumentation;
     using ClickerHeroesTrackerWebsite.Models.Game;
-    using ClickerHeroesTrackerWebsite.Models.Settings;
     using ClickerHeroesTrackerWebsite.Utility;
     using Microsoft.AspNetCore.Builder;
     using Microsoft.AspNetCore.Hosting;
@@ -39,21 +39,37 @@ namespace ClickerHeroesTrackerWebsite
                 app.UseRewriter(options);
             }
 
-            app.UseStaticFiles();
+            var staticFileOptions = this.Environment.IsDevelopment()
+                ? new StaticFileOptions()
+                {
+                    OnPrepareResponse = (context) =>
+                    {
+                        // Disable caching to help with development
+                        context.Context.Response.Headers["Cache-Control"] = "no-cache, no-store";
+                        context.Context.Response.Headers["Pragma"] = "no-cache";
+                        context.Context.Response.Headers["Expires"] = "-1";
+                    },
+                }
+                : new StaticFileOptions()
+                {
+                    OnPrepareResponse = (context) =>
+                    {
+                        // Cache for a year
+                        context.Context.Response.Headers["Cache-Control"] = "public,max-age=31536000";
+                        context.Context.Response.Headers["Expires"] = DateTime.UtcNow.AddYears(1).ToString("R");
+                    },
+                };
+            app.UseStaticFiles(staticFileOptions);
 
             app.UseAuthentication();
 
             app.UseMvc(routes =>
             {
+                // All other controllers use attribute routing, so fallback everything else to the Angular app
                 routes.MapRoute(
-                    name: "default",
-                    template: "{controller=Home}/{action=Index}");
-
-                // Frontend routes. Eventually just match a wildcard and let Angular render the 404
-                routes.MapRoute(
-                    name: "frontend-home",
-                    template: "beta/{*path}",
-                    defaults: new { controller = "Home", action = "Beta" });
+                    name: "frontend",
+                    template: "{*path}",
+                    defaults: new { controller = "Frontend", action = "Index" });
             });
 
             this.EnsureDatabaseCreated(app);

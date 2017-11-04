@@ -8,6 +8,7 @@ namespace ClickerHeroesTrackerWebsite
     using System.IO;
     using System.Linq;
     using System.Net.Http;
+    using AspNet.Security.OAuth.Validation;
     using AspNet.Security.OpenIdConnect.Primitives;
     using ClickerHeroesTrackerWebsite.Configuration;
     using ClickerHeroesTrackerWebsite.Instrumentation;
@@ -15,12 +16,11 @@ namespace ClickerHeroesTrackerWebsite
     using ClickerHeroesTrackerWebsite.Models.Game;
     using ClickerHeroesTrackerWebsite.Models.Settings;
     using ClickerHeroesTrackerWebsite.Services.Authentication;
-    using ClickerHeroesTrackerWebsite.Services.ContentManagement;
     using ClickerHeroesTrackerWebsite.Services.Database;
     using ClickerHeroesTrackerWebsite.Services.Email;
     using ClickerHeroesTrackerWebsite.Services.UploadProcessing;
     using Microsoft.ApplicationInsights.AspNetCore.Extensions;
-    using Microsoft.AspNetCore.Builder;
+    using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.DataProtection;
     using Microsoft.AspNetCore.Hosting;
     using Microsoft.AspNetCore.Identity;
@@ -169,7 +169,16 @@ namespace ClickerHeroesTrackerWebsite
             services.AddSingleton<FacebookAssertionGrantHandler>();
             services.AddSingleton<MicrosoftAssertionGrantHandler>();
 
-            this.ConfigureAuthentication(services);
+            services.AddAuthentication()
+                .AddOAuthValidation();
+
+            services.AddAuthorization(options =>
+            {
+                options.DefaultPolicy = new AuthorizationPolicyBuilder()
+                        .AddAuthenticationSchemes(OAuthValidationDefaults.AuthenticationScheme)
+                        .RequireAuthenticatedUser()
+                        .Build();
+            });
 
             var buildInfoProvider = new BuildInfoProvider(this.Environment);
 
@@ -177,7 +186,6 @@ namespace ClickerHeroesTrackerWebsite
             services.Configure((ApplicationInsightsServiceOptions options) =>
             {
                 options.ApplicationVersion = buildInfoProvider.BuildId;
-                options.EnableAuthenticationTrackingJavaScript = true;
             });
 
             services.AddCors();
@@ -230,7 +238,6 @@ namespace ClickerHeroesTrackerWebsite
             services.AddSingleton<IOptions<PasswordHasherOptions>, PasswordHasherOptionsAccessor>();
 
             // Per request registrations
-            services.AddScoped<IContentManager, ContentManager>();
             services.AddScoped<ICounterProvider, CounterProvider>();
             services.AddScoped<IDatabaseCommandFactory, DatabaseCommandFactory>();
             services.AddScoped<IUserSettingsProvider, UserSettingsProvider>();

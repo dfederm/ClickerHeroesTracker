@@ -6,18 +6,8 @@ namespace ClickerHeroesTrackerWebsite.Utility
 {
     using System;
 
-    public static class StringExtensions
+    internal static class StringExtensions
     {
-        public static string ToCamelCase(this string str)
-        {
-            if (str == null || str.Length == 0 || char.IsLower(str[0]))
-            {
-                return str;
-            }
-
-            return char.ToLowerInvariant(str[0]) + str.Substring(1);
-        }
-
         public static TEnum SafeParseEnum<TEnum>(this string str)
             where TEnum : struct
         {
