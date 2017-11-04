@@ -1,6 +1,6 @@
 import { Component, OnInit } from "@angular/core";
 import { ActivatedRoute, Router } from "@angular/router";
-import { UploadService, IUpload } from "../../services/uploadService/uploadService";
+import { UploadService } from "../../services/uploadService/uploadService";
 import { AuthenticationService, IUserInfo } from "../../services/authenticationService/authenticationService";
 import Decimal from "decimal.js";
 import { AppInsightsService } from "@markpieszak/ng-application-insights";
@@ -8,6 +8,7 @@ import { NgbModal } from "@ng-bootstrap/ng-bootstrap";
 import { switchMap } from "rxjs/operators";
 
 import { SettingsService, IUserSettings } from "../../services/settingsService/settingsService";
+import { IUpload } from "../../models";
 
 // tslint:disable-next-line:no-require-imports no-var-requires
 const gameData: IGameData = require("../../../../Website/src/wwwroot/data/GameData.json");

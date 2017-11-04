@@ -11,8 +11,9 @@ import { NgbModal } from "@ng-bootstrap/ng-bootstrap";
 import { UploadComponent } from "./upload";
 import { ExponentialPipe } from "../../pipes/exponentialPipe";
 import { AuthenticationService, IUserInfo } from "../../services/authenticationService/authenticationService";
-import { UploadService, IUpload } from "../../services/uploadService/uploadService";
+import { UploadService } from "../../services/uploadService/uploadService";
 import { SettingsService, IUserSettings } from "../../services/settingsService/settingsService";
+import { IUpload } from "../../models";
 
 describe("UploadComponent", () => {
     let component: UploadComponent;
@@ -85,24 +86,24 @@ describe("UploadComponent", () => {
             {
                 imports: [FormsModule],
                 declarations:
-                [
-                    UploadComponent,
-                    ExponentialPipe,
-                ],
+                    [
+                        UploadComponent,
+                        ExponentialPipe,
+                    ],
                 providers:
-                [
-                    { provide: AuthenticationService, useValue: authenticationService },
-                    { provide: ActivatedRoute, useValue: route },
-                    { provide: Router, useValue: router },
-                    { provide: UploadService, useValue: uploadService },
-                    { provide: SettingsService, useValue: settingsService },
-                    { provide: ChangeDetectorRef, useValue: changeDetectorRef },
-                    { provide: AppInsightsService, useValue: appInsights },
-                    { provide: NgbModal, useValue: modalService },
-                    DatePipe,
-                    PercentPipe,
-                    ExponentialPipe,
-                ],
+                    [
+                        { provide: AuthenticationService, useValue: authenticationService },
+                        { provide: ActivatedRoute, useValue: route },
+                        { provide: Router, useValue: router },
+                        { provide: UploadService, useValue: uploadService },
+                        { provide: SettingsService, useValue: settingsService },
+                        { provide: ChangeDetectorRef, useValue: changeDetectorRef },
+                        { provide: AppInsightsService, useValue: appInsights },
+                        { provide: NgbModal, useValue: modalService },
+                        DatePipe,
+                        PercentPipe,
+                        ExponentialPipe,
+                    ],
                 schemas: [NO_ERRORS_SCHEMA],
             })
             .compileComponents()

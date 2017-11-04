@@ -4,7 +4,7 @@ import { DatePipe } from "@angular/common";
 import { NO_ERRORS_SCHEMA } from "@angular/core";
 
 import { UploadsTableComponent } from "./uploadsTable";
-import { UploadService, IUploadSummaryListResponse } from "../../services/uploadService/uploadService";
+import { UserService, IUploadSummaryListResponse } from "../../services/userService/userService";
 
 describe("UploadsTableComponent", () => {
     let component: UploadsTableComponent;
@@ -23,15 +23,16 @@ describe("UploadsTableComponent", () => {
         ];
 
     beforeEach(async(() => {
-        let uploadService = {
-            getUploads(page: number, count: number): Promise<IUploadSummaryListResponse> {
+        let userService = {
+            getUploads(userName: string, page: number, count: number): Promise<IUploadSummaryListResponse> {
+                expect(userName).toEqual(component.userName);
                 let uploadsResponse: IUploadSummaryListResponse = {
                     pagination:
-                    {
-                        count: uploads.length,
-                        next: "someNext",
-                        previous: "somePrevious",
-                    },
+                        {
+                            count: uploads.length,
+                            next: "someNext",
+                            previous: "somePrevious",
+                        },
                     uploads: uploads.slice((page - 1) * count, page * count),
                 };
                 return Promise.resolve(uploadsResponse);
@@ -42,10 +43,10 @@ describe("UploadsTableComponent", () => {
             {
                 declarations: [UploadsTableComponent],
                 providers:
-                [
-                    { provide: UploadService, useValue: uploadService },
-                    DatePipe,
-                ],
+                    [
+                        { provide: UserService, useValue: userService },
+                        DatePipe,
+                    ],
                 schemas: [NO_ERRORS_SCHEMA],
             })
             .compileComponents()
@@ -96,8 +97,8 @@ describe("UploadsTableComponent", () => {
     }));
 
     it("should display an error when the upload service errors", async(() => {
-        let uploadService = TestBed.get(UploadService);
-        spyOn(uploadService, "getUploads").and.returnValue(Promise.reject("someReason"));
+        let userService = TestBed.get(UserService);
+        spyOn(userService, "getUploads").and.returnValue(Promise.reject("someReason"));
 
         fixture.detectChanges();
         fixture.whenStable().then(() => {
@@ -109,8 +110,8 @@ describe("UploadsTableComponent", () => {
     }));
 
     it("should display an error when the upload service returns an invalid response", async(() => {
-        let uploadService = TestBed.get(UploadService);
-        spyOn(uploadService, "getUploads").and.returnValue(Promise.resolve({}));
+        let userService = TestBed.get(UserService);
+        spyOn(userService, "getUploads").and.returnValue(Promise.resolve({}));
 
         fixture.detectChanges();
         fixture.whenStable().then(() => {

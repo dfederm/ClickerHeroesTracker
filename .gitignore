@@ -16,11 +16,8 @@
 # Visual Studio Publish settings
 PublishProfiles/
 
-# npm package dir too
+# npm packages
 node_modules/
-
-# generated assets from the WebClient
-dist/
 
 # WebClient logs
 logs/
@@ -28,16 +25,8 @@ logs/
 # WebClient-generated
 **/wwwroot/index.html
 **/wwwroot/manifest.json
-
-# bower and npm package dir
-**/wwwroot/lib/*
-
-# generated js
-**/wwwroot/**/*.js
-**/wwwroot/**/*.js.map
-
-# generated css
-**/wwwroot/css/*.min.css
+**/wwwroot/*.js
+**/wwwroot/*.js.map
 
 # in-memory database used on dev machines
 cht.db

@@ -9,7 +9,6 @@ namespace ClickerHeroesTrackerWebsite.Controllers
     using System.Net;
     using ClickerHeroesTrackerWebsite.Instrumentation;
     using ClickerHeroesTrackerWebsite.Models;
-    using ClickerHeroesTrackerWebsite.Models.Api;
     using ClickerHeroesTrackerWebsite.Models.Api.Stats;
     using ClickerHeroesTrackerWebsite.Models.Api.Uploads;
     using ClickerHeroesTrackerWebsite.Models.Game;
@@ -53,34 +52,6 @@ namespace ClickerHeroesTrackerWebsite.Controllers
             this.telemetryClient = telemetryClient;
             this.counterProvider = counterProvider;
             this.userManager = userManager;
-        }
-
-        [Route("")]
-        [HttpGet]
-        public IActionResult List(
-            int page = ParameterConstants.UploadSummaryList.Page.Default,
-            int count = ParameterConstants.UploadSummaryList.Count.Default)
-        {
-            // Validate parameters
-            if (page < ParameterConstants.UploadSummaryList.Page.Min)
-            {
-                return this.BadRequest("Invalid parameter: page");
-            }
-
-            if (count < ParameterConstants.UploadSummaryList.Count.Min
-                || count > ParameterConstants.UploadSummaryList.Count.Max)
-            {
-                return this.BadRequest("Invalid parameter: count");
-            }
-
-            var userId = this.userManager.GetUserId(this.User);
-            var model = new UploadSummaryListResponse()
-            {
-                Uploads = this.FetchUploads(userId, page, count),
-                Pagination = this.FetchPagination(userId, page, count),
-            };
-
-            return this.Ok(model);
         }
 
         [Route("{uploadId:int}")]
@@ -434,114 +405,6 @@ namespace ClickerHeroesTrackerWebsite.Controllers
             }
 
             return this.Ok();
-        }
-
-        private List<Upload> FetchUploads(string userId, int page, int count)
-        {
-            const string CommandText = @"
-                SELECT Id, UploadTime
-                FROM Uploads
-                WHERE UserId = @UserId
-                ORDER BY UploadTime DESC
-                OFFSET @Offset ROWS
-                FETCH NEXT @Count ROWS ONLY;";
-            var parameters = new Dictionary<string, object>
-            {
-                { "@UserId", userId },
-                { "@Offset", (page - 1) * count },
-                { "@Count", count },
-            };
-
-            using (var command = this.databaseCommandFactory.Create(CommandText, parameters))
-            using (var reader = command.ExecuteReader())
-            {
-                var uploads = new List<Upload>(count);
-                while (reader.Read())
-                {
-                    uploads.Add(new Upload
-                    {
-                        Id = Convert.ToInt32(reader["Id"]),
-
-                        // The DateTime is a datetime2 which has no timezone so comes out as DateTimeKind.Unknown. Se need to specify the kind so it gets serialized correctly.
-                        TimeSubmitted = DateTime.SpecifyKind(Convert.ToDateTime(reader["UploadTime"]), DateTimeKind.Utc),
-                    });
-                }
-
-                return uploads;
-            }
-        }
-
-        private PaginationMetadata FetchPagination(string userId, int page, int count)
-        {
-            const string GetUploadCountCommandText = @"
-	            SELECT COUNT(*) AS TotalUploads
-		        FROM Uploads
-		        WHERE UserId = @UserId";
-            var parameters = new Dictionary<string, object>
-            {
-                { "@UserId", userId },
-            };
-
-            using (var command = this.databaseCommandFactory.Create(GetUploadCountCommandText, parameters))
-            using (var reader = command.ExecuteReader())
-            {
-                if (!reader.Read())
-                {
-                    return null;
-                }
-
-                var pagination = new PaginationMetadata
-                {
-                    Count = Convert.ToInt32(reader["TotalUploads"]),
-                };
-
-                var currentPath = this.Request.Path;
-                if (page > 1)
-                {
-                    pagination.Previous = string.Format(
-                        "{0}?{1}={2}&{3}={4}",
-                        currentPath,
-                        nameof(page),
-                        page - 1,
-                        nameof(count),
-                        count);
-                }
-
-                if (page <= Math.Ceiling((float)pagination.Count / count))
-                {
-                    pagination.Next = string.Format(
-                        "{0}?{1}={2}&{3}={4}",
-                        currentPath,
-                        nameof(page),
-                        page + 1,
-                        nameof(count),
-                        count);
-                }
-
-                return pagination;
-            }
-        }
-
-        internal static class ParameterConstants
-        {
-            internal static class UploadSummaryList
-            {
-                internal static class Page
-                {
-                    internal const int Min = 1;
-
-                    internal const int Default = 1;
-                }
-
-                internal static class Count
-                {
-                    internal const int Min = 1;
-
-                    internal const int Max = 100;
-
-                    internal const int Default = 10;
-                }
-            }
         }
     }
 }
