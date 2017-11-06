@@ -83,12 +83,24 @@ namespace Website.Controllers
         [Route("{userName}/uploads")]
         [HttpGet]
         [AllowAnonymous]
-        public async Task<IActionResult> List(
+        public async Task<IActionResult> Uploads(
             string userName,
-            int page = ParameterConstants.List.Page.Default,
-            int count = ParameterConstants.List.Count.Default)
+            int page = ParameterConstants.Uploads.Page.Default,
+            int count = ParameterConstants.Uploads.Count.Default)
         {
+            // Validate parameters
             if (string.IsNullOrEmpty(userName))
+            {
+                return this.BadRequest();
+            }
+
+            if (page < ParameterConstants.Uploads.Page.Min)
+            {
+                return this.BadRequest();
+            }
+
+            if (count < ParameterConstants.Uploads.Count.Min
+                || count > ParameterConstants.Uploads.Count.Max)
             {
                 return this.BadRequest();
             }
@@ -105,23 +117,15 @@ namespace Website.Controllers
                 return this.NotFound();
             }
 
+            var userSettings = this.userSettingsProvider.Get(userId);
+            var isAdmin = this.User.IsInRole("Admin");
             var currentUserId = this.userManager.GetUserId(this.User);
-            if (!userId.Equals(currentUserId, StringComparison.OrdinalIgnoreCase)
-                && !this.User.IsInRole("Admin"))
+            var isOwn = userId.Equals(currentUserId, StringComparison.OrdinalIgnoreCase);
+            var isPublic = userSettings.AreUploadsPublic.GetValueOrDefault(true);
+            var isPermitted = isOwn || isPublic || isAdmin;
+            if (!isPermitted)
             {
                 return this.Forbid();
-            }
-
-            // Validate parameters
-            if (page < ParameterConstants.List.Page.Min)
-            {
-                return this.BadRequest();
-            }
-
-            if (count < ParameterConstants.List.Count.Min
-                || count > ParameterConstants.List.Count.Max)
-            {
-                return this.BadRequest();
             }
 
             const string GetUploadsCommandText = @"
@@ -167,34 +171,32 @@ namespace Website.Controllers
             using (var command = this.databaseCommandFactory.Create(GetUploadCountCommandText, getUploadCountparameters))
             using (var reader = command.ExecuteReader())
             {
-                if (!reader.Read())
+                if (reader.Read())
                 {
-                    return null;
-                }
+                    pagination.Count = Convert.ToInt32(reader["TotalUploads"]);
 
-                pagination.Count = Convert.ToInt32(reader["TotalUploads"]);
+                    var currentPath = this.Request.Path;
+                    if (page > 1)
+                    {
+                        pagination.Previous = string.Format(
+                            "{0}?{1}={2}&{3}={4}",
+                            currentPath,
+                            nameof(page),
+                            page - 1,
+                            nameof(count),
+                            count);
+                    }
 
-                var currentPath = this.Request.Path;
-                if (page > 1)
-                {
-                    pagination.Previous = string.Format(
-                        "{0}?{1}={2}&{3}={4}",
-                        currentPath,
-                        nameof(page),
-                        page - 1,
-                        nameof(count),
-                        count);
-                }
-
-                if (page <= Math.Ceiling((float)pagination.Count / count))
-                {
-                    pagination.Next = string.Format(
-                        "{0}?{1}={2}&{3}={4}",
-                        currentPath,
-                        nameof(page),
-                        page + 1,
-                        nameof(count),
-                        count);
+                    if (page <= Math.Ceiling((float)pagination.Count / count))
+                    {
+                        pagination.Next = string.Format(
+                            "{0}?{1}={2}&{3}={4}",
+                            currentPath,
+                            nameof(page),
+                            page + 1,
+                            nameof(count),
+                            count);
+                    }
                 }
             }
 
@@ -344,6 +346,146 @@ namespace Website.Controllers
             };
 
             return this.Ok(data);
+        }
+
+        [Route("{userName}/follows")]
+        [HttpPost]
+        public async Task<IActionResult> AddFollow(string userName, [FromBody] AddFollowRequest model)
+        {
+            if (string.IsNullOrEmpty(userName))
+            {
+                return this.BadRequest();
+            }
+
+            if (string.IsNullOrEmpty(model.FollowUserName))
+            {
+                return this.BadRequest();
+            }
+
+            var user = await this.userManager.FindByNameAsync(userName);
+            if (user == null)
+            {
+                return this.NotFound();
+            }
+
+            var userId = await this.userManager.GetUserIdAsync(user);
+            if (string.IsNullOrEmpty(userId))
+            {
+                return this.NotFound();
+            }
+
+            var currentUserId = this.userManager.GetUserId(this.User);
+            if (!userId.Equals(currentUserId, StringComparison.OrdinalIgnoreCase)
+                && !this.User.IsInRole("Admin"))
+            {
+                return this.Forbid();
+            }
+
+            var followUser = await this.userManager.FindByNameAsync(model.FollowUserName);
+            if (followUser == null)
+            {
+                return this.NotFound();
+            }
+
+            var followUserId = await this.userManager.GetUserIdAsync(followUser);
+            if (string.IsNullOrEmpty(followUserId))
+            {
+                return this.NotFound();
+            }
+
+            var parameters = new Dictionary<string, object>
+            {
+                { "@UserId", userId },
+                { "@FollowUserId", followUserId },
+            };
+            const string CommandText = @"
+                MERGE INTO UserFollows WITH (HOLDLOCK)
+                USING
+                    (VALUES (@UserId, @FollowUserId))
+                        AS Input(UserId, FollowUserId)
+                    ON UserFollows.UserId = Input.UserId
+                    AND UserFollows.FollowUserId = Input.FollowUserId
+                WHEN NOT MATCHED THEN
+                    INSERT (UserId, FollowUserId)
+                    VALUES(@UserId, @FollowUserId);";
+            using (var command = this.databaseCommandFactory.Create(
+                CommandText,
+                parameters))
+            {
+                command.ExecuteNonQuery();
+            }
+
+            return this.Ok();
+        }
+
+        [Route("{userName}/follows/{followUserName}")]
+        [HttpDelete]
+        public async Task<IActionResult> RemoveFollow(string userName, string followUserName)
+        {
+            if (string.IsNullOrEmpty(userName))
+            {
+                return this.BadRequest();
+            }
+
+            if (string.IsNullOrEmpty(followUserName))
+            {
+                return this.BadRequest();
+            }
+
+            var user = await this.userManager.FindByNameAsync(userName);
+            if (user == null)
+            {
+                return this.NotFound();
+            }
+
+            var userId = await this.userManager.GetUserIdAsync(user);
+            if (string.IsNullOrEmpty(userId))
+            {
+                return this.NotFound();
+            }
+
+            var currentUserId = this.userManager.GetUserId(this.User);
+            if (!userId.Equals(currentUserId, StringComparison.OrdinalIgnoreCase)
+                && !this.User.IsInRole("Admin"))
+            {
+                return this.Forbid();
+            }
+
+            var followUser = await this.userManager.FindByNameAsync(followUserName);
+            if (followUser == null)
+            {
+                return this.NotFound();
+            }
+
+            var followUserId = await this.userManager.GetUserIdAsync(followUser);
+            if (string.IsNullOrEmpty(followUserId))
+            {
+                return this.NotFound();
+            }
+
+            var parameters = new Dictionary<string, object>
+            {
+                { "@UserId", userId },
+                { "@FollowUserId", followUserId },
+            };
+            const string CommandText = @"
+                DELETE
+                FROM UserFollows
+                WHERE UserId = @UserId
+                AND FollowUserId = @FollowUserId;
+                SELECT @@ROWCOUNT;";
+            using (var command = this.databaseCommandFactory.Create(
+                CommandText,
+                parameters))
+            {
+                var numDeletions = Convert.ToInt32(command.ExecuteScalar());
+                if (numDeletions == 0)
+                {
+                    return this.NotFound();
+                }
+            }
+
+            return this.Ok();
         }
 
         [Route("{userName}/settings")]
@@ -656,7 +798,7 @@ namespace Website.Controllers
 
         internal static class ParameterConstants
         {
-            internal static class List
+            internal static class Uploads
             {
                 internal static class Page
                 {

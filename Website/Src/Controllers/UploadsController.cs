@@ -122,7 +122,7 @@ namespace ClickerHeroesTrackerWebsite.Controllers
 
             if (!isPermitted)
             {
-                return this.Unauthorized();
+                return this.Forbid();
             }
 
             // Only return the raw upload content if it's the requesting user's or an admin requested it.
@@ -370,7 +370,7 @@ namespace ClickerHeroesTrackerWebsite.Controllers
                     if (!string.Equals(uploadUserId, userId, StringComparison.OrdinalIgnoreCase) && !isAdmin)
                     {
                         // Not this user's, so not allowed
-                        return this.Unauthorized();
+                        return this.Forbid();
                     }
                 }
                 else
