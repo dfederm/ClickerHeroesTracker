@@ -47,22 +47,36 @@ namespace ClickerHeroesTrackerWebsite.Tests.Mocks
 
         public static Mock<IDatabaseCommand> CreateMockDatabaseCommand(
             IDictionary<string, object> expectedParameters,
-            IDataReader dataReader = null)
+            IDataReader dataReader)
+        {
+            var mockDatabaseCommand = CreateMockDatabaseCommandWithoutExecution(expectedParameters);
+            mockDatabaseCommand.Setup(_ => _.ExecuteReader()).Returns(dataReader);
+            return mockDatabaseCommand;
+        }
+
+        public static Mock<IDatabaseCommand> CreateMockDatabaseCommand(
+            IDictionary<string, object> expectedParameters,
+            object scalar)
+        {
+            var mockDatabaseCommand = CreateMockDatabaseCommandWithoutExecution(expectedParameters);
+            mockDatabaseCommand.Setup(_ => _.ExecuteScalar()).Returns(scalar);
+            return mockDatabaseCommand;
+        }
+
+        public static Mock<IDatabaseCommand> CreateMockDatabaseCommand(
+            IDictionary<string, object> expectedParameters)
+        {
+            var mockDatabaseCommand = CreateMockDatabaseCommandWithoutExecution(expectedParameters);
+            mockDatabaseCommand.Setup(_ => _.ExecuteNonQuery());
+            return mockDatabaseCommand;
+        }
+
+        private static Mock<IDatabaseCommand> CreateMockDatabaseCommandWithoutExecution(IDictionary<string, object> expectedParameters)
         {
             var mockDatabaseCommand = new Mock<IDatabaseCommand>(MockBehavior.Strict);
-            mockDatabaseCommand.SetupSet(_ => _.CommandText = It.IsAny<string>()).Verifiable();
-            mockDatabaseCommand.SetupSet(_ => _.Parameters = It.Is<IDictionary<string, object>>(parameters => DictionaryEquals(parameters, expectedParameters))).Verifiable();
-            mockDatabaseCommand.Setup(_ => _.Dispose()).Verifiable();
-
-            if (dataReader == null)
-            {
-                mockDatabaseCommand.Setup(_ => _.ExecuteNonQuery()).Verifiable();
-            }
-            else
-            {
-                mockDatabaseCommand.Setup(_ => _.ExecuteReader()).Returns(dataReader).Verifiable();
-            }
-
+            mockDatabaseCommand.SetupSet(_ => _.CommandText = It.IsAny<string>());
+            mockDatabaseCommand.SetupSet(_ => _.Parameters = It.Is<IDictionary<string, object>>(parameters => DictionaryEquals(parameters, expectedParameters)));
+            mockDatabaseCommand.Setup(_ => _.Dispose());
             return mockDatabaseCommand;
         }
 
