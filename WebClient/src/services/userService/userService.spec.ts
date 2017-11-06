@@ -166,7 +166,7 @@ describe("UserService", () => {
 
             expect(lastConnection).toBeDefined("no http service connection made");
             expect(lastConnection.request.method).toEqual(RequestMethod.Get, "method invalid");
-            expect(lastConnection.request.url).toEqual(`/api/users/${userName}/progress?start=${encodeURIComponent(startString)}&end=${encodeURIComponent(endString)}`, "url invalid");
+            expect(lastConnection.request.url).toEqual(`/api/users/${userName}/progress?start=${startString}&end=${endString}`, "url invalid");
             expect(authenticationService.getAuthHeaders).toHaveBeenCalled();
         }));
 
