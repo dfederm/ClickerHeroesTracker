@@ -79,7 +79,7 @@ export class AdminComponent implements OnInit {
     public recompute(): void {
         this.recomputeError = null;
 
-        let uploadIds = [];
+        let uploadIds: number[] = [];
         let uploadIdsRaw = this.recomputeUploadIds.split(",");
         for (let i = 0; i < uploadIdsRaw.length; i++) {
             let uploadId = parseInt(uploadIdsRaw[i]);
@@ -92,16 +92,18 @@ export class AdminComponent implements OnInit {
         }
 
         this.isRecomputeLoading = true;
-        let headers = this.authenticationService.getAuthHeaders();
-        headers.append("Content-Type", "application/json");
-        let options = new RequestOptions({ headers });
-        let body: IRecomputeRequest = {
-            uploadIds,
-            priority: this.recomputePriority,
-        };
-        this.http
-            .post("/api/admin/recompute", body, options)
-            .toPromise()
+        this.authenticationService.getAuthHeaders()
+            .then(headers => {
+                headers.append("Content-Type", "application/json");
+                let options = new RequestOptions({ headers });
+                let body: IRecomputeRequest = {
+                    uploadIds,
+                    priority: this.recomputePriority,
+                };
+                return this.http
+                    .post("/api/admin/recompute", body, options)
+                    .toPromise();
+            })
             .then(() => {
                 this.isRecomputeLoading = false;
                 this.refreshQueueData();
@@ -133,15 +135,17 @@ export class AdminComponent implements OnInit {
         this.clearQueueError = null;
         this.isClearQueueLoading = true;
 
-        let headers = this.authenticationService.getAuthHeaders();
-        headers.append("Content-Type", "application/json");
-        let options = new RequestOptions({ headers });
-        let body: IClearQueueRequest = {
-            priority: this.clearQueuePriority,
-        };
-        this.http
-            .post("/api/admin/clearqueue", body, options)
-            .toPromise()
+        this.authenticationService.getAuthHeaders()
+            .then(headers => {
+                headers.append("Content-Type", "application/json");
+                let options = new RequestOptions({ headers });
+                let body: IClearQueueRequest = {
+                    priority: this.clearQueuePriority,
+                };
+                return this.http
+                    .post("/api/admin/clearqueue", body, options)
+                    .toPromise();
+            })
             .then(() => {
                 this.isClearQueueLoading = false;
                 this.refreshQueueData();
@@ -176,10 +180,12 @@ export class AdminComponent implements OnInit {
         this.deletedStaleUploads = 0;
         this.totalStaleUploads = 0;
 
-        let headers = this.authenticationService.getAuthHeaders();
-        let options = new RequestOptions({ headers });
-        this.http.get("/api/admin/staleuploads", options)
-            .toPromise()
+        this.authenticationService.getAuthHeaders()
+            .then(headers => {
+                let options = new RequestOptions({ headers });
+                return this.http.get("/api/admin/staleuploads", options)
+                    .toPromise();
+            })
             .then(response => {
                 this.isStaleUploadsLoading = false;
                 this.staleUploadIds = response.json();
@@ -221,10 +227,12 @@ export class AdminComponent implements OnInit {
 
     private refreshQueueData(): Promise<void> {
         this.isLoadingQueues = true;
-        let headers = this.authenticationService.getAuthHeaders();
-        let options = new RequestOptions({ headers });
-        return this.http.get("/api/admin/queues", options)
-            .toPromise()
+        return this.authenticationService.getAuthHeaders()
+            .then(headers => {
+                let options = new RequestOptions({ headers });
+                return this.http.get("/api/admin/queues", options)
+                    .toPromise();
+            })
             .then(response => {
                 this.isLoadingQueues = false;
                 this.queues = response.json();

@@ -61,6 +61,7 @@ describe("AuthenticationService", () => {
             let expectedUserInfo = createResponseUserInfo();
 
             let authenticationService = injector.get(AuthenticationService) as AuthenticationService;
+            tick();
 
             expect(lastConnection).not.toBeNull("no http service connection made");
             expect(lastConnection.request.method).toEqual(RequestMethod.Post, "method invalid");
@@ -96,6 +97,7 @@ describe("AuthenticationService", () => {
             let expectedUserInfo = createResponseUserInfo();
 
             let authenticationService = injector.get(AuthenticationService) as AuthenticationService;
+            tick();
 
             expect(lastConnection).not.toBeNull("no http service connection made");
             expect(lastConnection.request.method).toEqual(RequestMethod.Post, "method invalid");
@@ -126,22 +128,34 @@ describe("AuthenticationService", () => {
     });
 
     describe("getAuthHeaders", () => {
-        it("should return empty headers when not logged in", () => {
+        it("should return empty headers when not logged in", done => {
             (localStorage.getItem as jasmine.Spy).and.returnValue(null);
 
             let authenticationService = injector.get(AuthenticationService) as AuthenticationService;
-            let headers = authenticationService.getAuthHeaders();
-            expect(headers.keys().length).toEqual(0);
+            return authenticationService.getAuthHeaders()
+                .then(headers => {
+                    expect(headers.keys().length).toEqual(0);
+                })
+                .then(done)
+                .catch(done.fail);
         });
 
-        it("should get auth headers when logged in", () => {
+        it("should get auth headers when logged in", done => {
             let tokens = createCachedAuthModel();
             (localStorage.getItem as jasmine.Spy).and.returnValue(JSON.stringify(tokens));
 
             let authenticationService = injector.get(AuthenticationService) as AuthenticationService;
-            let headers = authenticationService.getAuthHeaders();
-            expect(headers.keys().length).toEqual(1);
-            expect(headers.get("Authorization")).toEqual("someTokenType someAccessToken");
+
+            // It tries to refresh initially, and the headers will be blocked until the refresh responds.
+            lastConnection.mockRespond(new Response(new ResponseOptions({ body: JSON.stringify(tokens) })));
+
+            return authenticationService.getAuthHeaders()
+                .then(headers => {
+                    expect(headers.keys().length).toEqual(1);
+                    expect(headers.get("Authorization")).toEqual("someTokenType someAccessToken");
+                })
+                .then(done)
+                .catch(done.fail);
         });
     });
 
@@ -241,9 +255,12 @@ describe("AuthenticationService", () => {
                 .subscribe(userInfo => {
                     userInfoLog.push(userInfo);
                 });
-            authenticationService.logInWithAssertion("someGrantType", "someAssertion")
+            authenticationService.logInWithAssertion("someGrantType", "someAssertion", null)
                 .then(() => logInSuccessful = true)
                 .catch(e => error = e);
+
+            // Tick the getAuthHeaders call
+            tick();
 
             expect(lastConnection).not.toBeNull("no http service connection made");
             expect(lastConnection.request.method).toEqual(RequestMethod.Post, "method invalid");
@@ -267,9 +284,12 @@ describe("AuthenticationService", () => {
             let authenticationService = injector.get(AuthenticationService) as AuthenticationService;
             authenticationService.userInfo()
                 .subscribe(_ => userInfoLog.push(_));
-            authenticationService.logInWithAssertion("someGrantType", "someAssertion")
+            authenticationService.logInWithAssertion("someGrantType", "someAssertion", null)
                 .then(() => logInSuccessful = true)
                 .catch(e => error = e);
+
+            // Tick the getAuthHeaders call
+            tick();
 
             expect(lastConnection).not.toBeNull("no http service connection made");
             expect(lastConnection.request.method).toEqual(RequestMethod.Post, "method invalid");

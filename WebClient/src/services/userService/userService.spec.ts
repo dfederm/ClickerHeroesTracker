@@ -1,7 +1,6 @@
 import { ReflectiveInjector } from "@angular/core";
 import { fakeAsync, tick } from "@angular/core/testing";
-import { BaseRequestOptions, ConnectionBackend, Http, RequestOptions } from "@angular/http";
-import { Response, ResponseOptions, RequestMethod } from "@angular/http";
+import { BaseRequestOptions, ConnectionBackend, Http, Headers, RequestOptions, Response, ResponseOptions, RequestMethod } from "@angular/http";
 import { MockBackend, MockConnection } from "@angular/http/testing";
 import { AppInsightsService } from "@markpieszak/ng-application-insights";
 
@@ -27,7 +26,7 @@ describe("UserService", () => {
 
     beforeEach(() => {
         authenticationService = jasmine.createSpyObj("authenticationService", ["getAuthHeaders"]);
-        (authenticationService.getAuthHeaders as jasmine.Spy).and.returnValue(new Headers());
+        (authenticationService.getAuthHeaders as jasmine.Spy).and.returnValue(Promise.resolve(new Headers()));
 
         appInsights = jasmine.createSpyObj("appInsights", ["trackEvent"]);
 
@@ -55,6 +54,9 @@ describe("UserService", () => {
         it("should make the correct api call", fakeAsync(() => {
             userService.create(userName, email, password);
 
+            // Tick the getAuthHeaders call
+            tick();
+
             expect(lastConnection).toBeDefined("no http service connection made");
             expect(lastConnection.request.method).toEqual(RequestMethod.Post, "method invalid");
             expect(lastConnection.request.url).toEqual("/api/users", "url invalid");
@@ -67,6 +69,9 @@ describe("UserService", () => {
             userService.create(userName, email, password)
                 .then(() => succeeded = true)
                 .catch((e: string) => error = e);
+
+            // Tick the getAuthHeaders call
+            tick();
 
             lastConnection.mockRespond(new Response(new ResponseOptions()));
             tick();
@@ -83,6 +88,9 @@ describe("UserService", () => {
                 .then(() => succeeded = true)
                 .catch((e: string) => error = e);
 
+            // Tick the getAuthHeaders call
+            tick();
+
             lastConnection.mockError(new Error("someError"));
             tick();
 
@@ -97,6 +105,9 @@ describe("UserService", () => {
             userService.create(userName, email, password)
                 .then(() => succeeded = true)
                 .catch((e: string[]) => errors = e);
+
+            // Tick the getAuthHeaders call
+            tick();
 
             let validationError: IValidationErrorResponse = {
                 field0: ["error0_0", "error0_1", "error0_2"],
@@ -116,19 +127,25 @@ describe("UserService", () => {
         let page = 1;
         let count = 2;
 
-        it("should make an api call", () => {
+        it("should make an api call", fakeAsync(() => {
             userService.getUploads(userName, page, count);
+
+            // Tick the getAuthHeaders call
+            tick();
 
             expect(lastConnection).toBeDefined("no http service connection made");
             expect(lastConnection.request.method).toEqual(RequestMethod.Get, "method invalid");
             expect(lastConnection.request.url).toEqual(`/api/users/${userName}/uploads?page=${page}&count=${count}`, "url invalid");
             expect(authenticationService.getAuthHeaders).toHaveBeenCalled();
-        });
+        }));
 
         it("should return some uploads", fakeAsync(() => {
             let response: IUploadSummaryListResponse;
             userService.getUploads(userName, page, count)
                 .then((r: IUploadSummaryListResponse) => response = r);
+
+            // Tick the getAuthHeaders call
+            tick();
 
             let expectedResponse: IUploadSummaryListResponse = { pagination: { count: 0, next: "", previous: "" }, uploads: [] };
             lastConnection.mockRespond(new Response(new ResponseOptions({ body: JSON.stringify(expectedResponse) })));
@@ -144,6 +161,9 @@ describe("UserService", () => {
             userService.getUploads(userName, page, count)
                 .then((r: IUploadSummaryListResponse) => response = r)
                 .catch((e: string) => error = e);
+
+            // Tick the getAuthHeaders call
+            tick();
 
             lastConnection.mockError(new Error("someError"));
             tick();
@@ -164,6 +184,9 @@ describe("UserService", () => {
         it("should make the correct api call", fakeAsync(() => {
             userService.getProgress(userName, startDate, endDate);
 
+            // Tick the getAuthHeaders call
+            tick();
+
             expect(lastConnection).toBeDefined("no http service connection made");
             expect(lastConnection.request.method).toEqual(RequestMethod.Get, "method invalid");
             expect(lastConnection.request.url).toEqual(`/api/users/${userName}/progress?start=${startString}&end=${endString}`, "url invalid");
@@ -174,6 +197,9 @@ describe("UserService", () => {
             let progress: IProgressData;
             userService.getProgress(userName, startDate, endDate)
                 .then((r: IProgressData) => progress = r);
+
+            // Tick the getAuthHeaders call
+            tick();
 
             let expectedResponse: IProgressData = {
                 titanDamageData: {},
@@ -202,6 +228,9 @@ describe("UserService", () => {
                 .then((r: IProgressData) => progress = r)
                 .catch((e: string) => error = e);
 
+            // Tick the getAuthHeaders call
+            tick();
+
             lastConnection.mockError(new Error("someError"));
             tick();
 
@@ -215,6 +244,9 @@ describe("UserService", () => {
         it("should make the correct api call", fakeAsync(() => {
             userService.getFollows(userName);
 
+            // Tick the getAuthHeaders call
+            tick();
+
             expect(lastConnection).toBeDefined("no http service connection made");
             expect(lastConnection.request.method).toEqual(RequestMethod.Get, "method invalid");
             expect(lastConnection.request.url).toEqual(`/api/users/${userName}/follows`, "url invalid");
@@ -225,6 +257,9 @@ describe("UserService", () => {
             let follows: IFollowsData;
             userService.getFollows(userName)
                 .then((r: IFollowsData) => follows = r);
+
+            // Tick the getAuthHeaders call
+            tick();
 
             let expectedResponse: IFollowsData = {
                 follows: [],
@@ -242,6 +277,9 @@ describe("UserService", () => {
                 .then((r: IFollowsData) => follows = r)
                 .catch((e: string) => error = e);
 
+            // Tick the getAuthHeaders call
+            tick();
+
             lastConnection.mockError(new Error("someError"));
             tick();
 
@@ -255,6 +293,9 @@ describe("UserService", () => {
         it("should make the correct api call", fakeAsync(() => {
             userService.getLogins(userName);
 
+            // Tick the getAuthHeaders call
+            tick();
+
             expect(lastConnection).toBeDefined("no http service connection made");
             expect(lastConnection.request.method).toEqual(RequestMethod.Get, "method invalid");
             expect(lastConnection.request.url).toEqual(`/api/users/${userName}/logins`, "url invalid");
@@ -265,6 +306,9 @@ describe("UserService", () => {
             let data: IUserLogins;
             userService.getLogins(userName)
                 .then((d: IUserLogins) => data = d);
+
+            // Tick the getAuthHeaders call
+            tick();
 
             let expectedResponse: IUserLogins = {
                 hasPassword: true,
@@ -287,6 +331,9 @@ describe("UserService", () => {
                 .then((r: IUserLogins) => follows = r)
                 .catch((e: string) => error = e);
 
+            // Tick the getAuthHeaders call
+            tick();
+
             lastConnection.mockError(new Error("someError"));
             tick();
 
@@ -302,6 +349,9 @@ describe("UserService", () => {
         it("should make the correct api call", fakeAsync(() => {
             userService.removeLogin(userName, externalLogin);
 
+            // Tick the getAuthHeaders call
+            tick();
+
             expect(lastConnection).toBeDefined("no http service connection made");
             expect(lastConnection.request.method).toEqual(RequestMethod.Delete, "method invalid");
             expect(lastConnection.request.url).toEqual(`/api/users/${userName}/logins`, "url invalid");
@@ -314,6 +364,9 @@ describe("UserService", () => {
             userService.removeLogin(userName, externalLogin)
                 .then(() => succeeded = true)
                 .catch((e: string) => error = e);
+
+            // Tick the getAuthHeaders call
+            tick();
 
             lastConnection.mockRespond(new Response(new ResponseOptions()));
             tick();
@@ -329,6 +382,9 @@ describe("UserService", () => {
             userService.removeLogin(userName, externalLogin)
                 .then(() => succeeded = true)
                 .catch((e: string) => error = e);
+
+            // Tick the getAuthHeaders call
+            tick();
 
             lastConnection.mockError(new Error("someError"));
             tick();
@@ -345,6 +401,9 @@ describe("UserService", () => {
         it("should make the correct api call", fakeAsync(() => {
             userService.setPassword(userName, newPassword);
 
+            // Tick the getAuthHeaders call
+            tick();
+
             expect(lastConnection).toBeDefined("no http service connection made");
             expect(lastConnection.request.method).toEqual(RequestMethod.Post, "method invalid");
             expect(lastConnection.request.url).toEqual(`/api/users/${userName}/setpassword`, "url invalid");
@@ -357,6 +416,9 @@ describe("UserService", () => {
             userService.setPassword(userName, newPassword)
                 .then(() => succeeded = true)
                 .catch((e: string) => error = e);
+
+            // Tick the getAuthHeaders call
+            tick();
 
             lastConnection.mockRespond(new Response(new ResponseOptions()));
             tick();
@@ -373,6 +435,9 @@ describe("UserService", () => {
                 .then(() => succeeded = true)
                 .catch((e: string) => error = e);
 
+            // Tick the getAuthHeaders call
+            tick();
+
             lastConnection.mockError(new Error("someError"));
             tick();
 
@@ -387,6 +452,9 @@ describe("UserService", () => {
             userService.setPassword(userName, newPassword)
                 .then(() => succeeded = true)
                 .catch((e: string[]) => errors = e);
+
+            // Tick the getAuthHeaders call
+            tick();
 
             let validationError: IValidationErrorResponse = {
                 field0: ["error0_0", "error0_1", "error0_2"],
@@ -409,6 +477,9 @@ describe("UserService", () => {
         it("should make the correct api call", fakeAsync(() => {
             userService.changePassword(userName, currentPassword, newPassword);
 
+            // Tick the getAuthHeaders call
+            tick();
+
             expect(lastConnection).toBeDefined("no http service connection made");
             expect(lastConnection.request.method).toEqual(RequestMethod.Post, "method invalid");
             expect(lastConnection.request.url).toEqual(`/api/users/${userName}/changepassword`, "url invalid");
@@ -421,6 +492,9 @@ describe("UserService", () => {
             userService.changePassword(userName, currentPassword, newPassword)
                 .then(() => succeeded = true)
                 .catch((e: string) => error = e);
+
+            // Tick the getAuthHeaders call
+            tick();
 
             lastConnection.mockRespond(new Response(new ResponseOptions()));
             tick();
@@ -437,6 +511,9 @@ describe("UserService", () => {
                 .then(() => succeeded = true)
                 .catch((e: string) => error = e);
 
+            // Tick the getAuthHeaders call
+            tick();
+
             lastConnection.mockError(new Error("someError"));
             tick();
 
@@ -451,6 +528,9 @@ describe("UserService", () => {
             userService.changePassword(userName, currentPassword, newPassword)
                 .then(() => succeeded = true)
                 .catch((e: string[]) => errors = e);
+
+            // Tick the getAuthHeaders call
+            tick();
 
             let validationError: IValidationErrorResponse = {
                 field0: ["error0_0", "error0_1", "error0_2"],

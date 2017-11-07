@@ -4,7 +4,7 @@ import { Observable } from "rxjs/Observable";
 import { BehaviorSubject } from "rxjs/BehaviorSubject";
 import { Subscription } from "rxjs/Subscription";
 import * as JwtDecode from "jwt-decode";
-import { map } from "rxjs/operators";
+import { map, distinctUntilChanged } from "rxjs/operators";
 import { interval } from "rxjs/observable/interval";
 
 import "rxjs/add/operator/toPromise";
@@ -36,6 +36,10 @@ export class AuthenticationService {
 
     private refreshSubscription: Subscription;
 
+    // This promise is used effectively like a lock.
+    // It should always be assigned just before making a token request and resolve after the request returns.
+    private fetchTokensPromise: Promise<void>;
+
     constructor(private http: Http) {
         let tokensString = localStorage.getItem(AuthenticationService.tokensKey);
         this.currentTokens = tokensString == null ? null : JSON.parse(tokensString);
@@ -58,16 +62,20 @@ export class AuthenticationService {
             .then(() => this.scheduleRefresh());
     }
 
-    public logInWithAssertion(grantType: string, assertion: string, username?: string): Promise<void> {
+    public logInWithAssertion(grantType: string, assertion: string, username: string): Promise<void> {
         let params = new URLSearchParams();
         params.append("grant_type", grantType);
         params.append("assertion", assertion);
 
         if (username) {
             params.append("username", username);
+            return this.fetchTokens(params)
+                .then(() => this.scheduleRefresh());
         }
 
-        return this.fetchTokens(params)
+        // Get the auth headers in case it's an existing user adding an external login
+        return this.getAuthHeaders()
+            .then(headers => this.fetchTokens(params, headers))
             .then(() => this.scheduleRefresh());
     }
 
@@ -83,26 +91,38 @@ export class AuthenticationService {
     }
 
     public userInfo(): Observable<IUserInfo> {
-        return this.userInfoSubject;
+        return this.userInfoSubject.pipe(
+            distinctUntilChanged((x, y) => JSON.stringify(x) === JSON.stringify(y)),
+        );
     }
 
-    public getAuthHeaders(): Headers {
+    public getAuthHeaders(): Promise<Headers> {
         let headers = new Headers();
+        if (this.fetchTokensPromise) {
+            return this.fetchTokensPromise
+                .catch(() => void 0) // Swallow errors as we just use this effectively like a lock
+                .then(() => {
+                    if (this.currentTokens) {
+                        headers.append("Authorization", `${this.currentTokens.token_type} ${this.currentTokens.access_token}`);
+                    }
 
-        if (this.currentTokens) {
-            headers.append("Authorization", `${this.currentTokens.token_type} ${this.currentTokens.access_token}`);
+                    return headers;
+                });
+        } else {
+            return Promise.resolve(headers);
         }
-
-        return headers;
     }
 
-    private fetchTokens(params: URLSearchParams): Promise<void> {
-        let headers = this.getAuthHeaders();
+    private fetchTokens(params: URLSearchParams, headers?: Headers): Promise<void> {
+        if (!headers) {
+            headers = new Headers();
+        }
         headers.append("Content-Type", "application/x-www-form-urlencoded");
 
         let options = new RequestOptions({ headers });
         params.append("scope", "openid offline_access profile email roles");
-        return this.http.post("/api/auth/token", params.toString(), options)
+
+        this.fetchTokensPromise = this.http.post("/api/auth/token", params.toString(), options)
             .toPromise()
             .then(response => {
                 let tokens: IAuthTokenModel = response.json();
@@ -121,6 +141,7 @@ export class AuthenticationService {
 
                 return Promise.resolve();
             });
+        return this.fetchTokensPromise;
     }
 
     private refreshTokens(): Promise<void> {

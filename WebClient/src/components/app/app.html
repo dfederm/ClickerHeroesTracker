@@ -1,5 +1,7 @@
 <ngx-loading [show]="isLoading"></ngx-loading>
-<navbar></navbar>
-<banner></banner>
-<router-outlet></router-outlet>
-<ad></ad>
+<ng-container *ngIf="!isLoading">
+    <navbar></navbar>
+    <banner></banner>
+    <router-outlet></router-outlet>
+    <ad></ad>
+</ng-container>

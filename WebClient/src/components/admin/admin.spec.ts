@@ -2,7 +2,7 @@ import { NO_ERRORS_SCHEMA, DebugElement } from "@angular/core";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { By } from "@angular/platform-browser";
 import { FormsModule } from "@angular/forms";
-import { BaseRequestOptions, ConnectionBackend, Http, RequestOptions, RequestMethod, Response, ResponseOptions } from "@angular/http";
+import { BaseRequestOptions, ConnectionBackend, Http, Headers, RequestOptions, RequestMethod, Response, ResponseOptions } from "@angular/http";
 import { MockBackend, MockConnection } from "@angular/http/testing";
 
 import { AdminComponent, IUploadQueueStats, IValidationErrorResponse } from "./admin";
@@ -92,11 +92,14 @@ describe("AdminComponent", () => {
     describe("Initialization", () => {
         let authenticationService: AuthenticationService;
 
-        beforeEach(() => {
+        beforeEach(done => {
             authenticationService = TestBed.get(AuthenticationService) as AuthenticationService;
-            spyOn(authenticationService, "getAuthHeaders").and.returnValue(new Headers());
+            spyOn(authenticationService, "getAuthHeaders").and.returnValue(Promise.resolve(new Headers()));
 
             fixture.detectChanges();
+            fixture.whenStable()
+                .then(done)
+                .catch(done.fail);
         });
 
         it("should make api call", () => {
@@ -113,6 +116,7 @@ describe("AdminComponent", () => {
                 lastConnection.mockRespond(new Response(new ResponseOptions({ body: JSON.stringify(uploadQueueStats) })));
                 lastConnection = null;
 
+                fixture.detectChanges();
                 fixture.whenStable()
                     .then(() => {
                         // Need to wait for stability again since ngModel is async
@@ -143,6 +147,7 @@ describe("AdminComponent", () => {
             lastConnection.mockError(new Error());
             lastConnection = null;
 
+            fixture.detectChanges();
             fixture.whenStable()
                 .then(() => {
                     fixture.detectChanges();
@@ -163,17 +168,20 @@ describe("AdminComponent", () => {
 
         beforeEach(done => {
             authenticationService = TestBed.get(AuthenticationService) as AuthenticationService;
-            spyOn(authenticationService, "getAuthHeaders").and.returnValue(new Headers());
+            spyOn(authenticationService, "getAuthHeaders").and.returnValue(Promise.resolve(new Headers()));
 
             fixture.detectChanges();
-
-            expect(authenticationService.getAuthHeaders).toHaveBeenCalled();
-            (authenticationService.getAuthHeaders as jasmine.Spy).calls.reset();
-
-            lastConnection.mockRespond(new Response(new ResponseOptions({ body: JSON.stringify(uploadQueueStats) })));
-            lastConnection = null;
-
             fixture.whenStable()
+                .then(() => {
+                    expect(authenticationService.getAuthHeaders).toHaveBeenCalled();
+                    (authenticationService.getAuthHeaders as jasmine.Spy).calls.reset();
+
+                    lastConnection.mockRespond(new Response(new ResponseOptions({ body: JSON.stringify(uploadQueueStats) })));
+                    lastConnection = null;
+
+                    fixture.detectChanges();
+                    return fixture.whenStable();
+                })
                 .then(() => {
                     let forms = fixture.debugElement.queryAll(By.css("form"));
                     expect(forms.length).toEqual(2);
@@ -242,6 +250,10 @@ describe("AdminComponent", () => {
 
                         lastConnection.mockRespond(new Response(new ResponseOptions({ body: JSON.stringify(uploadQueueStats) })));
                         lastConnection = null;
+                        return fixture.whenStable();
+                    })
+                    .then(() => {
+                        fixture.detectChanges();
                         return fixture.whenStable();
                     })
                     .then(() => {
@@ -338,17 +350,20 @@ describe("AdminComponent", () => {
 
         beforeEach(done => {
             authenticationService = TestBed.get(AuthenticationService) as AuthenticationService;
-            spyOn(authenticationService, "getAuthHeaders").and.returnValue(new Headers());
+            spyOn(authenticationService, "getAuthHeaders").and.returnValue(Promise.resolve(new Headers()));
 
             fixture.detectChanges();
-
-            expect(authenticationService.getAuthHeaders).toHaveBeenCalled();
-            (authenticationService.getAuthHeaders as jasmine.Spy).calls.reset();
-
-            lastConnection.mockRespond(new Response(new ResponseOptions({ body: JSON.stringify(uploadQueueStats) })));
-            lastConnection = null;
-
             fixture.whenStable()
+                .then(() => {
+                    expect(authenticationService.getAuthHeaders).toHaveBeenCalled();
+                    (authenticationService.getAuthHeaders as jasmine.Spy).calls.reset();
+
+                    lastConnection.mockRespond(new Response(new ResponseOptions({ body: JSON.stringify(uploadQueueStats) })));
+                    lastConnection = null;
+
+                    fixture.detectChanges();
+                    return fixture.whenStable();
+                })
                 .then(() => {
                     let forms = fixture.debugElement.queryAll(By.css("form"));
                     expect(forms.length).toEqual(2);
@@ -378,6 +393,10 @@ describe("AdminComponent", () => {
 
                         lastConnection.mockRespond(new Response(new ResponseOptions({ body: JSON.stringify(uploadQueueStats) })));
                         lastConnection = null;
+                        return fixture.whenStable();
+                    })
+                    .then(() => {
+                        fixture.detectChanges();
                         return fixture.whenStable();
                     })
                     .then(() => {
@@ -448,17 +467,30 @@ describe("AdminComponent", () => {
     });
 
     describe("Stale uploads form", () => {
+        let authenticationService: AuthenticationService;
         let container: DebugElement;
 
-        beforeEach(() => {
+        beforeEach(done => {
             let containers = fixture.debugElement.queryAll(By.css(".col-md-4"));
             expect(containers.length).toEqual(3);
             container = containers[2];
 
-            fixture.detectChanges();
+            authenticationService = TestBed.get(AuthenticationService) as AuthenticationService;
+            spyOn(authenticationService, "getAuthHeaders").and.returnValue(Promise.resolve(new Headers()));
 
-            // Ignore the queue data fetch
-            lastConnection = null;
+            fixture.detectChanges();
+            fixture.whenStable()
+                .then(() => {
+                    fixture.detectChanges();
+
+                    expect(authenticationService.getAuthHeaders).toHaveBeenCalled();
+                    (authenticationService.getAuthHeaders as jasmine.Spy).calls.reset();
+
+                    // Ignore the queue data fetch
+                    lastConnection = null;
+                })
+                .then(done)
+                .catch(done.fail);
         });
 
         it("should initially just show the fetch button", () => {
@@ -474,21 +506,25 @@ describe("AdminComponent", () => {
         });
 
         it("should fetch stale uploads", done => {
-            let authenticationService = TestBed.get(AuthenticationService) as AuthenticationService;
-            spyOn(authenticationService, "getAuthHeaders").and.returnValue(new Headers());
-
             let fetchButton = container.query(By.css("button"));
             fetchButton.nativeElement.click();
 
-            expect(lastConnection).toBeDefined("no http service connection made");
-            expect(lastConnection.request.method).toEqual(RequestMethod.Get, "method invalid");
-            expect(lastConnection.request.url).toEqual("/api/admin/staleuploads", "url invalid");
-            expect(authenticationService.getAuthHeaders).toHaveBeenCalled();
-
-            lastConnection.mockRespond(new Response(new ResponseOptions({ body: JSON.stringify(staleuploads) })));
-            lastConnection = null;
-
+            fixture.detectChanges();
             fixture.whenStable()
+                .then(() => {
+                    fixture.detectChanges();
+
+                    expect(lastConnection).toBeDefined("no http service connection made");
+                    expect(lastConnection.request.method).toEqual(RequestMethod.Get, "method invalid");
+                    expect(lastConnection.request.url).toEqual("/api/admin/staleuploads", "url invalid");
+                    expect(authenticationService.getAuthHeaders).toHaveBeenCalled();
+
+                    lastConnection.mockRespond(new Response(new ResponseOptions({ body: JSON.stringify(staleuploads) })));
+                    lastConnection = null;
+
+                    fixture.detectChanges();
+                    return fixture.whenStable();
+                })
                 .then(() => {
                     fixture.detectChanges();
 
@@ -508,10 +544,7 @@ describe("AdminComponent", () => {
                 .catch(done.fail);
         });
 
-        it("should show errors when queue data fetch fails", done => {
-            let authenticationService = TestBed.get(AuthenticationService) as AuthenticationService;
-            spyOn(authenticationService, "getAuthHeaders").and.returnValue(new Headers());
-
+        it("should show errors when stale uploads fetch fails", done => {
             let fetchButton = container.query(By.css("button"));
             fetchButton.nativeElement.click();
 
@@ -520,10 +553,16 @@ describe("AdminComponent", () => {
                 field1: ["error1_0", "error1_1", "error1_2"],
                 field2: ["error2_0", "error2_1", "error2_2"],
             };
-            lastConnection.mockError(new MockError(new ResponseOptions({ body: validationError })));
-            lastConnection = null;
 
+            fixture.detectChanges();
             fixture.whenStable()
+                .then(() => {
+                    lastConnection.mockError(new MockError(new ResponseOptions({ body: validationError })));
+                    lastConnection = null;
+
+                    fixture.detectChanges();
+                    return fixture.whenStable();
+                })
                 .then(() => {
                     fixture.detectChanges();
 
@@ -536,19 +575,21 @@ describe("AdminComponent", () => {
         });
 
         it("should delete stale uploads", done => {
-            let authenticationService = TestBed.get(AuthenticationService) as AuthenticationService;
-            spyOn(authenticationService, "getAuthHeaders").and.returnValue(new Headers());
-
             let uploadService = TestBed.get(UploadService) as UploadService;
             spyOn(uploadService, "delete").and.returnValue(Promise.resolve());
 
             let fetchButton = container.query(By.css("button"));
             fetchButton.nativeElement.click();
 
-            lastConnection.mockRespond(new Response(new ResponseOptions({ body: JSON.stringify(staleuploads) })));
-            lastConnection = null;
-
+            fixture.detectChanges();
             fixture.whenStable()
+                .then(() => {
+                    lastConnection.mockRespond(new Response(new ResponseOptions({ body: JSON.stringify(staleuploads) })));
+                    lastConnection = null;
+
+                    fixture.detectChanges();
+                    return fixture.whenStable();
+                })
                 .then(() => {
                     fixture.detectChanges();
 
@@ -588,9 +629,6 @@ describe("AdminComponent", () => {
         });
 
         it("should cancel deletion", done => {
-            let authenticationService = TestBed.get(AuthenticationService) as AuthenticationService;
-            spyOn(authenticationService, "getAuthHeaders").and.returnValue(new Headers());
-
             let unresolvedPromises: (() => void)[] = [];
             let numDeletedStaleUploads = staleuploads.length / 2;
             let uploadService = TestBed.get(UploadService) as UploadService;
@@ -604,10 +642,15 @@ describe("AdminComponent", () => {
             let fetchButton = container.query(By.css("button"));
             fetchButton.nativeElement.click();
 
-            lastConnection.mockRespond(new Response(new ResponseOptions({ body: JSON.stringify(staleuploads) })));
-            lastConnection = null;
-
+            fixture.detectChanges();
             fixture.whenStable()
+                .then(() => {
+                    lastConnection.mockRespond(new Response(new ResponseOptions({ body: JSON.stringify(staleuploads) })));
+                    lastConnection = null;
+
+                    fixture.detectChanges();
+                    return fixture.whenStable();
+                })
                 .then(() => {
                     fixture.detectChanges();
 

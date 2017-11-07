@@ -1,7 +1,6 @@
 import { ReflectiveInjector } from "@angular/core";
 import { fakeAsync, tick } from "@angular/core/testing";
-import { BaseRequestOptions, ConnectionBackend, Http, RequestOptions } from "@angular/http";
-import { Response, ResponseOptions, RequestMethod } from "@angular/http";
+import { BaseRequestOptions, ConnectionBackend, Http, Headers, RequestOptions, Response, ResponseOptions, RequestMethod } from "@angular/http";
 import { MockBackend, MockConnection } from "@angular/http/testing";
 import { BehaviorSubject } from "rxjs/BehaviorSubject";
 import { AppInsightsService } from "@markpieszak/ng-application-insights";
@@ -33,7 +32,7 @@ describe("UploadService", () => {
         userInfo = new BehaviorSubject(notLoggedInUser);
         authenticationService = jasmine.createSpyObj("authenticationService", ["userInfo", "getAuthHeaders"]);
         (authenticationService.userInfo as jasmine.Spy).and.returnValue(userInfo);
-        (authenticationService.getAuthHeaders as jasmine.Spy).and.returnValue(new Headers());
+        (authenticationService.getAuthHeaders as jasmine.Spy).and.returnValue(Promise.resolve(new Headers()));
 
         appInsights = jasmine.createSpyObj("appInsights", ["trackEvent"]);
 
@@ -61,6 +60,9 @@ describe("UploadService", () => {
         it("should make the correct api call", fakeAsync(() => {
             uploadService.get(123);
 
+            // Tick the getAuthHeaders call
+            tick();
+
             expect(lastConnection).toBeDefined("no http service connection made");
             expect(lastConnection.request.method).toEqual(RequestMethod.Get, "method invalid");
             expect(lastConnection.request.url).toEqual("/api/uploads/123", "url invalid");
@@ -71,6 +73,9 @@ describe("UploadService", () => {
             let upload: IUpload;
             uploadService.get(123)
                 .then((r: IUpload) => upload = r);
+
+            // Tick the getAuthHeaders call
+            tick();
 
             let expectedUpload: IUpload = { id: 123, timeSubmitted: "someTimeSubmitted", playStyle: "somePlayStyle" };
             lastConnection.mockRespond(new Response(new ResponseOptions({ body: JSON.stringify(expectedUpload) })));
@@ -85,6 +90,9 @@ describe("UploadService", () => {
             uploadService.get(123)
                 .then((r: IUpload) => upload = r)
                 .catch((e: string) => error = e);
+
+            // Tick the getAuthHeaders call
+            tick();
 
             lastConnection.mockError(new Error("someError"));
             tick();
@@ -101,6 +109,9 @@ describe("UploadService", () => {
 
             uploadService.create("someEncodedSaveData", true, "somePlayStyle");
 
+            // Tick the getAuthHeaders call
+            tick();
+
             expect(lastConnection).toBeDefined("no http service connection made");
             expect(lastConnection.request.method).toEqual(RequestMethod.Post, "method invalid");
             expect(lastConnection.request.url).toEqual("/api/uploads", "url invalid");
@@ -112,6 +123,9 @@ describe("UploadService", () => {
             userInfo.next(loggedInUser);
 
             uploadService.create("someEncodedSaveData", true, "somePlayStyle");
+
+            // Tick the getAuthHeaders call
+            tick();
 
             expect(lastConnection).toBeDefined("no http service connection made");
             expect(lastConnection.request.method).toEqual(RequestMethod.Post, "method invalid");
@@ -126,6 +140,9 @@ describe("UploadService", () => {
             uploadService.create("someEncodedSaveData", true, "somePlayStyle")
                 .then((id: number) => uploadId = id)
                 .catch((e: Error) => error = e);
+
+            // Tick the getAuthHeaders call
+            tick();
 
             let expectedError = new Error("someError");
             lastConnection.mockError(expectedError);
@@ -142,6 +159,9 @@ describe("UploadService", () => {
         it("should make an api call", fakeAsync(() => {
             uploadService.delete(123);
 
+            // Tick the getAuthHeaders call
+            tick();
+
             expect(lastConnection).toBeDefined("no http service connection made");
             expect(lastConnection.request.method).toEqual(RequestMethod.Delete, "method invalid");
             expect(lastConnection.request.url).toEqual("/api/uploads/123", "url invalid");
@@ -154,6 +174,9 @@ describe("UploadService", () => {
             uploadService.delete(123)
                 .then(() => succeeded = true)
                 .catch((e: string) => error = e);
+
+            // Tick the getAuthHeaders call
+            tick();
 
             lastConnection.mockError(new Error("someError"));
             tick();

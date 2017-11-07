@@ -133,11 +133,13 @@ export class UserService {
     }
 
     public getUploads(userName: string, page: number, count: number): Promise<IUploadSummaryListResponse> {
-        let headers = this.authenticationService.getAuthHeaders();
-        let options = new RequestOptions({ headers });
-        return this.http
-            .get(`/api/users/${userName}/uploads?page=${page}&count=${count}`, options)
-            .toPromise()
+        return this.authenticationService.getAuthHeaders()
+            .then(headers => {
+                let options = new RequestOptions({ headers });
+                return this.http
+                    .get(`/api/users/${userName}/uploads?page=${page}&count=${count}`, options)
+                    .toPromise();
+            })
             .then(response => response.json() as IUploadSummaryListResponse)
             .catch(error => {
                 let errorMessage = error.message || error.toString();
@@ -151,11 +153,13 @@ export class UserService {
         params.append("start", start.toISOString());
         params.append("end", end.toISOString());
 
-        let headers = this.authenticationService.getAuthHeaders();
-        let options = new RequestOptions({ headers });
-        return this.http
-            .get(`/api/users/${userName}/progress?${params.toString()}`, options)
-            .toPromise()
+        return this.authenticationService.getAuthHeaders()
+            .then(headers => {
+                let options = new RequestOptions({ headers });
+                return this.http
+                    .get(`/api/users/${userName}/progress?${params.toString()}`, options)
+                    .toPromise();
+            })
             .then(response => response.json() as IProgressData)
             .catch(error => {
                 let errorMessage = error.message || error.toString();
@@ -165,11 +169,13 @@ export class UserService {
     }
 
     public getFollows(userName: string): Promise<IFollowsData> {
-        let headers = this.authenticationService.getAuthHeaders();
-        let options = new RequestOptions({ headers });
-        return this.http
-            .get(`/api/users/${userName}/follows`, options)
-            .toPromise()
+        return this.authenticationService.getAuthHeaders()
+            .then(headers => {
+                let options = new RequestOptions({ headers });
+                return this.http
+                    .get(`/api/users/${userName}/follows`, options)
+                    .toPromise();
+            })
             .then(response => response.json() as IFollowsData)
             .catch(error => {
                 let errorMessage = error.message || error.toString();
@@ -179,11 +185,13 @@ export class UserService {
     }
 
     public getLogins(userName: string): Promise<IUserLogins> {
-        let headers = this.authenticationService.getAuthHeaders();
-        let options = new RequestOptions({ headers });
-        return this.http
-            .get(`/api/users/${userName}/logins`, options)
-            .toPromise()
+        return this.authenticationService.getAuthHeaders()
+            .then(headers => {
+                let options = new RequestOptions({ headers });
+                return this.http
+                    .get(`/api/users/${userName}/logins`, options)
+                    .toPromise();
+            })
             .then(response => response.json() as IUserLogins)
             .catch(error => {
                 let errorMessage = error.message || error.toString();
@@ -193,11 +201,13 @@ export class UserService {
     }
 
     public removeLogin(userName: string, externalLogin: IExternalLogin): Promise<void> {
-        let headers = this.authenticationService.getAuthHeaders();
-        let options = new RequestOptions({ headers, body: externalLogin });
-        return this.http
-            .delete(`/api/users/${userName}/logins`, options)
-            .toPromise()
+        return this.authenticationService.getAuthHeaders()
+            .then(headers => {
+                let options = new RequestOptions({ headers, body: externalLogin });
+                return this.http
+                    .delete(`/api/users/${userName}/logins`, options)
+                    .toPromise();
+            })
             .then(() => void 0)
             .catch(error => {
                 let errorMessage = error.message || error.toString();
@@ -207,13 +217,15 @@ export class UserService {
     }
 
     public setPassword(userName: string, newPassword: string): Promise<void> {
-        let headers = this.authenticationService.getAuthHeaders();
-        headers.append("Content-Type", "application/json");
-        let options = new RequestOptions({ headers });
-        let body: ISetPasswordRequest = { newPassword };
-        return this.http
-            .post(`/api/users/${userName}/setpassword`, body, options)
-            .toPromise()
+        return this.authenticationService.getAuthHeaders()
+            .then(headers => {
+                headers.append("Content-Type", "application/json");
+                let options = new RequestOptions({ headers });
+                let body: ISetPasswordRequest = { newPassword };
+                return this.http
+                    .post(`/api/users/${userName}/setpassword`, body, options)
+                    .toPromise();
+            })
             .then(() => void 0)
             .catch(error => {
                 let errors: string[] = [];
@@ -239,13 +251,15 @@ export class UserService {
     }
 
     public changePassword(userName: string, currentPassword: string, newPassword: string): Promise<void> {
-        let headers = this.authenticationService.getAuthHeaders();
-        headers.append("Content-Type", "application/json");
-        let options = new RequestOptions({ headers });
-        let body: IChangePasswordRequest = { currentPassword, newPassword };
-        return this.http
-            .post(`/api/users/${userName}/changepassword`, body, options)
-            .toPromise()
+        return this.authenticationService.getAuthHeaders()
+            .then(headers => {
+                headers.append("Content-Type", "application/json");
+                let options = new RequestOptions({ headers });
+                let body: IChangePasswordRequest = { currentPassword, newPassword };
+                return this.http
+                    .post(`/api/users/${userName}/changepassword`, body, options)
+                    .toPromise();
+            })
             .then(() => void 0)
             .catch(error => {
                 let errors: string[] = [];

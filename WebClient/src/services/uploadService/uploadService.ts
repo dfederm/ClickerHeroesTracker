@@ -22,11 +22,13 @@ export class UploadService {
     }
 
     public get(id: number): Promise<IUpload> {
-        let headers = this.authenticationService.getAuthHeaders();
-        let options = new RequestOptions({ headers });
-        return this.http
-            .get(`/api/uploads/${id}`, options)
-            .toPromise()
+        return this.authenticationService.getAuthHeaders()
+            .then(headers => {
+                let options = new RequestOptions({ headers });
+                return this.http
+                    .get(`/api/uploads/${id}`, options)
+                    .toPromise();
+            })
             .then(response => response.json() as IUpload)
             .catch(error => {
                 let errorMessage = error.message || error.toString();
@@ -36,16 +38,18 @@ export class UploadService {
     }
 
     public create(encodedSaveData: string, addToProgress: boolean, playStyle: string): Promise<number> {
-        let headers = this.authenticationService.getAuthHeaders();
-        headers.append("Content-Type", "application/x-www-form-urlencoded");
-        let options = new RequestOptions({ headers });
-        let params = new URLSearchParams();
-        params.append("encodedSaveData", encodedSaveData);
-        params.append("addToProgress", (addToProgress && this.userInfo.isLoggedIn).toString());
-        params.append("playStyle", playStyle);
-        return this.http
-            .post("/api/uploads", params.toString(), options)
-            .toPromise()
+        return this.authenticationService.getAuthHeaders()
+            .then(headers => {
+                headers.append("Content-Type", "application/x-www-form-urlencoded");
+                let options = new RequestOptions({ headers });
+                let params = new URLSearchParams();
+                params.append("encodedSaveData", encodedSaveData);
+                params.append("addToProgress", (addToProgress && this.userInfo.isLoggedIn).toString());
+                params.append("playStyle", playStyle);
+                return this.http
+                    .post("/api/uploads", params.toString(), options)
+                    .toPromise();
+            })
             .then(result => parseInt(result.text()))
             .catch(error => {
                 let errorMessage = error.message || error.toString();
@@ -55,11 +59,13 @@ export class UploadService {
     }
 
     public delete(id: number): Promise<void> {
-        let headers = this.authenticationService.getAuthHeaders();
-        let options = new RequestOptions({ headers });
-        return this.http
-            .delete(`/api/uploads/${id}`, options)
-            .toPromise()
+        return this.authenticationService.getAuthHeaders()
+            .then(headers => {
+                let options = new RequestOptions({ headers });
+                return this.http
+                    .delete(`/api/uploads/${id}`, options)
+                    .toPromise();
+            })
             .then(() => void 0)
             .catch(error => {
                 let errorMessage = error.message || error.toString();

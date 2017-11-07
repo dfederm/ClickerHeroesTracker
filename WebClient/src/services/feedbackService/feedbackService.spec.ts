@@ -1,6 +1,6 @@
 import { ReflectiveInjector } from "@angular/core";
 import { fakeAsync, tick } from "@angular/core/testing";
-import { BaseRequestOptions, ConnectionBackend, Http, RequestOptions } from "@angular/http";
+import { BaseRequestOptions, ConnectionBackend, Http, Headers, RequestOptions } from "@angular/http";
 import { Response, ResponseOptions, RequestMethod } from "@angular/http";
 import { MockBackend, MockConnection } from "@angular/http/testing";
 import { AppInsightsService } from "@markpieszak/ng-application-insights";
@@ -20,7 +20,7 @@ describe("FeedbackService", () => {
 
     beforeEach(() => {
         authenticationService = jasmine.createSpyObj("authenticationService", ["getAuthHeaders"]);
-        (authenticationService.getAuthHeaders as jasmine.Spy).and.returnValue(new Headers());
+        (authenticationService.getAuthHeaders as jasmine.Spy).and.returnValue(Promise.resolve(new Headers()));
 
         appInsights = jasmine.createSpyObj("appInsights", ["trackEvent"]);
 
@@ -45,8 +45,11 @@ describe("FeedbackService", () => {
     });
 
     describe("send", () => {
-        it("should make the correct api call when the use is not logged in", fakeAsync(() => {
+        it("should make the correct api call", fakeAsync(() => {
             feedbackService.send(comments, email);
+
+            // Tick the getAuthHeaders call
+            tick();
 
             expect(authenticationService.getAuthHeaders).toHaveBeenCalled();
 
@@ -63,6 +66,9 @@ describe("FeedbackService", () => {
                 .then(() => succeeded = true)
                 .catch((e: string) => error = e);
 
+            // Tick the getAuthHeaders call
+            tick();
+
             lastConnection.mockRespond(new Response(new ResponseOptions()));
             tick();
 
@@ -77,6 +83,9 @@ describe("FeedbackService", () => {
             feedbackService.send(comments, email)
                 .then(() => succeeded = true)
                 .catch((e: Error) => error = e);
+
+            // Tick the getAuthHeaders call
+            tick();
 
             let expectedError = new Error("someError");
             lastConnection.mockError(expectedError);
