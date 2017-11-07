@@ -99,11 +99,13 @@ export class SettingsService {
         this.numPendingPatches++;
 
         // TODO: Handle if the user is not logged in
-        let headers = this.authenticationService.getAuthHeaders();
-        let options = new RequestOptions({ headers });
-        let body = { [setting]: value };
-        return this.http.patch(`/api/users/${this.userName}/settings`, body, options)
-            .toPromise()
+        return this.authenticationService.getAuthHeaders()
+            .then(headers => {
+                let options = new RequestOptions({ headers });
+                let body = { [setting]: value };
+                return this.http.patch(`/api/users/${this.userName}/settings`, body, options)
+                    .toPromise();
+            })
             .then(() => {
                 this.handlePatchCompleted();
             })
@@ -128,10 +130,12 @@ export class SettingsService {
     }
 
     private fetchSettings(): Promise<void> {
-        let headers = this.authenticationService.getAuthHeaders();
-        let options = new RequestOptions({ headers });
-        return this.http.get(`/api/users/${this.userName}/settings`, options)
-            .toPromise()
+        return this.authenticationService.getAuthHeaders()
+            .then(headers => {
+                let options = new RequestOptions({ headers });
+                return this.http.get(`/api/users/${this.userName}/settings`, options)
+                    .toPromise();
+            })
             .then(response => {
                 // If the user is in the process of updating their settings, just ignore this response so it doesn't plow over the newly updated settings.
                 // Once the patch finishes, it will refresh again.

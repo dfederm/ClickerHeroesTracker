@@ -33,13 +33,19 @@ export class AppComponent implements OnInit {
   public ngOnInit(): void {
     this.isLoading = true;
 
-    this.settingsService
-      .settings()
-      .subscribe(settings => this.handleSettings(settings));
-
+    // Get the auth headers simply because it forces a wait on fetching the initial auth tokens.
     this.authenticationService
-      .userInfo()
-      .subscribe(userInfo => this.handleUserInfo(userInfo));
+      .getAuthHeaders()
+      .catch(() => void 0) // Swallow errors
+      .then(() => {
+        this.authenticationService
+          .userInfo()
+          .subscribe(userInfo => this.handleUserInfo(userInfo));
+
+        this.settingsService
+          .settings()
+          .subscribe(settings => this.handleSettings(settings));
+      });
 
     // This is weird but Microsoft login redirects back to the site and expects it to create the object before it closes the popup.
     // See https://github.com/AzureAD/microsoft-authentication-library-for-js/issues/174

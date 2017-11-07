@@ -1,4 +1,5 @@
 import { NO_ERRORS_SCHEMA } from "@angular/core";
+import { Headers } from "@angular/http";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { Subject } from "rxjs";
 
@@ -7,7 +8,7 @@ import { AppInsightsService } from "@markpieszak/ng-application-insights";
 import { SettingsService, IUserSettings } from "../../services/settingsService/settingsService";
 import { AuthenticationService, IUserInfo } from "../../services/authenticationService/authenticationService";
 
-describe("BannerComponent", () => {
+describe("AppComponent", () => {
     let fixture: ComponentFixture<AppComponent>;
 
     let settingsSubject = new Subject<IUserSettings>();
@@ -16,7 +17,10 @@ describe("BannerComponent", () => {
 
     beforeEach(done => {
         let settingsService = { settings: () => settingsSubject };
-        let authenticationService = { userInfo: () => userInfoSubject };
+        let authenticationService = {
+            getAuthHeaders: () => Promise.resolve(new Headers()),
+            userInfo: () => userInfoSubject,
+        };
 
         appInsights = jasmine.createSpyObj("appInsights", ["setAuthenticatedUserContext", "clearAuthenticatedUserContext"]);
 
@@ -36,6 +40,7 @@ describe("BannerComponent", () => {
                 fixture = TestBed.createComponent(AppComponent);
 
                 fixture.detectChanges();
+                return fixture.whenStable();
             })
             .then(done)
             .catch(done.fail);

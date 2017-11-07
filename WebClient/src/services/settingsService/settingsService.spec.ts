@@ -1,7 +1,6 @@
 import { ReflectiveInjector } from "@angular/core";
 import { fakeAsync, tick, discardPeriodicTasks } from "@angular/core/testing";
-import { BaseRequestOptions, ConnectionBackend, Http, RequestOptions } from "@angular/http";
-import { Response, ResponseOptions, RequestMethod } from "@angular/http";
+import { BaseRequestOptions, ConnectionBackend, Http, RequestOptions, Response, ResponseOptions, Headers, RequestMethod } from "@angular/http";
 import { MockBackend, MockConnection } from "@angular/http/testing";
 import { BehaviorSubject } from "rxjs";
 
@@ -29,7 +28,7 @@ describe("SettingsService", () => {
         userInfo = new BehaviorSubject(notLoggedInUser);
         let authenticationService: AuthenticationService = jasmine.createSpyObj("authenticationService", ["userInfo", "getAuthHeaders"]);
         (authenticationService.userInfo as jasmine.Spy).and.returnValue(userInfo);
-        (authenticationService.getAuthHeaders as jasmine.Spy).and.returnValue(new Headers());
+        (authenticationService.getAuthHeaders as jasmine.Spy).and.returnValue(Promise.resolve(new Headers()));
 
         injector = ReflectiveInjector.resolveAndCreate(
             [
@@ -60,13 +59,13 @@ describe("SettingsService", () => {
     });
 
     describe("settings", () => {
-        it("should return default settings initially when there is no cached data", () => {
+        it("should return default settings initially when there is no cached data", fakeAsync(() => {
             let settingsLog = createService();
             expect(settingsLog.length).toEqual(1);
             expect(settingsLog[0]).toEqual(SettingsService.defaultSettings);
-        });
+        }));
 
-        it("should return default settings initially when there is cached data but the user is not logged in", () => {
+        it("should return default settings initially when there is cached data but the user is not logged in", fakeAsync(() => {
             let settings: IUserSettings = {
                 areUploadsPublic: false,
                 playStyle: "active",
@@ -88,9 +87,9 @@ describe("SettingsService", () => {
 
             // The cache is cleared
             expect(localStorage.removeItem).toHaveBeenCalledWith(SettingsService.settingsKey);
-        });
+        }));
 
-        it("should return cached settings initially when there is cached data and the user is logged in", () => {
+        it("should return cached settings initially when there is cached data and the user is logged in", fakeAsync(() => {
             let expectedSettings: IUserSettings = {
                 areUploadsPublic: false,
                 playStyle: "active",
@@ -111,11 +110,15 @@ describe("SettingsService", () => {
             expect(settingsLog[0]).toEqual(expectedSettings);
             expect(localStorage.getItem).toHaveBeenCalledWith(SettingsService.settingsKey);
             expect(localStorage.removeItem).not.toHaveBeenCalled();
-        });
+        }));
 
         it("should return settings when logged in", fakeAsync(() => {
             userInfo.next(loggedInUser);
             let settingsLog = createService();
+
+            // Tick the getAuthHeaders call, but don't tick longer than the refresh interval
+            tick(1);
+
             let expectedSettings = respondToGetSettingsRequest(0);
 
             // 2 because the settings fetch is async so we initially started with the defaults
@@ -131,6 +134,10 @@ describe("SettingsService", () => {
         it("should return default settings after logging out", fakeAsync(() => {
             userInfo.next(loggedInUser);
             let settingsLog = createService();
+
+            // Tick the getAuthHeaders call, but don't tick longer than the refresh interval
+            tick(1);
+
             let expectedSettings0 = respondToGetSettingsRequest(0);
 
             userInfo.next(notLoggedInUser);
@@ -144,6 +151,10 @@ describe("SettingsService", () => {
         it("should update the settings when it changes", fakeAsync(() => {
             userInfo.next(loggedInUser);
             let settingsLog = createService();
+
+            // Tick the getAuthHeaders call, but don't tick longer than the refresh interval
+            tick(1);
+
             let expectedSettings0 = respondToGetSettingsRequest(0);
 
             // Let the sync interval tick
@@ -163,6 +174,10 @@ describe("SettingsService", () => {
         it("should not update the settings when it doesn't change", fakeAsync(() => {
             userInfo.next(loggedInUser);
             let settingsLog = createService();
+
+            // Tick the getAuthHeaders call, but don't tick longer than the refresh interval
+            tick(1);
+
             let expectedSettings0 = respondToGetSettingsRequest(0);
 
             // Let the sync interval tick
@@ -194,6 +209,10 @@ describe("SettingsService", () => {
         it("should not update the settings when it errors", fakeAsync(() => {
             userInfo.next(loggedInUser);
             let settingsLog = createService();
+
+            // Tick the getAuthHeaders call, but don't tick longer than the refresh interval
+            tick(1);
+
             let expectedSettings0 = respondToGetSettingsRequest(0);
 
             // Let the sync interval tick
@@ -232,6 +251,9 @@ describe("SettingsService", () => {
             userInfo.next(loggedInUser);
             let settingsLog = createService();
             let retryDelay = SettingsService.retryDelay;
+
+            // Tick the getAuthHeaders call, but don't tick longer than the refresh interval
+            tick(1);
 
             // Retry and fail a bunch of times
             const numRetries = 100;
@@ -278,6 +300,9 @@ describe("SettingsService", () => {
                 .then(() => resolved = true)
                 .catch(() => rejected = true);
 
+            // Tick the getAuthHeaders call
+            tick();
+
             verifySetSettingsRequest();
             expect(settingsLog.length).toEqual(0);
 
@@ -293,6 +318,10 @@ describe("SettingsService", () => {
             settingsService.setSetting("playStyle", "somePlayStyle")
                 .then(() => resolved1 = true)
                 .catch(() => rejected1 = true);
+
+            // Tick the getAuthHeaders call
+            tick();
+
             let connection1 = lastConnection;
             expect(connection1).not.toBeNull();
             lastConnection = null;
@@ -306,6 +335,10 @@ describe("SettingsService", () => {
             settingsService.setSetting("playStyle", "somePlayStyle")
                 .then(() => resolved2 = true)
                 .catch(() => rejected2 = true);
+
+            // Tick the getAuthHeaders call
+            tick();
+
             let connection2 = lastConnection;
             expect(connection2).not.toBeNull();
             lastConnection = null;
@@ -354,6 +387,9 @@ describe("SettingsService", () => {
             settingsService.setSetting("playStyle", "somePlayStyle")
                 .then(() => resolved = true)
                 .catch(() => rejected = true);
+
+            // Tick the getAuthHeaders call
+            tick();
 
             // The refresh returned after the patch started
             respondToGetSettingsRequest(1, getSettingsConnection);
@@ -411,6 +447,9 @@ describe("SettingsService", () => {
                     settingsLog.push(settings);
                 }
             });
+
+            // Tick the getAuthHeaders call
+            tick();
 
             respondToGetSettingsRequest(0);
 
