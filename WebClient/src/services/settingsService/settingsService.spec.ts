@@ -3,6 +3,7 @@ import { fakeAsync, tick, discardPeriodicTasks } from "@angular/core/testing";
 import { BaseRequestOptions, ConnectionBackend, Http, RequestOptions, Response, ResponseOptions, Headers, RequestMethod } from "@angular/http";
 import { MockBackend, MockConnection } from "@angular/http/testing";
 import { BehaviorSubject } from "rxjs";
+import { AppInsightsService } from "@markpieszak/ng-application-insights";
 
 import { SettingsService, IUserSettings, PlayStyle, Theme } from "./settingsService";
 import { AuthenticationService, IUserInfo } from "../authenticationService/authenticationService";
@@ -30,6 +31,10 @@ describe("SettingsService", () => {
         (authenticationService.userInfo as jasmine.Spy).and.returnValue(userInfo);
         (authenticationService.getAuthHeaders as jasmine.Spy).and.returnValue(Promise.resolve(new Headers()));
 
+        let appInsights = {
+            trackEvent: (): void => void 0,
+        };
+
         injector = ReflectiveInjector.resolveAndCreate(
             [
                 { provide: AuthenticationService, useValue: authenticationService },
@@ -37,6 +42,7 @@ describe("SettingsService", () => {
                 { provide: RequestOptions, useClass: BaseRequestOptions },
                 Http,
                 SettingsService,
+                { provide: AppInsightsService, useValue: appInsights },
             ]);
 
         backend = injector.get(ConnectionBackend) as MockBackend;
@@ -511,7 +517,7 @@ describe("SettingsService", () => {
     function errorToGetSettingsRequest(): void {
         verifyGetSettingsRequest();
 
-        lastConnection.mockError();
+        lastConnection.mockError(new Error("someError"));
         lastConnection = null;
 
         // Don't tick longer than the refresh interval
@@ -545,7 +551,7 @@ describe("SettingsService", () => {
     function errorToSetSettingsRequest(): void {
         verifySetSettingsRequest();
 
-        lastConnection.mockError();
+        lastConnection.mockError(new Error("someError"));
         lastConnection = null;
 
         // Don't tick longer than the refresh interval
