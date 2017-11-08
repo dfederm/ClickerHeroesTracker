@@ -5,6 +5,7 @@ import { BehaviorSubject } from "rxjs/BehaviorSubject";
 import { Subscription } from "rxjs/Subscription";
 import { map, distinctUntilChanged } from "rxjs/operators";
 import { interval } from "rxjs/observable/interval";
+import { AppInsightsService } from "@markpieszak/ng-application-insights";
 
 import "rxjs/add/operator/toPromise";
 
@@ -58,6 +59,7 @@ export class SettingsService {
     constructor(
         private authenticationService: AuthenticationService,
         private http: Http,
+        private appInsights: AppInsightsService,
     ) {
         let settingsString = localStorage.getItem(SettingsService.settingsKey);
         let currentSettings = settingsString == null ? null : JSON.parse(settingsString);
@@ -110,6 +112,9 @@ export class SettingsService {
                 this.handlePatchCompleted();
             })
             .catch(error => {
+                let errorMessage = error.message || error.toString();
+                this.appInsights.trackEvent("SettingsService.setSetting.error", { message: errorMessage });
+
                 this.handlePatchCompleted();
                 return Promise.reject(error);
             });
@@ -119,6 +124,11 @@ export class SettingsService {
         this.fetchSettings()
             .then(() => this.scheduleRefresh())
             .catch(() => {
+                // If the user is no longer logged in, just bail
+                if (!this.userName) {
+                    return;
+                }
+
                 // If the initial fetch fails, retry after a delay
                 setTimeout(
                     (newDelay: number) => this.fetchSettingsInitial(newDelay),
@@ -132,6 +142,10 @@ export class SettingsService {
     private fetchSettings(): Promise<void> {
         return this.authenticationService.getAuthHeaders()
             .then(headers => {
+                if (!this.userName) {
+                    return Promise.reject("Not logged in");
+                }
+
                 let options = new RequestOptions({ headers });
                 return this.http.get(`/api/users/${this.userName}/settings`, options)
                     .toPromise();
@@ -153,6 +167,11 @@ export class SettingsService {
 
                 this.settingsSubject.next(this.normalizeSettings(newSettings));
                 return Promise.resolve();
+            })
+            .catch(error => {
+                let errorMessage = error.message || error.toString();
+                this.appInsights.trackEvent("SettingsService.fetchSettings.error", { message: errorMessage });
+                return Promise.reject(error);
             });
     }
 

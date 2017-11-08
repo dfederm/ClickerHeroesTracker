@@ -6,6 +6,7 @@ import { Subscription } from "rxjs/Subscription";
 import * as JwtDecode from "jwt-decode";
 import { map, distinctUntilChanged } from "rxjs/operators";
 import { interval } from "rxjs/observable/interval";
+import { AppInsightsService } from "@markpieszak/ng-application-insights";
 
 import "rxjs/add/operator/toPromise";
 
@@ -40,7 +41,10 @@ export class AuthenticationService {
     // It should always be assigned just before making a token request and resolve after the request returns.
     private fetchTokensPromise: Promise<void>;
 
-    constructor(private http: Http) {
+    constructor(
+        private appInsights: AppInsightsService,
+        private http: Http,
+    ) {
         let tokensString = localStorage.getItem(AuthenticationService.tokensKey);
         this.currentTokens = tokensString == null ? null : JSON.parse(tokensString);
         this.userInfoSubject = new BehaviorSubject(this.getUserInfo());
@@ -97,11 +101,12 @@ export class AuthenticationService {
     }
 
     public getAuthHeaders(): Promise<Headers> {
-        let headers = new Headers();
         if (this.fetchTokensPromise) {
             return this.fetchTokensPromise
                 .catch(() => void 0) // Swallow errors as we just use this effectively like a lock
                 .then(() => {
+                    let headers = new Headers();
+
                     if (this.currentTokens) {
                         headers.append("Authorization", `${this.currentTokens.token_type} ${this.currentTokens.access_token}`);
                     }
@@ -109,7 +114,7 @@ export class AuthenticationService {
                     return headers;
                 });
         } else {
-            return Promise.resolve(headers);
+            return Promise.resolve(new Headers());
         }
     }
 
@@ -140,6 +145,11 @@ export class AuthenticationService {
                 this.userInfoSubject.next(this.getUserInfo());
 
                 return Promise.resolve();
+            })
+            .catch(error => {
+                let errorMessage = error.message || error.toString();
+                this.appInsights.trackEvent("AuthenticationService.fetchTokens.error", { message: errorMessage });
+                return Promise.reject(error);
             });
         return this.fetchTokensPromise;
     }

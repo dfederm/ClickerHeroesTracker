@@ -3,6 +3,7 @@ import { fakeAsync, tick, discardPeriodicTasks } from "@angular/core/testing";
 import { BaseRequestOptions, ConnectionBackend, Http, RequestOptions } from "@angular/http";
 import { Response, ResponseOptions, RequestMethod } from "@angular/http";
 import { MockBackend, MockConnection } from "@angular/http/testing";
+import { AppInsightsService } from "@markpieszak/ng-application-insights";
 
 import { AuthenticationService, IAuthTokenModel, IUserInfo } from "./authenticationService";
 
@@ -16,12 +17,17 @@ describe("AuthenticationService", () => {
     };
 
     beforeEach(() => {
+        let appInsights = {
+            trackEvent: (): void => void 0,
+        };
+
         injector = ReflectiveInjector.resolveAndCreate(
             [
                 { provide: ConnectionBackend, useClass: MockBackend },
                 { provide: RequestOptions, useClass: BaseRequestOptions },
                 Http,
                 AuthenticationService,
+                { provide: AppInsightsService, useValue: appInsights },
             ]);
 
         spyOn(localStorage, "getItem");

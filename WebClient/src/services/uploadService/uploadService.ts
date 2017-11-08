@@ -46,8 +46,12 @@ export class UploadService {
                 params.append("encodedSaveData", encodedSaveData);
                 params.append("addToProgress", (addToProgress && this.userInfo.isLoggedIn).toString());
                 params.append("playStyle", playStyle);
+
+                // Angular doesn't encode '+' correctly. See: https://github.com/angular/angular/issues/11058
+                let body = params.toString().replace(/\+/gi, "%2B");
+
                 return this.http
-                    .post("/api/uploads", params.toString(), options)
+                    .post("/api/uploads", body, options)
                     .toPromise();
             })
             .then(result => parseInt(result.text()))
