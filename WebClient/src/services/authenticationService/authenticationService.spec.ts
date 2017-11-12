@@ -1,34 +1,34 @@
-import { ReflectiveInjector } from "@angular/core";
-import { fakeAsync, tick, discardPeriodicTasks } from "@angular/core/testing";
-import { BaseRequestOptions, ConnectionBackend, Http, RequestOptions } from "@angular/http";
-import { Response, ResponseOptions, RequestMethod } from "@angular/http";
-import { MockBackend, MockConnection } from "@angular/http/testing";
-import { AppInsightsService } from "@markpieszak/ng-application-insights";
+import { TestBed, fakeAsync, tick, discardPeriodicTasks } from "@angular/core/testing";
+import { HttpClientTestingModule, HttpTestingController } from "@angular/common/http/testing";
+import { HttpErrorHandlerService } from "../httpErrorHandlerService/httpErrorHandlerService";
 
 import { AuthenticationService, IAuthTokenModel, IUserInfo } from "./authenticationService";
 
 describe("AuthenticationService", () => {
-    let injector: ReflectiveInjector;
-    let backend: MockBackend;
-    let lastConnection: MockConnection = null;
+    const tokenRequest = { method: "post", url: "/api/auth/token" };
+
+    let httpMock: HttpTestingController;
 
     const notLoggedInUser: IUserInfo = {
         isLoggedIn: false,
     };
 
     beforeEach(() => {
-        let appInsights = {
-            trackEvent: (): void => void 0,
+        let httpErrorHandlerService = {
+            logError: (): void => void 0,
         };
 
-        injector = ReflectiveInjector.resolveAndCreate(
-            [
-                { provide: ConnectionBackend, useClass: MockBackend },
-                { provide: RequestOptions, useClass: BaseRequestOptions },
-                Http,
-                AuthenticationService,
-                { provide: AppInsightsService, useValue: appInsights },
-            ]);
+        TestBed.configureTestingModule(
+            {
+                imports: [
+                    HttpClientTestingModule,
+                ],
+                providers:
+                    [
+                        AuthenticationService,
+                        { provide: HttpErrorHandlerService, useValue: httpErrorHandlerService },
+                    ],
+            });
 
         spyOn(localStorage, "getItem");
         spyOn(localStorage, "setItem");
@@ -37,20 +37,18 @@ describe("AuthenticationService", () => {
         let now = Date.now();
         spyOn(Date, "now").and.callFake(() => now);
 
-        backend = injector.get(ConnectionBackend) as MockBackend;
-        backend.connections.subscribe((connection: MockConnection) => lastConnection = connection);
+        httpMock = TestBed.get(HttpTestingController) as HttpTestingController;
     });
 
     afterEach(() => {
-        lastConnection = null;
-        backend.verifyNoPendingRequests();
+        httpMock.verify();
     });
 
     describe("initialization", () => {
         it("should not be logged in initially when local storage is empty", fakeAsync(() => {
             (localStorage.getItem as jasmine.Spy).and.returnValue(null);
 
-            let authenticationService = injector.get(AuthenticationService) as AuthenticationService;
+            let authenticationService = TestBed.get(AuthenticationService) as AuthenticationService;
 
             authenticationService.userInfo()
                 .subscribe(userInfo => expect(userInfo).toEqual(notLoggedInUser));
@@ -58,7 +56,6 @@ describe("AuthenticationService", () => {
 
             expect(localStorage.getItem).toHaveBeenCalledWith("auth-tokens");
             expect(localStorage.setItem).not.toHaveBeenCalled();
-            expect(lastConnection).toBeNull();
         }));
 
         it("should be logged in initially and refresh the token when local storage is populated with a valid token", fakeAsync(() => {
@@ -66,13 +63,11 @@ describe("AuthenticationService", () => {
             (localStorage.getItem as jasmine.Spy).and.returnValue(JSON.stringify(tokens));
             let expectedUserInfo = createResponseUserInfo();
 
-            let authenticationService = injector.get(AuthenticationService) as AuthenticationService;
+            let authenticationService = TestBed.get(AuthenticationService) as AuthenticationService;
             tick();
 
-            expect(lastConnection).not.toBeNull("no http service connection made");
-            expect(lastConnection.request.method).toEqual(RequestMethod.Post, "method invalid");
-            expect(lastConnection.request.url).toEqual("/api/auth/token", "url invalid");
-            expect(lastConnection.request.text()).toEqual("grant_type=refresh_token&refresh_token=someRefreshToken&scope=openid%20offline_access%20profile%20email%20roles", "request body invalid");
+            let request = httpMock.expectOne(tokenRequest);
+            expect(request.request.body).toEqual("grant_type=refresh_token&refresh_token=someRefreshToken&scope=openid%20offline_access%20profile%20email%20roles");
 
             let actualUserInfo: IUserInfo;
             authenticationService.userInfo().subscribe(_ => actualUserInfo = _);
@@ -82,7 +77,7 @@ describe("AuthenticationService", () => {
             expect(actualUserInfo).toEqual(createCachedUserInfo());
 
             let newTokens = createResponseAuthModel();
-            lastConnection.mockRespond(new Response(new ResponseOptions({ body: JSON.stringify(newTokens) })));
+            request.flush(newTokens);
             newTokens.expiration_date = Date.now() + newTokens.expires_in * 1000;
 
             // Still logged in after the token refresh
@@ -102,13 +97,11 @@ describe("AuthenticationService", () => {
             (localStorage.getItem as jasmine.Spy).and.returnValue(JSON.stringify(tokens));
             let expectedUserInfo = createResponseUserInfo();
 
-            let authenticationService = injector.get(AuthenticationService) as AuthenticationService;
+            let authenticationService = TestBed.get(AuthenticationService) as AuthenticationService;
             tick();
 
-            expect(lastConnection).not.toBeNull("no http service connection made");
-            expect(lastConnection.request.method).toEqual(RequestMethod.Post, "method invalid");
-            expect(lastConnection.request.url).toEqual("/api/auth/token", "url invalid");
-            expect(lastConnection.request.text()).toEqual("grant_type=refresh_token&refresh_token=someRefreshToken&scope=openid%20offline_access%20profile%20email%20roles", "request body invalid");
+            let request = httpMock.expectOne(tokenRequest);
+            expect(request.request.body).toEqual("grant_type=refresh_token&refresh_token=someRefreshToken&scope=openid%20offline_access%20profile%20email%20roles");
 
             let actualUserInfo: IUserInfo;
             authenticationService.userInfo().subscribe(_ => actualUserInfo = _);
@@ -118,7 +111,7 @@ describe("AuthenticationService", () => {
             expect(actualUserInfo).toEqual(notLoggedInUser);
 
             let newTokens = createResponseAuthModel();
-            lastConnection.mockRespond(new Response(new ResponseOptions({ body: JSON.stringify(newTokens) })));
+            request.flush(newTokens);
             newTokens.expiration_date = Date.now() + newTokens.expires_in * 1000;
 
             // Logged in after the token refresh
@@ -137,7 +130,7 @@ describe("AuthenticationService", () => {
         it("should return empty headers when not logged in", done => {
             (localStorage.getItem as jasmine.Spy).and.returnValue(null);
 
-            let authenticationService = injector.get(AuthenticationService) as AuthenticationService;
+            let authenticationService = TestBed.get(AuthenticationService) as AuthenticationService;
             return authenticationService.getAuthHeaders()
                 .then(headers => {
                     expect(headers.keys().length).toEqual(0);
@@ -150,10 +143,11 @@ describe("AuthenticationService", () => {
             let tokens = createCachedAuthModel();
             (localStorage.getItem as jasmine.Spy).and.returnValue(JSON.stringify(tokens));
 
-            let authenticationService = injector.get(AuthenticationService) as AuthenticationService;
+            let authenticationService = TestBed.get(AuthenticationService) as AuthenticationService;
 
             // It tries to refresh initially, and the headers will be blocked until the refresh responds.
-            lastConnection.mockRespond(new Response(new ResponseOptions({ body: JSON.stringify(tokens) })));
+            let request = httpMock.expectOne(tokenRequest);
+            request.flush(tokens);
 
             return authenticationService.getAuthHeaders()
                 .then(headers => {
@@ -171,7 +165,7 @@ describe("AuthenticationService", () => {
             let error: Error;
             let userInfoLog: IUserInfo[] = [];
 
-            let authenticationService = injector.get(AuthenticationService) as AuthenticationService;
+            let authenticationService = TestBed.get(AuthenticationService) as AuthenticationService;
             authenticationService.userInfo()
                 .subscribe(userInfo => {
                     userInfoLog.push(userInfo);
@@ -180,12 +174,10 @@ describe("AuthenticationService", () => {
                 .then(() => logInSuccessful = true)
                 .catch(e => error = e);
 
-            expect(lastConnection).not.toBeNull("no http service connection made");
-            expect(lastConnection.request.method).toEqual(RequestMethod.Post, "method invalid");
-            expect(lastConnection.request.url).toEqual("/api/auth/token", "url invalid");
-            expect(lastConnection.request.text()).toEqual("grant_type=password&username=someUsername&password=somePassword&scope=openid%20offline_access%20profile%20email%20roles", "request body invalid");
+            let request = httpMock.expectOne(tokenRequest);
+            expect(request.request.body).toEqual("grant_type=password&username=someUsername&password=somePassword&scope=openid%20offline_access%20profile%20email%20roles");
 
-            lastConnection.mockError(new Error("someError"));
+            request.flush(null, { status: 500, statusText: "someStatus" });
             tick();
 
             expect(logInSuccessful).toEqual(false);
@@ -199,22 +191,19 @@ describe("AuthenticationService", () => {
             let error: Error;
             let userInfoLog: IUserInfo[] = [];
 
-            let authenticationService = injector.get(AuthenticationService) as AuthenticationService;
+            let authenticationService = TestBed.get(AuthenticationService) as AuthenticationService;
             authenticationService.userInfo()
                 .subscribe(_ => userInfoLog.push(_));
             authenticationService.logInWithPassword("someUsername", "somePassword")
                 .then(() => logInSuccessful = true)
                 .catch(e => error = e);
 
-            expect(lastConnection).not.toBeNull("no http service connection made");
-            expect(lastConnection.request.method).toEqual(RequestMethod.Post, "method invalid");
-            expect(lastConnection.request.url).toEqual("/api/auth/token", "url invalid");
-            expect(lastConnection.request.text()).toEqual("grant_type=password&username=someUsername&password=somePassword&scope=openid%20offline_access%20profile%20email%20roles", "request body invalid");
+            let request = httpMock.expectOne(tokenRequest);
+            expect(request.request.body).toEqual("grant_type=password&username=someUsername&password=somePassword&scope=openid%20offline_access%20profile%20email%20roles");
 
             let tokens = createResponseAuthModel(1);
             let userInfo = createResponseUserInfo(1);
-            lastConnection.mockRespond(new Response(new ResponseOptions({ body: JSON.stringify(tokens) })));
-            lastConnection = null;
+            request.flush(tokens);
             tokens.expiration_date = Date.now() + tokens.expires_in * 1000;
 
             // Don't tick enough to trigger the refresh interval
@@ -230,14 +219,12 @@ describe("AuthenticationService", () => {
             // Let the refresh interval tick
             tick(tokens.expires_in / 2 * 1000);
 
-            expect(lastConnection).not.toBeNull("no http service connection made");
-            expect(lastConnection.request.method).toEqual(RequestMethod.Post, "method invalid");
-            expect(lastConnection.request.url).toEqual("/api/auth/token", "url invalid");
-            expect(lastConnection.request.text()).toEqual("grant_type=refresh_token&refresh_token=someNewRefreshToken1&scope=openid%20offline_access%20profile%20email%20roles", "request body invalid");
+            let refreshedRequest = httpMock.expectOne(tokenRequest);
+            expect(refreshedRequest.request.body).toEqual("grant_type=refresh_token&refresh_token=someNewRefreshToken1&scope=openid%20offline_access%20profile%20email%20roles");
 
             let refreshedTokens = createResponseAuthModel(2);
             let refreshedUserInfo = createResponseUserInfo(2);
-            lastConnection.mockRespond(new Response(new ResponseOptions({ body: JSON.stringify(refreshedTokens) })));
+            refreshedRequest.flush(refreshedTokens);
             refreshedTokens.expiration_date = Date.now() + refreshedTokens.expires_in * 1000;
             tick();
 
@@ -256,7 +243,7 @@ describe("AuthenticationService", () => {
             let error: Error;
             let userInfoLog: IUserInfo[] = [];
 
-            let authenticationService = injector.get(AuthenticationService) as AuthenticationService;
+            let authenticationService = TestBed.get(AuthenticationService) as AuthenticationService;
             authenticationService.userInfo()
                 .subscribe(userInfo => {
                     userInfoLog.push(userInfo);
@@ -268,12 +255,10 @@ describe("AuthenticationService", () => {
             // Tick the getAuthHeaders call
             tick();
 
-            expect(lastConnection).not.toBeNull("no http service connection made");
-            expect(lastConnection.request.method).toEqual(RequestMethod.Post, "method invalid");
-            expect(lastConnection.request.url).toEqual("/api/auth/token", "url invalid");
-            expect(lastConnection.request.text()).toEqual("grant_type=someGrantType&assertion=someAssertion&scope=openid%20offline_access%20profile%20email%20roles", "request body invalid");
+            let request = httpMock.expectOne(tokenRequest);
+            expect(request.request.body).toEqual("grant_type=someGrantType&assertion=someAssertion&scope=openid%20offline_access%20profile%20email%20roles");
 
-            lastConnection.mockError(new Error("someError"));
+            request.flush(null, { status: 500, statusText: "someStatus" });
             tick();
 
             expect(logInSuccessful).toEqual(false);
@@ -287,7 +272,7 @@ describe("AuthenticationService", () => {
             let error: Error;
             let userInfoLog: IUserInfo[] = [];
 
-            let authenticationService = injector.get(AuthenticationService) as AuthenticationService;
+            let authenticationService = TestBed.get(AuthenticationService) as AuthenticationService;
             authenticationService.userInfo()
                 .subscribe(_ => userInfoLog.push(_));
             authenticationService.logInWithAssertion("someGrantType", "someAssertion", null)
@@ -297,15 +282,12 @@ describe("AuthenticationService", () => {
             // Tick the getAuthHeaders call
             tick();
 
-            expect(lastConnection).not.toBeNull("no http service connection made");
-            expect(lastConnection.request.method).toEqual(RequestMethod.Post, "method invalid");
-            expect(lastConnection.request.url).toEqual("/api/auth/token", "url invalid");
-            expect(lastConnection.request.text()).toEqual("grant_type=someGrantType&assertion=someAssertion&scope=openid%20offline_access%20profile%20email%20roles", "request body invalid");
+            let request = httpMock.expectOne(tokenRequest);
+            expect(request.request.body).toEqual("grant_type=someGrantType&assertion=someAssertion&scope=openid%20offline_access%20profile%20email%20roles");
 
             let tokens = createResponseAuthModel(1);
             let userInfo = createResponseUserInfo(1);
-            lastConnection.mockRespond(new Response(new ResponseOptions({ body: JSON.stringify(tokens) })));
-            lastConnection = null;
+            request.flush(tokens);
             tokens.expiration_date = Date.now() + tokens.expires_in * 1000;
 
             // Don't tick enough to trigger the refresh interval
@@ -321,14 +303,12 @@ describe("AuthenticationService", () => {
             // Let the refresh interval tick
             tick(tokens.expires_in / 2 * 1000);
 
-            expect(lastConnection).not.toBeNull("no http service connection made");
-            expect(lastConnection.request.method).toEqual(RequestMethod.Post, "method invalid");
-            expect(lastConnection.request.url).toEqual("/api/auth/token", "url invalid");
-            expect(lastConnection.request.text()).toEqual("grant_type=refresh_token&refresh_token=someNewRefreshToken1&scope=openid%20offline_access%20profile%20email%20roles", "request body invalid");
+            let refreshRequest = httpMock.expectOne(tokenRequest);
+            expect(refreshRequest.request.body).toEqual("grant_type=refresh_token&refresh_token=someNewRefreshToken1&scope=openid%20offline_access%20profile%20email%20roles");
 
             let refreshedTokens = createResponseAuthModel(2);
             let refreshedUserInfo = createResponseUserInfo(2);
-            lastConnection.mockRespond(new Response(new ResponseOptions({ body: JSON.stringify(refreshedTokens) })));
+            refreshRequest.flush(refreshedTokens);
             refreshedTokens.expiration_date = Date.now() + refreshedTokens.expires_in * 1000;
             tick();
 
@@ -341,13 +321,11 @@ describe("AuthenticationService", () => {
         }));
 
         it("should add the username when provided", fakeAsync(() => {
-            let authenticationService = injector.get(AuthenticationService) as AuthenticationService;
+            let authenticationService = TestBed.get(AuthenticationService) as AuthenticationService;
             authenticationService.logInWithAssertion("someGrantType", "someAssertion", "someUsername");
 
-            expect(lastConnection).not.toBeNull("no http service connection made");
-            expect(lastConnection.request.method).toEqual(RequestMethod.Post, "method invalid");
-            expect(lastConnection.request.url).toEqual("/api/auth/token", "url invalid");
-            expect(lastConnection.request.text()).toEqual("grant_type=someGrantType&assertion=someAssertion&username=someUsername&scope=openid%20offline_access%20profile%20email%20roles", "request body invalid");
+            let request = httpMock.expectOne(tokenRequest);
+            expect(request.request.body).toEqual("grant_type=someGrantType&assertion=someAssertion&username=someUsername&scope=openid%20offline_access%20profile%20email%20roles");
         }));
     });
 
@@ -359,9 +337,13 @@ describe("AuthenticationService", () => {
             (localStorage.getItem as jasmine.Spy).and.returnValue(JSON.stringify(tokens));
             let userInfo = createCachedUserInfo();
 
-            let authenticationService = injector.get(AuthenticationService) as AuthenticationService;
+            let authenticationService = TestBed.get(AuthenticationService) as AuthenticationService;
             authenticationService.userInfo()
                 .subscribe(_ => userInfoLog.push(_));
+
+            // The initial refresh
+            httpMock.expectOne(tokenRequest);
+
             authenticationService.logOut();
 
             expect(localStorage.removeItem).toHaveBeenCalledWith("auth-tokens");
@@ -375,22 +357,19 @@ describe("AuthenticationService", () => {
             (localStorage.getItem as jasmine.Spy).and.returnValue(JSON.stringify(tokens));
             let userInfo = createCachedUserInfo();
 
-            let authenticationService = injector.get(AuthenticationService) as AuthenticationService;
+            let authenticationService = TestBed.get(AuthenticationService) as AuthenticationService;
             authenticationService.userInfo()
                 .subscribe(_ => userInfoLog.push(_));
 
             // Let the refresh interval tick
             tick(tokens.expires_in / 2 * 1000);
 
-            expect(lastConnection).not.toBeNull("no http service connection made");
-            expect(lastConnection.request.method).toEqual(RequestMethod.Post, "method invalid");
-            expect(lastConnection.request.url).toEqual("/api/auth/token", "url invalid");
-            expect(lastConnection.request.text()).toEqual("grant_type=refresh_token&refresh_token=someRefreshToken&scope=openid%20offline_access%20profile%20email%20roles", "request body invalid");
+            let refreshedRequest = httpMock.expectOne(tokenRequest);
+            expect(refreshedRequest.request.body).toEqual("grant_type=refresh_token&refresh_token=someRefreshToken&scope=openid%20offline_access%20profile%20email%20roles");
 
             let refreshedTokens = createResponseAuthModel(2);
             let refreshedUserInfo = createResponseUserInfo(2);
-            lastConnection.mockRespond(new Response(new ResponseOptions({ body: JSON.stringify(refreshedTokens) })));
-            lastConnection = null;
+            refreshedRequest.flush(refreshedTokens);
             refreshedTokens.expiration_date = Date.now() + refreshedTokens.expires_in * 1000;
             tick();
 
@@ -407,7 +386,6 @@ describe("AuthenticationService", () => {
             tick(tokens.expires_in / 2 * 1000);
 
             // And nothing changed
-            expect(lastConnection).toBeNull();
             expect(localStorage.setItem).not.toHaveBeenCalled();
             expect(userInfoLog).toEqual([userInfo, refreshedUserInfo, notLoggedInUser]);
         }));

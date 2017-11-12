@@ -2,23 +2,22 @@ import { NO_ERRORS_SCHEMA, DebugElement } from "@angular/core";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { By } from "@angular/platform-browser";
 import { FormsModule } from "@angular/forms";
-import { BaseRequestOptions, ConnectionBackend, Http, Headers, RequestOptions, RequestMethod, Response, ResponseOptions } from "@angular/http";
-import { MockBackend, MockConnection } from "@angular/http/testing";
+import { HttpClientTestingModule, HttpTestingController } from "@angular/common/http/testing";
+import { HttpHeaders, HttpErrorResponse } from "@angular/common/http";
 
-import { AdminComponent, IUploadQueueStats, IValidationErrorResponse } from "./admin";
+import { AdminComponent, IUploadQueueStats } from "./admin";
 import { AuthenticationService } from "../../services/authenticationService/authenticationService";
-import { AppInsightsService } from "@markpieszak/ng-application-insights";
+import { HttpErrorHandlerService } from "../../services/httpErrorHandlerService/httpErrorHandlerService";
 import { UploadService } from "../../services/uploadService/uploadService";
-
-class MockError extends Response implements Error {
-    public name: string;
-    public message: string;
-}
 
 describe("AdminComponent", () => {
     let fixture: ComponentFixture<AdminComponent>;
-    let backend: MockBackend;
-    let lastConnection: MockConnection = null;
+    let httpMock: HttpTestingController;
+
+    const queuesRequest = { method: "get", url: "/api/admin/queues" };
+    const recomputeRequest = { method: "post", url: "/api/admin/recompute" };
+    const clearQueueRequest = { method: "post", url: "/api/admin/clearqueue" };
+    const staleUploadsRequest = { method: "get", url: "/api/admin/staleuploads" };
 
     const uploadQueueStats: IUploadQueueStats[] = [
         {
@@ -35,17 +34,13 @@ describe("AdminComponent", () => {
         },
     ];
 
-    let staleuploads: number[] = [];
-    for (let i = 0; i < 1000; i++) {
-        staleuploads.push(i);
-    }
-
     beforeEach(done => {
         let authenticationService = {
             getAuthHeaders: (): void => void 0,
         };
-        let appInsights = {
-            trackEvent: (): void => void 0,
+        let httpErrorHandlerService = {
+            logError: (): void => void 0,
+            getValidationErrors: (): void => void 0,
         };
         let uploadService = {
             delete: (): void => void 0,
@@ -55,29 +50,20 @@ describe("AdminComponent", () => {
             {
                 imports: [
                     FormsModule,
+                    HttpClientTestingModule,
                 ],
                 providers:
                     [
                         { provide: AuthenticationService, useValue: authenticationService },
-                        { provide: AppInsightsService, useValue: appInsights },
+                        { provide: HttpErrorHandlerService, useValue: httpErrorHandlerService },
                         { provide: UploadService, useValue: uploadService },
-                        { provide: ConnectionBackend, useClass: MockBackend },
-                        { provide: RequestOptions, useClass: BaseRequestOptions },
-                        Http,
                     ],
                 declarations: [AdminComponent],
                 schemas: [NO_ERRORS_SCHEMA],
             })
             .compileComponents()
             .then(() => {
-                backend = TestBed.get(ConnectionBackend) as MockBackend;
-                backend.connections.subscribe((connection: MockConnection) => {
-                    if (lastConnection != null) {
-                        fail("Previous connection not handled");
-                    }
-
-                    lastConnection = connection;
-                });
+                httpMock = TestBed.get(HttpTestingController) as HttpTestingController;
                 fixture = TestBed.createComponent(AdminComponent);
             })
             .then(done)
@@ -85,8 +71,7 @@ describe("AdminComponent", () => {
     });
 
     afterEach(() => {
-        lastConnection = null;
-        backend.verifyNoPendingRequests();
+        httpMock.verify();
     });
 
     describe("Initialization", () => {
@@ -94,7 +79,7 @@ describe("AdminComponent", () => {
 
         beforeEach(done => {
             authenticationService = TestBed.get(AuthenticationService) as AuthenticationService;
-            spyOn(authenticationService, "getAuthHeaders").and.returnValue(Promise.resolve(new Headers()));
+            spyOn(authenticationService, "getAuthHeaders").and.returnValue(Promise.resolve(new HttpHeaders()));
 
             fixture.detectChanges();
             fixture.whenStable()
@@ -103,9 +88,7 @@ describe("AdminComponent", () => {
         });
 
         it("should make api call", () => {
-            expect(lastConnection).toBeDefined("no http service connection made");
-            expect(lastConnection.request.method).toEqual(RequestMethod.Get, "method invalid");
-            expect(lastConnection.request.url).toEqual("/api/admin/queues", "url invalid");
+            httpMock.expectOne(queuesRequest);
             expect(authenticationService.getAuthHeaders).toHaveBeenCalled();
         });
 
@@ -113,8 +96,8 @@ describe("AdminComponent", () => {
         for (let i = 0; i < queueDropdownIds.length; i++) {
             let queueDropdownId = queueDropdownIds[i];
             it(`should populate the ${queueDropdownId} input with queue data`, done => {
-                lastConnection.mockRespond(new Response(new ResponseOptions({ body: JSON.stringify(uploadQueueStats) })));
-                lastConnection = null;
+                let request = httpMock.expectOne(queuesRequest);
+                request.flush(uploadQueueStats);
 
                 fixture.detectChanges();
                 fixture.whenStable()
@@ -144,8 +127,8 @@ describe("AdminComponent", () => {
         }
 
         it("should show errors when queue data fetch fails", done => {
-            lastConnection.mockError(new Error());
-            lastConnection = null;
+            let request = httpMock.expectOne(queuesRequest);
+            request.flush(null, { status: 500, statusText: "someStatus" });
 
             fixture.detectChanges();
             fixture.whenStable()
@@ -168,7 +151,7 @@ describe("AdminComponent", () => {
 
         beforeEach(done => {
             authenticationService = TestBed.get(AuthenticationService) as AuthenticationService;
-            spyOn(authenticationService, "getAuthHeaders").and.returnValue(Promise.resolve(new Headers()));
+            spyOn(authenticationService, "getAuthHeaders").and.returnValue(Promise.resolve(new HttpHeaders()));
 
             fixture.detectChanges();
             fixture.whenStable()
@@ -176,8 +159,8 @@ describe("AdminComponent", () => {
                     expect(authenticationService.getAuthHeaders).toHaveBeenCalled();
                     (authenticationService.getAuthHeaders as jasmine.Spy).calls.reset();
 
-                    lastConnection.mockRespond(new Response(new ResponseOptions({ body: JSON.stringify(uploadQueueStats) })));
-                    lastConnection = null;
+                    let request = httpMock.expectOne(queuesRequest);
+                    request.flush(uploadQueueStats);
 
                     fixture.detectChanges();
                     return fixture.whenStable();
@@ -241,15 +224,13 @@ describe("AdminComponent", () => {
 
                 submit()
                     .then(() => {
-                        expect(lastConnection).toBeDefined("no http service connection made");
-                        expect(lastConnection.request.method).toEqual(RequestMethod.Post, "method invalid");
-                        expect(lastConnection.request.url).toEqual("/api/admin/recompute", "url invalid");
-                        expect(lastConnection.request.json()).toEqual({ uploadIds: [123, 456, 789], priority: uploadQueueStats[dropdown.selectedIndex].priority }, "request body invalid");
+                        let request = httpMock.expectOne(recomputeRequest);
+                        expect(request.request.body).toEqual({ uploadIds: [123, 456, 789], priority: uploadQueueStats[dropdown.selectedIndex].priority });
+
                         expect(authenticationService.getAuthHeaders).toHaveBeenCalled();
                         (authenticationService.getAuthHeaders as jasmine.Spy).calls.reset();
 
-                        lastConnection.mockRespond(new Response(new ResponseOptions({ body: JSON.stringify(uploadQueueStats) })));
-                        lastConnection = null;
+                        request.flush(null);
                         return fixture.whenStable();
                     })
                     .then(() => {
@@ -259,9 +240,7 @@ describe("AdminComponent", () => {
                     .then(() => {
                         fixture.detectChanges();
 
-                        expect(lastConnection).toBeDefined("no http service connection made");
-                        expect(lastConnection.request.method).toEqual(RequestMethod.Get, "method invalid");
-                        expect(lastConnection.request.url).toEqual("/api/admin/queues", "url invalid");
+                        httpMock.expectOne(queuesRequest);
                         expect(authenticationService.getAuthHeaders).toHaveBeenCalled();
 
                         let errors = getAllErrors();
@@ -279,7 +258,6 @@ describe("AdminComponent", () => {
 
                 submit()
                     .then(() => {
-                        expect(lastConnection).toBeNull();
                         expect(authenticationService.getAuthHeaders).not.toHaveBeenCalled();
 
                         let errors = getAllErrors();
@@ -291,6 +269,10 @@ describe("AdminComponent", () => {
             });
 
             it("should show an error when the api call fails", done => {
+                let httpErrorHandlerService = TestBed.get(HttpErrorHandlerService) as HttpErrorHandlerService;
+                spyOn(httpErrorHandlerService, "getValidationErrors").and.returnValue(["error0", "error1", "error2"]);
+                spyOn(httpErrorHandlerService, "logError");
+
                 setInputValue(form, "recomputeUploadIds", "123,456,789");
 
                 let dropdown = form.query(By.css("select")).nativeElement as HTMLSelectElement;
@@ -298,19 +280,13 @@ describe("AdminComponent", () => {
 
                 submit()
                     .then(() => {
-                        expect(lastConnection).toBeDefined("no http service connection made");
-                        expect(lastConnection.request.method).toEqual(RequestMethod.Post, "method invalid");
-                        expect(lastConnection.request.url).toEqual("/api/admin/recompute", "url invalid");
-                        expect(lastConnection.request.json()).toEqual({ uploadIds: [123, 456, 789], priority: uploadQueueStats[dropdown.selectedIndex].priority }, "request body invalid");
+                        let request = httpMock.expectOne(recomputeRequest);
+                        expect(request.request.body).toEqual({ uploadIds: [123, 456, 789], priority: uploadQueueStats[dropdown.selectedIndex].priority });
+
                         expect(authenticationService.getAuthHeaders).toHaveBeenCalled();
 
-                        let validationError: IValidationErrorResponse = {
-                            field0: ["error0_0", "error0_1", "error0_2"],
-                            field1: ["error1_0", "error1_1", "error1_2"],
-                            field2: ["error2_0", "error2_1", "error2_2"],
-                        };
-                        lastConnection.mockError(new MockError(new ResponseOptions({ body: validationError })));
-                        lastConnection = null;
+                        request.flush(null, { status: 400, statusText: "someStatus" });
+
                         return fixture.whenStable();
                     })
                     .then(() => {
@@ -322,11 +298,12 @@ describe("AdminComponent", () => {
                     .then(() => {
                         fixture.detectChanges();
 
-                        expect(lastConnection).toBeNull();
+                        expect(httpErrorHandlerService.logError).toHaveBeenCalledWith("AdminComponent.recompute.error", jasmine.any(HttpErrorResponse));
+                        expect(httpErrorHandlerService.getValidationErrors).toHaveBeenCalledWith(jasmine.any(HttpErrorResponse));
 
                         let errors = getAllErrors();
                         expect(errors.length).toEqual(1);
-                        expect(errors[0]).toEqual("error0_0;error0_1;error0_2;error1_0;error1_1;error1_2;error2_0;error2_1;error2_2");
+                        expect(errors[0]).toEqual("error0;error1;error2");
                     })
                     .then(done)
                     .catch(done.fail);
@@ -350,7 +327,7 @@ describe("AdminComponent", () => {
 
         beforeEach(done => {
             authenticationService = TestBed.get(AuthenticationService) as AuthenticationService;
-            spyOn(authenticationService, "getAuthHeaders").and.returnValue(Promise.resolve(new Headers()));
+            spyOn(authenticationService, "getAuthHeaders").and.returnValue(Promise.resolve(new HttpHeaders()));
 
             fixture.detectChanges();
             fixture.whenStable()
@@ -358,8 +335,8 @@ describe("AdminComponent", () => {
                     expect(authenticationService.getAuthHeaders).toHaveBeenCalled();
                     (authenticationService.getAuthHeaders as jasmine.Spy).calls.reset();
 
-                    lastConnection.mockRespond(new Response(new ResponseOptions({ body: JSON.stringify(uploadQueueStats) })));
-                    lastConnection = null;
+                    let request = httpMock.expectOne(queuesRequest);
+                    request.flush(uploadQueueStats);
 
                     fixture.detectChanges();
                     return fixture.whenStable();
@@ -384,15 +361,14 @@ describe("AdminComponent", () => {
 
                 submit()
                     .then(() => {
-                        expect(lastConnection).toBeDefined("no http service connection made");
-                        expect(lastConnection.request.method).toEqual(RequestMethod.Post, "method invalid");
-                        expect(lastConnection.request.url).toEqual("/api/admin/clearqueue", "url invalid");
-                        expect(lastConnection.request.json()).toEqual({ priority: uploadQueueStats[dropdown.selectedIndex].priority }, "request body invalid");
+                        let request = httpMock.expectOne(clearQueueRequest);
+                        expect(request.request.body).toEqual({ priority: uploadQueueStats[dropdown.selectedIndex].priority });
+
                         expect(authenticationService.getAuthHeaders).toHaveBeenCalled();
                         (authenticationService.getAuthHeaders as jasmine.Spy).calls.reset();
 
-                        lastConnection.mockRespond(new Response(new ResponseOptions({ body: JSON.stringify(uploadQueueStats) })));
-                        lastConnection = null;
+                        request.flush(null);
+
                         return fixture.whenStable();
                     })
                     .then(() => {
@@ -402,9 +378,7 @@ describe("AdminComponent", () => {
                     .then(() => {
                         fixture.detectChanges();
 
-                        expect(lastConnection).toBeDefined("no http service connection made");
-                        expect(lastConnection.request.method).toEqual(RequestMethod.Get, "method invalid");
-                        expect(lastConnection.request.url).toEqual("/api/admin/queues", "url invalid");
+                        httpMock.expectOne(queuesRequest);
                         expect(authenticationService.getAuthHeaders).toHaveBeenCalled();
 
                         let errors = getAllErrors();
@@ -415,24 +389,22 @@ describe("AdminComponent", () => {
             });
 
             it("should show an error when the api call fails", done => {
+                let httpErrorHandlerService = TestBed.get(HttpErrorHandlerService) as HttpErrorHandlerService;
+                spyOn(httpErrorHandlerService, "getValidationErrors").and.returnValue(["error0", "error1", "error2"]);
+                spyOn(httpErrorHandlerService, "logError");
+
                 let dropdown = form.query(By.css("select")).nativeElement as HTMLSelectElement;
                 setSelectValue(dropdown, dropdown.selectedIndex + 1);
 
                 submit()
                     .then(() => {
-                        expect(lastConnection).toBeDefined("no http service connection made");
-                        expect(lastConnection.request.method).toEqual(RequestMethod.Post, "method invalid");
-                        expect(lastConnection.request.url).toEqual("/api/admin/clearqueue", "url invalid");
-                        expect(lastConnection.request.json()).toEqual({ priority: uploadQueueStats[dropdown.selectedIndex].priority }, "request body invalid");
+                        let request = httpMock.expectOne(clearQueueRequest);
+                        expect(request.request.body).toEqual({ priority: uploadQueueStats[dropdown.selectedIndex].priority });
+
                         expect(authenticationService.getAuthHeaders).toHaveBeenCalled();
 
-                        let validationError: IValidationErrorResponse = {
-                            field0: ["error0_0", "error0_1", "error0_2"],
-                            field1: ["error1_0", "error1_1", "error1_2"],
-                            field2: ["error2_0", "error2_1", "error2_2"],
-                        };
-                        lastConnection.mockError(new MockError(new ResponseOptions({ body: validationError })));
-                        lastConnection = null;
+                        request.flush(null, { status: 400, statusText: "someStatus" });
+
                         return fixture.whenStable();
                     })
                     .then(() => {
@@ -444,11 +416,12 @@ describe("AdminComponent", () => {
                     .then(() => {
                         fixture.detectChanges();
 
-                        expect(lastConnection).toBeNull();
+                        expect(httpErrorHandlerService.logError).toHaveBeenCalledWith("AdminComponent.clearQueue.error", jasmine.any(HttpErrorResponse));
+                        expect(httpErrorHandlerService.getValidationErrors).toHaveBeenCalledWith(jasmine.any(HttpErrorResponse));
 
                         let errors = getAllErrors();
                         expect(errors.length).toEqual(1);
-                        expect(errors[0]).toEqual("error0_0;error0_1;error0_2;error1_0;error1_1;error1_2;error2_0;error2_1;error2_2");
+                        expect(errors[0]).toEqual("error0;error1;error2");
                     })
                     .then(done)
                     .catch(done.fail);
@@ -470,13 +443,18 @@ describe("AdminComponent", () => {
         let authenticationService: AuthenticationService;
         let container: DebugElement;
 
+        let staleuploads: number[] = [];
+        for (let i = 0; i < 1000; i++) {
+            staleuploads.push(i);
+        }
+
         beforeEach(done => {
             let containers = fixture.debugElement.queryAll(By.css(".col-md-4"));
             expect(containers.length).toEqual(3);
             container = containers[2];
 
             authenticationService = TestBed.get(AuthenticationService) as AuthenticationService;
-            spyOn(authenticationService, "getAuthHeaders").and.returnValue(Promise.resolve(new Headers()));
+            spyOn(authenticationService, "getAuthHeaders").and.returnValue(Promise.resolve(new HttpHeaders()));
 
             fixture.detectChanges();
             fixture.whenStable()
@@ -486,8 +464,7 @@ describe("AdminComponent", () => {
                     expect(authenticationService.getAuthHeaders).toHaveBeenCalled();
                     (authenticationService.getAuthHeaders as jasmine.Spy).calls.reset();
 
-                    // Ignore the queue data fetch
-                    lastConnection = null;
+                    httpMock.expectOne(queuesRequest);
                 })
                 .then(done)
                 .catch(done.fail);
@@ -514,13 +491,12 @@ describe("AdminComponent", () => {
                 .then(() => {
                     fixture.detectChanges();
 
-                    expect(lastConnection).toBeDefined("no http service connection made");
-                    expect(lastConnection.request.method).toEqual(RequestMethod.Get, "method invalid");
-                    expect(lastConnection.request.url).toEqual("/api/admin/staleuploads", "url invalid");
                     expect(authenticationService.getAuthHeaders).toHaveBeenCalled();
 
-                    lastConnection.mockRespond(new Response(new ResponseOptions({ body: JSON.stringify(staleuploads) })));
-                    lastConnection = null;
+                    let request = httpMock.expectOne(staleUploadsRequest);
+
+                    // Make a copy so our mock data doesn't get altered
+                    request.flush(JSON.parse(JSON.stringify(staleuploads)));
 
                     fixture.detectChanges();
                     return fixture.whenStable();
@@ -545,20 +521,18 @@ describe("AdminComponent", () => {
         });
 
         it("should show errors when stale uploads fetch fails", done => {
+            let httpErrorHandlerService = TestBed.get(HttpErrorHandlerService) as HttpErrorHandlerService;
+            spyOn(httpErrorHandlerService, "getValidationErrors").and.returnValue(["error0", "error1", "error2"]);
+            spyOn(httpErrorHandlerService, "logError");
+
             let fetchButton = container.query(By.css("button"));
             fetchButton.nativeElement.click();
-
-            let validationError: IValidationErrorResponse = {
-                field0: ["error0_0", "error0_1", "error0_2"],
-                field1: ["error1_0", "error1_1", "error1_2"],
-                field2: ["error2_0", "error2_1", "error2_2"],
-            };
 
             fixture.detectChanges();
             fixture.whenStable()
                 .then(() => {
-                    lastConnection.mockError(new MockError(new ResponseOptions({ body: validationError })));
-                    lastConnection = null;
+                    let request = httpMock.expectOne(staleUploadsRequest);
+                    request.flush(null, { status: 400, statusText: "someStatus" });
 
                     fixture.detectChanges();
                     return fixture.whenStable();
@@ -566,9 +540,12 @@ describe("AdminComponent", () => {
                 .then(() => {
                     fixture.detectChanges();
 
+                    expect(httpErrorHandlerService.logError).toHaveBeenCalledWith("AdminComponent.fetchStaleUploads.error", jasmine.any(HttpErrorResponse));
+                    expect(httpErrorHandlerService.getValidationErrors).toHaveBeenCalledWith(jasmine.any(HttpErrorResponse));
+
                     let errors = getAllErrors();
                     expect(errors.length).toEqual(1);
-                    expect(errors[0]).toEqual("error0_0;error0_1;error0_2;error1_0;error1_1;error1_2;error2_0;error2_1;error2_2");
+                    expect(errors[0]).toEqual("error0;error1;error2");
                 })
                 .then(done)
                 .catch(done.fail);
@@ -584,8 +561,10 @@ describe("AdminComponent", () => {
             fixture.detectChanges();
             fixture.whenStable()
                 .then(() => {
-                    lastConnection.mockRespond(new Response(new ResponseOptions({ body: JSON.stringify(staleuploads) })));
-                    lastConnection = null;
+                    let request = httpMock.expectOne(staleUploadsRequest);
+
+                    // Make a copy so our mock data doesn't get altered
+                    request.flush(JSON.parse(JSON.stringify(staleuploads)));
 
                     fixture.detectChanges();
                     return fixture.whenStable();
@@ -645,8 +624,10 @@ describe("AdminComponent", () => {
             fixture.detectChanges();
             fixture.whenStable()
                 .then(() => {
-                    lastConnection.mockRespond(new Response(new ResponseOptions({ body: JSON.stringify(staleuploads) })));
-                    lastConnection = null;
+                    let request = httpMock.expectOne(staleUploadsRequest);
+
+                    // Make a copy so our mock data doesn't get altered
+                    request.flush(JSON.parse(JSON.stringify(staleuploads)));
 
                     fixture.detectChanges();
                     return fixture.whenStable();

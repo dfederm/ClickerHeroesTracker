@@ -1,10 +1,10 @@
 import { Injectable } from "@angular/core";
-import { Http, RequestOptions, Headers, URLSearchParams } from "@angular/http";
-import { AppInsightsService } from "@markpieszak/ng-application-insights";
+import { HttpClient, HttpHeaders, HttpParams, HttpErrorResponse } from "@angular/common/http";
+import { HttpErrorHandlerService } from "../httpErrorHandlerService/httpErrorHandlerService";
 
 import "rxjs/add/operator/toPromise";
 
-import { AuthenticationService } from "../../services/authenticationService/authenticationService";
+import { AuthenticationService } from "../authenticationService/authenticationService";
 import { IPaginationMetadata, IUpload } from "../../models";
 
 export interface ICreateUserRequest {
@@ -39,11 +39,6 @@ export interface IResetPasswordConfirmationRequest {
     email: string;
     password: string;
     code: string;
-}
-
-// This actually pretty generic, so if it's used elsewhere consider moving it somewhere more generic
-export interface IValidationErrorResponse {
-    [field: string]: string[];
 }
 
 export interface IProgressData {
@@ -90,14 +85,13 @@ export interface IExternalLogin {
 export class UserService {
     constructor(
         private authenticationService: AuthenticationService,
-        private http: Http,
-        private appInsights: AppInsightsService,
+        private http: HttpClient,
+        private httpErrorHandlerService: HttpErrorHandlerService,
     ) { }
 
     public create(userName: string, email: string, password: string): Promise<void> {
-        let headers = new Headers();
-        headers.append("Content-Type", "application/json");
-        let options = new RequestOptions({ headers });
+        let headers = new HttpHeaders();
+        headers = headers.set("Content-Type", "application/json");
 
         let body: ICreateUserRequest = {
             userName,
@@ -106,28 +100,12 @@ export class UserService {
         };
 
         return this.http
-            .post("/api/users", body, options)
+            .post("/api/users", body, { headers })
             .toPromise()
             .then(() => void 0)
-            .catch(error => {
-                let errors: string[] = [];
-
-                let validationErrorResponse: IValidationErrorResponse;
-                try {
-                    validationErrorResponse = error.json();
-                } catch (error) {
-                    // It must not have been json
-                }
-
-                if (validationErrorResponse) {
-                    for (let field in validationErrorResponse) {
-                        errors.push(...validationErrorResponse[field]);
-                    }
-                } else {
-                    errors.push(error.message || error.toString());
-                }
-
-                this.appInsights.trackEvent("UserService.create.error", { message: errors.join(";") });
+            .catch((err: HttpErrorResponse) => {
+                this.httpErrorHandlerService.logError("UserService.create.error", err);
+                let errors = this.httpErrorHandlerService.getValidationErrors(err);
                 return Promise.reject(errors);
             });
     }
@@ -135,117 +113,86 @@ export class UserService {
     public getUploads(userName: string, page: number, count: number): Promise<IUploadSummaryListResponse> {
         return this.authenticationService.getAuthHeaders()
             .then(headers => {
-                let options = new RequestOptions({ headers });
                 return this.http
-                    .get(`/api/users/${userName}/uploads?page=${page}&count=${count}`, options)
+                    .get<IUploadSummaryListResponse>(`/api/users/${userName}/uploads?page=${page}&count=${count}`, { headers })
                     .toPromise();
             })
-            .then(response => response.json() as IUploadSummaryListResponse)
-            .catch(error => {
-                let errorMessage = error.message || error.toString();
-                this.appInsights.trackEvent("UploadService.getUploads.error", { message: errorMessage });
-                return Promise.reject(errorMessage);
+            .catch((err: HttpErrorResponse) => {
+                this.httpErrorHandlerService.logError("UserService.getUploads.error", err);
+                return Promise.reject(err);
             });
     }
 
     public getProgress(userName: string, start: Date, end: Date): Promise<IProgressData> {
-        let params = new URLSearchParams();
-        params.append("start", start.toISOString());
-        params.append("end", end.toISOString());
+        let params = new HttpParams()
+            .set("start", start.toISOString())
+            .set("end", end.toISOString());
 
         return this.authenticationService.getAuthHeaders()
             .then(headers => {
-                let options = new RequestOptions({ headers });
                 return this.http
-                    .get(`/api/users/${userName}/progress?${params.toString()}`, options)
+                    .get<IProgressData>(`/api/users/${userName}/progress?${params.toString()}`, { headers })
                     .toPromise();
             })
-            .then(response => response.json() as IProgressData)
-            .catch(error => {
-                let errorMessage = error.message || error.toString();
-                this.appInsights.trackEvent("UserService.getProgress.error", { message: errorMessage });
-                return Promise.reject(errorMessage);
+            .catch((err: HttpErrorResponse) => {
+                this.httpErrorHandlerService.logError("UserService.getProgress.error", err);
+                return Promise.reject(err);
             });
     }
 
     public getFollows(userName: string): Promise<IFollowsData> {
         return this.authenticationService.getAuthHeaders()
             .then(headers => {
-                let options = new RequestOptions({ headers });
                 return this.http
-                    .get(`/api/users/${userName}/follows`, options)
+                    .get<IFollowsData>(`/api/users/${userName}/follows`, { headers })
                     .toPromise();
             })
-            .then(response => response.json() as IFollowsData)
-            .catch(error => {
-                let errorMessage = error.message || error.toString();
-                this.appInsights.trackEvent("UserService.getFollows.error", { message: errorMessage });
-                return Promise.reject(errorMessage);
+            .catch((err: HttpErrorResponse) => {
+                this.httpErrorHandlerService.logError("UserService.getFollows.error", err);
+                return Promise.reject(err);
             });
     }
 
     public getLogins(userName: string): Promise<IUserLogins> {
         return this.authenticationService.getAuthHeaders()
             .then(headers => {
-                let options = new RequestOptions({ headers });
                 return this.http
-                    .get(`/api/users/${userName}/logins`, options)
+                    .get<IUserLogins>(`/api/users/${userName}/logins`, { headers })
                     .toPromise();
             })
-            .then(response => response.json() as IUserLogins)
-            .catch(error => {
-                let errorMessage = error.message || error.toString();
-                this.appInsights.trackEvent("UserService.getLogins.error", { message: errorMessage });
-                return Promise.reject(errorMessage);
+            .catch((err: HttpErrorResponse) => {
+                this.httpErrorHandlerService.logError("UserService.getLogins.error", err);
+                return Promise.reject(err);
             });
     }
 
     public removeLogin(userName: string, externalLogin: IExternalLogin): Promise<void> {
         return this.authenticationService.getAuthHeaders()
             .then(headers => {
-                let options = new RequestOptions({ headers, body: externalLogin });
                 return this.http
-                    .delete(`/api/users/${userName}/logins`, options)
+                    .request("delete", `/api/users/${userName}/logins`, { headers, body: externalLogin })
                     .toPromise();
             })
             .then(() => void 0)
-            .catch(error => {
-                let errorMessage = error.message || error.toString();
-                this.appInsights.trackEvent("UserService.removeLogin.error", { message: errorMessage });
-                return Promise.reject(errorMessage);
+            .catch((err: HttpErrorResponse) => {
+                this.httpErrorHandlerService.logError("UserService.removeLogin.error", err);
+                return Promise.reject(err);
             });
     }
 
     public setPassword(userName: string, newPassword: string): Promise<void> {
         return this.authenticationService.getAuthHeaders()
             .then(headers => {
-                headers.append("Content-Type", "application/json");
-                let options = new RequestOptions({ headers });
+                headers = headers.set("Content-Type", "application/json");
                 let body: ISetPasswordRequest = { newPassword };
                 return this.http
-                    .post(`/api/users/${userName}/setpassword`, body, options)
+                    .post(`/api/users/${userName}/setpassword`, body, { headers })
                     .toPromise();
             })
             .then(() => void 0)
-            .catch(error => {
-                let errors: string[] = [];
-
-                let validationErrorResponse: IValidationErrorResponse;
-                try {
-                    validationErrorResponse = error.json();
-                } catch (error) {
-                    // It must not have been json
-                }
-
-                if (validationErrorResponse) {
-                    for (let field in validationErrorResponse) {
-                        errors.push(...validationErrorResponse[field]);
-                    }
-                } else {
-                    errors.push(error.message || error.toString());
-                }
-
-                this.appInsights.trackEvent("UserService.changePassword.error", { message: errors.join(";") });
+            .catch((err: HttpErrorResponse) => {
+                this.httpErrorHandlerService.logError("UserService.setPassword.error", err);
+                let errors = this.httpErrorHandlerService.getValidationErrors(err);
                 return Promise.reject(errors);
             });
     }
@@ -253,101 +200,50 @@ export class UserService {
     public changePassword(userName: string, currentPassword: string, newPassword: string): Promise<void> {
         return this.authenticationService.getAuthHeaders()
             .then(headers => {
-                headers.append("Content-Type", "application/json");
-                let options = new RequestOptions({ headers });
+                headers = headers.set("Content-Type", "application/json");
                 let body: IChangePasswordRequest = { currentPassword, newPassword };
                 return this.http
-                    .post(`/api/users/${userName}/changepassword`, body, options)
+                    .post(`/api/users/${userName}/changepassword`, body, { headers })
                     .toPromise();
             })
             .then(() => void 0)
-            .catch(error => {
-                let errors: string[] = [];
-
-                let validationErrorResponse: IValidationErrorResponse;
-                try {
-                    validationErrorResponse = error.json();
-                } catch (error) {
-                    // It must not have been json
-                }
-
-                if (validationErrorResponse) {
-                    for (let field in validationErrorResponse) {
-                        errors.push(...validationErrorResponse[field]);
-                    }
-                } else {
-                    errors.push(error.message || error.toString());
-                }
-
-                this.appInsights.trackEvent("UserService.changePassword.error", { message: errors.join(";") });
+            .catch((err: HttpErrorResponse) => {
+                this.httpErrorHandlerService.logError("UserService.changePassword.error", err);
+                let errors = this.httpErrorHandlerService.getValidationErrors(err);
                 return Promise.reject(errors);
             });
     }
 
     public resetPassword(email: string): Promise<void> {
-        let headers = new Headers();
-        headers.append("Content-Type", "application/json");
-        let options = new RequestOptions({ headers });
+        let headers = new HttpHeaders();
+        headers = headers.set("Content-Type", "application/json");
         let body: IResetPasswordRequest = { email };
         return this.http
-            .post("/api/users/resetpassword", body, options)
+            .post("/api/users/resetpassword", body, { headers })
             .toPromise()
             .then(() => void 0)
-            .catch(error => {
-                let errors: string[] = [];
-
-                let validationErrorResponse: IValidationErrorResponse;
-                try {
-                    validationErrorResponse = error.json();
-                } catch (error) {
-                    // It must not have been json
-                }
-
-                if (validationErrorResponse) {
-                    for (let field in validationErrorResponse) {
-                        errors.push(...validationErrorResponse[field]);
-                    }
-                } else {
-                    errors.push(error.message || error.toString());
-                }
-
-                this.appInsights.trackEvent("UserService.resetPassword.error", { message: errors.join(";") });
+            .catch((err: HttpErrorResponse) => {
+                this.httpErrorHandlerService.logError("UserService.resetPassword.error", err);
+                let errors = this.httpErrorHandlerService.getValidationErrors(err);
                 return Promise.reject(errors);
             });
     }
 
     public resetPasswordConfirmation(email: string, password: string, code: string): Promise<void> {
-        let headers = new Headers();
-        headers.append("Content-Type", "application/json");
-        let options = new RequestOptions({ headers });
+        let headers = new HttpHeaders();
+        headers = headers.set("Content-Type", "application/json");
         let body: IResetPasswordConfirmationRequest = {
             email,
             password,
             code,
         };
         return this.http
-            .post("/api/users/resetpasswordconfirmation", body, options)
+            .post("/api/users/resetpasswordconfirmation", body, { headers })
             .toPromise()
             .then(() => void 0)
-            .catch(error => {
-                let errors: string[] = [];
-
-                let validationErrorResponse: IValidationErrorResponse;
-                try {
-                    validationErrorResponse = error.json();
-                } catch (error) {
-                    // It must not have been json
-                }
-
-                if (validationErrorResponse) {
-                    for (let field in validationErrorResponse) {
-                        errors.push(...validationErrorResponse[field]);
-                    }
-                } else {
-                    errors.push(error.message || error.toString());
-                }
-
-                this.appInsights.trackEvent("UserService.resetPasswordConfirmation.error", { message: errors.join(";") });
+            .catch((err: HttpErrorResponse) => {
+                this.httpErrorHandlerService.logError("UserService.resetPasswordConfirmation.error", err);
+                let errors = this.httpErrorHandlerService.getValidationErrors(err);
                 return Promise.reject(errors);
             });
     }

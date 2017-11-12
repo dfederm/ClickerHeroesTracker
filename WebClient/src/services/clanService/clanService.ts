@@ -1,10 +1,10 @@
 import { Injectable } from "@angular/core";
-import { Http, RequestOptions, URLSearchParams } from "@angular/http";
-import { AppInsightsService } from "@markpieszak/ng-application-insights";
+import { HttpClient, HttpParams, HttpErrorResponse } from "@angular/common/http";
+import { HttpErrorHandlerService } from "../httpErrorHandlerService/httpErrorHandlerService";
 
 import "rxjs/add/operator/toPromise";
 
-import { AuthenticationService } from "../../services/authenticationService/authenticationService";
+import { AuthenticationService } from "../authenticationService/authenticationService";
 import { IPaginationMetadata } from "../../models";
 
 export interface IGuildMember {
@@ -60,17 +60,16 @@ export interface ISendMessageResponse {
 export class ClanService {
     constructor(
         private authenticationService: AuthenticationService,
-        private http: Http,
-        private appInsights: AppInsightsService,
+        private http: HttpClient,
+        private httpErrorHandlerService: HttpErrorHandlerService,
     ) { }
 
     // TODO: this is really the user's clan.
     public getClan(): Promise<IClanData> {
         return this.authenticationService.getAuthHeaders()
             .then(headers => {
-                let options = new RequestOptions({ headers });
                 return this.http
-                    .get("/api/clans", options)
+                    .get<IClanData>("/api/clans", { headers, observe: "response" })
                     .toPromise();
             })
             .then(response => {
@@ -79,12 +78,11 @@ export class ClanService {
                     return null;
                 }
 
-                return response.json() as IClanData;
+                return response.body;
             })
-            .catch(error => {
-                let errorMessage = error.message || error.toString();
-                this.appInsights.trackEvent("ClanService.getClan.error", { message: errorMessage });
-                return Promise.reject(errorMessage);
+            .catch((err: HttpErrorResponse) => {
+                this.httpErrorHandlerService.logError("ClanService.getClan.error", err);
+                return Promise.reject(err);
             });
     }
 
@@ -92,9 +90,8 @@ export class ClanService {
     public getUserClan(): Promise<ILeaderboardClan> {
         return this.authenticationService.getAuthHeaders()
             .then(headers => {
-                let options = new RequestOptions({ headers });
                 return this.http
-                    .get("/api/clans/userClan", options)
+                    .get<ILeaderboardClan>("/api/clans/userClan", { headers, observe: "response" })
                     .toPromise();
             })
             .then(response => {
@@ -103,57 +100,48 @@ export class ClanService {
                     return null;
                 }
 
-                return response.json() as ILeaderboardClan;
+                return response.body;
             })
-            .catch(error => {
-                let errorMessage = error.message || error.toString();
-                this.appInsights.trackEvent("ClanService.getUserClan.error", { message: errorMessage });
-                return Promise.reject(errorMessage);
+            .catch((err: HttpErrorResponse) => {
+                this.httpErrorHandlerService.logError("ClanService.getUserClan.error", err);
+                return Promise.reject(err);
             });
     }
 
     public getLeaderboard(page: number, count: number): Promise<ILeaderboardSummaryListResponse> {
         return this.authenticationService.getAuthHeaders()
             .then(headers => {
-                let options = new RequestOptions({ headers });
                 return this.http
-                    .get("/api/clans/leaderboard?page=" + page + "&count=" + count, options)
+                    .get<ILeaderboardSummaryListResponse>("/api/clans/leaderboard?page=" + page + "&count=" + count, { headers })
                     .toPromise();
             })
-            .then(response => {
-                return response.json() as ILeaderboardSummaryListResponse;
-            })
-            .catch(error => {
-                let errorMessage = error.message || error.toString();
-                this.appInsights.trackEvent("ClanService.getLeaderboard.error", { message: errorMessage });
-                return Promise.reject(errorMessage);
+            .catch((err: HttpErrorResponse) => {
+                this.httpErrorHandlerService.logError("ClanService.getLeaderboard.error", err);
+                return Promise.reject(err);
             });
     }
 
     public sendMessage(message: string, clanName: string): Promise<void> {
         return this.authenticationService.getAuthHeaders()
             .then(headers => {
-                headers.append("Content-Type", "application/x-www-form-urlencoded");
-                let options = new RequestOptions({ headers });
-                let params = new URLSearchParams();
-                params.append("message", message);
-                params.append("clanName", clanName);
+                headers = headers.set("Content-Type", "application/x-www-form-urlencoded");
+                let params = new HttpParams()
+                    .set("message", message)
+                    .set("clanName", clanName);
                 return this.http
-                    .post("/api/clans/messages", params.toString(), options)
+                    .post<ISendMessageResponse>("/api/clans/messages", params.toString(), { headers })
                     .toPromise();
             })
             .then(response => {
-                let sendMessageResponse = response.json() as ISendMessageResponse;
-                if (!sendMessageResponse.success) {
-                    return Promise.reject(sendMessageResponse.reason);
+                if (!response.success) {
+                    return Promise.reject(response.reason);
                 }
 
                 return Promise.resolve();
             })
-            .catch(error => {
-                let errorMessage = error.message || error.toString();
-                this.appInsights.trackEvent("ClanService.getLeaderboard.error", { message: errorMessage });
-                return Promise.reject(errorMessage);
+            .catch((err: HttpErrorResponse) => {
+                this.httpErrorHandlerService.logError("ClanService.sendMessage.error", err);
+                return Promise.reject(err);
             });
     }
 }

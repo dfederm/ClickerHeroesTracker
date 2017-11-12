@@ -1,9 +1,7 @@
-import { ReflectiveInjector } from "@angular/core";
-import { fakeAsync, tick } from "@angular/core/testing";
-import { BaseRequestOptions, ConnectionBackend, Http, Headers, RequestOptions } from "@angular/http";
-import { Response, ResponseOptions, RequestMethod } from "@angular/http";
-import { MockBackend, MockConnection } from "@angular/http/testing";
-import { AppInsightsService } from "@markpieszak/ng-application-insights";
+import { TestBed, fakeAsync, tick } from "@angular/core/testing";
+import { HttpClientTestingModule, HttpTestingController } from "@angular/common/http/testing";
+import { HttpHeaders, HttpErrorResponse } from "@angular/common/http";
+import { HttpErrorHandlerService } from "../httpErrorHandlerService/httpErrorHandlerService";
 
 import { FeedbackService } from "./feedbackService";
 import { AuthenticationService } from "../authenticationService/authenticationService";
@@ -11,40 +9,42 @@ import { AuthenticationService } from "../authenticationService/authenticationSe
 describe("FeedbackService", () => {
     let feedbackService: FeedbackService;
     let authenticationService: AuthenticationService;
-    let appInsights: AppInsightsService;
-    let backend: MockBackend;
-    let lastConnection: MockConnection;
+    let httpErrorHandlerService: HttpErrorHandlerService;
+    let httpMock: HttpTestingController;
 
     const comments = "someComments";
     const email = "someEmail";
 
     beforeEach(() => {
         authenticationService = jasmine.createSpyObj("authenticationService", ["getAuthHeaders"]);
-        (authenticationService.getAuthHeaders as jasmine.Spy).and.returnValue(Promise.resolve(new Headers()));
+        (authenticationService.getAuthHeaders as jasmine.Spy).and.returnValue(Promise.resolve(new HttpHeaders()));
 
-        appInsights = jasmine.createSpyObj("appInsights", ["trackEvent"]);
+        httpErrorHandlerService = jasmine.createSpyObj("httpErrorHandlerService", ["logError"]);
 
-        let injector = ReflectiveInjector.resolveAndCreate(
-            [
-                FeedbackService,
-                { provide: ConnectionBackend, useClass: MockBackend },
-                { provide: RequestOptions, useClass: BaseRequestOptions },
-                Http,
-                { provide: AuthenticationService, useValue: authenticationService },
-                { provide: AppInsightsService, useValue: appInsights },
-            ]);
+        TestBed.configureTestingModule(
+            {
+                imports: [
+                    HttpClientTestingModule,
+                ],
+                providers:
+                    [
+                        FeedbackService,
+                        { provide: AuthenticationService, useValue: authenticationService },
+                        { provide: HttpErrorHandlerService, useValue: httpErrorHandlerService },
+                    ],
+            });
 
-        feedbackService = injector.get(FeedbackService) as FeedbackService;
-        backend = injector.get(ConnectionBackend) as MockBackend;
-        backend.connections.subscribe((connection: MockConnection) => lastConnection = connection);
+        feedbackService = TestBed.get(FeedbackService) as FeedbackService;
+        httpMock = TestBed.get(HttpTestingController) as HttpTestingController;
     });
 
     afterEach(() => {
-        lastConnection = null;
-        backend.verifyNoPendingRequests();
+        httpMock.verify();
     });
 
     describe("send", () => {
+        const apiRequest = { method: "post", url: "/api/feedback" };
+
         it("should make the correct api call", fakeAsync(() => {
             feedbackService.send(comments, email);
 
@@ -53,47 +53,48 @@ describe("FeedbackService", () => {
 
             expect(authenticationService.getAuthHeaders).toHaveBeenCalled();
 
-            expect(lastConnection).toBeDefined("no http service connection made");
-            expect(lastConnection.request.method).toEqual(RequestMethod.Post, "method invalid");
-            expect(lastConnection.request.url).toEqual("/api/feedback", "url invalid");
-            expect(lastConnection.request.text()).toEqual("comments=someComments&email=someEmail", "request body invalid");
+            let request = httpMock.expectOne(apiRequest);
+            expect(request.request.body).toEqual("comments=someComments&email=someEmail");
         }));
 
         it("should handle when the api returns a success response", fakeAsync(() => {
             let succeeded = false;
-            let error: string;
+            let error: HttpErrorResponse;
             feedbackService.send(comments, email)
                 .then(() => succeeded = true)
-                .catch((e: string) => error = e);
+                .catch((e: HttpErrorResponse) => error = e);
 
             // Tick the getAuthHeaders call
             tick();
 
-            lastConnection.mockRespond(new Response(new ResponseOptions()));
+            let request = httpMock.expectOne(apiRequest);
+            request.flush(null);
             tick();
 
             expect(succeeded).toEqual(true);
             expect(error).toBeUndefined();
-            expect(appInsights.trackEvent).not.toHaveBeenCalled();
+            expect(httpErrorHandlerService.logError).not.toHaveBeenCalled();
         }));
 
         it("should handle http errors", fakeAsync(() => {
             let succeeded = false;
-            let error: Error;
+            let error: HttpErrorResponse;
             feedbackService.send(comments, email)
                 .then(() => succeeded = true)
-                .catch((e: Error) => error = e);
+                .catch((e: HttpErrorResponse) => error = e);
 
             // Tick the getAuthHeaders call
             tick();
 
-            let expectedError = new Error("someError");
-            lastConnection.mockError(expectedError);
+            let request = httpMock.expectOne(apiRequest);
+            request.flush(null, { status: 500, statusText: "someStatus" });
             tick();
 
             expect(succeeded).toEqual(false);
-            expect(error).toEqual(expectedError);
-            expect(appInsights.trackEvent).toHaveBeenCalled();
+            expect(error).toBeDefined();
+            expect(error.status).toEqual(500);
+            expect(error.statusText).toEqual("someStatus");
+            expect(httpErrorHandlerService.logError).toHaveBeenCalledWith("FeedbackService.send.error", error);
         }));
     });
 });

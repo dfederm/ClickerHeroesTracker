@@ -1,105 +1,65 @@
-import { ReflectiveInjector } from "@angular/core";
-import { fakeAsync, tick } from "@angular/core/testing";
-import { BaseRequestOptions, ConnectionBackend, Http, Headers, RequestOptions, Response, ResponseOptions, RequestMethod } from "@angular/http";
-import { MockBackend, MockConnection } from "@angular/http/testing";
-import { AppInsightsService } from "@markpieszak/ng-application-insights";
+import { TestBed, fakeAsync, tick } from "@angular/core/testing";
+import { HttpClientTestingModule, HttpTestingController } from "@angular/common/http/testing";
+import { HttpErrorHandlerService } from "../httpErrorHandlerService/httpErrorHandlerService";
+import { HttpHeaders, HttpErrorResponse } from "@angular/common/http";
 
-import { UserService, IProgressData, IFollowsData, IValidationErrorResponse, IUserLogins, IUploadSummaryListResponse } from "./userService";
+import { UserService, IProgressData, IFollowsData, IUserLogins, IUploadSummaryListResponse } from "./userService";
 import { AuthenticationService } from "../authenticationService/authenticationService";
-
-class MockError extends Response implements Error {
-    public name: string;
-    public message: string;
-}
 
 describe("UserService", () => {
     let userService: UserService;
     let authenticationService: AuthenticationService;
-    let appInsights: AppInsightsService;
-    let backend: MockBackend;
-    let lastConnection: MockConnection;
+    let httpErrorHandlerService: HttpErrorHandlerService;
+    let httpMock: HttpTestingController;
 
     const userName = "someUserName";
     const email = "someEmail";
     const password = "somePassword";
     const code = "someCode";
+    const expectedValidationErrors = ["error0", "error1", "error2"];
 
     beforeEach(() => {
         authenticationService = jasmine.createSpyObj("authenticationService", ["getAuthHeaders"]);
-        (authenticationService.getAuthHeaders as jasmine.Spy).and.returnValue(Promise.resolve(new Headers()));
+        (authenticationService.getAuthHeaders as jasmine.Spy).and.returnValue(Promise.resolve(new HttpHeaders()));
 
-        appInsights = jasmine.createSpyObj("appInsights", ["trackEvent"]);
+        httpErrorHandlerService = jasmine.createSpyObj("httpErrorHandlerService", ["logError", "getValidationErrors"]);
+        (httpErrorHandlerService.getValidationErrors as jasmine.Spy).and.returnValue(expectedValidationErrors);
 
-        let injector = ReflectiveInjector.resolveAndCreate(
-            [
-                UserService,
-                { provide: ConnectionBackend, useClass: MockBackend },
-                { provide: RequestOptions, useClass: BaseRequestOptions },
-                Http,
-                { provide: AuthenticationService, useValue: authenticationService },
-                { provide: AppInsightsService, useValue: appInsights },
-            ]);
+        TestBed.configureTestingModule(
+            {
+                imports: [
+                    HttpClientTestingModule,
+                ],
+                providers:
+                    [
+                        UserService,
+                        { provide: AuthenticationService, useValue: authenticationService },
+                        { provide: HttpErrorHandlerService, useValue: httpErrorHandlerService },
+                    ],
+            });
 
-        userService = injector.get(UserService) as UserService;
-        backend = injector.get(ConnectionBackend) as MockBackend;
-        backend.connections.subscribe((connection: MockConnection) => lastConnection = connection);
+        userService = TestBed.get(UserService) as UserService;
+        httpMock = TestBed.get(HttpTestingController) as HttpTestingController;
     });
 
     afterEach(() => {
-        lastConnection = null;
-        backend.verifyNoPendingRequests();
+        httpMock.verify();
     });
 
     describe("create", () => {
+        const apiRequest = { method: "post", url: "/api/users" };
+
         it("should make the correct api call", fakeAsync(() => {
             userService.create(userName, email, password);
 
             // Tick the getAuthHeaders call
             tick();
 
-            expect(lastConnection).toBeDefined("no http service connection made");
-            expect(lastConnection.request.method).toEqual(RequestMethod.Post, "method invalid");
-            expect(lastConnection.request.url).toEqual("/api/users", "url invalid");
-            expect(lastConnection.request.json()).toEqual({ userName, email, password }, "request body invalid");
+            let request = httpMock.expectOne(apiRequest);
+            expect(request.request.body).toEqual({ userName, email, password });
         }));
 
         it("should handle when the api returns a success response", fakeAsync(() => {
-            let succeeded = false;
-            let error: string;
-            userService.create(userName, email, password)
-                .then(() => succeeded = true)
-                .catch((e: string) => error = e);
-
-            // Tick the getAuthHeaders call
-            tick();
-
-            lastConnection.mockRespond(new Response(new ResponseOptions()));
-            tick();
-
-            expect(succeeded).toEqual(true);
-            expect(error).toBeUndefined();
-            expect(appInsights.trackEvent).not.toHaveBeenCalled();
-        }));
-
-        it("should handle http errors", fakeAsync(() => {
-            let succeeded = false;
-            let error: string;
-            userService.create(userName, email, password)
-                .then(() => succeeded = true)
-                .catch((e: string) => error = e);
-
-            // Tick the getAuthHeaders call
-            tick();
-
-            lastConnection.mockError(new Error("someError"));
-            tick();
-
-            expect(succeeded).toEqual(false);
-            expect(error).toEqual(["someError"]);
-            expect(appInsights.trackEvent).toHaveBeenCalled();
-        }));
-
-        it("should handle validation errors", fakeAsync(() => {
             let succeeded = false;
             let errors: string[];
             userService.create(userName, email, password)
@@ -109,23 +69,41 @@ describe("UserService", () => {
             // Tick the getAuthHeaders call
             tick();
 
-            let validationError: IValidationErrorResponse = {
-                field0: ["error0_0", "error0_1", "error0_2"],
-                field1: ["error1_0", "error1_1", "error1_2"],
-                field2: ["error2_0", "error2_1", "error2_2"],
-            };
-            lastConnection.mockError(new MockError(new ResponseOptions({ body: validationError })));
+            let request = httpMock.expectOne(apiRequest);
+            request.flush(null);
+            tick();
+
+            expect(succeeded).toEqual(true);
+            expect(errors).toBeUndefined();
+            expect(httpErrorHandlerService.logError).not.toHaveBeenCalled();
+            expect(httpErrorHandlerService.getValidationErrors).not.toHaveBeenCalled();
+        }));
+
+        it("should handle http errors", fakeAsync(() => {
+            let succeeded = false;
+            let errors: string[];
+            userService.create(userName, email, password)
+                .then(() => succeeded = true)
+                .catch((e: string[]) => errors = e);
+
+            // Tick the getAuthHeaders call
+            tick();
+
+            let request = httpMock.expectOne(apiRequest);
+            request.flush(null, { status: 500, statusText: "someStatus" });
             tick();
 
             expect(succeeded).toEqual(false);
-            expect(errors).toEqual(["error0_0", "error0_1", "error0_2", "error1_0", "error1_1", "error1_2", "error2_0", "error2_1", "error2_2"]);
-            expect(appInsights.trackEvent).toHaveBeenCalled();
+            expect(errors).toEqual(expectedValidationErrors);
+            expect(httpErrorHandlerService.logError).toHaveBeenCalledWith("UserService.create.error", jasmine.any(HttpErrorResponse));
+            expect(httpErrorHandlerService.getValidationErrors).toHaveBeenCalledWith(jasmine.any(HttpErrorResponse));
         }));
     });
 
     describe("getUploads", () => {
-        let page = 1;
-        let count = 2;
+        const page = 1;
+        const count = 2;
+        const apiRequest = { method: "get", url: `/api/users/${userName}/uploads?page=${page}&count=${count}` };
 
         it("should make an api call", fakeAsync(() => {
             userService.getUploads(userName, page, count);
@@ -133,53 +111,61 @@ describe("UserService", () => {
             // Tick the getAuthHeaders call
             tick();
 
-            expect(lastConnection).toBeDefined("no http service connection made");
-            expect(lastConnection.request.method).toEqual(RequestMethod.Get, "method invalid");
-            expect(lastConnection.request.url).toEqual(`/api/users/${userName}/uploads?page=${page}&count=${count}`, "url invalid");
+            httpMock.expectOne(apiRequest);
             expect(authenticationService.getAuthHeaders).toHaveBeenCalled();
         }));
 
         it("should return some uploads", fakeAsync(() => {
             let response: IUploadSummaryListResponse;
+            let error: HttpErrorResponse;
             userService.getUploads(userName, page, count)
-                .then((r: IUploadSummaryListResponse) => response = r);
+                .then((r: IUploadSummaryListResponse) => response = r)
+                .catch((e: HttpErrorResponse) => error = e);
 
             // Tick the getAuthHeaders call
             tick();
 
             let expectedResponse: IUploadSummaryListResponse = { pagination: { count: 0, next: "", previous: "" }, uploads: [] };
-            lastConnection.mockRespond(new Response(new ResponseOptions({ body: JSON.stringify(expectedResponse) })));
+            let request = httpMock.expectOne(apiRequest);
+            request.flush(expectedResponse);
             tick();
 
             expect(response).toEqual(expectedResponse, "should return the expected response");
             expect(authenticationService.getAuthHeaders).toHaveBeenCalled();
+            expect(error).toBeUndefined();
+            expect(httpErrorHandlerService.logError).not.toHaveBeenCalled();
+            expect(httpErrorHandlerService.getValidationErrors).not.toHaveBeenCalled();
         }));
 
         it("should handle http errors", fakeAsync(() => {
             let response: IUploadSummaryListResponse;
-            let error: string;
+            let error: HttpErrorResponse;
             userService.getUploads(userName, page, count)
                 .then((r: IUploadSummaryListResponse) => response = r)
-                .catch((e: string) => error = e);
+                .catch((e: HttpErrorResponse) => error = e);
 
             // Tick the getAuthHeaders call
             tick();
 
-            lastConnection.mockError(new Error("someError"));
+            let request = httpMock.expectOne(apiRequest);
+            request.flush(null, { status: 500, statusText: "someStatus" });
             tick();
 
             expect(response).toBeUndefined();
-            expect(error).toEqual("someError");
-            expect(authenticationService.getAuthHeaders).toHaveBeenCalled();
-            expect(appInsights.trackEvent).toHaveBeenCalled();
+            expect(error).toBeDefined();
+            expect(error.status).toEqual(500);
+            expect(error.statusText).toEqual("someStatus");
+            expect(httpErrorHandlerService.logError).toHaveBeenCalledWith("UserService.getUploads.error", error);
+            expect(httpErrorHandlerService.getValidationErrors).not.toHaveBeenCalled();
         }));
     });
 
     describe("getProgress", () => {
-        let startString = "2017-01-01T00:00:00.000Z";
-        let startDate = new Date(startString);
-        let endString = "2017-01-02T00:00:00.000Z";
-        let endDate = new Date(endString);
+        const startString = "2017-01-01T00:00:00.000Z";
+        const startDate = new Date(startString);
+        const endString = "2017-01-02T00:00:00.000Z";
+        const endDate = new Date(endString);
+        const apiRequest = { method: "get", url: `/api/users/${userName}/progress?start=${startString}&end=${endString}` };
 
         it("should make the correct api call", fakeAsync(() => {
             userService.getProgress(userName, startDate, endDate);
@@ -187,16 +173,16 @@ describe("UserService", () => {
             // Tick the getAuthHeaders call
             tick();
 
-            expect(lastConnection).toBeDefined("no http service connection made");
-            expect(lastConnection.request.method).toEqual(RequestMethod.Get, "method invalid");
-            expect(lastConnection.request.url).toEqual(`/api/users/${userName}/progress?start=${startString}&end=${endString}`, "url invalid");
+            httpMock.expectOne(apiRequest);
             expect(authenticationService.getAuthHeaders).toHaveBeenCalled();
         }));
 
         it("should return user progress", fakeAsync(() => {
             let progress: IProgressData;
+            let error: HttpErrorResponse;
             userService.getProgress(userName, startDate, endDate)
-                .then((r: IProgressData) => progress = r);
+                .then((r: IProgressData) => progress = r)
+                .catch((e: HttpErrorResponse) => error = e);
 
             // Tick the getAuthHeaders call
             tick();
@@ -215,48 +201,60 @@ describe("UserService", () => {
                 ancientLevelData: {},
                 outsiderLevelData: {},
             };
-            lastConnection.mockRespond(new Response(new ResponseOptions({ body: JSON.stringify(expectedResponse) })));
+            let request = httpMock.expectOne(apiRequest);
+            request.flush(expectedResponse);
             tick();
 
             expect(progress).toEqual(expectedResponse, "should return the expected response");
+            expect(authenticationService.getAuthHeaders).toHaveBeenCalled();
+            expect(error).toBeUndefined();
+            expect(httpErrorHandlerService.logError).not.toHaveBeenCalled();
+            expect(httpErrorHandlerService.getValidationErrors).not.toHaveBeenCalled();
         }));
 
         it("should handle http errors", fakeAsync(() => {
             let progress: IProgressData;
-            let error: string;
+            let error: HttpErrorResponse;
             userService.getProgress(userName, startDate, endDate)
                 .then((r: IProgressData) => progress = r)
-                .catch((e: string) => error = e);
+                .catch((e: HttpErrorResponse) => error = e);
 
             // Tick the getAuthHeaders call
             tick();
 
-            lastConnection.mockError(new Error("someError"));
+            let request = httpMock.expectOne(apiRequest);
+            request.flush(null, { status: 500, statusText: "someStatus" });
             tick();
 
             expect(progress).toBeUndefined();
-            expect(error).toEqual("someError");
-            expect(appInsights.trackEvent).toHaveBeenCalled();
+            expect(authenticationService.getAuthHeaders).toHaveBeenCalled();
+            expect(error).toBeDefined();
+            expect(error.status).toEqual(500);
+            expect(error.statusText).toEqual("someStatus");
+            expect(httpErrorHandlerService.logError).toHaveBeenCalledWith("UserService.getProgress.error", error);
+            expect(httpErrorHandlerService.getValidationErrors).not.toHaveBeenCalled();
         }));
     });
 
     describe("getFollows", () => {
+        const apiRequest = { method: "get", url: `/api/users/${userName}/follows` };
+
         it("should make the correct api call", fakeAsync(() => {
             userService.getFollows(userName);
 
             // Tick the getAuthHeaders call
             tick();
 
-            expect(lastConnection).toBeDefined("no http service connection made");
-            expect(lastConnection.request.method).toEqual(RequestMethod.Get, "method invalid");
-            expect(lastConnection.request.url).toEqual(`/api/users/${userName}/follows`, "url invalid");
+            httpMock.expectOne(apiRequest);
             expect(authenticationService.getAuthHeaders).toHaveBeenCalled();
         }));
 
         it("should return follow data", fakeAsync(() => {
             let follows: IFollowsData;
+            let error: HttpErrorResponse;
             userService.getFollows(userName)
-                .then((r: IFollowsData) => follows = r);
+                .then((r: IFollowsData) => follows = r)
+                .catch((e: HttpErrorResponse) => error = e);
 
             // Tick the getAuthHeaders call
             tick();
@@ -264,48 +262,60 @@ describe("UserService", () => {
             let expectedResponse: IFollowsData = {
                 follows: [],
             };
-            lastConnection.mockRespond(new Response(new ResponseOptions({ body: JSON.stringify(expectedResponse) })));
+            let request = httpMock.expectOne(apiRequest);
+            request.flush(expectedResponse);
             tick();
 
             expect(follows).toEqual(expectedResponse, "should return the expected response");
+            expect(authenticationService.getAuthHeaders).toHaveBeenCalled();
+            expect(error).toBeUndefined();
+            expect(httpErrorHandlerService.logError).not.toHaveBeenCalled();
+            expect(httpErrorHandlerService.getValidationErrors).not.toHaveBeenCalled();
         }));
 
         it("should handle http errors", fakeAsync(() => {
             let follows: IFollowsData;
-            let error: string;
+            let error: HttpErrorResponse;
             userService.getFollows(userName)
                 .then((r: IFollowsData) => follows = r)
-                .catch((e: string) => error = e);
+                .catch((e: HttpErrorResponse) => error = e);
 
             // Tick the getAuthHeaders call
             tick();
 
-            lastConnection.mockError(new Error("someError"));
+            let request = httpMock.expectOne(apiRequest);
+            request.flush(null, { status: 500, statusText: "someStatus" });
             tick();
 
             expect(follows).toBeUndefined();
-            expect(error).toEqual("someError");
-            expect(appInsights.trackEvent).toHaveBeenCalled();
+            expect(authenticationService.getAuthHeaders).toHaveBeenCalled();
+            expect(error).toBeDefined();
+            expect(error.status).toEqual(500);
+            expect(error.statusText).toEqual("someStatus");
+            expect(httpErrorHandlerService.logError).toHaveBeenCalledWith("UserService.getFollows.error", error);
+            expect(httpErrorHandlerService.getValidationErrors).not.toHaveBeenCalled();
         }));
     });
 
     describe("getLogins", () => {
+        const apiRequest = { method: "get", url: `/api/users/${userName}/logins` };
+
         it("should make the correct api call", fakeAsync(() => {
             userService.getLogins(userName);
 
             // Tick the getAuthHeaders call
             tick();
 
-            expect(lastConnection).toBeDefined("no http service connection made");
-            expect(lastConnection.request.method).toEqual(RequestMethod.Get, "method invalid");
-            expect(lastConnection.request.url).toEqual(`/api/users/${userName}/logins`, "url invalid");
+            httpMock.expectOne(apiRequest);
             expect(authenticationService.getAuthHeaders).toHaveBeenCalled();
         }));
 
         it("should return data", fakeAsync(() => {
             let data: IUserLogins;
+            let error: HttpErrorResponse;
             userService.getLogins(userName)
-                .then((d: IUserLogins) => data = d);
+                .then((d: IUserLogins) => data = d)
+                .catch((e: HttpErrorResponse) => error = e);
 
             // Tick the getAuthHeaders call
             tick();
@@ -318,33 +328,44 @@ describe("UserService", () => {
                     { providerName: "someProviderName2", externalUserId: "someExternalUserId2" },
                 ],
             };
-            lastConnection.mockRespond(new Response(new ResponseOptions({ body: JSON.stringify(expectedResponse) })));
+            let request = httpMock.expectOne(apiRequest);
+            request.flush(expectedResponse);
             tick();
 
             expect(data).toEqual(expectedResponse, "should return the expected response");
+            expect(authenticationService.getAuthHeaders).toHaveBeenCalled();
+            expect(error).toBeUndefined();
+            expect(httpErrorHandlerService.logError).not.toHaveBeenCalled();
+            expect(httpErrorHandlerService.getValidationErrors).not.toHaveBeenCalled();
         }));
 
         it("should handle http errors", fakeAsync(() => {
             let follows: IUserLogins;
-            let error: string;
+            let error: HttpErrorResponse;
             userService.getLogins(userName)
                 .then((r: IUserLogins) => follows = r)
-                .catch((e: string) => error = e);
+                .catch((e: HttpErrorResponse) => error = e);
 
             // Tick the getAuthHeaders call
             tick();
 
-            lastConnection.mockError(new Error("someError"));
+            let request = httpMock.expectOne(apiRequest);
+            request.flush(null, { status: 500, statusText: "someStatus" });
             tick();
 
             expect(follows).toBeUndefined();
-            expect(error).toEqual("someError");
-            expect(appInsights.trackEvent).toHaveBeenCalled();
+            expect(authenticationService.getAuthHeaders).toHaveBeenCalled();
+            expect(error).toBeDefined();
+            expect(error.status).toEqual(500);
+            expect(error.statusText).toEqual("someStatus");
+            expect(httpErrorHandlerService.logError).toHaveBeenCalledWith("UserService.getLogins.error", error);
+            expect(httpErrorHandlerService.getValidationErrors).not.toHaveBeenCalled();
         }));
     });
 
     describe("removeLogin", () => {
         const externalLogin = { providerName: "someProviderName", externalUserId: "someExternalUserId" };
+        const apiRequest = { method: "delete", url: `/api/users/${userName}/logins` };
 
         it("should make the correct api call", fakeAsync(() => {
             userService.removeLogin(userName, externalLogin);
@@ -352,51 +373,58 @@ describe("UserService", () => {
             // Tick the getAuthHeaders call
             tick();
 
-            expect(lastConnection).toBeDefined("no http service connection made");
-            expect(lastConnection.request.method).toEqual(RequestMethod.Delete, "method invalid");
-            expect(lastConnection.request.url).toEqual(`/api/users/${userName}/logins`, "url invalid");
-            expect(lastConnection.request.json()).toEqual(externalLogin, "request body invalid");
+            let request = httpMock.expectOne(apiRequest);
+            expect(request.request.body).toEqual(externalLogin);
         }));
 
         it("should handle when the api returns a success response", fakeAsync(() => {
             let succeeded = false;
-            let error: string;
+            let error: HttpErrorResponse;
             userService.removeLogin(userName, externalLogin)
                 .then(() => succeeded = true)
-                .catch((e: string) => error = e);
+                .catch((e: HttpErrorResponse) => error = e);
 
             // Tick the getAuthHeaders call
             tick();
 
-            lastConnection.mockRespond(new Response(new ResponseOptions()));
+            let request = httpMock.expectOne(apiRequest);
+            request.flush(null);
             tick();
 
             expect(succeeded).toEqual(true);
+            expect(authenticationService.getAuthHeaders).toHaveBeenCalled();
             expect(error).toBeUndefined();
-            expect(appInsights.trackEvent).not.toHaveBeenCalled();
+            expect(httpErrorHandlerService.logError).not.toHaveBeenCalled();
+            expect(httpErrorHandlerService.getValidationErrors).not.toHaveBeenCalled();
         }));
 
         it("should handle http errors", fakeAsync(() => {
             let succeeded = false;
-            let error: string;
+            let error: HttpErrorResponse;
             userService.removeLogin(userName, externalLogin)
                 .then(() => succeeded = true)
-                .catch((e: string) => error = e);
+                .catch((e: HttpErrorResponse) => error = e);
 
             // Tick the getAuthHeaders call
             tick();
 
-            lastConnection.mockError(new Error("someError"));
+            let request = httpMock.expectOne(apiRequest);
+            request.flush(null, { status: 500, statusText: "someStatus" });
             tick();
 
             expect(succeeded).toEqual(false);
-            expect(error).toEqual("someError");
-            expect(appInsights.trackEvent).toHaveBeenCalled();
+            expect(authenticationService.getAuthHeaders).toHaveBeenCalled();
+            expect(error).toBeDefined();
+            expect(error.status).toEqual(500);
+            expect(error.statusText).toEqual("someStatus");
+            expect(httpErrorHandlerService.logError).toHaveBeenCalledWith("UserService.removeLogin.error", error);
+            expect(httpErrorHandlerService.getValidationErrors).not.toHaveBeenCalled();
         }));
     });
 
     describe("setPassword", () => {
         const newPassword = "someNewPassword";
+        const apiRequest = { method: "post", url: `/api/users/${userName}/setpassword` };
 
         it("should make the correct api call", fakeAsync(() => {
             userService.setPassword(userName, newPassword);
@@ -404,49 +432,11 @@ describe("UserService", () => {
             // Tick the getAuthHeaders call
             tick();
 
-            expect(lastConnection).toBeDefined("no http service connection made");
-            expect(lastConnection.request.method).toEqual(RequestMethod.Post, "method invalid");
-            expect(lastConnection.request.url).toEqual(`/api/users/${userName}/setpassword`, "url invalid");
-            expect(lastConnection.request.json()).toEqual({ newPassword }, "request body invalid");
+            let request = httpMock.expectOne(apiRequest);
+            expect(request.request.body).toEqual({ newPassword });
         }));
 
         it("should handle when the api returns a success response", fakeAsync(() => {
-            let succeeded = false;
-            let error: string;
-            userService.setPassword(userName, newPassword)
-                .then(() => succeeded = true)
-                .catch((e: string) => error = e);
-
-            // Tick the getAuthHeaders call
-            tick();
-
-            lastConnection.mockRespond(new Response(new ResponseOptions()));
-            tick();
-
-            expect(succeeded).toEqual(true);
-            expect(error).toBeUndefined();
-            expect(appInsights.trackEvent).not.toHaveBeenCalled();
-        }));
-
-        it("should handle http errors", fakeAsync(() => {
-            let succeeded = false;
-            let error: string;
-            userService.setPassword(userName, newPassword)
-                .then(() => succeeded = true)
-                .catch((e: string) => error = e);
-
-            // Tick the getAuthHeaders call
-            tick();
-
-            lastConnection.mockError(new Error("someError"));
-            tick();
-
-            expect(succeeded).toEqual(false);
-            expect(error).toEqual(["someError"]);
-            expect(appInsights.trackEvent).toHaveBeenCalled();
-        }));
-
-        it("should handle validation errors", fakeAsync(() => {
             let succeeded = false;
             let errors: string[];
             userService.setPassword(userName, newPassword)
@@ -456,23 +446,41 @@ describe("UserService", () => {
             // Tick the getAuthHeaders call
             tick();
 
-            let validationError: IValidationErrorResponse = {
-                field0: ["error0_0", "error0_1", "error0_2"],
-                field1: ["error1_0", "error1_1", "error1_2"],
-                field2: ["error2_0", "error2_1", "error2_2"],
-            };
-            lastConnection.mockError(new MockError(new ResponseOptions({ body: validationError })));
+            let request = httpMock.expectOne(apiRequest);
+            request.flush(null);
+            tick();
+
+            expect(succeeded).toEqual(true);
+            expect(errors).toBeUndefined();
+            expect(httpErrorHandlerService.logError).not.toHaveBeenCalled();
+            expect(httpErrorHandlerService.getValidationErrors).not.toHaveBeenCalled();
+        }));
+
+        it("should handle http errors", fakeAsync(() => {
+            let succeeded = false;
+            let errors: string[];
+            userService.setPassword(userName, newPassword)
+                .then(() => succeeded = true)
+                .catch((e: string[]) => errors = e);
+
+            // Tick the getAuthHeaders call
+            tick();
+
+            let request = httpMock.expectOne(apiRequest);
+            request.flush(null, { status: 500, statusText: "someStatus" });
             tick();
 
             expect(succeeded).toEqual(false);
-            expect(errors).toEqual(["error0_0", "error0_1", "error0_2", "error1_0", "error1_1", "error1_2", "error2_0", "error2_1", "error2_2"]);
-            expect(appInsights.trackEvent).toHaveBeenCalled();
+            expect(errors).toEqual(expectedValidationErrors);
+            expect(httpErrorHandlerService.logError).toHaveBeenCalledWith("UserService.setPassword.error", jasmine.any(HttpErrorResponse));
+            expect(httpErrorHandlerService.getValidationErrors).toHaveBeenCalledWith(jasmine.any(HttpErrorResponse));
         }));
     });
 
     describe("changePassword", () => {
         const currentPassword = "someCurrentPassword";
         const newPassword = "someNewPassword";
+        const apiRequest = { method: "post", url: `/api/users/${userName}/changepassword` };
 
         it("should make the correct api call", fakeAsync(() => {
             userService.changePassword(userName, currentPassword, newPassword);
@@ -480,49 +488,11 @@ describe("UserService", () => {
             // Tick the getAuthHeaders call
             tick();
 
-            expect(lastConnection).toBeDefined("no http service connection made");
-            expect(lastConnection.request.method).toEqual(RequestMethod.Post, "method invalid");
-            expect(lastConnection.request.url).toEqual(`/api/users/${userName}/changepassword`, "url invalid");
-            expect(lastConnection.request.json()).toEqual({ currentPassword, newPassword }, "request body invalid");
+            let request = httpMock.expectOne(apiRequest);
+            expect(request.request.body).toEqual({ currentPassword, newPassword });
         }));
 
         it("should handle when the api returns a success response", fakeAsync(() => {
-            let succeeded = false;
-            let error: string;
-            userService.changePassword(userName, currentPassword, newPassword)
-                .then(() => succeeded = true)
-                .catch((e: string) => error = e);
-
-            // Tick the getAuthHeaders call
-            tick();
-
-            lastConnection.mockRespond(new Response(new ResponseOptions()));
-            tick();
-
-            expect(succeeded).toEqual(true);
-            expect(error).toBeUndefined();
-            expect(appInsights.trackEvent).not.toHaveBeenCalled();
-        }));
-
-        it("should handle http errors", fakeAsync(() => {
-            let succeeded = false;
-            let error: string;
-            userService.changePassword(userName, currentPassword, newPassword)
-                .then(() => succeeded = true)
-                .catch((e: string) => error = e);
-
-            // Tick the getAuthHeaders call
-            tick();
-
-            lastConnection.mockError(new Error("someError"));
-            tick();
-
-            expect(succeeded).toEqual(false);
-            expect(error).toEqual(["someError"]);
-            expect(appInsights.trackEvent).toHaveBeenCalled();
-        }));
-
-        it("should handle validation errors", fakeAsync(() => {
             let succeeded = false;
             let errors: string[];
             userService.changePassword(userName, currentPassword, newPassword)
@@ -532,139 +502,124 @@ describe("UserService", () => {
             // Tick the getAuthHeaders call
             tick();
 
-            let validationError: IValidationErrorResponse = {
-                field0: ["error0_0", "error0_1", "error0_2"],
-                field1: ["error1_0", "error1_1", "error1_2"],
-                field2: ["error2_0", "error2_1", "error2_2"],
-            };
-            lastConnection.mockError(new MockError(new ResponseOptions({ body: validationError })));
+            let request = httpMock.expectOne(apiRequest);
+            request.flush(null);
+            tick();
+
+            expect(succeeded).toEqual(true);
+            expect(errors).toBeUndefined();
+            expect(httpErrorHandlerService.logError).not.toHaveBeenCalled();
+            expect(httpErrorHandlerService.getValidationErrors).not.toHaveBeenCalled();
+        }));
+
+        it("should handle http errors", fakeAsync(() => {
+            let succeeded = false;
+            let errors: string[];
+            userService.changePassword(userName, currentPassword, newPassword)
+                .then(() => succeeded = true)
+                .catch((e: string[]) => errors = e);
+
+            // Tick the getAuthHeaders call
+            tick();
+
+            let request = httpMock.expectOne(apiRequest);
+            request.flush(null, { status: 500, statusText: "someStatus" });
             tick();
 
             expect(succeeded).toEqual(false);
-            expect(errors).toEqual(["error0_0", "error0_1", "error0_2", "error1_0", "error1_1", "error1_2", "error2_0", "error2_1", "error2_2"]);
-            expect(appInsights.trackEvent).toHaveBeenCalled();
+            expect(errors).toEqual(expectedValidationErrors);
+            expect(httpErrorHandlerService.logError).toHaveBeenCalledWith("UserService.changePassword.error", jasmine.any(HttpErrorResponse));
+            expect(httpErrorHandlerService.getValidationErrors).toHaveBeenCalledWith(jasmine.any(HttpErrorResponse));
         }));
     });
 
     describe("resetPassword", () => {
+        const apiRequest = { method: "post", url: "/api/users/resetpassword" };
+
         it("should make the correct api call", fakeAsync(() => {
             userService.resetPassword(email);
 
-            expect(lastConnection).toBeDefined("no http service connection made");
-            expect(lastConnection.request.method).toEqual(RequestMethod.Post, "method invalid");
-            expect(lastConnection.request.url).toEqual("/api/users/resetpassword", "url invalid");
-            expect(lastConnection.request.json()).toEqual({ email }, "request body invalid");
+            let request = httpMock.expectOne(apiRequest);
+            expect(request.request.body).toEqual({ email });
         }));
 
         it("should handle when the api returns a success response", fakeAsync(() => {
-            let succeeded = false;
-            let error: string;
-            userService.resetPassword(email)
-                .then(() => succeeded = true)
-                .catch((e: string) => error = e);
-
-            lastConnection.mockRespond(new Response(new ResponseOptions()));
-            tick();
-
-            expect(succeeded).toEqual(true);
-            expect(error).toBeUndefined();
-            expect(appInsights.trackEvent).not.toHaveBeenCalled();
-        }));
-
-        it("should handle http errors", fakeAsync(() => {
-            let succeeded = false;
-            let error: string;
-            userService.resetPassword(email)
-                .then(() => succeeded = true)
-                .catch((e: string) => error = e);
-
-            lastConnection.mockError(new Error("someError"));
-            tick();
-
-            expect(succeeded).toEqual(false);
-            expect(error).toEqual(["someError"]);
-            expect(appInsights.trackEvent).toHaveBeenCalled();
-        }));
-
-        it("should handle validation errors", fakeAsync(() => {
             let succeeded = false;
             let errors: string[];
             userService.resetPassword(email)
                 .then(() => succeeded = true)
                 .catch((e: string[]) => errors = e);
 
-            let validationError: IValidationErrorResponse = {
-                field0: ["error0_0", "error0_1", "error0_2"],
-                field1: ["error1_0", "error1_1", "error1_2"],
-                field2: ["error2_0", "error2_1", "error2_2"],
-            };
-            lastConnection.mockError(new MockError(new ResponseOptions({ body: validationError })));
+            let request = httpMock.expectOne(apiRequest);
+            request.flush(null);
+            tick();
+
+            expect(succeeded).toEqual(true);
+            expect(errors).toBeUndefined();
+            expect(httpErrorHandlerService.logError).not.toHaveBeenCalled();
+            expect(httpErrorHandlerService.getValidationErrors).not.toHaveBeenCalled();
+        }));
+
+        it("should handle http errors", fakeAsync(() => {
+            let succeeded = false;
+            let errors: string[];
+            userService.resetPassword(email)
+                .then(() => succeeded = true)
+                .catch((e: string[]) => errors = e);
+
+            let request = httpMock.expectOne(apiRequest);
+            request.flush(null, { status: 500, statusText: "someStatus" });
             tick();
 
             expect(succeeded).toEqual(false);
-            expect(errors).toEqual(["error0_0", "error0_1", "error0_2", "error1_0", "error1_1", "error1_2", "error2_0", "error2_1", "error2_2"]);
-            expect(appInsights.trackEvent).toHaveBeenCalled();
+            expect(errors).toEqual(expectedValidationErrors);
+            expect(httpErrorHandlerService.logError).toHaveBeenCalledWith("UserService.resetPassword.error", jasmine.any(HttpErrorResponse));
+            expect(httpErrorHandlerService.getValidationErrors).toHaveBeenCalledWith(jasmine.any(HttpErrorResponse));
         }));
     });
 
     describe("resetPasswordConfirmation", () => {
+        const apiRequest = { method: "post", url: "/api/users/resetpasswordconfirmation" };
+
         it("should make the correct api call", fakeAsync(() => {
             userService.resetPasswordConfirmation(email, password, code);
 
-            expect(lastConnection).toBeDefined("no http service connection made");
-            expect(lastConnection.request.method).toEqual(RequestMethod.Post, "method invalid");
-            expect(lastConnection.request.url).toEqual("/api/users/resetpasswordconfirmation", "url invalid");
-            expect(lastConnection.request.json()).toEqual({ email, password, code }, "request body invalid");
+            let request = httpMock.expectOne(apiRequest);
+            expect(request.request.body).toEqual({ email, password, code });
         }));
 
         it("should handle when the api returns a success response", fakeAsync(() => {
-            let succeeded = false;
-            let error: string;
-            userService.resetPasswordConfirmation(email, password, code)
-                .then(() => succeeded = true)
-                .catch((e: string) => error = e);
-
-            lastConnection.mockRespond(new Response(new ResponseOptions()));
-            tick();
-
-            expect(succeeded).toEqual(true);
-            expect(error).toBeUndefined();
-            expect(appInsights.trackEvent).not.toHaveBeenCalled();
-        }));
-
-        it("should handle http errors", fakeAsync(() => {
-            let succeeded = false;
-            let error: string;
-            userService.resetPasswordConfirmation(email, password, code)
-                .then(() => succeeded = true)
-                .catch((e: string) => error = e);
-
-            lastConnection.mockError(new Error("someError"));
-            tick();
-
-            expect(succeeded).toEqual(false);
-            expect(error).toEqual(["someError"]);
-            expect(appInsights.trackEvent).toHaveBeenCalled();
-        }));
-
-        it("should handle validation errors", fakeAsync(() => {
             let succeeded = false;
             let errors: string[];
             userService.resetPasswordConfirmation(email, password, code)
                 .then(() => succeeded = true)
                 .catch((e: string[]) => errors = e);
 
-            let validationError: IValidationErrorResponse = {
-                field0: ["error0_0", "error0_1", "error0_2"],
-                field1: ["error1_0", "error1_1", "error1_2"],
-                field2: ["error2_0", "error2_1", "error2_2"],
-            };
-            lastConnection.mockError(new MockError(new ResponseOptions({ body: validationError })));
+            let request = httpMock.expectOne(apiRequest);
+            request.flush(null);
+            tick();
+
+            expect(succeeded).toEqual(true);
+            expect(errors).toBeUndefined();
+            expect(httpErrorHandlerService.logError).not.toHaveBeenCalled();
+            expect(httpErrorHandlerService.getValidationErrors).not.toHaveBeenCalled();
+        }));
+
+        it("should handle http errors", fakeAsync(() => {
+            let succeeded = false;
+            let errors: string[];
+            userService.resetPasswordConfirmation(email, password, code)
+                .then(() => succeeded = true)
+                .catch((e: string[]) => errors = e);
+
+            let request = httpMock.expectOne(apiRequest);
+            request.flush(null, { status: 500, statusText: "someStatus" });
             tick();
 
             expect(succeeded).toEqual(false);
-            expect(errors).toEqual(["error0_0", "error0_1", "error0_2", "error1_0", "error1_1", "error1_2", "error2_0", "error2_1", "error2_2"]);
-            expect(appInsights.trackEvent).toHaveBeenCalled();
+            expect(errors).toEqual(expectedValidationErrors);
+            expect(httpErrorHandlerService.logError).toHaveBeenCalledWith("UserService.resetPasswordConfirmation.error", jasmine.any(HttpErrorResponse));
+            expect(httpErrorHandlerService.getValidationErrors).toHaveBeenCalledWith(jasmine.any(HttpErrorResponse));
         }));
     });
 });

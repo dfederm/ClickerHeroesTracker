@@ -1,6 +1,6 @@
 import { Component, OnInit } from "@angular/core";
 import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
-import { Response } from "@angular/http";
+import { HttpErrorResponse } from "@angular/common/http";
 import { Router } from "@angular/router";
 
 import { LogInDialogComponent } from "../logInDialog/logInDialog";
@@ -65,7 +65,7 @@ export class UploadDialogComponent implements OnInit {
                 this.activeModal.close();
                 this.isLoading = false;
             })
-            .catch((error: Response) => {
+            .catch((error: HttpErrorResponse) => {
                 this.errorMessage = error.status >= 400 && error.status < 500
                     ? "The uploaded save was not valid"
                     : "An unknown error occurred";

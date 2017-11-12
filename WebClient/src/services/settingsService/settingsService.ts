@@ -1,11 +1,11 @@
 import { Injectable } from "@angular/core";
-import { Http, RequestOptions } from "@angular/http";
+import { HttpClient, HttpErrorResponse } from "@angular/common/http";
 import { Observable } from "rxjs/Observable";
 import { BehaviorSubject } from "rxjs/BehaviorSubject";
 import { Subscription } from "rxjs/Subscription";
 import { map, distinctUntilChanged } from "rxjs/operators";
 import { interval } from "rxjs/observable/interval";
-import { AppInsightsService } from "@markpieszak/ng-application-insights";
+import { HttpErrorHandlerService } from "../httpErrorHandlerService/httpErrorHandlerService";
 
 import "rxjs/add/operator/toPromise";
 
@@ -58,8 +58,8 @@ export class SettingsService {
 
     constructor(
         private authenticationService: AuthenticationService,
-        private http: Http,
-        private appInsights: AppInsightsService,
+        private http: HttpClient,
+        private httpErrorHandlerService: HttpErrorHandlerService,
     ) {
         let settingsString = localStorage.getItem(SettingsService.settingsKey);
         let currentSettings = settingsString == null ? null : JSON.parse(settingsString);
@@ -103,20 +103,17 @@ export class SettingsService {
         // TODO: Handle if the user is not logged in
         return this.authenticationService.getAuthHeaders()
             .then(headers => {
-                let options = new RequestOptions({ headers });
                 let body = { [setting]: value };
-                return this.http.patch(`/api/users/${this.userName}/settings`, body, options)
+                return this.http.patch(`/api/users/${this.userName}/settings`, body, { headers })
                     .toPromise();
             })
             .then(() => {
                 this.handlePatchCompleted();
             })
-            .catch(error => {
-                let errorMessage = error.message || error.toString();
-                this.appInsights.trackEvent("SettingsService.setSetting.error", { message: errorMessage });
-
+            .catch((err: HttpErrorResponse) => {
+                this.httpErrorHandlerService.logError("SettingsService.setSetting.error", err);
                 this.handlePatchCompleted();
-                return Promise.reject(error);
+                return Promise.reject(err);
             });
     }
 
@@ -146,20 +143,14 @@ export class SettingsService {
                     return Promise.reject("Not logged in");
                 }
 
-                let options = new RequestOptions({ headers });
-                return this.http.get(`/api/users/${this.userName}/settings`, options)
+                return this.http.get<IUserSettings>(`/api/users/${this.userName}/settings`, { headers })
                     .toPromise();
             })
-            .then(response => {
+            .then(newSettings => {
                 // If the user is in the process of updating their settings, just ignore this response so it doesn't plow over the newly updated settings.
                 // Once the patch finishes, it will refresh again.
                 if (this.numPendingPatches !== 0) {
                     return Promise.resolve();
-                }
-
-                let newSettings: IUserSettings = response.json();
-                if (!newSettings) {
-                    return Promise.reject("Invalid settings response");
                 }
 
                 // Only store exactly what was sent back in case the client's defaults change.
@@ -168,10 +159,9 @@ export class SettingsService {
                 this.settingsSubject.next(this.normalizeSettings(newSettings));
                 return Promise.resolve();
             })
-            .catch(error => {
-                let errorMessage = error.message || error.toString();
-                this.appInsights.trackEvent("SettingsService.fetchSettings.error", { message: errorMessage });
-                return Promise.reject(error);
+            .catch((err: HttpErrorResponse) => {
+                this.httpErrorHandlerService.logError("SettingsService.fetchSettings.error", err);
+                return Promise.reject(err);
             });
     }
 

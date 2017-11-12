@@ -1,6 +1,6 @@
 import { Component, OnInit } from "@angular/core";
-import { Http, RequestOptions } from "@angular/http";
-import { AppInsightsService } from "@markpieszak/ng-application-insights";
+import { HttpClient, HttpErrorResponse } from "@angular/common/http";
+import { HttpErrorHandlerService } from "../../services/httpErrorHandlerService/httpErrorHandlerService";
 import { AuthenticationService } from "../../services/authenticationService/authenticationService";
 import { UploadService } from "../../services/uploadService/uploadService";
 
@@ -18,11 +18,6 @@ export interface IRecomputeRequest {
 
 export interface IClearQueueRequest {
     priority: string;
-}
-
-// This actually pretty generic, so if it's used elsewhere consider moving it somewhere more generic
-export interface IValidationErrorResponse {
-    [field: string]: string[];
 }
 
 @Component({
@@ -64,8 +59,8 @@ export class AdminComponent implements OnInit {
 
     constructor(
         private authenticationService: AuthenticationService,
-        private http: Http,
-        private appInsights: AppInsightsService,
+        private http: HttpClient,
+        private httpErrorHandlerService: HttpErrorHandlerService,
         private uploadService: UploadService,
     ) { }
 
@@ -94,39 +89,22 @@ export class AdminComponent implements OnInit {
         this.isRecomputeLoading = true;
         this.authenticationService.getAuthHeaders()
             .then(headers => {
-                headers.append("Content-Type", "application/json");
-                let options = new RequestOptions({ headers });
+                headers = headers.set("Content-Type", "application/json");
                 let body: IRecomputeRequest = {
                     uploadIds,
                     priority: this.recomputePriority,
                 };
                 return this.http
-                    .post("/api/admin/recompute", body, options)
+                    .post("/api/admin/recompute", body, { headers })
                     .toPromise();
             })
             .then(() => {
                 this.isRecomputeLoading = false;
                 this.refreshQueueData();
             })
-            .catch(error => {
-                let errors: string[] = [];
-
-                let validationErrorResponse: IValidationErrorResponse;
-                try {
-                    validationErrorResponse = error.json();
-                } catch (error) {
-                    // It must not have been json
-                }
-
-                if (validationErrorResponse) {
-                    for (let field in validationErrorResponse) {
-                        errors.push(...validationErrorResponse[field]);
-                    }
-                } else {
-                    errors.push(error.message || error.toString());
-                }
-
-                this.appInsights.trackEvent("AdminComponent.recompute.error", { message: errors.join(";") });
+            .catch((err: HttpErrorResponse) => {
+                this.httpErrorHandlerService.logError("AdminComponent.recompute.error", err);
+                let errors = this.httpErrorHandlerService.getValidationErrors(err);
                 this.recomputeError = errors.join(";");
             });
     }
@@ -137,38 +115,21 @@ export class AdminComponent implements OnInit {
 
         this.authenticationService.getAuthHeaders()
             .then(headers => {
-                headers.append("Content-Type", "application/json");
-                let options = new RequestOptions({ headers });
+                headers = headers.set("Content-Type", "application/json");
                 let body: IClearQueueRequest = {
                     priority: this.clearQueuePriority,
                 };
                 return this.http
-                    .post("/api/admin/clearqueue", body, options)
+                    .post("/api/admin/clearqueue", body, { headers })
                     .toPromise();
             })
             .then(() => {
                 this.isClearQueueLoading = false;
                 this.refreshQueueData();
             })
-            .catch(error => {
-                let errors: string[] = [];
-
-                let validationErrorResponse: IValidationErrorResponse;
-                try {
-                    validationErrorResponse = error.json();
-                } catch (error) {
-                    // It must not have been json
-                }
-
-                if (validationErrorResponse) {
-                    for (let field in validationErrorResponse) {
-                        errors.push(...validationErrorResponse[field]);
-                    }
-                } else {
-                    errors.push(error.message || error.toString());
-                }
-
-                this.appInsights.trackEvent("AdminComponent.clearQueue.error", { message: errors.join(";") });
+            .catch((err: HttpErrorResponse) => {
+                this.httpErrorHandlerService.logError("AdminComponent.clearQueue.error", err);
+                let errors = this.httpErrorHandlerService.getValidationErrors(err);
                 this.clearQueueError = errors.join(";");
             });
     }
@@ -182,34 +143,17 @@ export class AdminComponent implements OnInit {
 
         this.authenticationService.getAuthHeaders()
             .then(headers => {
-                let options = new RequestOptions({ headers });
-                return this.http.get("/api/admin/staleuploads", options)
+                return this.http.get<number[]>("/api/admin/staleuploads", { headers })
                     .toPromise();
             })
             .then(response => {
                 this.isStaleUploadsLoading = false;
-                this.staleUploadIds = response.json();
+                this.staleUploadIds = response;
                 this.totalStaleUploads = this.staleUploadIds.length;
             })
-            .catch(error => {
-                let errors: string[] = [];
-
-                let validationErrorResponse: IValidationErrorResponse;
-                try {
-                    validationErrorResponse = error.json();
-                } catch (error) {
-                    // It must not have been json
-                }
-
-                if (validationErrorResponse) {
-                    for (let field in validationErrorResponse) {
-                        errors.push(...validationErrorResponse[field]);
-                    }
-                } else {
-                    errors.push(error.message || error.toString());
-                }
-
-                this.appInsights.trackEvent("AdminComponent.fetchStaleUploads.error", { message: errors.join(";") });
+            .catch((err: HttpErrorResponse) => {
+                this.httpErrorHandlerService.logError("AdminComponent.fetchStaleUploads.error", err);
+                let errors = this.httpErrorHandlerService.getValidationErrors(err);
                 this.staleUploadError = errors.join(";");
             });
     }
@@ -229,13 +173,12 @@ export class AdminComponent implements OnInit {
         this.isLoadingQueues = true;
         return this.authenticationService.getAuthHeaders()
             .then(headers => {
-                let options = new RequestOptions({ headers });
-                return this.http.get("/api/admin/queues", options)
+                return this.http.get<IUploadQueueStats[]>("/api/admin/queues", { headers })
                     .toPromise();
             })
             .then(response => {
                 this.isLoadingQueues = false;
-                this.queues = response.json();
+                this.queues = response;
                 if (this.queues.length > 0) {
                     this.recomputePriority = this.queues[0].priority;
                     this.clearQueuePriority = this.queues[0].priority;
