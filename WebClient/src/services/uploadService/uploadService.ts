@@ -60,7 +60,7 @@ export class UploadService {
         return this.authenticationService.getAuthHeaders()
             .then(headers => {
                 return this.http
-                    .delete(`/api/uploads/${id}`, { headers })
+                    .delete(`/api/uploads/${id}`, { headers, responseType: "text" })
                     .toPromise();
             })
             .then(() => void 0)

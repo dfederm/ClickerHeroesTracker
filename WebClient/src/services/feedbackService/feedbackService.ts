@@ -21,7 +21,7 @@ export class FeedbackService {
                     .set("comments", comments)
                     .set("email", email);
                 return this.http
-                    .post("/api/feedback", params.toString(), { headers })
+                    .post("/api/feedback", params.toString(), { headers, responseType: "text" })
                     .toPromise();
             })
             .then(() => void 0)

@@ -297,6 +297,124 @@ describe("UserService", () => {
         }));
     });
 
+    describe("addFollow", () => {
+        const followUserName = "someFollowUserName";
+        const apiRequest = { method: "post", url: `/api/users/${userName}/follows/${followUserName}` };
+
+        it("should make the correct api call", fakeAsync(() => {
+            userService.addFollow(userName, followUserName);
+
+            // Tick the getAuthHeaders call
+            tick();
+
+            httpMock.expectOne(apiRequest);
+            expect(authenticationService.getAuthHeaders).toHaveBeenCalled();
+        }));
+
+        it("should handle when the api returns a success response", fakeAsync(() => {
+            let succeeded = false;
+            let error: HttpErrorResponse;
+            userService.addFollow(userName, followUserName)
+                .then(() => succeeded = true)
+                .catch((e: HttpErrorResponse) => error = e);
+
+            // Tick the getAuthHeaders call
+            tick();
+
+            let request = httpMock.expectOne(apiRequest);
+            request.flush(null);
+            tick();
+
+            expect(succeeded).toEqual(true);
+            expect(authenticationService.getAuthHeaders).toHaveBeenCalled();
+            expect(error).toBeUndefined();
+            expect(httpErrorHandlerService.logError).not.toHaveBeenCalled();
+            expect(httpErrorHandlerService.getValidationErrors).not.toHaveBeenCalled();
+        }));
+
+        it("should handle http errors", fakeAsync(() => {
+            let succeeded = false;
+            let error: HttpErrorResponse;
+            userService.addFollow(userName, followUserName)
+                .then(() => succeeded = true)
+                .catch((e: HttpErrorResponse) => error = e);
+
+            // Tick the getAuthHeaders call
+            tick();
+
+            let request = httpMock.expectOne(apiRequest);
+            request.flush(null, { status: 500, statusText: "someStatus" });
+            tick();
+
+            expect(succeeded).toEqual(false);
+            expect(authenticationService.getAuthHeaders).toHaveBeenCalled();
+            expect(error).toBeDefined();
+            expect(error.status).toEqual(500);
+            expect(error.statusText).toEqual("someStatus");
+            expect(httpErrorHandlerService.logError).toHaveBeenCalledWith("UserService.addFollow.error", error);
+            expect(httpErrorHandlerService.getValidationErrors).not.toHaveBeenCalled();
+        }));
+    });
+
+    describe("removeFollow", () => {
+        const followUserName = "someFollowUserName";
+        const apiRequest = { method: "delete", url: `/api/users/${userName}/follows/${followUserName}` };
+
+        it("should make the correct api call", fakeAsync(() => {
+            userService.removeFollow(userName, followUserName);
+
+            // Tick the getAuthHeaders call
+            tick();
+
+            httpMock.expectOne(apiRequest);
+            expect(authenticationService.getAuthHeaders).toHaveBeenCalled();
+        }));
+
+        it("should handle when the api returns a success response", fakeAsync(() => {
+            let succeeded = false;
+            let error: HttpErrorResponse;
+            userService.removeFollow(userName, followUserName)
+                .then(() => succeeded = true)
+                .catch((e: HttpErrorResponse) => error = e);
+
+            // Tick the getAuthHeaders call
+            tick();
+
+            let request = httpMock.expectOne(apiRequest);
+            request.flush(null);
+            tick();
+
+            expect(succeeded).toEqual(true);
+            expect(authenticationService.getAuthHeaders).toHaveBeenCalled();
+            expect(error).toBeUndefined();
+            expect(httpErrorHandlerService.logError).not.toHaveBeenCalled();
+            expect(httpErrorHandlerService.getValidationErrors).not.toHaveBeenCalled();
+        }));
+
+        it("should handle http errors", fakeAsync(() => {
+            let succeeded = false;
+            let error: HttpErrorResponse;
+            userService.removeFollow(userName, followUserName)
+                .then(() => succeeded = true)
+                .catch((e: HttpErrorResponse) => error = e);
+
+            // Tick the getAuthHeaders call
+            tick();
+
+            let request = httpMock.expectOne(apiRequest);
+            request.flush(null, { status: 500, statusText: "someStatus" });
+            tick();
+
+            expect(succeeded).toEqual(false);
+            expect(authenticationService.getAuthHeaders).toHaveBeenCalled();
+            expect(error).toBeDefined();
+            expect(error.status).toEqual(500);
+            expect(error.statusText).toEqual("someStatus");
+            expect(httpErrorHandlerService.logError).toHaveBeenCalledWith("UserService.removeFollow.error", error);
+            expect(httpErrorHandlerService.getValidationErrors).not.toHaveBeenCalled();
+        }));
+    });
+
     describe("getLogins", () => {
         const apiRequest = { method: "get", url: `/api/users/${userName}/logins` };
 

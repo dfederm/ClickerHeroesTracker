@@ -71,6 +71,10 @@ export interface IFollowsData {
     follows: string[];
 }
 
+export interface IAddFollowRequest {
+    followUserName: string;
+}
+
 export interface IUserLogins {
     hasPassword: boolean;
     externalLogins: IExternalLogin[];
@@ -100,7 +104,7 @@ export class UserService {
         };
 
         return this.http
-            .post("/api/users", body, { headers })
+            .post("/api/users", body, { headers, responseType: "text" })
             .toPromise()
             .then(() => void 0)
             .catch((err: HttpErrorResponse) => {
@@ -153,6 +157,35 @@ export class UserService {
             });
     }
 
+    public addFollow(userName: string, followUserName: string): Promise<void> {
+        return this.authenticationService.getAuthHeaders()
+            .then(headers => {
+                let body: IAddFollowRequest = { followUserName };
+                return this.http
+                    .post(`/api/users/${userName}/follows`, body, { headers, responseType: "text" })
+                    .toPromise();
+            })
+            .then(() => void 0)
+            .catch((err: HttpErrorResponse) => {
+                this.httpErrorHandlerService.logError("UserService.addFollow.error", err);
+                return Promise.reject(err);
+            });
+    }
+
+    public removeFollow(userName: string, followUserName: string): Promise<void> {
+        return this.authenticationService.getAuthHeaders()
+            .then(headers => {
+                return this.http
+                    .delete(`/api/users/${userName}/follows/${followUserName}`, { headers, responseType: "text" })
+                    .toPromise();
+            })
+            .then(() => void 0)
+            .catch((err: HttpErrorResponse) => {
+                this.httpErrorHandlerService.logError("UserService.removeFollow.error", err);
+                return Promise.reject(err);
+            });
+    }
+
     public getLogins(userName: string): Promise<IUserLogins> {
         return this.authenticationService.getAuthHeaders()
             .then(headers => {
@@ -170,7 +203,7 @@ export class UserService {
         return this.authenticationService.getAuthHeaders()
             .then(headers => {
                 return this.http
-                    .request("delete", `/api/users/${userName}/logins`, { headers, body: externalLogin })
+                    .request("delete", `/api/users/${userName}/logins`, { headers, body: externalLogin, responseType: "text" })
                     .toPromise();
             })
             .then(() => void 0)
@@ -186,7 +219,7 @@ export class UserService {
                 headers = headers.set("Content-Type", "application/json");
                 let body: ISetPasswordRequest = { newPassword };
                 return this.http
-                    .post(`/api/users/${userName}/setpassword`, body, { headers })
+                    .post(`/api/users/${userName}/setpassword`, body, { headers, responseType: "text" })
                     .toPromise();
             })
             .then(() => void 0)
@@ -203,7 +236,7 @@ export class UserService {
                 headers = headers.set("Content-Type", "application/json");
                 let body: IChangePasswordRequest = { currentPassword, newPassword };
                 return this.http
-                    .post(`/api/users/${userName}/changepassword`, body, { headers })
+                    .post(`/api/users/${userName}/changepassword`, body, { headers, responseType: "text" })
                     .toPromise();
             })
             .then(() => void 0)
@@ -219,7 +252,7 @@ export class UserService {
         headers = headers.set("Content-Type", "application/json");
         let body: IResetPasswordRequest = { email };
         return this.http
-            .post("/api/users/resetpassword", body, { headers })
+            .post("/api/users/resetpassword", body, { headers, responseType: "text" })
             .toPromise()
             .then(() => void 0)
             .catch((err: HttpErrorResponse) => {
@@ -238,7 +271,7 @@ export class UserService {
             code,
         };
         return this.http
-            .post("/api/users/resetpasswordconfirmation", body, { headers })
+            .post("/api/users/resetpasswordconfirmation", body, { headers, responseType: "text" })
             .toPromise()
             .then(() => void 0)
             .catch((err: HttpErrorResponse) => {
