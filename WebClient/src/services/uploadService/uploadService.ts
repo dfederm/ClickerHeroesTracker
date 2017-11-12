@@ -1,6 +1,6 @@
 import { Injectable } from "@angular/core";
-import { Http, RequestOptions, URLSearchParams } from "@angular/http";
-import { AppInsightsService } from "@markpieszak/ng-application-insights";
+import { HttpClient, HttpParams, HttpErrorResponse } from "@angular/common/http";
+import { HttpErrorHandlerService } from "../httpErrorHandlerService/httpErrorHandlerService";
 
 import "rxjs/add/operator/toPromise";
 
@@ -13,8 +13,8 @@ export class UploadService {
 
     constructor(
         private authenticationService: AuthenticationService,
-        private http: Http,
-        private appInsights: AppInsightsService,
+        private http: HttpClient,
+        private httpErrorHandlerService: HttpErrorHandlerService,
     ) {
         this.authenticationService
             .userInfo()
@@ -24,57 +24,49 @@ export class UploadService {
     public get(id: number): Promise<IUpload> {
         return this.authenticationService.getAuthHeaders()
             .then(headers => {
-                let options = new RequestOptions({ headers });
                 return this.http
-                    .get(`/api/uploads/${id}`, options)
+                    .get<IUpload>(`/api/uploads/${id}`, { headers })
                     .toPromise();
             })
-            .then(response => response.json() as IUpload)
-            .catch(error => {
-                let errorMessage = error.message || error.toString();
-                this.appInsights.trackEvent("UploadService.get.error", { message: errorMessage });
-                return Promise.reject(errorMessage);
+            .catch((err: HttpErrorResponse) => {
+                this.httpErrorHandlerService.logError("UploadService.get.error", err);
+                return Promise.reject(err);
             });
     }
 
     public create(encodedSaveData: string, addToProgress: boolean, playStyle: string): Promise<number> {
         return this.authenticationService.getAuthHeaders()
             .then(headers => {
-                headers.append("Content-Type", "application/x-www-form-urlencoded");
-                let options = new RequestOptions({ headers });
-                let params = new URLSearchParams();
-                params.append("encodedSaveData", encodedSaveData);
-                params.append("addToProgress", (addToProgress && this.userInfo.isLoggedIn).toString());
-                params.append("playStyle", playStyle);
+                headers = headers.set("Content-Type", "application/x-www-form-urlencoded");
+                let params = new HttpParams()
+                    .set("encodedSaveData", encodedSaveData)
+                    .set("addToProgress", (addToProgress && this.userInfo.isLoggedIn).toString())
+                    .set("playStyle", playStyle);
 
                 // Angular doesn't encode '+' correctly. See: https://github.com/angular/angular/issues/11058
                 let body = params.toString().replace(/\+/gi, "%2B");
 
                 return this.http
-                    .post("/api/uploads", body, options)
+                    .post<number>("/api/uploads", body, { headers })
                     .toPromise();
             })
-            .then(result => parseInt(result.text()))
-            .catch(error => {
-                let errorMessage = error.message || error.toString();
-                this.appInsights.trackEvent("UploadService.create.error", { message: errorMessage });
-                return Promise.reject(error);
+            .catch((err: HttpErrorResponse) => {
+                this.httpErrorHandlerService.logError("UploadService.create.error", err);
+                return Promise.reject(err);
             });
     }
 
     public delete(id: number): Promise<void> {
         return this.authenticationService.getAuthHeaders()
             .then(headers => {
-                let options = new RequestOptions({ headers });
                 return this.http
-                    .delete(`/api/uploads/${id}`, options)
+                    .delete(`/api/uploads/${id}`, { headers })
                     .toPromise();
             })
             .then(() => void 0)
-            .catch(error => {
-                let errorMessage = error.message || error.toString();
-                this.appInsights.trackEvent("UploadService.delete.error", { message: errorMessage });
-                return Promise.reject(errorMessage);
+            .catch((err: HttpErrorResponse) => {
+                this.httpErrorHandlerService.logError("UploadService.delete.error", err);
+                return Promise.reject(err);
             });
     }
 }

@@ -1,43 +1,39 @@
-import { ReflectiveInjector } from "@angular/core";
-import { fakeAsync, tick, discardPeriodicTasks } from "@angular/core/testing";
-import { BaseRequestOptions, ConnectionBackend, Http, RequestOptions } from "@angular/http";
-import { Response, ResponseOptions, RequestMethod } from "@angular/http";
-import { MockBackend, MockConnection } from "@angular/http/testing";
+import { TestBed, fakeAsync, tick, discardPeriodicTasks } from "@angular/core/testing";
+import { HttpClientTestingModule, HttpTestingController } from "@angular/common/http/testing";
+import { HttpErrorHandlerService } from "../httpErrorHandlerService/httpErrorHandlerService";
 
 import { VersionService, IVersion } from "./versionService";
 
 describe("VersionService", () => {
     let versionService: VersionService;
-    let backend: MockBackend;
-    let lastConnection: MockConnection = null;
+    let httpMock: HttpTestingController;
 
     beforeEach(() => {
-        let injector = ReflectiveInjector.resolveAndCreate(
-            [
-                { provide: ConnectionBackend, useClass: MockBackend },
-                { provide: RequestOptions, useClass: BaseRequestOptions },
-                Http,
-                VersionService,
-            ]);
+        let httpErrorHandlerService = {
+            logError: (): void => void 0,
+        };
 
-        backend = injector.get(ConnectionBackend) as MockBackend;
-        backend.connections.subscribe((connection: MockConnection) => {
-            if (lastConnection != null) {
-                fail("Previous connection not handled");
-            }
+        TestBed.configureTestingModule(
+            {
+                imports: [
+                    HttpClientTestingModule,
+                ],
+                providers: [
+                    VersionService,
+                    { provide: HttpErrorHandlerService, useValue: httpErrorHandlerService },
+                ],
+            });
 
-            lastConnection = connection;
-        });
-
-        versionService = injector.get(VersionService) as VersionService;
+        httpMock = TestBed.get(HttpTestingController) as HttpTestingController;
+        versionService = TestBed.get(VersionService) as VersionService;
     });
 
     afterEach(() => {
-        lastConnection = null;
-        backend.verifyNoPendingRequests();
+        httpMock.verify();
     });
 
     describe("getVersion", () => {
+        const apiRequest = { method: "get", url: "/version" };
         let versionLog: IVersion[];
 
         beforeEach(() => {
@@ -158,15 +154,7 @@ describe("VersionService", () => {
             discardPeriodicTasks();
         }));
 
-        function verifyLastConnection(): void {
-            expect(lastConnection).not.toBeNull("no http service connection made");
-            expect(lastConnection.request.method).toEqual(RequestMethod.Get, "method invalid");
-            expect(lastConnection.request.url).toEqual("/version", "url invalid");
-        }
-
         function respondToLastConnection(index: number): IVersion {
-            verifyLastConnection();
-
             let version = {
                 environment: "environment_" + index,
                 changelist: "changelist_" + index,
@@ -178,8 +166,8 @@ describe("VersionService", () => {
                 },
             };
 
-            lastConnection.mockRespond(new Response(new ResponseOptions({ body: JSON.stringify(version) })));
-            lastConnection = null;
+            let request = httpMock.expectOne(apiRequest);
+            request.flush(version);
 
             // Don't tick longer than the refresh interval
             tick(1);
@@ -188,20 +176,16 @@ describe("VersionService", () => {
         }
 
         function respondEmptyToLastConnection(): void {
-            verifyLastConnection();
-
-            lastConnection.mockRespond(new Response(new ResponseOptions({ body: "" })));
-            lastConnection = null;
+            let request = httpMock.expectOne(apiRequest);
+            request.flush("");
 
             // Don't tick longer than the refresh interval
             tick(1);
         }
 
         function errorToLastConnection(): void {
-            verifyLastConnection();
-
-            lastConnection.mockError();
-            lastConnection = null;
+            let request = httpMock.expectOne(apiRequest);
+            request.flush(null, { status: 500, statusText: "someStatus" });
 
             // Don't tick longer than the refresh interval
             tick(1);

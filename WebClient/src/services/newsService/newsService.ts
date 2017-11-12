@@ -1,6 +1,6 @@
 import { Injectable } from "@angular/core";
-import { Http } from "@angular/http";
-import { AppInsightsService } from "@markpieszak/ng-application-insights";
+import { HttpClient, HttpErrorResponse } from "@angular/common/http";
+import { HttpErrorHandlerService } from "../httpErrorHandlerService/httpErrorHandlerService";
 
 import "rxjs/add/operator/toPromise";
 
@@ -11,19 +11,17 @@ export interface ISiteNewsEntryListResponse {
 @Injectable()
 export class NewsService {
     constructor(
-        private http: Http,
-        private appInsights: AppInsightsService,
+        private http: HttpClient,
+        private httpErrorHandlerService: HttpErrorHandlerService,
     ) { }
 
     public getNews(): Promise<ISiteNewsEntryListResponse> {
         return this.http
-            .get("/api/news")
+            .get<ISiteNewsEntryListResponse>("/api/news")
             .toPromise()
-            .then(response => response.json() as ISiteNewsEntryListResponse)
-            .catch(error => {
-                let errorMessage = error.message || error.toString();
-                this.appInsights.trackEvent("NewsService.getNews.error", { message: errorMessage });
-                return Promise.reject(errorMessage);
+            .catch((err: HttpErrorResponse) => {
+                this.httpErrorHandlerService.logError("NewsService.getNews.error", err);
+                return Promise.reject(err);
             });
     }
 }

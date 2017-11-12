@@ -1,9 +1,8 @@
-import { ReflectiveInjector } from "@angular/core";
-import { fakeAsync, tick } from "@angular/core/testing";
-import { BaseRequestOptions, ConnectionBackend, Http, Headers, RequestOptions, Response, ResponseOptions, RequestMethod } from "@angular/http";
-import { MockBackend, MockConnection } from "@angular/http/testing";
+import { TestBed, fakeAsync, tick } from "@angular/core/testing";
+import { HttpClientTestingModule, HttpTestingController } from "@angular/common/http/testing";
 import { BehaviorSubject } from "rxjs/BehaviorSubject";
-import { AppInsightsService } from "@markpieszak/ng-application-insights";
+import { HttpErrorHandlerService } from "../httpErrorHandlerService/httpErrorHandlerService";
+import { HttpHeaders, HttpErrorResponse } from "@angular/common/http";
 
 import { UploadService } from "./uploadService";
 import { AuthenticationService, IUserInfo } from "../authenticationService/authenticationService";
@@ -12,9 +11,8 @@ import { IUpload } from "../../models";
 describe("UploadService", () => {
     let uploadService: UploadService;
     let authenticationService: AuthenticationService;
-    let appInsights: AppInsightsService;
-    let backend: MockBackend;
-    let lastConnection: MockConnection;
+    let httpErrorHandlerService: HttpErrorHandlerService;
+    let httpMock: HttpTestingController;
     let userInfo: BehaviorSubject<IUserInfo>;
 
     const loggedInUser: IUserInfo = {
@@ -32,40 +30,41 @@ describe("UploadService", () => {
         userInfo = new BehaviorSubject(notLoggedInUser);
         authenticationService = jasmine.createSpyObj("authenticationService", ["userInfo", "getAuthHeaders"]);
         (authenticationService.userInfo as jasmine.Spy).and.returnValue(userInfo);
-        (authenticationService.getAuthHeaders as jasmine.Spy).and.returnValue(Promise.resolve(new Headers()));
+        (authenticationService.getAuthHeaders as jasmine.Spy).and.returnValue(Promise.resolve(new HttpHeaders()));
 
-        appInsights = jasmine.createSpyObj("appInsights", ["trackEvent"]);
+        httpErrorHandlerService = jasmine.createSpyObj("httpErrorHandlerService", ["logError"]);
 
-        let injector = ReflectiveInjector.resolveAndCreate(
-            [
-                UploadService,
-                { provide: ConnectionBackend, useClass: MockBackend },
-                { provide: RequestOptions, useClass: BaseRequestOptions },
-                Http,
-                { provide: AuthenticationService, useValue: authenticationService },
-                { provide: AppInsightsService, useValue: appInsights },
-            ]);
+        TestBed.configureTestingModule(
+            {
+                imports: [
+                    HttpClientTestingModule,
+                ],
+                providers:
+                    [
+                        UploadService,
+                        { provide: AuthenticationService, useValue: authenticationService },
+                        { provide: HttpErrorHandlerService, useValue: httpErrorHandlerService },
+                    ],
+            });
 
-        uploadService = injector.get(UploadService) as UploadService;
-        backend = injector.get(ConnectionBackend) as MockBackend;
-        backend.connections.subscribe((connection: MockConnection) => lastConnection = connection);
+        uploadService = TestBed.get(UploadService) as UploadService;
+        httpMock = TestBed.get(HttpTestingController) as HttpTestingController;
     });
 
     afterEach(() => {
-        lastConnection = null;
-        backend.verifyNoPendingRequests();
+        httpMock.verify();
     });
 
     describe("get", () => {
+        const apiRequest = { method: "get", url: "/api/uploads/123" };
+
         it("should make the correct api call", fakeAsync(() => {
             uploadService.get(123);
 
             // Tick the getAuthHeaders call
             tick();
 
-            expect(lastConnection).toBeDefined("no http service connection made");
-            expect(lastConnection.request.method).toEqual(RequestMethod.Get, "method invalid");
-            expect(lastConnection.request.url).toEqual("/api/uploads/123", "url invalid");
+            httpMock.expectOne(apiRequest);
             expect(authenticationService.getAuthHeaders).toHaveBeenCalled();
         }));
 
@@ -77,33 +76,39 @@ describe("UploadService", () => {
             // Tick the getAuthHeaders call
             tick();
 
-            let expectedUpload: IUpload = { id: 123, timeSubmitted: "someTimeSubmitted", playStyle: "somePlayStyle" };
-            lastConnection.mockRespond(new Response(new ResponseOptions({ body: JSON.stringify(expectedUpload) })));
+            let expectedResponse: IUpload = { id: 123, timeSubmitted: "someTimeSubmitted", playStyle: "somePlayStyle" };
+            let request = httpMock.expectOne(apiRequest);
+            request.flush(expectedResponse);
             tick();
 
-            expect(upload).toEqual(expectedUpload, "should return the expected upload");
+            expect(upload).toEqual(expectedResponse, "should return the expected upload");
         }));
 
         it("should handle http errors", fakeAsync(() => {
             let upload: IUpload;
-            let error: string;
+            let error: HttpErrorResponse;
             uploadService.get(123)
                 .then((r: IUpload) => upload = r)
-                .catch((e: string) => error = e);
+                .catch((e: HttpErrorResponse) => error = e);
 
             // Tick the getAuthHeaders call
             tick();
 
-            lastConnection.mockError(new Error("someError"));
+            let request = httpMock.expectOne(apiRequest);
+            request.flush(null, { status: 500, statusText: "someStatus" });
             tick();
 
             expect(upload).toBeUndefined();
-            expect(error).toEqual("someError");
-            expect(appInsights.trackEvent).toHaveBeenCalled();
+            expect(error).toBeDefined();
+            expect(error.status).toEqual(500);
+            expect(error.statusText).toEqual("someStatus");
+            expect(httpErrorHandlerService.logError).toHaveBeenCalledWith("UploadService.get.error", error);
         }));
     });
 
     describe("create", () => {
+        const apiRequest = { method: "post", url: "/api/uploads" };
+
         it("should make the correct api call when the use is not logged in", fakeAsync(() => {
             userInfo.next(notLoggedInUser);
 
@@ -112,10 +117,8 @@ describe("UploadService", () => {
             // Tick the getAuthHeaders call
             tick();
 
-            expect(lastConnection).toBeDefined("no http service connection made");
-            expect(lastConnection.request.method).toEqual(RequestMethod.Post, "method invalid");
-            expect(lastConnection.request.url).toEqual("/api/uploads", "url invalid");
-            expect(lastConnection.request.text()).toEqual("encodedSaveData=someEncodedSaveData&addToProgress=false&playStyle=somePlayStyle", "request body invalid");
+            let request = httpMock.expectOne(apiRequest);
+            expect(request.request.body).toEqual("encodedSaveData=someEncodedSaveData&addToProgress=false&playStyle=somePlayStyle");
             expect(authenticationService.getAuthHeaders).toHaveBeenCalled();
         }));
 
@@ -127,64 +130,67 @@ describe("UploadService", () => {
             // Tick the getAuthHeaders call
             tick();
 
-            expect(lastConnection).toBeDefined("no http service connection made");
-            expect(lastConnection.request.method).toEqual(RequestMethod.Post, "method invalid");
-            expect(lastConnection.request.url).toEqual("/api/uploads", "url invalid");
-            expect(lastConnection.request.text()).toEqual("encodedSaveData=someEncodedSaveData&addToProgress=true&playStyle=somePlayStyle", "request body invalid");
+            let request = httpMock.expectOne(apiRequest);
+            expect(request.request.body).toEqual("encodedSaveData=someEncodedSaveData&addToProgress=true&playStyle=somePlayStyle");
             expect(authenticationService.getAuthHeaders).toHaveBeenCalled();
         }));
 
         it("should handle http errors", fakeAsync(() => {
             let uploadId: number;
-            let error: Error;
+            let error: HttpErrorResponse;
             uploadService.create("someEncodedSaveData", true, "somePlayStyle")
                 .then((id: number) => uploadId = id)
-                .catch((e: Error) => error = e);
+                .catch((e: HttpErrorResponse) => error = e);
 
             // Tick the getAuthHeaders call
             tick();
 
-            let expectedError = new Error("someError");
-            lastConnection.mockError(expectedError);
+            let request = httpMock.expectOne(apiRequest);
+            request.flush(null, { status: 500, statusText: "someStatus" });
             tick();
 
             expect(uploadId).toBeUndefined();
-            expect(error).toEqual(expectedError);
+            expect(error).toBeDefined();
+            expect(error.status).toEqual(500);
+            expect(error.statusText).toEqual("someStatus");
             expect(authenticationService.getAuthHeaders).toHaveBeenCalled();
-            expect(appInsights.trackEvent).toHaveBeenCalled();
+            expect(httpErrorHandlerService.logError).toHaveBeenCalledWith("UploadService.create.error", error);
         }));
     });
 
     describe("delete", () => {
+        const apiRequest = { method: "delete", url: "/api/uploads/123" };
+
         it("should make an api call", fakeAsync(() => {
             uploadService.delete(123);
 
             // Tick the getAuthHeaders call
             tick();
 
-            expect(lastConnection).toBeDefined("no http service connection made");
-            expect(lastConnection.request.method).toEqual(RequestMethod.Delete, "method invalid");
-            expect(lastConnection.request.url).toEqual("/api/uploads/123", "url invalid");
+            httpMock.expectOne(apiRequest);
             expect(authenticationService.getAuthHeaders).toHaveBeenCalled();
         }));
 
         it("should handle http errors", fakeAsync(() => {
             let succeeded = false;
-            let error: string;
+            let error: HttpErrorResponse;
             uploadService.delete(123)
                 .then(() => succeeded = true)
-                .catch((e: string) => error = e);
+                .catch((e: HttpErrorResponse) => error = e);
 
             // Tick the getAuthHeaders call
             tick();
 
-            lastConnection.mockError(new Error("someError"));
+            let request = httpMock.expectOne(apiRequest);
+            request.flush(null, { status: 500, statusText: "someStatus" });
             tick();
 
             expect(succeeded).toEqual(false);
-            expect(error).toEqual("someError");
+            expect(error).toBeDefined();
+            expect(error.status).toEqual(500);
+            expect(error.statusText).toEqual("someStatus");
             expect(authenticationService.getAuthHeaders).toHaveBeenCalled();
-            expect(appInsights.trackEvent).toHaveBeenCalled();
+            expect(httpErrorHandlerService.logError).toHaveBeenCalledWith("UploadService.delete.error", error);
         }));
     });
 });

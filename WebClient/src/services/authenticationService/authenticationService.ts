@@ -1,12 +1,12 @@
 import { Injectable } from "@angular/core";
-import { Http, Headers, RequestOptions, URLSearchParams } from "@angular/http";
+import { HttpClient, HttpHeaders, HttpParams, HttpErrorResponse } from "@angular/common/http";
 import { Observable } from "rxjs/Observable";
 import { BehaviorSubject } from "rxjs/BehaviorSubject";
 import { Subscription } from "rxjs/Subscription";
 import * as JwtDecode from "jwt-decode";
 import { map, distinctUntilChanged } from "rxjs/operators";
 import { interval } from "rxjs/observable/interval";
-import { AppInsightsService } from "@markpieszak/ng-application-insights";
+import { HttpErrorHandlerService } from "../httpErrorHandlerService/httpErrorHandlerService";
 
 import "rxjs/add/operator/toPromise";
 
@@ -42,8 +42,8 @@ export class AuthenticationService {
     private fetchTokensPromise: Promise<void>;
 
     constructor(
-        private appInsights: AppInsightsService,
-        private http: Http,
+        private httpErrorHandlerService: HttpErrorHandlerService,
+        private http: HttpClient,
     ) {
         let tokensString = localStorage.getItem(AuthenticationService.tokensKey);
         this.currentTokens = tokensString == null ? null : JSON.parse(tokensString);
@@ -58,21 +58,21 @@ export class AuthenticationService {
     }
 
     public logInWithPassword(username: string, password: string): Promise<void> {
-        let params = new URLSearchParams();
-        params.append("grant_type", "password");
-        params.append("username", username);
-        params.append("password", password);
+        let params = new HttpParams()
+            .set("grant_type", "password")
+            .set("username", username)
+            .set("password", password);
         return this.fetchTokens(params)
             .then(() => this.scheduleRefresh());
     }
 
     public logInWithAssertion(grantType: string, assertion: string, username: string): Promise<void> {
-        let params = new URLSearchParams();
-        params.append("grant_type", grantType);
-        params.append("assertion", assertion);
+        let params = new HttpParams()
+            .set("grant_type", grantType)
+            .set("assertion", assertion);
 
         if (username) {
-            params.append("username", username);
+            params = params.set("username", username);
             return this.fetchTokens(params)
                 .then(() => this.scheduleRefresh());
         }
@@ -100,37 +100,35 @@ export class AuthenticationService {
         );
     }
 
-    public getAuthHeaders(): Promise<Headers> {
+    public getAuthHeaders(): Promise<HttpHeaders> {
         if (this.fetchTokensPromise) {
             return this.fetchTokensPromise
                 .catch(() => void 0) // Swallow errors as we just use this effectively like a lock
                 .then(() => {
-                    let headers = new Headers();
+                    let headers = new HttpHeaders();
 
                     if (this.currentTokens) {
-                        headers.append("Authorization", `${this.currentTokens.token_type} ${this.currentTokens.access_token}`);
+                        headers = headers.set("Authorization", `${this.currentTokens.token_type} ${this.currentTokens.access_token}`);
                     }
 
                     return headers;
                 });
         } else {
-            return Promise.resolve(new Headers());
+            return Promise.resolve(new HttpHeaders());
         }
     }
 
-    private fetchTokens(params: URLSearchParams, headers?: Headers): Promise<void> {
+    private fetchTokens(params: HttpParams, headers?: HttpHeaders): Promise<void> {
         if (!headers) {
-            headers = new Headers();
+            headers = new HttpHeaders();
         }
-        headers.append("Content-Type", "application/x-www-form-urlencoded");
+        headers = headers.set("Content-Type", "application/x-www-form-urlencoded");
 
-        let options = new RequestOptions({ headers });
-        params.append("scope", "openid offline_access profile email roles");
+        params = params.set("scope", "openid offline_access profile email roles");
 
-        this.fetchTokensPromise = this.http.post("/api/auth/token", params.toString(), options)
+        this.fetchTokensPromise = this.http.post<IAuthTokenModel>("/api/auth/token", params.toString(), { headers })
             .toPromise()
-            .then(response => {
-                let tokens: IAuthTokenModel = response.json();
+            .then(tokens => {
                 if (!tokens
                     || !tokens.token_type
                     || !tokens.access_token
@@ -146,18 +144,17 @@ export class AuthenticationService {
 
                 return Promise.resolve();
             })
-            .catch(error => {
-                let errorMessage = error.message || error.toString();
-                this.appInsights.trackEvent("AuthenticationService.fetchTokens.error", { message: errorMessage });
-                return Promise.reject(error);
+            .catch((err: HttpErrorResponse) => {
+                this.httpErrorHandlerService.logError("AuthenticationService.fetchTokens.error", err);
+                return Promise.reject(err);
             });
         return this.fetchTokensPromise;
     }
 
     private refreshTokens(): Promise<void> {
-        let params = new URLSearchParams();
-        params.append("grant_type", "refresh_token");
-        params.append("refresh_token", this.currentTokens.refresh_token);
+        let params = new HttpParams()
+            .set("grant_type", "refresh_token")
+            .set("refresh_token", this.currentTokens.refresh_token);
         return this.fetchTokens(params);
     }
 

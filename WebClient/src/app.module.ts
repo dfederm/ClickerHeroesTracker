@@ -2,7 +2,7 @@ import { NgModule } from "@angular/core";
 import { BrowserModule } from "@angular/platform-browser";
 import { FormsModule } from "@angular/forms";
 import { RouterModule, Routes } from "@angular/router";
-import { HttpModule } from "@angular/http";
+import { HttpClientModule } from "@angular/common/http";
 import { NgbModule } from "@ng-bootstrap/ng-bootstrap";
 import { ClipboardModule } from "ngx-clipboard/dist";
 import { TimeAgoPipe } from "time-ago-pipe";
@@ -50,6 +50,7 @@ import { UserService } from "./services/userService/userService";
 import { VersionService } from "./services/versionService/versionService";
 import { SettingsService } from "./services/settingsService/settingsService";
 import { FeedbackService } from "./services/feedbackService/feedbackService";
+import { HttpErrorHandlerService } from "./services/httpErrorHandlerService/httpErrorHandlerService";
 
 const routes: Routes =
   [
@@ -71,7 +72,7 @@ const routes: Routes =
       BrowserModule,
       FormsModule,
       RouterModule.forRoot(routes),
-      HttpModule,
+      HttpClientModule,
       NgbModule.forRoot(),
       ClipboardModule,
       AdsenseModule.forRoot(),
@@ -133,6 +134,7 @@ const routes: Routes =
       VersionService,
       SettingsService,
       FeedbackService,
+      HttpErrorHandlerService,
     ],
   bootstrap: [AppComponent],
 })

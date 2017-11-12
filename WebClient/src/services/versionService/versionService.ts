@@ -1,9 +1,10 @@
 import { Injectable } from "@angular/core";
-import { Http } from "@angular/http";
+import { HttpClient, HttpErrorResponse } from "@angular/common/http";
 import { Observable } from "rxjs/Observable";
 import { BehaviorSubject } from "rxjs/BehaviorSubject";
 import { filter, distinctUntilChanged } from "rxjs/operators";
 import { interval } from "rxjs/observable/interval";
+import { HttpErrorHandlerService } from "../httpErrorHandlerService/httpErrorHandlerService";
 
 import "rxjs/add/operator/toPromise";
 
@@ -23,7 +24,10 @@ export class VersionService {
 
     private version: BehaviorSubject<IVersion>;
 
-    constructor(private http: Http) {
+    constructor(
+        private http: HttpClient,
+        private httpErrorHandlerService: HttpErrorHandlerService,
+    ) {
         this.version = new BehaviorSubject(null);
 
         /*
@@ -57,16 +61,14 @@ export class VersionService {
     }
 
     private fetchVersion(): Promise<void> {
-        return this.http.get("/version")
+        return this.http.get<IVersion>("/version")
             .toPromise()
-            .then(response => {
-                let version: IVersion = response.json();
-                if (!version) {
-                    return Promise.reject("Invalid version response");
-                }
-
+            .then(version => {
                 this.version.next(version);
-                return Promise.resolve();
+            })
+            .catch((err: HttpErrorResponse) => {
+                this.httpErrorHandlerService.logError("VersionService.fetchVersion.error", err);
+                return Promise.reject(err);
             });
     }
 

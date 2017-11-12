@@ -1,18 +1,18 @@
-import { ReflectiveInjector } from "@angular/core";
-import { fakeAsync, tick, discardPeriodicTasks } from "@angular/core/testing";
-import { BaseRequestOptions, ConnectionBackend, Http, RequestOptions, Response, ResponseOptions, Headers, RequestMethod } from "@angular/http";
-import { MockBackend, MockConnection } from "@angular/http/testing";
+import { TestBed, fakeAsync, tick, discardPeriodicTasks } from "@angular/core/testing";
+import { HttpClientTestingModule, HttpTestingController, TestRequest } from "@angular/common/http/testing";
+import { HttpHeaders } from "@angular/common/http";
 import { BehaviorSubject } from "rxjs";
-import { AppInsightsService } from "@markpieszak/ng-application-insights";
+import { HttpErrorHandlerService } from "../httpErrorHandlerService/httpErrorHandlerService";
 
 import { SettingsService, IUserSettings, PlayStyle, Theme } from "./settingsService";
 import { AuthenticationService, IUserInfo } from "../authenticationService/authenticationService";
 
 describe("SettingsService", () => {
-    let injector: ReflectiveInjector;
-    let backend: MockBackend;
-    let lastConnection: MockConnection = null;
+    let httpMock: HttpTestingController;
     let userInfo: BehaviorSubject<IUserInfo>;
+
+    const getSettingsRequest = { method: "get", url: "/api/users/someUsername/settings" };
+    const setSettingsRequest = { method: "patch", url: "/api/users/someUsername/settings" };
 
     const loggedInUser: IUserInfo = {
         isLoggedIn: true,
@@ -29,30 +29,26 @@ describe("SettingsService", () => {
         userInfo = new BehaviorSubject(notLoggedInUser);
         let authenticationService: AuthenticationService = jasmine.createSpyObj("authenticationService", ["userInfo", "getAuthHeaders"]);
         (authenticationService.userInfo as jasmine.Spy).and.returnValue(userInfo);
-        (authenticationService.getAuthHeaders as jasmine.Spy).and.returnValue(Promise.resolve(new Headers()));
+        (authenticationService.getAuthHeaders as jasmine.Spy).and.returnValue(Promise.resolve(new HttpHeaders()));
 
-        let appInsights = {
-            trackEvent: (): void => void 0,
+        let httpErrorHandlerService = {
+            logError: (): void => void 0,
         };
 
-        injector = ReflectiveInjector.resolveAndCreate(
-            [
-                { provide: AuthenticationService, useValue: authenticationService },
-                { provide: ConnectionBackend, useClass: MockBackend },
-                { provide: RequestOptions, useClass: BaseRequestOptions },
-                Http,
-                SettingsService,
-                { provide: AppInsightsService, useValue: appInsights },
-            ]);
+        TestBed.configureTestingModule(
+            {
+                imports: [
+                    HttpClientTestingModule,
+                ],
+                providers:
+                    [
+                        { provide: AuthenticationService, useValue: authenticationService },
+                        SettingsService,
+                        { provide: HttpErrorHandlerService, useValue: httpErrorHandlerService },
+                    ],
+            });
 
-        backend = injector.get(ConnectionBackend) as MockBackend;
-        backend.connections.subscribe((connection: MockConnection) => {
-            if (lastConnection != null) {
-                fail("Previous connection not handled");
-            }
-
-            lastConnection = connection;
-        });
+        httpMock = TestBed.get(HttpTestingController) as HttpTestingController;
 
         spyOn(localStorage, "getItem");
         spyOn(localStorage, "setItem");
@@ -60,8 +56,7 @@ describe("SettingsService", () => {
     });
 
     afterEach(() => {
-        lastConnection = null;
-        backend.verifyNoPendingRequests();
+        httpMock.verify();
     });
 
     describe("settings", () => {
@@ -111,6 +106,12 @@ describe("SettingsService", () => {
 
             userInfo.next(loggedInUser);
             let settingsLog = createService();
+
+            // Tick the getAuthHeaders call
+            tick();
+
+            // Initial fetch
+            expectGetSettingsRequest();
 
             expect(settingsLog.length).toEqual(1);
             expect(settingsLog[0]).toEqual(expectedSettings);
@@ -232,12 +233,6 @@ describe("SettingsService", () => {
                 errorToGetSettingsRequest();
             }
 
-            // Let the sync interval lapse a whole bunch more times with an empty settings
-            for (let i = 0; i < 100; i++) {
-                tick(SettingsService.syncInterval);
-                respondEmptyToGetSettingsRequest();
-            }
-
             // Let the sync interval tick again
             tick(SettingsService.syncInterval);
 
@@ -284,7 +279,7 @@ describe("SettingsService", () => {
 
         function createService(): IUserSettings[] {
             let settingsLog: IUserSettings[] = [];
-            let settingsService = injector.get(SettingsService) as SettingsService;
+            let settingsService = TestBed.get(SettingsService) as SettingsService;
 
             settingsService.settings().subscribe(settings => {
                 settingsLog.push(settings);
@@ -309,7 +304,7 @@ describe("SettingsService", () => {
             // Tick the getAuthHeaders call
             tick();
 
-            verifySetSettingsRequest();
+            expectSetSettingsRequest();
             expect(settingsLog.length).toEqual(0);
 
             expect(resolved).toEqual(false);
@@ -328,9 +323,7 @@ describe("SettingsService", () => {
             // Tick the getAuthHeaders call
             tick();
 
-            let connection1 = lastConnection;
-            expect(connection1).not.toBeNull();
-            lastConnection = null;
+            let request1 = expectSetSettingsRequest();
 
             // Let the sync interval tick
             tick(SettingsService.syncInterval);
@@ -345,11 +338,9 @@ describe("SettingsService", () => {
             // Tick the getAuthHeaders call
             tick();
 
-            let connection2 = lastConnection;
-            expect(connection2).not.toBeNull();
-            lastConnection = null;
+            let request2 = expectSetSettingsRequest();
 
-            respondToSetSettingsRequest(connection1);
+            respondToSetSettingsRequest(request1);
             expect(resolved1).toEqual(true);
             expect(rejected1).toEqual(false);
 
@@ -357,7 +348,7 @@ describe("SettingsService", () => {
             tick(SettingsService.syncInterval);
             expect(settingsLog.length).toEqual(0);
 
-            respondToSetSettingsRequest(connection2);
+            respondToSetSettingsRequest(request2);
             expect(resolved1).toEqual(true);
             expect(rejected1).toEqual(false);
 
@@ -384,9 +375,7 @@ describe("SettingsService", () => {
 
             // Let the sync interval tick, meaning the new request is pending but not returned yet
             tick(SettingsService.syncInterval);
-            let getSettingsConnection = lastConnection;
-            expect(getSettingsConnection).not.toBeNull();
-            lastConnection = null;
+            let request = expectGetSettingsRequest();
 
             let resolved = false;
             let rejected = false;
@@ -398,9 +387,9 @@ describe("SettingsService", () => {
             tick();
 
             // The refresh returned after the patch started
-            respondToGetSettingsRequest(1, getSettingsConnection);
+            respondToGetSettingsRequest(1, request);
 
-            verifySetSettingsRequest();
+            expectSetSettingsRequest();
             expect(settingsLog.length).toEqual(0);
 
             expect(resolved).toEqual(false);
@@ -446,7 +435,7 @@ describe("SettingsService", () => {
             userInfo.next(loggedInUser);
 
             let settingsLog: IUserSettings[];
-            settingsService = injector.get(SettingsService) as SettingsService;
+            settingsService = TestBed.get(SettingsService) as SettingsService;
 
             settingsService.settings().subscribe(settings => {
                 if (settingsLog) {
@@ -466,23 +455,14 @@ describe("SettingsService", () => {
         }
     });
 
-    function verifyGetSettingsRequest(connection?: MockConnection): void {
-        if (!connection) {
-            connection = lastConnection;
-        }
-
-        expect(connection).not.toBeNull("no http service connection made");
-        expect(connection.request.method).toEqual(RequestMethod.Get, "method invalid");
-        expect(connection.request.url).toEqual("/api/users/someUsername/settings", "url invalid");
+    function expectGetSettingsRequest(): TestRequest {
+        return httpMock.expectOne(getSettingsRequest);
     }
 
-    function respondToGetSettingsRequest(index: number, connection?: MockConnection): IUserSettings {
-        if (!connection) {
-            connection = lastConnection;
-            lastConnection = null;
+    function respondToGetSettingsRequest(index: number, request?: TestRequest): IUserSettings {
+        if (!request) {
+            request = expectGetSettingsRequest();
         }
-
-        verifyGetSettingsRequest(connection);
 
         let settings: IUserSettings = {
             areUploadsPublic: index % 2 === 0,
@@ -496,7 +476,7 @@ describe("SettingsService", () => {
             theme: (["light", "dark"] as Theme[])[index % 2],
         };
 
-        connection.mockRespond(new Response(new ResponseOptions({ body: JSON.stringify(settings) })));
+        request.flush(settings);
 
         // Don't tick longer than the refresh interval
         tick(1);
@@ -504,55 +484,34 @@ describe("SettingsService", () => {
         return settings;
     }
 
-    function respondEmptyToGetSettingsRequest(): void {
-        verifyGetSettingsRequest();
-
-        lastConnection.mockRespond(new Response(new ResponseOptions({ body: "" })));
-        lastConnection = null;
-
-        // Don't tick longer than the refresh interval
-        tick(1);
-    }
-
     function errorToGetSettingsRequest(): void {
-        verifyGetSettingsRequest();
-
-        lastConnection.mockError(new Error("someError"));
-        lastConnection = null;
+        let request = expectGetSettingsRequest();
+        request.flush(null, { status: 500, statusText: "someStatus" });
 
         // Don't tick longer than the refresh interval
         tick(1);
     }
 
-    function verifySetSettingsRequest(connection?: MockConnection): void {
-        if (!connection) {
-            connection = lastConnection;
-        }
-
-        expect(connection).not.toBeNull("no http service connection made");
-        expect(connection.request.method).toEqual(RequestMethod.Patch, "method invalid");
-        expect(connection.request.url).toEqual("/api/users/someUsername/settings", "url invalid");
-        expect(connection.request.json()).toEqual({ playStyle: "somePlayStyle" }, "request body invalid");
+    function expectSetSettingsRequest(): TestRequest {
+        let request = httpMock.expectOne(setSettingsRequest);
+        expect(request.request.body).toEqual({ playStyle: "somePlayStyle" });
+        return request;
     }
 
-    function respondToSetSettingsRequest(connection?: MockConnection): void {
-        if (!connection) {
-            connection = lastConnection;
-            lastConnection = null;
+    function respondToSetSettingsRequest(request?: TestRequest): void {
+        if (!request) {
+            request = expectSetSettingsRequest();
         }
 
-        verifySetSettingsRequest(connection);
-        connection.mockRespond(new Response(new ResponseOptions()));
+        request.flush(null);
 
         // Don't tick longer than the refresh interval
         tick(1);
     }
 
     function errorToSetSettingsRequest(): void {
-        verifySetSettingsRequest();
-
-        lastConnection.mockError(new Error("someError"));
-        lastConnection = null;
+        let request = expectSetSettingsRequest();
+        request.flush(null, { status: 500, statusText: "someStatus" });
 
         // Don't tick longer than the refresh interval
         tick(1);

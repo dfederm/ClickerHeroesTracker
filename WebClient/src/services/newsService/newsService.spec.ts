@@ -1,45 +1,44 @@
-import { ReflectiveInjector } from "@angular/core";
-import { fakeAsync, tick } from "@angular/core/testing";
-import { BaseRequestOptions, ConnectionBackend, Http, RequestOptions } from "@angular/http";
-import { Response, ResponseOptions } from "@angular/http";
-import { MockBackend, MockConnection } from "@angular/http/testing";
-import { AppInsightsService } from "@markpieszak/ng-application-insights";
+import { TestBed, fakeAsync, tick } from "@angular/core/testing";
+import { HttpClientTestingModule, HttpTestingController } from "@angular/common/http/testing";
+import { HttpErrorResponse } from "@angular/common/http";
+import { HttpErrorHandlerService } from "../httpErrorHandlerService/httpErrorHandlerService";
 
 import { NewsService, ISiteNewsEntryListResponse } from "./newsService";
 
 describe("NewsService", () => {
     let newsService: NewsService;
-    let appInsights: AppInsightsService;
-    let backend: MockBackend;
-    let lastConnection: MockConnection;
+    let httpErrorHandlerService: HttpErrorHandlerService;
+    let httpMock: HttpTestingController;
 
     describe("getNews", () => {
+        const apiRequest = { method: "get", url: "/api/news" };
+
         beforeEach(() => {
-            appInsights = jasmine.createSpyObj("appInsights", ["trackEvent"]);
+            httpErrorHandlerService = jasmine.createSpyObj("httpErrorHandlerService", ["logError"]);
 
-            let injector = ReflectiveInjector.resolveAndCreate(
-                [
-                    { provide: ConnectionBackend, useClass: MockBackend },
-                    { provide: RequestOptions, useClass: BaseRequestOptions },
-                    Http,
-                    NewsService,
-                    { provide: AppInsightsService, useValue: appInsights },
-                ]);
+            TestBed.configureTestingModule(
+                {
+                    imports: [
+                        HttpClientTestingModule,
+                    ],
+                    providers:
+                        [
+                            NewsService,
+                            { provide: HttpErrorHandlerService, useValue: httpErrorHandlerService },
+                        ],
+                });
 
-            newsService = injector.get(NewsService) as NewsService;
-            backend = injector.get(ConnectionBackend) as MockBackend;
-            backend.connections.subscribe((connection: MockConnection) => lastConnection = connection);
+            newsService = TestBed.get(NewsService) as NewsService;
+            httpMock = TestBed.get(HttpTestingController) as HttpTestingController;
         });
 
         afterAll(() => {
-            lastConnection = null;
-            backend.verifyNoPendingRequests();
+            httpMock.verify();
         });
 
         it("should make an api call", () => {
             newsService.getNews();
-            expect(lastConnection).toBeDefined("no http service connection made");
-            expect(lastConnection.request.url).toEqual("/api/news", "url invalid");
+            httpMock.expectOne(apiRequest);
         });
 
         it("should return some news", fakeAsync(() => {
@@ -48,7 +47,8 @@ describe("NewsService", () => {
                 .then((r: ISiteNewsEntryListResponse) => response = r);
 
             let expectedResponse: ISiteNewsEntryListResponse = { entries: { someEntry: ["someEntryValue1", "someEntryValue2"] } };
-            lastConnection.mockRespond(new Response(new ResponseOptions({ body: JSON.stringify(expectedResponse) })));
+            let request = httpMock.expectOne(apiRequest);
+            request.flush(expectedResponse);
             tick();
 
             expect(response).toEqual(expectedResponse, "should return the expected response");
@@ -56,17 +56,20 @@ describe("NewsService", () => {
 
         it("should handle errors", fakeAsync(() => {
             let response: ISiteNewsEntryListResponse;
-            let error: string;
+            let error: HttpErrorResponse;
             newsService.getNews()
                 .then((r: ISiteNewsEntryListResponse) => response = r)
-                .catch((e: string) => error = e);
+                .catch((e: HttpErrorResponse) => error = e);
 
-            lastConnection.mockError(new Error("someError"));
+            let request = httpMock.expectOne(apiRequest);
+            request.flush(null, { status: 500, statusText: "someStatus" });
             tick();
 
             expect(response).toBeUndefined();
-            expect(error).toEqual("someError");
-            expect(appInsights.trackEvent).toHaveBeenCalled();
+            expect(error).toBeDefined();
+            expect(error.status).toEqual(500);
+            expect(error.statusText).toEqual("someStatus");
+            expect(httpErrorHandlerService.logError).toHaveBeenCalledWith("NewsService.getNews.error", error);
         }));
     });
 });

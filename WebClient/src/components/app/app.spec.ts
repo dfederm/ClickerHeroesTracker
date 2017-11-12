@@ -1,5 +1,5 @@
 import { NO_ERRORS_SCHEMA } from "@angular/core";
-import { Headers } from "@angular/http";
+import { HttpHeaders } from "@angular/common/http";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { Subject } from "rxjs";
 
@@ -18,7 +18,7 @@ describe("AppComponent", () => {
     beforeEach(done => {
         let settingsService = { settings: () => settingsSubject };
         let authenticationService = {
-            getAuthHeaders: () => Promise.resolve(new Headers()),
+            getAuthHeaders: () => Promise.resolve(new HttpHeaders()),
             userInfo: () => userInfoSubject,
         };
 

@@ -3,7 +3,7 @@ import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
 import { By } from "@angular/platform-browser";
 import { FormsModule } from "@angular/forms";
 import { NO_ERRORS_SCHEMA, DebugElement } from "@angular/core";
-import { Response, ResponseOptions } from "@angular/http";
+import { HttpErrorResponse } from "@angular/common/http";
 import { Router } from "@angular/router";
 import { BehaviorSubject } from "rxjs/BehaviorSubject";
 
@@ -57,13 +57,13 @@ describe("UploadDialogComponent", () => {
                 imports: [FormsModule],
                 declarations: [UploadDialogComponent],
                 providers:
-                [
-                    { provide: AuthenticationService, useValue: authenticationService },
-                    { provide: UploadService, useValue: uploadService },
-                    { provide: SettingsService, useValue: settingsService },
-                    { provide: NgbActiveModal, useValue: activeModal },
-                    { provide: Router, useValue: router },
-                ],
+                    [
+                        { provide: AuthenticationService, useValue: authenticationService },
+                        { provide: UploadService, useValue: uploadService },
+                        { provide: SettingsService, useValue: settingsService },
+                        { provide: NgbActiveModal, useValue: activeModal },
+                        { provide: Router, useValue: router },
+                    ],
                 schemas: [NO_ERRORS_SCHEMA],
             })
             .compileComponents()
@@ -184,7 +184,7 @@ describe("UploadDialogComponent", () => {
             setUserInfo(loggedInUser)
                 .then(() => {
                     let uploadService = TestBed.get(UploadService) as UploadService;
-                    spyOn(uploadService, "create").and.returnValue(Promise.reject(new Response(new ResponseOptions({ status: 500 }))));
+                    spyOn(uploadService, "create").and.returnValue(Promise.reject(new HttpErrorResponse({ status: 500, statusText: "someStatusText" })));
 
                     let router = TestBed.get(Router) as Router;
                     spyOn(router, "navigate");
