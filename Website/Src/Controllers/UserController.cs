@@ -243,8 +243,6 @@ namespace Website.Controllers
                 return this.Forbid();
             }
 
-            var currentUserSettings = this.userSettingsProvider.Get(currentUserId);
-
             // Fill in missing range values as needed
             DateTime startDate;
             DateTime endDate;
@@ -291,6 +289,7 @@ namespace Website.Controllers
 
         [Route("{userName}/follows")]
         [HttpGet]
+        [AllowAnonymous]
         public async Task<IActionResult> Follows(string userName)
         {
             if (string.IsNullOrEmpty(userName))
@@ -310,8 +309,10 @@ namespace Website.Controllers
                 return this.NotFound();
             }
 
+            var userSettings = this.userSettingsProvider.Get(userId);
             var currentUserId = this.userManager.GetUserId(this.User);
             if (!userId.Equals(currentUserId, StringComparison.OrdinalIgnoreCase)
+                && !userSettings.AreUploadsPublic.GetValueOrDefault(true)
                 && !this.User.IsInRole("Admin"))
             {
                 return this.Forbid();

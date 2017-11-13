@@ -54,7 +54,7 @@ namespace ClickerHeroesTrackerWebsite.Controllers
         [Route("")]
         [HttpPost]
         [Authorize(Roles = "Admin", AuthenticationSchemes = OAuthValidationDefaults.AuthenticationScheme)]
-        public async Task<IActionResult> Post(SiteNewsEntry entry)
+        public async Task<IActionResult> Post([FromBody] SiteNewsEntry entry)
         {
             if (entry == null
                 || entry.Messages == null
