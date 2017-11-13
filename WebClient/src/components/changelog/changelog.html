@@ -4,12 +4,55 @@
 </p>
 <ngx-loading [show]="isLoading && !isError"></ngx-loading>
 
+<button *ngIf="canEdit"
+        class="btn btn-primary"
+        (click)="addSection()">
+  Add
+</button>
 <div *ngFor="let section of sections">
-  <h3 *ngIf="section.date">
+  <h3 *ngIf="section.date && !section.isNew">
     {{ section.date | date:'shortDate' }}
+    <button *ngIf="canEdit && !section.editable"
+            class="btn btn-primary"
+            (click)="section.editable = true">
+      Edit
+    </button>
+    <button *ngIf="canEdit && !section.editable"
+            class="btn btn-danger"
+            (click)="delete(section)">
+      Delete
+    </button>
+  </h3>
+  <h3 *ngIf="section.isNew">
+    <input type="text"
+           class="form-control form-control-lg"
+           [(ngModel)]="section.date" />
   </h3>
   <ul>
-    <li *ngFor="let entry of section.entries"
-        [innerHTML]="entry"></li>
+    <li *ngFor="let entry of section.entries; index as i">
+      <span *ngIf="!section.editable"
+            [innerHTML]="entry.message"></span>
+      <textarea type="text"
+                *ngIf="section.editable"
+                rows="2"
+                class="form-control"
+                [(ngModel)]="section.entries[i].message"></textarea>
+    </li>
+    <li *ngIf="section.editable">
+      <button class="btn btn-primary"
+              (click)="addMessage(section)">
+        Add
+      </button>
+    </li>
   </ul>
+  <button *ngIf="section.editable"
+          class="btn btn-primary"
+          (click)="save(section)">
+    Save
+  </button>
+  <button *ngIf="section.editable"
+          class="btn btn-primary"
+          (click)="section.editable = false">
+    Cancel
+  </button>
 </div>

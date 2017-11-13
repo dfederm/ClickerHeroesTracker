@@ -731,7 +731,12 @@ namespace UnitTests.Controllers
                 .Setup(_ => _.Create())
                 .Returns(mockDatabaseCommand.Object);
 
+            var userSettings = new UserSettings();
             var mockUserSettingsProvider = new Mock<IUserSettingsProvider>(MockBehavior.Strict);
+            mockUserSettingsProvider
+                .Setup(_ => _.Get(UserId))
+                .Returns(userSettings);
+
             var mockUser = new ApplicationUser();
             var mockCurrentUser = new Mock<ClaimsPrincipal>(MockBehavior.Strict);
             var mockUserManager = MockUserManager.CreateMock();
@@ -902,7 +907,13 @@ namespace UnitTests.Controllers
             var gameData = MockGameData.RealData;
             var telemetryClient = new TelemetryClient();
             var mockDatabaseCommandFactory = new Mock<IDatabaseCommandFactory>(MockBehavior.Strict);
+
+            var userSettings = new UserSettings { AreUploadsPublic = false };
             var mockUserSettingsProvider = new Mock<IUserSettingsProvider>(MockBehavior.Strict);
+            mockUserSettingsProvider
+                .Setup(_ => _.Get(UserId))
+                .Returns(userSettings);
+
             var mockUser = new ApplicationUser();
             var mockCurrentUser = new Mock<ClaimsPrincipal>(MockBehavior.Strict);
             mockCurrentUser
@@ -951,6 +962,87 @@ namespace UnitTests.Controllers
         }
 
         [Fact]
+        public async Task Follows_PublicUploadsAreAlwaysAllowed()
+        {
+            const string UserName = "SomeUserName";
+            const string UserId = "SomeUserId";
+
+            var gameData = MockGameData.RealData;
+            var telemetryClient = new TelemetryClient();
+
+            var follows = Enumerable.Range(0, 3)
+                .Select(i => "SomeUser" + i)
+                .ToList();
+            var datasets = follows
+                .Select<string, IDictionary<string, object>>(follow => new Dictionary<string, object> { { "UserName", follow } })
+                .ToList();
+            var mockDataReader = MockDatabaseHelper.CreateMockDataReader(datasets);
+            var mockDatabaseCommandParameters = new Dictionary<string, object>() { { "@UserId", UserId } };
+            var mockDatabaseCommand = MockDatabaseHelper.CreateMockDatabaseCommand(mockDatabaseCommandParameters, mockDataReader.Object);
+
+            var mockDatabaseCommandFactory = new Mock<IDatabaseCommandFactory>(MockBehavior.Strict);
+            mockDatabaseCommandFactory
+                .Setup(_ => _.Create())
+                .Returns(mockDatabaseCommand.Object);
+
+            var userSettings = new UserSettings { AreUploadsPublic = true };
+            var mockUserSettingsProvider = new Mock<IUserSettingsProvider>(MockBehavior.Strict);
+            mockUserSettingsProvider
+                .Setup(_ => _.Get(UserId))
+                .Returns(userSettings);
+
+            var mockUser = new ApplicationUser();
+            var mockCurrentUser = new Mock<ClaimsPrincipal>(MockBehavior.Strict);
+            var mockUserManager = MockUserManager.CreateMock();
+            mockUserManager
+                .Setup(_ => _.FindByNameAsync(UserName))
+                .Returns(Task.FromResult(mockUser));
+            mockUserManager
+                .Setup(_ => _.GetUserIdAsync(mockUser))
+                .Returns(Task.FromResult(UserId));
+            mockUserManager
+                .Setup(_ => _.GetUserId(mockCurrentUser.Object))
+                .Returns("SomeOtherUserId");
+
+            var mockHttpContext = new Mock<HttpContext>(MockBehavior.Strict);
+            mockHttpContext.SetupGet(_ => _.User).Returns(mockCurrentUser.Object).Verifiable();
+
+            var mockEmailSender = new Mock<IEmailSender>(MockBehavior.Strict);
+
+            var controller = new UserController(
+                gameData,
+                telemetryClient,
+                mockDatabaseCommandFactory.Object,
+                mockUserSettingsProvider.Object,
+                mockUserManager.Object,
+                mockEmailSender.Object);
+            controller.ControllerContext = new ControllerContext { HttpContext = mockHttpContext.Object };
+
+            var result = await controller.Follows(UserName);
+
+            Assert.NotNull(result);
+            Assert.IsType<OkObjectResult>(result);
+
+            var model = ((OkObjectResult)result).Value as FollowsData;
+            Assert.NotNull(model);
+            Assert.Equal(follows.Count, model.Follows.Count);
+            for (var i = 0; i < model.Follows.Count; i++)
+            {
+                Assert.Equal(follows[i], model.Follows[i]);
+            }
+
+            mockDatabaseCommandFactory.VerifyAll();
+            mockUserSettingsProvider.VerifyAll();
+            mockCurrentUser.VerifyAll();
+            mockHttpContext.VerifyAll();
+            mockEmailSender.VerifyAll();
+
+            // Workaround for a Moq bug. See: https://github.com/moq/moq4/issues/456#issuecomment-331692858
+            mockUserManager.Object.Logger = mockUserManager.Object.Logger;
+            mockUserManager.VerifyAll();
+        }
+
+        [Fact]
         public async Task Follows_AdminIsAlwaysAllowed()
         {
             const string UserName = "SomeUserName";
@@ -974,7 +1066,12 @@ namespace UnitTests.Controllers
                 .Setup(_ => _.Create())
                 .Returns(mockDatabaseCommand.Object);
 
+            var userSettings = new UserSettings { AreUploadsPublic = false };
             var mockUserSettingsProvider = new Mock<IUserSettingsProvider>(MockBehavior.Strict);
+            mockUserSettingsProvider
+                .Setup(_ => _.Get(UserId))
+                .Returns(userSettings);
+
             var mockUser = new ApplicationUser();
             var mockCurrentUser = new Mock<ClaimsPrincipal>(MockBehavior.Strict);
             mockCurrentUser
