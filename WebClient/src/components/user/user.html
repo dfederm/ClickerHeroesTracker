@@ -1,5 +1,25 @@
 <div class="container">
     <h2>{{ userName }}</h2>
+    <div *ngIf="currentUserName && currentUserName !== userName"
+         class="row">
+        <div class="col-md-6">
+            <p *ngIf="isActionsError"
+               class="alert alert-danger">
+                Oops! Something went wrong.
+            </p>
+            <ngx-loading [show]="isActionsLoading && !isActionsError"></ngx-loading>
+            <button *ngIf="!isCurrentUserFollowing"
+                    class="btn btn-secondary"
+                    (click)="follow()">
+                Follow
+            </button>
+            <button *ngIf="isCurrentUserFollowing"
+                    class="btn btn-secondary"
+                    (click)="unfollow()">
+                Unfollow
+            </button>
+        </div>
+    </div>
     <div class="row">
         <div class="col-md-6">
             <h4>Recent Uploads:</h4>

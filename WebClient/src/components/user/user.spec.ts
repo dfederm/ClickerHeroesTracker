@@ -9,6 +9,7 @@ import { UserComponent } from "./user";
 import { UserService, IProgressData, IFollowsData } from "../../services/userService/userService";
 import { SettingsService, IUserSettings } from "../../services/settingsService/settingsService";
 import { ActivatedRoute } from "@angular/router";
+import { AuthenticationService, IUserInfo } from "../../services/authenticationService/authenticationService";
 
 describe("UserComponent", () => {
     let fixture: ComponentFixture<UserComponent>;
@@ -60,13 +61,36 @@ describe("UserComponent", () => {
         ],
     };
 
+    let userInfo: BehaviorSubject<IUserInfo>;
+
+    const loggedInUser: IUserInfo = {
+        isLoggedIn: true,
+        id: "currentUserId",
+        username: "currentUserName",
+        email: "currentUserEmail",
+    };
+
+    const notLoggedInUser: IUserInfo = {
+        isLoggedIn: false,
+    };
+
     beforeEach(done => {
         let route = { params: routeParams };
         let userService = {
             getProgress: () => Promise.resolve(progress),
             getFollows: () => Promise.resolve(followsData),
+            addFollow: (): void => void 0,
+            removeFollow: (): void => void 0,
         };
         let settingsService = { settings: () => settingsSubject };
+
+        userInfo = new BehaviorSubject(loggedInUser);
+
+        let authenticationService = {
+            logInWithPassword: (): void => void 0,
+            logInWithAssertion: (): void => void 0,
+            userInfo: () => userInfo,
+        };
 
         TestBed.configureTestingModule(
             {
@@ -75,6 +99,7 @@ describe("UserComponent", () => {
                     { provide: ActivatedRoute, useValue: route },
                     { provide: UserService, useValue: userService },
                     { provide: SettingsService, useValue: settingsService },
+                    { provide: AuthenticationService, useValue: authenticationService },
                 ],
                 schemas: [NO_ERRORS_SCHEMA],
             })
@@ -86,14 +111,284 @@ describe("UserComponent", () => {
             .catch(done.fail);
     });
 
+    describe("Actions", () => {
+        it("should not display when the current user is not logged in", done => {
+            userInfo.next(notLoggedInUser);
+
+            fixture.detectChanges();
+            fixture.whenStable()
+                .then(() => {
+                    fixture.detectChanges();
+
+                    let containers = fixture.debugElement.queryAll(By.css(".col-md-6"));
+
+                    // Actions container is missing
+                    expect(containers.length).toEqual(3);
+                })
+                .then(done)
+                .catch(done.fail);
+        });
+
+        it("should not display when the current user is the user being viewed", done => {
+            userInfo.next({
+                isLoggedIn: true,
+                id: "someId",
+                username: userName,
+                email: "someEmail",
+            });
+
+            fixture.detectChanges();
+            fixture.whenStable()
+                .then(() => {
+                    fixture.detectChanges();
+
+                    let containers = fixture.debugElement.queryAll(By.css(".col-md-6"));
+
+                    // Actions container is missing
+                    expect(containers.length).toEqual(3);
+                })
+                .then(done)
+                .catch(done.fail);
+        });
+
+        it("should be able to follow the user", done => {
+            let userService = TestBed.get(UserService);
+            spyOn(userService, "getFollows").and.returnValue(Promise.resolve({ follows: ["someOtherUser"] }));
+            spyOn(userService, "addFollow").and.returnValue(Promise.resolve());
+
+            userInfo.next(loggedInUser);
+
+            fixture.detectChanges();
+            fixture.whenStable()
+                .then(() => {
+                    fixture.detectChanges();
+
+                    let containers = fixture.debugElement.queryAll(By.css(".col-md-6"));
+                    expect(containers.length).toEqual(4);
+
+                    let actionsContainer = containers[0];
+
+                    let buttons = actionsContainer.queryAll(By.css("button"));
+                    expect(buttons.length).toEqual(1);
+
+                    let followButton = buttons[0];
+                    expect(followButton).not.toBeNull();
+                    expect(followButton.nativeElement.textContent.trim()).toEqual("Follow");
+                    followButton.nativeElement.click();
+
+                    expect(userService.addFollow).toHaveBeenCalledWith(loggedInUser.username, userName);
+
+                    return fixture.whenStable();
+                })
+                .then(() => {
+                    fixture.detectChanges();
+
+                    let containers = fixture.debugElement.queryAll(By.css(".col-md-6"));
+                    expect(containers.length).toEqual(4);
+
+                    let actionsContainer = containers[0];
+
+                    let buttons = actionsContainer.queryAll(By.css("button"));
+                    expect(buttons.length).toEqual(1);
+
+                    let followButton = buttons[0];
+                    expect(followButton).not.toBeNull();
+                    expect(followButton.nativeElement.textContent.trim()).toEqual("Unfollow");
+                })
+                .then(done)
+                .catch(done.fail);
+        });
+
+        it("should show an error when following the user fails", done => {
+            let userService = TestBed.get(UserService);
+            spyOn(userService, "getFollows").and.returnValue(Promise.resolve({ follows: ["someOtherUser"] }));
+            spyOn(userService, "addFollow").and.returnValue(Promise.reject("someReason"));
+
+            userInfo.next(loggedInUser);
+
+            fixture.detectChanges();
+            fixture.whenStable()
+                .then(() => {
+                    fixture.detectChanges();
+
+                    let containers = fixture.debugElement.queryAll(By.css(".col-md-6"));
+                    expect(containers.length).toEqual(4);
+
+                    let actionsContainer = containers[0];
+
+                    let buttons = actionsContainer.queryAll(By.css("button"));
+                    expect(buttons.length).toEqual(1);
+
+                    let followButton = buttons[0];
+                    expect(followButton).not.toBeNull();
+                    expect(followButton.nativeElement.textContent.trim()).toEqual("Follow");
+                    followButton.nativeElement.click();
+
+                    expect(userService.addFollow).toHaveBeenCalledWith(loggedInUser.username, userName);
+
+                    return fixture.whenStable();
+                })
+                .then(() => {
+                    fixture.detectChanges();
+
+                    let containers = fixture.debugElement.queryAll(By.css(".col-md-6"));
+                    expect(containers.length).toEqual(4);
+
+                    let actionsContainer = containers[0];
+
+                    let buttons = actionsContainer.queryAll(By.css("button"));
+                    expect(buttons.length).toEqual(1);
+
+                    let followButton = buttons[0];
+                    expect(followButton).not.toBeNull();
+                    expect(followButton.nativeElement.textContent.trim()).toEqual("Follow");
+
+                    let error = actionsContainer.query(By.css(".alert-danger"));
+                    expect(error).not.toBeNull();
+                })
+                .then(done)
+                .catch(done.fail);
+        });
+
+        it("should be able to unfollow the user", done => {
+            let userService = TestBed.get(UserService);
+            spyOn(userService, "getFollows").and.returnValue(Promise.resolve({ follows: [userName] }));
+            spyOn(userService, "removeFollow").and.returnValue(Promise.resolve());
+
+            userInfo.next(loggedInUser);
+
+            fixture.detectChanges();
+            fixture.whenStable()
+                .then(() => {
+                    fixture.detectChanges();
+
+                    let containers = fixture.debugElement.queryAll(By.css(".col-md-6"));
+                    expect(containers.length).toEqual(4);
+
+                    let actionsContainer = containers[0];
+
+                    let buttons = actionsContainer.queryAll(By.css("button"));
+                    expect(buttons.length).toEqual(1);
+
+                    let followButton = buttons[0];
+                    expect(followButton).not.toBeNull();
+                    expect(followButton.nativeElement.textContent.trim()).toEqual("Unfollow");
+                    followButton.nativeElement.click();
+
+                    expect(userService.removeFollow).toHaveBeenCalledWith(loggedInUser.username, userName);
+
+                    return fixture.whenStable();
+                })
+                .then(() => {
+                    fixture.detectChanges();
+
+                    let containers = fixture.debugElement.queryAll(By.css(".col-md-6"));
+                    expect(containers.length).toEqual(4);
+
+                    let actionsContainer = containers[0];
+
+                    let buttons = actionsContainer.queryAll(By.css("button"));
+                    expect(buttons.length).toEqual(1);
+
+                    let followButton = buttons[0];
+                    expect(followButton).not.toBeNull();
+                    expect(followButton.nativeElement.textContent.trim()).toEqual("Follow");
+                })
+                .then(done)
+                .catch(done.fail);
+        });
+
+        it("should show an error when unfollowing the user fails", done => {
+            let userService = TestBed.get(UserService);
+            spyOn(userService, "getFollows").and.returnValue(Promise.resolve({ follows: [userName] }));
+            spyOn(userService, "removeFollow").and.returnValue(Promise.reject("someReason"));
+
+            userInfo.next(loggedInUser);
+
+            fixture.detectChanges();
+            fixture.whenStable()
+                .then(() => {
+                    fixture.detectChanges();
+
+                    let containers = fixture.debugElement.queryAll(By.css(".col-md-6"));
+                    expect(containers.length).toEqual(4);
+
+                    let actionsContainer = containers[0];
+
+                    let buttons = actionsContainer.queryAll(By.css("button"));
+                    expect(buttons.length).toEqual(1);
+
+                    let followButton = buttons[0];
+                    expect(followButton).not.toBeNull();
+                    expect(followButton.nativeElement.textContent.trim()).toEqual("Unfollow");
+                    followButton.nativeElement.click();
+
+                    expect(userService.removeFollow).toHaveBeenCalledWith(loggedInUser.username, userName);
+
+                    return fixture.whenStable();
+                })
+                .then(() => {
+                    fixture.detectChanges();
+
+                    let containers = fixture.debugElement.queryAll(By.css(".col-md-6"));
+                    expect(containers.length).toEqual(4);
+
+                    let actionsContainer = containers[0];
+
+                    let buttons = actionsContainer.queryAll(By.css("button"));
+                    expect(buttons.length).toEqual(1);
+
+                    let followButton = buttons[0];
+                    expect(followButton).not.toBeNull();
+                    expect(followButton.nativeElement.textContent.trim()).toEqual("Unfollow");
+
+                    let error = actionsContainer.query(By.css(".alert-danger"));
+                    expect(error).not.toBeNull();
+                })
+                .then(done)
+                .catch(done.fail);
+        });
+
+        it("should show an error when the current users' follows fail", done => {
+            let userService = TestBed.get(UserService);
+            spyOn(userService, "getFollows").and.returnValue(Promise.reject("someReason"));
+
+            userInfo.next(loggedInUser);
+
+            fixture.detectChanges();
+            fixture.whenStable()
+                .then(() => {
+                    fixture.detectChanges();
+
+                    let containers = fixture.debugElement.queryAll(By.css(".col-md-6"));
+                    expect(containers.length).toEqual(4);
+
+                    let actionsContainer = containers[0];
+
+                    let buttons = actionsContainer.queryAll(By.css("button"));
+                    expect(buttons.length).toEqual(1);
+
+                    // Show follow button by defailt
+                    let followButton = buttons[0];
+                    expect(followButton).not.toBeNull();
+                    expect(followButton.nativeElement.textContent.trim()).toEqual("Follow");
+
+                    let error = actionsContainer.query(By.css(".alert-danger"));
+                    expect(error).not.toBeNull();
+                })
+                .then(done)
+                .catch(done.fail);
+        });
+    });
+
     describe("Upload Table", () => {
         it("should display without pagination", () => {
             fixture.detectChanges();
 
             let containers = fixture.debugElement.queryAll(By.css(".col-md-6"));
-            expect(containers.length).toEqual(3);
+            expect(containers.length).toEqual(4);
 
-            let uploadsContainer = containers[0];
+            let uploadsContainer = containers[1];
 
             let uploadsTable = uploadsContainer.query(By.css("uploadsTable"));
             expect(uploadsTable).not.toBeNull();
@@ -111,9 +406,9 @@ describe("UserComponent", () => {
                     fixture.detectChanges();
 
                     let containers = fixture.debugElement.queryAll(By.css(".col-md-6"));
-                    expect(containers.length).toEqual(3);
+                    expect(containers.length).toEqual(4);
 
-                    let progressContainer = containers[1];
+                    let progressContainer = containers[2];
 
                     let error = progressContainer.query(By.css(".alert-danger"));
                     expect(error).toBeNull();
@@ -169,9 +464,9 @@ describe("UserComponent", () => {
                     fixture.detectChanges();
 
                     let containers = fixture.debugElement.queryAll(By.css(".col-md-6"));
-                    expect(containers.length).toEqual(3);
+                    expect(containers.length).toEqual(4);
 
-                    let progressContainer = containers[1];
+                    let progressContainer = containers[2];
 
                     let error = progressContainer.query(By.css(".alert-danger"));
                     expect(error).toBeNull();
@@ -223,9 +518,9 @@ describe("UserComponent", () => {
                     fixture.detectChanges();
 
                     let containers = fixture.debugElement.queryAll(By.css(".col-md-6"));
-                    expect(containers.length).toEqual(3);
+                    expect(containers.length).toEqual(4);
 
-                    let progressContainer = containers[1];
+                    let progressContainer = containers[2];
 
                     let chart = progressContainer.query(By.css("canvas"));
                     expect(chart).toBeNull();
@@ -250,9 +545,9 @@ describe("UserComponent", () => {
                     fixture.detectChanges();
 
                     let containers = fixture.debugElement.queryAll(By.css(".col-md-6"));
-                    expect(containers.length).toEqual(3);
+                    expect(containers.length).toEqual(4);
 
-                    let progressContainer = containers[1];
+                    let progressContainer = containers[2];
 
                     let chart = progressContainer.query(By.css("canvas"));
                     expect(chart).toBeNull();
@@ -276,9 +571,9 @@ describe("UserComponent", () => {
                     fixture.detectChanges();
 
                     let containers = fixture.debugElement.queryAll(By.css(".col-md-6"));
-                    expect(containers.length).toEqual(3);
+                    expect(containers.length).toEqual(4);
 
-                    let followsContainer = containers[2];
+                    let followsContainer = containers[3];
 
                     let error = followsContainer.query(By.css(".alert-danger"));
                     expect(error).toBeNull();
@@ -321,9 +616,9 @@ describe("UserComponent", () => {
                     fixture.detectChanges();
 
                     let containers = fixture.debugElement.queryAll(By.css(".col-md-6"));
-                    expect(containers.length).toEqual(3);
+                    expect(containers.length).toEqual(4);
 
-                    let followsContainer = containers[2];
+                    let followsContainer = containers[3];
 
                     let table = followsContainer.query(By.css("table"));
                     expect(table).toBeNull();
@@ -348,9 +643,9 @@ describe("UserComponent", () => {
                     fixture.detectChanges();
 
                     let containers = fixture.debugElement.queryAll(By.css(".col-md-6"));
-                    expect(containers.length).toEqual(3);
+                    expect(containers.length).toEqual(4);
 
-                    let followsContainer = containers[2];
+                    let followsContainer = containers[3];
 
                     let table = followsContainer.query(By.css("table"));
                     expect(table).toBeNull();

@@ -299,7 +299,7 @@ describe("UserService", () => {
 
     describe("addFollow", () => {
         const followUserName = "someFollowUserName";
-        const apiRequest = { method: "post", url: `/api/users/${userName}/follows/${followUserName}` };
+        const apiRequest = { method: "post", url: `/api/users/${userName}/follows` };
 
         it("should make the correct api call", fakeAsync(() => {
             userService.addFollow(userName, followUserName);
@@ -307,7 +307,8 @@ describe("UserService", () => {
             // Tick the getAuthHeaders call
             tick();
 
-            httpMock.expectOne(apiRequest);
+            let request = httpMock.expectOne(apiRequest);
+            expect(request.request.body).toEqual({ followUserName });
             expect(authenticationService.getAuthHeaders).toHaveBeenCalled();
         }));
 
