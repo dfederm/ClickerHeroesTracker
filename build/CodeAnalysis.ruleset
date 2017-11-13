@@ -50,6 +50,8 @@
     <Rule Id="SA1600" Action="None" />
     <!-- PartialElementsMustBeDocumented -->
     <Rule Id="SA1601" Action="None" />
+    <!-- EnumerationItemsMustBeDocumented -->
+    <Rule Id="SA1602" Action="None" />
     <!-- ElementParametersMustBeDocumented -->
     <Rule Id="SA1611" Action="None" />
   </Rules>

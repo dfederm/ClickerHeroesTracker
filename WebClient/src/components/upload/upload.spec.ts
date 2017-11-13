@@ -515,7 +515,8 @@ describe("UploadComponent", () => {
         }));
     });
 
-    describe("Ancient Levels", () => {
+    // TODO: Temporarily disabling until new suggestions come out
+    xdescribe("Ancient Levels", () => {
         it("should display data based on hybrid playstyle and Available Souls using souls from ascension", async(() => {
             let upload = getUpload();
             uploadServiceGetResolve(upload)
@@ -548,7 +549,6 @@ describe("UploadComponent", () => {
                             { name: "Revolc" },
                             { name: "Siyalatas", suggested: 5.306472455726447e+39 },
                             { name: "Sniperino", hasEffectiveLevel: true },
-                            { name: "Solomon", suggested: 1.1873757490168236e+32, hasEffectiveLevel: true },
                             { name: "Vaagur" },
                         ];
 
@@ -593,7 +593,6 @@ describe("UploadComponent", () => {
                             { name: "Revolc" },
                             { name: "Siyalatas", suggested: 2.2846000000530268e+39 },
                             { name: "Sniperino", hasEffectiveLevel: true },
-                            { name: "Solomon", suggested: 6.050525017318302e+31, hasEffectiveLevel: true },
                             { name: "Vaagur" },
                         ];
 
@@ -638,7 +637,6 @@ describe("UploadComponent", () => {
                             { name: "Revolc" },
                             { name: "Siyalatas", isPrimary: true },
                             { name: "Sniperino", hasEffectiveLevel: true },
-                            { name: "Solomon", suggested: 6.050504401284679e+31, hasEffectiveLevel: true },
                             { name: "Vaagur" },
                         ];
 
@@ -684,7 +682,6 @@ describe("UploadComponent", () => {
                             { name: "Revolc" },
                             { name: "Siyalatas", suggested: 2.2846000000530268e+39 },
                             { name: "Sniperino", hasEffectiveLevel: true },
-                            { name: "Solomon", suggested: 6.050525017318302e+31, hasEffectiveLevel: true },
                             { name: "Vaagur" },
                         ];
 
@@ -730,7 +727,6 @@ describe("UploadComponent", () => {
                             { name: "Revolc" },
                             { name: "Siyalatas", isPrimary: true },
                             { name: "Sniperino", hasEffectiveLevel: true },
-                            { name: "Solomon", suggested: 6.05050440128466e+31, hasEffectiveLevel: true },
                             { name: "Vaagur" },
                         ];
 
@@ -776,7 +772,6 @@ describe("UploadComponent", () => {
                             { name: "Revolc" },
                             { name: "Siyalatas" },
                             { name: "Sniperino", hasEffectiveLevel: true },
-                            { name: "Solomon", suggested: 6.050525017318302e+31, hasEffectiveLevel: true },
                             { name: "Vaagur" },
                         ];
 
@@ -822,7 +817,6 @@ describe("UploadComponent", () => {
                             { name: "Revolc" },
                             { name: "Siyalatas" },
                             { name: "Sniperino", hasEffectiveLevel: true },
-                            { name: "Solomon", suggested: 6.05050440128466e+31, hasEffectiveLevel: true },
                             { name: "Vaagur" },
                         ];
 
@@ -877,13 +871,17 @@ describe("UploadComponent", () => {
                 .then(() => {
                     fixture.detectChanges();
 
-                    let expectedValues: { name: string, suggested?: number }[] =
+                    let expectedValues: { name: string }[] =
                         [
-                            { name: "Xyliqil", suggested: 11 },
-                            { name: "Chor'gorloth", suggested: 10 },
-                            { name: "Phandoryss", suggested: 20 },
-                            { name: "Borb", suggested: 113 },
-                            { name: "Ponyboy", suggested: 36 },
+                            { name: "Xyliqil" },
+                            { name: "Chor'gorloth" },
+                            { name: "Phandoryss" },
+                            { name: "Ponyboy" },
+                            { name: "Borb" },
+                            { name: "Rhageist" },
+                            { name: "K'Ariqua" },
+                            { name: "Orphalas" },
+                            { name: "Sen-Akhan" },
                         ];
 
                     let errorMessage = fixture.debugElement.query(By.css(".alert-danger"));
@@ -902,11 +900,8 @@ describe("UploadComponent", () => {
                         let expectedName = expected.name + ":";
                         expect(getNormalizedTextContent(cells[0])).toEqual(expectedName);
 
-                        let expectedCurrentLevel = upload.stats["outsider" + expected.name.replace("'", "")].toString();
+                        let expectedCurrentLevel = upload.stats["outsider" + expected.name.replace("'", "").replace("-", "")] || "0";
                         expect(getNormalizedTextContent(cells[1])).toEqual(expectedCurrentLevel);
-
-                        let expectedSuggestedLevel = expected.suggested.toString();
-                        expect(getNormalizedTextContent(cells[2])).toEqual(expectedSuggestedLevel);
                     }
                 });
         }));
@@ -991,8 +986,6 @@ describe("UploadComponent", () => {
             uploadContent: "someUploadContent",
             playStyle: "hybrid",
             stats: {
-                ancientSolomon: "6.050525017318302e+31",
-                itemSolomon: "2.9129311827723887",
                 ancientLibertas: "2.1155410000491033e+39",
                 ancientSiyalatas: "2.2846000000530268e+39",
                 ancientMammon: "2.1155410000491033e+39",

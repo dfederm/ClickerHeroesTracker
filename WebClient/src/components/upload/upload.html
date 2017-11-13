@@ -4,6 +4,10 @@
        class="alert alert-danger">
         {{ errorMessage }}
     </p>
+    <p class="alert alert-warning">
+        The suggestions below are based on the last patch, so are likely wrong and may not even be possible. Check back later for
+        updated suggestions.
+    </p>
     <ngx-loading [show]="isLoading && !errorMessage"></ngx-loading>
     <div class="row">
         <div class="col-md-6">
@@ -210,28 +214,17 @@
                 <a href="https://redd.it/4xj8im"
                    target="_blank">/u/kragnir</a>.
             </p>
-            <p *ngIf="showLowAncientSoulWarning"
-               class="alert alert-warning">
-                The simulation data doesn't support ancient souls less than 30. The suggestions below are guesses and not based on hard math.
-            </p>
-            <p *ngIf="showMissingSimulationWarning"
-               class="alert alert-warning">
-                The simulation data is missing data for high level ancients. The suggestions below show the closest result that exists but
-                you may have some AS left over to spend based on your own judgement.
-            </p>
             <table class="table table-sm table-striped">
                 <thead>
                     <tr>
                         <th>Outsider</th>
                         <th>Current</th>
-                        <th>Suggested</th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr *ngFor="let outsider of outsiders">
                         <td>{{ outsider.name }}:</td>
                         <td class="text-right">{{ outsider.currentLevel | exponential }}</td>
-                        <td class="text-right">{{ outsider.suggestedLevel !== undefined ? (outsider.suggestedLevel | exponential) : "-" }}</td>
                     </tr>
                 </tbody>
             </table>

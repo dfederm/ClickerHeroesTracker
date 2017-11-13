@@ -13,9 +13,6 @@ import { IUpload } from "../../models";
 // tslint:disable-next-line:no-require-imports no-var-requires
 const gameData: IGameData = require("../../../../Website/src/wwwroot/data/GameData.json");
 
-// tslint:disable-next-line:no-require-imports no-var-requires
-const optimalOutsiderLevels: [number, number, number, number, number][] = require("../../../../Website/src/wwwroot/data/OptimalOutsiderLevels.json");
-
 interface IGameData {
     ancients: { [id: string]: { name: string, nonTranscendent: boolean, levelCostFormula: string } };
     outsiders: { [id: string]: { id: number, name: string } };
@@ -36,7 +33,6 @@ interface IOutsiderViewModel {
     id: number;
     name: string;
     currentLevel: decimal.Decimal;
-    suggestedLevel?: decimal.Decimal;
 }
 
 @Component({
@@ -73,9 +69,6 @@ export class UploadComponent implements OnInit {
     public ascensionsThisTranscension: decimal.Decimal = new Decimal(0);
     public ascensionsLifetime: decimal.Decimal = new Decimal(0);
     public rubies: decimal.Decimal = new Decimal(0);
-
-    public showLowAncientSoulWarning: boolean;
-    public showMissingSimulationWarning: boolean;
 
     public get suggestionType(): string {
         return this._suggestionType;
@@ -147,6 +140,13 @@ export class UploadComponent implements OnInit {
 
         for (const id in gameData.outsiders) {
             const outsiderDefinition = gameData.outsiders[id];
+
+            // Skip the old Borb which is no longer in the game.
+            // Unfotunately there's nothing in the game data that shows this, so hard-code it.
+            if (id === "4") {
+                continue;
+            }
+
             let outsider: IOutsiderViewModel = {
                 id: outsiderDefinition.id,
                 name: outsiderDefinition.name,
@@ -280,8 +280,6 @@ export class UploadComponent implements OnInit {
         this.ancientCostMultiplier = Decimal.pow(0.95, chorgorlothLevel);
 
         this.hydrateAncientSuggestions();
-
-        this.calculateOutsiderSuggestions();
     }
 
     private handleError(errorMessage: string): void {
@@ -441,11 +439,6 @@ export class UploadComponent implements OnInit {
         suggestedLevels.Kumawakamaru = lnPrimary.times(2.844).minus(lnAlpha.times(1.422)).minus(new Decimal(1).div(4).plus(currentKumaLevel.times(-0.01).exp()).ln().times(1.422)).minus(7.014);
         suggestedLevels.Mammon = suggestedLevels.Mimzee = currentPrimaryAncientLevel.times(0.926);
         suggestedLevels.Morgulis = currentPrimaryAncientLevel.pow(2);
-        suggestedLevels.Solomon = currentPrimaryAncientLevel.isZero()
-            ? new Decimal(0)
-            : this.transcendentPower.isZero()
-                ? this.getPreTranscendentSuggestedSolomonLevel(currentPrimaryAncientLevel, this.playStyle)
-                : currentPrimaryAncientLevel.pow(0.8).dividedBy(alpha.pow(0.4));
 
         // Math per play style
         switch (this.playStyle) {
@@ -474,80 +467,6 @@ export class UploadComponent implements OnInit {
         return suggestedLevels;
     }
 
-    private calculateOutsiderSuggestions(): void {
-        let ancientSouls = this.totalAncientSouls;
-
-        this.showLowAncientSoulWarning = false;
-        this.showMissingSimulationWarning = false;
-
-        let suggestedXyl = new Decimal(0);
-        let suggestedChor = new Decimal(0);
-        let suggestedPhan = new Decimal(0);
-        let suggestedBorb = new Decimal(0);
-        let suggestedPony = new Decimal(0);
-
-        if (ancientSouls.isZero()) {
-            // If the user has no ancient souls, all the suggestions should remain 0.
-        } else if (ancientSouls.lessThan(30)) {
-            // Less ancient souls than the simulation data supported. We can try to guess though.
-            // Our guess just alternates leveling Xyl and Pony until Xylk hits 7 and then dump into Pony unti lit matches the 30 AS simulation data.
-            this.showLowAncientSoulWarning = true;
-            this.appInsights.trackEvent("LowAncientSouls", { ancientSouls: ancientSouls.toString() });
-            if (ancientSouls.lessThan(14)) {
-                suggestedXyl = ancientSouls.dividedBy(2).ceil();
-                suggestedPony = ancientSouls.dividedBy(2).floor();
-            } else {
-                suggestedXyl = new Decimal(7);
-                suggestedPony = ancientSouls.minus(7);
-            }
-        } else {
-            if (ancientSouls.greaterThan(210)) {
-                this.showMissingSimulationWarning = true;
-                this.appInsights.trackEvent("MissingSimulationData", { ancientSouls: ancientSouls.toString() });
-                if (ancientSouls.greaterThanOrEqualTo(1500)) {
-                    ancientSouls = new Decimal(1500);
-                } else if (ancientSouls.greaterThanOrEqualTo(500)) {
-                    ancientSouls = ancientSouls.minus(ancientSouls.modulo(100));
-                } else {
-                    ancientSouls = ancientSouls.minus(ancientSouls.modulo(10));
-                }
-            }
-
-            const outsiderLevels = optimalOutsiderLevels[ancientSouls.toNumber()];
-            if (outsiderLevels === null) {
-                // Should not happen.
-                throw Error("Could not look up optimal outsider levels for " + ancientSouls + " ancient souls. Raw ancient souls: " + this.totalAncientSouls);
-            }
-
-            suggestedXyl = new Decimal(outsiderLevels[0]);
-            suggestedChor = new Decimal(outsiderLevels[1]);
-            suggestedPhan = new Decimal(outsiderLevels[2]);
-            suggestedBorb = new Decimal(outsiderLevels[3]);
-            suggestedPony = new Decimal(outsiderLevels[4]);
-        }
-
-        for (let i = 0; i < this.outsiders.length; i++) {
-            let outsider = this.outsiders[i];
-            switch (outsider.name) {
-                case "Xyliqil":
-                    outsider.suggestedLevel = suggestedXyl;
-                    break;
-                case "Chor'gorloth":
-                    outsider.suggestedLevel = suggestedChor;
-                    break;
-                case "Phandoryss":
-                    outsider.suggestedLevel = suggestedPhan;
-                    break;
-                case "Borb":
-                    outsider.suggestedLevel = suggestedBorb;
-                    break;
-                case "Ponyboy":
-                    outsider.suggestedLevel = suggestedPony;
-                    break;
-            }
-        }
-    }
-
     private getAncientLevel(ancientName: string): decimal.Decimal {
         let ancient = this.ancientsByName[ancientName];
         return ancient
@@ -555,29 +474,6 @@ export class UploadComponent implements OnInit {
                 ? ancient.effectiveLevel
                 : ancient.ancientLevel
             : new Decimal(0);
-    }
-
-    private getPreTranscendentSuggestedSolomonLevel(currentPrimaryAncientLevel: decimal.Decimal, playStyle: string): decimal.Decimal {
-        let solomonMultiplier1: number;
-        let solomonMultiplier2: number;
-        switch (playStyle) {
-            case "idle":
-                solomonMultiplier1 = 1.15;
-                solomonMultiplier2 = 3.25;
-                break;
-            case "hybrid":
-                solomonMultiplier1 = 1.32;
-                solomonMultiplier2 = 4.65;
-                break;
-            case "active":
-                solomonMultiplier1 = 1.21;
-                solomonMultiplier2 = 3.73;
-                break;
-        }
-
-        return Decimal.min(
-            currentPrimaryAncientLevel,
-            currentPrimaryAncientLevel.pow(2).times(solomonMultiplier2).ln().pow(0.4).times(currentPrimaryAncientLevel.pow(0.8)).times(solomonMultiplier1));
     }
 
     private getTotalAncientCost(suggestedLevels: { [key: string]: decimal.Decimal }): decimal.Decimal {
