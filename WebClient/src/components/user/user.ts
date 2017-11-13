@@ -2,6 +2,7 @@ import { Component, OnInit } from "@angular/core";
 
 import { UserService, IProgressData, IFollowsData } from "../../services/userService/userService";
 import { SettingsService, IUserSettings } from "../../services/settingsService/settingsService";
+import { AuthenticationService, IUserInfo } from "../../services/authenticationService/authenticationService";
 
 import Decimal from "decimal.js";
 import { ChartDataSets, ChartOptions, ChartTooltipItem } from "chart.js";
@@ -35,12 +36,19 @@ export class UserComponent implements OnInit {
   public isFollowsLoading: boolean;
   public follows: string[];
 
+  public isActionsError: boolean;
+  public isActionsLoading: boolean;
+  public currentUserName: string;
+  public isCurrentUserFollowing: boolean;
+  private currentUserFollows: string[];
+
   private settings: IUserSettings;
 
   constructor(
     private userService: UserService,
     private settingsService: SettingsService,
     private route: ActivatedRoute,
+    private authenticationService: AuthenticationService,
   ) { }
 
   public ngOnInit(): void {
@@ -51,6 +59,34 @@ export class UserComponent implements OnInit {
     this.settingsService
       .settings()
       .subscribe(settings => this.handleSettings(settings));
+
+    this.authenticationService
+      .userInfo()
+      .subscribe(userInfo => this.handleCurrentUserInfo(userInfo));
+  }
+
+  public follow(): void {
+    this.isActionsLoading = true;
+    this.userService.addFollow(this.currentUserName, this.userName)
+      .then(() => {
+        this.isActionsLoading = false;
+        this.isCurrentUserFollowing = true;
+      })
+      .catch(() => {
+        this.isActionsError = true;
+      });
+  }
+
+  public unfollow(): void {
+    this.isActionsLoading = true;
+    this.userService.removeFollow(this.currentUserName, this.userName)
+      .then(() => {
+        this.isActionsLoading = false;
+        this.isCurrentUserFollowing = false;
+      })
+      .catch(() => {
+        this.isActionsError = true;
+      });
   }
 
   private handleUser(userName: string): void {
@@ -61,11 +97,31 @@ export class UserComponent implements OnInit {
 
     this.userName = userName;
     this.refresh();
+    this.refreshActions();
   }
 
   private handleSettings(settings: IUserSettings): void {
     this.settings = settings;
     this.refresh();
+  }
+
+  private handleCurrentUserInfo(currentUserInfo: IUserInfo): void {
+    this.isActionsError = false;
+    if (currentUserInfo.isLoggedIn) {
+      this.currentUserName = currentUserInfo.username;
+      this.isActionsLoading = true;
+      this.userService.getFollows(this.currentUserName)
+        .then(data => {
+          this.isActionsLoading = false;
+          this.currentUserFollows = data.follows;
+          this.refreshActions();
+        })
+        .catch(() => this.isActionsError = true);
+    } else {
+      this.currentUserName = null;
+      this.currentUserFollows = null;
+      this.refreshActions();
+    }
   }
 
   private refresh(): void {
@@ -89,6 +145,18 @@ export class UserComponent implements OnInit {
     this.userService.getFollows(this.userName)
       .then(follows => this.handleFollowsData(follows))
       .catch(() => this.isFollowsError = true);
+  }
+
+  private refreshActions(): void {
+    this.isCurrentUserFollowing = false;
+    if (this.currentUserFollows) {
+      for (let i = 0; i < this.currentUserFollows.length; i++) {
+        if (this.currentUserFollows[i] === this.userName) {
+          this.isCurrentUserFollowing = true;
+          break;
+        }
+      }
+    }
   }
 
   private handleProgressData(progress: IProgressData): void {
