@@ -5,6 +5,7 @@
 namespace ClickerHeroesTrackerWebsite.Models.Stats
 {
     using System.Collections.Generic;
+    using System.Numerics;
     using ClickerHeroesTrackerWebsite.Models.Game;
     using ClickerHeroesTrackerWebsite.Models.SaveData;
     using Microsoft.ApplicationInsights;
@@ -32,11 +33,15 @@ namespace ClickerHeroesTrackerWebsite.Models.Stats
                     continue;
                 }
 
-                AncientData ancientData;
-                var ancientLevel = savedGame.AncientsData.Ancients.TryGetValue(ancient.Id, out ancientData)
+                var ancientLevel = savedGame.AncientsData.Ancients.TryGetValue(ancient.Id, out var ancientData)
                     ? ancientData.Level
-                    : 0;
-                var ancientLevelInfo = new AncientLevelInfo(ancientLevel, itemLevelsById.GetItemLevel(ancient.Id));
+                    : BigInteger.Zero;
+                if (!itemLevelsById.TryGetValue(ancient.Id, out var itemLevel))
+                {
+                    itemLevel = BigInteger.Zero;
+                }
+
+                var ancientLevelInfo = new AncientLevelInfo(ancientLevel, itemLevel);
                 ancientLevels.Add(ancient.Id, ancientLevelInfo);
             }
 

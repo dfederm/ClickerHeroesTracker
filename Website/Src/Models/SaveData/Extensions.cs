@@ -11,30 +11,6 @@ namespace ClickerHeroesTrackerWebsite.Models.SaveData
 
     internal static class Extensions
     {
-        public static BigInteger GetAncientLevel(this AncientsData ancientsData, int ancientId)
-        {
-            AncientData ancientData;
-            return ancientsData.Ancients.TryGetValue(ancientId, out ancientData)
-                ? ancientData.Level
-                : 0;
-        }
-
-        public static BigInteger GetItemLevel(this IDictionary<int, BigInteger> itemLevels, int ancientId)
-        {
-            BigInteger itemLevel;
-            return itemLevels.TryGetValue(ancientId, out itemLevel)
-                ? itemLevel
-                : 0;
-        }
-
-        public static long GetOutsiderLevel(this IDictionary<int, OutsiderData> outsiderLevels, int outsiderId)
-        {
-            OutsiderData outsiderData;
-            return outsiderLevels.TryGetValue(outsiderId, out outsiderData)
-                ? outsiderData.Level
-                : 0;
-        }
-
         public static IDictionary<int, BigInteger> GetItemLevels(this ItemsData itemsData, GameData gameData)
         {
             var itemLevels = new Dictionary<int, BigInteger>();

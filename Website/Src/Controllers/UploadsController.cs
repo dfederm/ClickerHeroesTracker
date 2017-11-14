@@ -183,8 +183,6 @@ namespace ClickerHeroesTrackerWebsite.Controllers
             upload.Stats.Add(StatType.TitanDamage, miscellaneousStatsModel.TitanDamage.ToTransportableString());
             upload.Stats.Add(StatType.TotalAncientSouls, miscellaneousStatsModel.TotalAncientSouls.ToString());
             upload.Stats.Add(StatType.TranscendentPower, miscellaneousStatsModel.TranscendentPower.ToString());
-            upload.Stats.Add(StatType.MaxTranscendentPrimalReward, miscellaneousStatsModel.MaxTranscendentPrimalReward.ToTransportableString());
-            upload.Stats.Add(StatType.BossLevelToTranscendentPrimalCap, miscellaneousStatsModel.BossLevelToTranscendentPrimalCap.ToString());
             upload.Stats.Add(StatType.HeroSouls, miscellaneousStatsModel.HeroSouls.ToTransportableString());
             upload.Stats.Add(StatType.PendingSouls, miscellaneousStatsModel.PendingSouls.ToTransportableString());
 
@@ -266,9 +264,7 @@ namespace ClickerHeroesTrackerWebsite.Controllers
                         HighestZoneThisTranscension,
                         HighestZoneLifetime,
                         AscensionsThisTranscension,
-                        AscensionsLifetime,
-                        MaxTranscendentPrimalReward,
-                        BossLevelToTranscendentPrimalCap)
+                        AscensionsLifetime)
                     VALUES(
                         @UploadId,
                         @TitanDamage,
@@ -280,9 +276,7 @@ namespace ClickerHeroesTrackerWebsite.Controllers
                         @HighestZoneThisTranscension,
                         @HighestZoneLifetime,
                         @AscensionsThisTranscension,
-                        @AscensionsLifetime,
-                        @MaxTranscendentPrimalReward,
-                        @BossLevelToTranscendentPrimalCap);";
+                        @AscensionsLifetime);";
                 command.Parameters = new Dictionary<string, object>
                 {
                     { "@UploadId", uploadId },
@@ -296,8 +290,6 @@ namespace ClickerHeroesTrackerWebsite.Controllers
                     { "@HighestZoneLifetime", miscellaneousStatsModel.HighestZoneLifetime },
                     { "@AscensionsThisTranscension", miscellaneousStatsModel.AscensionsThisTranscension },
                     { "@AscensionsLifetime", miscellaneousStatsModel.AscensionsLifetime },
-                    { "@MaxTranscendentPrimalReward", miscellaneousStatsModel.MaxTranscendentPrimalReward.ToTransportableString() },
-                    { "@BossLevelToTranscendentPrimalCap", miscellaneousStatsModel.BossLevelToTranscendentPrimalCap },
                 };
                 command.ExecuteNonQuery();
 

@@ -61,8 +61,6 @@ export class UploadComponent implements OnInit {
     public heroSoulsSacrificed: decimal.Decimal = new Decimal(0);
     public totalAncientSouls: decimal.Decimal = new Decimal(0);
     public transcendentPower: decimal.Decimal = new Decimal(0);
-    public maxTranscendentPrimalReward: decimal.Decimal = new Decimal(0);
-    public bossLevelToTranscendentPrimalCap: decimal.Decimal = new Decimal(0);
     public titanDamage: decimal.Decimal = new Decimal(0);
     public highestZoneThisTranscension: decimal.Decimal = new Decimal(0);
     public highestZoneLifetime: decimal.Decimal = new Decimal(0);
@@ -265,8 +263,6 @@ export class UploadComponent implements OnInit {
         this.heroSoulsSacrificed = stats.heroSoulsSacrificed || new Decimal(0);
         this.totalAncientSouls = stats.totalAncientSouls || new Decimal(0);
         this.transcendentPower = stats.transcendentPower || new Decimal(0);
-        this.maxTranscendentPrimalReward = stats.maxTranscendentPrimalReward || new Decimal(0);
-        this.bossLevelToTranscendentPrimalCap = stats.bossLevelToTranscendentPrimalCap || new Decimal(0);
         this.titanDamage = stats.titanDamage || new Decimal(0);
         this.highestZoneThisTranscension = stats.highestZoneThisTranscension || new Decimal(0);
         this.highestZoneLifetime = stats.highestZoneLifetime || new Decimal(0);
