@@ -111,8 +111,12 @@ namespace ClickerHeroesTrackerWebsite.Models.Api.Stats
         OutsiderXyliqil,
         OutsiderChorgorloth,
         OutsiderPhandoryss,
-        OutsiderBorb,
         OutsiderPonyboy,
+        OutsiderBorb,
+        OutsiderRhageist,
+        OutsiderKAriqua,
+        OutsiderOrphalas,
+        OutsiderSenAkhan,
 
         /* Miscelaneous stats */
         HeroSoulsSpent,

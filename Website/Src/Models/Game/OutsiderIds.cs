@@ -12,37 +12,27 @@ namespace ClickerHeroesTrackerWebsite.Models.Game
     /// </summary>
     public static class OutsiderIds
     {
-        /// <summary>
-        /// Xyliqil
-        /// </summary>
         public const int Xyliqil = 1;
-
-        /// <summary>
-        /// Chor'gorloth
-        /// </summary>
         public const int Chorgorloth = 2;
-
-        /// <summary>
-        /// Phandoryss
-        /// </summary>
         public const int Phandoryss = 3;
-
-        /// <summary>
-        /// Borb
-        /// </summary>
-        public const int Borb = 4;
-
-        /// <summary>
-        /// Ponyboy
-        /// </summary>
+        ////public const int Borb = 4; // This version of Borb was deprecated
         public const int Ponyboy = 5;
+        public const int Borb = 6;
+        public const int Rhageist = 7;
+        public const int KAriqua = 8;
+        public const int Orphalas = 9;
+        public const int SenAkhan = 10;
 
         private static readonly Dictionary<int, StatType> OutsiderStatTypeMap = new Dictionary<int, StatType>
         {
             { OutsiderIds.Borb, StatType.OutsiderBorb },
             { OutsiderIds.Chorgorloth, StatType.OutsiderChorgorloth },
+            { OutsiderIds.KAriqua, StatType.OutsiderKAriqua },
+            { OutsiderIds.Orphalas, StatType.OutsiderOrphalas },
             { OutsiderIds.Phandoryss, StatType.OutsiderPhandoryss },
             { OutsiderIds.Ponyboy, StatType.OutsiderPonyboy },
+            { OutsiderIds.Rhageist, StatType.OutsiderRhageist },
+            { OutsiderIds.SenAkhan, StatType.OutsiderSenAkhan },
             { OutsiderIds.Xyliqil, StatType.OutsiderXyliqil },
         };
 
