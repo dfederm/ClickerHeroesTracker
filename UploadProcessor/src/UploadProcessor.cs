@@ -316,9 +316,7 @@ namespace ClickerHeroesTracker.UploadProcessor
                                     @HighestZoneThisTranscension,
                                     @HighestZoneLifetime,
                                     @AscensionsThisTranscension,
-                                    @AscensionsLifetime,
-                                    @MaxTranscendentPrimalReward,
-                                    @BossLevelToTranscendentPrimalCap) )
+                                    @AscensionsLifetime) )
                                 AS Input(
                                     UploadId,
                                     TitanDamage,
@@ -330,9 +328,7 @@ namespace ClickerHeroesTracker.UploadProcessor
                                     HighestZoneThisTranscension,
                                     HighestZoneLifetime,
                                     AscensionsThisTranscension,
-                                    AscensionsLifetime,
-                                    MaxTranscendentPrimalReward,
-                                    BossLevelToTranscendentPrimalCap)
+                                    AscensionsLifetime)
                             ON ComputedStats.UploadId = Input.UploadId
                         WHEN MATCHED THEN
                             UPDATE
@@ -346,9 +342,7 @@ namespace ClickerHeroesTracker.UploadProcessor
                                 HighestZoneThisTranscension = Input.HighestZoneThisTranscension,
                                 HighestZoneLifetime = Input.HighestZoneLifetime,
                                 AscensionsThisTranscension = Input.AscensionsThisTranscension,
-                                AscensionsLifetime = Input.AscensionsLifetime,
-                                MaxTranscendentPrimalReward = Input.MaxTranscendentPrimalReward,
-                                BossLevelToTranscendentPrimalCap = Input.BossLevelToTranscendentPrimalCap
+                                AscensionsLifetime = Input.AscensionsLifetime
                         WHEN NOT MATCHED THEN
                             INSERT (
                                 UploadId,
@@ -361,9 +355,7 @@ namespace ClickerHeroesTracker.UploadProcessor
                                 HighestZoneThisTranscension,
                                 HighestZoneLifetime,
                                 AscensionsThisTranscension,
-                                AscensionsLifetime,
-                                MaxTranscendentPrimalReward,
-                                BossLevelToTranscendentPrimalCap)
+                                AscensionsLifetime)
                             VALUES (
                                 Input.UploadId,
                                 Input.TitanDamage,
@@ -375,9 +367,7 @@ namespace ClickerHeroesTracker.UploadProcessor
                                 Input.HighestZoneThisTranscension,
                                 Input.HighestZoneLifetime,
                                 Input.AscensionsThisTranscension,
-                                Input.AscensionsLifetime,
-                                Input.MaxTranscendentPrimalReward,
-                                Input.BossLevelToTranscendentPrimalCap);";
+                                Input.AscensionsLifetime);";
                     var computedStatsCommandParameters = new Dictionary<string, object>
                     {
                         { "@UploadId", uploadId },
@@ -391,8 +381,6 @@ namespace ClickerHeroesTracker.UploadProcessor
                         { "@HighestZoneLifetime", miscellaneousStatsModel.HighestZoneLifetime },
                         { "@AscensionsThisTranscension", miscellaneousStatsModel.AscensionsThisTranscension },
                         { "@AscensionsLifetime", miscellaneousStatsModel.AscensionsLifetime },
-                        { "@MaxTranscendentPrimalReward", miscellaneousStatsModel.MaxTranscendentPrimalReward.ToTransportableString() },
-                        { "@BossLevelToTranscendentPrimalCap", miscellaneousStatsModel.BossLevelToTranscendentPrimalCap },
                     };
 
                     using (var command = databaseCommandFactory.Create())

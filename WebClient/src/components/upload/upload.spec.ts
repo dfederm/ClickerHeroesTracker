@@ -923,8 +923,6 @@ describe("UploadComponent", () => {
                             { name: "Hero Souls Sacrificed", stat: "heroSoulsSacrificed", value: 2.641e+76, type: "exponential" },
                             { name: "Ancient Souls Earned", stat: "totalAncientSouls", value: 382, type: "exponential" },
                             { name: "Transcendent Power", stat: "transcendentPower", value: 0.03836, type: "percent" },
-                            { name: "Max Transcendent Primal Reward", stat: "maxTranscendentPrimalReward", value: 1.651e+76, type: "exponential" },
-                            { name: "Transcendent Primal Cap Zone", stat: "bossLevelToTranscendentPrimalCap", value: 13425, type: "exponential" },
                             { name: "Titan Damage", stat: "titanDamage", value: 2.262e+79, type: "exponential" },
                             { name: "Highest Zone", stat: "highestZoneThisTranscension", value: 19168, type: "exponential" },
                             { name: "Highest Zone (Lifetime)", stat: "highestZoneLifetime", value: 19168, type: "exponential" },
