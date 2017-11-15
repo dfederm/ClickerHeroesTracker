@@ -467,6 +467,7 @@ export class UploadComponent implements OnInit {
             suggestedLevels.Sniperino = suggestedSkillAncientLevel;
             suggestedLevels.Kleptos = suggestedSkillAncientLevel;
             suggestedLevels.Energon = suggestedSkillAncientLevel;
+            suggestedLevels.Pluto = suggestedSkillAncientLevel;
         }
 
         // Normalize the values
