@@ -25,6 +25,9 @@ export interface IUserSettings {
     logarithmicGraphScaleThreshold: number;
     hybridRatio: number;
     theme: Theme;
+    shouldLevelSkillAncients: boolean;
+    skillAncientBaseAncient: number;
+    skillAncientLevelDiff: number;
 }
 
 @Injectable()
@@ -44,6 +47,9 @@ export class SettingsService {
         logarithmicGraphScaleThreshold: 1000000,
         hybridRatio: 2,
         theme: "light",
+        shouldLevelSkillAncients: false,
+        skillAncientBaseAncient: 17, // Chronos
+        skillAncientLevelDiff: 0,
     };
 
     public static readonly settingsKey: string = "settings";

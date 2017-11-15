@@ -118,13 +118,8 @@ export class UploadComponent implements OnInit {
                 continue;
             }
 
-            let commaIndex = ancientDefinition.name.indexOf(",");
-            let ancientShortName = commaIndex >= 0
-                ? ancientDefinition.name.substring(0, commaIndex)
-                : ancientDefinition.name;
-
             let ancient: IAncientViewModel = {
-                name: ancientShortName,
+                name: this.getAncientShortName(ancientDefinition),
                 ancientLevel: new Decimal(0),
                 itemLevel: new Decimal(0),
                 effectiveLevel: new Decimal(0),
@@ -455,6 +450,25 @@ export class UploadComponent implements OnInit {
                 break;
         }
 
+        // Skill ancients
+        if (this.settings.shouldLevelSkillAncients) {
+            let skillAncientBaseAncient = gameData.ancients[this.settings.skillAncientBaseAncient];
+            let skillAncientBaseAncientShortName = this.getAncientShortName(skillAncientBaseAncient);
+            let skillAncientBaseAncientLevel = suggestedLevels[skillAncientBaseAncientShortName];
+            let suggestedSkillAncientLevel = skillAncientBaseAncientLevel.plus(this.settings.skillAncientLevelDiff);
+
+            // These two have effective caps where additional levels add less than floating point numbers can handle.
+            suggestedLevels.Vaagur = Decimal.min(1440, suggestedSkillAncientLevel);
+            suggestedLevels.Revolc = Decimal.min(3743, suggestedSkillAncientLevel);
+
+            suggestedLevels.Chawedo = suggestedSkillAncientLevel;
+            suggestedLevels.Hecatoncheir = suggestedSkillAncientLevel;
+            suggestedLevels.Berserker = suggestedSkillAncientLevel;
+            suggestedLevels.Sniperino = suggestedSkillAncientLevel;
+            suggestedLevels.Kleptos = suggestedSkillAncientLevel;
+            suggestedLevels.Energon = suggestedSkillAncientLevel;
+        }
+
         // Normalize the values
         for (let ancient in suggestedLevels) {
             suggestedLevels[ancient] = Decimal.max(suggestedLevels[ancient].ceil(), new Decimal(0));
@@ -500,11 +514,6 @@ export class UploadComponent implements OnInit {
         for (const ancientId in gameData.ancients) {
             const ancient = gameData.ancients[ancientId];
 
-            let commaIndex = ancient.name.indexOf(",");
-            let ancientShortName = commaIndex >= 0
-                ? ancient.name.substring(0, commaIndex)
-                : ancient.name;
-
             let ancientCost: (level: decimal.Decimal) => decimal.Decimal;
             switch (ancient.levelCostFormula) {
                 case "one":
@@ -541,9 +550,17 @@ export class UploadComponent implements OnInit {
                     ancientCost = () => new Decimal(0);
             }
 
+            let ancientShortName = this.getAncientShortName(ancient);
             ancientCosts[ancientShortName] = ancientCost;
         }
 
         return ancientCosts;
+    }
+
+    private getAncientShortName(ancient: { name: string }): string {
+        let commaIndex = ancient.name.indexOf(",");
+        return commaIndex >= 0
+            ? ancient.name.substring(0, commaIndex)
+            : ancient.name;
     }
 }

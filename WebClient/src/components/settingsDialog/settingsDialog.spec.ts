@@ -13,7 +13,8 @@ describe("SettingsDialogComponent", () => {
     let component: SettingsDialogComponent;
     let fixture: ComponentFixture<SettingsDialogComponent>;
 
-    let settings: IUserSettings = {
+    // "Fully expanded" settings, ie, show all possible inputs
+    const settings: IUserSettings = {
         areUploadsPublic: true,
         playStyle: "hybrid",
         useScientificNotation: true,
@@ -21,8 +22,11 @@ describe("SettingsDialogComponent", () => {
         useEffectiveLevelForSuggestions: false,
         useLogarithmicGraphScale: true,
         logarithmicGraphScaleThreshold: 1000000,
-        hybridRatio: 1,
+        hybridRatio: 2,
         theme: "light",
+        shouldLevelSkillAncients: true,
+        skillAncientBaseAncient: 17,
+        skillAncientLevelDiff: 0,
     };
 
     beforeEach(done => {
@@ -42,8 +46,7 @@ describe("SettingsDialogComponent", () => {
                 declarations: [
                     SettingsDialogComponent,
                 ],
-                providers:
-                [
+                providers: [
                     { provide: SettingsService, useValue: settingsService },
                     { provide: NgbActiveModal, useValue: activeModal },
                 ],
@@ -139,11 +142,135 @@ describe("SettingsDialogComponent", () => {
         });
     });
 
-    describe("Use scientific notation", () => {
+    describe("Should Level Skill Ancients", () => {
         let input: HTMLInputElement;
 
         beforeEach(() => {
             input = getInput(2, "input");
+        });
+
+        it("should be set to the inital value", () => {
+            verifyInitialValue(input, settings.shouldLevelSkillAncients);
+        });
+
+        it("should patch settings when the value changes", () => {
+            verifyServiceCalledWhenSettingChanges(
+                "shouldLevelSkillAncients",
+                () => {
+                    let newValue = !settings.shouldLevelSkillAncients;
+                    setCheckboxValue(input, newValue);
+                    return newValue;
+                },
+            );
+        });
+
+        it("should disable the setting until the patch is complete", done => {
+            verifyDisabledUntilPromiseResolves(input, () => setCheckboxValue(input, !settings.shouldLevelSkillAncients))
+                .then(done)
+                .catch(done.fail);
+        });
+
+        it("should show an error when the patch fails", done => {
+            verifyErrorShowWhenPromiseRejects(input, () => setCheckboxValue(input, !settings.shouldLevelSkillAncients))
+                .then(done)
+                .catch(done.fail);
+        });
+    });
+
+    describe("Skill Ancient Base Ancient", () => {
+        let input: HTMLSelectElement;
+
+        beforeEach(() => {
+            input = getInput(3, "select");
+        });
+
+        it("should be set to the inital value", () => {
+            verifyInitialValue(input, `${input.selectedIndex}: ${settings.skillAncientBaseAncient}`);
+        });
+
+        it("should hide when shouldLevelSkillAncients is off", () => {
+            let settingsService = TestBed.get(SettingsService) as SettingsService;
+            spyOn(settingsService, "setSetting").and.returnValue(Promise.resolve());
+
+            let shouldLevelSkillAncientsInput = getInput<HTMLInputElement>(2, "input");
+            setCheckboxValue(shouldLevelSkillAncientsInput, false);
+
+            expect(isInDom(input)).toEqual(false);
+        });
+
+        it("should patch settings when the value changes", () => {
+            verifyServiceCalledWhenSettingChanges(
+                "skillAncientBaseAncient",
+                () => {
+                    setSelectValue(input, input.selectedIndex + 1);
+                    return component.skillAncientBaseAncients[input.selectedIndex].id;
+                },
+            );
+        });
+
+        it("should disable the setting until the patch is complete", done => {
+            verifyDisabledUntilPromiseResolves(input, () => setSelectValue(input, input.selectedIndex + 1))
+                .then(done)
+                .catch(done.fail);
+        });
+
+        it("should show an error when the patch fails", done => {
+            verifyErrorShowWhenPromiseRejects(input, () => setSelectValue(input, input.selectedIndex + 1))
+                .then(done)
+                .catch(done.fail);
+        });
+    });
+
+    describe("Skill Ancient Level Diff", () => {
+        let input: HTMLInputElement;
+
+        beforeEach(() => {
+            input = getInput(4, "input");
+        });
+
+        it("should be set to the inital value", () => {
+            verifyInitialValue(input, settings.skillAncientLevelDiff.toString());
+        });
+
+        it("should hide when shouldLevelSkillAncients is off", () => {
+            let settingsService = TestBed.get(SettingsService) as SettingsService;
+            spyOn(settingsService, "setSetting").and.returnValue(Promise.resolve());
+
+            let shouldLevelSkillAncientsInput = getInput<HTMLInputElement>(2, "input");
+            setCheckboxValue(shouldLevelSkillAncientsInput, false);
+
+            expect(isInDom(input)).toEqual(false);
+        });
+
+        it("should patch settings when the value changes", () => {
+            verifyServiceCalledWhenSettingChanges(
+                "skillAncientLevelDiff",
+                () => {
+                    let newValue = settings.skillAncientLevelDiff + 1;
+                    setInputValue(input, newValue.toString());
+                    return newValue;
+                },
+            );
+        });
+
+        it("should disable the setting until the patch is complete", done => {
+            verifyDisabledUntilPromiseResolves(input, () => setInputValue(input, (settings.skillAncientLevelDiff + 1).toString()))
+                .then(done)
+                .catch(done.fail);
+        });
+
+        it("should show an error when the patch fails", done => {
+            verifyErrorShowWhenPromiseRejects(input, () => setInputValue(input, (settings.skillAncientLevelDiff + 1).toString()))
+                .then(done)
+                .catch(done.fail);
+        });
+    });
+
+    describe("Use scientific notation", () => {
+        let input: HTMLInputElement;
+
+        beforeEach(() => {
+            input = getInput(5, "input");
         });
 
         it("should be set to the inital value", () => {
@@ -178,7 +305,7 @@ describe("SettingsDialogComponent", () => {
         let input: HTMLInputElement;
 
         beforeEach(() => {
-            input = getInput(3, "input");
+            input = getInput(6, "input");
         });
 
         it("should be set to the inital value", () => {
@@ -189,7 +316,7 @@ describe("SettingsDialogComponent", () => {
             let settingsService = TestBed.get(SettingsService) as SettingsService;
             spyOn(settingsService, "setSetting").and.returnValue(Promise.resolve());
 
-            let useScientificNotationInput = getInput<HTMLInputElement>(2, "input");
+            let useScientificNotationInput = getInput<HTMLInputElement>(5, "input");
             setCheckboxValue(useScientificNotationInput, false);
 
             expect(isInDom(input)).toEqual(false);
@@ -223,7 +350,7 @@ describe("SettingsDialogComponent", () => {
         let input: HTMLInputElement;
 
         beforeEach(() => {
-            input = getInput(4, "input");
+            input = getInput(7, "input");
         });
 
         it("should be set to the inital value", () => {
@@ -258,7 +385,7 @@ describe("SettingsDialogComponent", () => {
         let input: HTMLInputElement;
 
         beforeEach(() => {
-            input = getInput(5, "input");
+            input = getInput(8, "input");
         });
 
         it("should be set to the inital value", () => {
@@ -269,7 +396,7 @@ describe("SettingsDialogComponent", () => {
             let settingsService = TestBed.get(SettingsService) as SettingsService;
             spyOn(settingsService, "setSetting").and.returnValue(Promise.resolve());
 
-            let useLogarithmicGraphScaleInput = getInput<HTMLInputElement>(4, "input");
+            let useLogarithmicGraphScaleInput = getInput<HTMLInputElement>(7, "input");
             setCheckboxValue(useLogarithmicGraphScaleInput, false);
 
             expect(isInDom(input)).toEqual(false);
@@ -303,7 +430,7 @@ describe("SettingsDialogComponent", () => {
         let input: HTMLSelectElement;
 
         beforeEach(() => {
-            input = getInput(6, "select");
+            input = getInput(9, "select");
         });
 
         it("should be set to the inital value", () => {
@@ -337,7 +464,7 @@ describe("SettingsDialogComponent", () => {
         let input: HTMLInputElement;
 
         beforeEach(() => {
-            input = getInput(7, "input");
+            input = getInput(10, "input");
         });
 
         it("should be set to the inital value", () => {
@@ -372,7 +499,7 @@ describe("SettingsDialogComponent", () => {
         let input: HTMLInputElement;
 
         beforeEach(() => {
-            input = getInput(8, "input");
+            input = getInput(11, "input");
         });
 
         it("should be set to the inital value", () => {
@@ -408,7 +535,7 @@ describe("SettingsDialogComponent", () => {
         expect(body).not.toBeNull();
 
         let formGroups = body.queryAll(By.css(".form-group"));
-        expect(formGroups.length).toEqual(9);
+        expect(formGroups.length).toEqual(12);
 
         let formGroup = formGroups[i];
         let inputElement = formGroup.query(By.css(selector));

@@ -49,8 +49,23 @@ namespace Website.Models.Api.Users
         public int? HybridRatio { get; set; }
 
         /// <summary>
-        /// Gets or sets a value indicating the theme type.
+        /// Gets or sets the theme type.
         /// </summary>
         public SiteThemeType? Theme { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether the user wants suggestions for skill ancients
+        /// </summary>
+        public bool? ShouldLevelSkillAncients { get; set; }
+
+        /// <summary>
+        /// Gets or sets the id of the ancient skill ancients should be based on
+        /// </summary>
+        public int? SkillAncientBaseAncient { get; set; }
+
+        /// <summary>
+        /// Gets or sets the preferred number of levels the skill ancients should be in relation to the base ancient.
+        /// </summary>
+        public int? SkillAncientLevelDiff { get; set; }
     }
 }

@@ -88,6 +88,15 @@ namespace ClickerHeroesTrackerWebsite.Models.Settings
                             case UserSettingsConstants.Theme:
                                 userSettings.Theme = Enum.TryParse<SiteThemeType>(settingValue, out var theme) ? new SiteThemeType?(theme) : null;
                                 break;
+                            case UserSettingsConstants.ShouldLevelSkillAncients:
+                                userSettings.ShouldLevelSkillAncients = bool.TryParse(settingValue, out var shouldLevelSkillAncients) ? new bool?(shouldLevelSkillAncients) : null;
+                                break;
+                            case UserSettingsConstants.SkillAncientBaseAncient:
+                                userSettings.SkillAncientBaseAncient = int.TryParse(settingValue, out var skillAncientBaseAncient) ? new int?(skillAncientBaseAncient) : null;
+                                break;
+                            case UserSettingsConstants.SkillAncientLevelDiff:
+                                userSettings.SkillAncientLevelDiff = int.TryParse(settingValue, out var skillAncientLevelDiff) ? new int?(skillAncientLevelDiff) : null;
+                                break;
                         }
                     }
                 }
@@ -172,6 +181,9 @@ namespace ClickerHeroesTrackerWebsite.Models.Settings
             AppendSetting(UserSettingsConstants.LogarithmicGraphScaleThreshold, userSettings.LogarithmicGraphScaleThreshold?.ToString());
             AppendSetting(UserSettingsConstants.HybridRatio, userSettings.HybridRatio?.ToString());
             AppendSetting(UserSettingsConstants.Theme, userSettings.Theme?.ToString());
+            AppendSetting(UserSettingsConstants.ShouldLevelSkillAncients, userSettings.ShouldLevelSkillAncients?.ToString());
+            AppendSetting(UserSettingsConstants.SkillAncientBaseAncient, userSettings.SkillAncientBaseAncient?.ToString());
+            AppendSetting(UserSettingsConstants.SkillAncientLevelDiff, userSettings.SkillAncientLevelDiff?.ToString());
 
             // If no settings were appended, just short-circuit.
             if (isFirst)

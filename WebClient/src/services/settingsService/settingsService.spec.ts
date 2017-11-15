@@ -77,6 +77,9 @@ describe("SettingsService", () => {
                 logarithmicGraphScaleThreshold: 456,
                 hybridRatio: 2,
                 theme: "dark",
+                shouldLevelSkillAncients: false,
+                skillAncientBaseAncient: 1,
+                skillAncientLevelDiff: 2,
             };
             (localStorage.getItem as jasmine.Spy).and.returnValue(JSON.stringify(settings));
 
@@ -101,6 +104,9 @@ describe("SettingsService", () => {
                 logarithmicGraphScaleThreshold: 456,
                 hybridRatio: 2,
                 theme: "dark",
+                shouldLevelSkillAncients: false,
+                skillAncientBaseAncient: 1,
+                skillAncientLevelDiff: 2,
             };
             (localStorage.getItem as jasmine.Spy).and.returnValue(JSON.stringify(expectedSettings));
 
@@ -474,6 +480,9 @@ describe("SettingsService", () => {
             logarithmicGraphScaleThreshold: index,
             hybridRatio: index,
             theme: (["light", "dark"] as Theme[])[index % 2],
+            shouldLevelSkillAncients: index % 2 === 0,
+            skillAncientBaseAncient: index,
+            skillAncientLevelDiff: index,
         };
 
         request.flush(settings);

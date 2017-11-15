@@ -15,5 +15,8 @@ namespace ClickerHeroesTrackerWebsite.Models.Settings
         public const byte LogarithmicGraphScaleThreshold = 10;
         public const byte HybridRatio = 11;
         public const byte Theme = 12;
+        public const byte ShouldLevelSkillAncients = 13;
+        public const byte SkillAncientBaseAncient = 14;
+        public const byte SkillAncientLevelDiff = 15;
     }
 }

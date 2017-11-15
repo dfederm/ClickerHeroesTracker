@@ -10,7 +10,7 @@ import { BehaviorSubject } from "rxjs/BehaviorSubject";
 import { UploadDialogComponent } from "./uploadDialog";
 import { AuthenticationService, IUserInfo } from "../../services/authenticationService/authenticationService";
 import { UploadService } from "../../services/uploadService/uploadService";
-import { SettingsService, IUserSettings } from "../../services/settingsService/settingsService";
+import { SettingsService } from "../../services/settingsService/settingsService";
 
 describe("UploadDialogComponent", () => {
     let component: UploadDialogComponent;
@@ -28,18 +28,7 @@ describe("UploadDialogComponent", () => {
         isLoggedIn: false,
     };
 
-    let settings: IUserSettings = {
-        areUploadsPublic: true,
-        playStyle: "hybrid",
-        useScientificNotation: true,
-        scientificNotationThreshold: 1000000,
-        useEffectiveLevelForSuggestions: false,
-        useLogarithmicGraphScale: true,
-        logarithmicGraphScaleThreshold: 1000000,
-        hybridRatio: 2,
-        theme: "light",
-    };
-
+    const settings = SettingsService.defaultSettings;
     let settingsSubject = new BehaviorSubject(settings);
 
     beforeEach(async(() => {
