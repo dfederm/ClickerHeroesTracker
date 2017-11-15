@@ -441,12 +441,13 @@ export class UploadComponent implements OnInit {
                 const hybridRatioReciprocal = 1 / this.settings.hybridRatio;
                 suggestedLevels.Bhaal = suggestedLevels.Fragsworth = currentPrimaryAncientLevel.times(hybridRatioReciprocal);
                 suggestedLevels.Juggernaut = suggestedLevels.Fragsworth.pow(0.8);
-                suggestedLevels.Libertas = suggestedLevels.Mammon;
+                suggestedLevels.Pluto = suggestedLevels.Libertas = suggestedLevels.Mammon;
                 suggestedLevels.Nogardnit = suggestedLevels.Libertas.pow(0.8);
                 break;
             case "active":
                 suggestedLevels.Bhaal = currentPrimaryAncientLevel;
                 suggestedLevels.Juggernaut = currentPrimaryAncientLevel.pow(0.8);
+                suggestedLevels.Pluto = suggestedLevels.Mammon;
                 break;
         }
 
@@ -467,7 +468,6 @@ export class UploadComponent implements OnInit {
             suggestedLevels.Sniperino = suggestedSkillAncientLevel;
             suggestedLevels.Kleptos = suggestedSkillAncientLevel;
             suggestedLevels.Energon = suggestedSkillAncientLevel;
-            suggestedLevels.Pluto = suggestedSkillAncientLevel;
         }
 
         // Normalize the values
