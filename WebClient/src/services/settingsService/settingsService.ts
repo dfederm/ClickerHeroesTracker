@@ -104,7 +104,7 @@ export class SettingsService {
         return this.authenticationService.getAuthHeaders()
             .then(headers => {
                 let body = { [setting]: value };
-                return this.http.patch(`/api/users/${this.userName}/settings`, body, { headers })
+                return this.http.patch(`/api/users/${this.userName}/settings`, body, { headers, responseType: "text" })
                     .toPromise();
             })
             .then(() => {

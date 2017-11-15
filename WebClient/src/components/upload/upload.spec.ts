@@ -1030,8 +1030,6 @@ describe("UploadComponent", () => {
                 titanDamage: "2.2615094954691136e+79",
                 totalAncientSouls: "382",
                 transcendentPower: "0.038364995397561684",
-                maxTranscendentPrimalReward: "1.6507071559237853e+76",
-                bossLevelToTranscendentPrimalCap: "13425",
                 heroSouls: "1.739561034051967e+76",
                 pendingSouls: "1e+80",
             },
