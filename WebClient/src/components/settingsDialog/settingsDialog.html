@@ -37,7 +37,7 @@
     <div *ngIf="settings.playStyle === 'hybrid'"
          class="form-group row">
         <label for="hybridRatio"
-               class="col-sm-8">
+               class="col-sm-8 col-form-label">
             Hybrid Ratio
             <a class="text-muted"
                placement="right"
@@ -56,8 +56,54 @@
         </div>
     </div>
     <div class="form-group row">
+        <label for="shouldLevelSkillAncients"
+               class="col-sm-8 col-form-label">
+            Show suggestions for skill ancients (includes Vaagur and Revolc)
+        </label>
+        <div class="col-sm-4">
+            <bSwitch [(ngModel)]="settings.shouldLevelSkillAncients"
+                     [switch-size]="'large'"
+                     [switch-disabled]="isSettingPending.shouldLevelSkillAncients"
+                     (onChangeState)="setSetting('shouldLevelSkillAncients', $event.currentValue)"></bSwitch>
+        </div>
+    </div>
+    <fieldset *ngIf="settings.shouldLevelSkillAncients"
+              class="form-group">
+        <div class="row">
+            <div class="col-sm-8 col-form-label">
+                Ancient which skill ancients suggestions are based on
+            </div>
+            <div class="col-sm-4">
+                <select class="form-control"
+                        [(ngModel)]="settings.skillAncientBaseAncient"
+                        (change)="setSetting('skillAncientBaseAncient', settings.skillAncientBaseAncient)"
+                        [disabled]="isSettingPending.skillAncientBaseAncient">
+                    <option *ngFor="let a of skillAncientBaseAncients"
+                            [ngValue]="a.id">{{ a.name }}</option>
+                </select>
+            </div>
+        </div>
+    </fieldset>
+    <div *ngIf="settings.shouldLevelSkillAncients"
+         class="form-group row">
+        <label for="skillAncientLevelDiff"
+               class="col-sm-8 col-form-label">
+            Number of levels skill ancients should be higher/lower than the ancient they're based on
+        </label>
+        <div class="col-sm-4">
+            <input type="number"
+                   class="form-control"
+                   id="skillAncientLevelDiff"
+                   name="skillAncientLevelDiff"
+                   [(ngModel)]="settings.skillAncientLevelDiff"
+                   (keyup.enter)="setSetting('skillAncientLevelDiff', settings.skillAncientLevelDiff)"
+                   (blur)="setSetting('skillAncientLevelDiff', settings.skillAncientLevelDiff)"
+                   [disabled]="isSettingPending.skillAncientLevelDiff" />
+        </div>
+    </div>
+    <div class="form-group row">
         <label for="useScientificNotation"
-               class="col-sm-8">
+               class="col-sm-8 col-form-label">
             Use scientific notation
         </label>
         <div class="col-sm-4">
@@ -70,7 +116,7 @@
     <div *ngIf="settings.useScientificNotation"
          class="form-group row">
         <label for="scientificNotationThreshold"
-               class="col-sm-8">
+               class="col-sm-8 col-form-label">
             Scientific notation threshold
             <a class="text-muted"
                placement="right"
@@ -90,7 +136,7 @@
     </div>
     <div class="form-group row">
         <label for="useLogarithmicGraphScale"
-               class="col-sm-8">
+               class="col-sm-8 col-form-label">
             Use logarithmic scale for graphs
         </label>
         <div class="col-sm-4">
@@ -103,7 +149,7 @@
     <div *ngIf="settings.useLogarithmicGraphScale"
          class="form-group row">
         <label for="logarithmicGraphScaleThreshold"
-               class="col-sm-8">
+               class="col-sm-8 col-form-label">
             Logarithmic scale threshold
             <a class="text-muted"
                placement="right"
@@ -139,7 +185,7 @@
     </fieldset>
     <div class="form-group row">
         <label for="useEffectiveLevelForSuggestions"
-               class="col-sm-8">
+               class="col-sm-8 col-form-label">
             Use the effective level (ancient + relic levels) for ancient suggestions
         </label>
         <div class="col-sm-4">
@@ -151,7 +197,7 @@
     </div>
     <div class="form-group row">
         <label for="areUploadsPublic"
-               class="col-sm-8">
+               class="col-sm-8 col-form-label">
             Allow your profile, progress, and uploads to be viewed by others
         </label>
         <div class="col-sm-4">

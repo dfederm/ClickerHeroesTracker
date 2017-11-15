@@ -12,7 +12,7 @@ import { UploadComponent } from "./upload";
 import { ExponentialPipe } from "../../pipes/exponentialPipe";
 import { AuthenticationService, IUserInfo } from "../../services/authenticationService/authenticationService";
 import { UploadService } from "../../services/uploadService/uploadService";
-import { SettingsService, IUserSettings } from "../../services/settingsService/settingsService";
+import { SettingsService } from "../../services/settingsService/settingsService";
 import { IUpload } from "../../models";
 
 describe("UploadComponent", () => {
@@ -28,17 +28,7 @@ describe("UploadComponent", () => {
     let uploadServiceDeleteResolve: () => Promise<void>;
     let uploadServiceDeleteReject: () => Promise<void>;
 
-    let settings: IUserSettings = {
-        areUploadsPublic: true,
-        playStyle: "hybrid",
-        useScientificNotation: true,
-        scientificNotationThreshold: 1000000,
-        useEffectiveLevelForSuggestions: false,
-        useLogarithmicGraphScale: true,
-        logarithmicGraphScaleThreshold: 1000000,
-        hybridRatio: 1,
-        theme: "light",
-    };
+    const settings = SettingsService.defaultSettings;
 
     let settingsSubject = new BehaviorSubject(settings);
 
@@ -515,9 +505,8 @@ describe("UploadComponent", () => {
         }));
     });
 
-    // TODO: Temporarily disabling until new suggestions come out
-    xdescribe("Ancient Levels", () => {
-        it("should display data based on hybrid playstyle and Available Souls using souls from ascension", async(() => {
+    describe("Ancient Levels", () => {
+        it("should display data based on hybrid playstyle and Available Souls using souls from ascension", done => {
             let upload = getUpload();
             uploadServiceGetResolve(upload)
                 .then(() => {
@@ -525,38 +514,41 @@ describe("UploadComponent", () => {
 
                     let expectedValues: { name: string, suggested?: number, hasEffectiveLevel?: boolean }[] =
                         [
-                            { name: "Argaiv", suggested: 5.306472455726447e+39 },
-                            { name: "Atman", suggested: 255, hasEffectiveLevel: true },
+                            { name: "Argaiv", suggested: 6.9257775001637016029e+39 },
+                            { name: "Atman", suggested: 256, hasEffectiveLevel: true },
                             { name: "Berserker" },
-                            { name: "Bhaal", suggested: 5.306472455726447e+39, hasEffectiveLevel: true },
+                            { name: "Bhaal", suggested: 3.4628887500818508015e+39, hasEffectiveLevel: true },
                             { name: "Bubos", suggested: 251 },
                             { name: "Chawedo" },
-                            { name: "Chronos", suggested: 246 },
-                            { name: "Dogcog", suggested: 257 },
-                            { name: "Dora", suggested: 255 },
+                            { name: "Chronos", suggested: 247 },
+                            { name: "Dogcog", suggested: 258 },
+                            { name: "Dora", suggested: 256 },
                             { name: "Energon" },
-                            { name: "Fortuna", suggested: 255, hasEffectiveLevel: true },
-                            { name: "Fragsworth", suggested: 5.306472455726447e+39, hasEffectiveLevel: true },
+                            { name: "Fortuna", suggested: 256, hasEffectiveLevel: true },
+                            { name: "Fragsworth", suggested: 3.4628887500818508015e+39, hasEffectiveLevel: true },
                             { name: "Hecatoncheir" },
-                            { name: "Juggernaut", suggested: 6.023441980154034e+31 },
+                            { name: "Juggernaut", suggested: 4.2810552386063456027e+31 },
                             { name: "Kleptos" },
                             { name: "Kumawakamaru", suggested: 258, hasEffectiveLevel: true },
-                            { name: "Libertas", suggested: 4.91379349400269e+39 },
-                            { name: "Mammon", suggested: 4.91379349400269e+39 },
-                            { name: "Mimzee", suggested: 4.91379349400269e+39 },
-                            { name: "Morgulis", suggested: 2.8158649923383468e+79 },
-                            { name: "Nogardnit", suggested: 5.66413402071902e+31 },
+                            { name: "Libertas", suggested: 6.4132699651515876843e+39 },
+                            { name: "Mammon", suggested: 6.4132699651515876843e+39 },
+                            { name: "Mimzee", suggested: 6.4132699651515876843e+39 },
+                            { name: "Morgulis", suggested: 4.7966393981773771756e+79 },
+                            { name: "Nogardnit", suggested: 7.0091219698725662922e+31 },
+                            { name: "Pluto" },
                             { name: "Revolc" },
-                            { name: "Siyalatas", suggested: 5.306472455726447e+39 },
+                            { name: "Siyalatas", suggested: 6.9257775001637016029e+39 },
                             { name: "Sniperino", hasEffectiveLevel: true },
                             { name: "Vaagur" },
                         ];
 
                     verify(upload, expectedValues);
-                });
-        }));
+                })
+                .then(done)
+                .catch(done.fail);
+        });
 
-        it("should display data based on hybrid playstyle and Available Souls without using souls from ascension", async(() => {
+        it("should display data based on hybrid playstyle and Available Souls without using souls from ascension", done => {
             let upload = getUpload();
             uploadServiceGetResolve(upload)
                 .then(() => {
@@ -590,6 +582,7 @@ describe("UploadComponent", () => {
                             { name: "Mimzee", suggested: 2.1155410000491033e+39 },
                             { name: "Morgulis", suggested: 5.2194381e+78 },
                             { name: "Nogardnit", suggested: 2.8862730089719703e+31 },
+                            { name: "Pluto" },
                             { name: "Revolc" },
                             { name: "Siyalatas", suggested: 2.2846000000530268e+39 },
                             { name: "Sniperino", hasEffectiveLevel: true },
@@ -597,10 +590,12 @@ describe("UploadComponent", () => {
                         ];
 
                     verify(upload, expectedValues);
-                });
-        }));
+                })
+                .then(done)
+                .catch(done.fail);
+        });
 
-        it("should display data based on hybrid playstyle and the Rules of Thumb", async(() => {
+        it("should display data based on hybrid playstyle and the Rules of Thumb", done => {
             let upload = getUpload();
             uploadServiceGetResolve(upload)
                 .then(() => {
@@ -616,7 +611,7 @@ describe("UploadComponent", () => {
                             { name: "Argaiv", suggested: 2.2846000000530268e+39 },
                             { name: "Atman", suggested: 253, hasEffectiveLevel: true },
                             { name: "Berserker" },
-                            { name: "Bhaal", suggested: 2.2846000000530268e+39, hasEffectiveLevel: true },
+                            { name: "Bhaal", suggested: 1.1423000000265134e+39, hasEffectiveLevel: true },
                             { name: "Bubos", suggested: 248 },
                             { name: "Chawedo" },
                             { name: "Chronos", suggested: 244 },
@@ -624,16 +619,17 @@ describe("UploadComponent", () => {
                             { name: "Dora", suggested: 253 },
                             { name: "Energon" },
                             { name: "Fortuna", suggested: 253, hasEffectiveLevel: true },
-                            { name: "Fragsworth", suggested: 2.2846000000530268e+39, hasEffectiveLevel: true },
+                            { name: "Fragsworth", suggested: 1.1423000000265134e+39, hasEffectiveLevel: true },
                             { name: "Hecatoncheir" },
-                            { name: "Juggernaut", suggested: 3.069362183115342e+31 },
+                            { name: "Juggernaut", suggested: 1.7628856453173435492e+31 },
                             { name: "Kleptos" },
                             { name: "Kumawakamaru", suggested: 255, hasEffectiveLevel: true },
-                            { name: "Libertas", suggested: 2.1155396000491028e+39 },
-                            { name: "Mammon", suggested: 2.1155396000491028e+39 },
-                            { name: "Mimzee", suggested: 2.1155396000491028e+39 },
-                            { name: "Morgulis", suggested: 5.21939716024229e+78 },
-                            { name: "Nogardnit", suggested: 2.886269813932436e+31 },
+                            { name: "Libertas", suggested: 2.1155396000491028168e+39 },
+                            { name: "Mammon", suggested: 2.1155396000491028168e+39 },
+                            { name: "Mimzee", suggested: 2.1155396000491028168e+39 },
+                            { name: "Morgulis", suggested: 5.2193971602422900546e+78 },
+                            { name: "Nogardnit", suggested: 2.8862698139324247207e+31 },
+                            { name: "Pluto" },
                             { name: "Revolc" },
                             { name: "Siyalatas", isPrimary: true },
                             { name: "Sniperino", hasEffectiveLevel: true },
@@ -641,10 +637,12 @@ describe("UploadComponent", () => {
                         ];
 
                     verify(upload, expectedValues);
-                });
-        }));
+                })
+                .then(done)
+                .catch(done.fail);
+        });
 
-        it("should display data based on idle playstyle and Available Souls without using souls from ascension", async(() => {
+        it("should display data based on idle playstyle and Available Souls without using souls from ascension", done => {
             let upload = getUpload();
             upload.playStyle = "idle";
             uploadServiceGetResolve(upload)
@@ -679,6 +677,7 @@ describe("UploadComponent", () => {
                             { name: "Mimzee", suggested: 2.1155410000491033e+39 },
                             { name: "Morgulis", suggested: 5.2194381e+78 },
                             { name: "Nogardnit", suggested: 2.8862730089719703e+31 },
+                            { name: "Pluto" },
                             { name: "Revolc" },
                             { name: "Siyalatas", suggested: 2.2846000000530268e+39 },
                             { name: "Sniperino", hasEffectiveLevel: true },
@@ -686,10 +685,12 @@ describe("UploadComponent", () => {
                         ];
 
                     verify(upload, expectedValues);
-                });
-        }));
+                })
+                .then(done)
+                .catch(done.fail);
+        });
 
-        it("should display data based on idle playstyle and the Rules of Thumb", async(() => {
+        it("should display data based on idle playstyle and the Rules of Thumb", done => {
             let upload = getUpload();
             upload.playStyle = "idle";
             uploadServiceGetResolve(upload)
@@ -719,11 +720,12 @@ describe("UploadComponent", () => {
                             { name: "Juggernaut" },
                             { name: "Kleptos" },
                             { name: "Kumawakamaru", suggested: 255, hasEffectiveLevel: true },
-                            { name: "Libertas", suggested: 2.1155396000491028e+39 },
-                            { name: "Mammon", suggested: 2.1155396000491028e+39 },
-                            { name: "Mimzee", suggested: 2.1155396000491028e+39 },
-                            { name: "Morgulis", suggested: 5.21939716024229e+78 },
-                            { name: "Nogardnit", suggested: 2.886269813932425e+31 },
+                            { name: "Libertas", suggested: 2.1155396000491028168e+39 },
+                            { name: "Mammon", suggested: 2.1155396000491028168e+39 },
+                            { name: "Mimzee", suggested: 2.1155396000491028168e+39 },
+                            { name: "Morgulis", suggested: 5.2193971602422900546e+78 },
+                            { name: "Nogardnit", suggested: 2.8862698139324247207e+31 },
+                            { name: "Pluto" },
                             { name: "Revolc" },
                             { name: "Siyalatas", isPrimary: true },
                             { name: "Sniperino", hasEffectiveLevel: true },
@@ -731,10 +733,12 @@ describe("UploadComponent", () => {
                         ];
 
                     verify(upload, expectedValues);
-                });
-        }));
+                })
+                .then(done)
+                .catch(done.fail);
+        });
 
-        it("should display data based on active playstyle and Available Souls without using souls from ascension", async(() => {
+        it("should display data based on active playstyle and Available Souls without using souls from ascension", done => {
             let upload = getUpload();
             upload.playStyle = "active";
             uploadServiceGetResolve(upload)
@@ -769,6 +773,7 @@ describe("UploadComponent", () => {
                             { name: "Mimzee", suggested: 2.1155410000491033e+39 },
                             { name: "Morgulis", suggested: 5.2194381e+78 },
                             { name: "Nogardnit" },
+                            { name: "Pluto" },
                             { name: "Revolc" },
                             { name: "Siyalatas" },
                             { name: "Sniperino", hasEffectiveLevel: true },
@@ -776,10 +781,12 @@ describe("UploadComponent", () => {
                         ];
 
                     verify(upload, expectedValues);
-                });
-        }));
+                })
+                .then(done)
+                .catch(done.fail);
+        });
 
-        it("should display data based on active playstyle and the Rules of Thumb", async(() => {
+        it("should display data based on active playstyle and the Rules of Thumb", done => {
             let upload = getUpload();
             upload.playStyle = "active";
             uploadServiceGetResolve(upload)
@@ -806,14 +813,15 @@ describe("UploadComponent", () => {
                             { name: "Fortuna", suggested: 253, hasEffectiveLevel: true },
                             { name: "Fragsworth", isPrimary: true, hasEffectiveLevel: true },
                             { name: "Hecatoncheir" },
-                            { name: "Juggernaut", suggested: 3.0693621831153293e+31 },
+                            { name: "Juggernaut", suggested: 3.069362183115329469e+31 },
                             { name: "Kleptos" },
                             { name: "Kumawakamaru", suggested: 255, hasEffectiveLevel: true },
                             { name: "Libertas" },
-                            { name: "Mammon", suggested: 2.1155396000491028e+39 },
-                            { name: "Mimzee", suggested: 2.1155396000491028e+39 },
-                            { name: "Morgulis", suggested: 5.21939716024229e+78 },
+                            { name: "Mammon", suggested: 2.1155396000491028168e+39 },
+                            { name: "Mimzee", suggested: 2.1155396000491028168e+39 },
+                            { name: "Morgulis", suggested: 5.2193971602422900546e+78 },
                             { name: "Nogardnit" },
+                            { name: "Pluto" },
                             { name: "Revolc" },
                             { name: "Siyalatas" },
                             { name: "Sniperino", hasEffectiveLevel: true },
@@ -821,8 +829,10 @@ describe("UploadComponent", () => {
                         ];
 
                     verify(upload, expectedValues);
-                });
-        }));
+                })
+                .then(done)
+                .catch(done.fail);
+        });
 
         function verify(upload: IUpload, expectedValues: { name: string, suggested?: number, hasEffectiveLevel?: boolean, isPrimary?: boolean }[]): void {
             let exponentialPipe = TestBed.get(ExponentialPipe) as ExponentialPipe;

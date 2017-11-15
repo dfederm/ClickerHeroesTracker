@@ -21,6 +21,16 @@ export class SettingsDialogComponent implements OnInit {
 
     public themes: Theme[] = ["light", "dark"];
 
+    public skillAncientBaseAncients: { name: string, id: number }[] = [
+        { name: "Atman", id: 13 },
+        { name: "Bubos", id: 18 },
+        { name: "Chronos", id: 17 },
+        { name: "Dogcog", id: 11 },
+        { name: "Dora", id: 14 },
+        { name: "Fortuna", id: 12 },
+        { name: "Kumawakamaru", id: 21 },
+    ];
+
     public ChangePasswordDialogComponent = ChangePasswordDialogComponent;
 
     constructor(

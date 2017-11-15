@@ -187,12 +187,15 @@ namespace UnitTests.Services.Settings
                 AreUploadsPublic = true,
                 PlayStyle = PlayStyle.Hybrid,
                 UseScientificNotation = true,
-                ScientificNotationThreshold = 123,
+                ScientificNotationThreshold = 1,
                 UseEffectiveLevelForSuggestions = true,
                 UseLogarithmicGraphScale = true,
-                LogarithmicGraphScaleThreshold = 456,
-                HybridRatio = 789,
+                LogarithmicGraphScaleThreshold = 2,
+                HybridRatio = 3,
                 Theme = SiteThemeType.Dark,
+                ShouldLevelSkillAncients = true,
+                SkillAncientBaseAncient = 4,
+                SkillAncientLevelDiff = 5,
             };
 
             var parameters = new Dictionary<string, object>
@@ -207,6 +210,9 @@ namespace UnitTests.Services.Settings
                 { "@Value" + UserSettingsConstants.LogarithmicGraphScaleThreshold, settings.LogarithmicGraphScaleThreshold.ToString() },
                 { "@Value" + UserSettingsConstants.HybridRatio, settings.HybridRatio.ToString() },
                 { "@Value" + UserSettingsConstants.Theme, settings.Theme.ToString() },
+                { "@Value" + UserSettingsConstants.ShouldLevelSkillAncients, settings.ShouldLevelSkillAncients.ToString() },
+                { "@Value" + UserSettingsConstants.SkillAncientBaseAncient, settings.SkillAncientBaseAncient.ToString() },
+                { "@Value" + UserSettingsConstants.SkillAncientLevelDiff, settings.SkillAncientLevelDiff.ToString() },
             };
 
             var mockDatabaseCommand = MockDatabaseHelper.CreateMockDatabaseCommand(parameters);
@@ -284,12 +290,15 @@ namespace UnitTests.Services.Settings
                 new Dictionary<string, object> { { "SettingId", UserSettingsConstants.AreUploadsPublic }, { "SettingValue", "true" } },
                 new Dictionary<string, object> { { "SettingId", UserSettingsConstants.PlayStyle }, { "SettingValue", "Hybrid" } },
                 new Dictionary<string, object> { { "SettingId", UserSettingsConstants.UseScientificNotation }, { "SettingValue", "true" } },
-                new Dictionary<string, object> { { "SettingId", UserSettingsConstants.ScientificNotationThreshold }, { "SettingValue", "123" } },
+                new Dictionary<string, object> { { "SettingId", UserSettingsConstants.ScientificNotationThreshold }, { "SettingValue", "1" } },
                 new Dictionary<string, object> { { "SettingId", UserSettingsConstants.UseEffectiveLevelForSuggestions }, { "SettingValue", "true" } },
                 new Dictionary<string, object> { { "SettingId", UserSettingsConstants.UseLogarithmicGraphScale }, { "SettingValue", "true" } },
-                new Dictionary<string, object> { { "SettingId", UserSettingsConstants.LogarithmicGraphScaleThreshold }, { "SettingValue", "456" } },
-                new Dictionary<string, object> { { "SettingId", UserSettingsConstants.HybridRatio }, { "SettingValue", "789" } },
+                new Dictionary<string, object> { { "SettingId", UserSettingsConstants.LogarithmicGraphScaleThreshold }, { "SettingValue", "2" } },
+                new Dictionary<string, object> { { "SettingId", UserSettingsConstants.HybridRatio }, { "SettingValue", "3" } },
                 new Dictionary<string, object> { { "SettingId", UserSettingsConstants.Theme }, { "SettingValue", "Dark" } },
+                new Dictionary<string, object> { { "SettingId", UserSettingsConstants.ShouldLevelSkillAncients }, { "SettingValue", "true" } },
+                new Dictionary<string, object> { { "SettingId", UserSettingsConstants.SkillAncientBaseAncient }, { "SettingValue", "4" } },
+                new Dictionary<string, object> { { "SettingId", UserSettingsConstants.SkillAncientLevelDiff }, { "SettingValue", "5" } },
             }.ToList();
         }
 
@@ -299,12 +308,15 @@ namespace UnitTests.Services.Settings
             Assert.True(settings.AreUploadsPublic);
             Assert.Equal(PlayStyle.Hybrid, settings.PlayStyle);
             Assert.True(settings.UseScientificNotation);
-            Assert.Equal(123, settings.ScientificNotationThreshold);
+            Assert.Equal(1, settings.ScientificNotationThreshold);
             Assert.True(settings.UseEffectiveLevelForSuggestions);
             Assert.True(settings.UseLogarithmicGraphScale);
-            Assert.Equal(456, settings.LogarithmicGraphScaleThreshold);
-            Assert.Equal(789, settings.HybridRatio);
+            Assert.Equal(2, settings.LogarithmicGraphScaleThreshold);
+            Assert.Equal(3, settings.HybridRatio);
             Assert.Equal(SiteThemeType.Dark, settings.Theme);
+            Assert.True(settings.ShouldLevelSkillAncients);
+            Assert.Equal(4, settings.SkillAncientBaseAncient);
+            Assert.Equal(5, settings.SkillAncientLevelDiff);
         }
 
         private static void VerifyDefaultSettings(UserSettings settings)
@@ -319,6 +331,9 @@ namespace UnitTests.Services.Settings
             Assert.Null(settings.LogarithmicGraphScaleThreshold);
             Assert.Null(settings.HybridRatio);
             Assert.Null(settings.Theme);
+            Assert.Null(settings.ShouldLevelSkillAncients);
+            Assert.Null(settings.SkillAncientBaseAncient);
+            Assert.Null(settings.SkillAncientLevelDiff);
         }
     }
 }

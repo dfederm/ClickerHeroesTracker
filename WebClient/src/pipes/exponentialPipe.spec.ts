@@ -19,6 +19,9 @@ describe("ExponentialPipe", () => {
         logarithmicGraphScaleThreshold: 1000000,
         hybridRatio: 2,
         theme: "light",
+        shouldLevelSkillAncients: false,
+        skillAncientBaseAncient: 17,
+        skillAncientLevelDiff: 0,
     };
 
     let settingsWithoutScientificNotation: IUserSettings = {
@@ -31,6 +34,9 @@ describe("ExponentialPipe", () => {
         logarithmicGraphScaleThreshold: 1000000,
         hybridRatio: 2,
         theme: "light",
+        shouldLevelSkillAncients: false,
+        skillAncientBaseAncient: 17,
+        skillAncientLevelDiff: 0,
     };
 
     let settingsSubject = new BehaviorSubject(settingsWithScientificNotation);
@@ -47,10 +53,10 @@ describe("ExponentialPipe", () => {
         fixture = TestBed.configureTestingModule(
             {
                 declarations:
-                [
-                    ExponentialPipe,
-                    MockComponent,
-                ],
+                    [
+                        ExponentialPipe,
+                        MockComponent,
+                    ],
                 providers: [
                     { provide: SettingsService, useValue: settingsService },
                 ],

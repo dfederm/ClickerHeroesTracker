@@ -7,7 +7,7 @@ import { BehaviorSubject } from "rxjs/BehaviorSubject";
 
 import { UserComponent } from "./user";
 import { UserService, IProgressData, IFollowsData } from "../../services/userService/userService";
-import { SettingsService, IUserSettings } from "../../services/settingsService/settingsService";
+import { SettingsService } from "../../services/settingsService/settingsService";
 import { ActivatedRoute } from "@angular/router";
 import { AuthenticationService, IUserInfo } from "../../services/authenticationService/authenticationService";
 
@@ -18,17 +18,7 @@ describe("UserComponent", () => {
 
     let routeParams = new BehaviorSubject({ userName });
 
-    let settings: IUserSettings = {
-        areUploadsPublic: true,
-        playStyle: "hybrid",
-        useScientificNotation: true,
-        scientificNotationThreshold: 1000000,
-        useEffectiveLevelForSuggestions: false,
-        useLogarithmicGraphScale: true,
-        logarithmicGraphScaleThreshold: 1000000,
-        hybridRatio: 2,
-        theme: "light",
-    };
+    const settings = SettingsService.defaultSettings;
 
     let settingsSubject = new BehaviorSubject(settings);
 

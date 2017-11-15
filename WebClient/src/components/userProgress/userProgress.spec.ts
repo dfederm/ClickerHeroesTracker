@@ -8,7 +8,7 @@ import Decimal from "decimal.js";
 import { UserProgressComponent } from "./userProgress";
 import { UserService, IProgressData } from "../../services/userService/userService";
 import { ChartDataSets, ChartPoint, ChartOptions } from "chart.js";
-import { SettingsService, IUserSettings } from "../../services/settingsService/settingsService";
+import { SettingsService } from "../../services/settingsService/settingsService";
 import { ExponentialPipe } from "../../pipes/exponentialPipe";
 
 describe("UserProgressComponent", () => {
@@ -58,18 +58,7 @@ describe("UserProgressComponent", () => {
         { title: "Ancient2", isLogarithmic: false, data: progress.ancientLevelData.ancient2 },
     ];
 
-    let settings: IUserSettings = {
-        areUploadsPublic: true,
-        playStyle: "hybrid",
-        useScientificNotation: true,
-        scientificNotationThreshold: 1000000,
-        useEffectiveLevelForSuggestions: false,
-        useLogarithmicGraphScale: true,
-        logarithmicGraphScaleThreshold: 1000000,
-        hybridRatio: 2,
-        theme: "light",
-    };
-
+    const settings = SettingsService.defaultSettings;
     let settingsSubject = new BehaviorSubject(settings);
 
     beforeEach(async(() => {
