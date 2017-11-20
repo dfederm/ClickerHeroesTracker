@@ -982,6 +982,46 @@ describe("UploadComponent", () => {
         }));
     });
 
+    describe("Optimal Ascension Zone", () => {
+        it("should show data after clicking the calculate button", done => {
+            let upload = getUpload();
+            uploadServiceGetResolve(upload)
+                .then(() => {
+                    fixture.detectChanges();
+
+                    let errorMessage = fixture.debugElement.query(By.css(".alert-danger"));
+                    expect(errorMessage).toBeNull("Error message found");
+
+                    // Not showing the table yet
+                    let tables = fixture.debugElement.queryAll(By.css("table"));
+                    expect(tables.length).toEqual(3);
+
+                    let buttons = fixture.debugElement.queryAll(By.css("button"));
+                    let calculateButton: DebugElement;
+                    for (let i = 0; i < buttons.length; i++) {
+                        if (getNormalizedTextContent(buttons[i]) === "Calculate") {
+                            calculateButton = buttons[i];
+                        }
+                    }
+
+                    expect(calculateButton).toBeDefined("Could not find the 'Calculate' button");
+
+                    calculateButton.nativeElement.click();
+                    fixture.detectChanges();
+
+                    // The new table exists
+                    tables = fixture.debugElement.queryAll(By.css("table"));
+                    expect(tables.length).toEqual(4);
+
+                    // Don't make specific assertions about the rows since there is some level of randomness in the calculation.
+                    let rows = tables[3].queryAll(By.css("tbody tr"));
+                    expect(rows.length).toBeGreaterThan(0);
+                })
+                .then(done)
+                .catch(done.fail);
+        });
+    });
+
     function getUpload(): IUpload {
         // Based on the real upload 355734
         return {
