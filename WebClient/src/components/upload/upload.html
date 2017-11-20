@@ -5,9 +5,8 @@
         {{ errorMessage }}
     </p>
     <p class="alert alert-warning">
-        The suggestions below are based on the last patch, so are likely wrong and may not even be possible. Check back later for
-        updated suggestions. Still on the old version (eg. the Steam version)? A 1.0e9 version of the site will be temporarily
-        available
+        The suggestions below are for the 1.0e10 patch. Still on the old version (eg. the Steam version)? A 1.0e9 version of the
+        site will be temporarily available
         <a href="https://clickerheroestracker-old.azurewebsites.net/">here</a>.
     </p>
     <ngx-loading [show]="isLoading && !errorMessage"></ngx-loading>
@@ -265,6 +264,43 @@
                     <tr>
                         <td>Rubies</td>
                         <td class="text-right">{{ rubies | exponential }}</td>
+                    </tr>
+                </tbody>
+            </table>
+            <h4>Optimal Ascension Zone (Experimental):</h4>
+            <p>
+                This is the zone at which you stop insta-killing monsters.
+            </p>
+            <p class="text-muted">
+                This feature is not complete yet as it assumes an idle playstyle and does not account for gilds, autoclickers, and possibly
+                some other aspects of the game.
+            </p>
+            <p class="text-muted">
+                Each row is a "step" in the calculation, ie. where purchasing hero levels is required to continue insta-killing.
+            </p>
+            <div>
+                <button *ngIf="!calculateAscensionZoneSteps"
+                        class="btn btn-secondary"
+                        (click)="calculateAscensionZone()">Calculate</button>
+            </div>
+            <table *ngIf="calculateAscensionZoneSteps"
+                   class="table table-sm table-striped">
+                <thead>
+                    <tr>
+                        <th>Zone</th>
+                        <th>Current Hero</th>
+                        <th>Hero Level</th>
+                        <th>Damage</th>
+                        <th>Gold</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngFor="let data of calculateAscensionZoneSteps">
+                        <td class="text-right">{{ data.zone }}</td>
+                        <td>{{ data.hero }}</td>
+                        <td class="text-right">{{ data.heroLevel }}</td>
+                        <td class="text-right">{{ data.damage | exponential }}</td>
+                        <td class="text-right">{{ data.gold | exponential }}</td>
                     </tr>
                 </tbody>
             </table>

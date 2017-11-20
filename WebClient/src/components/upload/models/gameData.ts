@@ -1,0 +1,45 @@
+// tslint:disable-next-line:no-require-imports no-var-requires
+export const gameData: IGameData = require("../../../../../Website/src/wwwroot/data/GameData.json");
+
+export interface IGameData {
+    heroes: { [id: string]: IHeroData };
+    upgrades: { [id: string]: IUpgradeData };
+    ancients: { [id: string]: IAncientData };
+    outsiders: { [id: string]: IOutsiderData };
+}
+
+export interface IHeroData {
+    id: number;
+    name: string;
+    attackFormula: string;
+    costFormula: string;
+    baseCost: number | string;
+    baseAttack: number | string;
+    baseClickDamage: number;
+    _live: string;
+}
+
+export interface IUpgradeData {
+    id: number;
+    heroLevelRequired: number;
+    isPercentage: number;
+    heroId: number;
+    upgradeFunction: string;
+    upgradeParams: string;
+    _live: string;
+    attribute: number;
+}
+
+export interface IAncientData {
+    name: string;
+    nonTranscendent: boolean;
+    levelCostFormula: string;
+    levelAmountFormula: string;
+    levelAmountParams: string;
+}
+
+export interface IOutsiderData {
+    id: number;
+    name: string;
+    levelAmountFormula: string;
+}
