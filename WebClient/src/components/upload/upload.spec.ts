@@ -939,6 +939,7 @@ describe("UploadComponent", () => {
                             { name: "Ascensions", stat: "ascensionsThisTranscension", value: 11, type: "exponential" },
                             { name: "Ascensions (Lifetime)", stat: "ascensionsLifetime", value: 3000, type: "exponential" },
                             { name: "Rubies", stat: "rubies", value: 112, type: "exponential" },
+                            { name: "Autoclickers", stat: "autoclickers", value: 9, type: "exponential" },
                         ];
 
                     let errorMessage = fixture.debugElement.query(By.css(".alert-danger"));
@@ -1083,6 +1084,7 @@ describe("UploadComponent", () => {
                 transcendentPower: "0.038364995397561684",
                 heroSouls: "1.739561034051967e+76",
                 pendingSouls: "1e+80",
+                autoclickers: "9",
             },
         };
     }

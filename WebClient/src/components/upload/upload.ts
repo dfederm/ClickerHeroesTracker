@@ -41,6 +41,7 @@ interface ICalculateAscensionZoneData {
     zone: number;
     hero: string;
     heroLevel: number;
+    heroGilds: number;
     damage: decimal.Decimal;
     gold: decimal.Decimal;
 }
@@ -77,6 +78,7 @@ export class UploadComponent implements OnInit {
     public ascensionsThisTranscension: decimal.Decimal = new Decimal(0);
     public ascensionsLifetime: decimal.Decimal = new Decimal(0);
     public rubies: decimal.Decimal = new Decimal(0);
+    public autoclickers: decimal.Decimal = new Decimal(0);
 
     public calculateAscensionZoneSteps: ICalculateAscensionZoneData[];
 
@@ -257,14 +259,22 @@ export class UploadComponent implements OnInit {
             outsidersMap[id] = new Outsider(gameData.outsiders[id], outsiderViewModel.currentLevel);
         }
 
-        // Set current state. TODO: Add proper values for gilds, paidForRubyMultiplier, transcendent
+        // Set current state.
         userData.heroSouls = this.heroSouls;
         userData.highestFinishedZonePersist = this.highestZoneThisTranscension.toNumber();
+        userData.totalAutoclickers = this.autoclickers.toNumber();
+
+        // TODO: Don't assume these
         userData.transcendent = true;
         userData.paidForRubyMultiplier = true;
 
+        // TODO: Handle purchasedGilds
+        userData.epicHeroReceivedUpTo = userData.highestFinishedZonePersist - (userData.highestFinishedZonePersist % 10);
+        let gilds = Math.max(0, userData.epicHeroReceivedUpTo / 10 - 9);
+
         let currentHeroId = 1; // Start with Cid
         let currentHero = heroCollection.getById(currentHeroId);
+        currentHero.epicLevel = gilds; // Assume the current hero has all gilds initially.
 
         // Seed with gold from finishing the first zone
         userData.addGold(userData.getGoldFromFinishingZone(1));
@@ -274,6 +284,7 @@ export class UploadComponent implements OnInit {
             zone: userData.currentZoneHeight,
             hero: this.getShortName(currentHero),
             heroLevel: currentHero.level,
+            heroGilds: currentHero.epicLevel,
             damage: attributes.currentAttack,
             gold: userData.gold,
         }];
@@ -319,7 +330,6 @@ export class UploadComponent implements OnInit {
                 if (allUpgradesPurchased && userData.gold.greaterThanOrEqualTo(heroCollection.getById(currentHeroId + 1).getCostUpToLevel(1))) {
                     currentHeroId++;
                     currentHero = heroCollection.getById(currentHeroId);
-                    userData.moveAllGildsToHero(currentHeroId);
                     didCurrentHeroChange = true;
                 }
             }
@@ -350,6 +360,10 @@ export class UploadComponent implements OnInit {
                 }
             }
 
+            // Regild
+            userData.moveAllGildsToHero(currentHeroId);
+            attributes.recalculate();
+
             // Get how far the user can insta-kill with the current damage
             let instakillStopZone = userData.getInstakillStopZone();
 
@@ -359,8 +373,15 @@ export class UploadComponent implements OnInit {
                     userData.addGold(userData.getGoldFromFinishingZone(i));
                 }
 
-                // TODO: Add new gilds to the pool id this is > highestFinishedZonePersist
                 userData.currentZoneHeight = instakillStopZone;
+
+                // Open all new gilds and move them to the current hero
+                if (userData.highestFinishedZonePersist < userData.currentZoneHeight) {
+                    userData.highestFinishedZonePersist = userData.currentZoneHeight;
+                    userData.openAllZoneGildedHeroes();
+                    userData.moveAllGildsToHero(currentHeroId);
+                    attributes.recalculate();
+                }
 
                 didMakeProgress = true;
 
@@ -368,6 +389,7 @@ export class UploadComponent implements OnInit {
                     zone: userData.currentZoneHeight,
                     hero: this.getShortName(currentHero),
                     heroLevel: currentHero.level,
+                    heroGilds: currentHero.epicLevel,
                     damage: attributes.currentAttack,
                     gold: userData.gold,
                 });
@@ -398,6 +420,7 @@ export class UploadComponent implements OnInit {
         }
 
         this.errorMessage = null;
+        this.calculateAscensionZoneSteps = null;
         this.uploadId = this.upload.id;
 
         if (this.upload.user) {
@@ -445,6 +468,7 @@ export class UploadComponent implements OnInit {
         this.ascensionsThisTranscension = stats.ascensionsThisTranscension || new Decimal(0);
         this.ascensionsLifetime = stats.ascensionsLifetime || new Decimal(0);
         this.rubies = stats.rubies || new Decimal(0);
+        this.autoclickers = stats.autoclickers || new Decimal(0);
 
         // Ancient cost discount multiplier
         const chorgorloth = this.outsidersByName["Chor'gorloth"];
