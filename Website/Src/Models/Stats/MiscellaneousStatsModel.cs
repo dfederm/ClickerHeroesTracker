@@ -30,6 +30,7 @@ namespace ClickerHeroesTrackerWebsite.Models.Stats
                 : 0;
             this.HeroSouls = savedGame.HeroSouls;
             this.PendingSouls = savedGame.PendingSouls;
+            this.Autoclickers = savedGame.Autoclickers;
         }
 
         public BigInteger HeroSoulsSpent { get; }
@@ -55,6 +56,8 @@ namespace ClickerHeroesTrackerWebsite.Models.Stats
         public BigInteger HeroSouls { get; set; }
 
         public BigInteger PendingSouls { get; }
+
+        public long Autoclickers { get; }
 
         private static BigInteger DivideWithPrecisionLoss(BigInteger n, double divisor)
         {

@@ -43,6 +43,8 @@ export class UserData {
 
     public totalAutoclickers = 0;
 
+    public epicHeroReceivedUpTo = 0;
+
     private purchasedUpgrades: { [id: number]: boolean } = {};
 
     constructor(
@@ -156,24 +158,102 @@ export class UserData {
             .times(this.ancients.tenXGoldChance.times(0.09).plus(1));
     }
 
-    public getMonsterReward(monster: Monster): decimal.Decimal {
-        let reward = monster.goldReward;
-
-        // Average out the 10x chance by multiplying it with its chance to happen
-        reward = reward.times(this.ancients.tenXGoldChance.times(0.09).plus(1));
-
-        /*
-        // TODO: Don't assume idle.
-        if (this.isIdle()) { }
-        */
-        reward = reward.times(this.ancients.idleGoldPercent.times(0.01).plus(1));
-
-        return reward;
-    }
-
     public addSouls(addedSouls: decimal.Decimal): decimal.Decimal {
         this.heroSouls = this.heroSouls.plus(addedSouls);
         return this.heroSouls;
+    }
+
+    public getRandomGoldenHeroes(uncollectedEpicHeroes: number, excludedHeroId: number = 0): number[] {
+        let heroGilds: number[] = [];
+
+        /*
+        // TODO: Do this right, although it at best saves a few hero souls
+        let loc5: number = this.getHighestHeroSeen();
+        if (loc5 < 5) {
+            loc5 = 5;
+        }
+        */
+        let highestHeroSeen = 5;
+
+        let loc6 = 1;
+        while (loc6 <= highestHeroSeen) {
+            heroGilds[loc6] = 0;
+            loc6++;
+        }
+
+        let loc7 = uncollectedEpicHeroes;
+        if (uncollectedEpicHeroes > 1000) {
+            let loc8 = 0;
+            let loc9 = Math.floor(loc7 / (highestHeroSeen - 1));
+            loc6 = 2;
+            while (loc6 <= highestHeroSeen) {
+                loc7 = loc7 - loc9;
+                heroGilds[loc6] = loc9;
+                loc8 = loc8 + loc9;
+                loc6++;
+            }
+        }
+
+        loc6 = 0;
+        while (loc6 < loc7) {
+            let heroId = excludedHeroId;
+            while (heroId === excludedHeroId) {
+                // Random number between 2 and loc5, Math.floor(Math.random() * (max - min + 1) + min);
+                heroId = Math.floor((Math.random() * (highestHeroSeen - 1)) + 2);
+            }
+
+            heroGilds[heroId] = heroGilds[heroId] + 1;
+            loc6++;
+        }
+
+        return heroGilds;
+    }
+
+    public openAllZoneGildedHeroes(): void {
+        let uncollectedEpicHeroes = this.numberOfUncollectedEpicHeroes;
+        this.collectEpicHeroGift(uncollectedEpicHeroes, false);
+
+        /*
+        // TODO restorePurchasedGilds
+        let i = 0;
+        while (i < uncollectedEpicHeroes) {
+            this.restorePurchasedGilds();
+            i++;
+        }
+        */
+
+        this.attributes.recalculate();
+    }
+
+    public get numberOfUncollectedEpicHeroes(): number {
+        let loc1 = this.epicHeroReceivedUpTo;
+        let loc2 = 0;
+        while (this.highestFinishedZonePersist >= 100 && (loc1 < 100 || loc1 + 10 <= this.highestFinishedZonePersist)) {
+            if (loc1 < 100) {
+                loc1 = 100;
+            } else {
+                loc1 = loc1 + 10;
+            }
+            loc2++;
+        }
+        return loc2;
+    }
+
+    public collectEpicHeroGift(uncollectedEpicHeroes: number = 1, shouldRecalculate: boolean = true): {}[] {
+        let gildLevels = this.getRandomGoldenHeroes(uncollectedEpicHeroes);
+        this.heroCollection.addGildLevels(gildLevels);
+
+        if (this.epicHeroReceivedUpTo < 100) {
+            this.epicHeroReceivedUpTo = 100;
+            uncollectedEpicHeroes--;
+        }
+
+        this.epicHeroReceivedUpTo = this.epicHeroReceivedUpTo + 10 * uncollectedEpicHeroes;
+        if (shouldRecalculate) {
+            this.attributes.recalculate();
+        }
+
+        return gildLevels;
     }
 
     public moveAllGildsToHero(heroId: number): void {

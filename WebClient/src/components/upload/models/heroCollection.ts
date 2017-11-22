@@ -23,4 +23,17 @@ export class HeroCollection {
 
         return epicLevels;
     }
+
+    public addEpicLevel(heroId: number, numLevels: number = 1): void {
+        let hero = this.getById(heroId);
+        hero.epicLevel = hero.epicLevel + numLevels;
+    }
+
+    public addGildLevels(gildLevels: number[]): void {
+        let heroId = 1;
+        while (heroId < gildLevels.length) {
+            this.addEpicLevel(heroId, gildLevels[heroId]);
+            heroId++;
+        }
+    }
 }

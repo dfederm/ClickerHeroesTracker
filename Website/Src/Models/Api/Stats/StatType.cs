@@ -131,5 +131,6 @@ namespace ClickerHeroesTrackerWebsite.Models.Api.Stats
         AscensionsLifetime,
         HeroSouls,
         PendingSouls,
+        Autoclickers,
     }
 }

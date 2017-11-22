@@ -34,124 +34,72 @@ namespace ClickerHeroesTrackerWebsite.Models.SaveData
             Zlib,
         }
 
-        /// <summary>
-        /// Gets or sets the ancients data for the saved game.
-        /// </summary>
         [JsonProperty(PropertyName = "ancients")]
         public AncientsData AncientsData { get; set; }
 
-        /// <summary>
-        /// Gets or sets the items data for the saved game.
-        /// </summary>
         [JsonProperty(PropertyName = "items")]
         public ItemsData ItemsData { get; set; }
 
-        /// <summary>
-        /// Gets or sets the items data for the saved game.
-        /// </summary>
         [JsonProperty(PropertyName = "outsiders")]
         public OutsidersData OutsidersData { get; set; }
 
-        /// <summary>
-        /// Gets or sets the user's titan damage.
-        /// </summary>
         [JsonProperty(PropertyName = "titanDamage")]
         [JsonConverter(typeof(BigIntegerStringConverter))]
         public BigInteger TitanDamage { get; set; }
 
-        /// <summary>
-        /// Gets or sets the total ancient souls earned
-        /// </summary>
         [JsonProperty(PropertyName = "ancientSoulsTotal")]
         [JsonConverter(typeof(LongFloorConverter))]
         public long AncientSoulsTotal { get; set; }
 
-        /// <summary>
-        /// Gets or sets the highest finished zone ever
-        /// </summary>
         [JsonProperty(PropertyName = "transcendentHighestFinishedZone")]
         [JsonConverter(typeof(LongFloorConverter))]
         public long TranscendentHighestFinishedZone { get; set; }
 
-        /// <summary>
-        /// Gets or sets the highest finished zone ever
-        /// </summary>
         [JsonProperty(PropertyName = "pretranscendentHighestFinishedZone")]
         [JsonConverter(typeof(LongFloorConverter))]
         public long PretranscendentHighestFinishedZone { get; set; }
 
-        /// <summary>
-        /// Gets or sets the highest finished zone in this transcendence
-        /// </summary>
         [JsonProperty(PropertyName = "highestFinishedZonePersist")]
         [JsonConverter(typeof(LongFloorConverter))]
         public long HighestFinishedZonePersist { get; set; }
 
-        /// <summary>
-        /// Gets or sets the hero souls sacrificed in transcendence
-        /// </summary>
         [JsonProperty(PropertyName = "heroSoulsSacrificed")]
         [JsonConverter(typeof(BigIntegerStringConverter))]
         public BigInteger HeroSoulsSacrificed { get; set; }
 
-        /// <summary>
-        /// Gets or sets the number of rubies
-        /// </summary>
         [JsonProperty(PropertyName = "rubies")]
         [JsonConverter(typeof(LongFloorConverter))]
         public long Rubies { get; set; }
 
-        /// <summary>
-        /// Gets or sets the number of ascensions this transcension
-        /// </summary>
         [JsonProperty(PropertyName = "numAscensionsThisTranscension")]
         [JsonConverter(typeof(LongFloorConverter))]
         public long NumAscensionsThisTranscension { get; set; }
 
-        /// <summary>
-        /// Gets or sets the number of ascensions ever
-        /// </summary>
         [JsonProperty(PropertyName = "numWorldResets")]
         [JsonConverter(typeof(LongFloorConverter))]
         public long NumWorldResets { get; set; }
 
-        /// <summary>
-        /// Gets or sets a value indicating whether the user has transcended yet.
-        /// </summary>
         [JsonProperty(PropertyName = "transcendent")]
         public bool Transcendent { get; set; }
 
-        /// <summary>
-        /// Gets or sets unique Id for the user.
-        /// </summary>
         [JsonProperty(PropertyName = "uniqueId")]
         public string UniqueId { get; set; }
 
-        /// <summary>
-        /// Gets or sets Password Hash for the user.
-        /// </summary>
         [JsonProperty(PropertyName = "passwordHash")]
         public string PasswordHash { get; set; }
 
-        /// <summary>
-        /// Gets or sets current number of souls.
-        /// </summary>
         [JsonProperty(PropertyName = "heroSouls")]
         [JsonConverter(typeof(BigIntegerStringConverter))]
         public BigInteger HeroSouls { get; set; }
 
-        /// <summary>
-        /// Gets or sets number of souls earned upon ascending.
-        /// </summary>
         [JsonProperty(PropertyName = "primalSouls")]
         [JsonConverter(typeof(BigIntegerStringConverter))]
         public BigInteger PendingSouls { get; set; }
 
-        /// <summary>
-        /// Parsed the encoded save game data to a structured object.
-        /// </summary>
-        /// <param name="encodedSaveData">The encoded saved game</param>
-        /// <returns>The structured saved game data</returns>
+        [JsonProperty(PropertyName = "autoclickers")]
+        [JsonConverter(typeof(LongFloorConverter))]
+        public long Autoclickers { get; set; }
+
         public static SavedGame Parse(string encodedSaveData)
         {
             // Decode the save

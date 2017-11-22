@@ -185,6 +185,7 @@ namespace ClickerHeroesTrackerWebsite.Controllers
             upload.Stats.Add(StatType.TranscendentPower, miscellaneousStatsModel.TranscendentPower.ToString());
             upload.Stats.Add(StatType.HeroSouls, miscellaneousStatsModel.HeroSouls.ToTransportableString());
             upload.Stats.Add(StatType.PendingSouls, miscellaneousStatsModel.PendingSouls.ToTransportableString());
+            upload.Stats.Add(StatType.Autoclickers, miscellaneousStatsModel.Autoclickers.ToString());
 
             return this.Ok(upload);
         }

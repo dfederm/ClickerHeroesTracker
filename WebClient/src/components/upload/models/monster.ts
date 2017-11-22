@@ -96,15 +96,14 @@ export class Monster {
         }
         */
 
-        let loc6: decimal.Decimal = this.oldMonsterLifeFormula1();
-        loc6 = loc6.dividedBy(15);
-        loc6 = loc6.times(this.userData.goldMultiplier);
-        // Metal Detector: loc6 = loc6.times(param2 ? 1 : this.userData.getSkillBonus("skillGoldBonus") + 1);
-        loc6 = loc6.times(loc4);
-        loc6 = loc6.times(this.ancients.goldPercent.times(0.01).plus(1));
-        loc6 = loc6.times(loc5);
-        loc6 = loc6.ceil();
-        return loc6;
+        return this.oldMonsterLifeFormula1()
+            .dividedBy(15)
+            .times(this.userData.goldMultiplier)
+            // Metal Detector: .times(param2 ? 1 : this.userData.getSkillBonus("skillGoldBonus") + 1);
+            .times(loc4)
+            .times(this.ancients.goldPercent.times(0.01).plus(1))
+            .times(loc5)
+            .ceil();
     }
 
     private oldMonsterLifeFormula1(): decimal.Decimal {
