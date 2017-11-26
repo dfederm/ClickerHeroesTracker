@@ -66,8 +66,8 @@ describe("SettingsService", () => {
             expect(settingsLog[0]).toEqual(SettingsService.defaultSettings);
         }));
 
-        it("should return default settings initially when there is cached data but the user is not logged in", fakeAsync(() => {
-            let settings: IUserSettings = {
+        it("should return cached settings initially when there is cached data and the user is not logged in", fakeAsync(() => {
+            let expectedSettings: IUserSettings = {
                 areUploadsPublic: false,
                 playStyle: "active",
                 useScientificNotation: false,
@@ -81,16 +81,14 @@ describe("SettingsService", () => {
                 skillAncientBaseAncient: 1,
                 skillAncientLevelDiff: 2,
             };
-            (localStorage.getItem as jasmine.Spy).and.returnValue(JSON.stringify(settings));
+            (localStorage.getItem as jasmine.Spy).and.returnValue(JSON.stringify(expectedSettings));
 
             let settingsLog = createService();
 
             expect(settingsLog.length).toEqual(1);
-            expect(settingsLog[0]).toEqual(SettingsService.defaultSettings);
+            expect(settingsLog[0]).toEqual(expectedSettings);
             expect(localStorage.getItem).toHaveBeenCalledWith(SettingsService.settingsKey);
-
-            // The cache is cleared
-            expect(localStorage.removeItem).toHaveBeenCalledWith(SettingsService.settingsKey);
+            expect(localStorage.removeItem).not.toHaveBeenCalled();
         }));
 
         it("should return cached settings initially when there is cached data and the user is logged in", fakeAsync(() => {
@@ -159,6 +157,9 @@ describe("SettingsService", () => {
             expect(settingsLog[0]).toEqual(SettingsService.defaultSettings);
             expect(settingsLog[1]).toEqual(expectedSettings0);
             expect(settingsLog[2]).toEqual(SettingsService.defaultSettings);
+
+            // The cache is cleared
+            expect(localStorage.removeItem).toHaveBeenCalledWith(SettingsService.settingsKey);
         }));
 
         it("should update the settings when it changes", fakeAsync(() => {
@@ -355,8 +356,8 @@ describe("SettingsService", () => {
             expect(settingsLog.length).toEqual(0);
 
             respondToSetSettingsRequest(request2);
-            expect(resolved1).toEqual(true);
-            expect(rejected1).toEqual(false);
+            expect(resolved2).toEqual(true);
+            expect(rejected2).toEqual(false);
 
             // Let the sync interval tick again
             tick(SettingsService.syncInterval);
@@ -436,6 +437,30 @@ describe("SettingsService", () => {
             // An interval was started, so abandon it.
             discardPeriodicTasks();
         }));
+
+        it("should update settings when the user is not logged in", done => {
+            userInfo.next(notLoggedInUser);
+
+            let settingsLog: IUserSettings[];
+            settingsService = TestBed.get(SettingsService) as SettingsService;
+
+            settingsService.settings().subscribe(settings => {
+                if (settingsLog) {
+                    settingsLog.push(settings);
+                }
+            });
+
+            // Start the log now so we skip the initial state.
+            settingsLog = [];
+
+            settingsService.setSetting("playStyle", "somePlayStyle")
+                .then(() => {
+                    expect(settingsLog.length).toEqual(1);
+                    expect(settingsLog[0]).toEqual(Object.assign({}, SettingsService.defaultSettings, { playStyle: "somePlayStyle" }));
+                })
+                .then(done)
+                .catch(done.fail);
+        });
 
         function createService(): IUserSettings[] {
             userInfo.next(loggedInUser);

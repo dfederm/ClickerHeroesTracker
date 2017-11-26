@@ -84,9 +84,12 @@ export class SettingsService {
                     this.userName = userInfo.username;
                     this.fetchSettingsInitial();
                 } else {
-                    this.userName = null;
-                    localStorage.removeItem(SettingsService.settingsKey);
-                    this.settingsSubject.next(this.normalizeSettings(null));
+                    // Only if the user was previously logged in do we want to clear the settings. Otherwise, just leave the ones read from local storage.
+                    if (this.userName) {
+                        this.userName = null;
+                        localStorage.removeItem(SettingsService.settingsKey);
+                        this.settingsSubject.next(this.normalizeSettings(null));
+                    }
                 }
             });
     }
@@ -104,23 +107,28 @@ export class SettingsService {
             this.refreshSubscription = null;
         }
 
-        this.numPendingPatches++;
+        let patch = { [setting]: value };
+        if (this.userName) {
+            this.numPendingPatches++;
 
-        // TODO: Handle if the user is not logged in
-        return this.authenticationService.getAuthHeaders()
-            .then(headers => {
-                let body = { [setting]: value };
-                return this.http.patch(`/api/users/${this.userName}/settings`, body, { headers, responseType: "text" })
-                    .toPromise();
-            })
-            .then(() => {
-                this.handlePatchCompleted();
-            })
-            .catch((err: HttpErrorResponse) => {
-                this.httpErrorHandlerService.logError("SettingsService.setSetting.error", err);
-                this.handlePatchCompleted();
-                return Promise.reject(err);
-            });
+            return this.authenticationService.getAuthHeaders()
+                .then(headers => {
+                    return this.http.patch(`/api/users/${this.userName}/settings`, patch, { headers, responseType: "text" })
+                        .toPromise();
+                })
+                .then(() => {
+                    this.handlePatchCompleted();
+                })
+                .catch((err: HttpErrorResponse) => {
+                    this.httpErrorHandlerService.logError("SettingsService.setSetting.error", err);
+                    this.handlePatchCompleted();
+                    return Promise.reject(err);
+                });
+        } else {
+            let newSettings = Object.assign({}, this.settingsSubject.getValue(), patch);
+            this.handleNewSettings(newSettings);
+            return Promise.resolve();
+        }
     }
 
     private fetchSettingsInitial(retryDelay: number = SettingsService.retryDelay): void {
@@ -159,10 +167,8 @@ export class SettingsService {
                     return Promise.resolve();
                 }
 
-                // Only store exactly what was sent back in case the client's defaults change.
-                localStorage.setItem(SettingsService.settingsKey, JSON.stringify(newSettings));
+                this.handleNewSettings(newSettings);
 
-                this.settingsSubject.next(this.normalizeSettings(newSettings));
                 return Promise.resolve();
             })
             .catch((err: HttpErrorResponse) => {
@@ -180,6 +186,13 @@ export class SettingsService {
                 .catch(() => void 0) // Just swallow errors from the refresh
                 .then(() => this.scheduleRefresh());
         }
+    }
+
+    private handleNewSettings(newSettings: IUserSettings): void {
+        // Store exactly what was given (before normalization) in case the client's defaults change.
+        localStorage.setItem(SettingsService.settingsKey, JSON.stringify(newSettings));
+
+        this.settingsSubject.next(this.normalizeSettings(newSettings));
     }
 
     // In case the settings are missing some values, fill in the defaults
