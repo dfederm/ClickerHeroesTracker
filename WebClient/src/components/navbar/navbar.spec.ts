@@ -40,11 +40,11 @@ describe("NavbarComponent", () => {
             {
                 declarations: [NavbarComponent],
                 providers:
-                [
-                    { provide: AuthenticationService, useValue: authenticationService },
-                    { provide: Router, useValue: router },
-                    { provide: NgbModal, useValue: modalService },
-                ],
+                    [
+                        { provide: AuthenticationService, useValue: authenticationService },
+                        { provide: Router, useValue: router },
+                        { provide: NgbModal, useValue: modalService },
+                    ],
                 schemas: [NO_ERRORS_SCHEMA],
             })
             .compileComponents()
@@ -62,18 +62,20 @@ describe("NavbarComponent", () => {
         fixture.whenStable().then(() => {
             fixture.detectChanges();
 
-            let navItems = fixture.debugElement.queryAll(By.css(".nav-item"));
-            expect(navItems).not.toBeNull();
-            expect(navItems.length).toEqual(5);
-
             let expectedLinks: { text: string, url?: string, dialog?: Type<{}> }[] =
                 [
                     { text: "Upload", dialog: component.UploadDialogComponent },
                     { text: "What's New", url: "/news" },
                     { text: "Feedback", dialog: component.FeedbackDialogComponent },
+                    { text: "Settings", dialog: component.SettingsDialogComponent },
                     { text: "Register", dialog: component.RegisterDialogComponent },
                     { text: "Log in", dialog: component.LogInDialogComponent },
                 ];
+
+            let navItems = fixture.debugElement.queryAll(By.css(".nav-item"));
+            expect(navItems).not.toBeNull();
+            expect(navItems.length).toEqual(expectedLinks.length);
+
             for (let i = 0; i < navItems.length; i++) {
                 let link = navItems[i].query(By.css(".nav-link"));
                 expect(link).not.toBeNull();
@@ -102,10 +104,6 @@ describe("NavbarComponent", () => {
         fixture.whenStable().then(() => {
             fixture.detectChanges();
 
-            let navItems = fixture.debugElement.queryAll(By.css(".nav-item"));
-            expect(navItems).not.toBeNull();
-            expect(navItems.length).toEqual(7);
-
             let expectedLinks: { text: string, url?: string, hasClickHandler?: boolean, dialog?: Type<{}> }[] =
                 [
                     { text: "Dashboard", url: "/users/someUsername" },
@@ -116,6 +114,11 @@ describe("NavbarComponent", () => {
                     { text: "Settings", dialog: component.SettingsDialogComponent },
                     { text: "Log off", hasClickHandler: true },
                 ];
+
+            let navItems = fixture.debugElement.queryAll(By.css(".nav-item"));
+            expect(navItems).not.toBeNull();
+            expect(navItems.length).toEqual(expectedLinks.length);
+
             for (let i = 0; i < navItems.length; i++) {
                 let link = navItems[i].query(By.css(".nav-link"));
                 expect(link).not.toBeNull();
