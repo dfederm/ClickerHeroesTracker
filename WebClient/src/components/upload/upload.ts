@@ -54,6 +54,19 @@ interface ICalculateAscensionZoneData {
 export class UploadComponent implements OnInit {
     private static exponentialRegex = /^(\d+(\.\d+)?)e\+?(\d+)$/i;
 
+    // These all have effective caps where additional levels add less than floating point numbers can handle.
+    private static ancientLevelCaps: { [ancientName: string]: number } = {
+        Atman: 2880,
+        Bubos: 18715,
+        Chronos: 1101,
+        Dogcog: 3743,
+        Dora: 18715,
+        Fortuna: 14972,
+        Kumawakamaru: 14972,
+        Revolc: 3743,
+        Vaagur: 1440,
+    };
+
     public userInfo: IUserInfo;
     public errorMessage: string;
     public isLoading: boolean;
@@ -663,16 +676,22 @@ export class UploadComponent implements OnInit {
             let skillAncientBaseAncientLevel = suggestedLevels[skillAncientBaseAncientShortName];
             let suggestedSkillAncientLevel = skillAncientBaseAncientLevel.plus(this.settings.skillAncientLevelDiff);
 
-            // These two have effective caps where additional levels add less than floating point numbers can handle.
-            suggestedLevels.Vaagur = Decimal.min(1440, suggestedSkillAncientLevel);
-            suggestedLevels.Revolc = Decimal.min(3743, suggestedSkillAncientLevel);
-
-            suggestedLevels.Chawedo = suggestedSkillAncientLevel;
-            suggestedLevels.Hecatoncheir = suggestedSkillAncientLevel;
             suggestedLevels.Berserker = suggestedSkillAncientLevel;
-            suggestedLevels.Sniperino = suggestedSkillAncientLevel;
-            suggestedLevels.Kleptos = suggestedSkillAncientLevel;
+            suggestedLevels.Chawedo = suggestedSkillAncientLevel;
             suggestedLevels.Energon = suggestedSkillAncientLevel;
+            suggestedLevels.Hecatoncheir = suggestedSkillAncientLevel;
+            suggestedLevels.Kleptos = suggestedSkillAncientLevel;
+            suggestedLevels.Revolc = suggestedSkillAncientLevel;
+            suggestedLevels.Sniperino = suggestedSkillAncientLevel;
+            suggestedLevels.Vaagur = suggestedSkillAncientLevel;
+        }
+
+        // Handle ancients with caps
+        for (let ancientName in UploadComponent.ancientLevelCaps) {
+            if (suggestedLevels[ancientName]) {
+                let maxLevel = UploadComponent.ancientLevelCaps[ancientName];
+                suggestedLevels[ancientName] = Decimal.min(maxLevel, suggestedLevels[ancientName]);
+            }
         }
 
         // Normalize the values
