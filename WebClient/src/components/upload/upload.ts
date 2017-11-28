@@ -653,14 +653,14 @@ export class UploadComponent implements OnInit {
         switch (this.playStyle) {
             case "idle":
                 suggestedLevels.Libertas = suggestedLevels.Mammon;
-                suggestedLevels.Nogardnit = suggestedLevels.Libertas.pow(0.8);
+                suggestedLevels.Nogardnit = this.autoclickers.isZero() ? new Decimal(0) : suggestedLevels.Libertas.pow(0.8);
                 break;
             case "hybrid":
                 const hybridRatioReciprocal = 1 / this.settings.hybridRatio;
                 suggestedLevels.Bhaal = suggestedLevels.Fragsworth = currentPrimaryAncientLevel.times(hybridRatioReciprocal);
                 suggestedLevels.Juggernaut = suggestedLevels.Fragsworth.pow(0.8);
                 suggestedLevels.Pluto = suggestedLevels.Libertas = suggestedLevels.Mammon;
-                suggestedLevels.Nogardnit = suggestedLevels.Libertas.pow(0.8);
+                suggestedLevels.Nogardnit = this.autoclickers.isZero() ? new Decimal(0) : suggestedLevels.Libertas.pow(0.8);
                 break;
             case "active":
                 suggestedLevels.Bhaal = currentPrimaryAncientLevel;
