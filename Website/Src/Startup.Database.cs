@@ -39,29 +39,8 @@ namespace ClickerHeroesTrackerWebsite
                 var databaseSettingsOptions = serviceProvider.GetService<IOptions<DatabaseSettings>>();
 
                 // Get all existing tables so we know what already exists
-                string tableNamesCommand;
-                switch (databaseSettingsOptions.Value?.Kind)
-                {
-                    case "SqlServer":
-                    {
-                        tableNamesCommand = "SELECT Name FROM sys.Tables WHERE Type = N'U'";
-                        break;
-                    }
-
-                    case "Sqlite":
-                    {
-                        tableNamesCommand = "SELECT name AS Name FROM sqlite_master WHERE type='table'";
-                        break;
-                    }
-
-                    default:
-                    {
-                        throw new InvalidOperationException($"Invalid configuration for \"Database:Kind\": {databaseSettingsOptions.Value?.Kind}");
-                    }
-                }
-
                 var existingTables = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-                using (var command = databaseCommandFactory.Create(tableNamesCommand))
+                using (var command = databaseCommandFactory.Create("SELECT Name FROM sys.Tables WHERE Type = N'U'"))
                 {
                     using (var reader = command.ExecuteReader())
                     {
@@ -83,7 +62,7 @@ namespace ClickerHeroesTrackerWebsite
                     "UserSettings",
                     "Clans",
                 };
-                var tableFiles = tables.Select(table => Path.Combine(this.Environment.ContentRootPath, @"Services\Database\Schemas", databaseSettingsOptions.Value.Kind, table + ".sql"));
+                var tableFiles = tables.Select(table => Path.Combine(this.Environment.ContentRootPath, @"Services\Database\Schemas", table + ".sql"));
                 foreach (var tableFile in tableFiles)
                 {
                     var tableName = Path.GetFileNameWithoutExtension(tableFile);

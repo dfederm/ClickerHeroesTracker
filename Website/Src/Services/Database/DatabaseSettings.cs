@@ -6,8 +6,6 @@ namespace ClickerHeroesTrackerWebsite.Services.Database
 {
     public sealed class DatabaseSettings
     {
-        public string Kind { get; set; }
-
         public string ConnectionString { get; set; }
     }
 }
