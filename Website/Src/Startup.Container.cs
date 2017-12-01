@@ -72,31 +72,9 @@ namespace ClickerHeroesTrackerWebsite
             }
 
             // Add Entity framework services.
-            var connectionString = this.Configuration["Database:ConnectionString"];
-            Action<DbContextOptionsBuilder> useDatabase;
-            switch (this.Configuration["Database:Kind"])
-            {
-                case "SqlServer":
-                    {
-                        useDatabase = options => options.UseSqlServer(connectionString);
-                        break;
-                    }
-
-                case "Sqlite":
-                    {
-                        useDatabase = options => options.UseSqlite(connectionString);
-                        break;
-                    }
-
-                default:
-                    {
-                        throw new InvalidOperationException($"Invalid configuration for \"Database:Kind\": {this.Configuration["Database:Kind"]}");
-                    }
-            }
-
             services.AddDbContext<ApplicationDbContext>(options =>
                 {
-                    useDatabase(options);
+                    options.UseSqlServer(this.Configuration["Database:ConnectionString"]);
 
                     // Register the entity sets needed by OpenIddict.
                     options.UseOpenIddict();

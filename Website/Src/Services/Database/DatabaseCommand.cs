@@ -8,7 +8,6 @@ namespace ClickerHeroesTrackerWebsite.Services.Database
     using System.Collections.Generic;
     using System.Data;
     using System.Data.Common;
-    using Microsoft.Data.Sqlite;
 
     internal sealed class DatabaseCommand : IDisposable, IDatabaseCommand
     {
@@ -101,13 +100,6 @@ namespace ClickerHeroesTrackerWebsite.Services.Database
             if (string.IsNullOrEmpty(this.CommandText))
             {
                 throw new InvalidOperationException("CommandText may not be empty");
-            }
-
-            // Compat shim for Sqlite. This is terrible!
-            if (this.command is SqliteCommand)
-            {
-                this.CommandText = this.CommandText
-                    .Replace("SCOPE_IDENTITY", "last_insert_rowid", StringComparison.OrdinalIgnoreCase);
             }
 
             this.command.CommandText = this.CommandText;

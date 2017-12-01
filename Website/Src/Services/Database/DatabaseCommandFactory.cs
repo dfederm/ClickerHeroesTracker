@@ -8,7 +8,6 @@ namespace ClickerHeroesTrackerWebsite.Services.Database
     using System.Collections.Generic;
     using System.Data.Common;
     using System.Data.SqlClient;
-    using Microsoft.Data.Sqlite;
     using Microsoft.Extensions.Options;
 
     /// <summary>
@@ -16,12 +15,6 @@ namespace ClickerHeroesTrackerWebsite.Services.Database
     /// </summary>
     public sealed class DatabaseCommandFactory : IDisposable, IDatabaseCommandFactory
     {
-        private static Dictionary<string, Func<string, DbConnection>> connectionFactories = new Dictionary<string, Func<string, DbConnection>>(StringComparer.OrdinalIgnoreCase)
-        {
-            { "SqlServer", str => new SqlConnection(str) },
-            { "Sqlite", str => new SqliteConnection(str) },
-        };
-
         private readonly DatabaseSettings databaseSettings;
 
         private DbConnection connection;
@@ -37,7 +30,7 @@ namespace ClickerHeroesTrackerWebsite.Services.Database
             // Create the connection if it hasn't been created yet.
             if (this.connection == null)
             {
-                this.connection = connectionFactories[this.databaseSettings.Kind](this.databaseSettings.ConnectionString);
+                this.connection = new SqlConnection(this.databaseSettings.ConnectionString);
                 this.connection.Open();
             }
 
