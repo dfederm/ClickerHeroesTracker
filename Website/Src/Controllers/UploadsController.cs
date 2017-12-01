@@ -7,7 +7,6 @@ namespace ClickerHeroesTrackerWebsite.Controllers
     using System;
     using System.Collections.Generic;
     using System.Net;
-    using ClickerHeroesTrackerWebsite.Instrumentation;
     using ClickerHeroesTrackerWebsite.Models;
     using ClickerHeroesTrackerWebsite.Models.Api.Stats;
     using ClickerHeroesTrackerWebsite.Models.Api.Uploads;
@@ -34,8 +33,6 @@ namespace ClickerHeroesTrackerWebsite.Controllers
 
         private readonly TelemetryClient telemetryClient;
 
-        private readonly ICounterProvider counterProvider;
-
         private readonly UserManager<ApplicationUser> userManager;
 
         public UploadsController(
@@ -43,14 +40,12 @@ namespace ClickerHeroesTrackerWebsite.Controllers
             GameData gameData,
             IUserSettingsProvider userSettingsProvider,
             TelemetryClient telemetryClient,
-            ICounterProvider counterProvider,
             UserManager<ApplicationUser> userManager)
         {
             this.databaseCommandFactory = databaseCommandFactory;
             this.gameData = gameData;
             this.userSettingsProvider = userSettingsProvider;
             this.telemetryClient = telemetryClient;
-            this.counterProvider = counterProvider;
             this.userManager = userManager;
         }
 

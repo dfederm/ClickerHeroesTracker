@@ -11,7 +11,6 @@ namespace ClickerHeroesTrackerWebsite
     using AspNet.Security.OAuth.Validation;
     using AspNet.Security.OpenIdConnect.Primitives;
     using ClickerHeroesTrackerWebsite.Configuration;
-    using ClickerHeroesTrackerWebsite.Instrumentation;
     using ClickerHeroesTrackerWebsite.Models;
     using ClickerHeroesTrackerWebsite.Models.Game;
     using ClickerHeroesTrackerWebsite.Models.Settings;
@@ -192,8 +191,6 @@ namespace ClickerHeroesTrackerWebsite
 
             services.AddMvc(options =>
             {
-                options.Filters.Add(typeof(MeasureLatencyFilter));
-
                 var jsonFormatter = options.OutputFormatters.OfType<JsonOutputFormatter>().Single();
 
                 // Allow the json formatter to handle requests from the browser
@@ -238,7 +235,6 @@ namespace ClickerHeroesTrackerWebsite
             services.AddSingleton<IOptions<PasswordHasherOptions>, PasswordHasherOptionsAccessor>();
 
             // Per request registrations
-            services.AddScoped<ICounterProvider, CounterProvider>();
             services.AddScoped<IDatabaseCommandFactory, DatabaseCommandFactory>();
             services.AddScoped<IUserSettingsProvider, UserSettingsProvider>();
 

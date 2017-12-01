@@ -10,7 +10,6 @@ namespace ClickerHeroesTracker.UploadProcessor
     using System.Threading;
     using System.Threading.Tasks;
     using ClickerHeroesTrackerWebsite;
-    using ClickerHeroesTrackerWebsite.Instrumentation;
     using ClickerHeroesTrackerWebsite.Models.Game;
     using ClickerHeroesTrackerWebsite.Services.Database;
     using ClickerHeroesTrackerWebsite.Services.UploadProcessing;
@@ -75,8 +74,7 @@ namespace ClickerHeroesTracker.UploadProcessor
                     var uploadIds = new List<int>();
 
                     const string CommandText = "SELECT Id FROM Uploads WHERE LastComputeTime < '" + LastComputeTime + "' ORDER BY LastComputeTime DESC";
-                    using (var counterProvider = new CounterProvider(telemetryClient))
-                    using (var databaseCommandFactory = new DatabaseCommandFactory(databaseSettingsOptions, counterProvider))
+                    using (var databaseCommandFactory = new DatabaseCommandFactory(databaseSettingsOptions))
                     using (var command = databaseCommandFactory.Create(CommandText))
                     using (var reader = command.ExecuteReader())
                     {
@@ -88,20 +86,17 @@ namespace ClickerHeroesTracker.UploadProcessor
                     }
 
                     Console.WriteLine($"Found {uploadIds.Count} uploads to schedule");
-                    using (var counterProvider = new CounterProvider(telemetryClient))
+                    var uploadScheduler = new AzureStorageUploadScheduler(queueClient);
+                    for (var i = 0; i < uploadIds.Count; i++)
                     {
-                        var uploadScheduler = new AzureStorageUploadScheduler(counterProvider, queueClient);
-                        for (var i = 0; i < uploadIds.Count; i++)
+                        if (cancelSource.IsCancellationRequested)
                         {
-                            if (cancelSource.IsCancellationRequested)
-                            {
-                                break;
-                            }
-
-                            Console.WriteLine($"Scheduling message {i + 1} of {uploadIds.Count} - {100 * (i + 1) / uploadIds.Count}%");
-                            var message = new UploadProcessingMessage { UploadId = uploadIds[i], Requester = "Ad-hoc Recompute", Priority = UploadProcessingMessagePriority.Low };
-                            await uploadScheduler.ScheduleAsync(message);
+                            break;
                         }
+
+                        Console.WriteLine($"Scheduling message {i + 1} of {uploadIds.Count} - {100 * (i + 1) / uploadIds.Count}%");
+                        var message = new UploadProcessingMessage { UploadId = uploadIds[i], Requester = "Ad-hoc Recompute", Priority = UploadProcessingMessagePriority.Low };
+                        await uploadScheduler.ScheduleAsync(message);
                     }
 
                     Console.WriteLine($"Stopped scheduling");

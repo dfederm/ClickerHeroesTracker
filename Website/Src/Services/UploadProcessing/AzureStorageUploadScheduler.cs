@@ -8,7 +8,6 @@ namespace ClickerHeroesTrackerWebsite.Services.UploadProcessing
     using System.Globalization;
     using System.Linq;
     using System.Threading.Tasks;
-    using ClickerHeroesTrackerWebsite.Instrumentation;
     using Microsoft.WindowsAzure.Storage.Queue;
     using Newtonsoft.Json;
     using Website.Services.UploadProcessing;
@@ -16,18 +15,13 @@ namespace ClickerHeroesTrackerWebsite.Services.UploadProcessing
     /// <inheritdoc />
     public sealed class AzureStorageUploadScheduler : IUploadScheduler
     {
-        private readonly ICounterProvider counterProvider;
-
         private readonly Dictionary<UploadProcessingMessagePriority, CloudQueue> clients;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="AzureStorageUploadScheduler"/> class.
         /// </summary>
-        public AzureStorageUploadScheduler(
-            ICounterProvider counterProvider,
-            CloudQueueClient queueClient)
+        public AzureStorageUploadScheduler(CloudQueueClient queueClient)
         {
-            this.counterProvider = counterProvider;
             this.clients = new Dictionary<UploadProcessingMessagePriority, CloudQueue>
             {
                 { UploadProcessingMessagePriority.Low, GetQueue(queueClient, UploadProcessingMessagePriority.Low) },
@@ -38,20 +32,17 @@ namespace ClickerHeroesTrackerWebsite.Services.UploadProcessing
         /// <inheritdoc />
         public async Task ScheduleAsync(UploadProcessingMessage message)
         {
-            using (this.counterProvider.Measure(Counter.ScheduleUpload))
-            {
-                await this.ScheduleInternal(message);
-            }
+            var client = this.clients[message.Priority];
+            var serializedMessage = JsonConvert.SerializeObject(message);
+            var queueMessage = new CloudQueueMessage(serializedMessage);
+            await client.AddMessageAsync(queueMessage);
         }
 
         /// <inheritdoc />
         public async Task ScheduleAsync(IEnumerable<UploadProcessingMessage> messages)
         {
-            using (this.counterProvider.Measure(Counter.BatchScheduleUpload))
-            {
-                // Use WaitAll to do them in parallel
-                await Task.WhenAll(messages.Select(this.ScheduleInternal));
-            }
+            // Use WaitAll to do them in parallel
+            await Task.WhenAll(messages.Select(this.ScheduleAsync));
         }
 
         /// <inheritdoc />
@@ -83,14 +74,6 @@ namespace ClickerHeroesTrackerWebsite.Services.UploadProcessing
             var queue = queueClient.GetQueueReference($"upload-processing-{priority.ToString().ToLower(CultureInfo.InvariantCulture)}-priority");
             queue.CreateIfNotExistsAsync().Wait();
             return queue;
-        }
-
-        private async Task ScheduleInternal(UploadProcessingMessage message)
-        {
-            var client = this.clients[message.Priority];
-            var serializedMessage = JsonConvert.SerializeObject(message);
-            var queueMessage = new CloudQueueMessage(serializedMessage);
-            await client.AddMessageAsync(queueMessage);
         }
     }
 }

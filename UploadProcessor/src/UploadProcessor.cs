@@ -10,7 +10,6 @@ namespace ClickerHeroesTracker.UploadProcessor
     using System.Text;
     using System.Threading;
     using System.Threading.Tasks;
-    using ClickerHeroesTrackerWebsite.Instrumentation;
     using ClickerHeroesTrackerWebsite.Models;
     using ClickerHeroesTrackerWebsite.Models.Game;
     using ClickerHeroesTrackerWebsite.Models.SaveData;
@@ -130,11 +129,7 @@ namespace ClickerHeroesTracker.UploadProcessor
 
             this.telemetryClient.TrackEvent("UploadProcessor-Recieved", properties);
 
-            using (var counterProvider = new CounterProvider(this.telemetryClient))
-            using (var databaseCommandFactory = new DatabaseCommandFactory(
-                this.databaseSettingsOptions,
-                counterProvider))
-            using (counterProvider.Measure(Counter.ProcessUpload))
+            using (var databaseCommandFactory = new DatabaseCommandFactory(this.databaseSettingsOptions))
             {
                 int uploadId = -1;
                 try
