@@ -8,7 +8,6 @@ namespace ClickerHeroesTrackerWebsite.Services.Database
     using System.Collections.Generic;
     using System.Data.Common;
     using System.Data.SqlClient;
-    using ClickerHeroesTrackerWebsite.Instrumentation;
     using Microsoft.Data.Sqlite;
     using Microsoft.Extensions.Options;
 
@@ -25,16 +24,11 @@ namespace ClickerHeroesTrackerWebsite.Services.Database
 
         private readonly DatabaseSettings databaseSettings;
 
-        private readonly ICounterProvider counterProvider;
-
         private DbConnection connection;
 
-        public DatabaseCommandFactory(
-            IOptions<DatabaseSettings> databaseSettingsOptions,
-            ICounterProvider counterProvider)
+        public DatabaseCommandFactory(IOptions<DatabaseSettings> databaseSettingsOptions)
         {
             this.databaseSettings = databaseSettingsOptions.Value;
-            this.counterProvider = counterProvider;
         }
 
         /// <inheritdoc/>
@@ -43,17 +37,11 @@ namespace ClickerHeroesTrackerWebsite.Services.Database
             // Create the connection if it hasn't been created yet.
             if (this.connection == null)
             {
-                using (this.counterProvider.Suspend(Counter.Internal))
-                using (this.counterProvider.Measure(Counter.Dependency))
-                {
-                    this.connection = connectionFactories[this.databaseSettings.Kind](this.databaseSettings.ConnectionString);
-                    this.connection.Open();
-                }
+                this.connection = connectionFactories[this.databaseSettings.Kind](this.databaseSettings.ConnectionString);
+                this.connection.Open();
             }
 
-            return new DatabaseCommand(
-                this.connection,
-                this.counterProvider);
+            return new DatabaseCommand(this.connection);
         }
 
         public void Dispose()

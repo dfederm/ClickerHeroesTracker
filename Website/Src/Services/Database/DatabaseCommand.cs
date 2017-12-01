@@ -8,34 +8,22 @@ namespace ClickerHeroesTrackerWebsite.Services.Database
     using System.Collections.Generic;
     using System.Data;
     using System.Data.Common;
-    using ClickerHeroesTrackerWebsite.Instrumentation;
     using Microsoft.Data.Sqlite;
 
     internal sealed class DatabaseCommand : IDisposable, IDatabaseCommand
     {
-        private readonly ICounterProvider counterProvider;
-
         private DbCommand command;
 
         private DbTransaction transaction;
 
-        public DatabaseCommand(
-            DbConnection connection,
-            ICounterProvider counterProvider)
+        public DatabaseCommand(DbConnection connection)
         {
             if (connection == null)
             {
                 throw new ArgumentNullException("connection");
             }
 
-            if (counterProvider == null)
-            {
-                throw new ArgumentNullException("counterProvider");
-            }
-
             this.command = connection.CreateCommand();
-
-            this.counterProvider = counterProvider;
         }
 
         public string CommandText { get; set; }
@@ -76,33 +64,21 @@ namespace ClickerHeroesTrackerWebsite.Services.Database
         {
             this.PrepareForExecution();
 
-            using (this.counterProvider.Suspend(Counter.Internal))
-            using (this.counterProvider.Measure(Counter.Dependency))
-            {
-                this.command.ExecuteNonQuery();
-            }
+            this.command.ExecuteNonQuery();
         }
 
         public object ExecuteScalar()
         {
             this.PrepareForExecution();
 
-            using (this.counterProvider.Suspend(Counter.Internal))
-            using (this.counterProvider.Measure(Counter.Dependency))
-            {
-                return this.command.ExecuteScalar();
-            }
+            return this.command.ExecuteScalar();
         }
 
         public IDataReader ExecuteReader()
         {
             this.PrepareForExecution();
 
-            using (this.counterProvider.Suspend(Counter.Internal))
-            using (this.counterProvider.Measure(Counter.Dependency))
-            {
-                return this.command.ExecuteReader();
-            }
+            return this.command.ExecuteReader();
         }
 
         public void Dispose()

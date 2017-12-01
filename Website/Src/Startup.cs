@@ -5,7 +5,6 @@
 namespace ClickerHeroesTrackerWebsite
 {
     using System;
-    using ClickerHeroesTrackerWebsite.Instrumentation;
     using ClickerHeroesTrackerWebsite.Models.Game;
     using ClickerHeroesTrackerWebsite.Utility;
     using Microsoft.AspNetCore.Builder;
@@ -27,9 +26,6 @@ namespace ClickerHeroesTrackerWebsite
             {
                 app.UseExceptionHandler("/Error");
             }
-
-            // We want to start measuring latency as soon as possible during a request.
-            app.UseMiddleware<MeasureLatencyMiddleware>();
 
             // Require https on non-devbox
             if (!this.Environment.IsDevelopment())
