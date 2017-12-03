@@ -17,8 +17,8 @@ export interface IVersion {
 
 @Injectable()
 export class VersionService {
-    // Poll the version every 5 minutes
-    public static pollingInterval = 5 * 60 * 1000;
+    // Poll the version every hour
+    public static pollingInterval = 60 * 60 * 1000;
 
     public static retryDelay = 1000;
 

@@ -32,8 +32,8 @@ export interface IUserSettings {
 
 @Injectable()
 export class SettingsService {
-    // Sync settings every 5 minutes
-    public static syncInterval = 5 * 60 * 1000;
+    // Sync settings every hour
+    public static syncInterval = 60 * 60 * 1000;
 
     public static retryDelay = 1000;
 
