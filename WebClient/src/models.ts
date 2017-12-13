@@ -16,9 +16,9 @@ export interface IUpload {
 
     user?: IUser;
 
-    uploadContent?: string;
+    content?: string;
 
-    stats?: { [key: string]: string };
+    isScrubbed?: boolean;
 }
 
 export interface IUser {

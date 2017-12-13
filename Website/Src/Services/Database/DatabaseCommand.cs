@@ -19,7 +19,7 @@ namespace ClickerHeroesTrackerWebsite.Services.Database
         {
             if (connection == null)
             {
-                throw new ArgumentNullException("connection");
+                throw new ArgumentNullException(nameof(connection));
             }
 
             this.command = connection.CreateCommand();

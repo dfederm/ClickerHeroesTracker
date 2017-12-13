@@ -19,8 +19,10 @@ import { Ancient } from "./models/ancient";
 import { Outsider } from "./models/outsider";
 import { Upgrade } from "./models/upgrade";
 import { Attributes } from "./models/attributes";
+import { SavedGame } from "./models/savedGame";
 
 interface IAncientViewModel {
+    id: string;
     name: string;
     ancientLevel: decimal.Decimal;
     itemLevel: decimal.Decimal;
@@ -75,7 +77,7 @@ export class UploadComponent implements OnInit {
     public userName: string;
     public uploadTime: string;
     public playStyle: string;
-    public uploadContent: string;
+    public savedGame: SavedGame;
 
     public ancients: IAncientViewModel[] = [];
     public outsiders: IOutsiderViewModel[] = [];
@@ -146,6 +148,7 @@ export class UploadComponent implements OnInit {
             }
 
             let ancient: IAncientViewModel = {
+                id,
                 name: this.getShortName(ancientDefinition),
                 ancientLevel: new Decimal(0),
                 itemLevel: new Decimal(0),
@@ -410,10 +413,6 @@ export class UploadComponent implements OnInit {
         }
     }
 
-    private static normalizeName(name: string): string {
-        return name.replace(/[^\w]/gi, "");
-    }
-
     private handleSettings(settings: IUserSettings): void {
         this.settings = settings;
         this.refresh();
@@ -446,42 +445,73 @@ export class UploadComponent implements OnInit {
 
         this.uploadTime = this.upload.timeSubmitted;
         this.playStyle = this.upload.playStyle;
-        this.uploadContent = this.upload.uploadContent;
+        this.savedGame = new SavedGame(this.upload.content, this.upload.isScrubbed);
 
-        let stats: { [key: string]: decimal.Decimal } = {};
-        if (this.upload.stats) {
-            for (let statType in this.upload.stats) {
-                stats[statType] = new Decimal(this.upload.stats[statType]);
+        let itemLevels: { [ancientId: string]: decimal.Decimal } = {};
+        if (this.savedGame.data.items && this.savedGame.data.items.items && this.savedGame.data.items.slots) {
+            for (let slotId in this.savedGame.data.items.slots) {
+                let itemId = this.savedGame.data.items.slots[slotId];
+                let item = this.savedGame.data.items.items[itemId];
+                if (item) {
+                    let bonuses = [
+                        { type: item.bonusType1, level: item.bonus1Level },
+                        { type: item.bonusType2, level: item.bonus2Level },
+                        { type: item.bonusType3, level: item.bonus3Level },
+                        { type: item.bonusType4, level: item.bonus4Level },
+                    ];
+
+                    for (let i = 0; i < bonuses.length; i++) {
+                        let bonus = bonuses[i];
+                        let bonusType = gameData.itemBonusTypes[bonus.type];
+                        if (bonusType) {
+                            itemLevels[bonusType.ancientId] = (itemLevels[bonusType.ancientId] || new Decimal(0)).plus(bonus.level);
+                        }
+                    }
+                }
             }
         }
 
-        for (let i = 0; i < this.ancients.length; i++) {
-            let ancient = this.ancients[i];
-            let ancientName = UploadComponent.normalizeName(ancient.name);
-            ancient.ancientLevel = stats["ancient" + ancientName] || new Decimal(0);
-            ancient.itemLevel = stats["item" + ancientName] || new Decimal(0);
-            ancient.effectiveLevel = ancient.ancientLevel.plus(ancient.itemLevel).floor();
+        let heroSoulsSpent = new Decimal(0);
+        if (this.savedGame.data.ancients && this.savedGame.data.ancients.ancients) {
+            for (let i = 0; i < this.ancients.length; i++) {
+                let ancient = this.ancients[i];
+                let ancientData = this.savedGame.data.ancients.ancients[ancient.id];
+                if (ancientData) {
+                    ancient.ancientLevel = new Decimal(ancientData.level || 0);
+                    ancient.itemLevel = itemLevels[ancient.id] || new Decimal(0);
+                    ancient.effectiveLevel = ancient.ancientLevel.plus(ancient.itemLevel).floor();
+                    heroSoulsSpent = heroSoulsSpent.plus(ancientData.spentHeroSouls);
+                }
+            }
         }
 
-        for (let i = 0; i < this.outsiders.length; i++) {
-            let outsider = this.outsiders[i];
-            let outsiderName = UploadComponent.normalizeName(outsider.name);
-            outsider.currentLevel = stats["outsider" + outsiderName] || new Decimal(0);
+        if (this.savedGame.data.outsiders && this.savedGame.data.outsiders.outsiders) {
+            for (let i = 0; i < this.outsiders.length; i++) {
+                let outsider = this.outsiders[i];
+                let outsiderData = this.savedGame.data.outsiders.outsiders[outsider.id];
+                if (outsiderData) {
+                    outsider.currentLevel = new Decimal(outsiderData.level || 0);
+                }
+            }
         }
 
-        this.pendingSouls = stats.pendingSouls || new Decimal(0);
-        this.heroSouls = stats.heroSouls || new Decimal(0);
-        this.heroSoulsSpent = stats.heroSoulsSpent || new Decimal(0);
-        this.heroSoulsSacrificed = stats.heroSoulsSacrificed || new Decimal(0);
-        this.totalAncientSouls = stats.totalAncientSouls || new Decimal(0);
-        this.transcendentPower = stats.transcendentPower || new Decimal(0);
-        this.titanDamage = stats.titanDamage || new Decimal(0);
-        this.highestZoneThisTranscension = stats.highestZoneThisTranscension || new Decimal(0);
-        this.highestZoneLifetime = stats.highestZoneLifetime || new Decimal(0);
-        this.ascensionsThisTranscension = stats.ascensionsThisTranscension || new Decimal(0);
-        this.ascensionsLifetime = stats.ascensionsLifetime || new Decimal(0);
-        this.rubies = stats.rubies || new Decimal(0);
-        this.autoclickers = stats.autoclickers || new Decimal(0);
+        this.pendingSouls = new Decimal(this.savedGame.data.primalSouls || 0);
+        this.heroSouls = new Decimal(this.savedGame.data.heroSouls || 0);
+        this.heroSoulsSpent = heroSoulsSpent;
+        this.heroSoulsSacrificed = new Decimal(this.savedGame.data.heroSoulsSacrificed || 0);
+        this.totalAncientSouls = new Decimal(this.savedGame.data.ancientSoulsTotal || 0);
+        this.transcendentPower = this.savedGame.data.transcendent
+            ? new Decimal((2 + (23 * (1 - Math.pow(Math.E, -0.0003 * this.totalAncientSouls.toNumber())))) / 100)
+            : new Decimal(0);
+        this.titanDamage = new Decimal(this.savedGame.data.titanDamage || 0);
+        this.highestZoneThisTranscension = new Decimal(this.savedGame.data.highestFinishedZonePersist || 0);
+        this.highestZoneLifetime = Decimal.max(this.savedGame.data.pretranscendentHighestFinishedZone || 0, this.savedGame.data.transcendentHighestFinishedZone || 0, this.highestZoneThisTranscension);
+        this.ascensionsLifetime = new Decimal(this.savedGame.data.numWorldResets || 0);
+        this.ascensionsThisTranscension = this.savedGame.data.transcendent
+            ? new Decimal(this.savedGame.data.numAscensionsThisTranscension || 0)
+            : this.ascensionsLifetime;
+        this.rubies = new Decimal(this.savedGame.data.rubies || 0);
+        this.autoclickers = new Decimal(this.savedGame.data.autoclickers || 0);
 
         // Ancient cost discount multiplier
         const chorgorloth = this.outsidersByName["Chor'gorloth"];

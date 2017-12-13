@@ -8,7 +8,6 @@ namespace ClickerHeroesTrackerWebsite.Controllers
     using System.Collections.Generic;
     using System.Net;
     using ClickerHeroesTrackerWebsite.Models;
-    using ClickerHeroesTrackerWebsite.Models.Api.Stats;
     using ClickerHeroesTrackerWebsite.Models.Api.Uploads;
     using ClickerHeroesTrackerWebsite.Models.Game;
     using ClickerHeroesTrackerWebsite.Models.SaveData;
@@ -16,7 +15,6 @@ namespace ClickerHeroesTrackerWebsite.Controllers
     using ClickerHeroesTrackerWebsite.Models.Stats;
     using ClickerHeroesTrackerWebsite.Services.Database;
     using ClickerHeroesTrackerWebsite.Utility;
-    using Microsoft.ApplicationInsights;
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Identity;
     using Microsoft.AspNetCore.Mvc;
@@ -31,21 +29,17 @@ namespace ClickerHeroesTrackerWebsite.Controllers
 
         private readonly IUserSettingsProvider userSettingsProvider;
 
-        private readonly TelemetryClient telemetryClient;
-
         private readonly UserManager<ApplicationUser> userManager;
 
         public UploadsController(
             IDatabaseCommandFactory databaseCommandFactory,
             GameData gameData,
             IUserSettingsProvider userSettingsProvider,
-            TelemetryClient telemetryClient,
             UserManager<ApplicationUser> userManager)
         {
             this.databaseCommandFactory = databaseCommandFactory;
             this.gameData = gameData;
             this.userSettingsProvider = userSettingsProvider;
-            this.telemetryClient = telemetryClient;
             this.userManager = userManager;
         }
 
@@ -68,7 +62,6 @@ namespace ClickerHeroesTrackerWebsite.Controllers
             };
 
             string uploadContent;
-            PlayStyle playStyle;
             var upload = new Upload { Id = uploadId };
             const string GetUploadDataCommandText = @"
 	            SELECT UserId, UserName, UploadTime, UploadContent, PlayStyle
@@ -99,7 +92,7 @@ namespace ClickerHeroesTrackerWebsite.Controllers
                     upload.TimeSubmitted = DateTime.SpecifyKind(Convert.ToDateTime(reader["UploadTime"]), DateTimeKind.Utc);
 
                     uploadContent = reader["UploadContent"].ToString();
-                    playStyle = reader["PlayStyle"].ToString().SafeParseEnum<PlayStyle>();
+                    upload.PlayStyle = reader["PlayStyle"].ToString().SafeParseEnum<PlayStyle>();
                 }
                 else
                 {
@@ -123,64 +116,13 @@ namespace ClickerHeroesTrackerWebsite.Controllers
             // Only return the raw upload content if it's the requesting user's or an admin requested it.
             if (isOwn || isAdmin)
             {
-                upload.UploadContent = uploadContent;
+                upload.Content = uploadContent;
             }
-
-            // Set the play style.
-            upload.PlayStyle = playStyle;
-
-            var savedGame = SavedGame.Parse(uploadContent);
-            upload.Stats = new Dictionary<StatType, string>();
-
-            // Get ancient level stats
-            var ancientLevelsModel = new AncientLevelsModel(
-                this.gameData,
-                savedGame,
-                this.telemetryClient);
-            foreach (var ancientLevelInfo in ancientLevelsModel.AncientLevels)
+            else
             {
-                var ancientLevel = ancientLevelInfo.Value.AncientLevel;
-                if (ancientLevel > 0)
-                {
-                    upload.Stats.Add(AncientIds.GetAncientStatType(ancientLevelInfo.Key), ancientLevel.ToTransportableString());
-                }
-
-                var itemLevel = ancientLevelInfo.Value.ItemLevel;
-                if (itemLevel > 0)
-                {
-                    upload.Stats.Add(AncientIds.GetItemStatType(ancientLevelInfo.Key), itemLevel.ToString());
-                }
+                upload.Content = SavedGame.ScrubIdentity(uploadContent);
+                upload.IsScrubbed = true;
             }
-
-            // Get outsider level stats
-            var outsiderLevelsModel = new OutsiderLevelsModel(
-                this.gameData,
-                savedGame,
-                this.telemetryClient);
-            foreach (var pair in outsiderLevelsModel.OutsiderLevels)
-            {
-                var outsiderLevel = pair.Value.Level;
-                if (outsiderLevel > 0)
-                {
-                    upload.Stats.Add(OutsiderIds.GetOusiderStatType(pair.Key), outsiderLevel.ToString());
-                }
-            }
-
-            // Get misc stats
-            var miscellaneousStatsModel = new MiscellaneousStatsModel(savedGame);
-            upload.Stats.Add(StatType.AscensionsLifetime, miscellaneousStatsModel.AscensionsLifetime.ToString());
-            upload.Stats.Add(StatType.AscensionsThisTranscension, miscellaneousStatsModel.AscensionsThisTranscension.ToString());
-            upload.Stats.Add(StatType.HeroSoulsSacrificed, miscellaneousStatsModel.HeroSoulsSacrificed.ToTransportableString());
-            upload.Stats.Add(StatType.HeroSoulsSpent, miscellaneousStatsModel.HeroSoulsSpent.ToTransportableString());
-            upload.Stats.Add(StatType.HighestZoneLifetime, miscellaneousStatsModel.HighestZoneLifetime.ToString());
-            upload.Stats.Add(StatType.HighestZoneThisTranscension, miscellaneousStatsModel.HighestZoneThisTranscension.ToString());
-            upload.Stats.Add(StatType.Rubies, miscellaneousStatsModel.Rubies.ToString());
-            upload.Stats.Add(StatType.TitanDamage, miscellaneousStatsModel.TitanDamage.ToTransportableString());
-            upload.Stats.Add(StatType.TotalAncientSouls, miscellaneousStatsModel.TotalAncientSouls.ToString());
-            upload.Stats.Add(StatType.TranscendentPower, miscellaneousStatsModel.TranscendentPower.ToString());
-            upload.Stats.Add(StatType.HeroSouls, miscellaneousStatsModel.HeroSouls.ToTransportableString());
-            upload.Stats.Add(StatType.PendingSouls, miscellaneousStatsModel.PendingSouls.ToTransportableString());
-            upload.Stats.Add(StatType.Autoclickers, miscellaneousStatsModel.Autoclickers.ToString());
 
             return this.Ok(upload);
         }
@@ -221,13 +163,11 @@ namespace ClickerHeroesTrackerWebsite.Controllers
 
             var ancientLevels = new AncientLevelsModel(
                 this.gameData,
-                savedGame,
-                this.telemetryClient);
+                savedGame);
             var outsiderLevels = new OutsiderLevelsModel(
                 this.gameData,
-                savedGame,
-                this.telemetryClient);
-            var miscellaneousStatsModel = new MiscellaneousStatsModel(savedGame);
+                savedGame);
+            var computedStats = new ComputedStats(savedGame);
 
             int uploadId;
             using (var command = this.databaseCommandFactory.Create())
@@ -276,16 +216,16 @@ namespace ClickerHeroesTrackerWebsite.Controllers
                 command.Parameters = new Dictionary<string, object>
                 {
                     { "@UploadId", uploadId },
-                    { "@TitanDamage", miscellaneousStatsModel.TitanDamage.ToTransportableString() },
-                    { "@SoulsSpent", miscellaneousStatsModel.HeroSoulsSpent.ToTransportableString() },
-                    { "@HeroSoulsSacrificed", miscellaneousStatsModel.HeroSoulsSacrificed.ToTransportableString() },
-                    { "@TotalAncientSouls", miscellaneousStatsModel.TotalAncientSouls },
-                    { "@TranscendentPower", miscellaneousStatsModel.TranscendentPower },
-                    { "@Rubies", miscellaneousStatsModel.Rubies },
-                    { "@HighestZoneThisTranscension", miscellaneousStatsModel.HighestZoneThisTranscension },
-                    { "@HighestZoneLifetime", miscellaneousStatsModel.HighestZoneLifetime },
-                    { "@AscensionsThisTranscension", miscellaneousStatsModel.AscensionsThisTranscension },
-                    { "@AscensionsLifetime", miscellaneousStatsModel.AscensionsLifetime },
+                    { "@TitanDamage", computedStats.TitanDamage },
+                    { "@SoulsSpent", computedStats.HeroSoulsSpent },
+                    { "@HeroSoulsSacrificed", computedStats.HeroSoulsSacrificed },
+                    { "@TotalAncientSouls", computedStats.TotalAncientSouls },
+                    { "@TranscendentPower", computedStats.TranscendentPower },
+                    { "@Rubies", computedStats.Rubies },
+                    { "@HighestZoneThisTranscension", computedStats.HighestZoneThisTranscension },
+                    { "@HighestZoneLifetime", computedStats.HighestZoneLifetime },
+                    { "@AscensionsThisTranscension", computedStats.AscensionsThisTranscension },
+                    { "@AscensionsLifetime", computedStats.AscensionsLifetime },
                 };
                 command.ExecuteNonQuery();
 
@@ -299,7 +239,7 @@ namespace ClickerHeroesTrackerWebsite.Controllers
                     {
                         { "@UploadId", uploadId },
                         { "@AncientId", pair.Key },
-                        { "@Level", pair.Value.AncientLevel.ToTransportableString() },
+                        { "@Level", pair.Value.ToTransportableString() },
                     };
                     command.ExecuteNonQuery();
                 }
@@ -314,7 +254,7 @@ namespace ClickerHeroesTrackerWebsite.Controllers
                     {
                         { "@UploadId", uploadId },
                         { "@OutsiderId", pair.Key },
-                        { "@Level", pair.Value.Level },
+                        { "@Level", pair.Value },
                     };
                     command.ExecuteNonQuery();
                 }

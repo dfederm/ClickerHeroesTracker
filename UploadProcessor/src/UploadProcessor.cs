@@ -177,13 +177,11 @@ namespace ClickerHeroesTracker.UploadProcessor
                     this.telemetryClient.TrackEvent("UploadProcessor-Processing", properties);
                     var ancientLevels = new AncientLevelsModel(
                         this.gameData,
-                        savedGame,
-                        this.telemetryClient);
+                        savedGame);
                     var outsiderLevels = new OutsiderLevelsModel(
                         this.gameData,
-                        savedGame,
-                        this.telemetryClient);
-                    var miscellaneousStatsModel = new MiscellaneousStatsModel(savedGame);
+                        savedGame);
+                    var computedStats = new ComputedStats(savedGame);
 
                     /* Build a query that looks like this:
                         MERGE INTO AncientLevels WITH (HOLDLOCK)
@@ -221,7 +219,7 @@ namespace ClickerHeroesTracker.UploadProcessor
                             ancientLevelsCommandText.Append(",");
                             ancientLevelsCommandText.Append(pair.Key);
                             ancientLevelsCommandText.Append(",'");
-                            ancientLevelsCommandText.Append(pair.Value.AncientLevel.ToTransportableString());
+                            ancientLevelsCommandText.Append(pair.Value.ToTransportableString());
                             ancientLevelsCommandText.Append("')");
 
                             isFirst = false;
@@ -277,7 +275,7 @@ namespace ClickerHeroesTracker.UploadProcessor
                             outsiderLevelsCommandText.Append(",");
                             outsiderLevelsCommandText.Append(pair.Key);
                             outsiderLevelsCommandText.Append(",");
-                            outsiderLevelsCommandText.Append(pair.Value.Level);
+                            outsiderLevelsCommandText.Append(pair.Value);
                             outsiderLevelsCommandText.Append(")");
 
                             isFirst = false;
@@ -366,16 +364,16 @@ namespace ClickerHeroesTracker.UploadProcessor
                     var computedStatsCommandParameters = new Dictionary<string, object>
                     {
                         { "@UploadId", uploadId },
-                        { "@TitanDamage", miscellaneousStatsModel.TitanDamage.ToTransportableString() },
-                        { "@SoulsSpent", miscellaneousStatsModel.HeroSoulsSpent.ToTransportableString() },
-                        { "@HeroSoulsSacrificed", miscellaneousStatsModel.HeroSoulsSacrificed.ToTransportableString() },
-                        { "@TotalAncientSouls", miscellaneousStatsModel.TotalAncientSouls },
-                        { "@TranscendentPower", miscellaneousStatsModel.TranscendentPower },
-                        { "@Rubies", miscellaneousStatsModel.Rubies },
-                        { "@HighestZoneThisTranscension", miscellaneousStatsModel.HighestZoneThisTranscension },
-                        { "@HighestZoneLifetime", miscellaneousStatsModel.HighestZoneLifetime },
-                        { "@AscensionsThisTranscension", miscellaneousStatsModel.AscensionsThisTranscension },
-                        { "@AscensionsLifetime", miscellaneousStatsModel.AscensionsLifetime },
+                        { "@TitanDamage", computedStats.TitanDamage },
+                        { "@SoulsSpent", computedStats.HeroSoulsSpent },
+                        { "@HeroSoulsSacrificed", computedStats.HeroSoulsSacrificed },
+                        { "@TotalAncientSouls", computedStats.TotalAncientSouls },
+                        { "@TranscendentPower", computedStats.TranscendentPower },
+                        { "@Rubies", computedStats.Rubies },
+                        { "@HighestZoneThisTranscension", computedStats.HighestZoneThisTranscension },
+                        { "@HighestZoneLifetime", computedStats.HighestZoneLifetime },
+                        { "@AscensionsThisTranscension", computedStats.AscensionsThisTranscension },
+                        { "@AscensionsLifetime", computedStats.AscensionsLifetime },
                     };
 
                     using (var command = databaseCommandFactory.Create())

@@ -1,13 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <RuleSet Name="CodeAnalysis" Description=" " ToolsVersion="14.0">
-  <!-- Remove the below suppressions once https://github.com/dotnet/roslyn/issues/8884 has been fixed. -->
-  <Rules AnalyzerId="Microsoft.Maintainability.Analyzers" RuleNamespace="Microsoft.Maintainability.Analyzers">
-    <!-- ReviewUnusedParameters -->
-    <Rule Id="CA1801" Action="None" />
-    <!-- AvoidUnusedPrivateFields -->
-    <Rule Id="CA1823" Action="None" />
-  </Rules>
-
   <!-- Not sure why we would need to ConfigureAwait on every call. Should look into this more. -->
   <Rules AnalyzerId="Microsoft.ApiDesignGuidelines.Analyzers" RuleNamespace="Microsoft.ApiDesignGuidelines.Analyzers">
     <!-- DoNotDirectlyAwaitATask -->
