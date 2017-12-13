@@ -7,7 +7,6 @@ namespace ClickerHeroesTrackerWebsite.Models.Stats
     using System.Collections.Generic;
     using ClickerHeroesTrackerWebsite.Models.Game;
     using ClickerHeroesTrackerWebsite.Models.SaveData;
-    using Microsoft.ApplicationInsights;
 
     /// <summary>
     /// The model for the outsider level summary view.
@@ -19,18 +18,20 @@ namespace ClickerHeroesTrackerWebsite.Models.Stats
         /// </summary>
         public OutsiderLevelsModel(
             GameData gameData,
-            SavedGame savedGame,
-            TelemetryClient telemetryClient)
+            SavedGame savedGame)
         {
-            var outsiderLevels = new SortedDictionary<int, OutsiderLevelInfo>();
+            var outsiderLevels = new Dictionary<int, long>();
+            var outsidersData = savedGame.Object["outsiders"]?["outsiders"];
             foreach (var outsider in gameData.Outsiders.Values)
             {
-                OutsiderData outsiderData = null;
-                var outsiderLevel = (savedGame?.OutsidersData?.Outsiders?.TryGetValue(outsider.Id, out outsiderData)).GetValueOrDefault()
-                    ? outsiderData.Level
-                    : 0;
-                var outsiderLevelInfo = new OutsiderLevelInfo(outsider.Name, outsiderLevel);
-                outsiderLevels.Add(outsider.Id, outsiderLevelInfo);
+                // Skip outsiders no longer in the game. Unfortunately there is no field that tells whether it's active
+                if (outsider.Id == 4)
+                {
+                    continue;
+                }
+
+                var outsiderLevel = (outsidersData?[outsider.Id.ToString()]?.Value<long>("level")).GetValueOrDefault(0);
+                outsiderLevels.Add(outsider.Id, outsiderLevel);
             }
 
             this.OutsiderLevels = outsiderLevels;
@@ -39,6 +40,6 @@ namespace ClickerHeroesTrackerWebsite.Models.Stats
         /// <summary>
         /// Gets the levels for each outsider.
         /// </summary>
-        public IDictionary<int, OutsiderLevelInfo> OutsiderLevels { get; } = new SortedDictionary<int, OutsiderLevelInfo>();
+        public IDictionary<int, long> OutsiderLevels { get; }
     }
 }

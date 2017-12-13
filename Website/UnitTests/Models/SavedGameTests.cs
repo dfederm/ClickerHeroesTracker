@@ -11,51 +11,20 @@ namespace ClickerHeroesTrackerWebsite.Tests.Models
     public class SavedGameTests
     {
         [Theory]
-        [InlineData("ValidEncoded", true)]
-        [InlineData("InvalidEncodedMissingAntiCheat", false)]
-        [InlineData("InvalidEncodedBadHash", false)]
-        [InlineData("InvalidEncodedBadData", false)]
-        [InlineData("ValidEncodedAndroid", true)]
-        [InlineData("InvalidEncodedAndroidNoBrace", false)]
-        [InlineData("InvalidEncodedOddLength", false)] // Length of the substring on the left side of the anti-cheat code is a odd number.
-        [InlineData("ValidEncodedZlib", true)]
-        public void SavedGame_DecodeSaveData(string testDataName, bool expectedValid)
+        [InlineData("ValidSprinkle", true)]
+        [InlineData("InvalidSprinkleMissingAntiCheat", false)]
+        [InlineData("InvalidSprinkleBadHash", false)]
+        [InlineData("InvalidSprinkleBadData", false)]
+        [InlineData("InvalidSprinkleOddLength", false)] // Length of the substring on the left side of the anti-cheat code is a odd number.
+        [InlineData("ValidAndroid", true)]
+        [InlineData("InvalidAndroidNoBrace", false)]
+        [InlineData("InvalidAndroidBadJson", false)]
+        [InlineData("ValidZlib", true)]
+        [InlineData("InvalidZlibBadData", false)]
+        public void SavedGame_Parse(string testDataName, bool expectedValid)
         {
             var encodedSaveData = File.ReadAllText(Path.Combine("TestData", testDataName + ".txt"));
-            var reader = SavedGame.DecodeSaveData(encodedSaveData);
-
-            if (expectedValid)
-            {
-                Assert.NotNull(reader);
-                Assert.NotEqual(-1, reader.Peek());
-            }
-            else
-            {
-                Assert.Null(reader);
-            }
-        }
-
-        [Theory]
-        [InlineData("InvalidEncodedAndroidBadJson")]
-        [InlineData("InvalidEncodedZlibBadData")]
-        public void SavedGame_DecodeAndDeserializeSaveData(string testDataName)
-        {
-            var encodedSaveData = File.ReadAllText(Path.Combine("TestData", testDataName + ".txt"));
-            var reader = SavedGame.DecodeSaveData(encodedSaveData);
-            var savedGame = SavedGame.DeserializeSavedGame(reader);
-
-            Assert.Null(savedGame);
-        }
-
-        [Theory]
-        [InlineData("ValidDecoded-0.19", true)]
-        [InlineData("ValidDecoded-1.0", true)]
-        [InlineData("InvalidDecodedNotJson", false)]
-        [InlineData("InvalidDecodedEmptyObject", true)]
-        public void SavedGame_DeserializeSavedGame(string testDataName, bool expectedValid)
-        {
-            var reader = File.OpenText(Path.Combine("TestData", testDataName + ".txt"));
-            var savedGame = SavedGame.DeserializeSavedGame(reader);
+            var savedGame = SavedGame.Parse(encodedSaveData);
 
             if (expectedValid)
             {
@@ -67,19 +36,21 @@ namespace ClickerHeroesTrackerWebsite.Tests.Models
             }
         }
 
+        // Only need to test valid saves as the Parsing tests handle invalid ones
         [Theory]
-        [InlineData("ValidEncoded", false)]
-        [InlineData("InvalidEncodedBadData", false)]
-        [InlineData("InvalidEncodedBadHash", false)]
-        [InlineData("InvalidEncodedMissingAntiCheat", false)]
-        [InlineData("ValidEncodedAndroid", true)]
-        [InlineData("InvalidEncodedAndroidNoBrace", true)]
-        [InlineData("InvalidEncodedAndroidBadJson", true)]
-        public void SavedGame_IsAndroid(string testDataName, bool expectedIsAndroid)
+        [InlineData("ValidSprinkle")]
+        [InlineData("ValidAndroid")]
+        [InlineData("ValidZlib")]
+        public void SavedGame_ScrubIdentity(string testDataName)
         {
             var encodedSaveData = File.ReadAllText(Path.Combine("TestData", testDataName + ".txt"));
 
-            Assert.Equal(expectedIsAndroid, SavedGame.IsAndroid(encodedSaveData));
+            var scrubbedSaveData = SavedGame.ScrubIdentity(encodedSaveData);
+            Assert.NotNull(scrubbedSaveData);
+
+            // Ensure it can be round-tripped
+            var savedGame = SavedGame.Parse(scrubbedSaveData);
+            Assert.NotNull(savedGame);
         }
     }
 }

@@ -8,7 +8,7 @@ namespace ClickerHeroesTrackerWebsite.Models.Stats
     using System.Numerics;
     using ClickerHeroesTrackerWebsite.Models.Game;
     using ClickerHeroesTrackerWebsite.Models.SaveData;
-    using Microsoft.ApplicationInsights;
+    using ClickerHeroesTrackerWebsite.Utility;
 
     /// <summary>
     /// The model for the ancient level summary view.
@@ -20,11 +20,10 @@ namespace ClickerHeroesTrackerWebsite.Models.Stats
         /// </summary>
         public AncientLevelsModel(
             GameData gameData,
-            SavedGame savedGame,
-            TelemetryClient telemetryClient)
+            SavedGame savedGame)
         {
-            var ancientLevels = new SortedDictionary<int, AncientLevelInfo>();
-            var itemLevelsById = savedGame.ItemsData.GetItemLevels(gameData);
+            var ancientLevels = new Dictionary<int, BigInteger>();
+            var ancientsData = savedGame.Object["ancients"]["ancients"];
             foreach (var ancient in gameData.Ancients.Values)
             {
                 // Skip ancients no longer in the game.
@@ -33,16 +32,9 @@ namespace ClickerHeroesTrackerWebsite.Models.Stats
                     continue;
                 }
 
-                var ancientLevel = savedGame.AncientsData.Ancients.TryGetValue(ancient.Id, out var ancientData)
-                    ? ancientData.Level
-                    : BigInteger.Zero;
-                if (!itemLevelsById.TryGetValue(ancient.Id, out var itemLevel))
-                {
-                    itemLevel = BigInteger.Zero;
-                }
+                var ancientLevel = ancientsData[ancient.Id.ToString()]?.Value<string>("level")?.ToBigInteger() ?? BigInteger.Zero;
 
-                var ancientLevelInfo = new AncientLevelInfo(ancientLevel, itemLevel);
-                ancientLevels.Add(ancient.Id, ancientLevelInfo);
+                ancientLevels.Add(ancient.Id, ancientLevel);
             }
 
             this.AncientLevels = ancientLevels;
@@ -51,6 +43,6 @@ namespace ClickerHeroesTrackerWebsite.Models.Stats
         /// <summary>
         /// Gets the levels for each ancient.
         /// </summary>
-        public IDictionary<int, AncientLevelInfo> AncientLevels { get; }
+        public IDictionary<int, BigInteger> AncientLevels { get; }
     }
 }

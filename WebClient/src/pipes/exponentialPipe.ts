@@ -32,6 +32,9 @@ export class ExponentialPipe implements PipeTransform {
         }
 
         if (typeof value === "number") {
+            // Account for floating point inaccuracy
+            value = Math.round(value);
+
             const useScientificNotation = settings && settings.useScientificNotation && Math.abs(value) > settings.scientificNotationThreshold;
             return useScientificNotation
                 ? value.toExponential(3)
@@ -39,6 +42,9 @@ export class ExponentialPipe implements PipeTransform {
         }
 
         if (value instanceof Decimal) {
+            // Account for floating point inaccuracy
+            value = value.round();
+
             const useScientificNotation = settings && settings.useScientificNotation && value.abs().greaterThan(settings.scientificNotationThreshold);
             return useScientificNotation
                 ? value.toExponential(3)

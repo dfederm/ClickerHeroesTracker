@@ -27,8 +27,6 @@ namespace Website.Controllers
     [Authorize]
     public class UserController : Controller
     {
-        private static Regex userNameRegex = new Regex("\\w+", RegexOptions.Compiled);
-
         private readonly GameData gameData;
 
         private readonly TelemetryClient telemetryClient;

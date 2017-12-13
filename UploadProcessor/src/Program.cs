@@ -32,8 +32,7 @@ namespace ClickerHeroesTracker.UploadProcessor
         /// <summary>
         /// The entrypoint method to the program.
         /// </summary>
-        /// <param name="args">The program arguments</param>
-        public static void Main(string[] args)
+        public static void Main()
         {
             var exitEvent = new ManualResetEvent(false);
             var cancelSource = new CancellationTokenSource();

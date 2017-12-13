@@ -49,15 +49,16 @@ namespace ClickerHeroesTrackerWebsite.Controllers
         public async Task<ActionResult> GetClan()
         {
             var userId = this.userManager.GetUserId(this.User);
-            SavedGame savedGame = this.GetLatestSave(userId);
+            var savedGame = this.GetLatestSave(userId);
 
-            if (savedGame?.UniqueId == null)
+            var uniqueId = savedGame.Object.Value<string>("uniqueId");
+            var passwordHash = savedGame.Object.Value<string>("passwordHash");
+            if (uniqueId == null)
             {
                 return this.NotFound();
             }
 
-            Clan clan = await this.GetClanInfomation(savedGame);
-
+            var clan = await this.GetClanInfomation(uniqueId, passwordHash);
             if (clan?.Guild == null)
             {
                 return this.NoContent();
@@ -90,8 +91,8 @@ namespace ClickerHeroesTrackerWebsite.Controllers
 
             var mesagesValues = new Dictionary<string, string>
             {
-                { "uid", savedGame.UniqueId },
-                { "passwordHash", savedGame.PasswordHash },
+                { "uid", uniqueId },
+                { "passwordHash", passwordHash },
                 { "guildName", clan.Guild.Name },
             };
 
@@ -161,7 +162,9 @@ namespace ClickerHeroesTrackerWebsite.Controllers
             var userId = this.userManager.GetUserId(this.User);
             SavedGame savedGame = this.GetLatestSave(userId);
 
-            if (savedGame?.UniqueId == null)
+            var uniqueId = savedGame.Object.Value<string>("uniqueId");
+            var passwordHash = savedGame.Object.Value<string>("passwordHash");
+            if (uniqueId == null)
             {
                 return this.NotFound();
             }
@@ -170,8 +173,8 @@ namespace ClickerHeroesTrackerWebsite.Controllers
             {
                 { "guildName", clanName },
                 { "message", message },
-                { "uid", savedGame.UniqueId },
-                { "passwordHash", savedGame.PasswordHash },
+                { "uid", uniqueId },
+                { "passwordHash", passwordHash },
             };
 
             var content = new FormUrlEncodedContent(guildValues);
@@ -204,9 +207,11 @@ namespace ClickerHeroesTrackerWebsite.Controllers
             SavedGame savedGame = this.GetLatestSave(userId);
             var clanName = string.Empty;
 
-            if (savedGame?.UniqueId != null)
+            var uniqueId = savedGame.Object.Value<string>("uniqueId");
+            var passwordHash = savedGame.Object.Value<string>("passwordHash");
+            if (uniqueId != null)
             {
-                Clan clan = await this.GetClanInfomation(savedGame);
+                var clan = await this.GetClanInfomation(uniqueId, passwordHash);
                 clanName = clan?.Guild?.Name ?? string.Empty;
             }
 
@@ -226,13 +231,14 @@ namespace ClickerHeroesTrackerWebsite.Controllers
             var userId = this.userManager.GetUserId(this.User);
             SavedGame savedGame = this.GetLatestSave(userId);
 
-            if (savedGame?.UniqueId == null)
+            var uniqueId = savedGame.Object.Value<string>("uniqueId");
+            var passwordHash = savedGame.Object.Value<string>("passwordHash");
+            if (uniqueId == null)
             {
                 return this.NoContent();
             }
 
-            Clan clan = await this.GetClanInfomation(savedGame);
-
+            var clan = await this.GetClanInfomation(uniqueId, passwordHash);
             if (clan?.Guild == null)
             {
                 return this.NoContent();
@@ -377,13 +383,13 @@ namespace ClickerHeroesTrackerWebsite.Controllers
             }
         }
 
-        private async Task<Clan> GetClanInfomation(SavedGame savedGame)
+        private async Task<Clan> GetClanInfomation(string uniqueId, string passwordHash)
         {
             var guildValues = new Dictionary<string, string>
-                {
-                    { "uid", savedGame.UniqueId },
-                    { "passwordHash", savedGame.PasswordHash },
-                };
+            {
+                { "uid", uniqueId },
+                { "passwordHash", passwordHash },
+            };
 
             var content = new FormUrlEncodedContent(guildValues);
 

@@ -2,10 +2,15 @@
 export const gameData: IGameData = require("../../../../../Website/src/wwwroot/data/GameData.json");
 
 export interface IGameData {
+    itemBonusTypes: { [id: string]: IItemBonusType };
     heroes: { [id: string]: IHeroData };
     upgrades: { [id: string]: IUpgradeData };
     ancients: { [id: string]: IAncientData };
     outsiders: { [id: string]: IOutsiderData };
+}
+
+export interface IItemBonusType {
+    ancientId: number;
 }
 
 export interface IHeroData {

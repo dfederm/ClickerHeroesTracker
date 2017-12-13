@@ -5,8 +5,8 @@
         {{ errorMessage }}
     </p>
     <p class="alert alert-warning">
-        The suggestions below are for the 1.0e10 patch. Still on the old version (eg. the Steam version)? A 1.0e9 version of the
-        site will be temporarily available
+        The suggestions below are for the 1.0e10 patch. Still on the old version? A 1.0e9 version of the site will be temporarily
+        available
         <a href="https://clickerheroestracker-old.azurewebsites.net/">here</a>.
     </p>
     <ngx-loading [show]="isLoading && !errorMessage"></ngx-loading>
@@ -31,8 +31,7 @@
             </ul>
         </div>
         <div class="col-md-6 pull-right">
-            <button *ngIf="uploadContent"
-                    class="btn btn-secondary"
+            <button class="btn btn-secondary"
                     (click)="openModal(viewSaveDataModal)">
                 View Save Data
             </button>
@@ -49,21 +48,42 @@
                 </div>
                 <div class="modal-body">
                     <div class="form-group">
-                        <p>This is the raw content previously uploaded.</p>
-                        <textarea class="form-control"
-                                  rows="2"
-                                  #uploadContextInput
-                                  readonly>{{ uploadContent }}</textarea>
+                        <ngb-tabset>
+                            <ngb-tab title="Shareable">
+                                <ng-template ngbTabContent>
+                                    <p>This has been scrubbed of personal data and is safely shareable.</p>
+                                    <textarea class="form-control"
+                                              rows="2"
+                                              #scrubbedContent
+                                              readonly>{{ savedGame.scrubbedContent }}</textarea>
+                                    <button type="button"
+                                            class="btn btn-primary float-right"
+                                            [ngxClipboard]="scrubbedContent"
+                                            (cbOnSuccess)="c()">Copy to Clipboard</button>
+                                </ng-template>
+                            </ngb-tab>
+                            <ngb-tab title="Raw Data"
+                                     *ngIf="!savedGame.isScrubbed">
+                                <ng-template ngbTabContent>
+                                    <p class="alert alert-warning">This is the exact content you previously uploaded. It generally should not be shared
+                                        to other players as it may contain personal data.</p>
+                                    <textarea class="form-control"
+                                              rows="2"
+                                              #rawContent
+                                              readonly>{{ savedGame.content }}</textarea>
+                                    <button type="button"
+                                            class="btn btn-primary float-right"
+                                            [ngxClipboard]="rawContent"
+                                            (cbOnSuccess)="c()">Copy to Clipboard</button>
+                                </ng-template>
+                            </ngb-tab>
+                        </ngb-tabset>
                     </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button"
                             class="btn btn-secondary"
                             (click)="d()">Close</button>
-                    <button type="button"
-                            class="btn btn-primary"
-                            [ngxClipboard]="uploadContextInput"
-                            (cbOnSuccess)="c()">Copy to Clipboard</button>
                 </div>
             </ng-template>
 
@@ -208,6 +228,8 @@
         </div>
         <div class="col-lg-6">
             <h4>Outsider:</h4>
+            <p>There are no suggestions for Outsiders yet as no one knows what is optimal yet. Once formulas are available,
+                they will be added.</p>
             <table class="table table-sm table-striped">
                 <thead>
                     <tr>
