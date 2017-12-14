@@ -4,7 +4,7 @@ import { UserService, IProgressData, IFollowsData } from "../../services/userSer
 import { SettingsService, IUserSettings } from "../../services/settingsService/settingsService";
 import { AuthenticationService, IUserInfo } from "../../services/authenticationService/authenticationService";
 
-import Decimal from "decimal.js";
+import { Decimal } from "decimal.js";
 import { ChartDataSets, ChartOptions, ChartTooltipItem } from "chart.js";
 import { ActivatedRoute } from "@angular/router";
 
@@ -172,7 +172,7 @@ export class UserComponent implements OnInit {
     let max = new Decimal(0);
     let requiresDecimal = false;
 
-    let decimalData: { x: number, y: decimal.Decimal }[] = [];
+    let decimalData: { x: number, y: Decimal }[] = [];
     for (let i in data) {
       let time = Date.parse(i);
       let value = new Decimal(data[i]);

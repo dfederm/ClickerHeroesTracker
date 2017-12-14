@@ -1,4 +1,4 @@
-import Decimal from "decimal.js";
+import { Decimal } from "decimal.js";
 import { HeroCollection } from "./heroCollection";
 
 export class Attributes {
@@ -10,7 +10,7 @@ export class Attributes {
         private heroCollection: HeroCollection,
     ) { }
 
-    public get currentAttack(): decimal.Decimal {
+    public get currentAttack(): Decimal {
         /*
         Powersurge
         let loc1 = this.userData.getSkillBonus("skillDpsMultiplier") + 1;
@@ -19,15 +19,15 @@ export class Attributes {
         return this._currentAttack;
     }
 
-    public get currentAttackUnmodified(): decimal.Decimal {
+    public get currentAttackUnmodified(): Decimal {
         return this._currentAttack;
     }
 
-    public get currentClickDamage(): decimal.Decimal {
+    public get currentClickDamage(): Decimal {
         return this._currentClickDamage.plus(1);
     }
 
-    public set currentClickDamage(param1: decimal.Decimal) {
+    public set currentClickDamage(param1: Decimal) {
         this._currentClickDamage = param1;
     }
 

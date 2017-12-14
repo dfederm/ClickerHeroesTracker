@@ -1,6 +1,6 @@
 import { NO_ERRORS_SCHEMA, Component } from "@angular/core";
 import { ComponentFixture, TestBed, async } from "@angular/core/testing";
-import Decimal from "decimal.js";
+import { Decimal } from "decimal.js";
 import { BehaviorSubject } from "rxjs";
 
 import { ExponentialPipe } from "./exponentialPipe";
@@ -45,7 +45,7 @@ describe("ExponentialPipe", () => {
         template: "{{ value | exponential }}",
     })
     class MockComponent {
-        public value: number | decimal.Decimal;
+        public value: number | Decimal;
     }
 
     beforeEach(async(() => {
@@ -104,7 +104,7 @@ describe("ExponentialPipe", () => {
         fixture.componentInstance.value = new Decimal(settingsWithScientificNotation.scientificNotationThreshold);
         fixture.detectChanges();
 
-        expect((fixture.nativeElement as HTMLElement).textContent).toEqual(fixture.componentInstance.value.toFormat());
+        expect((fixture.nativeElement as HTMLElement).textContent).toEqual(fixture.componentInstance.value.toFormat(0, 0));
     });
 
     it("should display a formatted Decimal when it is above the scientific notation threshold and scientific notation is on", () => {
@@ -120,6 +120,6 @@ describe("ExponentialPipe", () => {
         fixture.componentInstance.value = new Decimal(settingsWithoutScientificNotation.scientificNotationThreshold + 1);
         fixture.detectChanges();
 
-        expect((fixture.nativeElement as HTMLElement).textContent).toEqual(fixture.componentInstance.value.toFormat());
+        expect((fixture.nativeElement as HTMLElement).textContent).toEqual(fixture.componentInstance.value.toFormat(0, 0));
     });
 });

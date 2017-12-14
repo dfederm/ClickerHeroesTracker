@@ -111,12 +111,6 @@ describe("VersionService", () => {
                 errorToLastConnection();
             }
 
-            // Let the polling interval lapse a whole bunch more times with an empty version
-            for (let i = 0; i < 100; i++) {
-                tick(VersionService.pollingInterval);
-                respondEmptyToLastConnection();
-            }
-
             // Let the polling interval tick again
             tick(VersionService.pollingInterval);
 
@@ -173,14 +167,6 @@ describe("VersionService", () => {
             tick(1);
 
             return version;
-        }
-
-        function respondEmptyToLastConnection(): void {
-            let request = httpMock.expectOne(apiRequest);
-            request.flush("");
-
-            // Don't tick longer than the refresh interval
-            tick(1);
         }
 
         function errorToLastConnection(): void {

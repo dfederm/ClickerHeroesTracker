@@ -1,14 +1,14 @@
-import Decimal from "decimal.js";
+import { Decimal } from "decimal.js";
 import { IOutsiderData } from "./gameData";
 import { isLinear, linear, isPercent, percent } from "./functions";
 
 export class Outsider {
     constructor(
         private definition: IOutsiderData,
-        public level: decimal.Decimal,
+        public level: Decimal,
     ) { }
 
-    public getBonusAmount(): decimal.Decimal {
+    public getBonusAmount(): Decimal {
         if (isLinear(this.definition.levelAmountFormula)) {
             return linear(this.definition.levelAmountFormula, this.level);
         }

@@ -1,4 +1,4 @@
-import Decimal from "decimal.js";
+import { Decimal } from "decimal.js";
 import { IAncientData } from "./gameData";
 import { Outsiders } from "./outsiders";
 import { isLinear, linear, isPercent, percent } from "./functions";
@@ -21,10 +21,10 @@ export class Ancient {
     constructor(
         private definition: IAncientData,
         private outsiders: Outsiders,
-        public level: decimal.Decimal,
+        public level: Decimal,
     ) { }
 
-    public getBonusAmount(): decimal.Decimal {
+    public getBonusAmount(): Decimal {
         if (isLinear(this.definition.levelAmountFormula)) {
             return linear(this.definition.levelAmountFormula, this.level);
         }
@@ -71,7 +71,7 @@ export class Ancient {
         throw new Error("Unexpected ancient levelAmountFormula: " + this.definition.levelAmountFormula);
     }
 
-    private diminishingReturns(): decimal.Decimal {
+    private diminishingReturns(): Decimal {
         let params = this.definition.levelAmountParams.split(",");
         let param1 = Number(params[0]);
         let param2 = Number(params[1]);

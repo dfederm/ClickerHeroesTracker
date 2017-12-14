@@ -124,10 +124,7 @@ module.exports = () => {
 
     // Workaround for angular/angular#11580
     new webpack.ContextReplacementPlugin(
-      // The (\\|\/) piece accounts for path separators in *nix and Windows
-      /angular(\\|\/)core(\\|\/)@angular/,
-
-      // location of app
+      /\@angular(\\|\/)core(\\|\/)esm5/,
       path.resolve('./src')
     ),
   ];

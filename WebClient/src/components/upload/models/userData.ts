@@ -1,4 +1,4 @@
-import Decimal from "decimal.js";
+import { Decimal } from "decimal.js";
 import { HeroCollection } from "./heroCollection";
 import { Ancients } from "./ancients";
 import { Hero } from "./hero";
@@ -58,7 +58,7 @@ export class UserData {
         this.clickMultiplier = this.clickMultiplier * (1 + percentIncrease / 100);
     }
 
-    public getHeroSoulWorldDamageBonus(): decimal.Decimal {
+    public getHeroSoulWorldDamageBonus(): Decimal {
         return this.heroSouls.times(10).plus(this.ancients.dpsPercent);
     }
 
@@ -68,7 +68,7 @@ export class UserData {
             : 1;
     }
 
-    public getTreasureChestMultiplier(): decimal.Decimal {
+    public getTreasureChestMultiplier(): Decimal {
         return this.ancients.treasureChestGoldPercent.times(0.01).plus(1).times(UserData.TREASURE_MULTIPLIER);
     }
 
@@ -76,7 +76,7 @@ export class UserData {
         return Math.max(this.getUncappedBossHpMultiplier(level), UserData.MINIMUM_BOSS_HP_MULTIPLIER);
     }
 
-    public addGold(param1: decimal.Decimal): decimal.Decimal {
+    public addGold(param1: Decimal): Decimal {
         this.gold = this.gold.plus(param1);
         return this.gold;
     }
@@ -150,7 +150,7 @@ export class UserData {
         return Math.max((UserData.CHANCE_OF_TREASURE_MONSTER - loc3) * loc2, UserData.MINIMUM_TREASURE_CHANCE_MULTIPLIER);
     }
 
-    public getGoldFromFinishingZone(level: number): decimal.Decimal {
+    public getGoldFromFinishingZone(level: number): Decimal {
         return new Monster(this, this.ancients, level).goldReward
             .times(this.getZoneMonsterRequirement(level))
             .times(this.getTreasureChestMultiplier().plus(-1).times(this.getTreasureChestChance(level)).plus(1))
@@ -158,7 +158,7 @@ export class UserData {
             .times(this.ancients.tenXGoldChance.times(0.09).plus(1));
     }
 
-    public addSouls(addedSouls: decimal.Decimal): decimal.Decimal {
+    public addSouls(addedSouls: Decimal): Decimal {
         this.heroSouls = this.heroSouls.plus(addedSouls);
         return this.heroSouls;
     }
@@ -272,7 +272,7 @@ export class UserData {
         }
     }
 
-    private getUnassignedAutoClickerMultiplier(num: number): decimal.Decimal {
+    private getUnassignedAutoClickerMultiplier(num: number): Decimal {
         if (num === 0) {
             return new Decimal(0);
         }

@@ -943,7 +943,7 @@ describe("UploadComponent", () => {
                                 }
                             case "percent":
                                 {
-                                    expectedFormattedValue = percentPipe.transform(expectedValue);
+                                    expectedFormattedValue = percentPipe.transform(expectedValue, "1.1-3");
                                     break;
                                 }
                             default:
