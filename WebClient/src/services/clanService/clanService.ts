@@ -128,8 +128,12 @@ export class ClanService {
                 let params = new HttpParams()
                     .set("message", message)
                     .set("clanName", clanName);
+
+                // Angular doesn't encode '+' correctly. See: https://github.com/angular/angular/issues/11058
+                let body = params.toString().replace(/\+/gi, "%2B");
+
                 return this.http
-                    .post<ISendMessageResponse>("/api/clans/messages", params.toString(), { headers })
+                    .post<ISendMessageResponse>("/api/clans/messages", body, { headers })
                     .toPromise();
             })
             .then(response => {

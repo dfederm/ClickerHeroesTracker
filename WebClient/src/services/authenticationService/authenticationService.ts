@@ -126,7 +126,10 @@ export class AuthenticationService {
 
         params = params.set("scope", "openid offline_access profile email roles");
 
-        this.fetchTokensPromise = this.http.post<IAuthTokenModel>("/api/auth/token", params.toString(), { headers })
+        // Angular doesn't encode '+' correctly. See: https://github.com/angular/angular/issues/11058
+        let body = params.toString().replace(/\+/gi, "%2B");
+
+        this.fetchTokensPromise = this.http.post<IAuthTokenModel>("/api/auth/token", body, { headers })
             .toPromise()
             .then(tokens => {
                 if (!tokens

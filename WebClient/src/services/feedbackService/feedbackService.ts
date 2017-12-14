@@ -20,8 +20,12 @@ export class FeedbackService {
                 let params = new HttpParams()
                     .set("comments", comments)
                     .set("email", email);
+
+                // Angular doesn't encode '+' correctly. See: https://github.com/angular/angular/issues/11058
+                let body = params.toString().replace(/\+/gi, "%2B");
+
                 return this.http
-                    .post("/api/feedback", params.toString(), { headers, responseType: "text" })
+                    .post("/api/feedback", body, { headers, responseType: "text" })
                     .toPromise();
             })
             .then(() => void 0)
