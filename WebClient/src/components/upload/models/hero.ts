@@ -1,11 +1,11 @@
-import Decimal from "decimal.js";
+import { Decimal } from "decimal.js";
 import { IHeroData } from "./gameData";
 import { Ancients } from "./ancients";
 import { Outsiders } from "./outsiders";
 import { UserData } from "./userData";
 
 export class Hero {
-    private static baseAttackMultipliers: { [heroId: number]: decimal.Decimal } = {
+    private static baseAttackMultipliers: { [heroId: number]: Decimal } = {
         27: new Decimal("5e-4"),
         28: new Decimal("5e-6"),
         29: new Decimal("5e-8"),
@@ -56,7 +56,7 @@ export class Hero {
         this.damageMultiplier = this.upgradeDamageMultiplier.times(this.getMultiplierForHeroLevel());
     }
 
-    public get currentClickDamage(): decimal.Decimal {
+    public get currentClickDamage(): Decimal {
         if (this.definition.attackFormula !== "heroClickDamageFormula1") {
             return new Decimal(0);
         }
@@ -70,7 +70,7 @@ export class Hero {
             .times(this.outsiders.ancientSoulDamageBonus.times(0.01).plus(1));
     }
 
-    public get currentAttack(): decimal.Decimal {
+    public get currentAttack(): Decimal {
         if (this.definition.attackFormula !== "heroAttackFormula1") {
             return new Decimal(0);
         }
@@ -89,11 +89,11 @@ export class Hero {
         this.level = this.level + param1;
     }
 
-    public getCostUpToLevel(toLevel: number): decimal.Decimal {
+    public getCostUpToLevel(toLevel: number): Decimal {
         return this.processHeroFormula(this.definition.costFormula, this.level, toLevel);
     }
 
-    private get baseAttack(): decimal.Decimal {
+    private get baseAttack(): Decimal {
         if (this.definition.id === 1) {
             return new Decimal(0);
         }
@@ -103,9 +103,9 @@ export class Hero {
         return baseAttack.times(baseAttackMultiplier);
     }
 
-    private getMultiplierForHeroLevel(): decimal.Decimal {
+    private getMultiplierForHeroLevel(): Decimal {
         let loc7 = NaN;
-        let loc3: decimal.Decimal = new Decimal(1);
+        let loc3: Decimal = new Decimal(1);
         let loc4 = 7;
         let loc5: number = Math.min(Math.floor(this.level / 1000), 8);
         let loc6: number = Math.floor(this.level / 25) - loc5 - loc4;
@@ -143,11 +143,11 @@ export class Hero {
         return this.getMultiplierFor25Levels();
     }
 
-    private getEpicBonus(): decimal.Decimal {
+    private getEpicBonus(): Decimal {
         return this.ancients.gildedDamageBonusPercent.times(0.01).plus(0.5).times(this.epicLevel).plus(1);
     }
 
-    private processHeroFormula(param1: string, fromLevel: number = 0, toLevel: number = 1): decimal.Decimal {
+    private processHeroFormula(param1: string, fromLevel: number = 0, toLevel: number = 1): Decimal {
         if (fromLevel === 0) {
             fromLevel = this.level;
         }
@@ -163,14 +163,14 @@ export class Hero {
         return new Decimal(0);
     }
 
-    private heroCostFormula1(fromLevel: number, toLevel: number): decimal.Decimal {
-        let loc5: decimal.Decimal = null;
-        let loc7: decimal.Decimal = null;
+    private heroCostFormula1(fromLevel: number, toLevel: number): Decimal {
+        let loc5: Decimal = null;
+        let loc7: Decimal = null;
         let loc9 = 0;
-        let loc10: decimal.Decimal;
+        let loc10: Decimal;
         let loc11: number;
-        let loc12: decimal.Decimal;
-        let loc13: decimal.Decimal;
+        let loc12: Decimal;
+        let loc13: Decimal;
         let loc4 = 1.07;
         let loc6: number = 1 - this.ancients.heroLevelCostPercent.times(0.01).toNumber();
         if (this.definition.id === 1) {
@@ -214,7 +214,7 @@ export class Hero {
         return loc7;
     }
 
-    private heroCostFormula46(fromLevel: number, toLevel: number): decimal.Decimal {
+    private heroCostFormula46(fromLevel: number, toLevel: number): Decimal {
         let loc4 = 1.07;
         let loc6 = 1 - this.ancients.heroLevelCostPercent.times(0.01).toNumber();
         let loc7 = new Decimal(this.definition.baseCost);

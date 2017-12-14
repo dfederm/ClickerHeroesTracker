@@ -1,3 +1,5 @@
+import { Decimal } from "decimal.js";
+
 const linearStr = "linear";
 const percentStr = "percent";
 
@@ -5,7 +7,7 @@ export function isLinear(levelAmountFormula: string): boolean {
     return levelAmountFormula.startsWith(linearStr);
 }
 
-export function linear(levelAmountFormula: string, level: decimal.Decimal): decimal.Decimal {
+export function linear(levelAmountFormula: string, level: Decimal): Decimal {
     let linearSuffix = levelAmountFormula.substring(linearStr.length);
     let linearCoefficient: number;
     if (linearSuffix[0] === "0") {
@@ -27,7 +29,7 @@ export function isPercent(levelAmountFormula: string): boolean {
     return levelAmountFormula.startsWith(percentStr);
 }
 
-export function percent(levelAmountFormula: string, level: decimal.Decimal): decimal.Decimal {
+export function percent(levelAmountFormula: string, level: Decimal): Decimal {
     let percentSuffix = levelAmountFormula.substring(percent.length);
 
     // Eg. percent5 => 0.95 (95%)

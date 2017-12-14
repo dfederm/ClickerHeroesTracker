@@ -1,3 +1,4 @@
+import { Decimal } from "decimal.js";
 import { Ancient } from "./ancient";
 
 export class Ancients {
@@ -5,137 +6,137 @@ export class Ancients {
         private ancients: { [id: number]: Ancient },
     ) { }
 
-    public get idleGoldPercent(): decimal.Decimal {
+    public get idleGoldPercent(): Decimal {
         // Libertas
         return this.getAncientBonus(4);
     }
 
-    public get idleDpsPercent(): decimal.Decimal {
+    public get idleDpsPercent(): Decimal {
         // Siyalatas
         return this.getAncientBonus(5);
     }
 
-    public get goldPercent(): decimal.Decimal {
+    public get goldPercent(): Decimal {
         // Mammon
         return this.getAncientBonus(8);
     }
 
-    public get treasureChestGoldPercent(): decimal.Decimal {
+    public get treasureChestGoldPercent(): Decimal {
         // Mimzee
         return this.getAncientBonus(9);
     }
 
-    public get goldenClicksPercent(): decimal.Decimal {
+    public get goldenClicksPercent(): Decimal {
         // Pluto
         return this.getAncientBonus(10);
     }
 
-    public get heroLevelCostPercent(): decimal.Decimal {
+    public get heroLevelCostPercent(): Decimal {
         // Dogcog
         return this.getAncientBonus(11);
     }
 
-    public get tenXGoldChance(): decimal.Decimal {
+    public get tenXGoldChance(): Decimal {
         // Fortuna
         return this.getAncientBonus(12);
     }
 
-    public get primalBossSpawnPercent(): decimal.Decimal {
+    public get primalBossSpawnPercent(): Decimal {
         // Atman
         return this.getAncientBonus(13);
     }
 
-    public get treasureChestSpawnPercent(): decimal.Decimal {
+    public get treasureChestSpawnPercent(): Decimal {
         // Dora
         return this.getAncientBonus(14);
     }
 
-    public get criticalClickMultiplierPercent(): decimal.Decimal {
+    public get criticalClickMultiplierPercent(): Decimal {
         // Bhaal
         return this.getAncientBonus(15);
     }
 
-    public get dpsPercent(): decimal.Decimal {
+    public get dpsPercent(): Decimal {
         // Morg
         return this.getAncientBonus(16);
     }
 
-    public get bossTimerSeconds(): decimal.Decimal {
+    public get bossTimerSeconds(): Decimal {
         // Chronos
         return this.getAncientBonus(17);
     }
 
-    public get bossLifePercent(): decimal.Decimal {
+    public get bossLifePercent(): Decimal {
         // Bubos
         return this.getAncientBonus(18);
     }
 
-    public get clickDamagePercent(): decimal.Decimal {
+    public get clickDamagePercent(): Decimal {
         // Fragsworth
         return this.getAncientBonus(19);
     }
 
-    public get skillCooldownPercent(): decimal.Decimal {
+    public get skillCooldownPercent(): Decimal {
         // Vaagur
         return this.getAncientBonus(20);
     }
 
-    public get monsterLevelRequirement(): decimal.Decimal {
+    public get monsterLevelRequirement(): Decimal {
         // Kuma
         return this.getAncientBonus(21);
     }
 
-    public get clickstormSeconds(): decimal.Decimal {
+    public get clickstormSeconds(): Decimal {
         // Chawedo
         return this.getAncientBonus(22);
     }
 
-    public get superClicksSeconds(): decimal.Decimal {
+    public get superClicksSeconds(): Decimal {
         // Hecatoncheir
         return this.getAncientBonus(23);
     }
 
-    public get powersurgeSeconds(): decimal.Decimal {
+    public get powersurgeSeconds(): Decimal {
         // Berserker
         return this.getAncientBonus(24);
     }
 
-    public get luckyStrikesSeconds(): decimal.Decimal {
+    public get luckyStrikesSeconds(): Decimal {
         // Sniperino
         return this.getAncientBonus(25);
     }
 
-    public get goldenClicksSeconds(): decimal.Decimal {
+    public get goldenClicksSeconds(): Decimal {
         // Kleptos
         return this.getAncientBonus(26);
     }
 
-    public get metalDetectorSeconds(): decimal.Decimal {
+    public get metalDetectorSeconds(): Decimal {
         // Energon
         return this.getAncientBonus(27);
     }
 
-    public get gildedDamageBonusPercent(): decimal.Decimal {
+    public get gildedDamageBonusPercent(): Decimal {
         // Argaiv
         return this.getAncientBonus(28);
     }
 
-    public get comboClickPercent(): decimal.Decimal {
+    public get comboClickPercent(): Decimal {
         // Juggernaut
         return this.getAncientBonus(29);
     }
 
-    public get doubleRubyPercent(): decimal.Decimal {
+    public get doubleRubyPercent(): Decimal {
         // Revolc
         return this.getAncientBonus(31);
     }
 
-    public get idleUnassignedAutoclickerBonusPercent(): decimal.Decimal {
+    public get idleUnassignedAutoclickerBonusPercent(): Decimal {
         // Nogardnit
         return this.getAncientBonus(32);
     }
 
-    private getAncientBonus(id: number): decimal.Decimal {
+    private getAncientBonus(id: number): Decimal {
         return this.ancients[id].getBonusAmount();
     }
 }

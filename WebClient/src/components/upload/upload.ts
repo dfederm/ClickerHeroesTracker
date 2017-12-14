@@ -2,7 +2,7 @@ import { Component, OnInit } from "@angular/core";
 import { ActivatedRoute, Router } from "@angular/router";
 import { UploadService } from "../../services/uploadService/uploadService";
 import { AuthenticationService, IUserInfo } from "../../services/authenticationService/authenticationService";
-import Decimal from "decimal.js";
+import { Decimal } from "decimal.js";
 import { AppInsightsService } from "@markpieszak/ng-application-insights";
 import { NgbModal } from "@ng-bootstrap/ng-bootstrap";
 import { switchMap } from "rxjs/operators";
@@ -24,11 +24,11 @@ import { SavedGame } from "./models/savedGame";
 interface IAncientViewModel {
     id: string;
     name: string;
-    ancientLevel: decimal.Decimal;
-    itemLevel: decimal.Decimal;
-    effectiveLevel: decimal.Decimal;
-    suggestedLevel?: decimal.Decimal;
-    diffValue?: decimal.Decimal;
+    ancientLevel: Decimal;
+    itemLevel: Decimal;
+    effectiveLevel: Decimal;
+    suggestedLevel?: Decimal;
+    diffValue?: Decimal;
     diffCopyValue?: string;
     isBase?: boolean;
 }
@@ -36,7 +36,7 @@ interface IAncientViewModel {
 interface IOutsiderViewModel {
     id: number;
     name: string;
-    currentLevel: decimal.Decimal;
+    currentLevel: Decimal;
 }
 
 interface ICalculateAscensionZoneData {
@@ -44,8 +44,8 @@ interface ICalculateAscensionZoneData {
     hero: string;
     heroLevel: number;
     heroGilds: number;
-    damage: decimal.Decimal;
-    gold: decimal.Decimal;
+    damage: Decimal;
+    gold: Decimal;
 }
 
 @Component({
@@ -82,18 +82,18 @@ export class UploadComponent implements OnInit {
     public ancients: IAncientViewModel[] = [];
     public outsiders: IOutsiderViewModel[] = [];
 
-    public pendingSouls: decimal.Decimal = new Decimal(0);
-    public heroSoulsSpent: decimal.Decimal = new Decimal(0);
-    public heroSoulsSacrificed: decimal.Decimal = new Decimal(0);
-    public totalAncientSouls: decimal.Decimal = new Decimal(0);
-    public transcendentPower: decimal.Decimal = new Decimal(0);
-    public titanDamage: decimal.Decimal = new Decimal(0);
-    public highestZoneThisTranscension: decimal.Decimal = new Decimal(0);
-    public highestZoneLifetime: decimal.Decimal = new Decimal(0);
-    public ascensionsThisTranscension: decimal.Decimal = new Decimal(0);
-    public ascensionsLifetime: decimal.Decimal = new Decimal(0);
-    public rubies: decimal.Decimal = new Decimal(0);
-    public autoclickers: decimal.Decimal = new Decimal(0);
+    public pendingSouls: Decimal = new Decimal(0);
+    public heroSoulsSpent: Decimal = new Decimal(0);
+    public heroSoulsSacrificed: Decimal = new Decimal(0);
+    public totalAncientSouls: Decimal = new Decimal(0);
+    public transcendentPower: Decimal = new Decimal(0);
+    public titanDamage: Decimal = new Decimal(0);
+    public highestZoneThisTranscension: Decimal = new Decimal(0);
+    public highestZoneLifetime: Decimal = new Decimal(0);
+    public ascensionsThisTranscension: Decimal = new Decimal(0);
+    public ascensionsLifetime: Decimal = new Decimal(0);
+    public rubies: Decimal = new Decimal(0);
+    public autoclickers: Decimal = new Decimal(0);
 
     public calculateAscensionZoneSteps: ICalculateAscensionZoneData[];
 
@@ -124,8 +124,8 @@ export class UploadComponent implements OnInit {
     private outsidersByName: { [name: string]: IOutsiderViewModel } = {};
 
     private uploadId: number;
-    private heroSouls: decimal.Decimal;
-    private ancientCostMultiplier: decimal.Decimal;
+    private heroSouls: Decimal;
+    private ancientCostMultiplier: Decimal;
 
     private upload: IUpload;
     private settings: IUserSettings;
@@ -447,7 +447,7 @@ export class UploadComponent implements OnInit {
         this.playStyle = this.upload.playStyle;
         this.savedGame = new SavedGame(this.upload.content, this.upload.isScrubbed);
 
-        let itemLevels: { [ancientId: string]: decimal.Decimal } = {};
+        let itemLevels: { [ancientId: string]: Decimal } = {};
         if (this.savedGame.data.items && this.savedGame.data.items.items && this.savedGame.data.items.slots) {
             for (let slotId in this.savedGame.data.items.slots) {
                 let itemId = this.savedGame.data.items.slots[slotId];
@@ -526,7 +526,7 @@ export class UploadComponent implements OnInit {
         this.errorMessage = errorMessage;
     }
 
-    private formatForClipboard(num: decimal.Decimal): string {
+    private formatForClipboard(num: Decimal): string {
         // The game can't handle pasting in decimal points, so we'll just use an altered sci-not form that excludes the decimal (eg. 1.234e5 => 1234e2)
         if (num.greaterThanOrEqualTo(1e6)) {
             let str = num.toExponential();
@@ -554,7 +554,7 @@ export class UploadComponent implements OnInit {
             ? "Fragsworth"
             : "Siyalatas";
 
-        let suggestedLevels: { [key: string]: decimal.Decimal };
+        let suggestedLevels: { [key: string]: Decimal };
 
         if (this.suggestionType === "AvailableSouls") {
             let availableSouls = this.heroSouls;
@@ -564,8 +564,8 @@ export class UploadComponent implements OnInit {
 
             let baseLevel = this.getAncientLevel(baseAncient);
             let left = baseLevel.times(-1);
-            let right: decimal.Decimal;
-            let mid: decimal.Decimal;
+            let right: Decimal;
+            let mid: Decimal;
             if (availableSouls.greaterThan(0)) {
                 /*
                   If all hs were to be spent on Siya (or Frags), we would have the following cost equation,
@@ -577,7 +577,7 @@ export class UploadComponent implements OnInit {
                 right = new Decimal(0);
             }
 
-            let spentHS: decimal.Decimal;
+            let spentHS: Decimal;
 
             /*
               Iterate until we have converged, or until we are very close to convergence.
@@ -642,8 +642,8 @@ export class UploadComponent implements OnInit {
             });
     }
 
-    private calculateAncientSuggestions(currentPrimaryAncientLevel?: decimal.Decimal): { [key: string]: decimal.Decimal } {
-        const suggestedLevels: { [key: string]: decimal.Decimal } = {};
+    private calculateAncientSuggestions(currentPrimaryAncientLevel?: Decimal): { [key: string]: Decimal } {
+        const suggestedLevels: { [key: string]: Decimal } = {};
 
         const primaryAncient = this.playStyle === "active" ? "Fragsworth" : "Siyalatas";
         if (currentPrimaryAncientLevel === undefined) {
@@ -674,7 +674,7 @@ export class UploadComponent implements OnInit {
         suggestedLevels.Chronos = lnPrimary.times(2.75).minus(new Decimal(2).minus(currentChronosLevel.times(-0.034).exp()).ln().times(1.375)).minus(5.1);
         suggestedLevels.Dogcog = lnPrimary.times(2.844).minus(new Decimal(1).div(99).plus(currentDogcogLevel.times(-0.01).exp()).ln().times(1.422)).minus(7.232);
         suggestedLevels.Dora = lnPrimary.times(2.877).minus(new Decimal(100).div(99).minus(currentDoraLevel.times(-0.002).exp()).ln().times(1.4365)).minus(9.63);
-        suggestedLevels.Fortuna = lnPrimary.times(2.875).minus(Decimal(10).div(9).minus(currentFortunaLevel.times(-0.0025).exp()).ln().times(1.4375)).minus(9.3);
+        suggestedLevels.Fortuna = lnPrimary.times(2.875).minus(new Decimal(10).div(9).minus(currentFortunaLevel.times(-0.0025).exp()).ln().times(1.4375)).minus(9.3);
         suggestedLevels.Kumawakamaru = lnPrimary.times(2.844).minus(lnAlpha.times(1.422)).minus(new Decimal(1).div(4).plus(currentKumaLevel.times(-0.01).exp()).ln().times(1.422)).minus(7.014);
         suggestedLevels.Mammon = suggestedLevels.Mimzee = currentPrimaryAncientLevel.times(0.926);
         suggestedLevels.Morgulis = currentPrimaryAncientLevel.pow(2);
@@ -732,7 +732,7 @@ export class UploadComponent implements OnInit {
         return suggestedLevels;
     }
 
-    private getAncientLevel(ancientName: string): decimal.Decimal {
+    private getAncientLevel(ancientName: string): Decimal {
         let ancient = this.ancientsByName[ancientName];
         return ancient
             ? this.settings.useEffectiveLevelForSuggestions
@@ -741,7 +741,7 @@ export class UploadComponent implements OnInit {
             : new Decimal(0);
     }
 
-    private getTotalAncientCost(suggestedLevels: { [key: string]: decimal.Decimal }): decimal.Decimal {
+    private getTotalAncientCost(suggestedLevels: { [key: string]: Decimal }): Decimal {
         let cost = new Decimal(0);
         for (let ancient in suggestedLevels) {
             const suggestedLevel = suggestedLevels[ancient];
@@ -763,22 +763,22 @@ export class UploadComponent implements OnInit {
         return cost;
     }
 
-    private getAncientCostFormulas(): { [key: string]: (level: decimal.Decimal) => decimal.Decimal } {
-        const ancientCosts: { [key: string]: (level: decimal.Decimal) => decimal.Decimal } = {};
+    private getAncientCostFormulas(): { [key: string]: (level: Decimal) => Decimal } {
+        const ancientCosts: { [key: string]: (level: Decimal) => Decimal } = {};
 
         for (const ancientId in gameData.ancients) {
             const ancient = gameData.ancients[ancientId];
 
-            let ancientCost: (level: decimal.Decimal) => decimal.Decimal;
+            let ancientCost: (level: Decimal) => Decimal;
             switch (ancient.levelCostFormula) {
                 case "one":
-                    ancientCost = (n: decimal.Decimal) => n;
+                    ancientCost = (n: Decimal) => n;
                     break;
                 case "linear":
-                    ancientCost = (n: decimal.Decimal) => n.times(n.plus(1)).dividedBy(2);
+                    ancientCost = (n: Decimal) => n.times(n.plus(1)).dividedBy(2);
                     break;
                 case "polynomial1_5":
-                    ancientCost = (n: decimal.Decimal) => {
+                    ancientCost = (n: Decimal) => {
                         // Approximate above a certain level for perf
                         // Formula taken from https://github.com/superbob/clicker-heroes-1.0-hsoptimizer/blob/335f13b7304627065a4e515edeb3fb3c4e08f8ad/src/app/components/maths/maths.service.js
                         if (n.greaterThan(100)) {
@@ -799,7 +799,7 @@ export class UploadComponent implements OnInit {
                     };
                     break;
                 case "exponential":
-                    ancientCost = (n: decimal.Decimal) => Decimal.pow(2, n.plus(1)).minus(1);
+                    ancientCost = (n: Decimal) => Decimal.pow(2, n.plus(1)).minus(1);
                     break;
                 default:
                     ancientCost = () => new Decimal(0);

@@ -1,6 +1,5 @@
 import { Pipe, PipeTransform, ChangeDetectorRef } from "@angular/core";
-// tslint:disable-next-line:import-name - The module is named "decimal.js"
-import Decimal from "decimal.js";
+import { Decimal } from "decimal.js";
 import { SettingsService, IUserSettings } from "../services/settingsService/settingsService";
 
 // Some shenanigans to wire up toformat, which doesn't have typings.
@@ -26,7 +25,7 @@ export class ExponentialPipe implements PipeTransform {
             });
     }
 
-    public static formatNumber(value: number | decimal.Decimal, settings: IUserSettings): string {
+    public static formatNumber(value: number | Decimal, settings: IUserSettings): string {
         if (!value) {
             value = 0;
         }
@@ -48,13 +47,13 @@ export class ExponentialPipe implements PipeTransform {
             const useScientificNotation = settings && settings.useScientificNotation && value.abs().greaterThan(settings.scientificNotationThreshold);
             return useScientificNotation
                 ? value.toExponential(3)
-                : value.toFormat();
+                : value.toFormat(0, 0);
         }
 
         throw new Error("Unexpected value passed to ExponentialPipe");
     }
 
-    public transform(value: number | decimal.Decimal): string {
+    public transform(value: number | Decimal): string {
         return ExponentialPipe.formatNumber(value, this.settings);
     }
 }

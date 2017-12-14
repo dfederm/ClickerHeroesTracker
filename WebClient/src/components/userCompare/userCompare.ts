@@ -3,7 +3,7 @@ import { ActivatedRoute, Params } from "@angular/router";
 import { UserService, IProgressData } from "../../services/userService/userService";
 import { SettingsService, IUserSettings } from "../../services/settingsService/settingsService";
 
-import Decimal from "decimal.js";
+import { Decimal } from "decimal.js";
 import { ChartDataSets, ChartOptions, ChartTooltipItem } from "chart.js";
 import { ExponentialPipe } from "../../pipes/exponentialPipe";
 
@@ -167,7 +167,7 @@ export class UserCompareComponent implements OnInit {
         let max = new Decimal(0);
         let requiresDecimal = false;
 
-        let decimalData1: { x: number, y: decimal.Decimal }[] = [];
+        let decimalData1: { x: number, y: Decimal }[] = [];
         for (let i in data1) {
             let time = Date.parse(i);
             let value = new Decimal(data1[i]);
@@ -185,7 +185,7 @@ export class UserCompareComponent implements OnInit {
             decimalData1.push({ x: time, y: value });
         }
 
-        let decimalData2: { x: number, y: decimal.Decimal }[] = [];
+        let decimalData2: { x: number, y: Decimal }[] = [];
         for (let i in data2) {
             let time = Date.parse(i);
             let value = new Decimal(data2[i]);

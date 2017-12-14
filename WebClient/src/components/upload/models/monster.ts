@@ -1,4 +1,4 @@
-import Decimal from "decimal.js";
+import { Decimal } from "decimal.js";
 import { UserData } from "./userData";
 import { Ancients } from "./ancients";
 
@@ -15,7 +15,7 @@ export class Monster {
 
     private static healthAt200k = new Decimal("1.240e25409");
 
-    private static cachedMonsterLife: { [level: number]: decimal.Decimal } = Monster.createCachedMonsterLife();
+    private static cachedMonsterLife: { [level: number]: Decimal } = Monster.createCachedMonsterLife();
 
     constructor(
         private userData: UserData,
@@ -23,11 +23,11 @@ export class Monster {
         private level: number,
     ) { }
 
-    public get maxLife(): decimal.Decimal {
+    public get maxLife(): Decimal {
         return this.monsterLifeFormula1();
     }
 
-    public get goldReward(): decimal.Decimal {
+    public get goldReward(): Decimal {
         return this.monsterGoldFormula1();
     }
 
@@ -35,21 +35,21 @@ export class Monster {
         return this.level % Monster.BOSS_ZONE_MODULUS === 0;
     }
 
-    private static createCachedMonsterLife(): { [level: number]: decimal.Decimal } {
-        let cachedMonsterLife: { [level: number]: decimal.Decimal } = {};
+    private static createCachedMonsterLife(): { [level: number]: Decimal } {
+        let cachedMonsterLife: { [level: number]: Decimal } = {};
         cachedMonsterLife[Monster.levelWhereScaleChanges] = new Decimal(Monster.earlyBase).pow(Monster.levelWhereScaleChanges - 1).times(10);
         cachedMonsterLife[500] = new Decimal(Monster.lateBase).pow(500 - Monster.levelWhereScaleChanges).times(cachedMonsterLife[Monster.levelWhereScaleChanges]);
         return cachedMonsterLife;
     }
 
-    private monsterLifeFormula1(): decimal.Decimal {
-        let loc3: decimal.Decimal = null;
+    private monsterLifeFormula1(): Decimal {
+        let loc3: Decimal = null;
         let loc4: number;
         let loc6: number;
         let loc7: number;
         let loc8: number;
         let loc9: number;
-        let loc10: decimal.Decimal = null;
+        let loc10: Decimal = null;
 
         if (!this.userData.transcendent && this.userData.highestFinishedZonePersist > 500) {
             return this.oldMonsterLifeFormula1();
@@ -82,8 +82,8 @@ export class Monster {
         return loc3;
     }
 
-    private monsterGoldFormula1(): decimal.Decimal {
-        let loc4: decimal.Decimal = new Decimal(1);
+    private monsterGoldFormula1(): Decimal {
+        let loc4: Decimal = new Decimal(1);
         let loc5 = 1;
         if (this.level > 75) {
             loc5 = Math.min(3, Math.pow(1.025, this.level - 75));
@@ -106,7 +106,7 @@ export class Monster {
             .ceil();
     }
 
-    private oldMonsterLifeFormula1(): decimal.Decimal {
+    private oldMonsterLifeFormula1(): Decimal {
         let loc5: number;
         let loc6: number;
         let loc3 = 1.6;
@@ -142,7 +142,7 @@ export class Monster {
         return loc2;
     }
 
-    private monsterLifeByFiveHundreds(param1: number): decimal.Decimal {
+    private monsterLifeByFiveHundreds(param1: number): Decimal {
         if (Monster.cachedMonsterLife[param1] != null) {
             return Monster.cachedMonsterLife[param1];
         } else {

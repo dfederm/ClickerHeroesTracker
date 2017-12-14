@@ -1,4 +1,4 @@
-import Decimal from "decimal.js";
+import { Decimal } from "decimal.js";
 import { IUpgradeData, IHeroData } from "./gameData";
 
 export class Upgrade {
@@ -41,7 +41,7 @@ export class Upgrade {
         return this.definition.heroLevelRequired;
     }
 
-    public get cost(): decimal.Decimal {
+    public get cost(): Decimal {
         let hero = this.heroes[this.definition.heroId];
         let multiplier = Upgrade.attributeMultipliers[this.definition.attribute];
         return new Decimal(hero.baseCost).times(multiplier);
