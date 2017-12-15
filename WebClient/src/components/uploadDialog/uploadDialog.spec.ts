@@ -213,7 +213,7 @@ describe("UploadDialogComponent", () => {
                     playStyles = form.queryAll(By.css("[name='playStyle']"));
                     addToProgress = form.query(By.css("#addToProgress"));
                     warningMessage = form.query(By.css(".alert-warning"));
-                    button = form.query(By.css("button"));
+                    button = form.query(By.css("button[type='submit']"));
                 });
         }
     });

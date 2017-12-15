@@ -19,7 +19,15 @@
                       rows="2"
                       id="encodedSaveData"
                       name="encodedSaveData"
-                      [(ngModel)]="encodedSaveData"></textarea>
+                      placeholder="Paste save data"
+                      [(ngModel)]="encodedSaveData"></textarea> or
+            <button type="button"
+                    class="btn btn-primary"
+                    (click)="fileInput.click()">Load a File</button>
+            <input type="file"
+                   #fileInput
+                   class="d-none"
+                   (change)="uploadFile($event)" />
         </div>
         <fieldset class="form-group">
             <legend class="col-form-legend">Play Style</legend>
