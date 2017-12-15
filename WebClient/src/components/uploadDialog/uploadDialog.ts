@@ -71,4 +71,15 @@ export class UploadDialogComponent implements OnInit {
                     : "An unknown error occurred";
             });
     }
+
+    public uploadFile(event: Event): void {
+        let fileInput = event.target as HTMLInputElement;
+        let fileList = fileInput.files;
+        if (fileList.length > 0) {
+            let reader = new FileReader();
+            let file: File = fileList[0];
+            reader.onload = () => this.encodedSaveData = reader.result;
+            reader.readAsText(file);
+        }
+    }
 }
