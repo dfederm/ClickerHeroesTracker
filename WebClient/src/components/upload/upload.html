@@ -127,7 +127,7 @@
                 <a href="https://redd.it/4naohc"
                    target="_blank">
                     Math by /u/sugima
-                </a>.
+                </a>
             </p>
             <fieldset class="form-group">
                 <legend class="col-form-legend">Suggestion Type</legend>
@@ -228,21 +228,44 @@
         </div>
         <div class="col-lg-6">
             <h4>Outsider:</h4>
-            <p>There are no suggestions for Outsiders yet as no one knows what is optimal yet. Once formulas are available,
-                they will be added.</p>
+            <p class="text-muted">
+                Based on the
+                <a href="https://redd.it/7lxgj5"
+                   target="_blank">
+                    Spreadsheet by /u/SpencerSchlenk
+                </a>
+            </p>
+            <div class="form-group">
+                <label class="form-check-label">
+                    <input class="form-check-input"
+                           name="focusBorb"
+                           [(ngModel)]="focusBorb"
+                           type="checkbox">
+                    <span>Focus Borb?</span>
+                </label>
+            </div>
             <table class="table table-sm table-striped">
                 <thead>
                     <tr>
                         <th>Outsider</th>
                         <th>Current</th>
+                        <th>Suggested</th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr *ngFor="let outsider of outsiders">
                         <td>{{ outsider.name }}:</td>
                         <td class="text-right">{{ outsider.currentLevel | exponential }}</td>
+                        <td class="text-right">{{ outsider.suggestedLevel | exponential }}</td>
                     </tr>
                 </tbody>
+                <tfoot>
+                    <tr>
+                        <td></td>
+                        <td class="text-right">Remaining</td>
+                        <td class="text-right">{{ remainingAncientSouls }}</td>
+                    </tr>
+                </tfoot>
             </table>
             <h4>Miscellaneous stats:</h4>
             <table class="table table-sm table-striped">

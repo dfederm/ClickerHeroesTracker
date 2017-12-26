@@ -434,7 +434,7 @@ describe("UploadComponent", () => {
                     expect((suggestionTypes[0].nativeElement as HTMLInputElement).checked).toEqual(true);
                     expect((suggestionTypes[1].nativeElement as HTMLInputElement).checked).toEqual(false);
 
-                    let useSoulsFromAscension = fixture.debugElement.query(By.css("input[type='checkbox']"));
+                    let useSoulsFromAscension = fixture.debugElement.query(By.css("input[name='useSoulsFromAscension']"));
                     expect(useSoulsFromAscension).not.toBeNull("Couldn't find the 'Use souls from ascension' checkbox");
                 });
         }));
@@ -454,7 +454,7 @@ describe("UploadComponent", () => {
                     suggestionTypes[1].nativeElement.click();
                     fixture.detectChanges();
 
-                    let useSoulsFromAscension = fixture.debugElement.query(By.css("input[type='checkbox']"));
+                    let useSoulsFromAscension = fixture.debugElement.query(By.css("input[name='useSoulsFromAscension']"));
                     expect(useSoulsFromAscension).toBeNull("Unexpectedly found the 'Use souls from ascension' checkbox");
                 });
         }));
@@ -477,7 +477,7 @@ describe("UploadComponent", () => {
                     suggestionTypes[0].nativeElement.click();
                     fixture.detectChanges();
 
-                    let useSoulsFromAscension = fixture.debugElement.query(By.css("input[type='checkbox']"));
+                    let useSoulsFromAscension = fixture.debugElement.query(By.css("input[name='useSoulsFromAscension']"));
                     expect(useSoulsFromAscension).not.toBeNull("Couldn't find the 'Use souls from ascension' checkbox");
                 });
         }));
@@ -533,7 +533,7 @@ describe("UploadComponent", () => {
                     fixture.detectChanges();
 
                     // Don't use souls from ascension
-                    let useSoulsFromAscension = fixture.debugElement.query(By.css("input[type='checkbox']"));
+                    let useSoulsFromAscension = fixture.debugElement.query(By.css("input[name='useSoulsFromAscension']"));
                     useSoulsFromAscension.nativeElement.click();
                     fixture.detectChanges();
 
@@ -628,7 +628,7 @@ describe("UploadComponent", () => {
                     fixture.detectChanges();
 
                     // Don't use souls from ascension
-                    let useSoulsFromAscension = fixture.debugElement.query(By.css("input[type='checkbox']"));
+                    let useSoulsFromAscension = fixture.debugElement.query(By.css("input[name='useSoulsFromAscension']"));
                     useSoulsFromAscension.nativeElement.click();
                     fixture.detectChanges();
 
@@ -724,7 +724,7 @@ describe("UploadComponent", () => {
                     fixture.detectChanges();
 
                     // Don't use souls from ascension
-                    let useSoulsFromAscension = fixture.debugElement.query(By.css("input[type='checkbox']"));
+                    let useSoulsFromAscension = fixture.debugElement.query(By.css("input[name='useSoulsFromAscension']"));
                     useSoulsFromAscension.nativeElement.click();
                     fixture.detectChanges();
 
@@ -859,17 +859,17 @@ describe("UploadComponent", () => {
                 .then(() => {
                     fixture.detectChanges();
 
-                    let expectedValues: { name: string, level: number }[] =
+                    let expectedValues: { name: string, level: number, suggested: number }[] =
                         [
-                            { name: "Xyliqil", level: 0 },
-                            { name: "Chor'gorloth", level: 0 },
-                            { name: "Phandoryss", level: 0 },
-                            { name: "Ponyboy", level: 0 },
-                            { name: "Borb", level: 0 },
-                            { name: "Rhageist", level: 0 },
-                            { name: "K'Ariqua", level: 0 },
-                            { name: "Orphalas", level: 0 },
-                            { name: "Sen-Akhan", level: 0 },
+                            { name: "Xyliqil", level: 0, suggested: 0 },
+                            { name: "Chor'gorloth", level: 0, suggested: 10 },
+                            { name: "Phandoryss", level: 0, suggested: 74 },
+                            { name: "Ponyboy", level: 0, suggested: 19 },
+                            { name: "Borb", level: 0, suggested: 5 },
+                            { name: "Rhageist", level: 0, suggested: 6 },
+                            { name: "K'Ariqua", level: 0, suggested: 6 },
+                            { name: "Orphalas", level: 0, suggested: 6 },
+                            { name: "Sen-Akhan", level: 0, suggested: 6 },
                         ];
 
                     let errorMessage = fixture.debugElement.query(By.css(".alert-danger"));
@@ -882,12 +882,22 @@ describe("UploadComponent", () => {
                     expect(rows.length).toEqual(expectedValues.length);
 
                     for (let i = 0; i < rows.length; i++) {
-                        let cells = rows[i].children;
                         let expected = expectedValues[i];
+
+                        let cells = rows[i].children;
+                        expect(cells.length).toEqual(3);
 
                         expect(getNormalizedTextContent(cells[0])).toEqual(expected.name + ":");
                         expect(getNormalizedTextContent(cells[1])).toEqual(expected.level.toString());
+                        expect(getNormalizedTextContent(cells[2])).toEqual(expected.suggested.toString());
                     }
+
+                    let footer = tables[1].queryAll(By.css("tfoot tr"));
+                    expect(footer.length).toEqual(1);
+
+                    let footerCells = footer[0].children;
+                    expect(footerCells.length).toEqual(3);
+                    expect(getNormalizedTextContent(footerCells[2])).toEqual("80");
                 });
         }));
     });
