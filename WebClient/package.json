@@ -9,7 +9,7 @@
     "build": "webpack --config ./webpack.config.js --progress --profile --bail",
     "watch": "webpack --config ./webpack.config.js --progress --profile --watch",
     "test": "karma start ./karma.conf.js",
-    "test-watch": "karma start ./karma.conf.js --single-run false"
+    "test-watch": "karma start ./karma.conf.js --single-run false --browsers Chrome"
   },
   "dependencies": {
     "@angular/animations": "^5.1.1",

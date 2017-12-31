@@ -1,0 +1,39 @@
+<p class="text-muted">
+    Based on the
+    <a href="https://redd.it/7lxgj5"
+       target="_blank">
+        Spreadsheet by /u/SpencerSchlenk
+    </a>
+</p>
+<div class="form-group">
+    <label class="form-check-label">
+        <input class="form-check-input"
+               name="focusBorb"
+               [(ngModel)]="focusBorb"
+               type="checkbox">
+        <span>Focus Borb?</span>
+    </label>
+</div>
+<table class="table table-sm table-striped">
+    <thead>
+        <tr>
+            <th>Outsider</th>
+            <th>Current</th>
+            <th>Suggested</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr *ngFor="let outsider of outsiders">
+            <td>{{ outsider.name }}:</td>
+            <td class="text-right">{{ outsider.currentLevel | exponential }}</td>
+            <td class="text-right">{{ outsider.suggestedLevel | exponential }}</td>
+        </tr>
+    </tbody>
+    <tfoot>
+        <tr>
+            <td></td>
+            <td class="text-right">Remaining</td>
+            <td class="text-right">{{ remainingAncientSouls | exponential }}</td>
+        </tr>
+    </tfoot>
+</table>
