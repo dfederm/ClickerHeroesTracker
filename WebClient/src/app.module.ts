@@ -37,6 +37,9 @@ import { SettingsDialogComponent } from "./components/settingsDialog/settingsDia
 import { ChangePasswordDialogComponent } from "./components/changePasswordDialog/changePasswordDialog";
 import { AdminComponent } from "./components/admin/admin";
 import { NotFoundComponent } from "./components/notFound/notFound";
+import { AncientSuggestionsComponent } from "./components/ancientSuggestions/ancientSuggestions";
+import { OutsiderSuggestionsComponent } from "./components/outsiderSuggestions/outsiderSuggestions";
+import { AscensionZoneComponent } from "./components/ascensionZone/ascensionZone";
 
 import { OpenDialogDirective } from "./directives/openDialog/openDialog";
 
@@ -112,6 +115,9 @@ const routes: Routes =
       ChangePasswordDialogComponent,
       AdminComponent,
       NotFoundComponent,
+      AncientSuggestionsComponent,
+      OutsiderSuggestionsComponent,
+      AscensionZoneComponent,
     ],
   entryComponents:
     [

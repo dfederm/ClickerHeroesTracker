@@ -41,11 +41,11 @@ module.exports = function (config) {
         emitWarning: false,
         // thresholds for all files
         global: {
-          statements: 85,
+          statements: 90,
         },
         // thresholds per file. Really should raise this, but the game models hold it back.
         each: {
-          statements: 40,
+          statements: 45,
         }
       },
     },
@@ -71,7 +71,7 @@ module.exports = function (config) {
 
     // start these browsers
     // available browser launchers: https://npmjs.org/browse/keyword/karma-launcher
-    browsers: ['Chrome'],
+    browsers: ['ChromeHeadless'],
 
     // Continuous Integration mode
     // if true, Karma captures browsers, runs the tests and exits
@@ -79,6 +79,10 @@ module.exports = function (config) {
 
     // Concurrency level
     // how many browser should be started simultaneous
-    concurrency: Infinity
+    concurrency: Infinity,
+
+    // How long will Karma wait for a message from a browser before disconnecting from it (in ms).
+    // Sometimes dealing with very large numbers can cause a small hang.
+    browserNoActivityTimeout: 60000,
   });
 };

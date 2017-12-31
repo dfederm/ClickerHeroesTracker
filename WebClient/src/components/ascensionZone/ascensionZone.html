@@ -1,0 +1,37 @@
+<p>
+    This is the zone at which you stop insta-killing monsters.
+</p>
+<p class="text-muted">
+    This feature is not complete yet as it assumes an idle playstyle and may not fully account for some aspects of the game.
+</p>
+<p class="text-muted">
+    Each row is a "step" in the calculation, ie. where purchasing hero levels is required to continue insta-killing.
+</p>
+<div>
+    <button *ngIf="!calculateAscensionZoneSteps"
+            class="btn btn-secondary"
+            (click)="calculateAscensionZone()">Calculate</button>
+</div>
+<table *ngIf="calculateAscensionZoneSteps"
+       class="table table-sm table-striped">
+    <thead>
+        <tr>
+            <th>Zone</th>
+            <th>Current Hero</th>
+            <th>Hero Level</th>
+            <th>Hero Gilds</th>
+            <th>Damage</th>
+            <th>Gold</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr *ngFor="let data of calculateAscensionZoneSteps">
+            <td class="text-right">{{ data.zone }}</td>
+            <td>{{ data.hero }}</td>
+            <td class="text-right">{{ data.heroLevel }}</td>
+            <td class="text-right">{{ data.heroGilds }}</td>
+            <td class="text-right">{{ data.damage | exponential }}</td>
+            <td class="text-right">{{ data.gold | exponential }}</td>
+        </tr>
+    </tbody>
+</table>

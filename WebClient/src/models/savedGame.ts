@@ -38,6 +38,7 @@ export interface IOutsidersData {
 
 export interface ISavedGameData {
     transcendent: boolean;
+    paidForRubyMultiplier: boolean;
 
     primalSouls: number | string;
     heroSouls: number | string;

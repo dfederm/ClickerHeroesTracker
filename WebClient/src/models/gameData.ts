@@ -1,5 +1,5 @@
 // tslint:disable-next-line:no-require-imports no-var-requires
-export const gameData: IGameData = require("../../../../../Website/src/wwwroot/data/GameData.json");
+export const gameData: IGameData = require("../../../Website/src/wwwroot/data/GameData.json");
 
 export interface IGameData {
     itemBonusTypes: { [id: string]: IItemBonusType };
