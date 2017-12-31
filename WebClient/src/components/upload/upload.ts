@@ -12,7 +12,6 @@ import { SavedGame } from "../../models/savedGame";
 @Component({
     selector: "upload",
     templateUrl: "./upload.html",
-    styleUrls: ["./upload.css"],
 })
 export class UploadComponent implements OnInit {
     public userInfo: IUserInfo;

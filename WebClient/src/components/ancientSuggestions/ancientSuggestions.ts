@@ -20,6 +20,7 @@ interface IAncientViewModel {
 @Component({
     selector: "ancientSuggestions",
     templateUrl: "./ancientSuggestions.html",
+    styleUrls: ["./ancientSuggestions.css"],
 })
 export class AncientSuggestionsComponent implements OnInit {
     private static exponentialRegex = /^(\d+(\.\d+)?)e\+?(\d+)$/i;
