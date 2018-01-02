@@ -70,7 +70,7 @@ namespace ClickerHeroesTracker.UploadProcessor
                     }
                     else
                     {
-                        var processed = this.ProcessMessage(message);
+                        var processed = await this.ProcessMessageAsync(message);
                         if (processed || message.DequeueCount > MaxProcessAttempts)
                         {
                             await queue.DeleteMessageAsync(message);
@@ -87,12 +87,9 @@ namespace ClickerHeroesTracker.UploadProcessor
             return queue;
         }
 
-        private static void GetUploadDetails(
+        private static async Task<(string uploadContent, string userId, PlayStyle playStyle)> GetUploadDetailsAsync(
             IDatabaseCommandFactory databaseCommandFactory,
-            int uploadId,
-            out string uploadContent,
-            out string userId,
-            out PlayStyle playStyle)
+            int uploadId)
         {
             const string CommandText = @"
 	            SELECT UploadContent, UserId, PlayStyle
@@ -105,20 +102,23 @@ namespace ClickerHeroesTracker.UploadProcessor
             using (var command = databaseCommandFactory.Create(
                 CommandText,
                 commandParameters))
-            using (var reader = command.ExecuteReader())
+            using (var reader = await command.ExecuteReaderAsync())
             {
                 reader.Read();
-                uploadContent = reader["UploadContent"].ToString();
-                userId = reader["UserId"].ToString();
 
-                if (!Enum.TryParse(reader["PlayStyle"].ToString(), out playStyle))
+                var uploadContent = reader["UploadContent"].ToString();
+                var userId = reader["UserId"].ToString();
+
+                if (!Enum.TryParse(reader["PlayStyle"].ToString(), out PlayStyle playStyle))
                 {
                     playStyle = default(PlayStyle);
                 }
+
+                return (uploadContent, userId, playStyle);
             }
         }
 
-        private bool ProcessMessage(CloudQueueMessage queueMessage)
+        private async Task<bool> ProcessMessageAsync(CloudQueueMessage queueMessage)
         {
             var properties = new Dictionary<string, string>
             {
@@ -129,215 +129,187 @@ namespace ClickerHeroesTracker.UploadProcessor
 
             this.telemetryClient.TrackEvent("UploadProcessor-Recieved", properties);
 
-            using (var databaseCommandFactory = new DatabaseCommandFactory(this.databaseSettingsOptions))
+            var databaseCommandFactory = new DatabaseCommandFactory(this.databaseSettingsOptions);
+            int uploadId = -1;
+            try
             {
-                int uploadId = -1;
-                try
+                var message = JsonConvert.DeserializeObject<UploadProcessingMessage>(queueMessage.AsString);
+                if (message == null)
                 {
-                    var message = JsonConvert.DeserializeObject<UploadProcessingMessage>(queueMessage.AsString);
-                    if (message == null)
+                    this.telemetryClient.TrackEvent("UploadProcessor-Abandoned-ParseMessage", properties);
+                    return false;
+                }
+
+                uploadId = message.UploadId;
+                properties.Add("UploadId", uploadId.ToString());
+
+                this.CurrentUploadId = uploadId;
+
+                var (uploadContent, userId, playStyle) = await GetUploadDetailsAsync(databaseCommandFactory, uploadId);
+                properties.Add("UserId", userId);
+                if (string.IsNullOrWhiteSpace(uploadContent))
+                {
+                    this.telemetryClient.TrackEvent("UploadProcessor-Abandoned-FetchUpload", properties);
+                    return false;
+                }
+
+                // Handle legacy uplaods where the upload content was missing.
+                if (uploadContent.Equals("LEGACY", StringComparison.OrdinalIgnoreCase))
+                {
+                    this.telemetryClient.TrackEvent("UploadProcessor-Complete-Legacy", properties);
+                    using (var command = databaseCommandFactory.Create())
                     {
-                        this.telemetryClient.TrackEvent("UploadProcessor-Abandoned-ParseMessage", properties);
-                        return false;
+                        command.CommandText = "UPDATE Uploads SET LastComputeTime = getutcdate() WHERE Id = " + uploadId;
+                        await command.ExecuteNonQueryAsync();
                     }
 
-                    uploadId = message.UploadId;
-                    properties.Add("UploadId", uploadId.ToString());
+                    return true;
+                }
 
-                    this.CurrentUploadId = uploadId;
+                var savedGame = SavedGame.Parse(uploadContent);
+                if (savedGame == null)
+                {
+                    this.telemetryClient.TrackEvent("UploadProcessor-Abandoned-ParseUpload", properties);
+                    return false;
+                }
 
-                    GetUploadDetails(databaseCommandFactory, uploadId, out var uploadContent, out var userId, out var playStyle);
-                    properties.Add("UserId", userId);
-                    if (string.IsNullOrWhiteSpace(uploadContent))
+                this.telemetryClient.TrackEvent("UploadProcessor-Processing", properties);
+                var ancientLevels = new AncientLevelsModel(
+                    this.gameData,
+                    savedGame);
+                var outsiderLevels = new OutsiderLevelsModel(
+                    this.gameData,
+                    savedGame);
+                var computedStats = new ComputedStats(savedGame);
+
+                /* Build a query that looks like this:
+                    MERGE INTO AncientLevels WITH (HOLDLOCK)
+                    USING
+                        (VALUES (123, 1, '100'), (123, 2, '100'), ... )
+                            AS Input(UploadId, AncientId, Level)
+                        ON AncientLevels.UploadId = Input.UploadId
+                        AND AncientLevels.AncientId = Input.AncientId
+                    WHEN MATCHED THEN
+                        UPDATE
+                        SET
+                            Level = Input.Level
+                    WHEN NOT MATCHED THEN
+                        INSERT (UploadId, AncientId, Level)
+                        VALUES (Input.UploadId, Input.AncientId, Input.Level);
+                */
+                var ancientLevelsCommandText = new StringBuilder();
+                if (ancientLevels.AncientLevels.Count > 0)
+                {
+                    ancientLevelsCommandText.Append(@"
+                    MERGE INTO AncientLevels WITH (HOLDLOCK)
+                    USING
+                        ( VALUES ");
+                    var isFirst = true;
+                    foreach (var pair in ancientLevels.AncientLevels)
                     {
-                        this.telemetryClient.TrackEvent("UploadProcessor-Abandoned-FetchUpload", properties);
-                        return false;
-                    }
-
-                    // Handle legacy uplaods where the upload content was missing.
-                    if (uploadContent.Equals("LEGACY", StringComparison.OrdinalIgnoreCase))
-                    {
-                        this.telemetryClient.TrackEvent("UploadProcessor-Complete-Legacy", properties);
-                        using (var command = databaseCommandFactory.Create())
+                        if (!isFirst)
                         {
-                            command.CommandText = "UPDATE Uploads SET LastComputeTime = getutcdate() WHERE Id = " + uploadId;
-                            command.ExecuteNonQuery();
-                        }
-
-                        return true;
-                    }
-
-                    var savedGame = SavedGame.Parse(uploadContent);
-                    if (savedGame == null)
-                    {
-                        this.telemetryClient.TrackEvent("UploadProcessor-Abandoned-ParseUpload", properties);
-                        return false;
-                    }
-
-                    this.telemetryClient.TrackEvent("UploadProcessor-Processing", properties);
-                    var ancientLevels = new AncientLevelsModel(
-                        this.gameData,
-                        savedGame);
-                    var outsiderLevels = new OutsiderLevelsModel(
-                        this.gameData,
-                        savedGame);
-                    var computedStats = new ComputedStats(savedGame);
-
-                    /* Build a query that looks like this:
-                        MERGE INTO AncientLevels WITH (HOLDLOCK)
-                        USING
-                            (VALUES (123, 1, '100'), (123, 2, '100'), ... )
-                                AS Input(UploadId, AncientId, Level)
-                            ON AncientLevels.UploadId = Input.UploadId
-                            AND AncientLevels.AncientId = Input.AncientId
-                        WHEN MATCHED THEN
-                            UPDATE
-                            SET
-                                Level = Input.Level
-                        WHEN NOT MATCHED THEN
-                            INSERT (UploadId, AncientId, Level)
-                            VALUES (Input.UploadId, Input.AncientId, Input.Level);
-                    */
-                    var ancientLevelsCommandText = new StringBuilder();
-                    if (ancientLevels.AncientLevels.Count > 0)
-                    {
-                        ancientLevelsCommandText.Append(@"
-                        MERGE INTO AncientLevels WITH (HOLDLOCK)
-                        USING
-                            ( VALUES ");
-                        var isFirst = true;
-                        foreach (var pair in ancientLevels.AncientLevels)
-                        {
-                            if (!isFirst)
-                            {
-                                ancientLevelsCommandText.Append(",");
-                            }
-
-                            // No need to sanitize, these are all just numbers
-                            ancientLevelsCommandText.Append("(");
-                            ancientLevelsCommandText.Append(uploadId);
                             ancientLevelsCommandText.Append(",");
-                            ancientLevelsCommandText.Append(pair.Key);
-                            ancientLevelsCommandText.Append(",'");
-                            ancientLevelsCommandText.Append(pair.Value.ToTransportableString());
-                            ancientLevelsCommandText.Append("')");
-
-                            isFirst = false;
                         }
 
-                        ancientLevelsCommandText.Append(@"
-                            )
-                                AS Input(UploadId, AncientId, Level)
-                            ON AncientLevels.UploadId = Input.UploadId
-                            AND AncientLevels.AncientId = Input.AncientId
-                        WHEN MATCHED THEN
-                            UPDATE
-                            SET
-                                Level = Input.Level
-                        WHEN NOT MATCHED THEN
-                            INSERT (UploadId, AncientId, Level)
-                            VALUES (Input.UploadId, Input.AncientId, Input.Level);");
+                        // No need to sanitize, these are all just numbers
+                        ancientLevelsCommandText.Append("(");
+                        ancientLevelsCommandText.Append(uploadId);
+                        ancientLevelsCommandText.Append(",");
+                        ancientLevelsCommandText.Append(pair.Key);
+                        ancientLevelsCommandText.Append(",'");
+                        ancientLevelsCommandText.Append(pair.Value.ToTransportableString());
+                        ancientLevelsCommandText.Append("')");
+
+                        isFirst = false;
                     }
 
-                    /* Build a query that looks like this:
-                        MERGE INTO OutsiderLevels WITH (HOLDLOCK)
-                        USING
-                            (VALUES (123, 1, 100), (123, 2, 100), ... )
-                                AS Input(UploadId, OutsiderId, Level)
-                            ON OutsiderLevels.UploadId = Input.UploadId
-                            AND OutsiderLevels.OutsiderId = Input.OutsiderId
-                        WHEN MATCHED THEN
-                            UPDATE
-                            SET
-                                Level = Input.Level
-                        WHEN NOT MATCHED THEN
-                            INSERT (UploadId, OutsiderId, Level)
-                            VALUES (Input.UploadId, Input.OutsiderId, Input.Level);
-                    */
-                    var outsiderLevelsCommandText = new StringBuilder();
-                    if (outsiderLevels.OutsiderLevels.Count > 0)
+                    ancientLevelsCommandText.Append(@"
+                        )
+                            AS Input(UploadId, AncientId, Level)
+                        ON AncientLevels.UploadId = Input.UploadId
+                        AND AncientLevels.AncientId = Input.AncientId
+                    WHEN MATCHED THEN
+                        UPDATE
+                        SET
+                            Level = Input.Level
+                    WHEN NOT MATCHED THEN
+                        INSERT (UploadId, AncientId, Level)
+                        VALUES (Input.UploadId, Input.AncientId, Input.Level);");
+                }
+
+                /* Build a query that looks like this:
+                    MERGE INTO OutsiderLevels WITH (HOLDLOCK)
+                    USING
+                        (VALUES (123, 1, 100), (123, 2, 100), ... )
+                            AS Input(UploadId, OutsiderId, Level)
+                        ON OutsiderLevels.UploadId = Input.UploadId
+                        AND OutsiderLevels.OutsiderId = Input.OutsiderId
+                    WHEN MATCHED THEN
+                        UPDATE
+                        SET
+                            Level = Input.Level
+                    WHEN NOT MATCHED THEN
+                        INSERT (UploadId, OutsiderId, Level)
+                        VALUES (Input.UploadId, Input.OutsiderId, Input.Level);
+                */
+                var outsiderLevelsCommandText = new StringBuilder();
+                if (outsiderLevels.OutsiderLevels.Count > 0)
+                {
+                    outsiderLevelsCommandText.Append(@"
+                    MERGE INTO OutsiderLevels WITH (HOLDLOCK)
+                    USING
+                        ( VALUES ");
+                    var isFirst = true;
+                    foreach (var pair in outsiderLevels.OutsiderLevels)
                     {
-                        outsiderLevelsCommandText.Append(@"
-                        MERGE INTO OutsiderLevels WITH (HOLDLOCK)
-                        USING
-                            ( VALUES ");
-                        var isFirst = true;
-                        foreach (var pair in outsiderLevels.OutsiderLevels)
+                        if (!isFirst)
                         {
-                            if (!isFirst)
-                            {
-                                outsiderLevelsCommandText.Append(",");
-                            }
-
-                            // No need to sanitize, these are all just numbers
-                            outsiderLevelsCommandText.Append("(");
-                            outsiderLevelsCommandText.Append(uploadId);
                             outsiderLevelsCommandText.Append(",");
-                            outsiderLevelsCommandText.Append(pair.Key);
-                            outsiderLevelsCommandText.Append(",");
-                            outsiderLevelsCommandText.Append(pair.Value);
-                            outsiderLevelsCommandText.Append(")");
-
-                            isFirst = false;
                         }
 
-                        outsiderLevelsCommandText.Append(@"
-                            )
-                                AS Input(UploadId, OutsiderId, Level)
-                            ON OutsiderLevels.UploadId = Input.UploadId
-                            AND OutsiderLevels.OutsiderId = Input.OutsiderId
-                        WHEN MATCHED THEN
-                            UPDATE
-                            SET
-                                Level = Input.Level
-                        WHEN NOT MATCHED THEN
-                            INSERT (UploadId, OutsiderId, Level)
-                            VALUES (Input.UploadId, Input.OutsiderId, Input.Level);");
+                        // No need to sanitize, these are all just numbers
+                        outsiderLevelsCommandText.Append("(");
+                        outsiderLevelsCommandText.Append(uploadId);
+                        outsiderLevelsCommandText.Append(",");
+                        outsiderLevelsCommandText.Append(pair.Key);
+                        outsiderLevelsCommandText.Append(",");
+                        outsiderLevelsCommandText.Append(pair.Value);
+                        outsiderLevelsCommandText.Append(")");
+
+                        isFirst = false;
                     }
 
-                    const string ComputedStatsCommandText = @"
-                        MERGE INTO ComputedStats WITH (HOLDLOCK)
-                        USING
-                            (VALUES (
-                                    @UploadId,
-                                    @TitanDamage,
-                                    @SoulsSpent,
-                                    @HeroSoulsSacrificed,
-                                    @TotalAncientSouls,
-                                    @TranscendentPower,
-                                    @Rubies,
-                                    @HighestZoneThisTranscension,
-                                    @HighestZoneLifetime,
-                                    @AscensionsThisTranscension,
-                                    @AscensionsLifetime) )
-                                AS Input(
-                                    UploadId,
-                                    TitanDamage,
-                                    SoulsSpent,
-                                    HeroSoulsSacrificed,
-                                    TotalAncientSouls,
-                                    TranscendentPower,
-                                    Rubies,
-                                    HighestZoneThisTranscension,
-                                    HighestZoneLifetime,
-                                    AscensionsThisTranscension,
-                                    AscensionsLifetime)
-                            ON ComputedStats.UploadId = Input.UploadId
-                        WHEN MATCHED THEN
-                            UPDATE
-                            SET
-                                TitanDamage = Input.TitanDamage,
-                                SoulsSpent = Input.SoulsSpent,
-                                HeroSoulsSacrificed = Input.HeroSoulsSacrificed,
-                                TotalAncientSouls = Input.TotalAncientSouls,
-                                TranscendentPower = Input.TranscendentPower,
-                                Rubies = Input.Rubies,
-                                HighestZoneThisTranscension = Input.HighestZoneThisTranscension,
-                                HighestZoneLifetime = Input.HighestZoneLifetime,
-                                AscensionsThisTranscension = Input.AscensionsThisTranscension,
-                                AscensionsLifetime = Input.AscensionsLifetime
-                        WHEN NOT MATCHED THEN
-                            INSERT (
+                    outsiderLevelsCommandText.Append(@"
+                        )
+                            AS Input(UploadId, OutsiderId, Level)
+                        ON OutsiderLevels.UploadId = Input.UploadId
+                        AND OutsiderLevels.OutsiderId = Input.OutsiderId
+                    WHEN MATCHED THEN
+                        UPDATE
+                        SET
+                            Level = Input.Level
+                    WHEN NOT MATCHED THEN
+                        INSERT (UploadId, OutsiderId, Level)
+                        VALUES (Input.UploadId, Input.OutsiderId, Input.Level);");
+                }
+
+                const string ComputedStatsCommandText = @"
+                    MERGE INTO ComputedStats WITH (HOLDLOCK)
+                    USING
+                        (VALUES (
+                                @UploadId,
+                                @TitanDamage,
+                                @SoulsSpent,
+                                @HeroSoulsSacrificed,
+                                @TotalAncientSouls,
+                                @TranscendentPower,
+                                @Rubies,
+                                @HighestZoneThisTranscension,
+                                @HighestZoneLifetime,
+                                @AscensionsThisTranscension,
+                                @AscensionsLifetime) )
+                            AS Input(
                                 UploadId,
                                 TitanDamage,
                                 SoulsSpent,
@@ -349,76 +321,105 @@ namespace ClickerHeroesTracker.UploadProcessor
                                 HighestZoneLifetime,
                                 AscensionsThisTranscension,
                                 AscensionsLifetime)
-                            VALUES (
-                                Input.UploadId,
-                                Input.TitanDamage,
-                                Input.SoulsSpent,
-                                Input.HeroSoulsSacrificed,
-                                Input.TotalAncientSouls,
-                                Input.TranscendentPower,
-                                Input.Rubies,
-                                Input.HighestZoneThisTranscension,
-                                Input.HighestZoneLifetime,
-                                Input.AscensionsThisTranscension,
-                                Input.AscensionsLifetime);";
-                    var computedStatsCommandParameters = new Dictionary<string, object>
+                        ON ComputedStats.UploadId = Input.UploadId
+                    WHEN MATCHED THEN
+                        UPDATE
+                        SET
+                            TitanDamage = Input.TitanDamage,
+                            SoulsSpent = Input.SoulsSpent,
+                            HeroSoulsSacrificed = Input.HeroSoulsSacrificed,
+                            TotalAncientSouls = Input.TotalAncientSouls,
+                            TranscendentPower = Input.TranscendentPower,
+                            Rubies = Input.Rubies,
+                            HighestZoneThisTranscension = Input.HighestZoneThisTranscension,
+                            HighestZoneLifetime = Input.HighestZoneLifetime,
+                            AscensionsThisTranscension = Input.AscensionsThisTranscension,
+                            AscensionsLifetime = Input.AscensionsLifetime
+                    WHEN NOT MATCHED THEN
+                        INSERT (
+                            UploadId,
+                            TitanDamage,
+                            SoulsSpent,
+                            HeroSoulsSacrificed,
+                            TotalAncientSouls,
+                            TranscendentPower,
+                            Rubies,
+                            HighestZoneThisTranscension,
+                            HighestZoneLifetime,
+                            AscensionsThisTranscension,
+                            AscensionsLifetime)
+                        VALUES (
+                            Input.UploadId,
+                            Input.TitanDamage,
+                            Input.SoulsSpent,
+                            Input.HeroSoulsSacrificed,
+                            Input.TotalAncientSouls,
+                            Input.TranscendentPower,
+                            Input.Rubies,
+                            Input.HighestZoneThisTranscension,
+                            Input.HighestZoneLifetime,
+                            Input.AscensionsThisTranscension,
+                            Input.AscensionsLifetime);";
+                var computedStatsCommandParameters = new Dictionary<string, object>
+                {
+                    { "@UploadId", uploadId },
+                    { "@TitanDamage", computedStats.TitanDamage },
+                    { "@SoulsSpent", computedStats.HeroSoulsSpent },
+                    { "@HeroSoulsSacrificed", computedStats.HeroSoulsSacrificed },
+                    { "@TotalAncientSouls", computedStats.TotalAncientSouls },
+                    { "@TranscendentPower", computedStats.TranscendentPower },
+                    { "@Rubies", computedStats.Rubies },
+                    { "@HighestZoneThisTranscension", computedStats.HighestZoneThisTranscension },
+                    { "@HighestZoneLifetime", computedStats.HighestZoneLifetime },
+                    { "@AscensionsThisTranscension", computedStats.AscensionsThisTranscension },
+                    { "@AscensionsLifetime", computedStats.AscensionsLifetime },
+                };
+
+                using (var command = databaseCommandFactory.Create())
+                {
+                    await command.BeginTransactionAsync();
+
+                    if (ancientLevelsCommandText.Length > 0)
                     {
-                        { "@UploadId", uploadId },
-                        { "@TitanDamage", computedStats.TitanDamage },
-                        { "@SoulsSpent", computedStats.HeroSoulsSpent },
-                        { "@HeroSoulsSacrificed", computedStats.HeroSoulsSacrificed },
-                        { "@TotalAncientSouls", computedStats.TotalAncientSouls },
-                        { "@TranscendentPower", computedStats.TranscendentPower },
-                        { "@Rubies", computedStats.Rubies },
-                        { "@HighestZoneThisTranscension", computedStats.HighestZoneThisTranscension },
-                        { "@HighestZoneLifetime", computedStats.HighestZoneLifetime },
-                        { "@AscensionsThisTranscension", computedStats.AscensionsThisTranscension },
-                        { "@AscensionsLifetime", computedStats.AscensionsLifetime },
-                    };
-
-                    using (var command = databaseCommandFactory.Create())
-                    {
-                        command.BeginTransaction();
-
-                        if (ancientLevelsCommandText.Length > 0)
-                        {
-                            command.CommandText = ancientLevelsCommandText.ToString();
-                            command.ExecuteNonQuery();
-                        }
-
-                        if (outsiderLevelsCommandText.Length > 0)
-                        {
-                            command.CommandText = outsiderLevelsCommandText.ToString();
-                            command.ExecuteNonQuery();
-                        }
-
-                        command.CommandText = ComputedStatsCommandText;
-                        command.Parameters = computedStatsCommandParameters;
-                        command.ExecuteNonQuery();
-
-                        command.CommandText = "UPDATE Uploads SET LastComputeTime = getutcdate() WHERE Id = " + uploadId;
-                        command.ExecuteNonQuery();
-
-                        var commited = command.CommitTransaction();
-                        if (!commited)
-                        {
-                            this.telemetryClient.TrackEvent("UploadProcessor-Abandoned-CommitTransaction", properties);
-                            return false;
-                        }
+                        command.CommandText = ancientLevelsCommandText.ToString();
+                        await command.ExecuteNonQueryAsync();
                     }
 
-                    this.telemetryClient.TrackEvent("UploadProcessor-Complete", properties);
-                    return true;
+                    if (outsiderLevelsCommandText.Length > 0)
+                    {
+                        command.CommandText = outsiderLevelsCommandText.ToString();
+                        await command.ExecuteNonQueryAsync();
+                    }
+
+                    command.CommandText = ComputedStatsCommandText;
+                    command.Parameters = computedStatsCommandParameters;
+                    await command.ExecuteNonQueryAsync();
+
+                    command.CommandText = "UPDATE Uploads SET LastComputeTime = getutcdate() WHERE Id = " + uploadId;
+                    await command.ExecuteNonQueryAsync();
+
+                    try
+                    {
+                        command.CommitTransaction();
+                    }
+                    catch (Exception)
+                    {
+                        this.telemetryClient.TrackEvent("UploadProcessor-Abandoned-CommitTransaction", properties);
+                        return false;
+                    }
                 }
-                catch (Exception e)
-                {
-                    this.telemetryClient.TrackException(e, properties);
-                    return false;
-                }
-                finally
-                {
-                    this.CurrentUploadId = null;
-                }
+
+                this.telemetryClient.TrackEvent("UploadProcessor-Complete", properties);
+                return true;
+            }
+            catch (Exception e)
+            {
+                this.telemetryClient.TrackException(e, properties);
+                return false;
+            }
+            finally
+            {
+                this.CurrentUploadId = null;
             }
         }
     }

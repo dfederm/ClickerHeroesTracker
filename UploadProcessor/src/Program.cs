@@ -73,9 +73,9 @@ namespace ClickerHeroesTracker.UploadProcessor
                     var uploadIds = new List<int>();
 
                     const string CommandText = "SELECT Id FROM Uploads WHERE LastComputeTime < '" + LastComputeTime + "' ORDER BY LastComputeTime DESC";
-                    using (var databaseCommandFactory = new DatabaseCommandFactory(databaseSettingsOptions))
+                    var databaseCommandFactory = new DatabaseCommandFactory(databaseSettingsOptions);
                     using (var command = databaseCommandFactory.Create(CommandText))
-                    using (var reader = command.ExecuteReader())
+                    using (var reader = await command.ExecuteReaderAsync())
                     {
                         while (reader.Read())
                         {

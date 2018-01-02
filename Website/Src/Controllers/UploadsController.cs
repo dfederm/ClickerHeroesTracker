@@ -7,6 +7,7 @@ namespace ClickerHeroesTrackerWebsite.Controllers
     using System;
     using System.Collections.Generic;
     using System.Net;
+    using System.Threading.Tasks;
     using ClickerHeroesTrackerWebsite.Models;
     using ClickerHeroesTrackerWebsite.Models.Api.Uploads;
     using ClickerHeroesTrackerWebsite.Models.Game;
@@ -46,15 +47,12 @@ namespace ClickerHeroesTrackerWebsite.Controllers
         [Route("{uploadId:int}")]
         [HttpGet]
         [AllowAnonymous]
-        public IActionResult Details(int uploadId)
+        public async Task<IActionResult> Details(int uploadId)
         {
             if (uploadId < 0)
             {
                 return this.BadRequest();
             }
-
-            var userId = this.userManager.GetUserId(this.User);
-            var userSettings = this.userSettingsProvider.Get(userId);
 
             var uploadIdParameters = new Dictionary<string, object>
             {
@@ -72,7 +70,7 @@ namespace ClickerHeroesTrackerWebsite.Controllers
             using (var command = this.databaseCommandFactory.Create(
                 GetUploadDataCommandText,
                 uploadIdParameters))
-            using (var reader = command.ExecuteReader())
+            using (var reader = await command.ExecuteReaderAsync())
             {
                 if (reader.Read())
                 {
@@ -103,8 +101,8 @@ namespace ClickerHeroesTrackerWebsite.Controllers
 
             var isAdmin = this.User.IsInRole("Admin");
             var isUploadAnonymous = upload.User == null;
-            var isOwn = !isUploadAnonymous && string.Equals(userId, upload.User.Id, StringComparison.OrdinalIgnoreCase);
-            var uploadUserSettings = isOwn ? userSettings : this.userSettingsProvider.Get(upload.User?.Id);
+            var isOwn = !isUploadAnonymous && string.Equals(this.userManager.GetUserId(this.User), upload.User.Id, StringComparison.OrdinalIgnoreCase);
+            var uploadUserSettings = await this.userSettingsProvider.GetAsync(upload.User?.Id);
             var isPublic = isUploadAnonymous || uploadUserSettings.AreUploadsPublic.GetValueOrDefault(true);
             var isPermitted = isOwn || isPublic || isAdmin;
 
@@ -130,7 +128,7 @@ namespace ClickerHeroesTrackerWebsite.Controllers
         [Route("")]
         [HttpPost]
         [AllowAnonymous]
-        public IActionResult Add(UploadRequest uploadRequest)
+        public async Task<IActionResult> Add(UploadRequest uploadRequest)
         {
             if (uploadRequest.EncodedSaveData == null)
             {
@@ -157,7 +155,7 @@ namespace ClickerHeroesTrackerWebsite.Controllers
             }
             else
             {
-                var userSettings = this.userSettingsProvider.Get(userId);
+                var userSettings = await this.userSettingsProvider.GetAsync(userId);
                 playStyle = userSettings.PlayStyle.GetValueOrDefault(PlayStyle.Hybrid);
             }
 
@@ -172,7 +170,7 @@ namespace ClickerHeroesTrackerWebsite.Controllers
             int uploadId;
             using (var command = this.databaseCommandFactory.Create())
             {
-                command.BeginTransaction();
+                await command.BeginTransactionAsync();
 
                 // Insert Upload
                 command.CommandText = @"
@@ -185,7 +183,7 @@ namespace ClickerHeroesTrackerWebsite.Controllers
                     { "@UploadContent", uploadRequest.EncodedSaveData },
                     { "@PlayStyle", playStyle.ToString() },
                 };
-                uploadId = Convert.ToInt32(command.ExecuteScalar());
+                uploadId = Convert.ToInt32(await command.ExecuteScalarAsync());
 
                 // Insert computed stats
                 command.CommandText = @"
@@ -227,7 +225,7 @@ namespace ClickerHeroesTrackerWebsite.Controllers
                     { "@AscensionsThisTranscension", computedStats.AscensionsThisTranscension },
                     { "@AscensionsLifetime", computedStats.AscensionsLifetime },
                 };
-                command.ExecuteNonQuery();
+                await command.ExecuteNonQueryAsync();
 
                 // Insert ancient levels
                 foreach (var pair in ancientLevels.AncientLevels)
@@ -241,7 +239,7 @@ namespace ClickerHeroesTrackerWebsite.Controllers
                         { "@AncientId", pair.Key },
                         { "@Level", pair.Value.ToTransportableString() },
                     };
-                    command.ExecuteNonQuery();
+                    await command.ExecuteNonQueryAsync();
                 }
 
                 // Insert outsider levels
@@ -256,14 +254,10 @@ namespace ClickerHeroesTrackerWebsite.Controllers
                         { "@OutsiderId", pair.Key },
                         { "@Level", pair.Value },
                     };
-                    command.ExecuteNonQuery();
+                    await command.ExecuteNonQueryAsync();
                 }
 
-                var commited = command.CommitTransaction();
-                if (!commited)
-                {
-                    return this.StatusCode((int)HttpStatusCode.InternalServerError);
-                }
+                command.CommitTransaction();
             }
 
             return this.Ok(uploadId);
@@ -271,7 +265,7 @@ namespace ClickerHeroesTrackerWebsite.Controllers
 
         [Route("{uploadId:int}")]
         [HttpDelete]
-        public IActionResult Delete(int uploadId)
+        public async Task<IActionResult> Delete(int uploadId)
         {
             var parameters = new Dictionary<string, object>
             {
@@ -286,7 +280,7 @@ namespace ClickerHeroesTrackerWebsite.Controllers
             using (var command = this.databaseCommandFactory.Create(
                 GetUploadUserCommandText,
                 parameters))
-            using (var reader = command.ExecuteReader())
+            using (var reader = await command.ExecuteReaderAsync())
             {
                 if (reader.Read())
                 {
@@ -329,7 +323,7 @@ namespace ClickerHeroesTrackerWebsite.Controllers
                 DeleteUploadCommandText,
                 parameters))
             {
-                command.ExecuteNonQuery();
+                await command.ExecuteNonQueryAsync();
             }
 
             return this.Ok();

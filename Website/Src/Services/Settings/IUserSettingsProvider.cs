@@ -4,6 +4,7 @@
 
 namespace ClickerHeroesTrackerWebsite.Models.Settings
 {
+    using System.Threading.Tasks;
     using Website.Models.Api.Users;
 
     /// <summary>
@@ -16,13 +17,14 @@ namespace ClickerHeroesTrackerWebsite.Models.Settings
         /// </summary>
         /// <param name="userId">The user id for the user to fetch the settings for.</param>
         /// <returns>The user settings for the user</returns>
-        UserSettings Get(string userId);
+        Task<UserSettings> GetAsync(string userId);
 
         /// <summary>
         /// Patch the user settings for a user. It will override settings but not clear any missing from the patch.
         /// </summary>
         /// <param name="userId">The user id for the user to patch the settings for.</param>
         /// <param name="userSettings">The settings to patch</param>
-        void Patch(string userId, UserSettings userSettings);
+        /// <returns>Async task</returns>
+        Task PatchAsync(string userId, UserSettings userSettings);
     }
 }

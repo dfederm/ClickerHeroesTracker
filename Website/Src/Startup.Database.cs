@@ -8,6 +8,7 @@ namespace ClickerHeroesTrackerWebsite
     using System.Collections.Generic;
     using System.IO;
     using System.Linq;
+    using System.Threading.Tasks;
     using ClickerHeroesTrackerWebsite.Models;
     using ClickerHeroesTrackerWebsite.Services.Database;
     using Microsoft.AspNetCore.Builder;
@@ -26,14 +27,15 @@ namespace ClickerHeroesTrackerWebsite
         /// This is mostly for the in-memory database used in dev mode, but could be useful for new databases too.
         /// However, it's important to note that the tables created here may not be optimized. Indicies, foreign keys, etc may be missing.
         /// </remarks>
-        public void EnsureDatabaseCreated(IApplicationBuilder app)
+        /// <returns>Async task</returns>
+        public async Task EnsureDatabaseCreatedAsync(IApplicationBuilder app)
         {
             using (var serviceScope = app.ApplicationServices.GetRequiredService<IServiceScopeFactory>().CreateScope())
             {
                 var serviceProvider = serviceScope.ServiceProvider;
 
                 // Handle the EntityFramework tables
-                serviceProvider.GetService<ApplicationDbContext>().Database.EnsureCreated();
+                await serviceProvider.GetService<ApplicationDbContext>().Database.EnsureCreatedAsync();
 
                 var databaseCommandFactory = serviceProvider.GetService<IDatabaseCommandFactory>();
                 var databaseSettingsOptions = serviceProvider.GetService<IOptions<DatabaseSettings>>();
@@ -42,7 +44,7 @@ namespace ClickerHeroesTrackerWebsite
                 var existingTables = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
                 using (var command = databaseCommandFactory.Create("SELECT Name FROM sys.Tables WHERE Type = N'U'"))
                 {
-                    using (var reader = command.ExecuteReader())
+                    using (var reader = await command.ExecuteReaderAsync())
                     {
                         while (reader.Read())
                         {
@@ -71,7 +73,7 @@ namespace ClickerHeroesTrackerWebsite
                         var tableCreateCommand = File.ReadAllText(tableFile);
                         using (var command = databaseCommandFactory.Create(tableCreateCommand))
                         {
-                            command.ExecuteNonQuery();
+                            await command.ExecuteNonQueryAsync();
                         }
                     }
                 }

@@ -7,40 +7,46 @@ namespace ClickerHeroesTrackerWebsite.Services.Database
     using System;
     using System.Collections.Generic;
     using System.Data;
-    using System.Data.Common;
+    using System.Data.SqlClient;
+    using System.Threading.Tasks;
 
     internal sealed class DatabaseCommand : IDisposable, IDatabaseCommand
     {
-        private DbCommand command;
+        private readonly string connectionString;
 
-        private DbTransaction transaction;
+        private SqlConnection connection;
 
-        public DatabaseCommand(DbConnection connection)
+        private SqlCommand command;
+
+        private SqlTransaction transaction;
+
+        public DatabaseCommand(string connectionString)
         {
-            if (connection == null)
+            if (string.IsNullOrEmpty(connectionString))
             {
-                throw new ArgumentNullException(nameof(connection));
+                throw new ArgumentException("Value cannot be null or empty", nameof(connectionString));
             }
 
-            this.command = connection.CreateCommand();
+            this.connectionString = connectionString;
         }
 
         public string CommandText { get; set; }
 
         public IDictionary<string, object> Parameters { get; set; }
 
-        public void BeginTransaction()
+        public async Task BeginTransactionAsync()
         {
             if (this.transaction != null)
             {
                 throw new InvalidOperationException("This command has already begun a transaction");
             }
 
-            this.transaction = this.command.Connection.BeginTransaction();
+            await this.EnsureCommandCreated();
+            this.transaction = this.connection.BeginTransaction();
             this.command.Transaction = this.transaction;
         }
 
-        public bool CommitTransaction()
+        public void CommitTransaction()
         {
             if (this.transaction == null)
             {
@@ -50,34 +56,30 @@ namespace ClickerHeroesTrackerWebsite.Services.Database
             try
             {
                 this.transaction.Commit();
-                return true;
             }
             catch (Exception)
             {
                 this.transaction.Rollback();
-                return false;
+                throw;
             }
         }
 
-        public void ExecuteNonQuery()
+        public async Task ExecuteNonQueryAsync()
         {
-            this.PrepareForExecution();
-
-            this.command.ExecuteNonQuery();
+            await this.PrepareForExecutionAsync();
+            await this.command.ExecuteNonQueryAsync();
         }
 
-        public object ExecuteScalar()
+        public async Task<object> ExecuteScalarAsync()
         {
-            this.PrepareForExecution();
-
-            return this.command.ExecuteScalar();
+            await this.PrepareForExecutionAsync();
+            return await this.command.ExecuteScalarAsync();
         }
 
-        public IDataReader ExecuteReader()
+        public async Task<IDataReader> ExecuteReaderAsync()
         {
-            this.PrepareForExecution();
-
-            return this.command.ExecuteReader();
+            await this.PrepareForExecutionAsync();
+            return await this.command.ExecuteReaderAsync();
         }
 
         public void Dispose()
@@ -93,14 +95,22 @@ namespace ClickerHeroesTrackerWebsite.Services.Database
                 this.command.Dispose();
                 this.command = null;
             }
+
+            if (this.connection != null)
+            {
+                this.connection.Dispose();
+                this.connection = null;
+            }
         }
 
-        private void PrepareForExecution()
+        private async Task PrepareForExecutionAsync()
         {
             if (string.IsNullOrEmpty(this.CommandText))
             {
                 throw new InvalidOperationException("CommandText may not be empty");
             }
+
+            await this.EnsureCommandCreated();
 
             this.command.CommandText = this.CommandText;
 
@@ -114,6 +124,20 @@ namespace ClickerHeroesTrackerWebsite.Services.Database
                     dbParameter.Value = parameter.Value ?? DBNull.Value;
                     this.command.Parameters.Add(dbParameter);
                 }
+            }
+        }
+
+        private async Task EnsureCommandCreated()
+        {
+            if (this.connection == null)
+            {
+                this.connection = new SqlConnection(this.connectionString);
+                await this.connection.OpenAsync();
+            }
+
+            if (this.command == null)
+            {
+                this.command = this.connection.CreateCommand();
             }
         }
     }

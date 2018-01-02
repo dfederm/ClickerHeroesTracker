@@ -188,8 +188,8 @@ namespace UnitTests.Controllers
             var userSettings = new UserSettings();
             var mockUserSettingsProvider = new Mock<IUserSettingsProvider>(MockBehavior.Strict);
             mockUserSettingsProvider
-                .Setup(_ => _.Get(UserId))
-                .Returns(userSettings);
+                .Setup(_ => _.GetAsync(UserId))
+                .Returns(Task.FromResult(userSettings));
 
             var mockUser = new ApplicationUser();
             var mockCurrentUser = new Mock<ClaimsPrincipal>(MockBehavior.Strict);
@@ -415,8 +415,8 @@ namespace UnitTests.Controllers
             var userSettings = new UserSettings() { AreUploadsPublic = false };
             var mockUserSettingsProvider = new Mock<IUserSettingsProvider>(MockBehavior.Strict);
             mockUserSettingsProvider
-                .Setup(_ => _.Get(UserId))
-                .Returns(userSettings);
+                .Setup(_ => _.GetAsync(UserId))
+                .Returns(Task.FromResult(userSettings));
 
             var mockUser = new ApplicationUser();
             var mockCurrentUser = new Mock<ClaimsPrincipal>(MockBehavior.Strict);
@@ -511,8 +511,8 @@ namespace UnitTests.Controllers
             var userSettings = new UserSettings() { AreUploadsPublic = true };
             var mockUserSettingsProvider = new Mock<IUserSettingsProvider>(MockBehavior.Strict);
             mockUserSettingsProvider
-                .Setup(_ => _.Get(UserId))
-                .Returns(userSettings);
+                .Setup(_ => _.GetAsync(UserId))
+                .Returns(Task.FromResult(userSettings));
 
             var mockUser = new ApplicationUser();
             var mockCurrentUser = new Mock<ClaimsPrincipal>(MockBehavior.Strict);
@@ -632,8 +632,8 @@ namespace UnitTests.Controllers
             var userSettings = new UserSettings() { AreUploadsPublic = false };
             var mockUserSettingsProvider = new Mock<IUserSettingsProvider>(MockBehavior.Strict);
             mockUserSettingsProvider
-                .Setup(_ => _.Get(UserId))
-                .Returns(userSettings);
+                .Setup(_ => _.GetAsync(UserId))
+                .Returns(Task.FromResult(userSettings));
 
             var mockUser = new ApplicationUser();
             var mockCurrentUser = new Mock<ClaimsPrincipal>(MockBehavior.Strict);
@@ -734,8 +734,8 @@ namespace UnitTests.Controllers
             var userSettings = new UserSettings();
             var mockUserSettingsProvider = new Mock<IUserSettingsProvider>(MockBehavior.Strict);
             mockUserSettingsProvider
-                .Setup(_ => _.Get(UserId))
-                .Returns(userSettings);
+                .Setup(_ => _.GetAsync(UserId))
+                .Returns(Task.FromResult(userSettings));
 
             var mockUser = new ApplicationUser();
             var mockCurrentUser = new Mock<ClaimsPrincipal>(MockBehavior.Strict);
@@ -911,8 +911,8 @@ namespace UnitTests.Controllers
             var userSettings = new UserSettings { AreUploadsPublic = false };
             var mockUserSettingsProvider = new Mock<IUserSettingsProvider>(MockBehavior.Strict);
             mockUserSettingsProvider
-                .Setup(_ => _.Get(UserId))
-                .Returns(userSettings);
+                .Setup(_ => _.GetAsync(UserId))
+                .Returns(Task.FromResult(userSettings));
 
             var mockUser = new ApplicationUser();
             var mockCurrentUser = new Mock<ClaimsPrincipal>(MockBehavior.Strict);
@@ -988,8 +988,8 @@ namespace UnitTests.Controllers
             var userSettings = new UserSettings { AreUploadsPublic = true };
             var mockUserSettingsProvider = new Mock<IUserSettingsProvider>(MockBehavior.Strict);
             mockUserSettingsProvider
-                .Setup(_ => _.Get(UserId))
-                .Returns(userSettings);
+                .Setup(_ => _.GetAsync(UserId))
+                .Returns(Task.FromResult(userSettings));
 
             var mockUser = new ApplicationUser();
             var mockCurrentUser = new Mock<ClaimsPrincipal>(MockBehavior.Strict);
@@ -1069,8 +1069,8 @@ namespace UnitTests.Controllers
             var userSettings = new UserSettings { AreUploadsPublic = false };
             var mockUserSettingsProvider = new Mock<IUserSettingsProvider>(MockBehavior.Strict);
             mockUserSettingsProvider
-                .Setup(_ => _.Get(UserId))
-                .Returns(userSettings);
+                .Setup(_ => _.GetAsync(UserId))
+                .Returns(Task.FromResult(userSettings));
 
             var mockUser = new ApplicationUser();
             var mockCurrentUser = new Mock<ClaimsPrincipal>(MockBehavior.Strict);
@@ -2192,8 +2192,8 @@ namespace UnitTests.Controllers
             var userSettings = new UserSettings();
             var mockUserSettingsProvider = new Mock<IUserSettingsProvider>(MockBehavior.Strict);
             mockUserSettingsProvider
-                .Setup(_ => _.Get(UserId))
-                .Returns(userSettings);
+                .Setup(_ => _.GetAsync(UserId))
+                .Returns(Task.FromResult(userSettings));
 
             var mockUser = new ApplicationUser();
             var mockCurrentUser = new Mock<ClaimsPrincipal>(MockBehavior.Strict);
@@ -2423,8 +2423,8 @@ namespace UnitTests.Controllers
             var userSettings = new UserSettings();
             var mockUserSettingsProvider = new Mock<IUserSettingsProvider>(MockBehavior.Strict);
             mockUserSettingsProvider
-                .Setup(_ => _.Get(UserId))
-                .Returns(userSettings);
+                .Setup(_ => _.GetAsync(UserId))
+                .Returns(Task.FromResult(userSettings));
 
             var mockUser = new ApplicationUser();
             var mockCurrentUser = new Mock<ClaimsPrincipal>(MockBehavior.Strict);
@@ -2484,7 +2484,9 @@ namespace UnitTests.Controllers
             var mockDatabaseCommandFactory = new Mock<IDatabaseCommandFactory>(MockBehavior.Strict);
             var userSettings = new UserSettings();
             var mockUserSettingsProvider = new Mock<IUserSettingsProvider>(MockBehavior.Strict);
-            mockUserSettingsProvider.Setup(_ => _.Patch(UserId, userSettings));
+            mockUserSettingsProvider
+                .Setup(_ => _.PatchAsync(UserId, userSettings))
+                .Returns(Task.CompletedTask);
 
             var mockUser = new ApplicationUser();
             var mockCurrentUser = new Mock<ClaimsPrincipal>(MockBehavior.Strict);
@@ -3513,7 +3515,9 @@ namespace UnitTests.Controllers
             var mockDatabaseCommandFactory = new Mock<IDatabaseCommandFactory>(MockBehavior.Strict);
             var userSettings = new UserSettings();
             var mockUserSettingsProvider = new Mock<IUserSettingsProvider>(MockBehavior.Strict);
-            mockUserSettingsProvider.Setup(_ => _.Patch(UserId, userSettings));
+            mockUserSettingsProvider
+                .Setup(_ => _.PatchAsync(UserId, userSettings))
+                .Returns(Task.CompletedTask);
 
             var mockUser = new ApplicationUser();
             var mockCurrentUser = new Mock<ClaimsPrincipal>(MockBehavior.Strict);

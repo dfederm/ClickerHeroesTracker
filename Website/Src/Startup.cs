@@ -68,7 +68,7 @@ namespace ClickerHeroesTrackerWebsite
                     defaults: new { controller = "Frontend", action = "Index" });
             });
 
-            this.EnsureDatabaseCreated(app);
+            this.EnsureDatabaseCreatedAsync(app).GetAwaiter().GetResult();
 
             // Warm up the game data parsing
             app.ApplicationServices.GetService<GameData>();
