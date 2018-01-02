@@ -7,6 +7,7 @@ namespace ClickerHeroesTrackerWebsite.Tests.Mocks
     using System;
     using System.Collections.Generic;
     using System.Data;
+    using System.Threading.Tasks;
     using ClickerHeroesTrackerWebsite.Services.Database;
     using Moq;
 
@@ -50,7 +51,7 @@ namespace ClickerHeroesTrackerWebsite.Tests.Mocks
             IDataReader dataReader)
         {
             var mockDatabaseCommand = CreateMockDatabaseCommandWithoutExecution(expectedParameters);
-            mockDatabaseCommand.Setup(_ => _.ExecuteReader()).Returns(dataReader);
+            mockDatabaseCommand.Setup(_ => _.ExecuteReaderAsync()).Returns(Task.FromResult(dataReader));
             return mockDatabaseCommand;
         }
 
@@ -59,7 +60,7 @@ namespace ClickerHeroesTrackerWebsite.Tests.Mocks
             object scalar)
         {
             var mockDatabaseCommand = CreateMockDatabaseCommandWithoutExecution(expectedParameters);
-            mockDatabaseCommand.Setup(_ => _.ExecuteScalar()).Returns(scalar);
+            mockDatabaseCommand.Setup(_ => _.ExecuteScalarAsync()).Returns(Task.FromResult(scalar));
             return mockDatabaseCommand;
         }
 
@@ -67,7 +68,7 @@ namespace ClickerHeroesTrackerWebsite.Tests.Mocks
             IDictionary<string, object> expectedParameters)
         {
             var mockDatabaseCommand = CreateMockDatabaseCommandWithoutExecution(expectedParameters);
-            mockDatabaseCommand.Setup(_ => _.ExecuteNonQuery());
+            mockDatabaseCommand.Setup(_ => _.ExecuteNonQueryAsync()).Returns(Task.CompletedTask);
             return mockDatabaseCommand;
         }
 

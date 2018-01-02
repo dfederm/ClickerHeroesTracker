@@ -49,7 +49,7 @@ namespace ClickerHeroesTrackerWebsite.Controllers
         public async Task<ActionResult> GetClan()
         {
             var userId = this.userManager.GetUserId(this.User);
-            var savedGame = this.GetLatestSave(userId);
+            var savedGame = await this.GetLatestSaveAsync(userId);
 
             var uniqueId = savedGame.Object.Value<string>("uniqueId");
             var passwordHash = savedGame.Object.Value<string>("passwordHash");
@@ -149,7 +149,7 @@ namespace ClickerHeroesTrackerWebsite.Controllers
                     { "@CurrentRaidLevel", clan.Guild.CurrentRaidLevel },
                     { "@MemberCount", reindexedGuildMembers.Count },
                 };
-                command.ExecuteNonQuery();
+                await command.ExecuteNonQueryAsync();
             }
 
             return this.Ok(clanData);
@@ -160,7 +160,7 @@ namespace ClickerHeroesTrackerWebsite.Controllers
         public async Task<IActionResult> SendMessage(string message, string clanName)
         {
             var userId = this.userManager.GetUserId(this.User);
-            SavedGame savedGame = this.GetLatestSave(userId);
+            var savedGame = await this.GetLatestSaveAsync(userId);
 
             var uniqueId = savedGame.Object.Value<string>("uniqueId");
             var passwordHash = savedGame.Object.Value<string>("passwordHash");
@@ -203,8 +203,11 @@ namespace ClickerHeroesTrackerWebsite.Controllers
                 return this.BadRequest("Invalid parameter: count");
             }
 
+            // Fetch in parallel
+            var paginationTask = this.FetchPaginationAsync(page, count);
+
             var userId = this.userManager.GetUserId(this.User);
-            SavedGame savedGame = this.GetLatestSave(userId);
+            var savedGame = await this.GetLatestSaveAsync(userId);
             var clanName = string.Empty;
 
             var uniqueId = savedGame.Object.Value<string>("uniqueId");
@@ -217,8 +220,8 @@ namespace ClickerHeroesTrackerWebsite.Controllers
 
             var model = new LeaderboardSummaryListResponse()
             {
-                LeaderboardClans = this.FetchLeaderboard(page, count, clanName),
-                Pagination = this.FetchPagination(page, count),
+                LeaderboardClans = await this.FetchLeaderboardAsync(page, count, clanName),
+                Pagination = await paginationTask,
             };
 
             return this.Ok(model);
@@ -229,7 +232,7 @@ namespace ClickerHeroesTrackerWebsite.Controllers
         public async Task<IActionResult> GetUserClan()
         {
             var userId = this.userManager.GetUserId(this.User);
-            SavedGame savedGame = this.GetLatestSave(userId);
+            SavedGame savedGame = await this.GetLatestSaveAsync(userId);
 
             var uniqueId = savedGame.Object.Value<string>("uniqueId");
             var passwordHash = savedGame.Object.Value<string>("passwordHash");
@@ -256,7 +259,7 @@ namespace ClickerHeroesTrackerWebsite.Controllers
             };
             var leaderboardClan = new LeaderboardClan();
             using (var command = this.databaseCommandFactory.Create(GetLeaderboardDataCommandText, parameters))
-            using (var reader = command.ExecuteReader())
+            using (var reader = await command.ExecuteReaderAsync())
             {
                 if (reader.Read())
                 {
@@ -271,7 +274,7 @@ namespace ClickerHeroesTrackerWebsite.Controllers
             return this.Ok(leaderboardClan);
         }
 
-        public IList<LeaderboardClan> FetchLeaderboard(int page, int count, string clanName)
+        private async Task<IList<LeaderboardClan>> FetchLeaderboardAsync(int page, int count, string clanName)
         {
             var clans = new List<LeaderboardClan>();
             var offset = (page - 1) * count;
@@ -288,7 +291,7 @@ namespace ClickerHeroesTrackerWebsite.Controllers
                 { "@Count", count },
             };
             using (var command = this.databaseCommandFactory.Create(getLeaderboardDataCommandText, parameters))
-            using (var reader = command.ExecuteReader())
+            using (var reader = await command.ExecuteReaderAsync())
             {
                 var i = 1;
                 while (reader.Read())
@@ -310,7 +313,7 @@ namespace ClickerHeroesTrackerWebsite.Controllers
             return clans;
         }
 
-        public SavedGame GetLatestSave(string userId)
+        private async Task<SavedGame> GetLatestSaveAsync(string userId)
         {
             var userIdParameters = new Dictionary<string, object>
             {
@@ -325,7 +328,7 @@ namespace ClickerHeroesTrackerWebsite.Controllers
             using (var command = this.databaseCommandFactory.Create(
                 getUploadDataCommandText,
                 userIdParameters))
-            using (var reader = command.ExecuteReader())
+            using (var reader = await command.ExecuteReaderAsync())
             {
                 if (reader.Read())
                 {
@@ -337,14 +340,14 @@ namespace ClickerHeroesTrackerWebsite.Controllers
             }
         }
 
-        private PaginationMetadata FetchPagination(int page, int count)
+        private async Task<PaginationMetadata> FetchPaginationAsync(int page, int count)
         {
             const string GetLeaderboardCountCommandText = @"
 	            SELECT COUNT(*) AS TotalClans
 		        FROM Clans";
 
             using (var command = this.databaseCommandFactory.Create(GetLeaderboardCountCommandText))
-            using (var reader = command.ExecuteReader())
+            using (var reader = await command.ExecuteReaderAsync())
             {
                 if (!reader.Read())
                 {

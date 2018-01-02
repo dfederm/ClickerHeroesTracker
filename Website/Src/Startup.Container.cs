@@ -211,10 +211,10 @@ namespace ClickerHeroesTrackerWebsite
             services.AddSingleton<IBuildInfoProvider>(buildInfoProvider);
             services.AddSingleton<IEmailSender, EmailSender>();
             services.AddSingleton<IOptions<PasswordHasherOptions>, PasswordHasherOptionsAccessor>();
+            services.AddSingleton<IUserSettingsProvider, UserSettingsProvider>();
 
             // Per request registrations
             services.AddScoped<IDatabaseCommandFactory, DatabaseCommandFactory>();
-            services.AddScoped<IUserSettingsProvider, UserSettingsProvider>();
 
             // Configuration
             services.Configure<AuthenticationSettings>(options => this.Configuration.GetSection("Authentication").Bind(options));

@@ -7,7 +7,6 @@ namespace Website.Controllers
     using System;
     using System.Collections.Generic;
     using System.Linq;
-    using System.Text.RegularExpressions;
     using System.Threading.Tasks;
     using ClickerHeroesTrackerWebsite.Models;
     using ClickerHeroesTrackerWebsite.Models.Api;
@@ -115,7 +114,7 @@ namespace Website.Controllers
                 return this.NotFound();
             }
 
-            var userSettings = this.userSettingsProvider.Get(userId);
+            var userSettings = await this.userSettingsProvider.GetAsync(userId);
             var isAdmin = this.User.IsInRole("Admin");
             var currentUserId = this.userManager.GetUserId(this.User);
             var isOwn = userId.Equals(currentUserId, StringComparison.OrdinalIgnoreCase);
@@ -142,7 +141,7 @@ namespace Website.Controllers
 
             var uploads = new List<Upload>(count);
             using (var command = this.databaseCommandFactory.Create(GetUploadsCommandText, getUploadsCommandparameters))
-            using (var reader = command.ExecuteReader())
+            using (var reader = await command.ExecuteReaderAsync())
             {
                 while (reader.Read())
                 {
@@ -167,7 +166,7 @@ namespace Website.Controllers
 
             var pagination = new PaginationMetadata();
             using (var command = this.databaseCommandFactory.Create(GetUploadCountCommandText, getUploadCountparameters))
-            using (var reader = command.ExecuteReader())
+            using (var reader = await command.ExecuteReaderAsync())
             {
                 if (reader.Read())
                 {
@@ -232,7 +231,7 @@ namespace Website.Controllers
                 return this.NotFound();
             }
 
-            var userSettings = this.userSettingsProvider.Get(userId);
+            var userSettings = await this.userSettingsProvider.GetAsync(userId);
             var currentUserId = this.userManager.GetUserId(this.User);
             if (!userId.Equals(currentUserId, StringComparison.OrdinalIgnoreCase)
                 && !userSettings.AreUploadsPublic.GetValueOrDefault(true)
@@ -269,7 +268,7 @@ namespace Website.Controllers
                 endDate = now;
             }
 
-            var data = new ProgressData(
+            var data = await ProgressData.CreateAsync(
                 this.gameData,
                 this.telemetryClient,
                 this.databaseCommandFactory,
@@ -277,7 +276,7 @@ namespace Website.Controllers
                 startDate,
                 endDate);
 
-            if (!data.IsValid)
+            if (data == null)
             {
                 return this.StatusCode(500);
             }
@@ -307,7 +306,7 @@ namespace Website.Controllers
                 return this.NotFound();
             }
 
-            var userSettings = this.userSettingsProvider.Get(userId);
+            var userSettings = await this.userSettingsProvider.GetAsync(userId);
             var currentUserId = this.userManager.GetUserId(this.User);
             if (!userId.Equals(currentUserId, StringComparison.OrdinalIgnoreCase)
                 && !userSettings.AreUploadsPublic.GetValueOrDefault(true)
@@ -331,7 +330,7 @@ namespace Website.Controllers
             using (var command = this.databaseCommandFactory.Create(
                 GetUserFollowsCommandText,
                 parameters))
-            using (var reader = command.ExecuteReader())
+            using (var reader = await command.ExecuteReaderAsync())
             {
                 while (reader.Read())
                 {
@@ -411,7 +410,7 @@ namespace Website.Controllers
                 CommandText,
                 parameters))
             {
-                command.ExecuteNonQuery();
+                await command.ExecuteNonQueryAsync();
             }
 
             return this.Ok();
@@ -477,7 +476,7 @@ namespace Website.Controllers
                 CommandText,
                 parameters))
             {
-                var numDeletions = Convert.ToInt32(command.ExecuteScalar());
+                var numDeletions = Convert.ToInt32(await command.ExecuteScalarAsync());
                 if (numDeletions == 0)
                 {
                     return this.NotFound();
@@ -515,7 +514,7 @@ namespace Website.Controllers
                 return this.Forbid();
             }
 
-            var userSettings = this.userSettingsProvider.Get(userId);
+            var userSettings = await this.userSettingsProvider.GetAsync(userId);
 
             return this.Ok(userSettings);
         }
@@ -553,7 +552,7 @@ namespace Website.Controllers
                 return this.Forbid();
             }
 
-            this.userSettingsProvider.Patch(userId, model);
+            await this.userSettingsProvider.PatchAsync(userId, model);
 
             return this.Ok();
         }

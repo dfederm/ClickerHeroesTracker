@@ -250,7 +250,7 @@ namespace UnitTests.Controllers
         }
 
         [Fact]
-        public void StaleUploads_Success()
+        public async Task StaleUploads_Success()
         {
             var expectedIds = Enumerable.Range(0, 3).ToList();
             var datasets = expectedIds
@@ -269,7 +269,7 @@ namespace UnitTests.Controllers
                 mockDatabaseCommandFactory.Object,
                 mockUploadScheduler.Object,
                 mockUserManager.Object);
-            var result = controller.StaleUploads();
+            var result = await controller.StaleUploads();
 
             Assert.NotNull(result);
             Assert.IsType<OkObjectResult>(result);

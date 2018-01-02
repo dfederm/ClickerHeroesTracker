@@ -81,7 +81,7 @@ namespace Website.Controllers
 
         [Route("staleuploads")]
         [HttpGet]
-        public IActionResult StaleUploads()
+        public async Task<IActionResult> StaleUploads()
         {
             const string CommandText = @"
                 SELECT Id
@@ -90,7 +90,7 @@ namespace Website.Controllers
                 AND UploadTime < DATEADD(day, -30, GETDATE())";
             var uploadIds = new List<int>();
             using (var command = this.databaseCommandFactory.Create(CommandText))
-            using (var reader = command.ExecuteReader())
+            using (var reader = await command.ExecuteReaderAsync())
             {
                 while (reader.Read())
                 {

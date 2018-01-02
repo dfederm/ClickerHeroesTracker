@@ -7,6 +7,7 @@ namespace ClickerHeroesTrackerWebsite.Models.Settings
     using System;
     using System.Collections.Generic;
     using System.Text;
+    using System.Threading.Tasks;
     using ClickerHeroesTrackerWebsite.Services.Database;
     using Website.Models.Api.Users;
 
@@ -15,8 +16,6 @@ namespace ClickerHeroesTrackerWebsite.Models.Settings
     /// </summary>
     public class UserSettingsProvider : IUserSettingsProvider
     {
-        private readonly Dictionary<string, UserSettings> cache = new Dictionary<string, UserSettings>(StringComparer.OrdinalIgnoreCase);
-
         private readonly IDatabaseCommandFactory databaseCommandFactory;
 
         /// <summary>
@@ -28,7 +27,7 @@ namespace ClickerHeroesTrackerWebsite.Models.Settings
         }
 
         /// <inheritdoc/>
-        public UserSettings Get(string userId)
+        public async Task<UserSettings> GetAsync(string userId)
         {
             // If the user isn't logged in, use the default settings
             if (string.IsNullOrEmpty(userId))
@@ -36,79 +35,73 @@ namespace ClickerHeroesTrackerWebsite.Models.Settings
                 return new UserSettings();
             }
 
-            // Use a cache to avoid hitting the database multiple times in a request.
-            if (!this.cache.TryGetValue(userId, out var userSettings))
+            var userSettings = new UserSettings();
+
+            var parameters = new Dictionary<string, object>
             {
-                userSettings = new UserSettings();
+                { "@UserId", userId },
+            };
+            const string GetUserSettingsCommandText = @"
+                SELECT SettingId, SettingValue
+                FROM UserSettings
+                WHERE UserId = @UserId";
+            using (var command = this.databaseCommandFactory.Create(
+                GetUserSettingsCommandText,
+                parameters))
+            using (var reader = await command.ExecuteReaderAsync())
+            {
+                while (reader.Read())
+                {
+                    var settingId = Convert.ToByte(reader["SettingId"]);
+                    var settingValue = reader["SettingValue"].ToString();
 
-                var parameters = new Dictionary<string, object>
-                {
-                    { "@UserId", userId },
-                };
-                const string GetUserSettingsCommandText = @"
-                    SELECT SettingId, SettingValue
-                    FROM UserSettings
-                    WHERE UserId = @UserId";
-                using (var command = this.databaseCommandFactory.Create(
-                    GetUserSettingsCommandText,
-                    parameters))
-                using (var reader = command.ExecuteReader())
-                {
-                    while (reader.Read())
+                    switch (settingId)
                     {
-                        var settingId = Convert.ToByte(reader["SettingId"]);
-                        var settingValue = reader["SettingValue"].ToString();
-
-                        switch (settingId)
-                        {
-                            case UserSettingsConstants.AreUploadsPublic:
-                                userSettings.AreUploadsPublic = bool.TryParse(settingValue, out var areUploadsPublic) ? new bool?(areUploadsPublic) : null;
-                                break;
-                            case UserSettingsConstants.PlayStyle:
-                                userSettings.PlayStyle = Enum.TryParse<PlayStyle>(settingValue, out var playStyle) ? new PlayStyle?(playStyle) : null;
-                                break;
-                            case UserSettingsConstants.UseScientificNotation:
-                                userSettings.UseScientificNotation = bool.TryParse(settingValue, out var useScientificNotation) ? new bool?(useScientificNotation) : null;
-                                break;
-                            case UserSettingsConstants.ScientificNotationThreshold:
-                                userSettings.ScientificNotationThreshold = int.TryParse(settingValue, out var scientificNotationThreshold) ? new int?(scientificNotationThreshold) : null;
-                                break;
-                            case UserSettingsConstants.UseEffectiveLevelForSuggestions:
-                                userSettings.UseEffectiveLevelForSuggestions = bool.TryParse(settingValue, out var useEffectiveLevelForSuggestions) ? new bool?(useEffectiveLevelForSuggestions) : null;
-                                break;
-                            case UserSettingsConstants.UseLogarithmicGraphScale:
-                                userSettings.UseLogarithmicGraphScale = bool.TryParse(settingValue, out var useLogarithmicGraphScale) ? new bool?(useLogarithmicGraphScale) : null;
-                                break;
-                            case UserSettingsConstants.LogarithmicGraphScaleThreshold:
-                                userSettings.LogarithmicGraphScaleThreshold = int.TryParse(settingValue, out var logarithmicGraphScaleThreshold) ? new int?(logarithmicGraphScaleThreshold) : null;
-                                break;
-                            case UserSettingsConstants.HybridRatio:
-                                userSettings.HybridRatio = int.TryParse(settingValue, out var hybridRatio) ? new int?(hybridRatio) : null;
-                                break;
-                            case UserSettingsConstants.Theme:
-                                userSettings.Theme = Enum.TryParse<SiteThemeType>(settingValue, out var theme) ? new SiteThemeType?(theme) : null;
-                                break;
-                            case UserSettingsConstants.ShouldLevelSkillAncients:
-                                userSettings.ShouldLevelSkillAncients = bool.TryParse(settingValue, out var shouldLevelSkillAncients) ? new bool?(shouldLevelSkillAncients) : null;
-                                break;
-                            case UserSettingsConstants.SkillAncientBaseAncient:
-                                userSettings.SkillAncientBaseAncient = int.TryParse(settingValue, out var skillAncientBaseAncient) ? new int?(skillAncientBaseAncient) : null;
-                                break;
-                            case UserSettingsConstants.SkillAncientLevelDiff:
-                                userSettings.SkillAncientLevelDiff = int.TryParse(settingValue, out var skillAncientLevelDiff) ? new int?(skillAncientLevelDiff) : null;
-                                break;
-                        }
+                        case UserSettingsConstants.AreUploadsPublic:
+                            userSettings.AreUploadsPublic = bool.TryParse(settingValue, out var areUploadsPublic) ? new bool?(areUploadsPublic) : null;
+                            break;
+                        case UserSettingsConstants.PlayStyle:
+                            userSettings.PlayStyle = Enum.TryParse<PlayStyle>(settingValue, out var playStyle) ? new PlayStyle?(playStyle) : null;
+                            break;
+                        case UserSettingsConstants.UseScientificNotation:
+                            userSettings.UseScientificNotation = bool.TryParse(settingValue, out var useScientificNotation) ? new bool?(useScientificNotation) : null;
+                            break;
+                        case UserSettingsConstants.ScientificNotationThreshold:
+                            userSettings.ScientificNotationThreshold = int.TryParse(settingValue, out var scientificNotationThreshold) ? new int?(scientificNotationThreshold) : null;
+                            break;
+                        case UserSettingsConstants.UseEffectiveLevelForSuggestions:
+                            userSettings.UseEffectiveLevelForSuggestions = bool.TryParse(settingValue, out var useEffectiveLevelForSuggestions) ? new bool?(useEffectiveLevelForSuggestions) : null;
+                            break;
+                        case UserSettingsConstants.UseLogarithmicGraphScale:
+                            userSettings.UseLogarithmicGraphScale = bool.TryParse(settingValue, out var useLogarithmicGraphScale) ? new bool?(useLogarithmicGraphScale) : null;
+                            break;
+                        case UserSettingsConstants.LogarithmicGraphScaleThreshold:
+                            userSettings.LogarithmicGraphScaleThreshold = int.TryParse(settingValue, out var logarithmicGraphScaleThreshold) ? new int?(logarithmicGraphScaleThreshold) : null;
+                            break;
+                        case UserSettingsConstants.HybridRatio:
+                            userSettings.HybridRatio = int.TryParse(settingValue, out var hybridRatio) ? new int?(hybridRatio) : null;
+                            break;
+                        case UserSettingsConstants.Theme:
+                            userSettings.Theme = Enum.TryParse<SiteThemeType>(settingValue, out var theme) ? new SiteThemeType?(theme) : null;
+                            break;
+                        case UserSettingsConstants.ShouldLevelSkillAncients:
+                            userSettings.ShouldLevelSkillAncients = bool.TryParse(settingValue, out var shouldLevelSkillAncients) ? new bool?(shouldLevelSkillAncients) : null;
+                            break;
+                        case UserSettingsConstants.SkillAncientBaseAncient:
+                            userSettings.SkillAncientBaseAncient = int.TryParse(settingValue, out var skillAncientBaseAncient) ? new int?(skillAncientBaseAncient) : null;
+                            break;
+                        case UserSettingsConstants.SkillAncientLevelDiff:
+                            userSettings.SkillAncientLevelDiff = int.TryParse(settingValue, out var skillAncientLevelDiff) ? new int?(skillAncientLevelDiff) : null;
+                            break;
                     }
                 }
-
-                this.cache.Add(userId, userSettings);
             }
 
             return userSettings;
         }
 
         /// <inheritdoc/>
-        public void Patch(string userId, UserSettings userSettings)
+        public async Task PatchAsync(string userId, UserSettings userSettings)
         {
             if (string.IsNullOrEmpty(userId))
             {
@@ -207,11 +200,8 @@ namespace ClickerHeroesTrackerWebsite.Models.Settings
                 setUserSettingsCommandText.ToString(),
                 parameters))
             {
-                command.ExecuteNonQuery();
+                await command.ExecuteNonQueryAsync();
             }
-
-            // Bust the cache.
-            this.cache.Remove(userId);
         }
     }
 }
