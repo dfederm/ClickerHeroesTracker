@@ -11,6 +11,7 @@ import { SettingsDialogComponent } from "../settingsDialog/settingsDialog";
 @Component({
     selector: "navbar",
     templateUrl: "./navbar.html",
+    styleUrls: ["/navbar.css"],
 })
 export class NavbarComponent implements OnInit {
     public isCollapsed = true;
