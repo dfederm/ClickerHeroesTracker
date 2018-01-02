@@ -3,7 +3,7 @@ import { ComponentFixture, TestBed, async } from "@angular/core/testing";
 import { Decimal } from "decimal.js";
 import { BehaviorSubject } from "rxjs";
 
-import { ExponentialPipe } from "./exponentialPipe";
+import { ExponentialPipe, IFormattableDecimal } from "./exponentialPipe";
 import { SettingsService, IUserSettings } from "../services/settingsService/settingsService";
 
 describe("ExponentialPipe", () => {
@@ -104,7 +104,7 @@ describe("ExponentialPipe", () => {
         fixture.componentInstance.value = new Decimal(settingsWithScientificNotation.scientificNotationThreshold);
         fixture.detectChanges();
 
-        expect((fixture.nativeElement as HTMLElement).textContent).toEqual(fixture.componentInstance.value.toFormat(0, 0));
+        expect((fixture.nativeElement as HTMLElement).textContent).toEqual((fixture.componentInstance.value as IFormattableDecimal).toFormat(0, 0));
     });
 
     it("should display a formatted Decimal when it is above the scientific notation threshold and scientific notation is on", () => {
@@ -120,6 +120,6 @@ describe("ExponentialPipe", () => {
         fixture.componentInstance.value = new Decimal(settingsWithoutScientificNotation.scientificNotationThreshold + 1);
         fixture.detectChanges();
 
-        expect((fixture.nativeElement as HTMLElement).textContent).toEqual(fixture.componentInstance.value.toFormat(0, 0));
+        expect((fixture.nativeElement as HTMLElement).textContent).toEqual((fixture.componentInstance.value as IFormattableDecimal).toFormat(0, 0));
     });
 });

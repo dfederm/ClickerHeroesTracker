@@ -9,6 +9,11 @@ require("toformat")(Decimal);
 // tslint:enable:no-require-imports
 // tslint:enable:no-var-requires
 
+// Hack until toFormat has proper typings
+export interface IFormattableDecimal {
+    toFormat?(decimalPlaces: number, rounding: Decimal.Rounding): string;
+}
+
 @Pipe({ name: "exponential" })
 export class ExponentialPipe implements PipeTransform {
     private settings: IUserSettings;
@@ -47,7 +52,7 @@ export class ExponentialPipe implements PipeTransform {
             const useScientificNotation = settings && settings.useScientificNotation && value.abs().greaterThan(settings.scientificNotationThreshold);
             return useScientificNotation
                 ? value.toExponential(3)
-                : value.toFormat(0, 0);
+                : (value as IFormattableDecimal).toFormat(0, 0);
         }
 
         throw new Error("Unexpected value passed to ExponentialPipe");
