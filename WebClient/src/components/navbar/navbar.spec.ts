@@ -67,6 +67,7 @@ describe("NavbarComponent", () => {
                     { text: "Upload", dialog: component.UploadDialogComponent },
                     { text: "What's New", url: "/news" },
                     { text: "Feedback", dialog: component.FeedbackDialogComponent },
+                    { text: "", url: "https://github.com/dfederm/ClickerHeroesTracker" },
                     { text: "Settings", dialog: component.SettingsDialogComponent },
                     { text: "Register", dialog: component.RegisterDialogComponent },
                     { text: "Log in", dialog: component.LogInDialogComponent },
@@ -86,7 +87,9 @@ describe("NavbarComponent", () => {
                 }
 
                 if (expectations.url) {
-                    expect(link.attributes.routerLink).toEqual(expectations.url);
+                    // It may be either an attribute or property depending on whether it's static. It may also be a normal href
+                    let actualLink = link.attributes.routerLink || link.properties.routerLink || link.attributes.href;
+                    expect(actualLink).toEqual(expectations.url);
                 }
 
                 if (expectations.dialog) {
@@ -111,6 +114,7 @@ describe("NavbarComponent", () => {
                     { text: "Clans", url: "/clans" },
                     { text: "What's New", url: "/news" },
                     { text: "Feedback", dialog: component.FeedbackDialogComponent },
+                    { text: "", url: "https://github.com/dfederm/ClickerHeroesTracker" },
                     { text: "Settings", dialog: component.SettingsDialogComponent },
                     { text: "Log off", hasClickHandler: true },
                 ];
@@ -129,8 +133,9 @@ describe("NavbarComponent", () => {
                 }
 
                 if (expectations.url) {
-                    // It may be either an attribute or property depending on whether it's static.
-                    expect(link.attributes.routerLink || link.properties.routerLink).toEqual(expectations.url);
+                    // It may be either an attribute or property depending on whether it's static. It may also be a normal href
+                    let actualLink = link.attributes.routerLink || link.properties.routerLink || link.attributes.href;
+                    expect(actualLink).toEqual(expectations.url);
                 }
 
                 if (expectations.hasClickHandler) {
@@ -246,7 +251,7 @@ describe("NavbarComponent", () => {
 
         spyOn(authenticationService, "logOut");
 
-        let logOutLink = fixture.debugElement.queryAll(By.css(".nav-link"))[6];
+        let logOutLink = fixture.debugElement.queryAll(By.css(".nav-link"))[7];
         logOutLink.nativeElement.click();
 
         expect(authenticationService.logOut).toHaveBeenCalled();
