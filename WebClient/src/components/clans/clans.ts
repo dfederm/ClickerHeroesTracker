@@ -11,11 +11,13 @@ export class ClansComponent implements OnInit {
 
     public isClanInformationLoading: boolean;
 
+    public messagesError = "";
+
+    public isMessagesLoading: boolean;
+
     public isLeaderboardError = false;
 
     public isLeaderboardLoading: boolean;
-
-    public isMessageSendError = false;
 
     public isInClan: boolean;
 
@@ -53,16 +55,14 @@ export class ClansComponent implements OnInit {
     }
 
     public ngOnInit(): void {
-        this.getClanInformation();
+        this.getMessages();
 
         // The leaderboard depends on the user clan, so kick them off in parallel but don't process until they're both done.
-        // TODO: Combine these 3 calls in a smarter way.
         Promise.all([
-            this.clanService.getUserClan(),
+            this.getClanInformation(),
             this.getLeaderboard(),
         ])
             .then(results => {
-                this.userClan = results[0];
                 this.updateLeaderboard(results[1]);
             })
             .catch(() => {
@@ -71,15 +71,15 @@ export class ClansComponent implements OnInit {
     }
 
     public sendMessage(): void {
-        this.isMessageSendError = false;
-        this.isClanInformationLoading = true;
+        this.messagesError = "";
+        this.isMessagesLoading = true;
         this.clanService.sendMessage(this.newMessage, this.clanName)
             .then(() => {
                 this.newMessage = "";
-                return this.getClanInformation();
+                return this.getMessages();
             })
             .catch(() => {
-                this.isMessageSendError = true;
+                this.messagesError = "There was a problem sending your message. Please try again.";
             });
     }
 
@@ -95,10 +95,30 @@ export class ClansComponent implements OnInit {
                 this.isInClan = true;
                 this.clanName = response.clanName;
                 this.guildMembers = response.guildMembers;
-                this.messages = response.messages;
+
+                this.userClan = {
+                    name: response.clanName,
+                    currentRaidLevel: response.currentRaidLevel,
+                    memberCount: response.guildMembers.length,
+                    rank: response.rank,
+                    isUserClan: true,
+                };
             })
             .catch(() => {
                 this.isClanInformationError = true;
+            });
+    }
+
+    private getMessages(): Promise<void> {
+        this.messagesError = "";
+        this.isMessagesLoading = true;
+        return this.clanService.getMessages()
+            .then(messages => {
+                this.isMessagesLoading = false;
+                this.messages = messages;
+            })
+            .catch(() => {
+                this.messagesError = "There was a problem getting your clan's messages. Please try again.";
             });
     }
 

@@ -14,6 +14,6 @@ namespace ClickerHeroesTrackerWebsite.Models.Api.Clans
 
         public IList<GuildMember> GuildMembers { get; set; }
 
-        public IList<Message> Messages { get; set; }
+        public int Rank { get; set; }
     }
 }

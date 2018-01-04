@@ -3,7 +3,7 @@ import { HttpClientTestingModule, HttpTestingController } from "@angular/common/
 import { HttpHeaders, HttpErrorResponse } from "@angular/common/http";
 import { HttpErrorHandlerService } from "../httpErrorHandlerService/httpErrorHandlerService";
 
-import { ClanService, ISendMessageResponse, ILeaderboardClan, IClanData, ILeaderboardSummaryListResponse } from "./clanService";
+import { ClanService, ISendMessageResponse, IClanData, ILeaderboardSummaryListResponse, IMessage } from "./clanService";
 import { AuthenticationService } from "../authenticationService/authenticationService";
 
 describe("ClanService", () => {
@@ -60,7 +60,7 @@ describe("ClanService", () => {
             // Tick the getAuthHeaders call
             tick();
 
-            let expectedResponse: IClanData = { clanName: "", currentRaidLevel: 0, guildMembers: [], messages: [] };
+            let expectedResponse: IClanData = { clanName: "", currentRaidLevel: 0, guildMembers: [], rank: 0 };
             let request = httpMock.expectOne(apiRequest);
             request.flush(expectedResponse);
             tick();
@@ -105,75 +105,6 @@ describe("ClanService", () => {
             expect(error.statusText).toEqual("someStatus");
             expect(authenticationService.getAuthHeaders).toHaveBeenCalled();
             expect(httpErrorHandlerService.logError).toHaveBeenCalledWith("ClanService.getClan.error", error);
-        }));
-    });
-
-    describe("getUserClan", () => {
-        const apiRequest = { method: "get", url: "/api/clans/userClan" };
-
-        it("should make an api call", fakeAsync(() => {
-            clanService.getUserClan();
-
-            // Tick the getAuthHeaders call
-            tick();
-
-            httpMock.expectOne(apiRequest);
-            expect(authenticationService.getAuthHeaders).toHaveBeenCalled();
-        }));
-
-        it("should return the user's clan leaderboard data", fakeAsync(() => {
-            let response: ILeaderboardClan;
-            clanService.getUserClan()
-                .then((r: ILeaderboardClan) => response = r);
-
-            // Tick the getAuthHeaders call
-            tick();
-
-            let expectedResponse: ILeaderboardClan = { name: "", currentRaidLevel: 0, memberCount: 0, rank: 0, isUserClan: false };
-            let request = httpMock.expectOne(apiRequest);
-            request.flush(expectedResponse);
-            tick();
-
-            expect(response).toEqual(expectedResponse, "should return the expected response");
-            expect(authenticationService.getAuthHeaders).toHaveBeenCalled();
-        }));
-
-        it("should return null when the user isn't in a clan", fakeAsync(() => {
-            let response: ILeaderboardClan;
-            clanService.getUserClan()
-                .then((r: ILeaderboardClan) => response = r);
-
-            // Tick the getAuthHeaders call
-            tick();
-
-            let request = httpMock.expectOne(apiRequest);
-            request.flush(null, { status: 204, statusText: "someStatus" });
-            tick();
-
-            expect(response).toBeNull("should return null");
-            expect(authenticationService.getAuthHeaders).toHaveBeenCalled();
-        }));
-
-        it("should handle http errors", fakeAsync(() => {
-            let response: ILeaderboardClan;
-            let error: HttpErrorResponse;
-            clanService.getUserClan()
-                .then((r: ILeaderboardClan) => response = r)
-                .catch((e: HttpErrorResponse) => error = e);
-
-            // Tick the getAuthHeaders call
-            tick();
-
-            let request = httpMock.expectOne(apiRequest);
-            request.flush(null, { status: 500, statusText: "someStatus" });
-            tick();
-
-            expect(response).toBeUndefined();
-            expect(error).toBeDefined();
-            expect(error.status).toEqual(500);
-            expect(error.statusText).toEqual("someStatus");
-            expect(authenticationService.getAuthHeaders).toHaveBeenCalled();
-            expect(httpErrorHandlerService.logError).toHaveBeenCalledWith("ClanService.getUserClan.error", error);
         }));
     });
 
@@ -227,6 +158,63 @@ describe("ClanService", () => {
             expect(error.statusText).toEqual("someStatus");
             expect(authenticationService.getAuthHeaders).toHaveBeenCalled();
             expect(httpErrorHandlerService.logError).toHaveBeenCalledWith("ClanService.getLeaderboard.error", error);
+        }));
+    });
+
+    describe("getMessages", () => {
+        const apiRequest = { method: "get", url: "/api/clans/messages" };
+
+        it("should make an api call", fakeAsync(() => {
+            clanService.getMessages();
+
+            // Tick the getAuthHeaders call
+            tick();
+
+            httpMock.expectOne(apiRequest);
+            expect(authenticationService.getAuthHeaders).toHaveBeenCalled();
+        }));
+
+        it("should handle when the api returns a success response", fakeAsync(() => {
+            let response: IMessage[];
+            let error: HttpErrorResponse;
+            clanService.getMessages()
+                .then((r: IMessage[]) => response = r)
+                .catch((e: HttpErrorResponse) => error = e);
+
+            // Tick the getAuthHeaders call
+            tick();
+
+            let expectedResponse: IMessage[] = [{ date: "someDate", username: "someUsername", content: "someContent" }];
+            let request = httpMock.expectOne(apiRequest);
+            request.flush(expectedResponse);
+            tick();
+
+            expect(response).toEqual(expectedResponse);
+            expect(error).toBeUndefined();
+            expect(authenticationService.getAuthHeaders).toHaveBeenCalled();
+            expect(httpErrorHandlerService.logError).not.toHaveBeenCalled();
+        }));
+
+        it("should handle http errors", fakeAsync(() => {
+            let response: IMessage[];
+            let error: HttpErrorResponse;
+            clanService.getMessages()
+                .then((r: IMessage[]) => response = r)
+                .catch((e: HttpErrorResponse) => error = e);
+
+            // Tick the getAuthHeaders call
+            tick();
+
+            let request = httpMock.expectOne(apiRequest);
+            request.flush(null, { status: 500, statusText: "someStatus" });
+            tick();
+
+            expect(response).toBeUndefined();
+            expect(error).toBeDefined();
+            expect(error.status).toEqual(500);
+            expect(error.statusText).toEqual("someStatus");
+            expect(authenticationService.getAuthHeaders).toHaveBeenCalled();
+            expect(httpErrorHandlerService.logError).toHaveBeenCalledWith("ClanService.getMessages.error", error);
         }));
     });
 
