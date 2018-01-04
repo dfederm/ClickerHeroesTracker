@@ -5,7 +5,7 @@ import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { TimeAgoPipe } from "time-ago-pipe";
 
 import { ClansComponent } from "./clans";
-import { ClanService, ILeaderboardClan, IClanData, ILeaderboardSummaryListResponse } from "../../services/clanService/clanService";
+import { ClanService, ILeaderboardClan, IClanData, ILeaderboardSummaryListResponse, IMessage } from "../../services/clanService/clanService";
 
 describe("ClansComponent", () => {
     let component: ClansComponent;
@@ -27,42 +27,43 @@ describe("ClansComponent", () => {
     let userClanIndex = clans.findIndex(_ => _.isUserClan);
     let userClan = clans[userClanIndex];
 
+    let clanMembers = [];
+    for (let i = 0; i < userClan.memberCount; i++) {
+        clanMembers.push({ uid: "userId" + i, nickname: "user" + i, highestZone: i });
+    }
+
     let clanData: IClanData = {
+        rank: userClan.rank,
         clanName: userClan.name,
         currentRaidLevel: userClan.currentRaidLevel,
-        guildMembers:
-        [
-            { uid: "userId0", nickname: "user0", highestZone: 0 },
-            { uid: "userId1", nickname: "user1", highestZone: 1 },
-            { uid: "userId2", nickname: "user2", highestZone: 2 },
-        ],
-        messages:
-        [
-            { username: "user0", date: "2017-01-01T00:00:00", content: "message0" },
-            { username: null, date: "2017-01-02T00:00:00", content: "message1" },
-            { username: "user2", date: "2017-01-03T00:00:00", content: "message2" },
-        ],
+        guildMembers: clanMembers,
     };
+
+    let clanMessages = [
+        { username: "user0", date: "2017-01-01T00:00:00", content: "message0" },
+        { username: null, date: "2017-01-02T00:00:00", content: "message1" },
+        { username: "user2", date: "2017-01-03T00:00:00", content: "message2" },
+    ];
 
     beforeEach(done => {
         let clanService = {
             getClan(): Promise<IClanData> {
                 return Promise.resolve(clanData);
             },
-            getUserClan(): Promise<ILeaderboardClan> {
-                return Promise.resolve(userClan);
-            },
             getLeaderboard(page: number, count: number): Promise<ILeaderboardSummaryListResponse> {
                 let leaderboardSummaryListResponse: ILeaderboardSummaryListResponse = {
                     pagination:
-                    {
-                        count: clans.length,
-                        next: "someNext",
-                        previous: "somePrevious",
-                    },
+                        {
+                            count: clans.length,
+                            next: "someNext",
+                            previous: "somePrevious",
+                        },
                     leaderboardClans: clans.slice((page - 1) * count, page * count),
                 };
                 return Promise.resolve(leaderboardSummaryListResponse);
+            },
+            getMessages(): Promise<IMessage[]> {
+                return Promise.resolve(clanMessages);
             },
             sendMessage(): Promise<void> {
                 return Promise.resolve();
@@ -73,16 +74,16 @@ describe("ClansComponent", () => {
             {
                 imports: [FormsModule],
                 declarations:
-                [
-                    ClansComponent,
-                    TimeAgoPipe,
-                ],
+                    [
+                        ClansComponent,
+                        TimeAgoPipe,
+                    ],
                 providers:
-                [
-                    { provide: ClanService, useValue: clanService },
-                    TimeAgoPipe,
-                    ChangeDetectorRef, // Needed for TimeAgoPipe
-                ],
+                    [
+                        { provide: ClanService, useValue: clanService },
+                        TimeAgoPipe,
+                        ChangeDetectorRef, // Needed for TimeAgoPipe
+                    ],
                 schemas: [NO_ERRORS_SCHEMA],
             })
             .compileComponents()
@@ -95,8 +96,6 @@ describe("ClansComponent", () => {
     });
 
     it("should display clan information", done => {
-        let timeAgoPipe = TestBed.get(TimeAgoPipe) as TimeAgoPipe;
-
         fixture.detectChanges();
         fixture.whenStable()
             .then(() => {
@@ -120,28 +119,6 @@ describe("ClansComponent", () => {
                     expect(cells.length).toEqual(2);
                     expect(cells[0].nativeElement.textContent.trim()).toEqual(guildMember.nickname);
                     expect(cells[1].nativeElement.textContent.trim()).toEqual(guildMember.highestZone.toString());
-                }
-
-                let messages = clanInformation.queryAll(By.css(".clan-message"));
-                expect(messages.length).toEqual(clanData.messages.length);
-                for (let i = 0; i < messages.length; i++) {
-                    let messageElement = messages[i];
-                    let message = clanData.messages[i];
-
-                    let messageElementsPieces = messageElement.children;
-                    expect(messageElementsPieces.length).toEqual(2);
-
-                    let metadataElement = messageElementsPieces[0].children;
-                    expect(metadataElement[0].nativeElement.textContent.trim()).toEqual("(" + timeAgoPipe.transform(message.date) + ")");
-                    if (message.username) {
-                        expect(metadataElement[1].nativeElement.classList.contains("text-muted")).toBe(false);
-                        expect(metadataElement[1].nativeElement.textContent.trim()).toEqual(message.username);
-                    } else {
-                        expect(metadataElement[1].nativeElement.classList.contains("text-muted")).toBe(true);
-                        expect(metadataElement[1].nativeElement.textContent.trim()).toEqual("(Unknown)");
-                    }
-
-                    expect(messageElementsPieces[1].nativeElement.textContent.trim()).toEqual(message.content);
                 }
             })
             .then(done)
@@ -175,6 +152,61 @@ describe("ClansComponent", () => {
 
                 let error = fixture.debugElement.query(By.css("p"));
                 expect(error.nativeElement.textContent.trim()).toEqual("Please join a clan to view the clan's data");
+            })
+            .then(done)
+            .catch(done.fail);
+    });
+
+    it("should display messages", done => {
+        let timeAgoPipe = TestBed.get(TimeAgoPipe) as TimeAgoPipe;
+
+        fixture.detectChanges();
+        fixture.whenStable()
+            .then(() => {
+                fixture.detectChanges();
+
+                let containers = fixture.debugElement.queryAll(By.css(".col-lg-6"));
+                expect(containers.length).toEqual(2);
+
+                let clanInformation = containers[0];
+
+                let messages = clanInformation.queryAll(By.css(".clan-message"));
+                expect(messages.length).toEqual(clanMessages.length);
+                for (let i = 0; i < messages.length; i++) {
+                    let messageElement = messages[i];
+                    let expectedMessage = clanMessages[i];
+
+                    let messageElementsPieces = messageElement.children;
+                    expect(messageElementsPieces.length).toEqual(2);
+
+                    let metadataElement = messageElementsPieces[0].children;
+                    expect(metadataElement[0].nativeElement.textContent.trim()).toEqual("(" + timeAgoPipe.transform(expectedMessage.date) + ")");
+                    if (expectedMessage.username) {
+                        expect(metadataElement[1].nativeElement.classList.contains("text-muted")).toBe(false);
+                        expect(metadataElement[1].nativeElement.textContent.trim()).toEqual(expectedMessage.username);
+                    } else {
+                        expect(metadataElement[1].nativeElement.classList.contains("text-muted")).toBe(true);
+                        expect(metadataElement[1].nativeElement.textContent.trim()).toEqual("(Unknown)");
+                    }
+
+                    expect(messageElementsPieces[1].nativeElement.textContent.trim()).toEqual(expectedMessage.content);
+                }
+            })
+            .then(done)
+            .catch(done.fail);
+    });
+
+    it("should display an error when clanService.getMessages errors", done => {
+        let clanService = TestBed.get(ClanService);
+        spyOn(clanService, "getMessages").and.returnValue(Promise.reject("someReason"));
+
+        fixture.detectChanges();
+        fixture.whenStable()
+            .then(() => {
+                fixture.detectChanges();
+
+                let error = fixture.debugElement.query(By.css("p"));
+                expect(error.nativeElement.textContent.trim()).toEqual("There was a problem getting your clan's messages. Please try again.");
             })
             .then(done)
             .catch(done.fail);
@@ -214,11 +246,11 @@ describe("ClansComponent", () => {
                 expect(clanService.sendMessage).toHaveBeenCalledWith(message, userClan.name);
 
                 // Ensure we refresh the UI
-                spyOn(clanService, "getClan");
+                spyOn(clanService, "getMessages");
                 return fixture.whenStable();
             })
             .then(() => {
-                expect(clanService.getClan).toHaveBeenCalled();
+                expect(clanService.getMessages).toHaveBeenCalled();
             })
             .then(done)
             .catch(done.fail);

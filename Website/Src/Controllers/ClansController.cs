@@ -1,4 +1,4 @@
-﻿// <copyright file="ClansApiController.cs" company="Clicker Heroes Tracker">
+﻿// <copyright file="ClansController.cs" company="Clicker Heroes Tracker">
 // Copyright (c) Clicker Heroes Tracker. All rights reserved.
 // </copyright>
 
@@ -22,7 +22,7 @@ namespace ClickerHeroesTrackerWebsite.Controllers
 
     [Route("api/clans")]
     [Authorize]
-    public class ClansApiController : Controller
+    public class ClansController : Controller
     {
         private const string BaseUrl = "http://clickerheroes-savedgames3-747864888.us-east-1.elb.amazonaws.com";
 
@@ -34,7 +34,7 @@ namespace ClickerHeroesTrackerWebsite.Controllers
 
         private readonly HttpClient httpClient;
 
-        public ClansApiController(
+        public ClansController(
             IDatabaseCommandFactory databaseCommandFactory,
             UserManager<ApplicationUser> userManager,
             HttpClient httpClient)
@@ -49,140 +49,74 @@ namespace ClickerHeroesTrackerWebsite.Controllers
         public async Task<ActionResult> GetClan()
         {
             var userId = this.userManager.GetUserId(this.User);
-            var savedGame = await this.GetLatestSaveAsync(userId);
-
-            var uniqueId = savedGame.Object.Value<string>("uniqueId");
-            var passwordHash = savedGame.Object.Value<string>("passwordHash");
-            if (uniqueId == null)
+            var parameters = await this.GetBaseParameters(userId);
+            if (parameters == null)
             {
                 return this.NotFound();
             }
 
-            var clan = await this.GetClanInfomation(uniqueId, passwordHash);
+            var clan = await this.GetClanInfomation(parameters);
             if (clan?.Guild == null)
             {
                 return this.NoContent();
             }
 
-            HashSet<string> guildMemberIds = new HashSet<string>();
-            foreach (var x in clan.Guild.MemberUids)
-            {
-                if (x.Value == MemberType.Member)
-                {
-                    guildMemberIds.Add(x.Key);
-                }
-            }
+            var guildMembers = clan.GuildMembers.Values
+                .Where(member => clan.Guild.MemberUids.TryGetValue(member.Uid, out var memberType) && memberType == MemberType.Member)
+                .OrderByDescending(member => member.HighestZone)
+                .ToList();
 
-            var filteredGuildMembers = clan.GuildMembers
-                .Where(kvp => guildMemberIds.Contains(kvp.Value.Uid))
-                .OrderByDescending(kvp => kvp.Value.HighestZone);
-            List<GuildMember> reindexedGuildMembers = new List<GuildMember>();
-            foreach (var x in filteredGuildMembers)
-            {
-                reindexedGuildMembers.Add(x.Value);
-            }
-
-            ClanData clanData = new ClanData()
-            {
-                ClanName = clan.Guild.Name,
-                CurrentRaidLevel = clan.Guild.CurrentRaidLevel,
-                GuildMembers = reindexedGuildMembers,
-            };
-
-            var mesagesValues = new Dictionary<string, string>
-            {
-                { "uid", uniqueId },
-                { "passwordHash", passwordHash },
-                { "guildName", clan.Guild.Name },
-            };
-
-            var messagesUrl = BaseUrl + "/clans/getGuildMessages.php";
-            var content = new FormUrlEncodedContent(mesagesValues);
-
-            var messagesResponse = await this.httpClient.PostAsync(messagesUrl, content);
-
-            var messagesResponseString = await messagesResponse.Content.ReadAsStringAsync();
-
-            MessageResponse messages = JsonConvert.DeserializeObject<MessageResponse>(messagesResponseString);
-            List<Message> messageList = new List<Message>();
-            foreach (var mess in messages.Result.Messages)
-            {
-                Message message = new Message();
-                string[] messageSplit = mess.Value.Split(MessageDelimeter, 2);
-                message.Content = messageSplit[1];
-                double timestamp = Convert.ToDouble(mess.Key);
-                message.Date = timestamp.UnixTimeStampToDateTime();
-                GuildMember member = clan.GuildMembers.Values.FirstOrDefault(t => string.Equals(t.Uid, messageSplit[0], StringComparison.OrdinalIgnoreCase));
-                message.Username = member?.Nickname;
-
-                messageList.Add(message);
-            }
-
-            var count = messageList.Count - 15;
-            if (count > 0)
-            {
-                // remove that number of items from the start of the list
-                messageList.RemoveRange(0, count);
-            }
-
-            messageList.Reverse();
-            clanData.Messages = messageList;
-
-            using (var command = this.databaseCommandFactory.Create())
-            {
-                // Insert Clan
-                command.CommandText = @"
-                    IF EXISTS (SELECT * FROM Clans WHERE Name = @Name)
-                    BEGIN
-                        UPDATE Clans
-                        SET CurrentRaidLevel=@CurrentRaidLevel,MemberCount=@MemberCount
-                        WHERE Name=@Name
-                    END
-                    ELSE
-                    BEGIN
-                        INSERT INTO Clans(Name, CurrentRaidLevel,MemberCount)
-                        VALUES(@Name, @CurrentRaidLevel, @MemberCount);
-                    END";
-                command.Parameters = new Dictionary<string, object>
+            const string UpsertClanCommandText = @"
+                MERGE INTO Clans WITH (HOLDLOCK)
+                USING
+                    (VALUES (@Name, @CurrentRaidLevel, @MemberCount))
+                    AS Input(Name, CurrentRaidLevel, MemberCount)
+                ON Clans.Name = Input.Name
+                WHEN MATCHED THEN
+                    UPDATE
+                    SET
+                        CurrentRaidLevel = Input.CurrentRaidLevel,
+                        MemberCount = Input.MemberCount
+                WHEN NOT MATCHED THEN
+                    INSERT (Name, CurrentRaidLevel, MemberCount)
+                    VALUES (Input.Name, Input.CurrentRaidLevel, Input.MemberCount);";
+            var upsertClanCommandParameters = new Dictionary<string, object>
                 {
                     { "@Name", clan.Guild.Name },
                     { "@CurrentRaidLevel", clan.Guild.CurrentRaidLevel },
-                    { "@MemberCount", reindexedGuildMembers.Count },
+                    { "@MemberCount", guildMembers.Count },
                 };
+            using (var command = this.databaseCommandFactory.Create(UpsertClanCommandText, upsertClanCommandParameters))
+            {
                 await command.ExecuteNonQueryAsync();
             }
 
-            return this.Ok(clanData);
-        }
-
-        [Route("messages")]
-        [HttpPost]
-        public async Task<IActionResult> SendMessage(string message, string clanName)
-        {
-            var userId = this.userManager.GetUserId(this.User);
-            var savedGame = await this.GetLatestSaveAsync(userId);
-
-            var uniqueId = savedGame.Object.Value<string>("uniqueId");
-            var passwordHash = savedGame.Object.Value<string>("passwordHash");
-            if (uniqueId == null)
+            var rank = 0;
+            const string GetLeaderboardDataCommandText = @"
+                WITH NumberedRows
+                AS
+                (
+                    SELECT Name, ROW_NUMBER() OVER (ORDER BY CurrentRaidLevel DESC) AS RowNumber
+                    FROM Clans
+                )
+                SELECT RowNumber FROM NumberedRows WHERE Name = @Name";
+            var getLeaderboardDataCommandParameters = new Dictionary<string, object>
             {
-                return this.NotFound();
+                { "@Name", clan.Guild.Name },
+            };
+            using (var command = this.databaseCommandFactory.Create(GetLeaderboardDataCommandText, getLeaderboardDataCommandParameters))
+            {
+                rank = Convert.ToInt32(await command.ExecuteScalarAsync());
             }
 
-            var guildValues = new Dictionary<string, string>
+            var model = new ClanData
             {
-                { "guildName", clanName },
-                { "message", message },
-                { "uid", uniqueId },
-                { "passwordHash", passwordHash },
+                ClanName = clan.Guild.Name,
+                CurrentRaidLevel = clan.Guild.CurrentRaidLevel,
+                GuildMembers = guildMembers,
+                Rank = rank,
             };
-
-            var content = new FormUrlEncodedContent(guildValues);
-
-            var response = await this.httpClient.PostAsync(BaseUrl + "/clans/sendGuildMessage.php", content);
-
-            var responseString = await response.Content.ReadAsStringAsync();
-            return this.Ok(responseString);
+            return this.Ok(model);
         }
 
         [Route("leaderboard")]
@@ -207,14 +141,11 @@ namespace ClickerHeroesTrackerWebsite.Controllers
             var paginationTask = this.FetchPaginationAsync(page, count);
 
             var userId = this.userManager.GetUserId(this.User);
-            var savedGame = await this.GetLatestSaveAsync(userId);
+            var parameters = await this.GetBaseParameters(userId);
             var clanName = string.Empty;
-
-            var uniqueId = savedGame.Object.Value<string>("uniqueId");
-            var passwordHash = savedGame.Object.Value<string>("passwordHash");
-            if (uniqueId != null)
+            if (parameters != null)
             {
-                var clan = await this.GetClanInfomation(uniqueId, passwordHash);
+                var clan = await this.GetClanInfomation(parameters);
                 clanName = clan?.Guild?.Name ?? string.Empty;
             }
 
@@ -227,51 +158,83 @@ namespace ClickerHeroesTrackerWebsite.Controllers
             return this.Ok(model);
         }
 
-        [Route("userClan")]
+        [Route("messages")]
         [HttpGet]
-        public async Task<IActionResult> GetUserClan()
+        public async Task<IActionResult> GetMessages(int count = ParameterConstants.GetMessages.Count.Default)
         {
-            var userId = this.userManager.GetUserId(this.User);
-            SavedGame savedGame = await this.GetLatestSaveAsync(userId);
-
-            var uniqueId = savedGame.Object.Value<string>("uniqueId");
-            var passwordHash = savedGame.Object.Value<string>("passwordHash");
-            if (uniqueId == null)
+            // Validate parameters
+            if (count < ParameterConstants.GetMessages.Count.Min
+                || count > ParameterConstants.GetMessages.Count.Max)
             {
-                return this.NoContent();
+                return this.BadRequest("Invalid parameter: count");
             }
 
-            var clan = await this.GetClanInfomation(uniqueId, passwordHash);
+            var userId = this.userManager.GetUserId(this.User);
+            var parameters = await this.GetBaseParameters(userId);
+            if (parameters == null)
+            {
+                return this.NotFound();
+            }
+
+            var clan = await this.GetClanInfomation(parameters);
             if (clan?.Guild == null)
             {
                 return this.NoContent();
             }
 
-            const string GetLeaderboardDataCommandText = @"
-                WITH NumberedRows
-                AS
-                (SELECT Name, CurrentRaidLevel, MemberCount, ROW_NUMBER() OVER (ORDER BY CurrentRaidLevel DESC) AS RowNumber
-                FROM Clans)
-                SELECT Name, CurrentRaidLevel, MemberCount, RowNumber FROM NumberedRows WHERE Name = @Name";
-            var parameters = new Dictionary<string, object>
+            parameters.Add("guildName", clan.Guild.Name);
+
+            var content = new FormUrlEncodedContent(parameters);
+
+            var messagesResponse = await this.httpClient.PostAsync(BaseUrl + "/clans/getGuildMessages.php", content);
+
+            var messagesResponseString = await messagesResponse.Content.ReadAsStringAsync();
+
+            var messages = JsonConvert.DeserializeObject<MessageResponse>(messagesResponseString);
+            var messageList = new List<Message>(messages.Result.Messages.Count);
+            foreach (var kvp in messages.Result.Messages)
             {
-                { "@Name", clan.Guild.Name },
-            };
-            var leaderboardClan = new LeaderboardClan();
-            using (var command = this.databaseCommandFactory.Create(GetLeaderboardDataCommandText, parameters))
-            using (var reader = await command.ExecuteReaderAsync())
-            {
-                if (reader.Read())
-                {
-                    leaderboardClan.Name = reader["Name"].ToString();
-                    leaderboardClan.CurrentRaidLevel = Convert.ToInt32(reader["CurrentRaidLevel"]);
-                    leaderboardClan.MemberCount = Convert.ToInt32(reader["MemberCount"]);
-                    leaderboardClan.Rank = Convert.ToInt32(reader["RowNumber"]);
-                    leaderboardClan.IsUserClan = true;
-                }
+                var message = new Message();
+                var messageSplit = kvp.Value.Split(MessageDelimeter, 2);
+                message.Content = messageSplit[1];
+                var timestamp = Convert.ToDouble(kvp.Key);
+                message.Date = timestamp.UnixTimeStampToDateTime();
+                var member = clan.GuildMembers.Values.FirstOrDefault(t => string.Equals(t.Uid, messageSplit[0], StringComparison.OrdinalIgnoreCase));
+                message.Username = member?.Nickname;
+
+                messageList.Add(message);
             }
 
-            return this.Ok(leaderboardClan);
+            if (messageList.Count > count)
+            {
+                // remove that number of items from the start of the list
+                messageList.RemoveRange(0, messageList.Count - count);
+            }
+
+            messageList.Reverse();
+            return this.Ok(messageList);
+        }
+
+        [Route("messages")]
+        [HttpPost]
+        public async Task<IActionResult> SendMessage(string message, string clanName)
+        {
+            var userId = this.userManager.GetUserId(this.User);
+            var parameters = await this.GetBaseParameters(userId);
+            if (parameters == null)
+            {
+                return this.NotFound();
+            }
+
+            parameters.Add("guildName", clanName);
+            parameters.Add("message", message);
+
+            var content = new FormUrlEncodedContent(parameters);
+
+            var response = await this.httpClient.PostAsync(BaseUrl + "/clans/sendGuildMessage.php", content);
+
+            var responseString = await response.Content.ReadAsStringAsync();
+            return this.Ok(responseString);
         }
 
         private async Task<IList<LeaderboardClan>> FetchLeaderboardAsync(int page, int count, string clanName)
@@ -280,11 +243,11 @@ namespace ClickerHeroesTrackerWebsite.Controllers
             var offset = (page - 1) * count;
 
             const string getLeaderboardDataCommandText = @"
-	            SELECT Name, CurrentRaidLevel, MemberCount
+                SELECT Name, CurrentRaidLevel, MemberCount
                 FROM Clans
                 ORDER BY CurrentRaidLevel DESC
                     OFFSET @Offset ROWS
-		            FETCH NEXT @Count ROWS ONLY;";
+                    FETCH NEXT @Count ROWS ONLY;";
             var parameters = new Dictionary<string, object>
             {
                 { "@Offset", offset },
@@ -313,7 +276,7 @@ namespace ClickerHeroesTrackerWebsite.Controllers
             return clans;
         }
 
-        private async Task<SavedGame> GetLatestSaveAsync(string userId)
+        private async Task<Dictionary<string, string>> GetBaseParameters(string userId)
         {
             var userIdParameters = new Dictionary<string, object>
             {
@@ -321,7 +284,7 @@ namespace ClickerHeroesTrackerWebsite.Controllers
             };
 
             const string getUploadDataCommandText = @"
-	            SELECT TOP(1) UploadContent
+                SELECT TOP(1) UploadContent
                 FROM Uploads
                 WHERE UserId = @UserId
                 ORDER BY UploadTime DESC";
@@ -333,7 +296,15 @@ namespace ClickerHeroesTrackerWebsite.Controllers
                 if (reader.Read())
                 {
                     string uploadContent = reader["UploadContent"].ToString();
-                    return SavedGame.Parse(uploadContent);
+                    var savedGame = SavedGame.Parse(uploadContent);
+                    var uniqueId = savedGame.Object.Value<string>("uniqueId");
+                    var passwordHash = savedGame.Object.Value<string>("passwordHash");
+
+                    return new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+                    {
+                        { "uid", uniqueId },
+                        { "passwordHash", passwordHash },
+                    };
                 }
 
                 return null;
@@ -343,8 +314,8 @@ namespace ClickerHeroesTrackerWebsite.Controllers
         private async Task<PaginationMetadata> FetchPaginationAsync(int page, int count)
         {
             const string GetLeaderboardCountCommandText = @"
-	            SELECT COUNT(*) AS TotalClans
-		        FROM Clans";
+                SELECT COUNT(*) AS TotalClans
+                FROM Clans";
 
             using (var command = this.databaseCommandFactory.Create(GetLeaderboardCountCommandText))
             using (var reader = await command.ExecuteReaderAsync())
@@ -386,16 +357,9 @@ namespace ClickerHeroesTrackerWebsite.Controllers
             }
         }
 
-        private async Task<Clan> GetClanInfomation(string uniqueId, string passwordHash)
+        private async Task<Clan> GetClanInfomation(Dictionary<string, string> parameters)
         {
-            var guildValues = new Dictionary<string, string>
-            {
-                { "uid", uniqueId },
-                { "passwordHash", passwordHash },
-            };
-
-            var content = new FormUrlEncodedContent(guildValues);
-
+            var content = new FormUrlEncodedContent(parameters);
             var response = await this.httpClient.PostAsync(BaseUrl + "/clans/getGuildInfo.php", content);
 
             var responseString = await response.Content.ReadAsStringAsync();
@@ -430,6 +394,18 @@ namespace ClickerHeroesTrackerWebsite.Controllers
                     internal const int Min = 1;
 
                     internal const int Max = 100;
+
+                    internal const int Default = 10;
+                }
+            }
+
+            internal static class GetMessages
+            {
+                internal static class Count
+                {
+                    internal const int Min = 1;
+
+                    internal const int Max = 25;
 
                     internal const int Default = 10;
                 }

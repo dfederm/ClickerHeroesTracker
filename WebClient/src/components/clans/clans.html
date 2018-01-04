@@ -2,8 +2,8 @@
     <h2>Clans</h2>
     <div class="row">
         <div class="col-lg-6">
-            <ngx-loading [show]="isClanInformationLoading && !isClanInformationError"></ngx-loading>
             <h3 *ngIf="isInClan && !isClanInformationError">{{ clanName }}</h3>
+            <ngx-loading [show]="isClanInformationLoading && !isClanInformationError"></ngx-loading>
             <p *ngIf="isClanInformationError"
                class="alert alert-danger">
                 There was a problem getting your clan's data
@@ -28,9 +28,11 @@
                 </tbody>
             </table>
             <div>
-                <p *ngIf="isMessageSendError"
+                <h3>Message Board</h3>
+                <ngx-loading [show]="isMessagesLoading && !messagesError"></ngx-loading>
+                <p *ngIf="messagesError"
                    class="alert alert-danger">
-                    There was a problem sending your message. Please try again.
+                    {{ messagesError }}
                 </p>
                 <form (ngSubmit)="sendMessage()"
                       class="form-inline">

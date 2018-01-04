@@ -22,7 +22,7 @@ export interface IClanData {
 
     guildMembers: IGuildMember[];
 
-    messages: IMessage[];
+    rank: number;
 }
 
 export interface IMessage {
@@ -86,28 +86,6 @@ export class ClanService {
             });
     }
 
-    // TODO this should be combined with the call above.
-    public getUserClan(): Promise<ILeaderboardClan> {
-        return this.authenticationService.getAuthHeaders()
-            .then(headers => {
-                return this.http
-                    .get<ILeaderboardClan>("/api/clans/userClan", { headers, observe: "response" })
-                    .toPromise();
-            })
-            .then(response => {
-                if (response.status === 204) {
-                    // This means the user is not part of a clan.
-                    return null;
-                }
-
-                return response.body;
-            })
-            .catch((err: HttpErrorResponse) => {
-                this.httpErrorHandlerService.logError("ClanService.getUserClan.error", err);
-                return Promise.reject(err);
-            });
-    }
-
     public getLeaderboard(page: number, count: number): Promise<ILeaderboardSummaryListResponse> {
         return this.authenticationService.getAuthHeaders()
             .then(headers => {
@@ -117,6 +95,19 @@ export class ClanService {
             })
             .catch((err: HttpErrorResponse) => {
                 this.httpErrorHandlerService.logError("ClanService.getLeaderboard.error", err);
+                return Promise.reject(err);
+            });
+    }
+
+    public getMessages(): Promise<IMessage[]> {
+        return this.authenticationService.getAuthHeaders()
+            .then(headers => {
+                return this.http
+                    .get<IMessage[]>("/api/clans/messages", { headers })
+                    .toPromise();
+            })
+            .catch((err: HttpErrorResponse) => {
+                this.httpErrorHandlerService.logError("ClanService.getMessages.error", err);
                 return Promise.reject(err);
             });
     }
