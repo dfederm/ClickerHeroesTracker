@@ -46,7 +46,7 @@ namespace Website.Models.Api.Users
         /// <summary>
         /// Gets or sets the hybrid idle:active ratio
         /// </summary>
-        public int? HybridRatio { get; set; }
+        public double? HybridRatio { get; set; }
 
         /// <summary>
         /// Gets or sets the theme type.
