@@ -14,7 +14,8 @@ export class AppComponent implements OnInit {
 
   // TODO: Consider getting all themes from https://bootswatch.com/api/4.json
   public static themeCssUrls: { [theme: string]: string } = {
-    light: "https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/css/bootstrap.min.css",
+    light: "https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.3/css/bootstrap.min.css",
+    // TODO: Use https://maxcdn.bootstrapcdn.com/bootswatch/4.0.0-beta.3/slate/bootstrap.min.css once it's up
     dark: "https://bootswatch.com/4/slate/bootstrap.min.css",
   };
 
