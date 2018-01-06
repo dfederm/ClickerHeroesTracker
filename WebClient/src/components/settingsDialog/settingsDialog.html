@@ -42,10 +42,11 @@
             <a class="text-muted"
                placement="right"
                container="body"
-               ngbTooltip="This is the ratio to use for leveling idle and active ancients.">(?)</a>
+               ngbTooltip="This is the ratio to use for leveling idle and active ancients. 100 would mean 100:1 Siya:Frags (focusing idle), while 0.01 would mean 1:100 (focusing active).">(?)</a>
         </label>
         <div class="col-sm-4">
             <input type="number"
+                   min="0"
                    class="form-control"
                    id="hybridRatio"
                    name="hybridRatio"

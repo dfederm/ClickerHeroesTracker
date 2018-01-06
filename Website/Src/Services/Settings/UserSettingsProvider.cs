@@ -79,7 +79,7 @@ namespace ClickerHeroesTrackerWebsite.Models.Settings
                             userSettings.LogarithmicGraphScaleThreshold = int.TryParse(settingValue, out var logarithmicGraphScaleThreshold) ? new int?(logarithmicGraphScaleThreshold) : null;
                             break;
                         case UserSettingsConstants.HybridRatio:
-                            userSettings.HybridRatio = int.TryParse(settingValue, out var hybridRatio) ? new int?(hybridRatio) : null;
+                            userSettings.HybridRatio = double.TryParse(settingValue, out var hybridRatio) ? new double?(hybridRatio) : null;
                             break;
                         case UserSettingsConstants.Theme:
                             userSettings.Theme = Enum.TryParse<SiteThemeType>(settingValue, out var theme) ? new SiteThemeType?(theme) : null;
