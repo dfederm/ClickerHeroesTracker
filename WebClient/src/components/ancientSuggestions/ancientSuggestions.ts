@@ -143,6 +143,10 @@ export class AncientSuggestionsComponent implements OnInit {
 
     // tslint:disable-next-line:cyclomatic-complexity
     private handleSavedGame(): void {
+        if (!this.savedGame) {
+            return;
+        }
+
         let itemLevels: { [ancientId: string]: Decimal } = {};
         if (this.savedGame.data.items && this.savedGame.data.items.items && this.savedGame.data.items.slots) {
             for (let slotId in this.savedGame.data.items.slots) {
@@ -207,7 +211,8 @@ export class AncientSuggestionsComponent implements OnInit {
         const latencyCounter = "AncientSuggestions";
         this.appInsights.startTrackEvent(latencyCounter);
 
-        const baseAncient = this.playStyle === "active"
+        const isHybridRatioActiveFocused = this.settings.hybridRatio < 1;
+        const baseAncient = this.playStyle === "active" || (this.playStyle === "hybrid" && isHybridRatioActiveFocused)
             ? "Fragsworth"
             : "Siyalatas";
 
@@ -302,7 +307,15 @@ export class AncientSuggestionsComponent implements OnInit {
     private calculateAncientSuggestions(currentPrimaryAncientLevel?: Decimal): { [key: string]: Decimal } {
         const suggestedLevels: { [key: string]: Decimal } = {};
 
-        const primaryAncient = this.playStyle === "active" ? "Fragsworth" : "Siyalatas";
+        const isHybridRatioActiveFocused = this.settings.hybridRatio < 1;
+        const hybridRatio = isHybridRatioActiveFocused
+            ? this.settings.hybridRatio
+            : 1 / this.settings.hybridRatio;
+
+        const primaryAncient = this.playStyle === "active" || (this.playStyle === "hybrid" && isHybridRatioActiveFocused)
+            ? "Fragsworth"
+            : "Siyalatas";
+
         if (currentPrimaryAncientLevel === undefined) {
             // Use the current level, but don't use it in the suggestions.
             currentPrimaryAncientLevel = this.getAncientLevel(primaryAncient);
@@ -338,21 +351,36 @@ export class AncientSuggestionsComponent implements OnInit {
 
         // Math per play style
         switch (this.playStyle) {
+            case "active":
+                suggestedLevels.Bhaal = currentPrimaryAncientLevel;
+                suggestedLevels.Juggernaut = currentPrimaryAncientLevel.pow(0.8);
+                suggestedLevels.Pluto = suggestedLevels.Mammon;
+                break;
             case "idle":
                 suggestedLevels.Libertas = suggestedLevels.Mammon;
                 suggestedLevels.Nogardnit = this.autoclickers.isZero() ? new Decimal(0) : suggestedLevels.Libertas.pow(0.8);
                 break;
             case "hybrid":
-                const hybridRatioReciprocal = 1 / this.settings.hybridRatio;
-                suggestedLevels.Bhaal = suggestedLevels.Fragsworth = currentPrimaryAncientLevel.times(hybridRatioReciprocal);
-                suggestedLevels.Juggernaut = suggestedLevels.Fragsworth.pow(0.8);
-                suggestedLevels.Pluto = suggestedLevels.Libertas = suggestedLevels.Mammon;
-                suggestedLevels.Nogardnit = this.autoclickers.isZero() ? new Decimal(0) : suggestedLevels.Libertas.pow(0.8);
-                break;
-            case "active":
-                suggestedLevels.Bhaal = currentPrimaryAncientLevel;
-                suggestedLevels.Juggernaut = currentPrimaryAncientLevel.pow(0.8);
-                suggestedLevels.Pluto = suggestedLevels.Mammon;
+                if (isHybridRatioActiveFocused) {
+                    // Active-focused
+                    suggestedLevels.Bhaal = currentPrimaryAncientLevel;
+                    suggestedLevels.Juggernaut = currentPrimaryAncientLevel.pow(0.8);
+                    suggestedLevels.Pluto = suggestedLevels.Mammon;
+
+                    suggestedLevels.Siyalatas = currentPrimaryAncientLevel.times(hybridRatio);
+                    suggestedLevels.Libertas = suggestedLevels.Mammon.times(hybridRatio);
+                    suggestedLevels.Nogardnit = this.autoclickers.isZero() ? new Decimal(0) : suggestedLevels.Libertas.pow(0.8);
+                } else {
+                    // Idle-focused
+                    suggestedLevels.Libertas = suggestedLevels.Mammon;
+                    suggestedLevels.Nogardnit = this.autoclickers.isZero() ? new Decimal(0) : suggestedLevels.Libertas.pow(0.8);
+
+                    suggestedLevels.Fragsworth = currentPrimaryAncientLevel.times(hybridRatio);
+                    suggestedLevels.Bhaal = suggestedLevels.Fragsworth;
+                    suggestedLevels.Juggernaut = suggestedLevels.Fragsworth.pow(0.8);
+                    suggestedLevels.Pluto = suggestedLevels.Mammon.times(hybridRatio);
+                }
+
                 break;
         }
 
