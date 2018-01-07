@@ -63,6 +63,8 @@ namespace ClickerHeroesTrackerWebsite
                     "UserFollows",
                     "UserSettings",
                     "Clans",
+                    "ClanMembers",
+                    "GameUsers",
                 };
                 var tableFiles = tables.Select(table => Path.Combine(this.Environment.ContentRootPath, @"Services\Database\Schemas", table + ".sql"));
                 foreach (var tableFile in tableFiles)

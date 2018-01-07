@@ -6,7 +6,6 @@ namespace ClickerHeroesTrackerWebsite.Controllers
 {
     using System;
     using System.Collections.Generic;
-    using System.Net;
     using System.Threading.Tasks;
     using ClickerHeroesTrackerWebsite.Models;
     using ClickerHeroesTrackerWebsite.Models.Api.Uploads;
@@ -19,6 +18,7 @@ namespace ClickerHeroesTrackerWebsite.Controllers
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Identity;
     using Microsoft.AspNetCore.Mvc;
+    using Website.Services.Clans;
 
     [Route("api/uploads")]
     [Authorize]
@@ -32,16 +32,20 @@ namespace ClickerHeroesTrackerWebsite.Controllers
 
         private readonly UserManager<ApplicationUser> userManager;
 
+        private readonly IClanManager clanManager;
+
         public UploadsController(
             IDatabaseCommandFactory databaseCommandFactory,
             GameData gameData,
             IUserSettingsProvider userSettingsProvider,
-            UserManager<ApplicationUser> userManager)
+            UserManager<ApplicationUser> userManager,
+            IClanManager clanManager)
         {
             this.databaseCommandFactory = databaseCommandFactory;
             this.gameData = gameData;
             this.userSettingsProvider = userSettingsProvider;
             this.userManager = userManager;
+            this.clanManager = clanManager;
         }
 
         [Route("{uploadId:int}")]
@@ -137,8 +141,11 @@ namespace ClickerHeroesTrackerWebsite.Controllers
             }
 
             // Only associate it with the user if they requested that it be added to their progress.
-            var userId = uploadRequest.AddToProgress && this.User.Identity.IsAuthenticated
+            var realUserId = this.User.Identity.IsAuthenticated
                 ? this.userManager.GetUserId(this.User)
+                : null;
+            var userId = uploadRequest.AddToProgress
+                ? realUserId
                 : null;
 
             var savedGame = SavedGame.Parse(uploadRequest.EncodedSaveData);
@@ -147,6 +154,11 @@ namespace ClickerHeroesTrackerWebsite.Controllers
                 // Not a valid save
                 return this.BadRequest();
             }
+
+            // Kick off a clan update in parallel
+            var gameUserId = savedGame.Object.Value<string>("uniqueId");
+            var passwordHash = savedGame.Object.Value<string>("passwordHash");
+            var updateClanTask = this.clanManager.UpdateClanAsync(realUserId, gameUserId, passwordHash);
 
             PlayStyle playStyle;
             if (uploadRequest.PlayStyle.HasValue)
@@ -259,6 +271,9 @@ namespace ClickerHeroesTrackerWebsite.Controllers
 
                 command.CommitTransaction();
             }
+
+            // Wait for the task to finish
+            await updateClanTask;
 
             return this.Ok(uploadId);
         }

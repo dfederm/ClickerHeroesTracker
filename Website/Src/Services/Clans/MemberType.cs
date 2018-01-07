@@ -2,7 +2,7 @@
 // Copyright (c) Clicker Heroes Tracker. All rights reserved.
 // </copyright>
 
-namespace ClickerHeroesTrackerWebsite.Models.Api.Clans
+namespace Website.Services.Clans
 {
     public enum MemberType
     {

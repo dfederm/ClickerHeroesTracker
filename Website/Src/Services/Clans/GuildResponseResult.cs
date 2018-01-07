@@ -1,19 +1,16 @@
-﻿// <copyright file="Clan.cs" company="Clicker Heroes Tracker">
+﻿// <copyright file="GuildResponseResult.cs" company="Clicker Heroes Tracker">
 // Copyright (c) Clicker Heroes Tracker. All rights reserved.
 // </copyright>
 
-namespace ClickerHeroesTrackerWebsite.Models.Api.Clans
+namespace Website.Services.Clans
 {
     using System.Collections.Generic;
+    using ClickerHeroesTrackerWebsite.Models.Api.Clans;
 
-    public sealed class Clan
+    public sealed class GuildResponseResult
     {
         public Guild Guild { get; set; }
 
         public IDictionary<string, GuildMember> GuildMembers { get; set; }
-
-        public User User { get; set; }
-
-        public IList<Message> Messages { get; set; }
     }
 }

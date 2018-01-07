@@ -2,10 +2,10 @@
 // Copyright (c) Clicker Heroes Tracker. All rights reserved.
 // </copyright>
 
-namespace ClickerHeroesTrackerWebsite.Models.Api.Clans
+namespace Website.Services.Clans
 {
     public class MessageResponse
     {
-        public MessageResponseContent Result { get; set; }
+        public MessageResponseResult Result { get; set; }
     }
 }
