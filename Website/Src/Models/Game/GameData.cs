@@ -12,9 +12,9 @@ namespace ClickerHeroesTrackerWebsite.Models.Game
     /// Represents the root game data object.
     /// </summary>
     /// <remarks>
-    /// See GameData.json, last saved from ClickerHeroes_v14262.swf
+    /// See GameData.json, last saved from ClickerHeroes_v14640.swf
     /// Instructions:
-    /// Download the.swf from the link in the source code.
+    /// Download the swf from the link in the source code.
     /// Decompile using JPEXS Free Flash Decompiler
     /// Go to binary data folder and click on the only thing in there
     /// Click the open embedded swf message at the top of the hex editor

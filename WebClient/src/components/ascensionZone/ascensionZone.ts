@@ -200,6 +200,7 @@ export class AscensionZoneComponent {
                 }
 
                 // If we have all the upgrades and can purchase the next hero, do so.
+                // TODO: Handle the weird interaction between Cadu and Ceus. Users should swap between them every upgrade.
                 if (allUpgradesPurchased && userData.gold.greaterThanOrEqualTo(heroCollection.getById(currentHeroId + 1).getCostUpToLevel(1))) {
                     currentHeroId++;
                     currentHero = heroCollection.getById(currentHeroId);

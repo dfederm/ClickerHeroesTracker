@@ -63,6 +63,9 @@ export class Monster {
             loc4 = Monster.levelWhereScaleChanges;
         } else if (this.level > 200000) {
             loc3 = Monster.healthAt200k.times(new Decimal(1.545).pow(this.level - 200001));
+
+            // This isn't set in game code but it seems to handle it somehow. The effect is negligable anyway at this level, so this guess doesn't really matter
+            loc4 = Monster.levelWhereScaleChanges;
         } else {
             loc6 = Math.floor(this.level / 500);
             loc7 = loc6 * 500;
