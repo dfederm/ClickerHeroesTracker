@@ -1,9 +1,6 @@
 ﻿CREATE TABLE [dbo].[Clans] (
-    [Id]     INT	IDENTITY (1, 1) NOT NULL,
-    [Name]       NVARCHAR (450) NOT NULL,
-    [CurrentRaidLevel]    INT        NOT NULL,
-    [MemberCount]    INT        NOT NULL
+    [Name]             NVARCHAR (450) NOT NULL,
+    [CurrentRaidLevel] INT            NOT NULL,
+    [ClanMasterId]     CHAR (16)      NOT NULL,
+    PRIMARY KEY CLUSTERED ([Name] ASC)
 );
-
-CREATE CLUSTERED INDEX [Id]
-    ON [dbo].[Clans]([Id] ASC);

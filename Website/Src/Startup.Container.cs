@@ -37,6 +37,7 @@ namespace ClickerHeroesTrackerWebsite
     using Newtonsoft.Json.Serialization;
     using Website.Models.Authentication;
     using Website.Services.Authentication;
+    using Website.Services.Clans;
     using Website.Services.SiteNews;
 
     /// <summary>
@@ -209,6 +210,7 @@ namespace ClickerHeroesTrackerWebsite
             services.AddSingleton<HttpClient>(_ => new HttpClient());
             services.AddSingleton<IAssertionGrantHandlerProvider, AssertionGrantHandlerProvider>();
             services.AddSingleton<IBuildInfoProvider>(buildInfoProvider);
+            services.AddSingleton<IClanManager, ClanManager>();
             services.AddSingleton<IEmailSender, EmailSender>();
             services.AddSingleton<IOptions<PasswordHasherOptions>, PasswordHasherOptionsAccessor>();
             services.AddSingleton<IUserSettingsProvider, UserSettingsProvider>();
