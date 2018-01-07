@@ -141,11 +141,8 @@ namespace ClickerHeroesTrackerWebsite.Controllers
             }
 
             // Only associate it with the user if they requested that it be added to their progress.
-            var realUserId = this.User.Identity.IsAuthenticated
+            var userId = uploadRequest.AddToProgress && this.User.Identity.IsAuthenticated
                 ? this.userManager.GetUserId(this.User)
-                : null;
-            var userId = uploadRequest.AddToProgress
-                ? realUserId
                 : null;
 
             var savedGame = SavedGame.Parse(uploadRequest.EncodedSaveData);
@@ -158,7 +155,7 @@ namespace ClickerHeroesTrackerWebsite.Controllers
             // Kick off a clan update in parallel
             var gameUserId = savedGame.Object.Value<string>("uniqueId");
             var passwordHash = savedGame.Object.Value<string>("passwordHash");
-            var updateClanTask = this.clanManager.UpdateClanAsync(realUserId, gameUserId, passwordHash);
+            var updateClanTask = this.clanManager.UpdateClanAsync(userId, gameUserId, passwordHash);
 
             PlayStyle playStyle;
             if (uploadRequest.PlayStyle.HasValue)
