@@ -6,6 +6,10 @@ import { TimeAgoPipe } from "time-ago-pipe";
 
 import { ClansComponent } from "./clans";
 import { ClanService, ILeaderboardClan, IClanData, ILeaderboardSummaryListResponse, IMessage } from "../../services/clanService/clanService";
+import { AuthenticationService, IUserInfo } from "../../services/authenticationService/authenticationService";
+import { BehaviorSubject } from "rxjs";
+import { UserService } from "../../services/userService/userService";
+import { IUser } from "../../models";
 
 describe("ClansComponent", () => {
     let component: ClansComponent;
@@ -45,6 +49,18 @@ describe("ClansComponent", () => {
         { username: "user2", date: "2017-01-03T00:00:00", content: "message2" },
     ];
 
+    const userInfo: IUserInfo = {
+        isLoggedIn: true,
+        id: "someId",
+        username: "someUsername",
+        email: "someEmail",
+    };
+
+    const user: IUser = {
+        name: userInfo.username,
+        clanName: clanData.clanName,
+    };
+
     beforeEach(done => {
         let clanService = {
             getClan(): Promise<IClanData> {
@@ -70,6 +86,12 @@ describe("ClansComponent", () => {
             },
         };
 
+        let authenticationService = { userInfo: () => new BehaviorSubject(userInfo) };
+
+        let userService = {
+            getUser: (): Promise<IUser> => Promise.resolve(user),
+        };
+
         TestBed.configureTestingModule(
             {
                 imports: [FormsModule],
@@ -81,6 +103,8 @@ describe("ClansComponent", () => {
                 providers:
                     [
                         { provide: ClanService, useValue: clanService },
+                        { provide: AuthenticationService, useValue: authenticationService },
+                        { provide: UserService, useValue: userService },
                         TimeAgoPipe,
                         ChangeDetectorRef, // Needed for TimeAgoPipe
                     ],
@@ -142,8 +166,8 @@ describe("ClansComponent", () => {
     });
 
     it("should display an error when the user is not in a clan", done => {
-        let clanService = TestBed.get(ClanService);
-        spyOn(clanService, "getClan").and.returnValue(Promise.resolve(null));
+        let userService = TestBed.get(UserService);
+        spyOn(userService, "getUser").and.returnValue(Promise.resolve(null));
 
         fixture.detectChanges();
         fixture.whenStable()
@@ -151,7 +175,7 @@ describe("ClansComponent", () => {
                 fixture.detectChanges();
 
                 let error = fixture.debugElement.query(By.css("p"));
-                expect(error.nativeElement.textContent.trim()).toEqual("Please join a clan to view the clan's data");
+                expect(error.nativeElement.textContent.trim()).toEqual("You are not currently in a clan");
             })
             .then(done)
             .catch(done.fail);

@@ -64,12 +64,11 @@ export class ClanService {
         private readonly httpErrorHandlerService: HttpErrorHandlerService,
     ) { }
 
-    // TODO: this is really the user's clan.
-    public getClan(): Promise<IClanData> {
+    public getClan(clanName: string): Promise<IClanData> {
         return this.authenticationService.getAuthHeaders()
             .then(headers => {
                 return this.http
-                    .get<IClanData>("/api/clans", { headers, observe: "response" })
+                    .get<IClanData>(`/api/clans/${clanName}`, { headers, observe: "response" })
                     .toPromise();
             })
             .then(response => {
@@ -90,7 +89,7 @@ export class ClanService {
         return this.authenticationService.getAuthHeaders()
             .then(headers => {
                 return this.http
-                    .get<ILeaderboardSummaryListResponse>("/api/clans/leaderboard?page=" + page + "&count=" + count, { headers })
+                    .get<ILeaderboardSummaryListResponse>("/api/clans?page=" + page + "&count=" + count, { headers })
                     .toPromise();
             })
             .catch((err: HttpErrorResponse) => {

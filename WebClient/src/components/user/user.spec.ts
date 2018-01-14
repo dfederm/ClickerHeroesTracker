@@ -10,6 +10,7 @@ import { UserService, IProgressData, IFollowsData } from "../../services/userSer
 import { SettingsService } from "../../services/settingsService/settingsService";
 import { ActivatedRoute } from "@angular/router";
 import { AuthenticationService, IUserInfo } from "../../services/authenticationService/authenticationService";
+import { IUser } from "../../models";
 
 describe("UserComponent", () => {
     let fixture: ComponentFixture<UserComponent>;
@@ -64,11 +65,17 @@ describe("UserComponent", () => {
         isLoggedIn: false,
     };
 
+    const user: IUser = {
+        name: loggedInUser.username,
+        clanName: "someClanName",
+    };
+
     beforeEach(done => {
         let route = { params: routeParams };
         let userService = {
             getProgress: () => Promise.resolve(progress),
             getFollows: () => Promise.resolve(followsData),
+            getUser: () => Promise.resolve(user),
             addFollow: (): void => void 0,
             removeFollow: (): void => void 0,
         };

@@ -40,10 +40,10 @@ describe("ClanService", () => {
     });
 
     describe("getClan", () => {
-        const apiRequest = { method: "get", url: "/api/clans" };
+        const apiRequest = { method: "get", url: "/api/clans/someClan" };
 
         it("should make an api call", fakeAsync(() => {
-            clanService.getClan();
+            clanService.getClan("someClan");
 
             // Tick the getAuthHeaders call
             tick();
@@ -54,7 +54,7 @@ describe("ClanService", () => {
 
         it("should return clan information", fakeAsync(() => {
             let response: IClanData;
-            clanService.getClan()
+            clanService.getClan("someClan")
                 .then((r: IClanData) => response = r);
 
             // Tick the getAuthHeaders call
@@ -71,7 +71,7 @@ describe("ClanService", () => {
 
         it("should return null when the user isn't in a clan", fakeAsync(() => {
             let response: IClanData;
-            clanService.getClan()
+            clanService.getClan("someClan")
                 .then((r: IClanData) => response = r);
 
             // Tick the getAuthHeaders call
@@ -88,7 +88,7 @@ describe("ClanService", () => {
         it("should handle http errors", fakeAsync(() => {
             let response: IClanData;
             let error: HttpErrorResponse;
-            clanService.getClan()
+            clanService.getClan("someClan")
                 .then((r: IClanData) => response = r)
                 .catch((e: HttpErrorResponse) => error = e);
 
@@ -109,7 +109,7 @@ describe("ClanService", () => {
     });
 
     describe("getLeaderboard", () => {
-        const apiRequest = { method: "get", url: "/api/clans/leaderboard?page=1&count=2" };
+        const apiRequest = { method: "get", url: "/api/clans?page=1&count=2" };
 
         it("should make an api call", fakeAsync(() => {
             clanService.getLeaderboard(1, 2);

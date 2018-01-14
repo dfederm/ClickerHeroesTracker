@@ -2,28 +2,27 @@
     <h2>Clans</h2>
     <div class="row">
         <div class="col-lg-6">
-            <h3 *ngIf="isInClan && !isClanInformationError">{{ clanName }}</h3>
+            <h3 *ngIf="clanName">{{ clanName }}</h3>
             <ngx-loading [show]="isClanInformationLoading && !isClanInformationError"></ngx-loading>
             <p *ngIf="isClanInformationError"
                class="alert alert-danger">
                 There was a problem getting your clan's data
             </p>
-            <p *ngIf="!isInClan && !isClanInformationError && !isClanInformationLoading"
-               class="alert alert-danger">
-                Please join a clan to view the clan's data
+            <p *ngIf="!clanName && !isClanInformationError && !isClanInformationLoading">
+                You are not currently in a clan
             </p>
-            <table *ngIf="isInClan && !isClanInformationError"
+            <table *ngIf="guildMembers"
                    class="table table-sm table-striped">
                 <thead>
                     <tr>
                         <th>Name</th>
-                        <th>Highest Zone</th>
+                        <th class="text-right">Highest Zone</th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr *ngFor="let guildMember of guildMembers">
                         <td>{{ guildMember.nickname }}</td>
-                        <td>{{ guildMember.highestZone }}</td>
+                        <td class="text-right">{{ guildMember.highestZone }}</td>
                     </tr>
                 </tbody>
             </table>

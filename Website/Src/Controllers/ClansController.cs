@@ -28,12 +28,15 @@ namespace ClickerHeroesTrackerWebsite.Controllers
             this.clanManager = clanManager;
         }
 
-        [Route("")]
+        [Route("{clanName}")]
         [HttpGet]
-        public async Task<ActionResult> GetClan()
+        public async Task<ActionResult> Get(string clanName)
         {
-            var userId = this.userManager.GetUserId(this.User);
-            var clanName = await this.clanManager.GetClanNameAsync(userId);
+            // Validate parameters
+            if (string.IsNullOrEmpty(clanName))
+            {
+                return this.BadRequest();
+            }
 
             // Fetch in parallel
             var clanDataTask = this.clanManager.GetClanDataAsync(clanName);
@@ -50,20 +53,20 @@ namespace ClickerHeroesTrackerWebsite.Controllers
             return this.Ok(clanData);
         }
 
-        [Route("leaderboard")]
+        [Route("")]
         [HttpGet]
-        public async Task<IActionResult> GetLeaderboard(
-            int page = ParameterConstants.LeaderboardSummaryList.Page.Default,
-            int count = ParameterConstants.LeaderboardSummaryList.Count.Default)
+        public async Task<IActionResult> List(
+            int page = ParameterConstants.List.Page.Default,
+            int count = ParameterConstants.List.Count.Default)
         {
             // Validate parameters
-            if (page < ParameterConstants.LeaderboardSummaryList.Page.Min)
+            if (page < ParameterConstants.List.Page.Min)
             {
                 return this.BadRequest("Invalid parameter: page");
             }
 
-            if (count < ParameterConstants.LeaderboardSummaryList.Count.Min
-                || count > ParameterConstants.LeaderboardSummaryList.Count.Max)
+            if (count < ParameterConstants.List.Count.Min
+                || count > ParameterConstants.List.Count.Max)
             {
                 return this.BadRequest("Invalid parameter: count");
             }
@@ -122,7 +125,7 @@ namespace ClickerHeroesTrackerWebsite.Controllers
 
         internal static class ParameterConstants
         {
-            internal static class LeaderboardSummaryList
+            internal static class List
             {
                 internal static class Page
                 {

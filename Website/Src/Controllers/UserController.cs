@@ -21,6 +21,7 @@ namespace Website.Controllers
     using Microsoft.AspNetCore.Identity;
     using Microsoft.AspNetCore.Mvc;
     using Website.Models.Api.Users;
+    using Website.Services.Clans;
 
     [Route("api/users")]
     [Authorize]
@@ -38,13 +39,16 @@ namespace Website.Controllers
 
         private readonly IEmailSender emailSender;
 
+        private readonly IClanManager clanManager;
+
         public UserController(
             GameData gameData,
             TelemetryClient telemetryClient,
             IDatabaseCommandFactory databaseCommandFactory,
             IUserSettingsProvider userSettingsProvider,
             UserManager<ApplicationUser> userManager,
-            IEmailSender emailSender)
+            IEmailSender emailSender,
+            IClanManager clanManager)
         {
             this.gameData = gameData;
             this.telemetryClient = telemetryClient;
@@ -52,6 +56,7 @@ namespace Website.Controllers
             this.userSettingsProvider = userSettingsProvider;
             this.userManager = userManager;
             this.emailSender = emailSender;
+            this.clanManager = clanManager;
         }
 
         [Route("")]
@@ -75,6 +80,38 @@ namespace Website.Controllers
             }
 
             return this.BadRequest(this.ModelState);
+        }
+
+        [Route("{userName}")]
+        [HttpGet]
+        [AllowAnonymous]
+        public async Task<IActionResult> Get(string userName)
+        {
+            // Validate parameters
+            if (string.IsNullOrEmpty(userName))
+            {
+                return this.BadRequest();
+            }
+
+            var user = await this.userManager.FindByNameAsync(userName);
+            if (user == null)
+            {
+                return this.NotFound();
+            }
+
+            var userId = await this.userManager.GetUserIdAsync(user);
+            if (string.IsNullOrEmpty(userId))
+            {
+                return this.NotFound();
+            }
+
+            var model = new User
+            {
+                Name = user.UserName,
+                ClanName = await this.clanManager.GetClanNameAsync(userId),
+            };
+
+            return this.Ok(model);
         }
 
         [Route("{userName}/uploads")]
