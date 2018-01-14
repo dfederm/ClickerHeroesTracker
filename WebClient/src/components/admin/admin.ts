@@ -58,10 +58,10 @@ export class AdminComponent implements OnInit {
     public totalStaleUploads: number;
 
     constructor(
-        private authenticationService: AuthenticationService,
-        private http: HttpClient,
-        private httpErrorHandlerService: HttpErrorHandlerService,
-        private uploadService: UploadService,
+        private readonly authenticationService: AuthenticationService,
+        private readonly http: HttpClient,
+        private readonly httpErrorHandlerService: HttpErrorHandlerService,
+        private readonly uploadService: UploadService,
     ) { }
 
     public ngOnInit(): void {

@@ -39,7 +39,7 @@ export class ClansComponent implements OnInit {
 
     private _leaderboardPage = 1;
 
-    constructor(private clanService: ClanService) { }
+    constructor(private readonly clanService: ClanService) { }
 
     public get leaderboardPage(): number {
         return this._leaderboardPage;

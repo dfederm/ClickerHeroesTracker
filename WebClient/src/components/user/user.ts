@@ -45,10 +45,10 @@ export class UserComponent implements OnInit {
   private settings: IUserSettings;
 
   constructor(
-    private userService: UserService,
-    private settingsService: SettingsService,
-    private route: ActivatedRoute,
-    private authenticationService: AuthenticationService,
+    private readonly userService: UserService,
+    private readonly settingsService: SettingsService,
+    private readonly route: ActivatedRoute,
+    private readonly authenticationService: AuthenticationService,
   ) { }
 
   public ngOnInit(): void {

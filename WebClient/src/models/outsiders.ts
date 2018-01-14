@@ -3,7 +3,7 @@ import { Outsider } from "./outsider";
 
 export class Outsiders {
     constructor(
-        private outsiders: { [id: number]: Outsider },
+        private readonly outsiders: { [id: number]: Outsider },
     ) { }
 
     public get idleBonus(): Decimal {

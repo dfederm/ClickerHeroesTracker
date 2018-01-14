@@ -33,11 +33,11 @@ export class UploadDialogComponent implements OnInit {
     public RegisterDialogComponent = RegisterDialogComponent;
 
     constructor(
-        private authenticationService: AuthenticationService,
-        private uploadService: UploadService,
+        private readonly authenticationService: AuthenticationService,
+        private readonly uploadService: UploadService,
         public activeModal: NgbActiveModal,
-        private router: Router,
-        private settingsService: SettingsService,
+        private readonly router: Router,
+        private readonly settingsService: SettingsService,
     ) { }
 
     public ngOnInit(): void {

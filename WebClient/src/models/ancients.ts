@@ -3,7 +3,7 @@ import { Ancient } from "./ancient";
 
 export class Ancients {
     constructor(
-        private ancients: { [id: number]: Ancient },
+        private readonly ancients: { [id: number]: Ancient },
     ) { }
 
     public get idleGoldPercent(): Decimal {

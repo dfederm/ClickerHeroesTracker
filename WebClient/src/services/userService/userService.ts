@@ -88,9 +88,9 @@ export interface IExternalLogin {
 @Injectable()
 export class UserService {
     constructor(
-        private authenticationService: AuthenticationService,
-        private http: HttpClient,
-        private httpErrorHandlerService: HttpErrorHandlerService,
+        private readonly authenticationService: AuthenticationService,
+        private readonly http: HttpClient,
+        private readonly httpErrorHandlerService: HttpErrorHandlerService,
     ) { }
 
     public create(userName: string, email: string, password: string): Promise<void> {

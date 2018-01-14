@@ -7,21 +7,21 @@ import { Monster } from "./monster";
 import { Attributes } from "./attributes";
 
 export class UserData {
-    private static BOSS_HP_MULTIPLIER = 10;
+    private static readonly BOSS_HP_MULTIPLIER = 10;
 
-    private static MINIMUM_BOSS_HP_MULTIPLIER = 5;
+    private static readonly MINIMUM_BOSS_HP_MULTIPLIER = 5;
 
-    private static BOSS_HEALTH_INCREASE_PER_ZONE_INTERVAL = 0.04;
+    private static readonly BOSS_HEALTH_INCREASE_PER_ZONE_INTERVAL = 0.04;
 
-    private static BOSS_HEALTH_INCREASE_ZONE_INTERVAL = 500;
+    private static readonly BOSS_HEALTH_INCREASE_ZONE_INTERVAL = 500;
 
-    private static TREASURE_CHANCE_DECREASE_ZONE_INTERVAL = 500;
+    private static readonly TREASURE_CHANCE_DECREASE_ZONE_INTERVAL = 500;
 
-    private static TREASURE_MULTIPLIER = 10;
+    private static readonly TREASURE_MULTIPLIER = 10;
 
-    private static MINIMUM_TREASURE_CHANCE_MULTIPLIER = 0.01;
+    private static readonly MINIMUM_TREASURE_CHANCE_MULTIPLIER = 0.01;
 
-    private static CHANCE_OF_TREASURE_MONSTER = 0.01;
+    private static readonly CHANCE_OF_TREASURE_MONSTER = 0.01;
 
     public clickMultiplier = 1.0;
 
@@ -45,12 +45,12 @@ export class UserData {
 
     public epicHeroReceivedUpTo = 0;
 
-    private purchasedUpgrades: { [id: number]: boolean } = {};
+    private readonly purchasedUpgrades: { [id: number]: boolean } = {};
 
     constructor(
-        private heroCollection: HeroCollection,
-        private ancients: Ancients,
-        private attributes: Attributes,
+        private readonly heroCollection: HeroCollection,
+        private readonly ancients: Ancients,
+        private readonly attributes: Attributes,
     ) { }
 
     public upgradeClickPercent(params: string): void {

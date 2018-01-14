@@ -5,7 +5,7 @@ import { Outsiders } from "./outsiders";
 import { UserData } from "./userData";
 
 export class Hero {
-    private static baseAttackMultipliers: { [heroId: number]: Decimal } = {
+    private static readonly baseAttackMultipliers: { [heroId: number]: Decimal } = {
         27: new Decimal("5e-4"),
         28: new Decimal("5e-6"),
         29: new Decimal("5e-8"),
@@ -38,10 +38,10 @@ export class Hero {
     public upgradeDamageMultiplier = new Decimal(1);
 
     constructor(
-        private definition: IHeroData,
-        private userData: UserData,
-        private ancients: Ancients,
-        private outsiders: Outsiders,
+        private readonly definition: IHeroData,
+        private readonly userData: UserData,
+        private readonly ancients: Ancients,
+        private readonly outsiders: Outsiders,
     ) { }
 
     public get id(): number {

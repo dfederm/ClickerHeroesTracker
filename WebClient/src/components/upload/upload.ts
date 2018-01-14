@@ -41,11 +41,11 @@ export class UploadComponent implements OnInit {
     private upload: IUpload;
 
     constructor(
-        private authenticationService: AuthenticationService,
-        private route: ActivatedRoute,
-        private router: Router,
-        private uploadService: UploadService,
-        private modalService: NgbModal,
+        private readonly authenticationService: AuthenticationService,
+        private readonly route: ActivatedRoute,
+        private readonly router: Router,
+        private readonly uploadService: UploadService,
+        private readonly modalService: NgbModal,
     ) {
     }
 

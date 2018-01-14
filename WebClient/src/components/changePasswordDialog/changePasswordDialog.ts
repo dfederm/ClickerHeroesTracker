@@ -24,8 +24,8 @@ export class ChangePasswordDialogComponent implements OnInit {
     private userName: string;
 
     constructor(
-        private authenticationService: AuthenticationService,
-        private userService: UserService,
+        private readonly authenticationService: AuthenticationService,
+        private readonly userService: UserService,
         public activeModal: NgbActiveModal,
     ) { }
 

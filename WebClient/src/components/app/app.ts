@@ -26,9 +26,9 @@ export class AppComponent implements OnInit {
   private hasUserInfo: boolean;
 
   constructor(
-    private settingsService: SettingsService,
-    private authenticationService: AuthenticationService,
-    private appInsights: AppInsightsService,
+    private readonly settingsService: SettingsService,
+    private readonly authenticationService: AuthenticationService,
+    private readonly appInsights: AppInsightsService,
   ) { }
 
   public ngOnInit(): void {

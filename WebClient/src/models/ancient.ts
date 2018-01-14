@@ -4,7 +4,7 @@ import { Outsiders } from "./outsiders";
 import { isLinear, linear, isPercent, percent } from "./functions";
 
 export class Ancient {
-    private static libAndSiyaVariables = [
+    private static readonly libAndSiyaVariables = [
         { threshold: 10, minus: 0, times: 25, plus: 0 },
         { threshold: 20, minus: 9, times: 24, plus: 225 },
         { threshold: 30, minus: 19, times: 23, plus: 465 },
@@ -19,8 +19,8 @@ export class Ancient {
     ];
 
     constructor(
-        private definition: IAncientData,
-        private outsiders: Outsiders,
+        private readonly definition: IAncientData,
+        private readonly outsiders: Outsiders,
         public level: Decimal,
     ) { }
 

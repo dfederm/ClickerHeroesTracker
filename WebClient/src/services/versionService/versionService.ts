@@ -22,11 +22,11 @@ export class VersionService {
 
     public static retryDelay = 1000;
 
-    private version: BehaviorSubject<IVersion>;
+    private readonly version: BehaviorSubject<IVersion>;
 
     constructor(
-        private http: HttpClient,
-        private httpErrorHandlerService: HttpErrorHandlerService,
+        private readonly http: HttpClient,
+        private readonly httpErrorHandlerService: HttpErrorHandlerService,
     ) {
         this.version = new BehaviorSubject(null);
 

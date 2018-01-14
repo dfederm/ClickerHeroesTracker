@@ -33,7 +33,7 @@ export class AuthenticationService {
 
     private currentTokens: IAuthTokenModel;
 
-    private userInfoSubject: BehaviorSubject<IUserInfo>;
+    private readonly userInfoSubject: BehaviorSubject<IUserInfo>;
 
     private refreshSubscription: Subscription;
 
@@ -42,8 +42,8 @@ export class AuthenticationService {
     private fetchTokensPromise: Promise<void>;
 
     constructor(
-        private httpErrorHandlerService: HttpErrorHandlerService,
-        private http: HttpClient,
+        private readonly httpErrorHandlerService: HttpErrorHandlerService,
+        private readonly http: HttpClient,
     ) {
         let tokensString = localStorage.getItem(AuthenticationService.tokensKey);
         this.currentTokens = tokensString == null ? null : JSON.parse(tokensString);

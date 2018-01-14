@@ -12,8 +12,8 @@ export class AdComponent implements OnInit, OnDestroy {
     private subscription: Subscription;
 
     constructor(
-        private router: Router,
-        private cdRef: ChangeDetectorRef,
+        private readonly router: Router,
+        private readonly cdRef: ChangeDetectorRef,
     ) { }
 
     public ngOnInit(): void {

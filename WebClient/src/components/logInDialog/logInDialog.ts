@@ -23,7 +23,7 @@ export class LogInDialogComponent {
     public ResetPasswordDialogComponent = ResetPasswordDialogComponent;
 
     constructor(
-        private authenticationService: AuthenticationService,
+        private readonly authenticationService: AuthenticationService,
         public activeModal: NgbActiveModal,
     ) { }
 

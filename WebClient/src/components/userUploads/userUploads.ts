@@ -9,7 +9,7 @@ export class UserUploadsComponent implements OnInit {
   public userName: string;
 
   constructor(
-    private route: ActivatedRoute,
+    private readonly route: ActivatedRoute,
   ) { }
 
   public ngOnInit(): void {

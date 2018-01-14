@@ -4,7 +4,7 @@ import { isLinear, linear, isPercent, percent } from "./functions";
 
 export class Outsider {
     constructor(
-        private definition: IOutsiderData,
+        private readonly definition: IOutsiderData,
         public level: Decimal,
     ) { }
 

@@ -23,10 +23,10 @@ interface IAncientViewModel {
     styleUrls: ["./ancientSuggestions.css"],
 })
 export class AncientSuggestionsComponent implements OnInit {
-    private static exponentialRegex = /^(\d+(\.\d+)?)e\+?(\d+)$/i;
+    private static readonly exponentialRegex = /^(\d+(\.\d+)?)e\+?(\d+)$/i;
 
     // These all have effective caps where additional levels add less than floating point numbers can handle.
-    private static ancientLevelCaps: { [ancientName: string]: number } = {
+    private static readonly ancientLevelCaps: { [ancientName: string]: number } = {
         Atman: 2880,
         Bubos: 18715,
         Chronos: 1101,
@@ -85,9 +85,9 @@ export class AncientSuggestionsComponent implements OnInit {
 
     // An index for quick lookup of ancient cost formulas.
     // Each formula gets the sum of the cost of the ancient from 1 to N.
-    private ancientCostFormulas = this.getAncientCostFormulas();
+    private readonly ancientCostFormulas = this.getAncientCostFormulas();
 
-    private ancientsByName: { [name: string]: IAncientViewModel } = {};
+    private readonly ancientsByName: { [name: string]: IAncientViewModel } = {};
 
     private settings: IUserSettings;
     private ancientCostMultiplier: Decimal;
@@ -99,8 +99,8 @@ export class AncientSuggestionsComponent implements OnInit {
     private autoclickers: Decimal = new Decimal(0);
 
     constructor(
-        private appInsights: AppInsightsService,
-        private settingsService: SettingsService,
+        private readonly appInsights: AppInsightsService,
+        private readonly settingsService: SettingsService,
     ) {
         for (const id in gameData.ancients) {
             const ancientDefinition = gameData.ancients[id];

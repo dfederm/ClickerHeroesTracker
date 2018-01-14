@@ -59,9 +59,9 @@ export interface ISendMessageResponse {
 @Injectable()
 export class ClanService {
     constructor(
-        private authenticationService: AuthenticationService,
-        private http: HttpClient,
-        private httpErrorHandlerService: HttpErrorHandlerService,
+        private readonly authenticationService: AuthenticationService,
+        private readonly http: HttpClient,
+        private readonly httpErrorHandlerService: HttpErrorHandlerService,
     ) { }
 
     // TODO: this is really the user's clan.
