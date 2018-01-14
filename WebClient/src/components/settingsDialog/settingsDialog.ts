@@ -34,7 +34,7 @@ export class SettingsDialogComponent implements OnInit {
     public ChangePasswordDialogComponent = ChangePasswordDialogComponent;
 
     constructor(
-        private settingsService: SettingsService,
+        private readonly settingsService: SettingsService,
         public activeModal: NgbActiveModal,
     ) { }
 

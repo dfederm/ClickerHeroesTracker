@@ -37,9 +37,9 @@ export class UserCompareComponent implements OnInit {
     private settings: IUserSettings;
 
     constructor(
-        private route: ActivatedRoute,
-        private userService: UserService,
-        private settingsService: SettingsService,
+        private readonly route: ActivatedRoute,
+        private readonly userService: UserService,
+        private readonly settingsService: SettingsService,
     ) { }
 
     public get currentDateRange(): string {

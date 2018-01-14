@@ -26,8 +26,8 @@ export class ChangelogComponent implements OnInit {
     public isFull: boolean;
 
     constructor(
-        private newsService: NewsService,
-        private authenticationService: AuthenticationService,
+        private readonly newsService: NewsService,
+        private readonly authenticationService: AuthenticationService,
     ) { }
 
     public ngOnInit(): void {

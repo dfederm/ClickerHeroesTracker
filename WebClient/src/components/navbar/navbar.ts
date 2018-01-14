@@ -25,8 +25,8 @@ export class NavbarComponent implements OnInit {
     public SettingsDialogComponent = SettingsDialogComponent;
 
     constructor(
-        private authenticationService: AuthenticationService,
-        private router: Router,
+        private readonly authenticationService: AuthenticationService,
+        private readonly router: Router,
     ) { }
 
     public ngOnInit(): void {

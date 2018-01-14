@@ -7,7 +7,7 @@ export class Attributes {
     private _currentClickDamage = new Decimal(0);
 
     constructor(
-        private heroCollection: HeroCollection,
+        private readonly heroCollection: HeroCollection,
     ) { }
 
     public get currentAttack(): Decimal {

@@ -81,6 +81,7 @@
     "no-duplicate-switch-case": true,
     "no-duplicate-super": true,
     "no-duplicate-variable": true,
+    "no-dynamic-delete": true,
     "no-empty": true,
     "no-empty-interface": true,
     "no-eval": true,
@@ -132,6 +133,7 @@
       "ignore-for-loop"
     ],
     "prefer-method-signature": true,
+    "prefer-readonly": true,
     "quotemark": [
       true,
       "double",

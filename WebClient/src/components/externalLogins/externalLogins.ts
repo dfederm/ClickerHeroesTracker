@@ -46,7 +46,7 @@ export class ExternalLoginsComponent implements OnInit {
 
     private assertion: string;
 
-    private allLogins: ILoginButton[] = [
+    private readonly allLogins: ILoginButton[] = [
         {
             name: "Google",
             logIn: () => this.googleLogIn(),
@@ -62,9 +62,9 @@ export class ExternalLoginsComponent implements OnInit {
     ];
 
     constructor(
-        private authenticationService: AuthenticationService,
+        private readonly authenticationService: AuthenticationService,
         public activeModal: NgbActiveModal,
-        private userService: UserService,
+        private readonly userService: UserService,
     ) { }
 
     public ngOnInit(): void {

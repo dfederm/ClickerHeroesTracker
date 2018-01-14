@@ -14,7 +14,7 @@ export class BannerComponent implements OnInit, OnDestroy {
     private initialVersion: { [bundle: string]: string };
 
     constructor(
-        private versionService: VersionService,
+        private readonly versionService: VersionService,
     ) { }
 
     public ngOnInit(): void {

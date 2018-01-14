@@ -62,27 +62,27 @@ type EncodingAlgorithm = "unknown" | "sprinkle" | "android" | "zlib";
 
 // Ensure the logic here stays in sync with SavedGame.cs on the server
 export class SavedGame {
-    private static sprinkleAntiCheatCode = "Fe12NAfA3R6z4k0z";
+    private static readonly sprinkleAntiCheatCode = "Fe12NAfA3R6z4k0z";
 
-    private static sprinkleSalt = "af0ik392jrmt0nsfdghy0";
+    private static readonly sprinkleSalt = "af0ik392jrmt0nsfdghy0";
 
-    private static androidPrefix = "ClickerHeroesAccountSO";
+    private static readonly androidPrefix = "ClickerHeroesAccountSO";
 
-    private static hashLength = 32;
+    private static readonly hashLength = 32;
 
-    private static zlibHash = "7a990d405d2c6fb93aa8fbb0ec1a3b23";
+    private static readonly zlibHash = "7a990d405d2c6fb93aa8fbb0ec1a3b23";
 
-    private static encodingAlgorithmHashes: { [hash: string]: EncodingAlgorithm } = {
+    private static readonly encodingAlgorithmHashes: { [hash: string]: EncodingAlgorithm } = {
         [SavedGame.zlibHash]: "zlib",
     };
 
-    private static decodeFuncs: { [encodingAlgorithm: string]: (content: string) => ISavedGameData } = {
+    private static readonly decodeFuncs: { [encodingAlgorithm: string]: (content: string) => ISavedGameData } = {
         sprinkle: SavedGame.decodeSprinkle,
         android: SavedGame.decodeAndroid,
         zlib: SavedGame.decodeZlib,
     };
 
-    private static encodeFuncs: { [encodingAlgorithm: string]: (data: ISavedGameData) => string } = {
+    private static readonly encodeFuncs: { [encodingAlgorithm: string]: (data: ISavedGameData) => string } = {
         sprinkle: SavedGame.encodeSprinkle,
         android: SavedGame.encodeAndroid,
         zlib: SavedGame.encodeZlib,
@@ -90,7 +90,7 @@ export class SavedGame {
 
     public data: ISavedGameData;
 
-    private encoding: EncodingAlgorithm;
+    private readonly encoding: EncodingAlgorithm;
 
     private _scrubbedContent: string;
 

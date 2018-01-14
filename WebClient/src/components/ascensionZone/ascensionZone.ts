@@ -42,7 +42,7 @@ export class AscensionZoneComponent {
     private _savedGame: SavedGame;
 
     constructor(
-        private appInsights: AppInsightsService,
+        private readonly appInsights: AppInsightsService,
     ) {
     }
 

@@ -8,9 +8,9 @@ import "rxjs/add/operator/toPromise";
 @Injectable()
 export class FeedbackService {
     constructor(
-        private authenticationService: AuthenticationService,
-        private http: HttpClient,
-        private httpErrorHandlerService: HttpErrorHandlerService,
+        private readonly authenticationService: AuthenticationService,
+        private readonly http: HttpClient,
+        private readonly httpErrorHandlerService: HttpErrorHandlerService,
     ) { }
 
     public send(comments: string, email: string): Promise<void> {

@@ -6,7 +6,7 @@ export class Upgrade {
 
     public static ASCENSION2_ID = 132;
 
-    private static attributeMultipliers: { [attribute: number]: number } = {
+    private static readonly attributeMultipliers: { [attribute: number]: number } = {
         1: 10,
         2: 25,
         3: 100,
@@ -17,8 +17,8 @@ export class Upgrade {
     };
 
     constructor(
-        private definition: IUpgradeData,
-        private heroes: { [id: string]: IHeroData },
+        private readonly definition: IUpgradeData,
+        private readonly heroes: { [id: string]: IHeroData },
     ) { }
 
     public get id(): number {

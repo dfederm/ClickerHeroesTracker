@@ -40,10 +40,10 @@ export class OutsiderSuggestionsComponent {
     private _savedGame: SavedGame;
     private _focusBorb = true;
 
-    private outsidersByName: { [name: string]: IOutsiderViewModel } = {};
+    private readonly outsidersByName: { [name: string]: IOutsiderViewModel } = {};
 
     constructor(
-        private appInsights: AppInsightsService,
+        private readonly appInsights: AppInsightsService,
     ) {
         for (const id in gameData.outsiders) {
             const outsiderDefinition = gameData.outsiders[id];

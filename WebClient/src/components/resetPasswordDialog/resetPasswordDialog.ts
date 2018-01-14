@@ -24,8 +24,8 @@ export class ResetPasswordDialogComponent {
     public codeSent = false;
 
     constructor(
-        private userService: UserService,
-        private modalService: NgbModal,
+        private readonly userService: UserService,
+        private readonly modalService: NgbModal,
         public activeModal: NgbActiveModal,
     ) { }
 

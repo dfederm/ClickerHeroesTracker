@@ -20,8 +20,8 @@ export class FeedbackDialogComponent implements OnInit {
     public email = "";
 
     constructor(
-        private authenticationService: AuthenticationService,
-        private feedbackService: FeedbackService,
+        private readonly authenticationService: AuthenticationService,
+        private readonly feedbackService: FeedbackService,
         public activeModal: NgbActiveModal,
     ) { }
 

@@ -13,8 +13,8 @@ export class OpenDialogDirective {
 
     constructor(
         element: ElementRef,
-        private modalService: NgbModal,
-        @Optional() private activeModal: NgbActiveModal,
+        private readonly modalService: NgbModal,
+        @Optional() private readonly activeModal: NgbActiveModal,
     ) {
         (element.nativeElement as HTMLAnchorElement).href = "#";
     }

@@ -3,24 +3,24 @@ import { UserData } from "./userData";
 import { Ancients } from "./ancients";
 
 export class Monster {
-    private static BOSS_ZONE_MODULUS = 5;
+    private static readonly BOSS_ZONE_MODULUS = 5;
 
-    private static earlyBase = 1.55;
+    private static readonly earlyBase = 1.55;
 
-    private static lateBase = 1.145;
+    private static readonly lateBase = 1.145;
 
-    private static levelWhereScaleChanges = 140;
+    private static readonly levelWhereScaleChanges = 140;
 
-    private static increasePerFiveHundredLevels = 0.001;
+    private static readonly increasePerFiveHundredLevels = 0.001;
 
-    private static healthAt200k = new Decimal("1.240e25409");
+    private static readonly healthAt200k = new Decimal("1.240e25409");
 
-    private static cachedMonsterLife: { [level: number]: Decimal } = Monster.createCachedMonsterLife();
+    private static readonly cachedMonsterLife: { [level: number]: Decimal } = Monster.createCachedMonsterLife();
 
     constructor(
-        private userData: UserData,
-        private ancients: Ancients,
-        private level: number,
+        private readonly userData: UserData,
+        private readonly ancients: Ancients,
+        private readonly level: number,
     ) { }
 
     public get maxLife(): Decimal {

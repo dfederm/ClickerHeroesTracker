@@ -61,7 +61,6 @@ module.exports = () => {
         test: /\.ts$/,
         enforce: 'pre',
         loader: 'tslint-loader',
-        exclude: path.resolve("./node_modules"),
         options: {
           configFile: path.resolve('./tslint.json'),
           tsConfigFile: path.resolve('./tsconfig.json'),

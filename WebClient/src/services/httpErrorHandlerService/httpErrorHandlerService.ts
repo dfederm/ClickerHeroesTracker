@@ -9,7 +9,7 @@ export interface IValidationErrorResponse {
 @Injectable()
 export class HttpErrorHandlerService {
     constructor(
-        private appInsights: AppInsightsService,
+        private readonly appInsights: AppInsightsService,
     ) { }
 
     public logError(eventName: string, err: HttpErrorResponse): void {

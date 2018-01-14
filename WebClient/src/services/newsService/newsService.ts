@@ -17,9 +17,9 @@ export interface ISiteNewsEntry {
 @Injectable()
 export class NewsService {
     constructor(
-        private authenticationService: AuthenticationService,
-        private http: HttpClient,
-        private httpErrorHandlerService: HttpErrorHandlerService,
+        private readonly authenticationService: AuthenticationService,
+        private readonly http: HttpClient,
+        private readonly httpErrorHandlerService: HttpErrorHandlerService,
     ) { }
 
     public getNews(): Promise<ISiteNewsEntryListResponse> {

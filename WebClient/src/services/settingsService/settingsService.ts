@@ -54,7 +54,7 @@ export class SettingsService {
 
     public static readonly settingsKey: string = "settings";
 
-    private settingsSubject: BehaviorSubject<IUserSettings>;
+    private readonly settingsSubject: BehaviorSubject<IUserSettings>;
 
     private userName: string;
 
@@ -63,9 +63,9 @@ export class SettingsService {
     private numPendingPatches = 0;
 
     constructor(
-        private authenticationService: AuthenticationService,
-        private http: HttpClient,
-        private httpErrorHandlerService: HttpErrorHandlerService,
+        private readonly authenticationService: AuthenticationService,
+        private readonly http: HttpClient,
+        private readonly httpErrorHandlerService: HttpErrorHandlerService,
     ) {
         let settingsString = localStorage.getItem(SettingsService.settingsKey);
         let currentSettings = settingsString == null ? null : JSON.parse(settingsString);

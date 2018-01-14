@@ -12,9 +12,9 @@ export class UploadService {
     private userInfo: IUserInfo;
 
     constructor(
-        private authenticationService: AuthenticationService,
-        private http: HttpClient,
-        private httpErrorHandlerService: HttpErrorHandlerService,
+        private readonly authenticationService: AuthenticationService,
+        private readonly http: HttpClient,
+        private readonly httpErrorHandlerService: HttpErrorHandlerService,
     ) {
         this.authenticationService
             .userInfo()

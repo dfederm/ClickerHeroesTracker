@@ -45,7 +45,7 @@ export class UploadsTableComponent implements OnInit {
         this.populateUploads();
     }
 
-    constructor(private userService: UserService) { }
+    constructor(private readonly userService: UserService) { }
 
     public ngOnInit(): void {
         this.populateUploads();
