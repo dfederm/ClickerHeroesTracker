@@ -18,8 +18,8 @@ export class UploadComponent implements OnInit {
     public errorMessage: string;
     public isLoading: boolean;
 
-    public userId: string;
     public userName: string;
+    public clanName: string;
     public uploadTime: string;
     public playStyle: string;
     public savedGame: SavedGame;
@@ -102,11 +102,11 @@ export class UploadComponent implements OnInit {
         this.uploadId = this.upload.id;
 
         if (this.upload.user) {
-            this.userId = this.upload.user.id;
             this.userName = this.upload.user.name;
+            this.clanName = this.upload.user.clanName;
         } else {
-            this.userId = null;
             this.userName = null;
+            this.clanName = null;
         }
 
         this.uploadTime = this.upload.timeSubmitted;

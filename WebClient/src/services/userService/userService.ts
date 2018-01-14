@@ -5,7 +5,7 @@ import { HttpErrorHandlerService } from "../httpErrorHandlerService/httpErrorHan
 import "rxjs/add/operator/toPromise";
 
 import { AuthenticationService } from "../authenticationService/authenticationService";
-import { IPaginationMetadata, IUpload } from "../../models";
+import { IPaginationMetadata, IUpload, IUser } from "../../models";
 
 export interface ICreateUserRequest {
     userName: string;
@@ -111,6 +111,19 @@ export class UserService {
                 this.httpErrorHandlerService.logError("UserService.create.error", err);
                 let errors = this.httpErrorHandlerService.getValidationErrors(err);
                 return Promise.reject(errors);
+            });
+    }
+
+    public getUser(userName: string): Promise<IUser> {
+        let headers = new HttpHeaders();
+        headers = headers.set("Content-Type", "application/json");
+
+        return this.http
+            .get<IUser>(`/api/users/${userName}`, { headers })
+            .toPromise()
+            .catch((err: HttpErrorResponse) => {
+                this.httpErrorHandlerService.logError("UserService.getUser.error", err);
+                return Promise.reject(err);
             });
     }
 

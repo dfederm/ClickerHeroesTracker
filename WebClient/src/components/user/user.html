@@ -1,5 +1,8 @@
 <div class="container">
-    <h2>{{ userName }}</h2>
+    <h2>
+        {{ userName }}
+        <span *ngIf="clanName">&lt;{{ clanName }}&gt;</span>
+    </h2>
     <div *ngIf="currentUserName && currentUserName !== userName"
          class="row">
         <div class="col-md-6">
@@ -63,7 +66,7 @@
                 Oops! Something went wrong while fetching followed users
             </p>
             <p *ngIf="(!follows || !follows.length) && !isFollowsError">
-                You are currently not following any users. This feature is coming soon.
+                You are currently not following any users.
             </p>
             <ngx-loading [show]="isFollowsLoading && !isFollowsError"></ngx-loading>
             <table *ngIf="follows && follows.length"

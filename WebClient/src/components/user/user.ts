@@ -27,6 +27,7 @@ interface IProgressViewModel {
 })
 export class UserComponent implements OnInit {
   public userName: string;
+  public clanName: string;
 
   public isProgressError: boolean;
   public isProgressLoading: boolean;
@@ -94,6 +95,7 @@ export class UserComponent implements OnInit {
     this.isFollowsError = false;
     this.progress = null;
     this.follows = null;
+    this.clanName = null;
 
     this.userName = userName;
     this.refresh();
@@ -145,6 +147,10 @@ export class UserComponent implements OnInit {
     this.userService.getFollows(this.userName)
       .then(follows => this.handleFollowsData(follows))
       .catch(() => this.isFollowsError = true);
+
+    // Ignore errors; it just means we don't see the clan name
+    this.userService.getUser(this.userName)
+      .then(user => this.clanName = user.clanName);
   }
 
   private refreshActions(): void {

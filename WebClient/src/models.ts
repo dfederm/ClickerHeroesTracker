@@ -22,7 +22,7 @@ export interface IUpload {
 }
 
 export interface IUser {
-    id: string;
-
     name: string;
+
+    clanName: string;
 }

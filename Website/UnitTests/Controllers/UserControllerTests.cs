@@ -22,6 +22,7 @@ namespace UnitTests.Controllers
     using Moq;
     using Website.Controllers;
     using Website.Models.Api.Users;
+    using Website.Services.Clans;
     using Xunit;
 
     public sealed class UserControllerTests
@@ -45,6 +46,7 @@ namespace UnitTests.Controllers
                 .Setup(_ => _.CreateAsync(It.Is<ApplicationUser>(user => user.UserName == createUser.UserName && user.Email == createUser.Email), createUser.Password))
                 .Returns(Task.FromResult(IdentityResult.Success));
             var mockEmailSender = new Mock<IEmailSender>(MockBehavior.Strict);
+            var mockClanManager = new Mock<IClanManager>(MockBehavior.Strict);
 
             var controller = new UserController(
                 gameData,
@@ -52,7 +54,8 @@ namespace UnitTests.Controllers
                 mockDatabaseCommandFactory.Object,
                 mockUserSettingsProvider.Object,
                 mockUserManager.Object,
-                mockEmailSender.Object);
+                mockEmailSender.Object,
+                mockClanManager.Object);
             var result = await controller.Create(createUser);
 
             Assert.NotNull(result);
@@ -61,6 +64,7 @@ namespace UnitTests.Controllers
             mockDatabaseCommandFactory.VerifyAll();
             mockUserSettingsProvider.VerifyAll();
             mockEmailSender.VerifyAll();
+            mockClanManager.VerifyAll();
 
             // Workaround for a Moq bug. See: https://github.com/moq/moq4/issues/456#issuecomment-331692858
             mockUserManager.Object.Logger = mockUserManager.Object.Logger;
@@ -77,6 +81,7 @@ namespace UnitTests.Controllers
             var mockUserSettingsProvider = new Mock<IUserSettingsProvider>(MockBehavior.Strict);
             var mockUserManager = MockUserManager.CreateMock();
             var mockEmailSender = new Mock<IEmailSender>(MockBehavior.Strict);
+            var mockClanManager = new Mock<IClanManager>(MockBehavior.Strict);
 
             var controller = new UserController(
                 gameData,
@@ -84,7 +89,8 @@ namespace UnitTests.Controllers
                 mockDatabaseCommandFactory.Object,
                 mockUserSettingsProvider.Object,
                 mockUserManager.Object,
-                mockEmailSender.Object);
+                mockEmailSender.Object,
+                mockClanManager.Object);
             controller.ModelState.AddModelError("SomeKey", "SomeErrorMessage");
             var result = await controller.Create(createUser);
 
@@ -94,6 +100,7 @@ namespace UnitTests.Controllers
             mockDatabaseCommandFactory.VerifyAll();
             mockUserSettingsProvider.VerifyAll();
             mockEmailSender.VerifyAll();
+            mockClanManager.VerifyAll();
 
             // Workaround for a Moq bug. See: https://github.com/moq/moq4/issues/456#issuecomment-331692858
             mockUserManager.Object.Logger = mockUserManager.Object.Logger;
@@ -119,6 +126,7 @@ namespace UnitTests.Controllers
                 .Setup(_ => _.CreateAsync(It.Is<ApplicationUser>(user => user.UserName == createUser.UserName && user.Email == createUser.Email), createUser.Password))
                 .Returns(Task.FromResult(IdentityResult.Failed(new IdentityError { Description = "SomeDescription" })));
             var mockEmailSender = new Mock<IEmailSender>(MockBehavior.Strict);
+            var mockClanManager = new Mock<IClanManager>(MockBehavior.Strict);
 
             var controller = new UserController(
                 gameData,
@@ -126,7 +134,8 @@ namespace UnitTests.Controllers
                 mockDatabaseCommandFactory.Object,
                 mockUserSettingsProvider.Object,
                 mockUserManager.Object,
-                mockEmailSender.Object);
+                mockEmailSender.Object,
+                mockClanManager.Object);
             var result = await controller.Create(createUser);
 
             Assert.NotNull(result);
@@ -136,6 +145,198 @@ namespace UnitTests.Controllers
             mockDatabaseCommandFactory.VerifyAll();
             mockUserSettingsProvider.VerifyAll();
             mockEmailSender.VerifyAll();
+            mockClanManager.VerifyAll();
+
+            // Workaround for a Moq bug. See: https://github.com/moq/moq4/issues/456#issuecomment-331692858
+            mockUserManager.Object.Logger = mockUserManager.Object.Logger;
+            mockUserManager.VerifyAll();
+        }
+
+        [Fact]
+        public async Task Get_Success()
+        {
+            const string UserName = "SomeUserName";
+            const string UserId = "SomeUserId";
+            const string ClanName = "SomeClanName";
+
+            var gameData = MockGameData.RealData;
+            var telemetryClient = new TelemetryClient();
+            var mockDatabaseCommandFactory = new Mock<IDatabaseCommandFactory>(MockBehavior.Strict);
+            var mockUserSettingsProvider = new Mock<IUserSettingsProvider>(MockBehavior.Strict);
+
+            var mockUser = new ApplicationUser { UserName = UserName };
+            var mockCurrentUser = new Mock<ClaimsPrincipal>(MockBehavior.Strict);
+
+            var mockUserManager = MockUserManager.CreateMock();
+            mockUserManager
+                .Setup(_ => _.FindByNameAsync(UserName))
+                .Returns(Task.FromResult(mockUser));
+            mockUserManager
+                .Setup(_ => _.GetUserIdAsync(mockUser))
+                .Returns(Task.FromResult(UserId));
+
+            var mockEmailSender = new Mock<IEmailSender>(MockBehavior.Strict);
+
+            var mockClanManager = new Mock<IClanManager>(MockBehavior.Strict);
+            mockClanManager
+                .Setup(_ => _.GetClanNameAsync(UserId))
+                .Returns(Task.FromResult(ClanName));
+
+            var controller = new UserController(
+                gameData,
+                telemetryClient,
+                mockDatabaseCommandFactory.Object,
+                mockUserSettingsProvider.Object,
+                mockUserManager.Object,
+                mockEmailSender.Object,
+                mockClanManager.Object);
+
+            var result = await controller.Get(UserName);
+
+            Assert.NotNull(result);
+            Assert.IsType<OkObjectResult>(result);
+
+            var model = ((OkObjectResult)result).Value as User;
+            Assert.NotNull(model);
+
+            Assert.Equal(UserName, model.Name);
+            Assert.Equal(ClanName, model.ClanName);
+
+            mockDatabaseCommandFactory.VerifyAll();
+            mockUserSettingsProvider.VerifyAll();
+            mockCurrentUser.VerifyAll();
+            mockEmailSender.VerifyAll();
+            mockClanManager.VerifyAll();
+
+            // Workaround for a Moq bug. See: https://github.com/moq/moq4/issues/456#issuecomment-331692858
+            mockUserManager.Object.Logger = mockUserManager.Object.Logger;
+            mockUserManager.VerifyAll();
+        }
+
+        [Fact]
+        public async Task Get_MissingUserName()
+        {
+            var gameData = MockGameData.RealData;
+            var telemetryClient = new TelemetryClient();
+            var mockDatabaseCommandFactory = new Mock<IDatabaseCommandFactory>(MockBehavior.Strict);
+            var mockUserSettingsProvider = new Mock<IUserSettingsProvider>(MockBehavior.Strict);
+            var mockUserManager = MockUserManager.CreateMock();
+            var mockEmailSender = new Mock<IEmailSender>(MockBehavior.Strict);
+            var mockClanManager = new Mock<IClanManager>(MockBehavior.Strict);
+
+            var controller = new UserController(
+                gameData,
+                telemetryClient,
+                mockDatabaseCommandFactory.Object,
+                mockUserSettingsProvider.Object,
+                mockUserManager.Object,
+                mockEmailSender.Object,
+                mockClanManager.Object);
+
+            var result = await controller.Get(null);
+
+            Assert.NotNull(result);
+            Assert.IsType<BadRequestResult>(result);
+
+            mockDatabaseCommandFactory.VerifyAll();
+            mockUserSettingsProvider.VerifyAll();
+            mockEmailSender.VerifyAll();
+            mockClanManager.VerifyAll();
+
+            // Workaround for a Moq bug. See: https://github.com/moq/moq4/issues/456#issuecomment-331692858
+            mockUserManager.Object.Logger = mockUserManager.Object.Logger;
+            mockUserManager.VerifyAll();
+        }
+
+        [Fact]
+        public async Task Get_NotFoundUser()
+        {
+            const string UserName = "SomeUserName";
+
+            var gameData = MockGameData.RealData;
+            var telemetryClient = new TelemetryClient();
+            var mockDatabaseCommandFactory = new Mock<IDatabaseCommandFactory>(MockBehavior.Strict);
+            var mockUserSettingsProvider = new Mock<IUserSettingsProvider>(MockBehavior.Strict);
+
+            var mockUser = new ApplicationUser { UserName = UserName };
+            var mockCurrentUser = new Mock<ClaimsPrincipal>(MockBehavior.Strict);
+
+            var mockUserManager = MockUserManager.CreateMock();
+            mockUserManager
+                .Setup(_ => _.FindByNameAsync(UserName))
+                .Returns(Task.FromResult<ApplicationUser>(null));
+
+            var mockEmailSender = new Mock<IEmailSender>(MockBehavior.Strict);
+            var mockClanManager = new Mock<IClanManager>(MockBehavior.Strict);
+
+            var controller = new UserController(
+                gameData,
+                telemetryClient,
+                mockDatabaseCommandFactory.Object,
+                mockUserSettingsProvider.Object,
+                mockUserManager.Object,
+                mockEmailSender.Object,
+                mockClanManager.Object);
+
+            var result = await controller.Get(UserName);
+
+            Assert.NotNull(result);
+            Assert.IsType<NotFoundResult>(result);
+
+            mockDatabaseCommandFactory.VerifyAll();
+            mockUserSettingsProvider.VerifyAll();
+            mockCurrentUser.VerifyAll();
+            mockEmailSender.VerifyAll();
+            mockClanManager.VerifyAll();
+
+            // Workaround for a Moq bug. See: https://github.com/moq/moq4/issues/456#issuecomment-331692858
+            mockUserManager.Object.Logger = mockUserManager.Object.Logger;
+            mockUserManager.VerifyAll();
+        }
+
+        [Fact]
+        public async Task Get_NotFoundUserId()
+        {
+            const string UserName = "SomeUserName";
+
+            var gameData = MockGameData.RealData;
+            var telemetryClient = new TelemetryClient();
+            var mockDatabaseCommandFactory = new Mock<IDatabaseCommandFactory>(MockBehavior.Strict);
+            var mockUserSettingsProvider = new Mock<IUserSettingsProvider>(MockBehavior.Strict);
+
+            var mockUser = new ApplicationUser { UserName = UserName };
+            var mockCurrentUser = new Mock<ClaimsPrincipal>(MockBehavior.Strict);
+
+            var mockUserManager = MockUserManager.CreateMock();
+            mockUserManager
+                .Setup(_ => _.FindByNameAsync(UserName))
+                .Returns(Task.FromResult(mockUser));
+            mockUserManager
+                .Setup(_ => _.GetUserIdAsync(mockUser))
+                .Returns(Task.FromResult<string>(null));
+
+            var mockEmailSender = new Mock<IEmailSender>(MockBehavior.Strict);
+            var mockClanManager = new Mock<IClanManager>(MockBehavior.Strict);
+
+            var controller = new UserController(
+                gameData,
+                telemetryClient,
+                mockDatabaseCommandFactory.Object,
+                mockUserSettingsProvider.Object,
+                mockUserManager.Object,
+                mockEmailSender.Object,
+                mockClanManager.Object);
+
+            var result = await controller.Get(UserName);
+
+            Assert.NotNull(result);
+            Assert.IsType<NotFoundResult>(result);
+
+            mockDatabaseCommandFactory.VerifyAll();
+            mockUserSettingsProvider.VerifyAll();
+            mockCurrentUser.VerifyAll();
+            mockEmailSender.VerifyAll();
+            mockClanManager.VerifyAll();
 
             // Workaround for a Moq bug. See: https://github.com/moq/moq4/issues/456#issuecomment-331692858
             mockUserManager.Object.Logger = mockUserManager.Object.Logger;
@@ -217,6 +418,7 @@ namespace UnitTests.Controllers
             mockHttpContext.SetupGet(_ => _.Request).Returns(mockHttpRequest.Object);
 
             var mockEmailSender = new Mock<IEmailSender>(MockBehavior.Strict);
+            var mockClanManager = new Mock<IClanManager>(MockBehavior.Strict);
 
             var controller = new UserController(
                 gameData,
@@ -224,7 +426,8 @@ namespace UnitTests.Controllers
                 mockDatabaseCommandFactory.Object,
                 mockUserSettingsProvider.Object,
                 mockUserManager.Object,
-                mockEmailSender.Object);
+                mockEmailSender.Object,
+                mockClanManager.Object);
             controller.ControllerContext = new ControllerContext { HttpContext = mockHttpContext.Object };
 
             var result = await controller.Uploads(UserName, Page, Count);
@@ -257,6 +460,7 @@ namespace UnitTests.Controllers
             mockHttpRequest.VerifyAll();
             mockHttpContext.VerifyAll();
             mockEmailSender.VerifyAll();
+            mockClanManager.VerifyAll();
 
             // Workaround for a Moq bug. See: https://github.com/moq/moq4/issues/456#issuecomment-331692858
             mockUserManager.Object.Logger = mockUserManager.Object.Logger;
@@ -292,6 +496,7 @@ namespace UnitTests.Controllers
             var mockUserSettingsProvider = new Mock<IUserSettingsProvider>(MockBehavior.Strict);
             var mockUserManager = MockUserManager.CreateMock();
             var mockEmailSender = new Mock<IEmailSender>(MockBehavior.Strict);
+            var mockClanManager = new Mock<IClanManager>(MockBehavior.Strict);
 
             var controller = new UserController(
                 gameData,
@@ -299,7 +504,8 @@ namespace UnitTests.Controllers
                 mockDatabaseCommandFactory.Object,
                 mockUserSettingsProvider.Object,
                 mockUserManager.Object,
-                mockEmailSender.Object);
+                mockEmailSender.Object,
+                mockClanManager.Object);
 
             var result = await controller.Uploads(userName, page, count);
 
@@ -309,6 +515,7 @@ namespace UnitTests.Controllers
             mockDatabaseCommandFactory.VerifyAll();
             mockUserSettingsProvider.VerifyAll();
             mockEmailSender.VerifyAll();
+            mockClanManager.VerifyAll();
 
             // Workaround for a Moq bug. See: https://github.com/moq/moq4/issues/456#issuecomment-331692858
             mockUserManager.Object.Logger = mockUserManager.Object.Logger;
@@ -333,6 +540,7 @@ namespace UnitTests.Controllers
                 .Returns(Task.FromResult<ApplicationUser>(null));
 
             var mockEmailSender = new Mock<IEmailSender>(MockBehavior.Strict);
+            var mockClanManager = new Mock<IClanManager>(MockBehavior.Strict);
 
             var controller = new UserController(
                 gameData,
@@ -340,7 +548,8 @@ namespace UnitTests.Controllers
                 mockDatabaseCommandFactory.Object,
                 mockUserSettingsProvider.Object,
                 mockUserManager.Object,
-                mockEmailSender.Object);
+                mockEmailSender.Object,
+                mockClanManager.Object);
 
             var result = await controller.Uploads(UserName, Page, Count);
 
@@ -350,6 +559,7 @@ namespace UnitTests.Controllers
             mockDatabaseCommandFactory.VerifyAll();
             mockUserSettingsProvider.VerifyAll();
             mockEmailSender.VerifyAll();
+            mockClanManager.VerifyAll();
 
             // Workaround for a Moq bug. See: https://github.com/moq/moq4/issues/456#issuecomment-331692858
             mockUserManager.Object.Logger = mockUserManager.Object.Logger;
@@ -378,6 +588,7 @@ namespace UnitTests.Controllers
                 .Returns(Task.FromResult<string>(null));
 
             var mockEmailSender = new Mock<IEmailSender>(MockBehavior.Strict);
+            var mockClanManager = new Mock<IClanManager>(MockBehavior.Strict);
 
             var controller = new UserController(
                 gameData,
@@ -385,7 +596,8 @@ namespace UnitTests.Controllers
                 mockDatabaseCommandFactory.Object,
                 mockUserSettingsProvider.Object,
                 mockUserManager.Object,
-                mockEmailSender.Object);
+                mockEmailSender.Object,
+                mockClanManager.Object);
             var result = await controller.Uploads(UserName, Page, Count);
 
             Assert.NotNull(result);
@@ -394,6 +606,7 @@ namespace UnitTests.Controllers
             mockDatabaseCommandFactory.VerifyAll();
             mockUserSettingsProvider.VerifyAll();
             mockEmailSender.VerifyAll();
+            mockClanManager.VerifyAll();
 
             // Workaround for a Moq bug. See: https://github.com/moq/moq4/issues/456#issuecomment-331692858
             mockUserManager.Object.Logger = mockUserManager.Object.Logger;
@@ -439,6 +652,7 @@ namespace UnitTests.Controllers
             mockHttpContext.SetupGet(_ => _.User).Returns(mockCurrentUser.Object);
 
             var mockEmailSender = new Mock<IEmailSender>(MockBehavior.Strict);
+            var mockClanManager = new Mock<IClanManager>(MockBehavior.Strict);
 
             var controller = new UserController(
                 gameData,
@@ -446,7 +660,8 @@ namespace UnitTests.Controllers
                 mockDatabaseCommandFactory.Object,
                 mockUserSettingsProvider.Object,
                 mockUserManager.Object,
-                mockEmailSender.Object);
+                mockEmailSender.Object,
+                mockClanManager.Object);
             controller.ControllerContext = new ControllerContext { HttpContext = mockHttpContext.Object };
 
             var result = await controller.Uploads(UserName, Page, Count);
@@ -459,6 +674,7 @@ namespace UnitTests.Controllers
             mockCurrentUser.VerifyAll();
             mockHttpContext.VerifyAll();
             mockEmailSender.VerifyAll();
+            mockClanManager.VerifyAll();
 
             // Workaround for a Moq bug. See: https://github.com/moq/moq4/issues/456#issuecomment-331692858
             mockUserManager.Object.Logger = mockUserManager.Object.Logger;
@@ -540,6 +756,7 @@ namespace UnitTests.Controllers
             mockHttpContext.SetupGet(_ => _.Request).Returns(mockHttpRequest.Object);
 
             var mockEmailSender = new Mock<IEmailSender>(MockBehavior.Strict);
+            var mockClanManager = new Mock<IClanManager>(MockBehavior.Strict);
 
             var controller = new UserController(
                 gameData,
@@ -547,7 +764,8 @@ namespace UnitTests.Controllers
                 mockDatabaseCommandFactory.Object,
                 mockUserSettingsProvider.Object,
                 mockUserManager.Object,
-                mockEmailSender.Object);
+                mockEmailSender.Object,
+                mockClanManager.Object);
             controller.ControllerContext = new ControllerContext { HttpContext = mockHttpContext.Object };
 
             var result = await controller.Uploads(UserName, Page, Count);
@@ -580,6 +798,7 @@ namespace UnitTests.Controllers
             mockHttpRequest.VerifyAll();
             mockHttpContext.VerifyAll();
             mockEmailSender.VerifyAll();
+            mockClanManager.VerifyAll();
 
             // Workaround for a Moq bug. See: https://github.com/moq/moq4/issues/456#issuecomment-331692858
             mockUserManager.Object.Logger = mockUserManager.Object.Logger;
@@ -661,6 +880,7 @@ namespace UnitTests.Controllers
             mockHttpContext.SetupGet(_ => _.Request).Returns(mockHttpRequest.Object);
 
             var mockEmailSender = new Mock<IEmailSender>(MockBehavior.Strict);
+            var mockClanManager = new Mock<IClanManager>(MockBehavior.Strict);
 
             var controller = new UserController(
                 gameData,
@@ -668,7 +888,8 @@ namespace UnitTests.Controllers
                 mockDatabaseCommandFactory.Object,
                 mockUserSettingsProvider.Object,
                 mockUserManager.Object,
-                mockEmailSender.Object);
+                mockEmailSender.Object,
+                mockClanManager.Object);
             controller.ControllerContext = new ControllerContext { HttpContext = mockHttpContext.Object };
 
             var result = await controller.Uploads(UserName, Page, Count);
@@ -701,6 +922,7 @@ namespace UnitTests.Controllers
             mockHttpRequest.VerifyAll();
             mockHttpContext.VerifyAll();
             mockEmailSender.VerifyAll();
+            mockClanManager.VerifyAll();
 
             // Workaround for a Moq bug. See: https://github.com/moq/moq4/issues/456#issuecomment-331692858
             mockUserManager.Object.Logger = mockUserManager.Object.Logger;
@@ -754,6 +976,7 @@ namespace UnitTests.Controllers
             mockHttpContext.SetupGet(_ => _.User).Returns(mockCurrentUser.Object).Verifiable();
 
             var mockEmailSender = new Mock<IEmailSender>(MockBehavior.Strict);
+            var mockClanManager = new Mock<IClanManager>(MockBehavior.Strict);
 
             var controller = new UserController(
                 gameData,
@@ -761,7 +984,8 @@ namespace UnitTests.Controllers
                 mockDatabaseCommandFactory.Object,
                 mockUserSettingsProvider.Object,
                 mockUserManager.Object,
-                mockEmailSender.Object);
+                mockEmailSender.Object,
+                mockClanManager.Object);
             controller.ControllerContext = new ControllerContext { HttpContext = mockHttpContext.Object };
 
             var result = await controller.Follows(UserName);
@@ -782,6 +1006,7 @@ namespace UnitTests.Controllers
             mockCurrentUser.VerifyAll();
             mockHttpContext.VerifyAll();
             mockEmailSender.VerifyAll();
+            mockClanManager.VerifyAll();
 
             // Workaround for a Moq bug. See: https://github.com/moq/moq4/issues/456#issuecomment-331692858
             mockUserManager.Object.Logger = mockUserManager.Object.Logger;
@@ -797,6 +1022,7 @@ namespace UnitTests.Controllers
             var mockUserSettingsProvider = new Mock<IUserSettingsProvider>(MockBehavior.Strict);
             var mockUserManager = MockUserManager.CreateMock();
             var mockEmailSender = new Mock<IEmailSender>(MockBehavior.Strict);
+            var mockClanManager = new Mock<IClanManager>(MockBehavior.Strict);
 
             var controller = new UserController(
                 gameData,
@@ -804,7 +1030,8 @@ namespace UnitTests.Controllers
                 mockDatabaseCommandFactory.Object,
                 mockUserSettingsProvider.Object,
                 mockUserManager.Object,
-                mockEmailSender.Object);
+                mockEmailSender.Object,
+                mockClanManager.Object);
 
             var result = await controller.Follows(null);
 
@@ -814,6 +1041,7 @@ namespace UnitTests.Controllers
             mockDatabaseCommandFactory.VerifyAll();
             mockUserSettingsProvider.VerifyAll();
             mockEmailSender.VerifyAll();
+            mockClanManager.VerifyAll();
 
             // Workaround for a Moq bug. See: https://github.com/moq/moq4/issues/456#issuecomment-331692858
             mockUserManager.Object.Logger = mockUserManager.Object.Logger;
@@ -835,6 +1063,7 @@ namespace UnitTests.Controllers
                 .Returns(Task.FromResult<ApplicationUser>(null));
 
             var mockEmailSender = new Mock<IEmailSender>(MockBehavior.Strict);
+            var mockClanManager = new Mock<IClanManager>(MockBehavior.Strict);
 
             var controller = new UserController(
                 gameData,
@@ -842,7 +1071,8 @@ namespace UnitTests.Controllers
                 mockDatabaseCommandFactory.Object,
                 mockUserSettingsProvider.Object,
                 mockUserManager.Object,
-                mockEmailSender.Object);
+                mockEmailSender.Object,
+                mockClanManager.Object);
             var result = await controller.Follows(UserName);
 
             Assert.NotNull(result);
@@ -851,6 +1081,7 @@ namespace UnitTests.Controllers
             mockDatabaseCommandFactory.VerifyAll();
             mockUserSettingsProvider.VerifyAll();
             mockEmailSender.VerifyAll();
+            mockClanManager.VerifyAll();
 
             // Workaround for a Moq bug. See: https://github.com/moq/moq4/issues/456#issuecomment-331692858
             mockUserManager.Object.Logger = mockUserManager.Object.Logger;
@@ -876,6 +1107,7 @@ namespace UnitTests.Controllers
                 .Returns(Task.FromResult<string>(null));
 
             var mockEmailSender = new Mock<IEmailSender>(MockBehavior.Strict);
+            var mockClanManager = new Mock<IClanManager>(MockBehavior.Strict);
 
             var controller = new UserController(
                 gameData,
@@ -883,7 +1115,8 @@ namespace UnitTests.Controllers
                 mockDatabaseCommandFactory.Object,
                 mockUserSettingsProvider.Object,
                 mockUserManager.Object,
-                mockEmailSender.Object);
+                mockEmailSender.Object,
+                mockClanManager.Object);
             var result = await controller.Follows(UserName);
 
             Assert.NotNull(result);
@@ -892,6 +1125,7 @@ namespace UnitTests.Controllers
             mockDatabaseCommandFactory.VerifyAll();
             mockUserSettingsProvider.VerifyAll();
             mockEmailSender.VerifyAll();
+            mockClanManager.VerifyAll();
 
             // Workaround for a Moq bug. See: https://github.com/moq/moq4/issues/456#issuecomment-331692858
             mockUserManager.Object.Logger = mockUserManager.Object.Logger;
@@ -935,6 +1169,7 @@ namespace UnitTests.Controllers
             mockHttpContext.SetupGet(_ => _.User).Returns(mockCurrentUser.Object).Verifiable();
 
             var mockEmailSender = new Mock<IEmailSender>(MockBehavior.Strict);
+            var mockClanManager = new Mock<IClanManager>(MockBehavior.Strict);
 
             var controller = new UserController(
                 gameData,
@@ -942,7 +1177,8 @@ namespace UnitTests.Controllers
                 mockDatabaseCommandFactory.Object,
                 mockUserSettingsProvider.Object,
                 mockUserManager.Object,
-                mockEmailSender.Object);
+                mockEmailSender.Object,
+                mockClanManager.Object);
             controller.ControllerContext = new ControllerContext { HttpContext = mockHttpContext.Object };
 
             var result = await controller.Follows(UserName);
@@ -955,6 +1191,7 @@ namespace UnitTests.Controllers
             mockCurrentUser.VerifyAll();
             mockHttpContext.VerifyAll();
             mockEmailSender.VerifyAll();
+            mockClanManager.VerifyAll();
 
             // Workaround for a Moq bug. See: https://github.com/moq/moq4/issues/456#issuecomment-331692858
             mockUserManager.Object.Logger = mockUserManager.Object.Logger;
@@ -1008,6 +1245,7 @@ namespace UnitTests.Controllers
             mockHttpContext.SetupGet(_ => _.User).Returns(mockCurrentUser.Object).Verifiable();
 
             var mockEmailSender = new Mock<IEmailSender>(MockBehavior.Strict);
+            var mockClanManager = new Mock<IClanManager>(MockBehavior.Strict);
 
             var controller = new UserController(
                 gameData,
@@ -1015,7 +1253,8 @@ namespace UnitTests.Controllers
                 mockDatabaseCommandFactory.Object,
                 mockUserSettingsProvider.Object,
                 mockUserManager.Object,
-                mockEmailSender.Object);
+                mockEmailSender.Object,
+                mockClanManager.Object);
             controller.ControllerContext = new ControllerContext { HttpContext = mockHttpContext.Object };
 
             var result = await controller.Follows(UserName);
@@ -1036,6 +1275,7 @@ namespace UnitTests.Controllers
             mockCurrentUser.VerifyAll();
             mockHttpContext.VerifyAll();
             mockEmailSender.VerifyAll();
+            mockClanManager.VerifyAll();
 
             // Workaround for a Moq bug. See: https://github.com/moq/moq4/issues/456#issuecomment-331692858
             mockUserManager.Object.Logger = mockUserManager.Object.Logger;
@@ -1093,6 +1333,7 @@ namespace UnitTests.Controllers
             mockHttpContext.SetupGet(_ => _.User).Returns(mockCurrentUser.Object).Verifiable();
 
             var mockEmailSender = new Mock<IEmailSender>(MockBehavior.Strict);
+            var mockClanManager = new Mock<IClanManager>(MockBehavior.Strict);
 
             var controller = new UserController(
                 gameData,
@@ -1100,7 +1341,8 @@ namespace UnitTests.Controllers
                 mockDatabaseCommandFactory.Object,
                 mockUserSettingsProvider.Object,
                 mockUserManager.Object,
-                mockEmailSender.Object);
+                mockEmailSender.Object,
+                mockClanManager.Object);
             controller.ControllerContext = new ControllerContext { HttpContext = mockHttpContext.Object };
 
             var result = await controller.Follows(UserName);
@@ -1121,6 +1363,7 @@ namespace UnitTests.Controllers
             mockCurrentUser.VerifyAll();
             mockHttpContext.VerifyAll();
             mockEmailSender.VerifyAll();
+            mockClanManager.VerifyAll();
 
             // Workaround for a Moq bug. See: https://github.com/moq/moq4/issues/456#issuecomment-331692858
             mockUserManager.Object.Logger = mockUserManager.Object.Logger;
@@ -1175,6 +1418,7 @@ namespace UnitTests.Controllers
             mockHttpContext.SetupGet(_ => _.User).Returns(mockCurrentUser.Object).Verifiable();
 
             var mockEmailSender = new Mock<IEmailSender>(MockBehavior.Strict);
+            var mockClanManager = new Mock<IClanManager>(MockBehavior.Strict);
 
             var controller = new UserController(
                 gameData,
@@ -1182,7 +1426,8 @@ namespace UnitTests.Controllers
                 mockDatabaseCommandFactory.Object,
                 mockUserSettingsProvider.Object,
                 mockUserManager.Object,
-                mockEmailSender.Object);
+                mockEmailSender.Object,
+                mockClanManager.Object);
             controller.ControllerContext = new ControllerContext { HttpContext = mockHttpContext.Object };
 
             var result = await controller.AddFollow(UserName, model);
@@ -1195,6 +1440,7 @@ namespace UnitTests.Controllers
             mockCurrentUser.VerifyAll();
             mockHttpContext.VerifyAll();
             mockEmailSender.VerifyAll();
+            mockClanManager.VerifyAll();
 
             // Workaround for a Moq bug. See: https://github.com/moq/moq4/issues/456#issuecomment-331692858
             mockUserManager.Object.Logger = mockUserManager.Object.Logger;
@@ -1216,6 +1462,7 @@ namespace UnitTests.Controllers
             var mockFollowUser = new ApplicationUser();
             var mockUserManager = MockUserManager.CreateMock();
             var mockEmailSender = new Mock<IEmailSender>(MockBehavior.Strict);
+            var mockClanManager = new Mock<IClanManager>(MockBehavior.Strict);
 
             var controller = new UserController(
                 gameData,
@@ -1223,7 +1470,8 @@ namespace UnitTests.Controllers
                 mockDatabaseCommandFactory.Object,
                 mockUserSettingsProvider.Object,
                 mockUserManager.Object,
-                mockEmailSender.Object);
+                mockEmailSender.Object,
+                mockClanManager.Object);
             var result = await controller.AddFollow(null, model);
 
             Assert.NotNull(result);
@@ -1232,6 +1480,7 @@ namespace UnitTests.Controllers
             mockDatabaseCommandFactory.VerifyAll();
             mockUserSettingsProvider.VerifyAll();
             mockEmailSender.VerifyAll();
+            mockClanManager.VerifyAll();
 
             // Workaround for a Moq bug. See: https://github.com/moq/moq4/issues/456#issuecomment-331692858
             mockUserManager.Object.Logger = mockUserManager.Object.Logger;
@@ -1255,6 +1504,7 @@ namespace UnitTests.Controllers
             var mockFollowUser = new ApplicationUser();
             var mockUserManager = MockUserManager.CreateMock();
             var mockEmailSender = new Mock<IEmailSender>(MockBehavior.Strict);
+            var mockClanManager = new Mock<IClanManager>(MockBehavior.Strict);
 
             var controller = new UserController(
                 gameData,
@@ -1262,7 +1512,8 @@ namespace UnitTests.Controllers
                 mockDatabaseCommandFactory.Object,
                 mockUserSettingsProvider.Object,
                 mockUserManager.Object,
-                mockEmailSender.Object);
+                mockEmailSender.Object,
+                mockClanManager.Object);
             var result = await controller.AddFollow(UserId, model);
 
             Assert.NotNull(result);
@@ -1271,6 +1522,7 @@ namespace UnitTests.Controllers
             mockDatabaseCommandFactory.VerifyAll();
             mockUserSettingsProvider.VerifyAll();
             mockEmailSender.VerifyAll();
+            mockClanManager.VerifyAll();
 
             // Workaround for a Moq bug. See: https://github.com/moq/moq4/issues/456#issuecomment-331692858
             mockUserManager.Object.Logger = mockUserManager.Object.Logger;
@@ -1300,6 +1552,7 @@ namespace UnitTests.Controllers
                 .Returns(Task.FromResult<ApplicationUser>(null));
 
             var mockEmailSender = new Mock<IEmailSender>(MockBehavior.Strict);
+            var mockClanManager = new Mock<IClanManager>(MockBehavior.Strict);
 
             var controller = new UserController(
                 gameData,
@@ -1307,7 +1560,8 @@ namespace UnitTests.Controllers
                 mockDatabaseCommandFactory.Object,
                 mockUserSettingsProvider.Object,
                 mockUserManager.Object,
-                mockEmailSender.Object);
+                mockEmailSender.Object,
+                mockClanManager.Object);
             var result = await controller.AddFollow(UserName, model);
 
             Assert.NotNull(result);
@@ -1317,6 +1571,7 @@ namespace UnitTests.Controllers
             mockUserSettingsProvider.VerifyAll();
             mockCurrentUser.VerifyAll();
             mockEmailSender.VerifyAll();
+            mockClanManager.VerifyAll();
 
             // Workaround for a Moq bug. See: https://github.com/moq/moq4/issues/456#issuecomment-331692858
             mockUserManager.Object.Logger = mockUserManager.Object.Logger;
@@ -1348,6 +1603,7 @@ namespace UnitTests.Controllers
                 .Returns(Task.FromResult<string>(null));
 
             var mockEmailSender = new Mock<IEmailSender>(MockBehavior.Strict);
+            var mockClanManager = new Mock<IClanManager>(MockBehavior.Strict);
 
             var controller = new UserController(
                 gameData,
@@ -1355,7 +1611,8 @@ namespace UnitTests.Controllers
                 mockDatabaseCommandFactory.Object,
                 mockUserSettingsProvider.Object,
                 mockUserManager.Object,
-                mockEmailSender.Object);
+                mockEmailSender.Object,
+                mockClanManager.Object);
             var result = await controller.AddFollow(UserName, model);
 
             Assert.NotNull(result);
@@ -1365,6 +1622,7 @@ namespace UnitTests.Controllers
             mockUserSettingsProvider.VerifyAll();
             mockCurrentUser.VerifyAll();
             mockEmailSender.VerifyAll();
+            mockClanManager.VerifyAll();
 
             // Workaround for a Moq bug. See: https://github.com/moq/moq4/issues/456#issuecomment-331692858
             mockUserManager.Object.Logger = mockUserManager.Object.Logger;
@@ -1407,6 +1665,7 @@ namespace UnitTests.Controllers
             mockHttpContext.SetupGet(_ => _.User).Returns(mockCurrentUser.Object).Verifiable();
 
             var mockEmailSender = new Mock<IEmailSender>(MockBehavior.Strict);
+            var mockClanManager = new Mock<IClanManager>(MockBehavior.Strict);
 
             var controller = new UserController(
                 gameData,
@@ -1414,7 +1673,8 @@ namespace UnitTests.Controllers
                 mockDatabaseCommandFactory.Object,
                 mockUserSettingsProvider.Object,
                 mockUserManager.Object,
-                mockEmailSender.Object);
+                mockEmailSender.Object,
+                mockClanManager.Object);
             controller.ControllerContext = new ControllerContext { HttpContext = mockHttpContext.Object };
             var result = await controller.AddFollow(UserName, model);
 
@@ -1425,6 +1685,7 @@ namespace UnitTests.Controllers
             mockUserSettingsProvider.VerifyAll();
             mockCurrentUser.VerifyAll();
             mockEmailSender.VerifyAll();
+            mockClanManager.VerifyAll();
 
             // Workaround for a Moq bug. See: https://github.com/moq/moq4/issues/456#issuecomment-331692858
             mockUserManager.Object.Logger = mockUserManager.Object.Logger;
@@ -1470,6 +1731,7 @@ namespace UnitTests.Controllers
             mockHttpContext.SetupGet(_ => _.User).Returns(mockCurrentUser.Object).Verifiable();
 
             var mockEmailSender = new Mock<IEmailSender>(MockBehavior.Strict);
+            var mockClanManager = new Mock<IClanManager>(MockBehavior.Strict);
 
             var controller = new UserController(
                 gameData,
@@ -1477,7 +1739,8 @@ namespace UnitTests.Controllers
                 mockDatabaseCommandFactory.Object,
                 mockUserSettingsProvider.Object,
                 mockUserManager.Object,
-                mockEmailSender.Object);
+                mockEmailSender.Object,
+                mockClanManager.Object);
             controller.ControllerContext = new ControllerContext { HttpContext = mockHttpContext.Object };
 
             var result = await controller.AddFollow(UserName, model);
@@ -1489,6 +1752,7 @@ namespace UnitTests.Controllers
             mockUserSettingsProvider.VerifyAll();
             mockCurrentUser.VerifyAll();
             mockEmailSender.VerifyAll();
+            mockClanManager.VerifyAll();
 
             // Workaround for a Moq bug. See: https://github.com/moq/moq4/issues/456#issuecomment-331692858
             mockUserManager.Object.Logger = mockUserManager.Object.Logger;
@@ -1532,6 +1796,7 @@ namespace UnitTests.Controllers
             mockHttpContext.SetupGet(_ => _.User).Returns(mockCurrentUser.Object).Verifiable();
 
             var mockEmailSender = new Mock<IEmailSender>(MockBehavior.Strict);
+            var mockClanManager = new Mock<IClanManager>(MockBehavior.Strict);
 
             var controller = new UserController(
                 gameData,
@@ -1539,7 +1804,8 @@ namespace UnitTests.Controllers
                 mockDatabaseCommandFactory.Object,
                 mockUserSettingsProvider.Object,
                 mockUserManager.Object,
-                mockEmailSender.Object);
+                mockEmailSender.Object,
+                mockClanManager.Object);
             controller.ControllerContext = new ControllerContext { HttpContext = mockHttpContext.Object };
 
             var result = await controller.AddFollow(UserName, model);
@@ -1552,6 +1818,7 @@ namespace UnitTests.Controllers
             mockCurrentUser.VerifyAll();
             mockHttpContext.VerifyAll();
             mockEmailSender.VerifyAll();
+            mockClanManager.VerifyAll();
 
             // Workaround for a Moq bug. See: https://github.com/moq/moq4/issues/456#issuecomment-331692858
             mockUserManager.Object.Logger = mockUserManager.Object.Logger;
@@ -1610,6 +1877,7 @@ namespace UnitTests.Controllers
             mockHttpContext.SetupGet(_ => _.User).Returns(mockCurrentUser.Object).Verifiable();
 
             var mockEmailSender = new Mock<IEmailSender>(MockBehavior.Strict);
+            var mockClanManager = new Mock<IClanManager>(MockBehavior.Strict);
 
             var controller = new UserController(
                 gameData,
@@ -1617,7 +1885,8 @@ namespace UnitTests.Controllers
                 mockDatabaseCommandFactory.Object,
                 mockUserSettingsProvider.Object,
                 mockUserManager.Object,
-                mockEmailSender.Object);
+                mockEmailSender.Object,
+                mockClanManager.Object);
             controller.ControllerContext = new ControllerContext { HttpContext = mockHttpContext.Object };
 
             var result = await controller.AddFollow(UserName, model);
@@ -1630,6 +1899,7 @@ namespace UnitTests.Controllers
             mockCurrentUser.VerifyAll();
             mockHttpContext.VerifyAll();
             mockEmailSender.VerifyAll();
+            mockClanManager.VerifyAll();
 
             // Workaround for a Moq bug. See: https://github.com/moq/moq4/issues/456#issuecomment-331692858
             mockUserManager.Object.Logger = mockUserManager.Object.Logger;
@@ -1680,6 +1950,7 @@ namespace UnitTests.Controllers
             mockHttpContext.SetupGet(_ => _.User).Returns(mockCurrentUser.Object).Verifiable();
 
             var mockEmailSender = new Mock<IEmailSender>(MockBehavior.Strict);
+            var mockClanManager = new Mock<IClanManager>(MockBehavior.Strict);
 
             var controller = new UserController(
                 gameData,
@@ -1687,7 +1958,8 @@ namespace UnitTests.Controllers
                 mockDatabaseCommandFactory.Object,
                 mockUserSettingsProvider.Object,
                 mockUserManager.Object,
-                mockEmailSender.Object);
+                mockEmailSender.Object,
+                mockClanManager.Object);
             controller.ControllerContext = new ControllerContext { HttpContext = mockHttpContext.Object };
 
             var result = await controller.RemoveFollow(UserName, FollowUserName);
@@ -1700,6 +1972,7 @@ namespace UnitTests.Controllers
             mockCurrentUser.VerifyAll();
             mockHttpContext.VerifyAll();
             mockEmailSender.VerifyAll();
+            mockClanManager.VerifyAll();
 
             // Workaround for a Moq bug. See: https://github.com/moq/moq4/issues/456#issuecomment-331692858
             mockUserManager.Object.Logger = mockUserManager.Object.Logger;
@@ -1718,6 +1991,7 @@ namespace UnitTests.Controllers
             var mockFollowUser = new ApplicationUser();
             var mockUserManager = MockUserManager.CreateMock();
             var mockEmailSender = new Mock<IEmailSender>(MockBehavior.Strict);
+            var mockClanManager = new Mock<IClanManager>(MockBehavior.Strict);
 
             var controller = new UserController(
                 gameData,
@@ -1725,7 +1999,8 @@ namespace UnitTests.Controllers
                 mockDatabaseCommandFactory.Object,
                 mockUserSettingsProvider.Object,
                 mockUserManager.Object,
-                mockEmailSender.Object);
+                mockEmailSender.Object,
+                mockClanManager.Object);
             var result = await controller.RemoveFollow(null, FollowUserName);
 
             Assert.NotNull(result);
@@ -1734,6 +2009,7 @@ namespace UnitTests.Controllers
             mockDatabaseCommandFactory.VerifyAll();
             mockUserSettingsProvider.VerifyAll();
             mockEmailSender.VerifyAll();
+            mockClanManager.VerifyAll();
 
             // Workaround for a Moq bug. See: https://github.com/moq/moq4/issues/456#issuecomment-331692858
             mockUserManager.Object.Logger = mockUserManager.Object.Logger;
@@ -1752,6 +2028,7 @@ namespace UnitTests.Controllers
             var mockFollowUser = new ApplicationUser();
             var mockUserManager = MockUserManager.CreateMock();
             var mockEmailSender = new Mock<IEmailSender>(MockBehavior.Strict);
+            var mockClanManager = new Mock<IClanManager>(MockBehavior.Strict);
 
             var controller = new UserController(
                 gameData,
@@ -1759,7 +2036,8 @@ namespace UnitTests.Controllers
                 mockDatabaseCommandFactory.Object,
                 mockUserSettingsProvider.Object,
                 mockUserManager.Object,
-                mockEmailSender.Object);
+                mockEmailSender.Object,
+                mockClanManager.Object);
             var result = await controller.RemoveFollow(UserName, null);
 
             Assert.NotNull(result);
@@ -1768,6 +2046,7 @@ namespace UnitTests.Controllers
             mockDatabaseCommandFactory.VerifyAll();
             mockUserSettingsProvider.VerifyAll();
             mockEmailSender.VerifyAll();
+            mockClanManager.VerifyAll();
 
             // Workaround for a Moq bug. See: https://github.com/moq/moq4/issues/456#issuecomment-331692858
             mockUserManager.Object.Logger = mockUserManager.Object.Logger;
@@ -1793,6 +2072,7 @@ namespace UnitTests.Controllers
                 .Returns(Task.FromResult<ApplicationUser>(null));
 
             var mockEmailSender = new Mock<IEmailSender>(MockBehavior.Strict);
+            var mockClanManager = new Mock<IClanManager>(MockBehavior.Strict);
 
             var controller = new UserController(
                 gameData,
@@ -1800,7 +2080,8 @@ namespace UnitTests.Controllers
                 mockDatabaseCommandFactory.Object,
                 mockUserSettingsProvider.Object,
                 mockUserManager.Object,
-                mockEmailSender.Object);
+                mockEmailSender.Object,
+                mockClanManager.Object);
             var result = await controller.RemoveFollow(UserName, FollowUserName);
 
             Assert.NotNull(result);
@@ -1810,6 +2091,7 @@ namespace UnitTests.Controllers
             mockUserSettingsProvider.VerifyAll();
             mockCurrentUser.VerifyAll();
             mockEmailSender.VerifyAll();
+            mockClanManager.VerifyAll();
 
             // Workaround for a Moq bug. See: https://github.com/moq/moq4/issues/456#issuecomment-331692858
             mockUserManager.Object.Logger = mockUserManager.Object.Logger;
@@ -1837,6 +2119,7 @@ namespace UnitTests.Controllers
                 .Returns(Task.FromResult<string>(null));
 
             var mockEmailSender = new Mock<IEmailSender>(MockBehavior.Strict);
+            var mockClanManager = new Mock<IClanManager>(MockBehavior.Strict);
 
             var controller = new UserController(
                 gameData,
@@ -1844,7 +2127,8 @@ namespace UnitTests.Controllers
                 mockDatabaseCommandFactory.Object,
                 mockUserSettingsProvider.Object,
                 mockUserManager.Object,
-                mockEmailSender.Object);
+                mockEmailSender.Object,
+                mockClanManager.Object);
             var result = await controller.RemoveFollow(UserName, FollowUserName);
 
             Assert.NotNull(result);
@@ -1854,6 +2138,7 @@ namespace UnitTests.Controllers
             mockUserSettingsProvider.VerifyAll();
             mockCurrentUser.VerifyAll();
             mockEmailSender.VerifyAll();
+            mockClanManager.VerifyAll();
 
             // Workaround for a Moq bug. See: https://github.com/moq/moq4/issues/456#issuecomment-331692858
             mockUserManager.Object.Logger = mockUserManager.Object.Logger;
@@ -1892,6 +2177,7 @@ namespace UnitTests.Controllers
             mockHttpContext.SetupGet(_ => _.User).Returns(mockCurrentUser.Object).Verifiable();
 
             var mockEmailSender = new Mock<IEmailSender>(MockBehavior.Strict);
+            var mockClanManager = new Mock<IClanManager>(MockBehavior.Strict);
 
             var controller = new UserController(
                 gameData,
@@ -1899,7 +2185,8 @@ namespace UnitTests.Controllers
                 mockDatabaseCommandFactory.Object,
                 mockUserSettingsProvider.Object,
                 mockUserManager.Object,
-                mockEmailSender.Object);
+                mockEmailSender.Object,
+                mockClanManager.Object);
             controller.ControllerContext = new ControllerContext { HttpContext = mockHttpContext.Object };
             var result = await controller.RemoveFollow(UserName, FollowUserName);
 
@@ -1910,6 +2197,7 @@ namespace UnitTests.Controllers
             mockUserSettingsProvider.VerifyAll();
             mockCurrentUser.VerifyAll();
             mockEmailSender.VerifyAll();
+            mockClanManager.VerifyAll();
 
             // Workaround for a Moq bug. See: https://github.com/moq/moq4/issues/456#issuecomment-331692858
             mockUserManager.Object.Logger = mockUserManager.Object.Logger;
@@ -1951,6 +2239,7 @@ namespace UnitTests.Controllers
             mockHttpContext.SetupGet(_ => _.User).Returns(mockCurrentUser.Object).Verifiable();
 
             var mockEmailSender = new Mock<IEmailSender>(MockBehavior.Strict);
+            var mockClanManager = new Mock<IClanManager>(MockBehavior.Strict);
 
             var controller = new UserController(
                 gameData,
@@ -1958,7 +2247,8 @@ namespace UnitTests.Controllers
                 mockDatabaseCommandFactory.Object,
                 mockUserSettingsProvider.Object,
                 mockUserManager.Object,
-                mockEmailSender.Object);
+                mockEmailSender.Object,
+                mockClanManager.Object);
             controller.ControllerContext = new ControllerContext { HttpContext = mockHttpContext.Object };
 
             var result = await controller.RemoveFollow(UserName, FollowUserName);
@@ -1970,6 +2260,7 @@ namespace UnitTests.Controllers
             mockUserSettingsProvider.VerifyAll();
             mockCurrentUser.VerifyAll();
             mockEmailSender.VerifyAll();
+            mockClanManager.VerifyAll();
 
             // Workaround for a Moq bug. See: https://github.com/moq/moq4/issues/456#issuecomment-331692858
             mockUserManager.Object.Logger = mockUserManager.Object.Logger;
@@ -2009,6 +2300,7 @@ namespace UnitTests.Controllers
             mockHttpContext.SetupGet(_ => _.User).Returns(mockCurrentUser.Object).Verifiable();
 
             var mockEmailSender = new Mock<IEmailSender>(MockBehavior.Strict);
+            var mockClanManager = new Mock<IClanManager>(MockBehavior.Strict);
 
             var controller = new UserController(
                 gameData,
@@ -2016,7 +2308,8 @@ namespace UnitTests.Controllers
                 mockDatabaseCommandFactory.Object,
                 mockUserSettingsProvider.Object,
                 mockUserManager.Object,
-                mockEmailSender.Object);
+                mockEmailSender.Object,
+                mockClanManager.Object);
             controller.ControllerContext = new ControllerContext { HttpContext = mockHttpContext.Object };
 
             var result = await controller.RemoveFollow(UserName, FollowUserName);
@@ -2029,6 +2322,7 @@ namespace UnitTests.Controllers
             mockCurrentUser.VerifyAll();
             mockHttpContext.VerifyAll();
             mockEmailSender.VerifyAll();
+            mockClanManager.VerifyAll();
 
             // Workaround for a Moq bug. See: https://github.com/moq/moq4/issues/456#issuecomment-331692858
             mockUserManager.Object.Logger = mockUserManager.Object.Logger;
@@ -2083,6 +2377,7 @@ namespace UnitTests.Controllers
             mockHttpContext.SetupGet(_ => _.User).Returns(mockCurrentUser.Object).Verifiable();
 
             var mockEmailSender = new Mock<IEmailSender>(MockBehavior.Strict);
+            var mockClanManager = new Mock<IClanManager>(MockBehavior.Strict);
 
             var controller = new UserController(
                 gameData,
@@ -2090,7 +2385,8 @@ namespace UnitTests.Controllers
                 mockDatabaseCommandFactory.Object,
                 mockUserSettingsProvider.Object,
                 mockUserManager.Object,
-                mockEmailSender.Object);
+                mockEmailSender.Object,
+                mockClanManager.Object);
             controller.ControllerContext = new ControllerContext { HttpContext = mockHttpContext.Object };
 
             var result = await controller.RemoveFollow(UserName, FollowUserName);
@@ -2103,6 +2399,7 @@ namespace UnitTests.Controllers
             mockCurrentUser.VerifyAll();
             mockHttpContext.VerifyAll();
             mockEmailSender.VerifyAll();
+            mockClanManager.VerifyAll();
 
             // Workaround for a Moq bug. See: https://github.com/moq/moq4/issues/456#issuecomment-331692858
             mockUserManager.Object.Logger = mockUserManager.Object.Logger;
@@ -2153,6 +2450,7 @@ namespace UnitTests.Controllers
             mockHttpContext.SetupGet(_ => _.User).Returns(mockCurrentUser.Object).Verifiable();
 
             var mockEmailSender = new Mock<IEmailSender>(MockBehavior.Strict);
+            var mockClanManager = new Mock<IClanManager>(MockBehavior.Strict);
 
             var controller = new UserController(
                 gameData,
@@ -2160,7 +2458,8 @@ namespace UnitTests.Controllers
                 mockDatabaseCommandFactory.Object,
                 mockUserSettingsProvider.Object,
                 mockUserManager.Object,
-                mockEmailSender.Object);
+                mockEmailSender.Object,
+                mockClanManager.Object);
             controller.ControllerContext = new ControllerContext { HttpContext = mockHttpContext.Object };
 
             var result = await controller.RemoveFollow(UserName, FollowUserName);
@@ -2173,6 +2472,7 @@ namespace UnitTests.Controllers
             mockCurrentUser.VerifyAll();
             mockHttpContext.VerifyAll();
             mockEmailSender.VerifyAll();
+            mockClanManager.VerifyAll();
 
             // Workaround for a Moq bug. See: https://github.com/moq/moq4/issues/456#issuecomment-331692858
             mockUserManager.Object.Logger = mockUserManager.Object.Logger;
@@ -2212,6 +2512,7 @@ namespace UnitTests.Controllers
             mockHttpContext.SetupGet(_ => _.User).Returns(mockCurrentUser.Object).Verifiable();
 
             var mockEmailSender = new Mock<IEmailSender>(MockBehavior.Strict);
+            var mockClanManager = new Mock<IClanManager>(MockBehavior.Strict);
 
             var controller = new UserController(
                 gameData,
@@ -2219,7 +2520,8 @@ namespace UnitTests.Controllers
                 mockDatabaseCommandFactory.Object,
                 mockUserSettingsProvider.Object,
                 mockUserManager.Object,
-                mockEmailSender.Object);
+                mockEmailSender.Object,
+                mockClanManager.Object);
             controller.ControllerContext = new ControllerContext { HttpContext = mockHttpContext.Object };
 
             var result = await controller.GetSettings(UserName);
@@ -2233,6 +2535,7 @@ namespace UnitTests.Controllers
             mockCurrentUser.VerifyAll();
             mockHttpContext.VerifyAll();
             mockEmailSender.VerifyAll();
+            mockClanManager.VerifyAll();
 
             // Workaround for a Moq bug. See: https://github.com/moq/moq4/issues/456#issuecomment-331692858
             mockUserManager.Object.Logger = mockUserManager.Object.Logger;
@@ -2248,6 +2551,7 @@ namespace UnitTests.Controllers
             var mockUserSettingsProvider = new Mock<IUserSettingsProvider>(MockBehavior.Strict);
             var mockUserManager = MockUserManager.CreateMock();
             var mockEmailSender = new Mock<IEmailSender>(MockBehavior.Strict);
+            var mockClanManager = new Mock<IClanManager>(MockBehavior.Strict);
 
             var controller = new UserController(
                 gameData,
@@ -2255,7 +2559,8 @@ namespace UnitTests.Controllers
                 mockDatabaseCommandFactory.Object,
                 mockUserSettingsProvider.Object,
                 mockUserManager.Object,
-                mockEmailSender.Object);
+                mockEmailSender.Object,
+                mockClanManager.Object);
 
             var result = await controller.GetSettings(null);
 
@@ -2265,6 +2570,7 @@ namespace UnitTests.Controllers
             mockDatabaseCommandFactory.VerifyAll();
             mockUserSettingsProvider.VerifyAll();
             mockEmailSender.VerifyAll();
+            mockClanManager.VerifyAll();
 
             // Workaround for a Moq bug. See: https://github.com/moq/moq4/issues/456#issuecomment-331692858
             mockUserManager.Object.Logger = mockUserManager.Object.Logger;
@@ -2287,6 +2593,7 @@ namespace UnitTests.Controllers
                 .Returns(Task.FromResult<ApplicationUser>(null));
 
             var mockEmailSender = new Mock<IEmailSender>(MockBehavior.Strict);
+            var mockClanManager = new Mock<IClanManager>(MockBehavior.Strict);
 
             var controller = new UserController(
                 gameData,
@@ -2294,7 +2601,8 @@ namespace UnitTests.Controllers
                 mockDatabaseCommandFactory.Object,
                 mockUserSettingsProvider.Object,
                 mockUserManager.Object,
-                mockEmailSender.Object);
+                mockEmailSender.Object,
+                mockClanManager.Object);
 
             var result = await controller.GetSettings(UserName);
 
@@ -2304,6 +2612,7 @@ namespace UnitTests.Controllers
             mockDatabaseCommandFactory.VerifyAll();
             mockUserSettingsProvider.VerifyAll();
             mockEmailSender.VerifyAll();
+            mockClanManager.VerifyAll();
 
             // Workaround for a Moq bug. See: https://github.com/moq/moq4/issues/456#issuecomment-331692858
             mockUserManager.Object.Logger = mockUserManager.Object.Logger;
@@ -2330,6 +2639,7 @@ namespace UnitTests.Controllers
                 .Returns(Task.FromResult<string>(null));
 
             var mockEmailSender = new Mock<IEmailSender>(MockBehavior.Strict);
+            var mockClanManager = new Mock<IClanManager>(MockBehavior.Strict);
 
             var controller = new UserController(
                 gameData,
@@ -2337,7 +2647,8 @@ namespace UnitTests.Controllers
                 mockDatabaseCommandFactory.Object,
                 mockUserSettingsProvider.Object,
                 mockUserManager.Object,
-                mockEmailSender.Object);
+                mockEmailSender.Object,
+                mockClanManager.Object);
 
             var result = await controller.GetSettings(UserName);
 
@@ -2347,6 +2658,7 @@ namespace UnitTests.Controllers
             mockDatabaseCommandFactory.VerifyAll();
             mockUserSettingsProvider.VerifyAll();
             mockEmailSender.VerifyAll();
+            mockClanManager.VerifyAll();
 
             // Workaround for a Moq bug. See: https://github.com/moq/moq4/issues/456#issuecomment-331692858
             mockUserManager.Object.Logger = mockUserManager.Object.Logger;
@@ -2384,6 +2696,7 @@ namespace UnitTests.Controllers
             mockHttpContext.SetupGet(_ => _.User).Returns(mockCurrentUser.Object).Verifiable();
 
             var mockEmailSender = new Mock<IEmailSender>(MockBehavior.Strict);
+            var mockClanManager = new Mock<IClanManager>(MockBehavior.Strict);
 
             var controller = new UserController(
                 gameData,
@@ -2391,7 +2704,8 @@ namespace UnitTests.Controllers
                 mockDatabaseCommandFactory.Object,
                 mockUserSettingsProvider.Object,
                 mockUserManager.Object,
-                mockEmailSender.Object);
+                mockEmailSender.Object,
+                mockClanManager.Object);
             controller.ControllerContext = new ControllerContext { HttpContext = mockHttpContext.Object };
 
             var result = await controller.GetSettings(UserName);
@@ -2404,6 +2718,7 @@ namespace UnitTests.Controllers
             mockCurrentUser.VerifyAll();
             mockHttpContext.VerifyAll();
             mockEmailSender.VerifyAll();
+            mockClanManager.VerifyAll();
 
             // Workaround for a Moq bug. See: https://github.com/moq/moq4/issues/456#issuecomment-331692858
             mockUserManager.Object.Logger = mockUserManager.Object.Logger;
@@ -2446,6 +2761,7 @@ namespace UnitTests.Controllers
             mockHttpContext.SetupGet(_ => _.User).Returns(mockCurrentUser.Object).Verifiable();
 
             var mockEmailSender = new Mock<IEmailSender>(MockBehavior.Strict);
+            var mockClanManager = new Mock<IClanManager>(MockBehavior.Strict);
 
             var controller = new UserController(
                 gameData,
@@ -2453,7 +2769,8 @@ namespace UnitTests.Controllers
                 mockDatabaseCommandFactory.Object,
                 mockUserSettingsProvider.Object,
                 mockUserManager.Object,
-                mockEmailSender.Object);
+                mockEmailSender.Object,
+                mockClanManager.Object);
             controller.ControllerContext = new ControllerContext { HttpContext = mockHttpContext.Object };
 
             var result = await controller.GetSettings(UserName);
@@ -2467,6 +2784,7 @@ namespace UnitTests.Controllers
             mockCurrentUser.VerifyAll();
             mockHttpContext.VerifyAll();
             mockEmailSender.VerifyAll();
+            mockClanManager.VerifyAll();
 
             // Workaround for a Moq bug. See: https://github.com/moq/moq4/issues/456#issuecomment-331692858
             mockUserManager.Object.Logger = mockUserManager.Object.Logger;
@@ -2505,6 +2823,7 @@ namespace UnitTests.Controllers
             mockHttpContext.SetupGet(_ => _.User).Returns(mockCurrentUser.Object).Verifiable();
 
             var mockEmailSender = new Mock<IEmailSender>(MockBehavior.Strict);
+            var mockClanManager = new Mock<IClanManager>(MockBehavior.Strict);
 
             var controller = new UserController(
                 gameData,
@@ -2512,7 +2831,8 @@ namespace UnitTests.Controllers
                 mockDatabaseCommandFactory.Object,
                 mockUserSettingsProvider.Object,
                 mockUserManager.Object,
-                mockEmailSender.Object);
+                mockEmailSender.Object,
+                mockClanManager.Object);
             controller.ControllerContext = new ControllerContext { HttpContext = mockHttpContext.Object };
 
             var result = await controller.PatchSettings(UserName, userSettings);
@@ -2525,6 +2845,7 @@ namespace UnitTests.Controllers
             mockCurrentUser.VerifyAll();
             mockHttpContext.VerifyAll();
             mockEmailSender.VerifyAll();
+            mockClanManager.VerifyAll();
 
             // Workaround for a Moq bug. See: https://github.com/moq/moq4/issues/456#issuecomment-331692858
             mockUserManager.Object.Logger = mockUserManager.Object.Logger;
@@ -2541,6 +2862,7 @@ namespace UnitTests.Controllers
             var mockUserSettingsProvider = new Mock<IUserSettingsProvider>(MockBehavior.Strict);
             var mockUserManager = MockUserManager.CreateMock();
             var mockEmailSender = new Mock<IEmailSender>(MockBehavior.Strict);
+            var mockClanManager = new Mock<IClanManager>(MockBehavior.Strict);
 
             var controller = new UserController(
                 gameData,
@@ -2548,7 +2870,8 @@ namespace UnitTests.Controllers
                 mockDatabaseCommandFactory.Object,
                 mockUserSettingsProvider.Object,
                 mockUserManager.Object,
-                mockEmailSender.Object);
+                mockEmailSender.Object,
+                mockClanManager.Object);
 
             var result = await controller.PatchSettings(null, userSettings);
 
@@ -2558,6 +2881,7 @@ namespace UnitTests.Controllers
             mockDatabaseCommandFactory.VerifyAll();
             mockUserSettingsProvider.VerifyAll();
             mockEmailSender.VerifyAll();
+            mockClanManager.VerifyAll();
 
             // Workaround for a Moq bug. See: https://github.com/moq/moq4/issues/456#issuecomment-331692858
             mockUserManager.Object.Logger = mockUserManager.Object.Logger;
@@ -2575,6 +2899,7 @@ namespace UnitTests.Controllers
             var mockUserSettingsProvider = new Mock<IUserSettingsProvider>(MockBehavior.Strict);
             var mockUserManager = MockUserManager.CreateMock();
             var mockEmailSender = new Mock<IEmailSender>(MockBehavior.Strict);
+            var mockClanManager = new Mock<IClanManager>(MockBehavior.Strict);
 
             var controller = new UserController(
                 gameData,
@@ -2582,7 +2907,8 @@ namespace UnitTests.Controllers
                 mockDatabaseCommandFactory.Object,
                 mockUserSettingsProvider.Object,
                 mockUserManager.Object,
-                mockEmailSender.Object);
+                mockEmailSender.Object,
+                mockClanManager.Object);
 
             var result = await controller.PatchSettings(UserName, null);
 
@@ -2592,6 +2918,7 @@ namespace UnitTests.Controllers
             mockDatabaseCommandFactory.VerifyAll();
             mockUserSettingsProvider.VerifyAll();
             mockEmailSender.VerifyAll();
+            mockClanManager.VerifyAll();
 
             // Workaround for a Moq bug. See: https://github.com/moq/moq4/issues/456#issuecomment-331692858
             mockUserManager.Object.Logger = mockUserManager.Object.Logger;
@@ -2615,6 +2942,7 @@ namespace UnitTests.Controllers
                 .Returns(Task.FromResult<ApplicationUser>(null));
 
             var mockEmailSender = new Mock<IEmailSender>(MockBehavior.Strict);
+            var mockClanManager = new Mock<IClanManager>(MockBehavior.Strict);
 
             var controller = new UserController(
                 gameData,
@@ -2622,7 +2950,8 @@ namespace UnitTests.Controllers
                 mockDatabaseCommandFactory.Object,
                 mockUserSettingsProvider.Object,
                 mockUserManager.Object,
-                mockEmailSender.Object);
+                mockEmailSender.Object,
+                mockClanManager.Object);
 
             var result = await controller.PatchSettings(UserName, userSettings);
 
@@ -2632,6 +2961,7 @@ namespace UnitTests.Controllers
             mockDatabaseCommandFactory.VerifyAll();
             mockUserSettingsProvider.VerifyAll();
             mockEmailSender.VerifyAll();
+            mockClanManager.VerifyAll();
 
             // Workaround for a Moq bug. See: https://github.com/moq/moq4/issues/456#issuecomment-331692858
             mockUserManager.Object.Logger = mockUserManager.Object.Logger;
@@ -2659,6 +2989,7 @@ namespace UnitTests.Controllers
                 .Returns(Task.FromResult<string>(null));
 
             var mockEmailSender = new Mock<IEmailSender>(MockBehavior.Strict);
+            var mockClanManager = new Mock<IClanManager>(MockBehavior.Strict);
 
             var controller = new UserController(
                 gameData,
@@ -2666,7 +2997,8 @@ namespace UnitTests.Controllers
                 mockDatabaseCommandFactory.Object,
                 mockUserSettingsProvider.Object,
                 mockUserManager.Object,
-                mockEmailSender.Object);
+                mockEmailSender.Object,
+                mockClanManager.Object);
 
             var result = await controller.PatchSettings(UserName, userSettings);
 
@@ -2676,6 +3008,7 @@ namespace UnitTests.Controllers
             mockDatabaseCommandFactory.VerifyAll();
             mockUserSettingsProvider.VerifyAll();
             mockEmailSender.VerifyAll();
+            mockClanManager.VerifyAll();
 
             // Workaround for a Moq bug. See: https://github.com/moq/moq4/issues/456#issuecomment-331692858
             mockUserManager.Object.Logger = mockUserManager.Object.Logger;
@@ -2714,6 +3047,7 @@ namespace UnitTests.Controllers
             mockHttpContext.SetupGet(_ => _.User).Returns(mockCurrentUser.Object).Verifiable();
 
             var mockEmailSender = new Mock<IEmailSender>(MockBehavior.Strict);
+            var mockClanManager = new Mock<IClanManager>(MockBehavior.Strict);
 
             var controller = new UserController(
                 gameData,
@@ -2721,7 +3055,8 @@ namespace UnitTests.Controllers
                 mockDatabaseCommandFactory.Object,
                 mockUserSettingsProvider.Object,
                 mockUserManager.Object,
-                mockEmailSender.Object);
+                mockEmailSender.Object,
+                mockClanManager.Object);
             controller.ControllerContext = new ControllerContext { HttpContext = mockHttpContext.Object };
 
             var result = await controller.PatchSettings(UserName, userSettings);
@@ -2734,6 +3069,7 @@ namespace UnitTests.Controllers
             mockCurrentUser.VerifyAll();
             mockHttpContext.VerifyAll();
             mockEmailSender.VerifyAll();
+            mockClanManager.VerifyAll();
 
             // Workaround for a Moq bug. See: https://github.com/moq/moq4/issues/456#issuecomment-331692858
             mockUserManager.Object.Logger = mockUserManager.Object.Logger;
@@ -2783,6 +3119,7 @@ namespace UnitTests.Controllers
             mockHttpContext.SetupGet(_ => _.User).Returns(mockCurrentUser.Object).Verifiable();
 
             var mockEmailSender = new Mock<IEmailSender>(MockBehavior.Strict);
+            var mockClanManager = new Mock<IClanManager>(MockBehavior.Strict);
 
             var controller = new UserController(
                 gameData,
@@ -2790,7 +3127,8 @@ namespace UnitTests.Controllers
                 mockDatabaseCommandFactory.Object,
                 mockUserSettingsProvider.Object,
                 mockUserManager.Object,
-                mockEmailSender.Object);
+                mockEmailSender.Object,
+                mockClanManager.Object);
             controller.ControllerContext = new ControllerContext { HttpContext = mockHttpContext.Object };
 
             var result = await controller.GetLogins(UserName);
@@ -2813,6 +3151,7 @@ namespace UnitTests.Controllers
             mockCurrentUser.VerifyAll();
             mockHttpContext.VerifyAll();
             mockEmailSender.VerifyAll();
+            mockClanManager.VerifyAll();
 
             // Workaround for a Moq bug. See: https://github.com/moq/moq4/issues/456#issuecomment-331692858
             mockUserManager.Object.Logger = mockUserManager.Object.Logger;
@@ -2828,6 +3167,7 @@ namespace UnitTests.Controllers
             var mockUserSettingsProvider = new Mock<IUserSettingsProvider>(MockBehavior.Strict);
             var mockUserManager = MockUserManager.CreateMock();
             var mockEmailSender = new Mock<IEmailSender>(MockBehavior.Strict);
+            var mockClanManager = new Mock<IClanManager>(MockBehavior.Strict);
 
             var controller = new UserController(
                 gameData,
@@ -2835,7 +3175,8 @@ namespace UnitTests.Controllers
                 mockDatabaseCommandFactory.Object,
                 mockUserSettingsProvider.Object,
                 mockUserManager.Object,
-                mockEmailSender.Object);
+                mockEmailSender.Object,
+                mockClanManager.Object);
 
             var result = await controller.GetLogins(null);
 
@@ -2845,6 +3186,7 @@ namespace UnitTests.Controllers
             mockDatabaseCommandFactory.VerifyAll();
             mockUserSettingsProvider.VerifyAll();
             mockEmailSender.VerifyAll();
+            mockClanManager.VerifyAll();
 
             // Workaround for a Moq bug. See: https://github.com/moq/moq4/issues/456#issuecomment-331692858
             mockUserManager.Object.Logger = mockUserManager.Object.Logger;
@@ -2867,6 +3209,7 @@ namespace UnitTests.Controllers
                 .Returns(Task.FromResult<ApplicationUser>(null));
 
             var mockEmailSender = new Mock<IEmailSender>(MockBehavior.Strict);
+            var mockClanManager = new Mock<IClanManager>(MockBehavior.Strict);
 
             var controller = new UserController(
                 gameData,
@@ -2874,7 +3217,8 @@ namespace UnitTests.Controllers
                 mockDatabaseCommandFactory.Object,
                 mockUserSettingsProvider.Object,
                 mockUserManager.Object,
-                mockEmailSender.Object);
+                mockEmailSender.Object,
+                mockClanManager.Object);
 
             var result = await controller.GetLogins(UserName);
 
@@ -2884,6 +3228,7 @@ namespace UnitTests.Controllers
             mockDatabaseCommandFactory.VerifyAll();
             mockUserSettingsProvider.VerifyAll();
             mockEmailSender.VerifyAll();
+            mockClanManager.VerifyAll();
 
             // Workaround for a Moq bug. See: https://github.com/moq/moq4/issues/456#issuecomment-331692858
             mockUserManager.Object.Logger = mockUserManager.Object.Logger;
@@ -2910,6 +3255,7 @@ namespace UnitTests.Controllers
                 .Returns(Task.FromResult<string>(null));
 
             var mockEmailSender = new Mock<IEmailSender>(MockBehavior.Strict);
+            var mockClanManager = new Mock<IClanManager>(MockBehavior.Strict);
 
             var controller = new UserController(
                 gameData,
@@ -2917,7 +3263,8 @@ namespace UnitTests.Controllers
                 mockDatabaseCommandFactory.Object,
                 mockUserSettingsProvider.Object,
                 mockUserManager.Object,
-                mockEmailSender.Object);
+                mockEmailSender.Object,
+                mockClanManager.Object);
 
             var result = await controller.GetLogins(UserName);
 
@@ -2927,6 +3274,7 @@ namespace UnitTests.Controllers
             mockDatabaseCommandFactory.VerifyAll();
             mockUserSettingsProvider.VerifyAll();
             mockEmailSender.VerifyAll();
+            mockClanManager.VerifyAll();
 
             // Workaround for a Moq bug. See: https://github.com/moq/moq4/issues/456#issuecomment-331692858
             mockUserManager.Object.Logger = mockUserManager.Object.Logger;
@@ -2964,6 +3312,7 @@ namespace UnitTests.Controllers
             mockHttpContext.SetupGet(_ => _.User).Returns(mockCurrentUser.Object).Verifiable();
 
             var mockEmailSender = new Mock<IEmailSender>(MockBehavior.Strict);
+            var mockClanManager = new Mock<IClanManager>(MockBehavior.Strict);
 
             var controller = new UserController(
                 gameData,
@@ -2971,7 +3320,8 @@ namespace UnitTests.Controllers
                 mockDatabaseCommandFactory.Object,
                 mockUserSettingsProvider.Object,
                 mockUserManager.Object,
-                mockEmailSender.Object);
+                mockEmailSender.Object,
+                mockClanManager.Object);
             controller.ControllerContext = new ControllerContext { HttpContext = mockHttpContext.Object };
 
             var result = await controller.GetLogins(UserName);
@@ -2984,6 +3334,7 @@ namespace UnitTests.Controllers
             mockCurrentUser.VerifyAll();
             mockHttpContext.VerifyAll();
             mockEmailSender.VerifyAll();
+            mockClanManager.VerifyAll();
 
             // Workaround for a Moq bug. See: https://github.com/moq/moq4/issues/456#issuecomment-331692858
             mockUserManager.Object.Logger = mockUserManager.Object.Logger;
@@ -3033,6 +3384,7 @@ namespace UnitTests.Controllers
             mockHttpContext.SetupGet(_ => _.User).Returns(mockCurrentUser.Object).Verifiable();
 
             var mockEmailSender = new Mock<IEmailSender>(MockBehavior.Strict);
+            var mockClanManager = new Mock<IClanManager>(MockBehavior.Strict);
 
             var controller = new UserController(
                 gameData,
@@ -3040,7 +3392,8 @@ namespace UnitTests.Controllers
                 mockDatabaseCommandFactory.Object,
                 mockUserSettingsProvider.Object,
                 mockUserManager.Object,
-                mockEmailSender.Object);
+                mockEmailSender.Object,
+                mockClanManager.Object);
             controller.ControllerContext = new ControllerContext { HttpContext = mockHttpContext.Object };
 
             var result = await controller.GetLogins(UserName);
@@ -3063,6 +3416,7 @@ namespace UnitTests.Controllers
             mockCurrentUser.VerifyAll();
             mockHttpContext.VerifyAll();
             mockEmailSender.VerifyAll();
+            mockClanManager.VerifyAll();
 
             // Workaround for a Moq bug. See: https://github.com/moq/moq4/issues/456#issuecomment-331692858
             mockUserManager.Object.Logger = mockUserManager.Object.Logger;
@@ -3107,6 +3461,7 @@ namespace UnitTests.Controllers
             mockHttpContext.SetupGet(_ => _.User).Returns(mockCurrentUser.Object).Verifiable();
 
             var mockEmailSender = new Mock<IEmailSender>(MockBehavior.Strict);
+            var mockClanManager = new Mock<IClanManager>(MockBehavior.Strict);
 
             var controller = new UserController(
                 gameData,
@@ -3114,7 +3469,8 @@ namespace UnitTests.Controllers
                 mockDatabaseCommandFactory.Object,
                 mockUserSettingsProvider.Object,
                 mockUserManager.Object,
-                mockEmailSender.Object);
+                mockEmailSender.Object,
+                mockClanManager.Object);
             controller.ControllerContext = new ControllerContext { HttpContext = mockHttpContext.Object };
 
             var result = await controller.RemoveLogin(UserName, model);
@@ -3127,6 +3483,7 @@ namespace UnitTests.Controllers
             mockCurrentUser.VerifyAll();
             mockHttpContext.VerifyAll();
             mockEmailSender.VerifyAll();
+            mockClanManager.VerifyAll();
 
             // Workaround for a Moq bug. See: https://github.com/moq/moq4/issues/456#issuecomment-331692858
             mockUserManager.Object.Logger = mockUserManager.Object.Logger;
@@ -3151,6 +3508,7 @@ namespace UnitTests.Controllers
             var mockUserSettingsProvider = new Mock<IUserSettingsProvider>(MockBehavior.Strict);
             var mockUserManager = MockUserManager.CreateMock();
             var mockEmailSender = new Mock<IEmailSender>(MockBehavior.Strict);
+            var mockClanManager = new Mock<IClanManager>(MockBehavior.Strict);
 
             var controller = new UserController(
                 gameData,
@@ -3158,7 +3516,8 @@ namespace UnitTests.Controllers
                 mockDatabaseCommandFactory.Object,
                 mockUserSettingsProvider.Object,
                 mockUserManager.Object,
-                mockEmailSender.Object);
+                mockEmailSender.Object,
+                mockClanManager.Object);
 
             var result = await controller.RemoveLogin(null, model);
 
@@ -3168,6 +3527,7 @@ namespace UnitTests.Controllers
             mockDatabaseCommandFactory.VerifyAll();
             mockUserSettingsProvider.VerifyAll();
             mockEmailSender.VerifyAll();
+            mockClanManager.VerifyAll();
 
             // Workaround for a Moq bug. See: https://github.com/moq/moq4/issues/456#issuecomment-331692858
             mockUserManager.Object.Logger = mockUserManager.Object.Logger;
@@ -3186,6 +3546,7 @@ namespace UnitTests.Controllers
             var mockUserSettingsProvider = new Mock<IUserSettingsProvider>(MockBehavior.Strict);
             var mockUserManager = MockUserManager.CreateMock();
             var mockEmailSender = new Mock<IEmailSender>(MockBehavior.Strict);
+            var mockClanManager = new Mock<IClanManager>(MockBehavior.Strict);
 
             var controller = new UserController(
                 gameData,
@@ -3193,7 +3554,8 @@ namespace UnitTests.Controllers
                 mockDatabaseCommandFactory.Object,
                 mockUserSettingsProvider.Object,
                 mockUserManager.Object,
-                mockEmailSender.Object);
+                mockEmailSender.Object,
+                mockClanManager.Object);
             controller.ModelState.AddModelError("SomeKey", "SomeErrorMessage");
             var result = await controller.RemoveLogin(UserName, model);
 
@@ -3232,6 +3594,7 @@ namespace UnitTests.Controllers
                 .Returns(Task.FromResult<ApplicationUser>(null));
 
             var mockEmailSender = new Mock<IEmailSender>(MockBehavior.Strict);
+            var mockClanManager = new Mock<IClanManager>(MockBehavior.Strict);
 
             var controller = new UserController(
                 gameData,
@@ -3239,7 +3602,8 @@ namespace UnitTests.Controllers
                 mockDatabaseCommandFactory.Object,
                 mockUserSettingsProvider.Object,
                 mockUserManager.Object,
-                mockEmailSender.Object);
+                mockEmailSender.Object,
+                mockClanManager.Object);
 
             var result = await controller.RemoveLogin(UserName, model);
 
@@ -3249,6 +3613,7 @@ namespace UnitTests.Controllers
             mockDatabaseCommandFactory.VerifyAll();
             mockUserSettingsProvider.VerifyAll();
             mockEmailSender.VerifyAll();
+            mockClanManager.VerifyAll();
 
             // Workaround for a Moq bug. See: https://github.com/moq/moq4/issues/456#issuecomment-331692858
             mockUserManager.Object.Logger = mockUserManager.Object.Logger;
@@ -3283,6 +3648,7 @@ namespace UnitTests.Controllers
                 .Returns(Task.FromResult<string>(null));
 
             var mockEmailSender = new Mock<IEmailSender>(MockBehavior.Strict);
+            var mockClanManager = new Mock<IClanManager>(MockBehavior.Strict);
 
             var controller = new UserController(
                 gameData,
@@ -3290,7 +3656,8 @@ namespace UnitTests.Controllers
                 mockDatabaseCommandFactory.Object,
                 mockUserSettingsProvider.Object,
                 mockUserManager.Object,
-                mockEmailSender.Object);
+                mockEmailSender.Object,
+                mockClanManager.Object);
 
             var result = await controller.RemoveLogin(UserName, model);
 
@@ -3300,6 +3667,7 @@ namespace UnitTests.Controllers
             mockDatabaseCommandFactory.VerifyAll();
             mockUserSettingsProvider.VerifyAll();
             mockEmailSender.VerifyAll();
+            mockClanManager.VerifyAll();
 
             // Workaround for a Moq bug. See: https://github.com/moq/moq4/issues/456#issuecomment-331692858
             mockUserManager.Object.Logger = mockUserManager.Object.Logger;
@@ -3345,6 +3713,7 @@ namespace UnitTests.Controllers
             mockHttpContext.SetupGet(_ => _.User).Returns(mockCurrentUser.Object).Verifiable();
 
             var mockEmailSender = new Mock<IEmailSender>(MockBehavior.Strict);
+            var mockClanManager = new Mock<IClanManager>(MockBehavior.Strict);
 
             var controller = new UserController(
                 gameData,
@@ -3352,7 +3721,8 @@ namespace UnitTests.Controllers
                 mockDatabaseCommandFactory.Object,
                 mockUserSettingsProvider.Object,
                 mockUserManager.Object,
-                mockEmailSender.Object);
+                mockEmailSender.Object,
+                mockClanManager.Object);
             controller.ControllerContext = new ControllerContext { HttpContext = mockHttpContext.Object };
 
             var result = await controller.RemoveLogin(UserName, model);
@@ -3365,6 +3735,7 @@ namespace UnitTests.Controllers
             mockCurrentUser.VerifyAll();
             mockHttpContext.VerifyAll();
             mockEmailSender.VerifyAll();
+            mockClanManager.VerifyAll();
 
             // Workaround for a Moq bug. See: https://github.com/moq/moq4/issues/456#issuecomment-331692858
             mockUserManager.Object.Logger = mockUserManager.Object.Logger;
@@ -3413,6 +3784,7 @@ namespace UnitTests.Controllers
             mockHttpContext.SetupGet(_ => _.User).Returns(mockCurrentUser.Object).Verifiable();
 
             var mockEmailSender = new Mock<IEmailSender>(MockBehavior.Strict);
+            var mockClanManager = new Mock<IClanManager>(MockBehavior.Strict);
 
             var controller = new UserController(
                 gameData,
@@ -3420,7 +3792,8 @@ namespace UnitTests.Controllers
                 mockDatabaseCommandFactory.Object,
                 mockUserSettingsProvider.Object,
                 mockUserManager.Object,
-                mockEmailSender.Object);
+                mockEmailSender.Object,
+                mockClanManager.Object);
             controller.ControllerContext = new ControllerContext { HttpContext = mockHttpContext.Object };
 
             var result = await controller.RemoveLogin(UserName, model);
@@ -3433,6 +3806,7 @@ namespace UnitTests.Controllers
             mockCurrentUser.VerifyAll();
             mockHttpContext.VerifyAll();
             mockEmailSender.VerifyAll();
+            mockClanManager.VerifyAll();
 
             // Workaround for a Moq bug. See: https://github.com/moq/moq4/issues/456#issuecomment-331692858
             mockUserManager.Object.Logger = mockUserManager.Object.Logger;
@@ -3477,6 +3851,7 @@ namespace UnitTests.Controllers
             mockHttpContext.SetupGet(_ => _.User).Returns(mockCurrentUser.Object).Verifiable();
 
             var mockEmailSender = new Mock<IEmailSender>(MockBehavior.Strict);
+            var mockClanManager = new Mock<IClanManager>(MockBehavior.Strict);
 
             var controller = new UserController(
                 gameData,
@@ -3484,7 +3859,8 @@ namespace UnitTests.Controllers
                 mockDatabaseCommandFactory.Object,
                 mockUserSettingsProvider.Object,
                 mockUserManager.Object,
-                mockEmailSender.Object);
+                mockEmailSender.Object,
+                mockClanManager.Object);
             controller.ControllerContext = new ControllerContext { HttpContext = mockHttpContext.Object };
 
             var result = await controller.RemoveLogin(UserName, model);
@@ -3498,6 +3874,7 @@ namespace UnitTests.Controllers
             mockCurrentUser.VerifyAll();
             mockHttpContext.VerifyAll();
             mockEmailSender.VerifyAll();
+            mockClanManager.VerifyAll();
 
             // Workaround for a Moq bug. See: https://github.com/moq/moq4/issues/456#issuecomment-331692858
             mockUserManager.Object.Logger = mockUserManager.Object.Logger;
@@ -3539,6 +3916,7 @@ namespace UnitTests.Controllers
             mockHttpContext.SetupGet(_ => _.User).Returns(mockCurrentUser.Object).Verifiable();
 
             var mockEmailSender = new Mock<IEmailSender>(MockBehavior.Strict);
+            var mockClanManager = new Mock<IClanManager>(MockBehavior.Strict);
 
             var controller = new UserController(
                 gameData,
@@ -3546,7 +3924,8 @@ namespace UnitTests.Controllers
                 mockDatabaseCommandFactory.Object,
                 mockUserSettingsProvider.Object,
                 mockUserManager.Object,
-                mockEmailSender.Object);
+                mockEmailSender.Object,
+                mockClanManager.Object);
             controller.ControllerContext = new ControllerContext { HttpContext = mockHttpContext.Object };
 
             var result = await controller.PatchSettings(UserName, userSettings);
@@ -3559,6 +3938,7 @@ namespace UnitTests.Controllers
             mockCurrentUser.VerifyAll();
             mockHttpContext.VerifyAll();
             mockEmailSender.VerifyAll();
+            mockClanManager.VerifyAll();
 
             // Workaround for a Moq bug. See: https://github.com/moq/moq4/issues/456#issuecomment-331692858
             mockUserManager.Object.Logger = mockUserManager.Object.Logger;
@@ -3601,6 +3981,7 @@ namespace UnitTests.Controllers
             mockHttpContext.SetupGet(_ => _.User).Returns(mockCurrentUser.Object).Verifiable();
 
             var mockEmailSender = new Mock<IEmailSender>(MockBehavior.Strict);
+            var mockClanManager = new Mock<IClanManager>(MockBehavior.Strict);
 
             var controller = new UserController(
                 gameData,
@@ -3608,7 +3989,8 @@ namespace UnitTests.Controllers
                 mockDatabaseCommandFactory.Object,
                 mockUserSettingsProvider.Object,
                 mockUserManager.Object,
-                mockEmailSender.Object);
+                mockEmailSender.Object,
+                mockClanManager.Object);
             controller.ControllerContext = new ControllerContext { HttpContext = mockHttpContext.Object };
 
             var result = await controller.SetPassword(UserName, model);
@@ -3621,6 +4003,7 @@ namespace UnitTests.Controllers
             mockCurrentUser.VerifyAll();
             mockHttpContext.VerifyAll();
             mockEmailSender.VerifyAll();
+            mockClanManager.VerifyAll();
 
             // Workaround for a Moq bug. See: https://github.com/moq/moq4/issues/456#issuecomment-331692858
             mockUserManager.Object.Logger = mockUserManager.Object.Logger;
@@ -3643,6 +4026,7 @@ namespace UnitTests.Controllers
             var mockUserSettingsProvider = new Mock<IUserSettingsProvider>(MockBehavior.Strict);
             var mockUserManager = MockUserManager.CreateMock();
             var mockEmailSender = new Mock<IEmailSender>(MockBehavior.Strict);
+            var mockClanManager = new Mock<IClanManager>(MockBehavior.Strict);
 
             var controller = new UserController(
                 gameData,
@@ -3650,7 +4034,8 @@ namespace UnitTests.Controllers
                 mockDatabaseCommandFactory.Object,
                 mockUserSettingsProvider.Object,
                 mockUserManager.Object,
-                mockEmailSender.Object);
+                mockEmailSender.Object,
+                mockClanManager.Object);
 
             var result = await controller.SetPassword(null, model);
 
@@ -3660,6 +4045,7 @@ namespace UnitTests.Controllers
             mockDatabaseCommandFactory.VerifyAll();
             mockUserSettingsProvider.VerifyAll();
             mockEmailSender.VerifyAll();
+            mockClanManager.VerifyAll();
 
             // Workaround for a Moq bug. See: https://github.com/moq/moq4/issues/456#issuecomment-331692858
             mockUserManager.Object.Logger = mockUserManager.Object.Logger;
@@ -3678,6 +4064,7 @@ namespace UnitTests.Controllers
             var mockUserSettingsProvider = new Mock<IUserSettingsProvider>(MockBehavior.Strict);
             var mockUserManager = MockUserManager.CreateMock();
             var mockEmailSender = new Mock<IEmailSender>(MockBehavior.Strict);
+            var mockClanManager = new Mock<IClanManager>(MockBehavior.Strict);
 
             var controller = new UserController(
                 gameData,
@@ -3685,7 +4072,8 @@ namespace UnitTests.Controllers
                 mockDatabaseCommandFactory.Object,
                 mockUserSettingsProvider.Object,
                 mockUserManager.Object,
-                mockEmailSender.Object);
+                mockEmailSender.Object,
+                mockClanManager.Object);
             controller.ModelState.AddModelError("SomeKey", "SomeErrorMessage");
             var result = await controller.SetPassword(UserName, model);
 
@@ -3722,6 +4110,7 @@ namespace UnitTests.Controllers
                 .Returns(Task.FromResult<ApplicationUser>(null));
 
             var mockEmailSender = new Mock<IEmailSender>(MockBehavior.Strict);
+            var mockClanManager = new Mock<IClanManager>(MockBehavior.Strict);
 
             var controller = new UserController(
                 gameData,
@@ -3729,7 +4118,8 @@ namespace UnitTests.Controllers
                 mockDatabaseCommandFactory.Object,
                 mockUserSettingsProvider.Object,
                 mockUserManager.Object,
-                mockEmailSender.Object);
+                mockEmailSender.Object,
+                mockClanManager.Object);
 
             var result = await controller.SetPassword(UserName, model);
 
@@ -3739,6 +4129,7 @@ namespace UnitTests.Controllers
             mockDatabaseCommandFactory.VerifyAll();
             mockUserSettingsProvider.VerifyAll();
             mockEmailSender.VerifyAll();
+            mockClanManager.VerifyAll();
 
             // Workaround for a Moq bug. See: https://github.com/moq/moq4/issues/456#issuecomment-331692858
             mockUserManager.Object.Logger = mockUserManager.Object.Logger;
@@ -3771,6 +4162,7 @@ namespace UnitTests.Controllers
                 .Returns(Task.FromResult<string>(null));
 
             var mockEmailSender = new Mock<IEmailSender>(MockBehavior.Strict);
+            var mockClanManager = new Mock<IClanManager>(MockBehavior.Strict);
 
             var controller = new UserController(
                 gameData,
@@ -3778,7 +4170,8 @@ namespace UnitTests.Controllers
                 mockDatabaseCommandFactory.Object,
                 mockUserSettingsProvider.Object,
                 mockUserManager.Object,
-                mockEmailSender.Object);
+                mockEmailSender.Object,
+                mockClanManager.Object);
 
             var result = await controller.SetPassword(UserName, model);
 
@@ -3788,6 +4181,7 @@ namespace UnitTests.Controllers
             mockDatabaseCommandFactory.VerifyAll();
             mockUserSettingsProvider.VerifyAll();
             mockEmailSender.VerifyAll();
+            mockClanManager.VerifyAll();
 
             // Workaround for a Moq bug. See: https://github.com/moq/moq4/issues/456#issuecomment-331692858
             mockUserManager.Object.Logger = mockUserManager.Object.Logger;
@@ -3831,6 +4225,7 @@ namespace UnitTests.Controllers
             mockHttpContext.SetupGet(_ => _.User).Returns(mockCurrentUser.Object).Verifiable();
 
             var mockEmailSender = new Mock<IEmailSender>(MockBehavior.Strict);
+            var mockClanManager = new Mock<IClanManager>(MockBehavior.Strict);
 
             var controller = new UserController(
                 gameData,
@@ -3838,7 +4233,8 @@ namespace UnitTests.Controllers
                 mockDatabaseCommandFactory.Object,
                 mockUserSettingsProvider.Object,
                 mockUserManager.Object,
-                mockEmailSender.Object);
+                mockEmailSender.Object,
+                mockClanManager.Object);
             controller.ControllerContext = new ControllerContext { HttpContext = mockHttpContext.Object };
 
             var result = await controller.SetPassword(UserName, model);
@@ -3851,6 +4247,7 @@ namespace UnitTests.Controllers
             mockCurrentUser.VerifyAll();
             mockHttpContext.VerifyAll();
             mockEmailSender.VerifyAll();
+            mockClanManager.VerifyAll();
 
             // Workaround for a Moq bug. See: https://github.com/moq/moq4/issues/456#issuecomment-331692858
             mockUserManager.Object.Logger = mockUserManager.Object.Logger;
@@ -3897,6 +4294,7 @@ namespace UnitTests.Controllers
             mockHttpContext.SetupGet(_ => _.User).Returns(mockCurrentUser.Object).Verifiable();
 
             var mockEmailSender = new Mock<IEmailSender>(MockBehavior.Strict);
+            var mockClanManager = new Mock<IClanManager>(MockBehavior.Strict);
 
             var controller = new UserController(
                 gameData,
@@ -3904,7 +4302,8 @@ namespace UnitTests.Controllers
                 mockDatabaseCommandFactory.Object,
                 mockUserSettingsProvider.Object,
                 mockUserManager.Object,
-                mockEmailSender.Object);
+                mockEmailSender.Object,
+                mockClanManager.Object);
             controller.ControllerContext = new ControllerContext { HttpContext = mockHttpContext.Object };
 
             var result = await controller.SetPassword(UserName, model);
@@ -3917,6 +4316,7 @@ namespace UnitTests.Controllers
             mockCurrentUser.VerifyAll();
             mockHttpContext.VerifyAll();
             mockEmailSender.VerifyAll();
+            mockClanManager.VerifyAll();
 
             // Workaround for a Moq bug. See: https://github.com/moq/moq4/issues/456#issuecomment-331692858
             mockUserManager.Object.Logger = mockUserManager.Object.Logger;
@@ -3959,6 +4359,7 @@ namespace UnitTests.Controllers
             mockHttpContext.SetupGet(_ => _.User).Returns(mockCurrentUser.Object).Verifiable();
 
             var mockEmailSender = new Mock<IEmailSender>(MockBehavior.Strict);
+            var mockClanManager = new Mock<IClanManager>(MockBehavior.Strict);
 
             var controller = new UserController(
                 gameData,
@@ -3966,7 +4367,8 @@ namespace UnitTests.Controllers
                 mockDatabaseCommandFactory.Object,
                 mockUserSettingsProvider.Object,
                 mockUserManager.Object,
-                mockEmailSender.Object);
+                mockEmailSender.Object,
+                mockClanManager.Object);
             controller.ControllerContext = new ControllerContext { HttpContext = mockHttpContext.Object };
 
             var result = await controller.SetPassword(UserName, model);
@@ -3980,6 +4382,7 @@ namespace UnitTests.Controllers
             mockCurrentUser.VerifyAll();
             mockHttpContext.VerifyAll();
             mockEmailSender.VerifyAll();
+            mockClanManager.VerifyAll();
 
             // Workaround for a Moq bug. See: https://github.com/moq/moq4/issues/456#issuecomment-331692858
             mockUserManager.Object.Logger = mockUserManager.Object.Logger;
@@ -4024,6 +4427,7 @@ namespace UnitTests.Controllers
             mockHttpContext.SetupGet(_ => _.User).Returns(mockCurrentUser.Object).Verifiable();
 
             var mockEmailSender = new Mock<IEmailSender>(MockBehavior.Strict);
+            var mockClanManager = new Mock<IClanManager>(MockBehavior.Strict);
 
             var controller = new UserController(
                 gameData,
@@ -4031,7 +4435,8 @@ namespace UnitTests.Controllers
                 mockDatabaseCommandFactory.Object,
                 mockUserSettingsProvider.Object,
                 mockUserManager.Object,
-                mockEmailSender.Object);
+                mockEmailSender.Object,
+                mockClanManager.Object);
             controller.ControllerContext = new ControllerContext { HttpContext = mockHttpContext.Object };
 
             var result = await controller.ChangePassword(UserName, model);
@@ -4044,6 +4449,7 @@ namespace UnitTests.Controllers
             mockCurrentUser.VerifyAll();
             mockHttpContext.VerifyAll();
             mockEmailSender.VerifyAll();
+            mockClanManager.VerifyAll();
 
             // Workaround for a Moq bug. See: https://github.com/moq/moq4/issues/456#issuecomment-331692858
             mockUserManager.Object.Logger = mockUserManager.Object.Logger;
@@ -4068,6 +4474,7 @@ namespace UnitTests.Controllers
             var mockUserSettingsProvider = new Mock<IUserSettingsProvider>(MockBehavior.Strict);
             var mockUserManager = MockUserManager.CreateMock();
             var mockEmailSender = new Mock<IEmailSender>(MockBehavior.Strict);
+            var mockClanManager = new Mock<IClanManager>(MockBehavior.Strict);
 
             var controller = new UserController(
                 gameData,
@@ -4075,7 +4482,8 @@ namespace UnitTests.Controllers
                 mockDatabaseCommandFactory.Object,
                 mockUserSettingsProvider.Object,
                 mockUserManager.Object,
-                mockEmailSender.Object);
+                mockEmailSender.Object,
+                mockClanManager.Object);
 
             var result = await controller.ChangePassword(null, model);
 
@@ -4085,6 +4493,7 @@ namespace UnitTests.Controllers
             mockDatabaseCommandFactory.VerifyAll();
             mockUserSettingsProvider.VerifyAll();
             mockEmailSender.VerifyAll();
+            mockClanManager.VerifyAll();
 
             // Workaround for a Moq bug. See: https://github.com/moq/moq4/issues/456#issuecomment-331692858
             mockUserManager.Object.Logger = mockUserManager.Object.Logger;
@@ -4103,6 +4512,7 @@ namespace UnitTests.Controllers
             var mockUserSettingsProvider = new Mock<IUserSettingsProvider>(MockBehavior.Strict);
             var mockUserManager = MockUserManager.CreateMock();
             var mockEmailSender = new Mock<IEmailSender>(MockBehavior.Strict);
+            var mockClanManager = new Mock<IClanManager>(MockBehavior.Strict);
 
             var controller = new UserController(
                 gameData,
@@ -4110,7 +4520,8 @@ namespace UnitTests.Controllers
                 mockDatabaseCommandFactory.Object,
                 mockUserSettingsProvider.Object,
                 mockUserManager.Object,
-                mockEmailSender.Object);
+                mockEmailSender.Object,
+                mockClanManager.Object);
             controller.ModelState.AddModelError("SomeKey", "SomeErrorMessage");
             var result = await controller.ChangePassword(UserName, model);
 
@@ -4149,6 +4560,7 @@ namespace UnitTests.Controllers
                 .Returns(Task.FromResult<ApplicationUser>(null));
 
             var mockEmailSender = new Mock<IEmailSender>(MockBehavior.Strict);
+            var mockClanManager = new Mock<IClanManager>(MockBehavior.Strict);
 
             var controller = new UserController(
                 gameData,
@@ -4156,7 +4568,8 @@ namespace UnitTests.Controllers
                 mockDatabaseCommandFactory.Object,
                 mockUserSettingsProvider.Object,
                 mockUserManager.Object,
-                mockEmailSender.Object);
+                mockEmailSender.Object,
+                mockClanManager.Object);
 
             var result = await controller.ChangePassword(UserName, model);
 
@@ -4166,6 +4579,7 @@ namespace UnitTests.Controllers
             mockDatabaseCommandFactory.VerifyAll();
             mockUserSettingsProvider.VerifyAll();
             mockEmailSender.VerifyAll();
+            mockClanManager.VerifyAll();
 
             // Workaround for a Moq bug. See: https://github.com/moq/moq4/issues/456#issuecomment-331692858
             mockUserManager.Object.Logger = mockUserManager.Object.Logger;
@@ -4200,6 +4614,7 @@ namespace UnitTests.Controllers
                 .Returns(Task.FromResult<string>(null));
 
             var mockEmailSender = new Mock<IEmailSender>(MockBehavior.Strict);
+            var mockClanManager = new Mock<IClanManager>(MockBehavior.Strict);
 
             var controller = new UserController(
                 gameData,
@@ -4207,7 +4622,8 @@ namespace UnitTests.Controllers
                 mockDatabaseCommandFactory.Object,
                 mockUserSettingsProvider.Object,
                 mockUserManager.Object,
-                mockEmailSender.Object);
+                mockEmailSender.Object,
+                mockClanManager.Object);
 
             var result = await controller.ChangePassword(UserName, model);
 
@@ -4217,6 +4633,7 @@ namespace UnitTests.Controllers
             mockDatabaseCommandFactory.VerifyAll();
             mockUserSettingsProvider.VerifyAll();
             mockEmailSender.VerifyAll();
+            mockClanManager.VerifyAll();
 
             // Workaround for a Moq bug. See: https://github.com/moq/moq4/issues/456#issuecomment-331692858
             mockUserManager.Object.Logger = mockUserManager.Object.Logger;
@@ -4262,6 +4679,7 @@ namespace UnitTests.Controllers
             mockHttpContext.SetupGet(_ => _.User).Returns(mockCurrentUser.Object).Verifiable();
 
             var mockEmailSender = new Mock<IEmailSender>(MockBehavior.Strict);
+            var mockClanManager = new Mock<IClanManager>(MockBehavior.Strict);
 
             var controller = new UserController(
                 gameData,
@@ -4269,7 +4687,8 @@ namespace UnitTests.Controllers
                 mockDatabaseCommandFactory.Object,
                 mockUserSettingsProvider.Object,
                 mockUserManager.Object,
-                mockEmailSender.Object);
+                mockEmailSender.Object,
+                mockClanManager.Object);
             controller.ControllerContext = new ControllerContext { HttpContext = mockHttpContext.Object };
 
             var result = await controller.ChangePassword(UserName, model);
@@ -4282,6 +4701,7 @@ namespace UnitTests.Controllers
             mockCurrentUser.VerifyAll();
             mockHttpContext.VerifyAll();
             mockEmailSender.VerifyAll();
+            mockClanManager.VerifyAll();
 
             // Workaround for a Moq bug. See: https://github.com/moq/moq4/issues/456#issuecomment-331692858
             mockUserManager.Object.Logger = mockUserManager.Object.Logger;
@@ -4330,6 +4750,7 @@ namespace UnitTests.Controllers
             mockHttpContext.SetupGet(_ => _.User).Returns(mockCurrentUser.Object).Verifiable();
 
             var mockEmailSender = new Mock<IEmailSender>(MockBehavior.Strict);
+            var mockClanManager = new Mock<IClanManager>(MockBehavior.Strict);
 
             var controller = new UserController(
                 gameData,
@@ -4337,7 +4758,8 @@ namespace UnitTests.Controllers
                 mockDatabaseCommandFactory.Object,
                 mockUserSettingsProvider.Object,
                 mockUserManager.Object,
-                mockEmailSender.Object);
+                mockEmailSender.Object,
+                mockClanManager.Object);
             controller.ControllerContext = new ControllerContext { HttpContext = mockHttpContext.Object };
 
             var result = await controller.ChangePassword(UserName, model);
@@ -4350,6 +4772,7 @@ namespace UnitTests.Controllers
             mockCurrentUser.VerifyAll();
             mockHttpContext.VerifyAll();
             mockEmailSender.VerifyAll();
+            mockClanManager.VerifyAll();
 
             // Workaround for a Moq bug. See: https://github.com/moq/moq4/issues/456#issuecomment-331692858
             mockUserManager.Object.Logger = mockUserManager.Object.Logger;
@@ -4394,6 +4817,7 @@ namespace UnitTests.Controllers
             mockHttpContext.SetupGet(_ => _.User).Returns(mockCurrentUser.Object).Verifiable();
 
             var mockEmailSender = new Mock<IEmailSender>(MockBehavior.Strict);
+            var mockClanManager = new Mock<IClanManager>(MockBehavior.Strict);
 
             var controller = new UserController(
                 gameData,
@@ -4401,7 +4825,8 @@ namespace UnitTests.Controllers
                 mockDatabaseCommandFactory.Object,
                 mockUserSettingsProvider.Object,
                 mockUserManager.Object,
-                mockEmailSender.Object);
+                mockEmailSender.Object,
+                mockClanManager.Object);
             controller.ControllerContext = new ControllerContext { HttpContext = mockHttpContext.Object };
 
             var result = await controller.ChangePassword(UserName, model);
@@ -4415,6 +4840,7 @@ namespace UnitTests.Controllers
             mockCurrentUser.VerifyAll();
             mockHttpContext.VerifyAll();
             mockEmailSender.VerifyAll();
+            mockClanManager.VerifyAll();
 
             // Workaround for a Moq bug. See: https://github.com/moq/moq4/issues/456#issuecomment-331692858
             mockUserManager.Object.Logger = mockUserManager.Object.Logger;
@@ -4450,13 +4876,16 @@ namespace UnitTests.Controllers
                 .Setup(_ => _.SendEmailAsync(model.Email, It.IsAny<string>(), It.Is<string>(str => str.Contains(Code))))
                 .Returns(Task.CompletedTask);
 
+            var mockClanManager = new Mock<IClanManager>(MockBehavior.Strict);
+
             var controller = new UserController(
                 gameData,
                 telemetryClient,
                 mockDatabaseCommandFactory.Object,
                 mockUserSettingsProvider.Object,
                 mockUserManager.Object,
-                mockEmailSender.Object);
+                mockEmailSender.Object,
+                mockClanManager.Object);
             var result = await controller.ResetPassword(model);
 
             Assert.NotNull(result);
@@ -4465,6 +4894,7 @@ namespace UnitTests.Controllers
             mockDatabaseCommandFactory.VerifyAll();
             mockUserSettingsProvider.VerifyAll();
             mockEmailSender.VerifyAll();
+            mockClanManager.VerifyAll();
 
             // Workaround for a Moq bug. See: https://github.com/moq/moq4/issues/456#issuecomment-331692858
             mockUserManager.Object.Logger = mockUserManager.Object.Logger;
@@ -4484,6 +4914,7 @@ namespace UnitTests.Controllers
             var mockDatabaseCommandFactory = new Mock<IDatabaseCommandFactory>(MockBehavior.Strict);
             var mockUserSettingsProvider = new Mock<IUserSettingsProvider>(MockBehavior.Strict);
             var mockEmailSender = new Mock<IEmailSender>(MockBehavior.Strict);
+            var mockClanManager = new Mock<IClanManager>(MockBehavior.Strict);
 
             var mockUserManager = MockUserManager.CreateMock();
             mockUserManager
@@ -4496,7 +4927,8 @@ namespace UnitTests.Controllers
                 mockDatabaseCommandFactory.Object,
                 mockUserSettingsProvider.Object,
                 mockUserManager.Object,
-                mockEmailSender.Object);
+                mockEmailSender.Object,
+                mockClanManager.Object);
             var result = await controller.ResetPassword(model);
 
             Assert.NotNull(result);
@@ -4520,6 +4952,7 @@ namespace UnitTests.Controllers
             var mockUserSettingsProvider = new Mock<IUserSettingsProvider>(MockBehavior.Strict);
             var mockUserManager = MockUserManager.CreateMock();
             var mockEmailSender = new Mock<IEmailSender>(MockBehavior.Strict);
+            var mockClanManager = new Mock<IClanManager>(MockBehavior.Strict);
 
             var controller = new UserController(
                 gameData,
@@ -4527,7 +4960,8 @@ namespace UnitTests.Controllers
                 mockDatabaseCommandFactory.Object,
                 mockUserSettingsProvider.Object,
                 mockUserManager.Object,
-                mockEmailSender.Object);
+                mockEmailSender.Object,
+                mockClanManager.Object);
             controller.ModelState.AddModelError("SomeKey", "SomeErrorMessage");
             var result = await controller.ResetPassword(model);
 
@@ -4557,6 +4991,7 @@ namespace UnitTests.Controllers
             var mockDatabaseCommandFactory = new Mock<IDatabaseCommandFactory>(MockBehavior.Strict);
             var mockUserSettingsProvider = new Mock<IUserSettingsProvider>(MockBehavior.Strict);
             var mockEmailSender = new Mock<IEmailSender>(MockBehavior.Strict);
+            var mockClanManager = new Mock<IClanManager>(MockBehavior.Strict);
 
             var mockUser = new ApplicationUser();
             var mockUserManager = MockUserManager.CreateMock();
@@ -4573,7 +5008,8 @@ namespace UnitTests.Controllers
                 mockDatabaseCommandFactory.Object,
                 mockUserSettingsProvider.Object,
                 mockUserManager.Object,
-                mockEmailSender.Object);
+                mockEmailSender.Object,
+                mockClanManager.Object);
             var result = await controller.ResetPasswordConfirmation(model);
 
             Assert.NotNull(result);
@@ -4582,6 +5018,7 @@ namespace UnitTests.Controllers
             mockDatabaseCommandFactory.VerifyAll();
             mockUserSettingsProvider.VerifyAll();
             mockEmailSender.VerifyAll();
+            mockClanManager.VerifyAll();
 
             // Workaround for a Moq bug. See: https://github.com/moq/moq4/issues/456#issuecomment-331692858
             mockUserManager.Object.Logger = mockUserManager.Object.Logger;
@@ -4603,6 +5040,7 @@ namespace UnitTests.Controllers
             var mockDatabaseCommandFactory = new Mock<IDatabaseCommandFactory>(MockBehavior.Strict);
             var mockUserSettingsProvider = new Mock<IUserSettingsProvider>(MockBehavior.Strict);
             var mockEmailSender = new Mock<IEmailSender>(MockBehavior.Strict);
+            var mockClanManager = new Mock<IClanManager>(MockBehavior.Strict);
 
             var mockUserManager = MockUserManager.CreateMock();
             mockUserManager
@@ -4615,7 +5053,8 @@ namespace UnitTests.Controllers
                 mockDatabaseCommandFactory.Object,
                 mockUserSettingsProvider.Object,
                 mockUserManager.Object,
-                mockEmailSender.Object);
+                mockEmailSender.Object,
+                mockClanManager.Object);
             var result = await controller.ResetPasswordConfirmation(model);
 
             Assert.NotNull(result);
@@ -4644,6 +5083,7 @@ namespace UnitTests.Controllers
             var mockDatabaseCommandFactory = new Mock<IDatabaseCommandFactory>(MockBehavior.Strict);
             var mockUserSettingsProvider = new Mock<IUserSettingsProvider>(MockBehavior.Strict);
             var mockEmailSender = new Mock<IEmailSender>(MockBehavior.Strict);
+            var mockClanManager = new Mock<IClanManager>(MockBehavior.Strict);
 
             var mockUser = new ApplicationUser();
             var mockUserManager = MockUserManager.CreateMock();
@@ -4660,7 +5100,8 @@ namespace UnitTests.Controllers
                 mockDatabaseCommandFactory.Object,
                 mockUserSettingsProvider.Object,
                 mockUserManager.Object,
-                mockEmailSender.Object);
+                mockEmailSender.Object,
+                mockClanManager.Object);
             var result = await controller.ResetPasswordConfirmation(model);
 
             Assert.NotNull(result);
@@ -4685,6 +5126,7 @@ namespace UnitTests.Controllers
             var mockUserSettingsProvider = new Mock<IUserSettingsProvider>(MockBehavior.Strict);
             var mockUserManager = MockUserManager.CreateMock();
             var mockEmailSender = new Mock<IEmailSender>(MockBehavior.Strict);
+            var mockClanManager = new Mock<IClanManager>(MockBehavior.Strict);
 
             var controller = new UserController(
                 gameData,
@@ -4692,7 +5134,8 @@ namespace UnitTests.Controllers
                 mockDatabaseCommandFactory.Object,
                 mockUserSettingsProvider.Object,
                 mockUserManager.Object,
-                mockEmailSender.Object);
+                mockEmailSender.Object,
+                mockClanManager.Object);
             controller.ModelState.AddModelError("SomeKey", "SomeErrorMessage");
             var result = await controller.ResetPasswordConfirmation(model);
 

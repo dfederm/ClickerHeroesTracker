@@ -63,6 +63,7 @@ namespace ClickerHeroesTrackerWebsite.Controllers
                 { "@UploadId", uploadId },
             };
 
+            string uploadUserId;
             string uploadContent;
             var upload = new Upload { Id = uploadId };
             const string GetUploadDataCommandText = @"
@@ -78,15 +79,15 @@ namespace ClickerHeroesTrackerWebsite.Controllers
             {
                 if (reader.Read())
                 {
-                    var uploadUserId = reader["UserId"].ToString();
-                    var uploadUserName = reader["UserName"].ToString();
+                    uploadUserId = reader["UserId"].ToString();
 
-                    if (!string.IsNullOrEmpty(uploadUserId))
+                    var uploadUserName = reader["UserName"].ToString();
+                    if (!string.IsNullOrEmpty(uploadUserName))
                     {
-                        upload.User = new User()
+                        upload.User = new User
                         {
-                            Id = uploadUserId,
                             Name = uploadUserName,
+                            ClanName = await this.clanManager.GetClanNameAsync(uploadUserId),
                         };
                     }
 
@@ -105,8 +106,8 @@ namespace ClickerHeroesTrackerWebsite.Controllers
 
             var isAdmin = this.User.IsInRole("Admin");
             var isUploadAnonymous = upload.User == null;
-            var isOwn = !isUploadAnonymous && string.Equals(this.userManager.GetUserId(this.User), upload.User.Id, StringComparison.OrdinalIgnoreCase);
-            var uploadUserSettings = await this.userSettingsProvider.GetAsync(upload.User?.Id);
+            var isOwn = !isUploadAnonymous && string.Equals(this.userManager.GetUserId(this.User), uploadUserId, StringComparison.OrdinalIgnoreCase);
+            var uploadUserSettings = await this.userSettingsProvider.GetAsync(uploadUserId);
             var isPublic = isUploadAnonymous || uploadUserSettings.AreUploadsPublic.GetValueOrDefault(true);
             var isPermitted = isOwn || isPublic || isAdmin;
 

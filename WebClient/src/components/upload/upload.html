@@ -19,6 +19,7 @@
                        routerLink="/users/{{userName}}">{{ userName }}</a>
                     <span *ngIf="!userName"
                           class="text-muted">(Anonymous)</span>
+                    <span *ngIf="clanName">&lt;{{ clanName }}&gt;</span>
                 </li>
                 <li>
                     <label>Upload Time:</label>
@@ -87,7 +88,7 @@
                 </div>
             </ng-template>
 
-            <button *ngIf="userId && userInfo && userId === userInfo.id"
+            <button *ngIf="userName && userInfo && userName === userInfo.username"
                     class="btn btn-danger"
                     (click)="openModal(deleteUploadModal)">
                 Delete

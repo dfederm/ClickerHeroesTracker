@@ -5,6 +5,7 @@ import { HttpHeaders, HttpErrorResponse } from "@angular/common/http";
 
 import { UserService, IProgressData, IFollowsData, IUserLogins, IUploadSummaryListResponse } from "./userService";
 import { AuthenticationService } from "../authenticationService/authenticationService";
+import { IUser } from "../../models";
 
 describe("UserService", () => {
     let userService: UserService;
@@ -97,6 +98,62 @@ describe("UserService", () => {
             expect(errors).toEqual(expectedValidationErrors);
             expect(httpErrorHandlerService.logError).toHaveBeenCalledWith("UserService.create.error", jasmine.any(HttpErrorResponse));
             expect(httpErrorHandlerService.getValidationErrors).toHaveBeenCalledWith(jasmine.any(HttpErrorResponse));
+        }));
+    });
+
+    describe("getUser", () => {
+        const apiRequest = { method: "get", url: `/api/users/${userName}` };
+
+        it("should make an api call", fakeAsync(() => {
+            userService.getUser(userName);
+
+            // Tick the getAuthHeaders call
+            tick();
+
+            httpMock.expectOne(apiRequest);
+        }));
+
+        it("should return some uploads", fakeAsync(() => {
+            let response: IUser;
+            let error: HttpErrorResponse;
+            userService.getUser(userName)
+                .then((r: IUser) => response = r)
+                .catch((e: HttpErrorResponse) => error = e);
+
+            // Tick the getAuthHeaders call
+            tick();
+
+            let expectedResponse: IUser = { name: "someName", clanName: "someClanName" };
+            let request = httpMock.expectOne(apiRequest);
+            request.flush(expectedResponse);
+            tick();
+
+            expect(response).toEqual(expectedResponse, "should return the expected response");
+            expect(error).toBeUndefined();
+            expect(httpErrorHandlerService.logError).not.toHaveBeenCalled();
+            expect(httpErrorHandlerService.getValidationErrors).not.toHaveBeenCalled();
+        }));
+
+        it("should handle http errors", fakeAsync(() => {
+            let response: IUser;
+            let error: HttpErrorResponse;
+            userService.getUser(userName)
+                .then((r: IUser) => response = r)
+                .catch((e: HttpErrorResponse) => error = e);
+
+            // Tick the getAuthHeaders call
+            tick();
+
+            let request = httpMock.expectOne(apiRequest);
+            request.flush(null, { status: 500, statusText: "someStatus" });
+            tick();
+
+            expect(response).toBeUndefined();
+            expect(error).toBeDefined();
+            expect(error.status).toEqual(500);
+            expect(error.statusText).toEqual("someStatus");
+            expect(httpErrorHandlerService.logError).toHaveBeenCalledWith("UserService.getUser.error", error);
+            expect(httpErrorHandlerService.getValidationErrors).not.toHaveBeenCalled();
         }));
     });
 
