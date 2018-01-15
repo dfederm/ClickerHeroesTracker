@@ -1,71 +1,13 @@
 <div class="container">
-    <h2>Clans</h2>
+    <h2>Clan Leaderboard</h2>
     <div class="row">
         <div class="col-lg-6">
-            <h3 *ngIf="clanName">{{ clanName }}</h3>
-            <ngx-loading [show]="isClanInformationLoading && !isClanInformationError"></ngx-loading>
-            <p *ngIf="isClanInformationError"
-               class="alert alert-danger">
-                There was a problem getting your clan's data
-            </p>
-            <p *ngIf="!clanName && !isClanInformationError && !isClanInformationLoading">
-                You are not currently in a clan
-            </p>
-            <table *ngIf="guildMembers"
-                   class="table table-sm table-striped">
-                <thead>
-                    <tr>
-                        <th>Name</th>
-                        <th class="text-right">Highest Zone</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr *ngFor="let guildMember of guildMembers">
-                        <td>{{ guildMember.nickname }}</td>
-                        <td class="text-right">{{ guildMember.highestZone }}</td>
-                    </tr>
-                </tbody>
-            </table>
-            <div>
-                <h3>Message Board</h3>
-                <ngx-loading [show]="isMessagesLoading && !messagesError"></ngx-loading>
-                <p *ngIf="messagesError"
-                   class="alert alert-danger">
-                    {{ messagesError }}
-                </p>
-                <form (ngSubmit)="sendMessage()"
-                      class="form-inline">
-                    <input type="text"
-                           id="newMessage"
-                           name="newMessage"
-                           class="form-control"
-                           maxlength="150"
-                           [(ngModel)]="newMessage" />
-                    <button type="submit"
-                            class="btn btn-success">Send</button>
-                </form>
-                <div *ngFor="let message of messages"
-                     class="clan-message">
-                    <p>
-                        <span>
-                            ({{ message.date | timeAgo }})
-                        </span>
-                        <span [ngClass]="{'text-muted' : !message.username}">
-                            {{ message.username || "(Unknown)" }}
-                        </span>
-                    </p>
-                    <p class="clan-message-content">{{ message.content }}</p>
-                </div>
-            </div>
-        </div>
-        <div class="col-lg-6">
-            <h3>Clans Leaderboard</h3>
-            <p *ngIf="isLeaderboardError"
+            <p *ngIf="isError"
                class="alert alert-danger">
                 There was a problem getting leaderboard data
             </p>
-            <ngx-loading [show]="isLeaderboardLoading && !isLeaderboardError"></ngx-loading>
-            <table *ngIf="!isLeaderboardError"
+            <ngx-loading [show]="isLoading && !isError"></ngx-loading>
+            <table *ngIf="!isError"
                    class="table table-sm table-striped">
                 <thead>
                     <tr>
@@ -79,15 +21,18 @@
                     <tr *ngFor="let clan of clans"
                         [ngClass]="{'table-success' : clan.isUserClan}">
                         <td>{{ clan.rank }}</td>
-                        <td>{{ clan.name }}</td>
-                        <td>{{ clan.memberCount }}</td>
-                        <td>{{ clan.currentRaidLevel }}</td>
+                        <td>
+                            <a *ngIf="clan.name"
+                               routerLink="/clans/{{clan.name}}">{{ clan.name }}</a>
+                        </td>
+                        <td>{{ clan.memberCount | number }}</td>
+                        <td>{{ clan.currentRaidLevel | number }}</td>
                     </tr>
                 </tbody>
             </table>
             <ngb-pagination [collectionSize]="totalClans"
-                            [(page)]="leaderboardPage"
-                            [pageSize]="leaderboardCount"
+                            [(page)]="page"
+                            [pageSize]="count"
                             [maxSize]="5"
                             [rotate]="true"
                             [ellipses]="false"

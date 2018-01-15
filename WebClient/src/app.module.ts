@@ -40,6 +40,7 @@ import { NotFoundComponent } from "./components/notFound/notFound";
 import { AncientSuggestionsComponent } from "./components/ancientSuggestions/ancientSuggestions";
 import { OutsiderSuggestionsComponent } from "./components/outsiderSuggestions/outsiderSuggestions";
 import { AscensionZoneComponent } from "./components/ascensionZone/ascensionZone";
+import { ClanComponent } from "./components/clan/clan";
 
 import { OpenDialogDirective } from "./directives/openDialog/openDialog";
 
@@ -61,6 +62,7 @@ const routes: Routes =
     { path: "news", component: NewsComponent },
     { path: "uploads/:id", component: UploadComponent },
     { path: "clans", component: ClansComponent },
+    { path: "clans/:clanName", component: ClanComponent },
     { path: "users/:userName", component: UserComponent },
     { path: "users/:userName/uploads", component: UserUploadsComponent },
     { path: "users/:userName/progress", component: UserProgressComponent },
@@ -118,6 +120,7 @@ const routes: Routes =
       AncientSuggestionsComponent,
       OutsiderSuggestionsComponent,
       AscensionZoneComponent,
+      ClanComponent,
     ],
   entryComponents:
     [

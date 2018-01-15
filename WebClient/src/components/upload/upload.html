@@ -19,7 +19,8 @@
                        routerLink="/users/{{userName}}">{{ userName }}</a>
                     <span *ngIf="!userName"
                           class="text-muted">(Anonymous)</span>
-                    <span *ngIf="clanName">&lt;{{ clanName }}&gt;</span>
+                    <a *ngIf="clanName"
+                       routerLink="/clans/{{clanName}}">&lt;{{ clanName }}&gt;</a>
                 </li>
                 <li>
                     <label>Upload Time:</label>
