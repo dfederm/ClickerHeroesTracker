@@ -65,6 +65,7 @@ describe("NavbarComponent", () => {
             let expectedLinks: { text: string, url?: string, dialog?: Type<{}> }[] =
                 [
                     { text: "Upload", dialog: component.UploadDialogComponent },
+                    { text: "Clans", url: "/clans" },
                     { text: "What's New", url: "/news" },
                     { text: "Feedback", dialog: component.FeedbackDialogComponent },
                     { text: "", url: "https://github.com/dfederm/ClickerHeroesTracker" },
