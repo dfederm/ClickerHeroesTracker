@@ -11,5 +11,7 @@ namespace ClickerHeroesTrackerWebsite.Models.Api.Clans
         public string Nickname { get; set; }
 
         public string Uid { get; set; }
+
+        public string UserName { get; set; }
     }
 }

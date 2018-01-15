@@ -39,18 +39,12 @@ namespace ClickerHeroesTrackerWebsite.Controllers
                 return this.BadRequest();
             }
 
-            // Fetch in parallel
-            var clanDataTask = this.clanManager.GetClanDataAsync(clanName);
-            var guildMembersTask = this.clanManager.GetGuildMembersAsync(clanName);
-            await Task.WhenAll(clanDataTask, guildMembersTask);
-
-            var clanData = clanDataTask.Result;
+            var clanData = await this.clanManager.GetClanDataAsync(clanName);
             if (clanData == null)
             {
                 return this.NotFound();
             }
 
-            clanData.GuildMembers = guildMembersTask.Result;
             return this.Ok(clanData);
         }
 

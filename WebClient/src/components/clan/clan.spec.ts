@@ -17,7 +17,7 @@ describe("ClanComponent", () => {
 
     let clanMembers = [];
     for (let i = 0; i < 5; i++) {
-        clanMembers.push({ uid: "userId" + i, nickname: "user" + i, highestZone: i });
+        clanMembers.push({ uid: "userId" + i, nickname: "nickname" + i, highestZone: i, userName: i % 2 ? "userName" + i : null });
     }
 
     let clan: IClanData = {
@@ -134,9 +134,14 @@ describe("ClanComponent", () => {
                     let userRow = userRows[i];
                     let guildMember = clan.guildMembers[i];
 
+                    let expectedName = guildMember.nickname;
+                    if (guildMember.userName) {
+                        expectedName += " ( " + guildMember.userName + " )";
+                    }
+
                     let cells = userRow.children;
                     expect(cells.length).toEqual(2);
-                    expect(cells[0].nativeElement.textContent.trim()).toEqual(guildMember.nickname);
+                    expect(cells[0].nativeElement.textContent.trim().replace(/\s+/g, " ")).toEqual(expectedName);
                     expect(cells[1].nativeElement.textContent.trim()).toEqual(guildMember.highestZone.toString());
                 }
             })

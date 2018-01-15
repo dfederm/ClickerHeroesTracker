@@ -13,6 +13,8 @@ export interface IGuildMember {
     nickname: string;
 
     uid: string;
+
+    userName: string;
 }
 
 export interface IClanData {

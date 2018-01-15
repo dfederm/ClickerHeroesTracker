@@ -15,8 +15,6 @@ namespace Website.Services.Clans
 
         Task<ClanData> GetClanDataAsync(string clanName);
 
-        Task<IList<GuildMember>> GetGuildMembersAsync(string clanName);
-
         Task UpdateClanAsync(string userId, string gameUserId, string passwordHash);
 
         Task<IList<Message>> GetMessages(string userId, int count);
