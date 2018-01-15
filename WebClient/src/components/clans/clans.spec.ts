@@ -31,7 +31,7 @@ describe("ClansComponent", () => {
 
     let clanMembers = [];
     for (let i = 0; i < userClan.memberCount; i++) {
-        clanMembers.push({ uid: "userId" + i, nickname: "user" + i, highestZone: i });
+        clanMembers.push({ uid: "userId" + i, nickname: "nickname" + i, highestZone: i, userName: i % 2 ? "userName" + i : null });
     }
 
     let clanData: IClanData = {

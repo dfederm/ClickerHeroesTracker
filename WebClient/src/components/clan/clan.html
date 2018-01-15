@@ -37,7 +37,14 @@
                 </thead>
                 <tbody>
                     <tr *ngFor="let guildMember of guildMembers">
-                        <td>{{ guildMember.nickname }}</td>
+                        <td>
+                            {{ guildMember.nickname }}
+                            <span *ngIf="guildMember.userName">
+                                (
+                                <a routerLink="/users/{{ guildMember.userName }}">{{ guildMember.userName }}</a>
+                                )
+                            </span>
+                        </td>
                         <td class="text-right">{{ guildMember.highestZone | number }}</td>
                     </tr>
                 </tbody>

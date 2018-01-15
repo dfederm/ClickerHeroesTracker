@@ -12,7 +12,6 @@ namespace Website.Services.Clans
     using System.Threading.Tasks;
     using ClickerHeroesTrackerWebsite.Models.Api;
     using ClickerHeroesTrackerWebsite.Models.Api.Clans;
-    using ClickerHeroesTrackerWebsite.Models.SaveData;
     using ClickerHeroesTrackerWebsite.Services.Database;
     using ClickerHeroesTrackerWebsite.Utility;
     using Newtonsoft.Json;
@@ -62,63 +61,17 @@ namespace Website.Services.Clans
 
         public async Task<ClanData> GetClanDataAsync(string clanName)
         {
-            const string CommandText = @"
-                WITH NumberedRows
-                AS
-                (
-                    SELECT ROW_NUMBER() OVER (ORDER BY CurrentRaidLevel DESC) AS RowNumber, CurrentRaidLevel, Name
-                    FROM Clans
-                )
-                SELECT RowNumber, CurrentRaidLevel, @ClanName AS ClanName
-                FROM NumberedRows
-                WHERE Name = @ClanName;";
-            var parameters = new Dictionary<string, object>
-            {
-                { "@ClanName", clanName },
-            };
-            using (var command = this.databaseCommandFactory.Create(CommandText, parameters))
-            using (var reader = await command.ExecuteReaderAsync())
-            {
-                if (reader.Read())
-                {
-                    return new ClanData
-                    {
-                        Rank = Convert.ToInt32(reader["RowNumber"]),
-                        CurrentRaidLevel = Convert.ToInt32(reader["CurrentRaidLevel"]),
-                        ClanName = reader["ClanName"].ToString(),
-                    };
-                }
+            var clanDataTask = this.GetBasicClanDataAsync(clanName);
+            var guildMembersTask = this.GetGuildMembersAsync(clanName);
+            await Task.WhenAll(clanDataTask, guildMembersTask);
 
-                return null;
+            var clanData = clanDataTask.Result;
+            if (clanData != null)
+            {
+                clanData.GuildMembers = guildMembersTask.Result;
             }
-        }
 
-        public async Task<IList<GuildMember>> GetGuildMembersAsync(string clanName)
-        {
-            const string CommandText = @"
-                SELECT Id, Nickname, HighestZone
-                FROM ClanMembers
-                WHERE ClanName = @ClanName;";
-            var parameters = new Dictionary<string, object>
-            {
-                { "@ClanName", clanName },
-            };
-            using (var command = this.databaseCommandFactory.Create(CommandText, parameters))
-            using (var reader = await command.ExecuteReaderAsync())
-            {
-                var guildMembers = new List<GuildMember>();
-                while (reader.Read())
-                {
-                    guildMembers.Add(new GuildMember
-                    {
-                        Uid = reader["Id"].ToString(),
-                        Nickname = reader["Nickname"].ToString(),
-                        HighestZone = Convert.ToInt32(reader["HighestZone"]),
-                    });
-                }
-
-                return guildMembers;
-            }
+            return clanData;
         }
 
         public async Task UpdateClanAsync(string userId, string gameUserId, string passwordHash)
@@ -333,6 +286,72 @@ namespace Website.Services.Clans
                 }
 
                 return pagination;
+            }
+        }
+
+        private async Task<ClanData> GetBasicClanDataAsync(string clanName)
+        {
+            const string CommandText = @"
+                WITH NumberedRows
+                AS
+                (
+                    SELECT ROW_NUMBER() OVER (ORDER BY CurrentRaidLevel DESC) AS RowNumber, CurrentRaidLevel, Name
+                    FROM Clans
+                )
+                SELECT RowNumber, CurrentRaidLevel, @ClanName AS ClanName
+                FROM NumberedRows
+                WHERE Name = @ClanName;";
+            var parameters = new Dictionary<string, object>
+            {
+                { "@ClanName", clanName },
+            };
+            using (var command = this.databaseCommandFactory.Create(CommandText, parameters))
+            using (var reader = await command.ExecuteReaderAsync())
+            {
+                if (reader.Read())
+                {
+                    return new ClanData
+                    {
+                        Rank = Convert.ToInt32(reader["RowNumber"]),
+                        CurrentRaidLevel = Convert.ToInt32(reader["CurrentRaidLevel"]),
+                        ClanName = reader["ClanName"].ToString(),
+                    };
+                }
+
+                return null;
+            }
+        }
+
+        private async Task<IList<GuildMember>> GetGuildMembersAsync(string clanName)
+        {
+            const string CommandText = @"
+                SELECT ClanMembers.Id as Uid, Nickname, HighestZone, UserName
+                FROM ClanMembers
+                LEFT JOIN GameUsers
+                ON ClanMembers.Id = GameUsers.Id
+                LEFT JOIN AspNetUsers
+                ON GameUsers.UserId = AspNetUsers.Id
+                WHERE ClanName = @ClanName;";
+            var parameters = new Dictionary<string, object>
+            {
+                { "@ClanName", clanName },
+            };
+            using (var command = this.databaseCommandFactory.Create(CommandText, parameters))
+            using (var reader = await command.ExecuteReaderAsync())
+            {
+                var guildMembers = new List<GuildMember>();
+                while (reader.Read())
+                {
+                    guildMembers.Add(new GuildMember
+                    {
+                        Uid = reader["Uid"].ToString(),
+                        Nickname = reader["Nickname"].ToString(),
+                        HighestZone = Convert.ToInt32(reader["HighestZone"]),
+                        UserName = reader["UserName"]?.ToString(),
+                    });
+                }
+
+                return guildMembers;
             }
         }
 
