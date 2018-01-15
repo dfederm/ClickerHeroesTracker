@@ -1,7 +1,8 @@
 <div class="container">
     <h2>
         {{ userName }}
-        <span *ngIf="clanName">&lt;{{ clanName }}&gt;</span>
+        <a *ngIf="clanName"
+           routerLink="/clans/{{clanName}}">&lt;{{ clanName }}&gt;</a>
     </h2>
     <div *ngIf="currentUserName && currentUserName !== userName"
          class="row">
