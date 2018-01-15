@@ -30,6 +30,7 @@ namespace ClickerHeroesTrackerWebsite.Controllers
 
         [Route("{clanName}")]
         [HttpGet]
+        [AllowAnonymous]
         public async Task<ActionResult> Get(string clanName)
         {
             // Validate parameters
@@ -55,6 +56,7 @@ namespace ClickerHeroesTrackerWebsite.Controllers
 
         [Route("")]
         [HttpGet]
+        [AllowAnonymous]
         public async Task<IActionResult> List(
             int page = ParameterConstants.List.Page.Default,
             int count = ParameterConstants.List.Count.Default)
