@@ -83,36 +83,38 @@ namespace Website.Services.Clans
 
             // Start this immediately since it does not rely on getting the clan information
             var updateGameUsers = this.UpdateGameUsersTableAsync(userId, gameUserId, passwordHash);
-
-            var parameters = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+            try
             {
-                { "uid", gameUserId },
-                { "passwordHash", passwordHash },
-            };
-            var content = new FormUrlEncodedContent(parameters);
-            var response = await this.httpClient.PostAsync(BaseUrl + "/clans/getGuildInfo.php", content);
+                var parameters = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+                {
+                    { "uid", gameUserId },
+                    { "passwordHash", passwordHash },
+                };
+                var content = new FormUrlEncodedContent(parameters);
+                var response = await this.httpClient.PostAsync(BaseUrl + "/clans/getGuildInfo.php", content);
 
-            var responseString = await response.Content.ReadAsStringAsync();
-            if (responseString.Contains("\"success\": false"))
-            {
-                // At least wait for this task we started
-                await updateGameUsers;
-                return;
+                var responseString = await response.Content.ReadAsStringAsync();
+                if (responseString.Contains("\"success\": false"))
+                {
+                    return;
+                }
+
+                var clanResponse = JsonConvert.DeserializeObject<GuildResponse>(responseString);
+                var clan = clanResponse.Result;
+                if (clan?.Guild == null)
+                {
+                    return;
+                }
+
+                // Wait for the clans table first since it may create a foreign key required by the clan members table.
+                await this.UpdateClansTableAsync(clan);
+                await this.UpdateClanMembersTableAsync(clan);
             }
-
-            var clanResponse = JsonConvert.DeserializeObject<GuildResponse>(responseString);
-            var clan = clanResponse.Result;
-            if (clan?.Guild == null)
+            finally
             {
-                // At least wait for this task we started
+                // Wait for this task we started
                 await updateGameUsers;
-                return;
             }
-
-            var updateClan = this.UpdateClansTableAsync(clan);
-            var updateClanMembers = this.UpdateClanMembersTableAsync(clan);
-
-            await Task.WhenAll(updateClan, updateClanMembers, updateGameUsers);
         }
 
         public async Task<IList<Message>> GetMessages(string userId, int count)

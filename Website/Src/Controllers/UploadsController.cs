@@ -15,6 +15,7 @@ namespace ClickerHeroesTrackerWebsite.Controllers
     using ClickerHeroesTrackerWebsite.Models.Stats;
     using ClickerHeroesTrackerWebsite.Services.Database;
     using ClickerHeroesTrackerWebsite.Utility;
+    using Microsoft.ApplicationInsights;
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Identity;
     using Microsoft.AspNetCore.Mvc;
@@ -34,18 +35,22 @@ namespace ClickerHeroesTrackerWebsite.Controllers
 
         private readonly IClanManager clanManager;
 
+        private readonly TelemetryClient telemetryClient;
+
         public UploadsController(
             IDatabaseCommandFactory databaseCommandFactory,
             GameData gameData,
             IUserSettingsProvider userSettingsProvider,
             UserManager<ApplicationUser> userManager,
-            IClanManager clanManager)
+            IClanManager clanManager,
+            TelemetryClient telemetryClient)
         {
             this.databaseCommandFactory = databaseCommandFactory;
             this.gameData = gameData;
             this.userSettingsProvider = userSettingsProvider;
             this.userManager = userManager;
             this.clanManager = clanManager;
+            this.telemetryClient = telemetryClient;
         }
 
         [Route("{uploadId:int}")]
@@ -270,8 +275,19 @@ namespace ClickerHeroesTrackerWebsite.Controllers
                 command.CommitTransaction();
             }
 
-            // Wait for the task to finish
-            await updateClanTask;
+            // Wait for the task to finish, but don't fail the request if it fails
+            try
+            {
+                await updateClanTask;
+            }
+            catch (Exception e)
+            {
+                var properties = new Dictionary<string, string>
+                {
+                    { "UploadId", uploadId.ToString() },
+                };
+                this.telemetryClient.TrackException(e, properties);
+            }
 
             return this.Ok(uploadId);
         }
