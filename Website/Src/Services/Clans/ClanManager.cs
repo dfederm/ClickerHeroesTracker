@@ -164,7 +164,7 @@ namespace Website.Services.Clans
                 {
                     Content = messageSplit[1],
                     Date = Convert.ToDouble(kvp.Key).UnixTimeStampToDateTime(),
-                    Username = guildMembers[messageSplit[0]],
+                    Username = guildMembers.TryGetValue(messageSplit[0], out var userName) ? userName : null,
                 });
             }
 
