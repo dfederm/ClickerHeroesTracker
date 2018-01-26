@@ -4,7 +4,7 @@ import { FormsModule } from "@angular/forms";
 import { RouterModule, Routes } from "@angular/router";
 import { HttpClientModule } from "@angular/common/http";
 import { NgbModule } from "@ng-bootstrap/ng-bootstrap";
-import { ClipboardModule } from "ngx-clipboard/dist";
+import { ClipboardModule } from "ngx-clipboard";
 import { TimeAgoPipe } from "time-ago-pipe";
 import { AdsenseModule } from "ng2-adsense";
 import { ApplicationInsightsModule, AppInsightsService } from "@markpieszak/ng-application-insights";

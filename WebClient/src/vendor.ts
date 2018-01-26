@@ -9,7 +9,7 @@ import "@angular/router";
 // Other libraries
 import "rxjs/_esm5/operators";
 import "@ng-bootstrap/ng-bootstrap";
-import "ngx-clipboard/dist";
+import "ngx-clipboard";
 import "time-ago-pipe";
 import "ng2-adsense";
 import "decimal.js";
