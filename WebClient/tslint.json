@@ -230,6 +230,7 @@
     "no-attribute-parameter-decorator": true,
     "no-forward-ref": true,
     "no-input-rename": true,
+    "no-output-named-after-standard-event": true,
     "no-output-on-prefix": true,
     "no-output-rename": true,
     "pipe-naming": [
@@ -278,6 +279,7 @@
     "no-string-based-set-immediate": true,
     "no-string-based-set-interval": true,
     "no-string-based-set-timeout": true,
+    "no-this-assignment": true,
     "no-typeof-undefined": true,
     "no-unnecessary-bind": true,
     "no-unnecessary-field-initialization": true,
@@ -286,7 +288,6 @@
     "no-unnecessary-semicolons": true,
     "no-unsupported-browser-code": true,
     "no-useless-files": true,
-    "no-var-self": true,
     "no-with-statement": true,
     "non-literal-require": true,
     "possible-timing-attack": true,
