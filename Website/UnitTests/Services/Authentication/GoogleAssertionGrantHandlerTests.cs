@@ -7,7 +7,8 @@ namespace UnitTests.Services.Authentication
     using System.Net;
     using System.Threading.Tasks;
     using Microsoft.Extensions.Options;
-    using UnitTests.Mocks;
+    using Newtonsoft.Json;
+    using Testing.HttpClient;
     using Website.Models.Authentication;
     using Website.Services.Authentication;
     using Xunit;
@@ -32,23 +33,26 @@ namespace UnitTests.Services.Authentication
             };
             var options = Options.Create(authenticationSettings);
 
-            var httpClient = new MockHttpClient();
-            httpClient.AddMockResponse(ValidationEndpoint, new JsonWebToken
+            using (var http = new HttpClientTestingFactory())
             {
-                Aud = ClientId,
-                Sub = ExternalUserId,
-                Email = ExternalUserEmail,
-            });
+                var handler = new GoogleAssertionGrantHandler(options, http.HttpClient);
+                var resultTask = handler.ValidateAsync(Assertion);
 
-            var handler = new GoogleAssertionGrantHandler(options, httpClient);
-            var result = await handler.ValidateAsync(Assertion);
+                http.Expect(ValidationEndpoint).Respond(JsonConvert.SerializeObject(new JsonWebToken
+                {
+                    Aud = ClientId,
+                    Sub = ExternalUserId,
+                    Email = ExternalUserEmail,
+                }));
 
-            Assert.NotNull(result);
-            Assert.True(result.IsSuccessful);
-            Assert.Equal(ExternalUserId, result.ExternalUserId);
-            Assert.Equal(ExternalUserEmail, result.ExternalUserEmail);
+                var result = await resultTask;
+                Assert.NotNull(result);
+                Assert.True(result.IsSuccessful);
+                Assert.Equal(ExternalUserId, result.ExternalUserId);
+                Assert.Equal(ExternalUserEmail, result.ExternalUserEmail);
 
-            httpClient.VerifyNoOutstandingRequests();
+                http.EnsureNoOutstandingRequests();
+            }
         }
 
         [Fact]
@@ -57,16 +61,19 @@ namespace UnitTests.Services.Authentication
             var authenticationSettings = new AuthenticationSettings();
             var options = Options.Create(authenticationSettings);
 
-            var httpClient = new MockHttpClient();
-            httpClient.AddMockResponse(ValidationEndpoint, HttpStatusCode.BadRequest);
+            using (var http = new HttpClientTestingFactory())
+            {
+                var handler = new GoogleAssertionGrantHandler(options, http.HttpClient);
+                var resultTask = handler.ValidateAsync(Assertion);
 
-            var handler = new GoogleAssertionGrantHandler(options, httpClient);
-            var result = await handler.ValidateAsync(Assertion);
+                http.Expect(ValidationEndpoint).Respond(HttpStatusCode.BadRequest);
 
-            Assert.NotNull(result);
-            Assert.False(result.IsSuccessful);
+                var result = await resultTask;
+                Assert.NotNull(result);
+                Assert.False(result.IsSuccessful);
 
-            httpClient.VerifyNoOutstandingRequests();
+                http.EnsureNoOutstandingRequests();
+            }
         }
 
         [Fact]
@@ -81,20 +88,23 @@ namespace UnitTests.Services.Authentication
             };
             var options = Options.Create(authenticationSettings);
 
-            var httpClient = new MockHttpClient();
-            httpClient.AddMockResponse(ValidationEndpoint, new JsonWebToken
+            using (var http = new HttpClientTestingFactory())
             {
-                Aud = "SomeOtherClientId",
-                Sub = ExternalUserId,
-            });
+                var handler = new GoogleAssertionGrantHandler(options, http.HttpClient);
+                var resultTask = handler.ValidateAsync(Assertion);
 
-            var handler = new GoogleAssertionGrantHandler(options, httpClient);
-            var result = await handler.ValidateAsync(Assertion);
+                http.Expect(ValidationEndpoint).Respond(JsonConvert.SerializeObject(new JsonWebToken
+                {
+                    Aud = "SomeOtherClientId",
+                    Sub = ExternalUserId,
+                }));
 
-            Assert.NotNull(result);
-            Assert.False(result.IsSuccessful);
+                var result = await resultTask;
+                Assert.NotNull(result);
+                Assert.False(result.IsSuccessful);
 
-            httpClient.VerifyNoOutstandingRequests();
+                http.EnsureNoOutstandingRequests();
+            }
         }
     }
 }

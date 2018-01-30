@@ -11,7 +11,7 @@ namespace UnitTests.Services.Authentication
     using Microsoft.Extensions.Options;
     using Microsoft.IdentityModel.Protocols.OpenIdConnect;
     using Microsoft.IdentityModel.Tokens;
-    using UnitTests.Mocks;
+    using Testing.HttpClient;
     using Website.Models.Authentication;
     using Website.Services.Authentication;
     using Xunit;
@@ -55,26 +55,29 @@ namespace UnitTests.Services.Authentication
             configuration.JsonWebKeySet = new JsonWebKeySet();
             configuration.JsonWebKeySet.Keys.Add(jsonWebKey);
 
-            var httpClient = new MockHttpClient();
-            httpClient.AddMockResponse(ConfigurationEndpoint, OpenIdConnectConfiguration.Write(configuration));
+            using (var http = new HttpClientTestingFactory())
+            {
+                var tokenHandler = new JwtSecurityTokenHandler();
+                var token = new JwtSecurityToken(
+                    audience: ClientId,
+                    claims: new[] { new Claim("sub", ExternalUserId), new Claim("email", ExternalUserEmail) },
+                    notBefore: DateTime.UtcNow,
+                    expires: DateTime.UtcNow + TimeSpan.FromHours(1),
+                    signingCredentials: new SigningCredentials(jsonWebKey, jsonWebKey.Alg));
 
-            var tokenHandler = new JwtSecurityTokenHandler();
-            var token = new JwtSecurityToken(
-                audience: ClientId,
-                claims: new[] { new Claim("sub", ExternalUserId), new Claim("email", ExternalUserEmail) },
-                notBefore: DateTime.UtcNow,
-                expires: DateTime.UtcNow + TimeSpan.FromHours(1),
-                signingCredentials: new SigningCredentials(jsonWebKey, jsonWebKey.Alg));
+                var handler = new MicrosoftAssertionGrantHandler(options, http.HttpClient);
+                var resultTask = handler.ValidateAsync(tokenHandler.WriteToken(token));
 
-            var handler = new MicrosoftAssertionGrantHandler(options, httpClient);
-            var result = await handler.ValidateAsync(tokenHandler.WriteToken(token));
+                http.Expect(ConfigurationEndpoint).Respond(OpenIdConnectConfiguration.Write(configuration));
 
-            Assert.NotNull(result);
-            Assert.True(result.IsSuccessful);
-            Assert.Equal(ExternalUserId, result.ExternalUserId);
-            Assert.Equal(ExternalUserEmail, result.ExternalUserEmail);
+                var result = await resultTask;
+                Assert.NotNull(result);
+                Assert.True(result.IsSuccessful);
+                Assert.Equal(ExternalUserId, result.ExternalUserId);
+                Assert.Equal(ExternalUserEmail, result.ExternalUserEmail);
 
-            httpClient.VerifyNoOutstandingRequests();
+                http.EnsureNoOutstandingRequests();
+            }
         }
 
         [Fact]
@@ -93,24 +96,27 @@ namespace UnitTests.Services.Authentication
             configuration.JsonWebKeySet = new JsonWebKeySet();
             configuration.JsonWebKeySet.Keys.Add(jsonWebKey);
 
-            var httpClient = new MockHttpClient();
-            httpClient.AddMockResponse(ConfigurationEndpoint, OpenIdConnectConfiguration.Write(configuration));
+            using (var http = new HttpClientTestingFactory())
+            {
+                var tokenHandler = new JwtSecurityTokenHandler();
+                var token = new JwtSecurityToken(
+                    audience: "SomeOtherClientId",
+                    claims: new[] { new Claim("sub", ExternalUserId), new Claim("email", ExternalUserEmail) },
+                    notBefore: DateTime.UtcNow,
+                    expires: DateTime.UtcNow + TimeSpan.FromHours(1),
+                    signingCredentials: new SigningCredentials(jsonWebKey, jsonWebKey.Alg));
 
-            var tokenHandler = new JwtSecurityTokenHandler();
-            var token = new JwtSecurityToken(
-                audience: "SomeOtherClientId",
-                claims: new[] { new Claim("sub", ExternalUserId), new Claim("email", ExternalUserEmail) },
-                notBefore: DateTime.UtcNow,
-                expires: DateTime.UtcNow + TimeSpan.FromHours(1),
-                signingCredentials: new SigningCredentials(jsonWebKey, jsonWebKey.Alg));
+                var handler = new MicrosoftAssertionGrantHandler(options, http.HttpClient);
+                var resultTask = handler.ValidateAsync(tokenHandler.WriteToken(token));
 
-            var handler = new MicrosoftAssertionGrantHandler(options, httpClient);
-            var result = await handler.ValidateAsync(tokenHandler.WriteToken(token));
+                http.Expect(ConfigurationEndpoint).Respond(OpenIdConnectConfiguration.Write(configuration));
 
-            Assert.NotNull(result);
-            Assert.False(result.IsSuccessful);
+                var result = await resultTask;
+                Assert.NotNull(result);
+                Assert.False(result.IsSuccessful);
 
-            httpClient.VerifyNoOutstandingRequests();
+                http.EnsureNoOutstandingRequests();
+            }
         }
 
         [Fact]
@@ -129,16 +135,19 @@ namespace UnitTests.Services.Authentication
             configuration.JsonWebKeySet = new JsonWebKeySet();
             configuration.JsonWebKeySet.Keys.Add(jsonWebKey);
 
-            var httpClient = new MockHttpClient();
-            httpClient.AddMockResponse(ConfigurationEndpoint, OpenIdConnectConfiguration.Write(configuration));
+            using (var http = new HttpClientTestingFactory())
+            {
+                var handler = new MicrosoftAssertionGrantHandler(options, http.HttpClient);
+                var resultTask = handler.ValidateAsync("SomeBadAssertion");
 
-            var handler = new MicrosoftAssertionGrantHandler(options, httpClient);
-            var result = await handler.ValidateAsync("SomeBadAssertion");
+                http.Expect(ConfigurationEndpoint).Respond(OpenIdConnectConfiguration.Write(configuration));
 
-            Assert.NotNull(result);
-            Assert.False(result.IsSuccessful);
+                var result = await resultTask;
+                Assert.NotNull(result);
+                Assert.False(result.IsSuccessful);
 
-            httpClient.VerifyNoOutstandingRequests();
+                http.EnsureNoOutstandingRequests();
+            }
         }
     }
 }
