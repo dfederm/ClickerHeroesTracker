@@ -4,10 +4,12 @@
 
 namespace UnitTests.Services.Authentication
 {
+    using System;
     using System.Net;
     using System.Threading.Tasks;
     using Microsoft.Extensions.Options;
-    using UnitTests.Mocks;
+    using Newtonsoft.Json;
+    using Testing.HttpClient;
     using Website.Models.Authentication;
     using Website.Services.Authentication;
     using Xunit;
@@ -21,6 +23,9 @@ namespace UnitTests.Services.Authentication
         private const string AppEndpoint = "https://graph.facebook.com/app/?access_token=" + Assertion;
         private const string UserEndpoint = "https://graph.facebook.com/me?fields=id,email&access_token=" + Assertion;
 
+        // Upping the match timeout since this makes sequential http calls which for some reason may take more than the default of 100ms to chain together.
+        private static readonly HttpClientTestingFactorySettings HttpClientTestingFactorySettings = new HttpClientTestingFactorySettings { ExpectationMatchTimeout = TimeSpan.FromSeconds(1) };
+
         [Fact]
         public async Task ValidateAsync_Success()
         {
@@ -33,19 +38,22 @@ namespace UnitTests.Services.Authentication
             };
             var options = Options.Create(authenticationSettings);
 
-            var httpClient = new MockHttpClient();
-            httpClient.AddMockResponse(AppEndpoint, new FacebookApp { Id = AppId });
-            httpClient.AddMockResponse(UserEndpoint, new FacebookUser { Id = ExternalUserId, Email = ExternalUserEmail });
+            using (var http = new HttpClientTestingFactory(HttpClientTestingFactorySettings))
+            {
+                var handler = new FacebookAssertionGrantHandler(options, http.HttpClient);
+                var resultTask = handler.ValidateAsync(Assertion);
 
-            var handler = new FacebookAssertionGrantHandler(options, httpClient);
-            var result = await handler.ValidateAsync(Assertion);
+                http.Expect(AppEndpoint).Respond(JsonConvert.SerializeObject(new FacebookApp { Id = AppId }));
+                http.Expect(UserEndpoint).Respond(JsonConvert.SerializeObject(new FacebookUser { Id = ExternalUserId, Email = ExternalUserEmail }));
 
-            Assert.NotNull(result);
-            Assert.True(result.IsSuccessful);
-            Assert.Equal(ExternalUserId, result.ExternalUserId);
-            Assert.Equal(ExternalUserEmail, result.ExternalUserEmail);
+                var result = await resultTask;
+                Assert.NotNull(result);
+                Assert.True(result.IsSuccessful);
+                Assert.Equal(ExternalUserId, result.ExternalUserId);
+                Assert.Equal(ExternalUserEmail, result.ExternalUserEmail);
 
-            httpClient.VerifyNoOutstandingRequests();
+                http.EnsureNoOutstandingRequests();
+            }
         }
 
         [Fact]
@@ -54,16 +62,19 @@ namespace UnitTests.Services.Authentication
             var authenticationSettings = new AuthenticationSettings();
             var options = Options.Create(authenticationSettings);
 
-            var httpClient = new MockHttpClient();
-            httpClient.AddMockResponse(AppEndpoint, HttpStatusCode.BadRequest);
+            using (var http = new HttpClientTestingFactory(HttpClientTestingFactorySettings))
+            {
+                var handler = new FacebookAssertionGrantHandler(options, http.HttpClient);
+                var resultTask = handler.ValidateAsync(Assertion);
 
-            var handler = new FacebookAssertionGrantHandler(options, httpClient);
-            var result = await handler.ValidateAsync(Assertion);
+                http.Expect(AppEndpoint).Respond(HttpStatusCode.BadRequest);
 
-            Assert.NotNull(result);
-            Assert.False(result.IsSuccessful);
+                var result = await resultTask;
+                Assert.NotNull(result);
+                Assert.False(result.IsSuccessful);
 
-            httpClient.VerifyNoOutstandingRequests();
+                http.EnsureNoOutstandingRequests();
+            }
         }
 
         [Fact]
@@ -78,17 +89,20 @@ namespace UnitTests.Services.Authentication
             };
             var options = Options.Create(authenticationSettings);
 
-            var httpClient = new MockHttpClient();
-            httpClient.AddMockResponse(AppEndpoint, new FacebookApp { Id = AppId });
-            httpClient.AddMockResponse(UserEndpoint, HttpStatusCode.BadRequest);
+            using (var http = new HttpClientTestingFactory(HttpClientTestingFactorySettings))
+            {
+                var handler = new FacebookAssertionGrantHandler(options, http.HttpClient);
+                var resultTask = handler.ValidateAsync(Assertion);
 
-            var handler = new FacebookAssertionGrantHandler(options, httpClient);
-            var result = await handler.ValidateAsync(Assertion);
+                http.Expect(AppEndpoint).Respond(JsonConvert.SerializeObject(new FacebookApp { Id = AppId }));
+                http.Expect(UserEndpoint).Respond(HttpStatusCode.BadRequest);
 
-            Assert.NotNull(result);
-            Assert.False(result.IsSuccessful);
+                var result = await resultTask;
+                Assert.NotNull(result);
+                Assert.False(result.IsSuccessful);
 
-            httpClient.VerifyNoOutstandingRequests();
+                http.EnsureNoOutstandingRequests();
+            }
         }
 
         [Fact]
@@ -103,16 +117,19 @@ namespace UnitTests.Services.Authentication
             };
             var options = Options.Create(authenticationSettings);
 
-            var httpClient = new MockHttpClient();
-            httpClient.AddMockResponse(AppEndpoint, new FacebookApp { Id = "SomeOtherAppId" });
+            using (var http = new HttpClientTestingFactory(HttpClientTestingFactorySettings))
+            {
+                var handler = new FacebookAssertionGrantHandler(options, http.HttpClient);
+                var resultTask = handler.ValidateAsync(Assertion);
 
-            var handler = new FacebookAssertionGrantHandler(options, httpClient);
-            var result = await handler.ValidateAsync(Assertion);
+                http.Expect(AppEndpoint).Respond(JsonConvert.SerializeObject(new FacebookApp { Id = "SomeOtherAppId" }));
 
-            Assert.NotNull(result);
-            Assert.False(result.IsSuccessful);
+                var result = await resultTask;
+                Assert.NotNull(result);
+                Assert.False(result.IsSuccessful);
 
-            httpClient.VerifyNoOutstandingRequests();
+                http.EnsureNoOutstandingRequests();
+            }
         }
     }
 }
