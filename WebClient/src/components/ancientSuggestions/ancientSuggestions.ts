@@ -15,6 +15,7 @@ interface IAncientViewModel {
     diffValue?: Decimal;
     diffCopyValue?: string;
     isBase?: boolean;
+    purchaseTime: number;
 }
 
 @Component({
@@ -116,13 +117,14 @@ export class AncientSuggestionsComponent implements OnInit {
                 ancientLevel: new Decimal(0),
                 itemLevel: new Decimal(0),
                 effectiveLevel: new Decimal(0),
+                purchaseTime: 0,
             };
 
             this.ancients.push(ancient);
             this.ancientsByName[ancient.name] = ancient;
         }
 
-        this.ancients = this.ancients.sort((a, b) => a.name < b.name ? -1 : 1);
+        this.sortAncients();
     }
 
     public static getShortName(entity: { name: string }): string {
@@ -179,6 +181,7 @@ export class AncientSuggestionsComponent implements OnInit {
                     ancient.ancientLevel = new Decimal(ancientData.level || 0);
                     ancient.itemLevel = itemLevels[ancient.id] || new Decimal(0);
                     ancient.effectiveLevel = ancient.ancientLevel.plus(ancient.itemLevel).floor();
+                    ancient.purchaseTime = ancientData.purchaseTime;
                 }
             }
         }
@@ -199,6 +202,8 @@ export class AncientSuggestionsComponent implements OnInit {
         this.ancientCostMultiplier = Decimal.pow(0.95, chorgorlothLevel);
 
         this.hydrateAncientSuggestions();
+
+        this.sortAncients();
     }
 
     // tslint:disable-next-line:cyclomatic-complexity
@@ -515,5 +520,38 @@ export class AncientSuggestionsComponent implements OnInit {
         }
 
         return ancientCosts;
+    }
+
+    private sortAncients(): void {
+        // For mobile, sort by purchase time, then by name.
+        if (this.savedGame && this.savedGame.data && this.savedGame.data.saveOrigin === "mobile") {
+            this.ancients = this.ancients.sort((a, b) => {
+                // If both are not purchased, sort by name (at the bottom)
+                if (a.purchaseTime === 0 && b.purchaseTime === 0) {
+                    return a.name < b.name ? -1 : 1;
+                }
+
+                // Bring unpurchased to the bottom
+                if (a.purchaseTime === 0) {
+                    return 1;
+                }
+
+                if (b.purchaseTime === 0) {
+                    return -1;
+                }
+
+                // Sort by date
+                let timeDiff = a.purchaseTime - b.purchaseTime;
+                if (timeDiff !== 0) {
+                    return timeDiff;
+                }
+
+                // Finally, sort by id
+                return parseInt(a.id) - parseInt(b.id);
+            });
+        } else {
+            // Sort by name
+            this.ancients = this.ancients.sort((a, b) => a.name < b.name ? -1 : 1);
+        }
     }
 }

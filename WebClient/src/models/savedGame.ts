@@ -21,6 +21,7 @@ export interface IAncientData {
     id: number;
     level: number | string;
     spentHeroSouls: number | string;
+    purchaseTime: number;
 }
 
 export interface IAncientsData {
@@ -39,6 +40,7 @@ export interface IOutsidersData {
 export interface ISavedGameData {
     transcendent: boolean;
     paidForRubyMultiplier: boolean;
+    saveOrigin: string;
 
     primalSouls: number | string;
     heroSouls: number | string;
