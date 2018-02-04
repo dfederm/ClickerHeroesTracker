@@ -230,7 +230,7 @@ describe("AncientSuggestionsComponent", () => {
                     { name: "Vaagur" },
                 ];
 
-            verify(expectedValues);
+            verify(expectedValues, "-9.9999352075945758335e+749");
         });
 
         it("should display data based on hybrid playstyle and Available Souls without using souls from ascension", () => {
@@ -269,7 +269,7 @@ describe("AncientSuggestionsComponent", () => {
                     { name: "Vaagur" },
                 ];
 
-            verify(expectedValues);
+            verify(expectedValues, "-9.9997843328756843346e+499");
         });
 
         it("should display data based on hybrid playstyle and the Rules of Thumb", () => {
@@ -350,7 +350,7 @@ describe("AncientSuggestionsComponent", () => {
                     { name: "Vaagur" },
                 ];
 
-            verify(expectedValues);
+            verify(expectedValues, "-9.9997843328756843346e+499");
         });
 
         it("should display data based on idle playstyle and the Rules of Thumb", () => {
@@ -427,7 +427,7 @@ describe("AncientSuggestionsComponent", () => {
                     { name: "Vaagur" },
                 ];
 
-            verify(expectedValues);
+            verify(expectedValues, "-9.9986729745924893928e+499");
         });
 
         it("should display data based on active playstyle and the Rules of Thumb", () => {
@@ -468,7 +468,7 @@ describe("AncientSuggestionsComponent", () => {
             verify(expectedValues);
         });
 
-        function verify(expectedValues: { name: string, suggested?: string, isPrimary?: boolean }[]): void {
+        function verify(expectedValues: { name: string, suggested?: string, isPrimary?: boolean }[], expectedSpentSoulsStr?: string): void {
             fixture.detectChanges();
 
             let exponentialPipe = TestBed.get(ExponentialPipe) as ExponentialPipe;
@@ -504,10 +504,47 @@ describe("AncientSuggestionsComponent", () => {
                 expect(getNormalizedTextContent(cells[2])).toEqual(expectedSuggestedLevelText, `Unexpected suggested level for ${expected.name}`);
 
                 let expectedDifference = expectedSuggestedLevel.minus(expectedCurrentLevel);
+                if (expectedDifference.log().floor().minus(expectedCurrentLevel.log().floor()).lessThan(-4)) {
+                    expectedDifference = new Decimal(0);
+                }
+
                 let expectedDifferenceText = expected.isPrimary || expected.suggested === undefined
                     ? "-"
                     : exponentialPipe.transform(expectedDifference);
                 expect(getNormalizedTextContent(cells[3])).toEqual(expectedDifferenceText, `Unexpected difference in levels for ${expected.name}`);
+            }
+
+            let heroSoulsRow = table.query(By.css("tfoot tr"));
+            if (component.suggestionType === "RulesOfThumb") {
+                expect(heroSoulsRow).toBeNull();
+                expect(expectedSpentSoulsStr).toBeUndefined();
+            } else {
+                expect(heroSoulsRow).not.toBeNull();
+                expect(expectedSpentSoulsStr).toBeDefined();
+
+                let heroSoulsCells = heroSoulsRow.children;
+                expect(heroSoulsCells.length).toEqual(4);
+
+                let expectedAvailableSouls = new Decimal(savedGame.data.heroSouls);
+                if (component.useSoulsFromAscension) {
+                    expectedAvailableSouls = expectedAvailableSouls.plus(savedGame.data.primalSouls);
+                }
+
+                let expectedAvailableSoulsText = exponentialPipe.transform(expectedAvailableSouls);
+                expect(getNormalizedTextContent(heroSoulsCells[1])).toEqual(expectedAvailableSoulsText);
+                expect(expectedAvailableSouls).toEqual(component.availableSouls);
+
+                let expectedSpentSouls = new Decimal(expectedSpentSoulsStr);
+                let expectedSpentSoulsText = exponentialPipe.transform(expectedSpentSouls);
+                expect(getNormalizedTextContent(heroSoulsCells[2])).toEqual(expectedSpentSoulsText);
+                expect(expectedSpentSouls).toEqual(component.spentSouls);
+                expect(expectedSpentSouls.isPositive()).toEqual(false);
+
+                let expectedRemainingSouls = expectedAvailableSouls.plus(expectedSpentSouls);
+                let expectedRemainingSoulsText = exponentialPipe.transform(expectedRemainingSouls);
+                expect(getNormalizedTextContent(heroSoulsCells[3])).toEqual(expectedRemainingSoulsText);
+                expect(expectedRemainingSouls).toEqual(component.remainingSouls);
+                expect(expectedRemainingSouls.isNegative()).toEqual(false);
             }
         }
     });
