@@ -100,4 +100,12 @@
             </td>
         </tr>
     </tbody>
+    <tfoot *ngIf="this.suggestionType === 'AvailableSouls'">
+        <tr>
+            <th>Hero Souls</th>
+            <td class="text-right">{{ availableSouls | exponential }}</td>
+            <td class="text-right">{{ spentSouls | exponential }}</td>
+            <td class="text-right">{{ remainingSouls | exponential }}</td>
+        </tr>
+    </tfoot>
 </table>

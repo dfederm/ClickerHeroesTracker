@@ -41,6 +41,12 @@ export class AncientSuggestionsComponent implements OnInit {
 
     public ancients: IAncientViewModel[] = [];
 
+    public availableSouls: Decimal = new Decimal(0);
+
+    public spentSouls: Decimal = new Decimal(0);
+
+    public remainingSouls: Decimal = new Decimal(0);
+
     public pendingSouls: Decimal = new Decimal(0);
 
     public get playStyle(): string {
@@ -224,22 +230,22 @@ export class AncientSuggestionsComponent implements OnInit {
         let suggestedLevels: { [key: string]: Decimal };
 
         if (this.suggestionType === "AvailableSouls") {
-            let availableSouls = this.heroSouls;
+            this.availableSouls = this.heroSouls;
             if (this.useSoulsFromAscension) {
-                availableSouls = availableSouls.plus(this.pendingSouls);
+                this.availableSouls = this.availableSouls.plus(this.pendingSouls);
             }
 
             let baseLevel = this.getAncientLevel(baseAncient);
             let left = baseLevel.times(-1);
             let right: Decimal;
             let mid: Decimal;
-            if (availableSouls.greaterThan(0)) {
+            if (this.availableSouls.greaterThan(0)) {
                 /*
                   If all hs were to be spent on Siya (or Frags), we would have the following cost equation,
                   where bf and bi are the final and current level of Siya (or Frags) respectively:
                   (1/2 bf^2 - 1/2 bi^2) * multiplier = hs. Solve for bf and you get the following equation:
                 */
-                right = availableSouls.dividedBy(this.ancientCostMultiplier).times(2).plus(baseLevel.pow(2)).sqrt().ceil();
+                right = this.availableSouls.dividedBy(this.ancientCostMultiplier).times(2).plus(baseLevel.pow(2)).sqrt().ceil();
             } else {
                 right = new Decimal(0);
             }
@@ -253,11 +259,11 @@ export class AncientSuggestionsComponent implements OnInit {
               in play-time). As such, we'll make do with an approximation.
             */
             let initialDiff = right.minus(left);
-            while (right.minus(left).greaterThan(1) && right.minus(left).dividedBy(initialDiff).greaterThan(0.00001)) {
+            while (right.minus(left).greaterThan(1) && right.minus(left).dividedBy(initialDiff).greaterThan(1e-5)) {
                 if (spentHS === undefined) {
                     mid = right.plus(left).dividedBy(2).floor();
                 } else {
-                    let fitIndicator = spentHS.dividedBy(availableSouls).ln();
+                    let fitIndicator = spentHS.dividedBy(this.availableSouls).ln();
                     let interval = right.minus(left);
 
                     // If the (log of) the number of the percentage of spent hero souls is very large or very small, place the new search point off-center.
@@ -273,7 +279,7 @@ export class AncientSuggestionsComponent implements OnInit {
                 // Level according to RoT and calculate new cost
                 const newSuggestedLevels = this.calculateAncientSuggestions(baseLevel.plus(mid));
                 spentHS = this.getTotalAncientCost(newSuggestedLevels);
-                if (spentHS.lessThan(availableSouls)) {
+                if (spentHS.lessThan(this.availableSouls)) {
                     left = mid;
                 } else {
                     right = mid;
@@ -281,6 +287,9 @@ export class AncientSuggestionsComponent implements OnInit {
             }
 
             suggestedLevels = this.calculateAncientSuggestions(baseLevel.plus(left));
+
+            this.spentSouls = this.getTotalAncientCost(suggestedLevels).negated();
+            this.remainingSouls = this.availableSouls.plus(this.spentSouls);
 
             // Ensure we don't suggest removing levels
             for (let ancient in suggestedLevels) {
@@ -417,6 +426,12 @@ export class AncientSuggestionsComponent implements OnInit {
         // Normalize the values
         for (let ancient in suggestedLevels) {
             suggestedLevels[ancient] = Decimal.max(suggestedLevels[ancient].ceil(), new Decimal(0));
+
+            // The game only lets you buy 4 exponents less than what you currently have, so clip any suggestions less than that.
+            const minimumLevelingThreshold = -4;
+            if (suggestedLevels[ancient].minus(this.ancientsByName[ancient].ancientLevel).log().floor().minus(this.ancientsByName[ancient].ancientLevel.log().floor()).lessThan(minimumLevelingThreshold)) {
+                suggestedLevels[ancient] = this.ancientsByName[ancient].ancientLevel;
+            }
         }
 
         return suggestedLevels;
