@@ -1,9 +1,9 @@
 # Getting started
 ## Prereqs
 1. **Clone the Repo** - There should be a "Clone" button to the right on this page.
-1. Install [.NET Core 2.1.0](https://github.com/dotnet/cli/blob/master/README.md#installers-and-binaries). Currently there is no official release for this version, so you'll need to download a nightly build. Try to match the version listed in [global.json](global.json)
-1. If you want to use **Visual Studio**, install [Visual Studio 2017](https://www.visualstudio.com/vs/). The Community version is free.
-1. You may also build from the **command line** and use an editor like [Visual Studio Code](https://code.visualstudio.com/).
+1. Install [.NET Core](https://www.microsoft.com/net/download/). Match the SDK version listed in [global.json](global.json)
+1. For the API code, you'll want [Visual Studio 2017](https://www.visualstudio.com/vs/). The Community version is free.
+1. For the frontend code, use an editor like [Visual Studio Code](https://code.visualstudio.com/).
 1. Use **SQL** for the local database:
     1. [SQL LocalDB](https://docs.microsoft.com/en-us/sql/database-engine/configure-windows/sql-server-2016-express-localdb#install-localdb) should work just fine.
     1. Add a new empty database to your local instance, eg. "ClickerHeroesTrackerData"
