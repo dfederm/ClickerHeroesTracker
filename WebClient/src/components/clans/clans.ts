@@ -16,7 +16,7 @@ export class ClansComponent implements OnInit {
 
     public totalClans: number;
 
-    public count = 10;
+    public count = 20;
 
     private userClan: ILeaderboardClan;
 
