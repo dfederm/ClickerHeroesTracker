@@ -1,12 +1,10 @@
 import { Component, OnInit } from "@angular/core";
 import { ActivatedRoute, Router } from "@angular/router";
-import { UploadService } from "../../services/uploadService/uploadService";
+import { UploadService, IUpload } from "../../services/uploadService/uploadService";
 import { AuthenticationService, IUserInfo } from "../../services/authenticationService/authenticationService";
 import { Decimal } from "decimal.js";
 import { NgbModal } from "@ng-bootstrap/ng-bootstrap";
 import { switchMap } from "rxjs/operators";
-
-import { IUpload } from "../../models";
 import { SavedGame } from "../../models/savedGame";
 
 @Component({

@@ -5,7 +5,21 @@ import { HttpErrorHandlerService } from "../httpErrorHandlerService/httpErrorHan
 import "rxjs/add/operator/toPromise";
 
 import { AuthenticationService, IUserInfo } from "../../services/authenticationService/authenticationService";
-import { IUpload } from "../../models";
+import { IUser } from "../../models";
+
+export interface IUpload {
+    id: number;
+
+    timeSubmitted: string;
+
+    playStyle: string;
+
+    user: IUser;
+
+    content: string;
+
+    isScrubbed: boolean;
+}
 
 @Injectable()
 export class UploadService {

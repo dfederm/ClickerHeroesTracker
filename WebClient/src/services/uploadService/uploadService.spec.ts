@@ -4,9 +4,8 @@ import { BehaviorSubject } from "rxjs/BehaviorSubject";
 import { HttpErrorHandlerService } from "../httpErrorHandlerService/httpErrorHandlerService";
 import { HttpHeaders, HttpErrorResponse } from "@angular/common/http";
 
-import { UploadService } from "./uploadService";
+import { UploadService, IUpload } from "./uploadService";
 import { AuthenticationService, IUserInfo } from "../authenticationService/authenticationService";
-import { IUpload } from "../../models";
 
 describe("UploadService", () => {
     let uploadService: UploadService;
@@ -76,7 +75,7 @@ describe("UploadService", () => {
             // Tick the getAuthHeaders call
             tick();
 
-            let expectedResponse: IUpload = { id: 123, timeSubmitted: "someTimeSubmitted", playStyle: "somePlayStyle" };
+            let expectedResponse: IUpload = { id: 123, timeSubmitted: "someTimeSubmitted", playStyle: "somePlayStyle", user: { name: "someUserName", clanName: "someClanName" }, content: "someContent", isScrubbed: false };
             let request = httpMock.expectOne(apiRequest);
             request.flush(expectedResponse);
             tick();

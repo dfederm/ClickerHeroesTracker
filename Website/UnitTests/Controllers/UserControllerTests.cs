@@ -358,7 +358,14 @@ namespace UnitTests.Controllers
 
             var expectedUploadIds = Enumerable.Range(0, 3).ToList();
             var getUploadsDatasets = expectedUploadIds
-                .Select<int, IDictionary<string, object>>(id => new Dictionary<string, object> { { "Id", id }, { "UploadTime", "2017-01-01T00:00:00.000Z" } })
+                .Select<int, IDictionary<string, object>>(id => new Dictionary<string, object>
+                {
+                    { "Id", id },
+                    { "UploadTime", "2017-01-01T00:00:00.000Z" },
+                    { "AscensionNumber", 100 },
+                    { "Zone", 200 },
+                    { "Souls", "1e300" },
+                })
                 .ToList();
             var mockGetUploadsDataReader = MockDatabaseHelper.CreateMockDataReader(getUploadsDatasets);
             var mockGetUploadsDatabaseCommandParameters = new Dictionary<string, object>() { { "@UserId", UserId }, { "@Offset", (Page - 1) * Count }, { "@Count", Count } };
@@ -696,7 +703,14 @@ namespace UnitTests.Controllers
 
             var expectedUploadIds = Enumerable.Range(0, 3).ToList();
             var getUploadsDatasets = expectedUploadIds
-                .Select<int, IDictionary<string, object>>(id => new Dictionary<string, object> { { "Id", id }, { "UploadTime", "2017-01-01T00:00:00.000Z" } })
+                .Select<int, IDictionary<string, object>>(id => new Dictionary<string, object>
+                {
+                    { "Id", id },
+                    { "UploadTime", "2017-01-01T00:00:00.000Z" },
+                    { "AscensionNumber", 100 },
+                    { "Zone", 200 },
+                    { "Souls", "1e300" },
+                })
                 .ToList();
             var mockGetUploadsDataReader = MockDatabaseHelper.CreateMockDataReader(getUploadsDatasets);
             var mockGetUploadsDatabaseCommandParameters = new Dictionary<string, object>() { { "@UserId", UserId }, { "@Offset", (Page - 1) * Count }, { "@Count", Count } };
@@ -820,7 +834,14 @@ namespace UnitTests.Controllers
 
             var expectedUploadIds = Enumerable.Range(0, 3).ToList();
             var getUploadsDatasets = expectedUploadIds
-                .Select<int, IDictionary<string, object>>(id => new Dictionary<string, object> { { "Id", id }, { "UploadTime", "2017-01-01T00:00:00.000Z" } })
+                .Select<int, IDictionary<string, object>>(id => new Dictionary<string, object>
+                {
+                    { "Id", id },
+                    { "UploadTime", "2017-01-01T00:00:00.000Z" },
+                    { "AscensionNumber", 100 },
+                    { "Zone", 200 },
+                    { "Souls", "1e300" },
+                })
                 .ToList();
             var mockGetUploadsDataReader = MockDatabaseHelper.CreateMockDataReader(getUploadsDatasets);
             var mockGetUploadsDatabaseCommandParameters = new Dictionary<string, object>() { { "@UserId", UserId }, { "@Offset", (Page - 1) * Count }, { "@Count", Count } };

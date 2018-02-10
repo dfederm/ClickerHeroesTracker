@@ -19,6 +19,6 @@ namespace ClickerHeroesTrackerWebsite.Models.Api.Uploads
         /// <summary>
         /// Gets or sets the list of uploads requested.
         /// </summary>
-        public IList<Upload> Uploads { get; set; }
+        public IList<UploadSummary> Uploads { get; set; }
     }
 }

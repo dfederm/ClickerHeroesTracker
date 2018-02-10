@@ -7,20 +7,6 @@ export interface IPaginationMetadata {
     next: string;
 }
 
-export interface IUpload {
-    id: number;
-
-    timeSubmitted: string;
-
-    playStyle: string;
-
-    user?: IUser;
-
-    content?: string;
-
-    isScrubbed?: boolean;
-}
-
 export interface IUser {
     name: string;
 
