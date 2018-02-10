@@ -1,10 +1,13 @@
 import { Component, OnInit, Input } from "@angular/core";
-
 import { UserService, IUploadSummaryListResponse } from "../../services/userService/userService";
+import { Decimal } from "decimal.js";
 
 interface IUploadViewModel {
     id: number;
     uploadTime: Date;
+    ascensionNumber: number;
+    zone: number;
+    souls: Decimal;
 }
 
 @Component({
@@ -73,6 +76,9 @@ export class UploadsTableComponent implements OnInit {
             this.uploads.push({
                 id: upload.id,
                 uploadTime: new Date(upload.timeSubmitted),
+                ascensionNumber: upload.ascensionNumber,
+                zone: upload.zone,
+                souls: new Decimal(upload.souls),
             });
         }
 

@@ -163,8 +163,14 @@ namespace Website.Controllers
             }
 
             const string GetUploadsCommandText = @"
-                SELECT Id, UploadTime
+                SELECT Id,
+                    UploadTime,
+                    AscensionsLifetime AS AscensionNumber,
+                    HighestZoneThisTranscension AS Zone,
+                    RTRIM(SoulsSpent) AS Souls
                 FROM Uploads
+                INNER JOIN ComputedStats
+                ON ComputedStats.UploadId = Uploads.Id
                 WHERE UserId = @UserId
                 ORDER BY UploadTime DESC
                 OFFSET @Offset ROWS
@@ -176,18 +182,22 @@ namespace Website.Controllers
                 { "@Count", count },
             };
 
-            var uploads = new List<Upload>(count);
+            var uploads = new List<UploadSummary>(count);
             using (var command = this.databaseCommandFactory.Create(GetUploadsCommandText, getUploadsCommandparameters))
             using (var reader = await command.ExecuteReaderAsync())
             {
                 while (reader.Read())
                 {
-                    uploads.Add(new Upload
+                    uploads.Add(new UploadSummary
                     {
                         Id = Convert.ToInt32(reader["Id"]),
 
                         // The DateTime is a datetime2 which has no timezone so comes out as DateTimeKind.Unknown. Se need to specify the kind so it gets serialized correctly.
                         TimeSubmitted = DateTime.SpecifyKind(Convert.ToDateTime(reader["UploadTime"]), DateTimeKind.Utc),
+
+                        AscensionNumber = Convert.ToInt32(reader["AscensionNumber"]),
+                        Zone = Convert.ToInt32(reader["Zone"]),
+                        Souls = reader["Souls"].ToString(),
                     });
                 }
             }

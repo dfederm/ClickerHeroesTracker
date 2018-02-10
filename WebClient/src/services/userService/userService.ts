@@ -5,7 +5,7 @@ import { HttpErrorHandlerService } from "../httpErrorHandlerService/httpErrorHan
 import "rxjs/add/operator/toPromise";
 
 import { AuthenticationService } from "../authenticationService/authenticationService";
-import { IPaginationMetadata, IUpload, IUser } from "../../models";
+import { IPaginationMetadata, IUser } from "../../models";
 
 export interface ICreateUserRequest {
     userName: string;
@@ -18,7 +18,19 @@ export interface ICreateUserRequest {
 export interface IUploadSummaryListResponse {
     pagination: IPaginationMetadata;
 
-    uploads: IUpload[];
+    uploads: IUploadSummary[];
+}
+
+export interface IUploadSummary {
+    id: number;
+
+    timeSubmitted: string;
+
+    ascensionNumber: number;
+
+    zone: number;
+
+    souls: string;
 }
 
 export interface ISetPasswordRequest {

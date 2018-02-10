@@ -12,9 +12,8 @@ import { Decimal } from "decimal.js";
 import { UploadComponent } from "./upload";
 import { ExponentialPipe } from "../../pipes/exponentialPipe";
 import { AuthenticationService, IUserInfo } from "../../services/authenticationService/authenticationService";
-import { UploadService } from "../../services/uploadService/uploadService";
+import { UploadService, IUpload } from "../../services/uploadService/uploadService";
 import { SettingsService } from "../../services/settingsService/settingsService";
-import { IUpload } from "../../models";
 
 describe("UploadComponent", () => {
     let component: UploadComponent;

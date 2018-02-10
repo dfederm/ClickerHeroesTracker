@@ -1,26 +1,26 @@
 import { ComponentFixture, TestBed, async } from "@angular/core/testing";
 import { By } from "@angular/platform-browser";
 import { DatePipe } from "@angular/common";
-import { NO_ERRORS_SCHEMA } from "@angular/core";
+import { NO_ERRORS_SCHEMA, ChangeDetectorRef } from "@angular/core";
+import { Decimal } from "decimal.js";
 
 import { UploadsTableComponent } from "./uploadsTable";
-import { UserService, IUploadSummaryListResponse } from "../../services/userService/userService";
+import { UserService, IUploadSummaryListResponse, IUploadSummary } from "../../services/userService/userService";
+import { ExponentialPipe } from "../../pipes/exponentialPipe";
+import { SettingsService } from "../../services/settingsService/settingsService";
+import { BehaviorSubject } from "rxjs";
 
 describe("UploadsTableComponent", () => {
     let component: UploadsTableComponent;
     let fixture: ComponentFixture<UploadsTableComponent>;
 
-    let uploads =
-        [
-            { id: 0, timeSubmitted: "2017-01-01T00:00:00", playStyle: "idle" },
-            { id: 1, timeSubmitted: "2017-01-02T00:00:00", playStyle: "idle" },
-            { id: 2, timeSubmitted: "2017-01-03T00:00:00", playStyle: "idle" },
-            { id: 3, timeSubmitted: "2017-01-04T00:00:00", playStyle: "idle" },
-            { id: 4, timeSubmitted: "2017-01-05T00:00:00", playStyle: "idle" },
-            { id: 5, timeSubmitted: "2017-01-06T00:00:00", playStyle: "idle" },
-            { id: 6, timeSubmitted: "2017-01-07T00:00:00", playStyle: "idle" },
-            { id: 7, timeSubmitted: "2017-01-08T00:00:00", playStyle: "idle" },
-        ];
+    const settings = SettingsService.defaultSettings;
+    let settingsSubject = new BehaviorSubject(settings);
+
+    let uploads: IUploadSummary[] = [];
+    for (let i = 0; i < 8; i++) {
+        uploads.push({ id: i, timeSubmitted: `2017-01-0${i + 1}T00:00:00`, ascensionNumber: i, zone: 100 * i, souls: `1e${100 * i}` });
+    }
 
     beforeEach(async(() => {
         let userService = {
@@ -38,15 +38,22 @@ describe("UploadsTableComponent", () => {
                 return Promise.resolve(uploadsResponse);
             },
         };
+        let settingsService = { settings: () => settingsSubject };
+        let changeDetectorRef = { markForCheck: (): void => void 0 };
 
         TestBed.configureTestingModule(
             {
-                declarations: [UploadsTableComponent],
-                providers:
-                    [
-                        { provide: UserService, useValue: userService },
-                        DatePipe,
-                    ],
+                declarations: [
+                    UploadsTableComponent,
+                    ExponentialPipe,
+                ],
+                providers: [
+                    { provide: UserService, useValue: userService },
+                    { provide: SettingsService, useValue: settingsService },
+                    { provide: ChangeDetectorRef, useValue: changeDetectorRef },
+                    DatePipe,
+                    ExponentialPipe,
+                ],
                 schemas: [NO_ERRORS_SCHEMA],
             })
             .compileComponents()
@@ -124,6 +131,7 @@ describe("UploadsTableComponent", () => {
 
     function verifyTable(page: number): Promise<void> {
         let datePipe = TestBed.get(DatePipe) as DatePipe;
+        let exponentialPipe = TestBed.get(ExponentialPipe) as ExponentialPipe;
 
         fixture.detectChanges();
         return fixture.whenStable().then(() => {
@@ -136,12 +144,21 @@ describe("UploadsTableComponent", () => {
                 let expectedUpload = uploads[((page - 1) * component.count) + i];
 
                 let cells = rows[i].children;
-                expect(cells.length).toEqual(2);
+                expect(cells.length).toEqual(5);
 
-                let dateCell = cells[0];
+                let ascensionCell = cells[0];
+                expect(ascensionCell.nativeElement.textContent.trim()).toEqual(exponentialPipe.transform(expectedUpload.ascensionNumber));
+
+                let zoneCell = cells[1];
+                expect(zoneCell.nativeElement.textContent.trim()).toEqual(exponentialPipe.transform(expectedUpload.zone));
+
+                let soulsCell = cells[2];
+                expect(soulsCell.nativeElement.textContent.trim()).toEqual(exponentialPipe.transform(new Decimal(expectedUpload.souls)));
+
+                let dateCell = cells[3];
                 expect(dateCell.nativeElement.textContent.trim()).toEqual(datePipe.transform(expectedUpload.timeSubmitted, "short"));
 
-                let viewCell = cells[1];
+                let viewCell = cells[4];
                 let link = viewCell.query(By.css("a"));
                 expect(link.properties.routerLink).toEqual(`/uploads/${expectedUpload.id}`);
             }

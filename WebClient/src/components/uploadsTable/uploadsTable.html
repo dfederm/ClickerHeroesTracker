@@ -7,14 +7,18 @@
 <table class="table table-sm table-striped">
   <thead>
     <tr>
-      <th>
-        Upload Time
-      </th>
+      <th>Ascension</th>
+      <th>Zone</th>
+      <th>Souls</th>
+      <th>Time</th>
       <th></th>
     </tr>
   </thead>
   <tbody>
     <tr *ngFor="let upload of uploads">
+      <td>{{ upload.ascensionNumber | exponential }}</td>
+      <td>{{ upload.zone | exponential }}</td>
+      <td>{{ upload.souls | exponential }}</td>
       <td>{{ upload.uploadTime | date:'short' }}</td>
       <td class="text-right">
         <a routerLink="/uploads/{{upload.id}}">View</a>
