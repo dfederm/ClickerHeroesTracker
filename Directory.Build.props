@@ -9,6 +9,7 @@
     <TargetFramework>netcoreapp2.0</TargetFramework>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <CodeAnalysisRuleSet>$(MSBuildThisFileDirectory)\build\CodeAnalysis.ruleset</CodeAnalysisRuleSet>
+    <Deterministic>true</Deterministic>
     <!-- Enable Code Coverage. This is a temporary workaround for https://github.com/Microsoft/vstest/issues/800 -->
     <DebugType>Full</DebugType>
   </PropertyGroup>
