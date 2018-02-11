@@ -1,4 +1,4 @@
-import { NO_ERRORS_SCHEMA } from "@angular/core";
+import { NO_ERRORS_SCHEMA, LOCALE_ID } from "@angular/core";
 import { ComponentFixture, TestBed, async } from "@angular/core/testing";
 import { By } from "@angular/platform-browser";
 import { ActivatedRoute, Params } from "@angular/router";
@@ -10,6 +10,7 @@ import { UserService, IProgressData } from "../../services/userService/userServi
 import { ChartDataSets, ChartPoint, ChartOptions } from "chart.js";
 import { SettingsService } from "../../services/settingsService/settingsService";
 import { ExponentialPipe } from "../../pipes/exponentialPipe";
+import { PercentPipe } from "@angular/common";
 
 describe("UserProgressComponent", () => {
     let component: UserProgressComponent;
@@ -21,7 +22,7 @@ describe("UserProgressComponent", () => {
         titanDamageData: createData(1),
         heroSoulsSacrificedData: createData(2),
         totalAncientSoulsData: createData(3),
-        transcendentPowerData: createData(4),
+        transcendentPowerData: createData(4, false),
         rubiesData: createData(5),
         highestZoneThisTranscensionData: createData(6),
         highestZoneLifetimeData: createData(7),
@@ -40,26 +41,29 @@ describe("UserProgressComponent", () => {
     };
 
     let expectedChartOrder = [
-        { title: "Souls Spent", isLogarithmic: true, data: progress.soulsSpentData },
-        { title: "Titan Damage", isLogarithmic: false, data: progress.titanDamageData },
-        { title: "Hero Souls Sacrificed", isLogarithmic: true, data: progress.heroSoulsSacrificedData },
-        { title: "Total Ancient Souls", isLogarithmic: false, data: progress.totalAncientSoulsData },
-        { title: "Transcendent Power", isLogarithmic: true, data: progress.transcendentPowerData },
-        { title: "Rubies", isLogarithmic: false, data: progress.rubiesData },
-        { title: "Highest Zone This Transcension", isLogarithmic: true, data: progress.highestZoneThisTranscensionData },
-        { title: "Highest Zone Lifetime", isLogarithmic: false, data: progress.highestZoneLifetimeData },
-        { title: "Ascensions This Transcension", isLogarithmic: true, data: progress.ascensionsThisTranscensionData },
-        { title: "Ascensions Lifetime", isLogarithmic: false, data: progress.ascensionsLifetimeData },
-        { title: "Outsider0", isLogarithmic: true, data: progress.outsiderLevelData.outsider0 },
-        { title: "Outsider1", isLogarithmic: false, data: progress.outsiderLevelData.outsider1 },
-        { title: "Outsider2", isLogarithmic: true, data: progress.outsiderLevelData.outsider2 },
-        { title: "Ancient0", isLogarithmic: false, data: progress.ancientLevelData.ancient0 },
-        { title: "Ancient1", isLogarithmic: true, data: progress.ancientLevelData.ancient1 },
-        { title: "Ancient2", isLogarithmic: false, data: progress.ancientLevelData.ancient2 },
+        { title: "Souls Spent", isLogarithmic: true, isPercent: false, data: progress.soulsSpentData },
+        { title: "Titan Damage", isLogarithmic: false, isPercent: false, data: progress.titanDamageData },
+        { title: "Hero Souls Sacrificed", isLogarithmic: true, isPercent: false, data: progress.heroSoulsSacrificedData },
+        { title: "Total Ancient Souls", isLogarithmic: false, isPercent: false, data: progress.totalAncientSoulsData },
+        { title: "Transcendent Power", isLogarithmic: false, isPercent: true, data: progress.transcendentPowerData },
+        { title: "Rubies", isLogarithmic: false, isPercent: false, data: progress.rubiesData },
+        { title: "Highest Zone This Transcension", isLogarithmic: true, isPercent: false, data: progress.highestZoneThisTranscensionData },
+        { title: "Highest Zone Lifetime", isLogarithmic: false, isPercent: false, data: progress.highestZoneLifetimeData },
+        { title: "Ascensions This Transcension", isLogarithmic: true, isPercent: false, data: progress.ascensionsThisTranscensionData },
+        { title: "Ascensions Lifetime", isLogarithmic: false, isPercent: false, data: progress.ascensionsLifetimeData },
+        { title: "Outsider0", isLogarithmic: true, isPercent: false, data: progress.outsiderLevelData.outsider0 },
+        { title: "Outsider1", isLogarithmic: false, isPercent: false, data: progress.outsiderLevelData.outsider1 },
+        { title: "Outsider2", isLogarithmic: true, isPercent: false, data: progress.outsiderLevelData.outsider2 },
+        { title: "Ancient0", isLogarithmic: false, isPercent: false, data: progress.ancientLevelData.ancient0 },
+        { title: "Ancient1", isLogarithmic: true, isPercent: false, data: progress.ancientLevelData.ancient1 },
+        { title: "Ancient2", isLogarithmic: false, isPercent: false, data: progress.ancientLevelData.ancient2 },
     ];
 
     const settings = SettingsService.defaultSettings;
     let settingsSubject = new BehaviorSubject(settings);
+
+    const locale = "en-us";
+    const percentPipe = new PercentPipe(locale);
 
     beforeEach(async(() => {
         let userService = {
@@ -79,6 +83,7 @@ describe("UserProgressComponent", () => {
                     { provide: ActivatedRoute, useValue: route },
                     { provide: UserService, useValue: userService },
                     { provide: SettingsService, useValue: settingsService },
+                    { provide: LOCALE_ID, useValue: locale },
                 ],
                 schemas: [NO_ERRORS_SCHEMA],
             })
@@ -201,6 +206,7 @@ describe("UserProgressComponent", () => {
                         let data = datasets[0].data as ChartPoint[];
                         let expectedData = expectedChartOrder[i].data;
                         let isLogarithmic = expectedChartOrder[i].isLogarithmic;
+                        let isPercent = expectedChartOrder[i].isPercent;
                         let dataKeys = Object.keys(expectedData);
                         expect(data.length).toEqual(dataKeys.length);
                         for (let j = 0; j < data.length; j++) {
@@ -218,7 +224,9 @@ describe("UserProgressComponent", () => {
                             let expectedLabelNum = isLogarithmic
                                 ? Decimal.pow(10, expectedValue)
                                 : Number(expectedValue);
-                            let expectedLabel = ExponentialPipe.formatNumber(expectedLabelNum, settings);
+                            let expectedLabel = isPercent
+                                ? percentPipe.transform(expectedValue / 100, "1.1-3")
+                                : ExponentialPipe.formatNumber(expectedLabelNum, settings);
                             expect((options.tooltips.callbacks.label as Function)({ yLabel: expectedValue })).toEqual(expectedLabel);
                             expect(options.scales.yAxes[0].ticks.callback(expectedValue, null, null)).toEqual(expectedLabel);
                         }
@@ -276,9 +284,9 @@ describe("UserProgressComponent", () => {
         });
     });
 
-    function createData(index: number): { [date: string]: string } {
+    function createData(index: number, useLargeNumbers: boolean = true): { [date: string]: string } {
         // Mix it up to let some charts be logarithmic
-        let prefix = index % 2
+        let prefix = !useLargeNumbers || index % 2
             ? index.toString()
             : "1e10" + index;
         return {

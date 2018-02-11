@@ -1,4 +1,4 @@
-import { Component, OnInit } from "@angular/core";
+import { Component, OnInit, Inject, LOCALE_ID } from "@angular/core";
 import { ActivatedRoute, Params } from "@angular/router";
 import { UserService, IProgressData } from "../../services/userService/userService";
 
@@ -6,6 +6,7 @@ import { Decimal } from "decimal.js";
 import { ChartDataSets, ChartOptions, ChartTooltipItem } from "chart.js";
 import { SettingsService, IUserSettings } from "../../services/settingsService/settingsService";
 import { ExponentialPipe } from "../../pipes/exponentialPipe";
+import { PercentPipe } from "@angular/common";
 
 interface IChartViewModel {
     isProminent: boolean;
@@ -34,12 +35,16 @@ export class UserProgressComponent implements OnInit {
     public charts: IChartViewModel[];
 
     private settings: IUserSettings;
+    private readonly percentPipe: PercentPipe;
 
     constructor(
         private readonly route: ActivatedRoute,
         private readonly userService: UserService,
         private readonly settingsService: SettingsService,
-    ) { }
+        @Inject(LOCALE_ID) locale: string,
+    ) {
+        this.percentPipe = new PercentPipe(locale);
+    }
 
     public get currentDateRange(): string {
         return this._currentDateRange;
@@ -123,23 +128,26 @@ export class UserProgressComponent implements OnInit {
 
         let charts: IChartViewModel[] = [];
 
-        charts.push(this.createChart("Souls Spent", true, progress.soulsSpentData));
-        charts.push(this.createChart("Titan Damage", true, progress.titanDamageData));
-        charts.push(this.createChart("Hero Souls Sacrificed", true, progress.heroSoulsSacrificedData));
-        charts.push(this.createChart("Total Ancient Souls", true, progress.totalAncientSoulsData));
-        charts.push(this.createChart("Transcendent Power", true, progress.transcendentPowerData));
-        charts.push(this.createChart("Rubies", true, progress.rubiesData));
-        charts.push(this.createChart("Highest Zone This Transcension", true, progress.highestZoneThisTranscensionData));
-        charts.push(this.createChart("Highest Zone Lifetime", true, progress.highestZoneLifetimeData));
-        charts.push(this.createChart("Ascensions This Transcension", true, progress.ascensionsThisTranscensionData));
-        charts.push(this.createChart("Ascensions Lifetime", true, progress.ascensionsLifetimeData));
+        let formatExponential = this.formatExponential.bind(this);
+        let formatPercent = this.formatPercent.bind(this);
+
+        charts.push(this.createChart("Souls Spent", true, progress.soulsSpentData, formatExponential));
+        charts.push(this.createChart("Titan Damage", true, progress.titanDamageData, formatExponential));
+        charts.push(this.createChart("Hero Souls Sacrificed", true, progress.heroSoulsSacrificedData, formatExponential));
+        charts.push(this.createChart("Total Ancient Souls", true, progress.totalAncientSoulsData, formatExponential));
+        charts.push(this.createChart("Transcendent Power", true, progress.transcendentPowerData, formatPercent));
+        charts.push(this.createChart("Rubies", true, progress.rubiesData, formatExponential));
+        charts.push(this.createChart("Highest Zone This Transcension", true, progress.highestZoneThisTranscensionData, formatExponential));
+        charts.push(this.createChart("Highest Zone Lifetime", true, progress.highestZoneLifetimeData, formatExponential));
+        charts.push(this.createChart("Ascensions This Transcension", true, progress.ascensionsThisTranscensionData, formatExponential));
+        charts.push(this.createChart("Ascensions Lifetime", true, progress.ascensionsLifetimeData, formatExponential));
 
         for (let outsider in progress.outsiderLevelData) {
-            charts.push(this.createChart(this.toTitleCase(outsider), false, progress.outsiderLevelData[outsider]));
+            charts.push(this.createChart(this.toTitleCase(outsider), false, progress.outsiderLevelData[outsider], formatExponential));
         }
 
         for (let ancient in progress.ancientLevelData) {
-            charts.push(this.createChart(this.toTitleCase(ancient), false, progress.ancientLevelData[ancient]));
+            charts.push(this.createChart(this.toTitleCase(ancient), false, progress.ancientLevelData[ancient], formatExponential));
         }
 
         // Only valid charts
@@ -152,6 +160,7 @@ export class UserProgressComponent implements OnInit {
         title: string,
         isProminent: boolean,
         data: { [time: string]: string },
+        formatValue: (value: string | number, isLogarithmic: boolean) => string,
     ): IChartViewModel {
         if (!data) {
             return null;
@@ -226,7 +235,7 @@ export class UserProgressComponent implements OnInit {
                             return new Date(tooltipItems[0].xLabel).toLocaleString();
                         },
                         label: (tooltipItem: ChartTooltipItem) => {
-                            return this.formatNumber(tooltipItem.yLabel, isLogarithmic);
+                            return formatValue(tooltipItem.yLabel, isLogarithmic);
                         },
                     },
                 },
@@ -247,7 +256,7 @@ export class UserProgressComponent implements OnInit {
                             type: "linear",
                             ticks: {
                                 callback: (value: number): string => {
-                                    return this.formatNumber(value, isLogarithmic);
+                                    return formatValue(value, isLogarithmic);
                                 },
                             },
                         },
@@ -257,11 +266,18 @@ export class UserProgressComponent implements OnInit {
         };
     }
 
-    private formatNumber(value: string | number, isLogarithmic: boolean): string {
+    private formatExponential(value: string | number, isLogarithmic: boolean): string {
         let num = isLogarithmic
             ? Decimal.pow(10, value)
             : Number(value);
         return ExponentialPipe.formatNumber(num, this.settings);
+    }
+
+    private formatPercent(value: string | number, isLogarithmic: boolean): string {
+        let num = isLogarithmic
+            ? Decimal.pow(10, value).toNumber()
+            : Number(value);
+        return this.percentPipe.transform(num / 100, "1.1-3");
     }
 
     private toTitleCase(srt: string): string {

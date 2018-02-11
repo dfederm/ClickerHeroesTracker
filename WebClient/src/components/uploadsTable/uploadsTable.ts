@@ -55,6 +55,7 @@ export class UploadsTableComponent implements OnInit {
     }
 
     private populateUploads(): void {
+        this.isError = false;
         this.isLoading = true;
         this.userService
             .getUploads(this.userName, this.page, this.count)
