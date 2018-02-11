@@ -23,7 +23,10 @@ export class ChangelogComponent implements OnInit {
     public canEdit: boolean;
 
     @Input()
-    public isFull: boolean;
+    public showDates: boolean;
+
+    @Input()
+    public maxEntries?: number;
 
     constructor(
         private readonly newsService: NewsService,
@@ -33,7 +36,8 @@ export class ChangelogComponent implements OnInit {
     public ngOnInit(): void {
         this.refreshNews();
 
-        if (this.isFull) {
+        // Editing is only possible when showing dates
+        if (this.showDates) {
             this.authenticationService
                 .userInfo()
                 .subscribe(userInfo => this.canEdit = userInfo.isAdmin);
@@ -96,7 +100,6 @@ export class ChangelogComponent implements OnInit {
         this.isLoading = false;
         let entries = response.entries;
 
-        const maxEntries = 3;
         let numEntries = 0;
 
         // Put the dates in an array so we can enumerate backwards
@@ -114,13 +117,13 @@ export class ChangelogComponent implements OnInit {
             let dateUtc = new Date(dateStr);
             let date = new Date(dateUtc.getUTCFullYear(), dateUtc.getUTCMonth(), dateUtc.getUTCDate());
 
-            if (this.isFull || !currentSection) {
+            if (this.showDates || !currentSection) {
                 if (currentSection) {
                     this.sections.push(currentSection);
                 }
 
                 currentSection = {
-                    date: this.isFull ? date : null,
+                    date: this.showDates ? date : null,
                     entries: [],
                     editable: false,
                 };
@@ -130,12 +133,12 @@ export class ChangelogComponent implements OnInit {
             for (let j = 0; j < messages.length; j++) {
                 currentSection.entries.push({ message: messages[j] });
                 numEntries++;
-                if (!this.isFull && numEntries === maxEntries) {
+                if (this.isFull(numEntries)) {
                     break;
                 }
             }
 
-            if (!this.isFull && numEntries === maxEntries) {
+            if (this.isFull(numEntries)) {
                 break;
             }
         }
@@ -143,5 +146,9 @@ export class ChangelogComponent implements OnInit {
         if (currentSection) {
             this.sections.push(currentSection);
         }
+    }
+
+    private isFull(numEntries: number): boolean {
+        return this.maxEntries && numEntries >= this.maxEntries;
     }
 }

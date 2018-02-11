@@ -1,5 +1,5 @@
 import { NO_ERRORS_SCHEMA } from "@angular/core";
-import { ComponentFixture, TestBed, async } from "@angular/core/testing";
+import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { By } from "@angular/platform-browser";
 
 import { NewsComponent } from "./news";
@@ -7,7 +7,7 @@ import { NewsComponent } from "./news";
 describe("NewsComponent", () => {
     let fixture: ComponentFixture<NewsComponent>;
 
-    beforeEach(async(() => {
+    beforeEach(done => {
         TestBed.configureTestingModule(
             {
                 declarations: [NewsComponent],
@@ -16,10 +16,12 @@ describe("NewsComponent", () => {
             .compileComponents()
             .then(() => {
                 fixture = TestBed.createComponent(NewsComponent);
-            });
-    }));
+            })
+            .then(done)
+            .catch(done.fail);
+    });
 
-    it("should display the full changelog", () => {
+    it("should display a changelog with dates", () => {
         fixture.detectChanges();
 
         let changelogContainer = fixture.debugElement.query(By.css(".container"));
@@ -27,6 +29,6 @@ describe("NewsComponent", () => {
 
         let changelog = changelogContainer.query(By.css("changelog"));
         expect(changelog).not.toBeNull();
-        expect(changelog.properties.isFull).toEqual(true);
+        expect(changelog.properties.showDates).toEqual(true);
     });
 });

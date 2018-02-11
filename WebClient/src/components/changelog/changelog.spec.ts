@@ -65,22 +65,22 @@ describe("ChangelogComponent", () => {
             .catch(done.fail);
     });
 
-    it("should display all sections of news entries when isFull=true", done => {
+    it("should display all news entries grouped by date", done => {
         let newsService = TestBed.get(NewsService);
         spyOn(newsService, "getNews").and.returnValue(Promise.resolve(siteNewsEntryListResponse));
 
-        component.isFull = true;
-
         let datePipe = TestBed.get(DatePipe) as DatePipe;
 
+        component.showDates = true;
         fixture.detectChanges();
+
         fixture.whenStable()
             .then(() => {
                 fixture.detectChanges();
                 expect(newsService.getNews).toHaveBeenCalled();
 
                 let sections = fixture.debugElement.queryAll(By.css("div"));
-                expect(sections.length).toEqual(3);
+                expect(sections.length).toEqual(Object.keys(siteNewsEntryListResponse.entries).length);
 
                 for (let i = 0; i < sections.length; i++) {
                     // The sections are rendered in reverse order
@@ -102,11 +102,12 @@ describe("ChangelogComponent", () => {
             .catch(done.fail);
     });
 
-    it("should display one section of 3 news entries when isFull=false", done => {
+    it("should display limited news entries in a single group", done => {
         let newsService = TestBed.get(NewsService);
         spyOn(newsService, "getNews").and.returnValue(Promise.resolve(siteNewsEntryListResponse));
 
-        component.isFull = false;
+        component.showDates = false;
+        component.maxEntries = 3;
         fixture.detectChanges();
 
         fixture.whenStable()
@@ -162,7 +163,7 @@ describe("ChangelogComponent", () => {
         });
 
         it("should not show edit and delete buttons when isFull=false", done => {
-            component.isFull = false;
+            component.showDates = false;
 
             fixture.detectChanges();
             fixture.whenStable()
@@ -186,7 +187,7 @@ describe("ChangelogComponent", () => {
         });
 
         it("should show edit and delete buttons when isFull=true", done => {
-            component.isFull = true;
+            component.showDates = true;
 
             fixture.detectChanges();
             fixture.whenStable()
@@ -214,7 +215,7 @@ describe("ChangelogComponent", () => {
         it("should add a new section", done => {
             spyOn(newsService, "addNews").and.returnValue(Promise.resolve());
 
-            component.isFull = true;
+            component.showDates = true;
 
             let saveButton: DebugElement;
             let dateStr: string;
@@ -294,7 +295,7 @@ describe("ChangelogComponent", () => {
         it("should edit an existing section", done => {
             spyOn(newsService, "addNews").and.returnValue(Promise.resolve());
 
-            component.isFull = true;
+            component.showDates = true;
 
             let section: DebugElement;
             let saveButton: DebugElement;
@@ -371,7 +372,7 @@ describe("ChangelogComponent", () => {
         it("should delete an existing section", done => {
             spyOn(newsService, "deleteNews").and.returnValue(Promise.resolve());
 
-            component.isFull = true;
+            component.showDates = true;
 
             fixture.detectChanges();
             fixture.whenStable()
