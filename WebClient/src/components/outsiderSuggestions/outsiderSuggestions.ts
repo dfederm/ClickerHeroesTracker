@@ -7,8 +7,8 @@ import { Decimal } from "decimal.js";
 interface IOutsiderViewModel {
     id: number;
     name: string;
-    currentLevel: Decimal;
-    suggestedLevel: Decimal;
+    currentLevel: number;
+    suggestedLevel: number;
 }
 
 @Component({
@@ -17,7 +17,13 @@ interface IOutsiderViewModel {
 })
 export class OutsiderSuggestionsComponent {
     public outsiders: IOutsiderViewModel[] = [];
-    public remainingAncientSouls: Decimal = new Decimal(0);
+    public remainingAncientSouls = 0;
+
+    public newHze: number;
+    public newHeroSouls: Decimal;
+    public newAncientSouls: number;
+    public ancientSoulsDiff: number;
+    public newTranscendentPower: number;
 
     public get savedGame(): SavedGame {
         return this._savedGame;
@@ -29,16 +35,16 @@ export class OutsiderSuggestionsComponent {
         this.refresh();
     }
 
-    public get focusBorb(): boolean {
-        return this._focusBorb;
+    public get useBeta(): boolean {
+        return this._useBeta;
     }
-    public set focusBorb(value: boolean) {
-        this._focusBorb = value;
+    public set useBeta(value: boolean) {
+        this._useBeta = value;
         this.refresh();
     }
 
     private _savedGame: SavedGame;
-    private _focusBorb = true;
+    private _useBeta = false;
 
     private readonly outsidersByName: { [name: string]: IOutsiderViewModel } = {};
 
@@ -57,8 +63,8 @@ export class OutsiderSuggestionsComponent {
             let outsider: IOutsiderViewModel = {
                 id: outsiderDefinition.id,
                 name: outsiderDefinition.name,
-                currentLevel: new Decimal(0),
-                suggestedLevel: new Decimal(0),
+                currentLevel: 0,
+                suggestedLevel: 0,
             };
 
             this.outsiders.push(outsider);
@@ -79,165 +85,162 @@ export class OutsiderSuggestionsComponent {
                 let outsider = this.outsiders[i];
                 let outsiderData = this.savedGame.data.outsiders.outsiders[outsider.id];
                 if (outsiderData) {
-                    outsider.currentLevel = new Decimal(outsiderData.level || 0);
+                    outsider.currentLevel = outsiderData.level;
                 }
             }
-        }
-
-        let totalAncientSouls = new Decimal(this.savedGame.data.ancientSoulsTotal || 0);
-        if (totalAncientSouls.isZero()) {
-            for (let outsider of this.outsiders) {
-                outsider.suggestedLevel = new Decimal(0);
-            }
-
-            this.remainingAncientSouls = new Decimal(0);
-            return;
         }
 
         const latencyCounter = "OutsiderSuggestions";
         this.appInsights.startTrackEvent(latencyCounter);
 
-        let isMoreThan30000 = totalAncientSouls.greaterThan(30000);
-        let isLessThan100 = totalAncientSouls.lessThan(100);
+        let ancientSouls = Number(this.savedGame.data.ancientSoulsTotal) || 0;
+        let transcendentPower = (25 - 23 * Math.exp(-0.0003 * ancientSouls)) / 100;
 
-        let ponyLevel: Decimal;
-        let chorLevel: Decimal;
-        let phanLevel: Decimal;
-        let borbLevel: Decimal;
-        let rhageistLevel: Decimal;
-        let kariquaLevel: Decimal;
-        let orphalasLevel: Decimal;
-        let senAkhanLevel: Decimal;
-
-        // For all but Phan
-        let costToLevelFunc = (cost: Decimal) => cost.times(8).plus(1).squareRoot().minus(1).dividedBy(2).floor();
-        let levelToCostFunc = (level: Decimal) => level.plus(1).times(level).dividedBy(2);
-
-        let halfAncientSouls = totalAncientSouls.dividedBy(2).floor();
-
-        // Pony and Chor
-        if (isMoreThan30000) {
-            ponyLevel = new Decimal(0);
-            chorLevel = new Decimal(0);
-        } else if (isLessThan100) {
-            // Get highest buyable level for Pony
-            ponyLevel = costToLevelFunc(totalAncientSouls);
-
-            // If what's remaining is less than 5, go 1 less
-            if (totalAncientSouls.minus(levelToCostFunc(ponyLevel)).lessThan(5)) {
-                ponyLevel = ponyLevel.minus(1);
-            }
-
-            chorLevel = new Decimal(0);
+        // Figure out goals for this transcendence
+        if (ancientSouls < 100) {
+            let a = ancientSouls + 42;
+            this.newHze = (a / 5 - 6) * 51.8 * Math.log(1.25) / Math.log(1 + transcendentPower);
+        } else if (ancientSouls < 10500) {
+            this.newHze = (1 - Math.exp(-ancientSouls / 3900)) * 200000 + 4800;
         } else {
-            // Spend at most half on Pony and Chor
-            let maxPonyChorLevel = costToLevelFunc(halfAncientSouls);
-
-            let ponyBenefitFunc = (level: Decimal) => level.times(level).times(10).plus(1);
-
-            let chorReduction = new Decimal(1).dividedBy(0.95);
-            let chorBenefitFunc = (level: Decimal) => chorReduction.pow(level);
-
-            // Pony-favored leveling
-            let ponyFavoredMaxTotalBenefit = new Decimal(0);
-            let ponyFavoredPonyLevel = new Decimal(0);
-            let ponyFavoredChorLevel = new Decimal(0);
-            ponyLevel = maxPonyChorLevel;
-            chorLevel = new Decimal(0);
-            while (ponyLevel.greaterThan(chorLevel)) {
-                let ponyCost = levelToCostFunc(ponyLevel);
-                let ponyBenefit = ponyBenefitFunc(ponyLevel);
-
-                chorLevel = Decimal.min(costToLevelFunc(halfAncientSouls.minus(ponyCost)), 150);
-                let chorBenefit = chorBenefitFunc(chorLevel);
-
-                let totalBenefit = ponyBenefit.times(chorBenefit);
-                if (totalBenefit.greaterThan(ponyFavoredMaxTotalBenefit)) {
-                    ponyFavoredMaxTotalBenefit = totalBenefit;
-                    ponyFavoredPonyLevel = ponyLevel;
-                    ponyFavoredChorLevel = chorLevel;
+            if (this.useBeta) {
+                if (ancientSouls >= 27000) {
+                    this.newHze = 2716000;
+                } else if (ancientSouls >= 17000) {
+                    let a = ancientSouls * 2;
+                    this.newHze = (a / 5 - 6) * 51.8 * Math.log(1.25) / Math.log(1 + transcendentPower);
+                    this.newHze = Math.min(1236000, this.newHze);
+                } else if (ancientSouls >= 14500) {
+                    let a = Math.max(27000, ancientSouls * 1.8);
+                    this.newHze = (a / 5 - 5) * 51.8 * Math.log(1.25) / Math.log(1 + transcendentPower);
+                } else {
+                    this.newHze = 220000;
                 }
-
-                ponyLevel = ponyLevel.minus(1);
-            }
-
-            // Chor-favored leveling
-            let chorFavoredMaxTotalBenefit = new Decimal(0);
-            let chorFavoredPonyLevel = new Decimal(0);
-            let chorFavoredChorLevel = new Decimal(0);
-            chorLevel = Decimal.min(maxPonyChorLevel, 150);
-            ponyLevel = new Decimal(0);
-            while (chorLevel.greaterThan(ponyLevel)) {
-                let chorCost = levelToCostFunc(chorLevel);
-                let chorBenefit = chorBenefitFunc(chorLevel);
-
-                ponyLevel = costToLevelFunc(halfAncientSouls.minus(chorCost));
-                let ponyBenefit = ponyBenefitFunc(ponyLevel);
-
-                let totalBenefit = ponyBenefit.times(chorBenefit);
-                if (totalBenefit.greaterThan(chorFavoredMaxTotalBenefit)) {
-                    chorFavoredMaxTotalBenefit = totalBenefit;
-                    chorFavoredPonyLevel = ponyLevel;
-                    chorFavoredChorLevel = chorLevel;
-                }
-
-                chorLevel = chorLevel.minus(1);
-            }
-
-            // Choose the better Chor/Pony approach
-            if (ponyFavoredMaxTotalBenefit.greaterThan(chorFavoredMaxTotalBenefit)) {
-                ponyLevel = ponyFavoredPonyLevel;
-                chorLevel = ponyFavoredChorLevel;
             } else {
-                ponyLevel = chorFavoredPonyLevel;
-                chorLevel = chorFavoredChorLevel;
-            }
-        }
-
-        if (isMoreThan30000 || isLessThan100) {
-            rhageistLevel = new Decimal(0);
-            kariquaLevel = new Decimal(0);
-            orphalasLevel = new Decimal(0);
-            senAkhanLevel = new Decimal(0);
-        }
-
-        // Borb, Phan, amd super outsiders
-        if (isLessThan100) {
-            let ponyCost = levelToCostFunc(ponyLevel);
-            let soulsMinusPonyCost = totalAncientSouls.minus(ponyCost);
-
-            borbLevel = soulsMinusPonyCost.greaterThan(4) ? new Decimal(2) : new Decimal(1);
-            phanLevel = soulsMinusPonyCost.minus(levelToCostFunc(borbLevel));
-        } else {
-            let borbCostCap: Decimal;
-            if (isMoreThan30000) {
-                phanLevel = new Decimal(0);
-                borbCostCap = totalAncientSouls.times(0.9);
-            } else {
-                phanLevel = totalAncientSouls.times(0.15).floor();
-
-                let superOutsiderLevel = costToLevelFunc(totalAncientSouls.dividedBy(20).floor());
-
-                rhageistLevel = Decimal.min(superOutsiderLevel, 50);
-                kariquaLevel = Decimal.min(superOutsiderLevel, 10);
-                orphalasLevel = Decimal.min(superOutsiderLevel, 10);
-                senAkhanLevel = Decimal.min(superOutsiderLevel, 20);
-
-                borbCostCap = totalAncientSouls.times(0.04);
-                if (this.focusBorb) {
-                    let extra = levelToCostFunc(superOutsiderLevel)
-                        .times(4)
-                        .minus(levelToCostFunc(rhageistLevel))
-                        .minus(levelToCostFunc(kariquaLevel))
-                        .minus(levelToCostFunc(orphalasLevel))
-                        .minus(levelToCostFunc(senAkhanLevel));
-                    borbCostCap = borbCostCap.plus(extra);
+                if (ancientSouls >= 80000) {
+                    let b = this.spendAS(1, ancientSouls - 20000);
+                    this.newHze = Math.min(2716000, 46500 + b * 5000);
+                } else if (ancientSouls >= 20000) {
+                    let b = this.spendAS(1, ancientSouls * 0.75);
+                    this.newHze = Math.min(2716000, 46500 + b * 5000);
+                } else if (ancientSouls >= 17000) {
+                    let as = ancientSouls * 2;
+                    this.newHze = (as / 5 - 6) * 51.8 * Math.log(1.25) / Math.log(1 + transcendentPower);
+                    this.newHze = Math.min(1236000, this.newHze);
+                } else if (ancientSouls >= 14500) {
+                    let a = ancientSouls * 1.8;
+                    this.newHze = (a / 5 - 6) * 51.8 * Math.log(1.25) / Math.log(1 + transcendentPower);
+                    this.newHze = Math.min(1236000, this.newHze);
+                } else {
+                    this.newHze = 220000;
                 }
             }
-
-            borbLevel = Decimal.min(costToLevelFunc(borbCostCap), 245);
         }
 
+        this.newHze = Math.floor(this.newHze);
+        let newLogHeroSouls = Math.log10(1 + transcendentPower) * this.newHze / 5 + (this.useBeta ? 5 : 6);
+
+        // Ancient effects
+        let ancientLevels = Math.floor(newLogHeroSouls * 3.284) + 11;
+        let kuma = -100 * (1 - Math.exp(-0.0025 * ancientLevels));
+        let atman = 75 * (1 - Math.exp(-0.013 * ancientLevels));
+        let bubos = -5 * (1 - Math.exp(-0.002 * ancientLevels));
+        let chronos = 30 * (1 - Math.exp(-0.034 * ancientLevels));
+        let dora = 9900 * (1 - Math.exp(-0.002 * ancientLevels));
+
+        // Unbuffed Stats
+        let nerfs = Math.floor(this.newHze / 500) * 500 / 500;
+        let unbuffedMonstersPerZone = 10 + nerfs * (this.useBeta ? 0.1 : 1);
+        let unbuffedTreasureChestChance = Math.exp(-0.006 * nerfs);
+        let unbuffedBossHealth = 10 + nerfs * 0.4;
+        let unbuffedBossTimer = 30 - nerfs * 2;
+        let unbuffedPrimalBossChance = 25 - nerfs * 2;
+
+        // Outsider Caps
+        let borbCap = Math.max(0, Math.ceil(((unbuffedMonstersPerZone - 2) / -kuma - 1) / 0.1));
+        let rhageistCap = Math.ceil(((100 - unbuffedPrimalBossChance) / atman - 1) / 0.25);
+        let kariquaCap = Math.ceil(((unbuffedBossHealth - 5) / -bubos - 1) / 0.5);
+        let orphalasCap = Math.max(1, Math.ceil(((2 - unbuffedBossTimer) / chronos - 1) / 0.75)) + 2;
+        let senakhanCap = Math.max(1, Math.ceil((100 / unbuffedTreasureChestChance) / (dora / 100 + 1) - 1));
+
+        let rhageistRatio = 0.25;
+        let kariquaRatio = 0.03;
+        let orphalasRatio = 0.07;
+        let senakhanRatio = 0.05;
+
+        if (ancientSouls < 100) {
+            let ratioChange = ancientSouls / 100;
+            rhageistRatio *= ratioChange;
+            kariquaRatio *= ratioChange;
+            orphalasRatio *= ratioChange;
+            senakhanRatio *= ratioChange;
+        }
+
+        // Apply limits
+        rhageistCap = Math.min(rhageistCap, 107);
+        kariquaCap = Math.min(kariquaCap, 164);
+        orphalasCap = Math.min(orphalasCap, 147);
+        senakhanCap = Math.min(senakhanCap, 71);
+
+        // Outsider Leveling
+        this.remainingAncientSouls = ancientSouls;
+
+        let borbLevel = this.useBeta
+            ? Math.max((this.remainingAncientSouls >= 138) ? 10 : this.spendAS(0.4, this.remainingAncientSouls), borbCap)
+            : Math.max((this.remainingAncientSouls >= 300) ? 15 : this.spendAS(0.4, this.remainingAncientSouls), borbCap);
+        if (this.getCostFromLevel(borbLevel) > (this.remainingAncientSouls - 5)) {
+            borbLevel = this.spendAS(1, this.remainingAncientSouls - 5);
+        }
+
+        this.remainingAncientSouls -= this.getCostFromLevel(borbLevel);
+
+        // Xyl sucks
+        let xyliqilLevel = 0;
+        this.remainingAncientSouls -= this.getCostFromLevel(xyliqilLevel);
+
+        // Super outsiders
+        let rhageistLevel = this.getCostFromLevel(rhageistCap) > (this.remainingAncientSouls * rhageistRatio)
+            ? this.spendAS(rhageistRatio, this.remainingAncientSouls)
+            : rhageistCap;
+        let kariquaLevel = this.getCostFromLevel(kariquaCap) > (this.remainingAncientSouls * kariquaRatio)
+            ? this.spendAS(kariquaRatio, this.remainingAncientSouls)
+            : kariquaCap;
+        let orphalasLevel = this.getCostFromLevel(orphalasCap) > (this.remainingAncientSouls * orphalasRatio)
+            ? this.spendAS(orphalasRatio, this.remainingAncientSouls)
+            : orphalasCap;
+        let senakhanLevel = this.getCostFromLevel(senakhanCap) > (this.remainingAncientSouls * senakhanRatio)
+            ? this.spendAS(senakhanRatio, this.remainingAncientSouls)
+            : senakhanCap;
+
+        this.remainingAncientSouls -= this.getCostFromLevel(rhageistLevel);
+        this.remainingAncientSouls -= this.getCostFromLevel(kariquaLevel);
+        this.remainingAncientSouls -= this.getCostFromLevel(orphalasLevel);
+        this.remainingAncientSouls -= this.getCostFromLevel(senakhanLevel);
+
+        // Chor, Phan, and Pony
+        let levels = this.nOS(this.remainingAncientSouls, transcendentPower, this.newHze);
+        let chorLevel = levels[0];
+        let phanLevel = levels[1];
+        let ponyLevel = levels[2];
+
+        this.remainingAncientSouls -= this.getCostFromLevel(chorLevel);
+        this.remainingAncientSouls -= phanLevel;
+        this.remainingAncientSouls -= this.getCostFromLevel(ponyLevel);
+
+        // End of transcension estimates
+        let ponyBonus = Math.pow(ponyLevel, 2) * (this.useBeta ? 1 : 10);
+        let series = 1 / (1 - 1 / (1 + transcendentPower));
+        let buffedPrimalBossChance = Math.max(5, unbuffedPrimalBossChance + atman * (1 + rhageistLevel * 0.25));
+        let pbcm = 100 / Math.min(buffedPrimalBossChance, 100);
+
+        newLogHeroSouls = Math.log10(1 + transcendentPower) * (this.newHze - 105) / 5 + Math.log10(ponyBonus + 1) + Math.log10(20 * series * pbcm);
+        this.newHeroSouls = Decimal.pow(10, newLogHeroSouls);
+        this.newAncientSouls = Math.max(ancientSouls, Math.floor(newLogHeroSouls * 5));
+        this.ancientSoulsDiff = this.newAncientSouls - ancientSouls;
+        this.newTranscendentPower = (25 - 23 * Math.exp(-0.0003 * this.newAncientSouls)) / 100;
+
+        // Update outtsider view models
+        this.outsidersByName.Xyliqil.suggestedLevel = xyliqilLevel;
         this.outsidersByName["Chor'gorloth"].suggestedLevel = chorLevel;
         this.outsidersByName.Ponyboy.suggestedLevel = ponyLevel;
         this.outsidersByName.Phandoryss.suggestedLevel = phanLevel;
@@ -245,18 +248,81 @@ export class OutsiderSuggestionsComponent {
         this.outsidersByName.Rhageist.suggestedLevel = rhageistLevel;
         this.outsidersByName["K'Ariqua"].suggestedLevel = kariquaLevel;
         this.outsidersByName.Orphalas.suggestedLevel = orphalasLevel;
-        this.outsidersByName["Sen-Akhan"].suggestedLevel = senAkhanLevel;
-
-        this.remainingAncientSouls = totalAncientSouls
-            .minus(levelToCostFunc(chorLevel))
-            .minus(levelToCostFunc(ponyLevel))
-            .minus(phanLevel)
-            .minus(levelToCostFunc(borbLevel))
-            .minus(levelToCostFunc(rhageistLevel))
-            .minus(levelToCostFunc(kariquaLevel))
-            .minus(levelToCostFunc(orphalasLevel))
-            .minus(levelToCostFunc(senAkhanLevel));
+        this.outsidersByName["Sen-Akhan"].suggestedLevel = senakhanLevel;
 
         this.appInsights.stopTrackEvent(latencyCounter);
+    }
+
+    private nOS(ancientSouls: number, transcendentPower: number, zone: number): [number, number, number] {
+        let hpMultiplier = Math.min(1.545, 1.145 + zone / 500000);
+        let hsMultiplier = Math.pow(1 + transcendentPower, 0.2);
+        let chor = 0;
+        let phan = 0;
+        let pony = 0;
+
+        let chorBuff = 1 / 0.95;
+
+        while (ancientSouls > 0) {
+            if (pony < 1) {
+                ancientSouls -= ++pony;
+                continue;
+            } else if (phan < 3) {
+                phan++;
+                ancientSouls--;
+                continue;
+            }
+
+            let damageIncrease = (phan + 2) / (phan + 1);
+            let zoneIncrease = Math.log(damageIncrease) / Math.log(hpMultiplier) * 1.4;
+            let phanBuff = Math.pow(hsMultiplier, zoneIncrease);
+
+            if (phan < 5) {
+                phanBuff *= 1.3;
+            }
+
+            if (chor < ancientSouls && chor < 150) {
+                let chorBpAS = Math.pow(chorBuff, 1 / (chor + 1));
+                if (chorBpAS >= phanBuff) {
+                    if (pony < ancientSouls) {
+                        let ponyBuff = (Math.pow(pony + 1, 2) * (this.useBeta ? 1 : 10) + 1) / (Math.pow(pony, 2) * (this.useBeta ? 1 : 10) + 1);
+                        let ponyBpAS = Math.pow(ponyBuff, 1 / (pony + 1));
+                        if (ponyBpAS >= chorBpAS) {
+                            ancientSouls -= ++pony;
+                            continue;
+                        }
+                    }
+                    ancientSouls -= ++chor;
+                    continue;
+                }
+            }
+
+            if (pony < ancientSouls) {
+                let ponyBuff = (Math.pow(pony + 1, 2) * (this.useBeta ? 1 : 10) + 1) / (Math.pow(pony, 2) * (this.useBeta ? 1 : 10) + 1);
+                let ponyBpAS = Math.pow(ponyBuff, 1 / (pony + 1));
+                if (ponyBpAS >= phanBuff) {
+                    ancientSouls -= ++pony;
+                    continue;
+                }
+            }
+
+            phan++;
+            ancientSouls--;
+
+        }
+
+        return [chor, phan, pony];
+    }
+
+    private getCostFromLevel(level: number): number {
+        return (level + 1) * (level / 2);
+    }
+
+    private spendAS(ratio: number, as: number): number {
+        let spendable = ratio * as;
+        if (spendable < 1) {
+            return 0;
+        }
+
+        return Math.floor(Math.sqrt(8 * spendable + 1) / 2 - 0.5);
     }
 }

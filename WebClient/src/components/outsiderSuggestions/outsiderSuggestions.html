@@ -1,17 +1,17 @@
 <p class="text-muted">
     Based on the
-    <a href="https://redd.it/7lxgj5"
+    <a href="https://redd.it/7on5it"
        target="_blank">
-        Spreadsheet by /u/SpencerSchlenk
+        work of /u/Driej
     </a>
 </p>
 <div class="form-group form-check">
     <label class="form-check-label">
         <input class="form-check-input"
-               name="focusBorb"
-               [(ngModel)]="focusBorb"
+               name="useBeta"
+               [(ngModel)]="useBeta"
                type="checkbox">
-        <span>Focus Borb?</span>
+        <span>e11 beta?</span>
     </label>
 </div>
 <table class="table table-sm table-striped">
@@ -36,4 +36,30 @@
             <td class="text-right">{{ remainingAncientSouls | exponential }}</td>
         </tr>
     </tfoot>
+</table>
+<table class="table table-sm table-striped">
+    <thead>
+        <tr>
+            <th>End of Transcension Estimates</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>Highest Zone:</td>
+            <td class="text-right">{{ newHze | exponential }}</td>
+        </tr>
+        <tr>
+            <td>Hero Souls:</td>
+            <td class="text-right">{{ newHeroSouls | exponential }}</td>
+        </tr>
+        <tr>
+            <td>Ancient Souls:</td>
+            <td class="text-right">{{ newAncientSouls | exponential }} (+{{ ancientSoulsDiff | exponential }})</td>
+        </tr>
+        <tr>
+            <td>Transcendent Power:</td>
+            <td class="text-right">{{ newTranscendentPower | percent:'1.1-3' }}</td>
+        </tr>
+    </tbody>
 </table>
