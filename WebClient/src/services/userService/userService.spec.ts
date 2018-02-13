@@ -111,6 +111,8 @@ describe("UserService", () => {
             tick();
 
             httpMock.expectOne(apiRequest);
+
+            expect(authenticationService.getAuthHeaders).not.toHaveBeenCalled();
         }));
 
         it("should return some uploads", fakeAsync(() => {
@@ -132,6 +134,7 @@ describe("UserService", () => {
             expect(error).toBeUndefined();
             expect(httpErrorHandlerService.logError).not.toHaveBeenCalled();
             expect(httpErrorHandlerService.getValidationErrors).not.toHaveBeenCalled();
+            expect(authenticationService.getAuthHeaders).not.toHaveBeenCalled();
         }));
 
         it("should handle http errors", fakeAsync(() => {
@@ -154,6 +157,7 @@ describe("UserService", () => {
             expect(error.statusText).toEqual("someStatus");
             expect(httpErrorHandlerService.logError).toHaveBeenCalledWith("UserService.getUser.error", error);
             expect(httpErrorHandlerService.getValidationErrors).not.toHaveBeenCalled();
+            expect(authenticationService.getAuthHeaders).not.toHaveBeenCalled();
         }));
     });
 
@@ -209,6 +213,7 @@ describe("UserService", () => {
             tick();
 
             expect(response).toBeUndefined();
+            expect(authenticationService.getAuthHeaders).toHaveBeenCalled();
             expect(error).toBeDefined();
             expect(error.status).toEqual(500);
             expect(error.statusText).toEqual("someStatus");
