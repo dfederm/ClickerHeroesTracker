@@ -44,7 +44,10 @@ describe("NewsService", () => {
 
         it("should make an api call", fakeAsync(() => {
             newsService.getNews();
+
             httpMock.expectOne(apiRequest);
+
+            expect(authenticationService.getAuthHeaders).not.toHaveBeenCalled();
         }));
 
         it("should return some news", fakeAsync(() => {
@@ -58,6 +61,7 @@ describe("NewsService", () => {
             tick();
 
             expect(response).toEqual(expectedResponse, "should return the expected response");
+            expect(authenticationService.getAuthHeaders).not.toHaveBeenCalled();
         }));
 
         it("should handle errors", fakeAsync(() => {
@@ -72,6 +76,7 @@ describe("NewsService", () => {
             tick();
 
             expect(response).toBeUndefined();
+            expect(authenticationService.getAuthHeaders).not.toHaveBeenCalled();
             expect(error).toBeDefined();
             expect(error.status).toEqual(500);
             expect(error.statusText).toEqual("someStatus");
@@ -112,6 +117,7 @@ describe("NewsService", () => {
             tick();
 
             expect(succeeded).toEqual(true);
+            expect(authenticationService.getAuthHeaders).toHaveBeenCalled();
             expect(error).toBeUndefined();
             expect(httpErrorHandlerService.logError).not.toHaveBeenCalled();
         }));
@@ -131,6 +137,7 @@ describe("NewsService", () => {
             tick();
 
             expect(succeeded).toEqual(false);
+            expect(authenticationService.getAuthHeaders).toHaveBeenCalled();
             expect(error).toBeDefined();
             expect(error.status).toEqual(500);
             expect(error.statusText).toEqual("someStatus");
@@ -167,9 +174,9 @@ describe("NewsService", () => {
             tick();
 
             expect(succeeded).toEqual(true);
+            expect(authenticationService.getAuthHeaders).toHaveBeenCalled();
             expect(error).toBeUndefined();
             expect(httpErrorHandlerService.logError).not.toHaveBeenCalled();
-            expect(authenticationService.getAuthHeaders).toHaveBeenCalled();
         }));
 
         it("should handle errors", fakeAsync(() => {
@@ -187,11 +194,11 @@ describe("NewsService", () => {
             tick();
 
             expect(succeeded).toEqual(false);
+            expect(authenticationService.getAuthHeaders).toHaveBeenCalled();
             expect(error).toBeDefined();
             expect(error.status).toEqual(500);
             expect(error.statusText).toEqual("someStatus");
             expect(httpErrorHandlerService.logError).toHaveBeenCalledWith("NewsService.deleteNews.error", error);
-            expect(authenticationService.getAuthHeaders).toHaveBeenCalled();
         }));
     });
 });
