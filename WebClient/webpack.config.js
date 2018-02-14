@@ -7,6 +7,7 @@ const CleanWebpackPlugin = require('clean-webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
 const ManifestPlugin = require('webpack-manifest-plugin');
+const AngularCompilerPlugin = require('@ngtools/webpack').AngularCompilerPlugin;
 
 // Get npm lifecycle event to identify the environment
 var ENV = process.env.npm_lifecycle_event;
@@ -61,6 +62,7 @@ module.exports = () => {
         test: /\.ts$/,
         enforce: 'pre',
         loader: 'tslint-loader',
+        exclude: path.resolve("./node_modules"),
         options: {
           configFile: path.resolve('./tslint.json'),
           tsConfigFile: path.resolve('./tsconfig.json'),
@@ -69,19 +71,6 @@ module.exports = () => {
           typeCheck: true,
           fix: true,
         }
-      },
-      {
-        test: /\.ts$/,
-        loaders: [
-          {
-            loader: 'awesome-typescript-loader',
-            options:
-              {
-                configFileName: path.resolve('./tsconfig.json')
-              }
-          },
-          'angular2-template-loader'
-        ]
       },
       {
         test: /\.html$/,
@@ -97,6 +86,27 @@ module.exports = () => {
       }
     ]
   };
+
+  if (isProd) {
+    config.module.rules.push({
+      test: /(?:\.ngfactory\.js|\.ngstyle\.js|\.ts)$/,
+      loader: '@ngtools/webpack'
+    });
+  } else {
+    config.module.rules.push({
+      test: /\.ts$/,
+      loaders: [
+        {
+          loader: 'awesome-typescript-loader',
+          options:
+            {
+              configFileName: path.resolve('./tsconfig.json')
+            }
+        },
+        'angular2-template-loader'
+      ]
+    });
+  }
 
   if (isTest && !isTestWatch) {
     config.module.rules.push(
@@ -120,12 +130,6 @@ module.exports = () => {
     }),
 
     new webpack.optimize.ModuleConcatenationPlugin(),
-
-    // Workaround for angular/angular#11580
-    new webpack.ContextReplacementPlugin(
-      /\@angular(\\|\/)core(\\|\/)esm5/,
-      path.resolve('./src')
-    ),
   ];
 
   if (!isTest) {
@@ -180,6 +184,12 @@ module.exports = () => {
       // Only emit files when there are no errors
       new webpack.NoEmitOnErrorsPlugin(),
 
+      new AngularCompilerPlugin({
+        tsConfigPath: './tsconfig.json',
+        entryModule: './src/app.module#AppModule',
+        sourceMap: true,
+      }),
+
       // Minify all javascript, switch loaders to minimizing mode
       new webpack.optimize.UglifyJsPlugin({
         sourceMap: true,
@@ -194,6 +204,14 @@ module.exports = () => {
           minimize: false // workaround for ng2
         }
       })
+    );
+  } else {
+    config.plugins.push(
+      // Workaround for angular/angular#11580
+      new webpack.ContextReplacementPlugin(
+        /\@angular(\\|\/)core(\\|\/)esm5/,
+        path.resolve('./src')
+      )
     );
   }
 

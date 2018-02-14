@@ -1,10 +1,13 @@
-import { platformBrowserDynamic } from "@angular/platform-browser-dynamic";
-import { enableProdMode } from "@angular/core";
-
-import { AppModule } from "./app.module";
+// tslint:disable:no-require-imports
+// tslint:disable:no-var-requires
 
 if (process.env.ENV === "prod") {
-    enableProdMode();
+    require("@angular/core").enableProdMode();
+    let platformBrowser = require("@angular/platform-browser").platformBrowser;
+    let appModuleFactory = require("./app.module.ngfactory").AppModuleNgFactory;
+    platformBrowser().bootstrapModuleFactory(appModuleFactory);
+} else {
+    let platformBrowserDynamic = require("@angular/platform-browser-dynamic").platformBrowserDynamic;
+    let appModule = require("./app.module").AppModule;
+    platformBrowserDynamic().bootstrapModule(appModule);
 }
-
-platformBrowserDynamic().bootstrapModule(AppModule);

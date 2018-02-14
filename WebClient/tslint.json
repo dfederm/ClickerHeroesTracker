@@ -263,7 +263,6 @@
     "no-disable-auto-sanitization": true,
     "no-document-domain": true,
     "no-document-write": true,
-    "no-duplicate-case": true,
     "no-empty-line-after-opening-brace": true,
     "no-exec-script": true,
     "no-function-constructor-with-string-args": true,
@@ -293,7 +292,6 @@
     "possible-timing-attack": true,
     "prefer-array-literal": true,
     "promise-must-complete": true,
-    "use-named-parameter": true,
-    "valid-typeof": true
+    "use-named-parameter": true
   }
 }
