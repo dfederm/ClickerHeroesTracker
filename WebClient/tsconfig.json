@@ -18,6 +18,11 @@
       "./node_modules/@types/"
     ]
   },
+  "angularCompilerOptions": {
+    "strictInjectionParameters": true,
+    "fullTemplateTypeCheck": true,
+    "preserveWhitespaces": false
+  },
   "exclude": [
     "node_modules/*",
     "dist/*"

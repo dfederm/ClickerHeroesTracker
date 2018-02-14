@@ -38,11 +38,12 @@
     "ngx-loading": "^1.0.14",
     "pako": "^1.0.6",
     "rxjs": "^5.5.6",
-    "time-ago-pipe": "^1.2.1",
+    "time-ago-pipe": "git://github.com/dfederm/time-ago-pipe#apf-dist",
     "toformat": "^2.0.0",
     "zone.js": "git://github.com/JiaLiPassion/zone.js#jasmine-dist"
   },
   "devDependencies": {
+    "@ngtools/webpack": "^1.9.8",
     "@types/chart.js": "^2.7.7",
     "@types/crypto-js": "^3.1.38",
     "@types/fb": "0.0.23",

@@ -59,14 +59,6 @@
         <tr *ngFor="let ancient of ancients">
             <td>
                 {{ ancient.name }}:
-                <a href="/Manage"
-                   class="text-muted"
-                   *ngIf="ancient.name == 'Solomon' && savedGame && savedGame.data && !savedGame.data.transcendent"
-                   placement="right"
-                   container="body"
-                   ngbTooltip="{{userInfo.isLoggedIn ? 'This is using your settings for the Solomon formula preference. You can change this on your settings page.' : 'By default we use the &quot;Ln&quot; Solomon formula. You may change this by logging in and changing your settings.'}}">
-                    (?)
-                </a>
             </td>
 
             <td class="text-right">

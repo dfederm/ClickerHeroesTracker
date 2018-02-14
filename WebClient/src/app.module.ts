@@ -5,7 +5,7 @@ import { RouterModule, Routes } from "@angular/router";
 import { HttpClientModule } from "@angular/common/http";
 import { NgbModule } from "@ng-bootstrap/ng-bootstrap";
 import { ClipboardModule } from "ngx-clipboard";
-import { TimeAgoPipe } from "time-ago-pipe";
+import { TimeAgoPipeModule } from "time-ago-pipe";
 import { AdsenseModule } from "ng2-adsense";
 import { ApplicationInsightsModule, AppInsightsService } from "@markpieszak/ng-application-insights";
 import { ChartsModule } from "ng2-charts";
@@ -87,6 +87,7 @@ const routes: Routes =
       CompareValidatorModule,
       JWBootstrapSwitchModule,
       LoadingModule,
+      TimeAgoPipeModule,
     ],
   declarations:
     [
@@ -105,7 +106,6 @@ const routes: Routes =
       UploadComponent,
       ExponentialPipe,
       ClansComponent,
-      TimeAgoPipe,
       UserProgressComponent,
       UserCompareComponent,
       BannerComponent,

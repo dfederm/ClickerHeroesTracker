@@ -12,7 +12,7 @@
                     <td>{{ externalLogin.providerName }}</td>
                     <td class="text-right">
                         <!-- Don't allow users to remove the only way they have to log in -->
-                        <button *ngIf="logins.hasPassword || logins.externalLogins > 1"
+                        <button *ngIf="logins.hasPassword || logins.externalLogins.length > 1"
                                 class="btn btn-primary"
                                 (click)="removeLogin(externalLogin)">Remove</button>
                     </td>
