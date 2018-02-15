@@ -1,6 +1,6 @@
 import { Component, OnInit } from "@angular/core";
 import { ClanService, ILeaderboardClan, ILeaderboardSummaryListResponse } from "../../services/clanService/clanService";
-import { AuthenticationService } from "../../services/authenticationService/authenticationService";
+import { AuthenticationService, IUserInfo } from "../../services/authenticationService/authenticationService";
 import { UserService } from "../../services/userService/userService";
 
 @Component({
@@ -45,36 +45,40 @@ export class ClansComponent implements OnInit {
         this.authenticationService
             .userInfo()
             .subscribe(userInfo => {
-                this.getUserClan(userInfo.username);
+                this.handleUser(userInfo);
             });
     }
 
-    private getUserClan(username: string): Promise<void> {
+    private handleUser(userInfo: IUserInfo): void {
         this.userClan = null;
 
-        return this.userService.getUser(username)
-            .then(user => {
-                if (!user || !user.clanName) {
-                    return null;
-                }
+        if (userInfo.isLoggedIn) {
+            this.userService.getUser(userInfo.username)
+                .then(user => {
+                    if (!user || !user.clanName) {
+                        return null;
+                    }
 
-                return this.clanService.getClan(user.clanName);
-            })
-            .then(response => {
-                if (!response) {
-                    return;
-                }
+                    return this.clanService.getClan(user.clanName);
+                })
+                .then(response => {
+                    if (!response) {
+                        return;
+                    }
 
-                this.userClan = {
-                    name: response.clanName,
-                    currentRaidLevel: response.currentRaidLevel,
-                    memberCount: response.guildMembers.length,
-                    rank: response.rank,
-                    isUserClan: true,
-                };
+                    this.userClan = {
+                        name: response.clanName,
+                        currentRaidLevel: response.currentRaidLevel,
+                        memberCount: response.guildMembers.length,
+                        rank: response.rank,
+                        isUserClan: true,
+                    };
 
-                this.updateLeaderboard();
-            });
+                    this.updateLeaderboard();
+                });
+        } else {
+            this.updateLeaderboard();
+        }
     }
 
     private getLeaderboard(): Promise<void> {
@@ -96,7 +100,8 @@ export class ClansComponent implements OnInit {
             return;
         }
 
-        this.clans = this.leaderboardResponse.leaderboardClans;
+        // Clone the list since we may mutate it.
+        this.clans = this.leaderboardResponse.leaderboardClans.slice();
 
         // Only add the user clan if it's not in the results
         if (this.userClan && !this.clans.find(clan => clan.isUserClan)) {

@@ -1,6 +1,6 @@
 import { Component, OnInit } from "@angular/core";
 import { ClanService, IGuildMember, IMessage } from "../../services/clanService/clanService";
-import { AuthenticationService } from "../../services/authenticationService/authenticationService";
+import { AuthenticationService, IUserInfo } from "../../services/authenticationService/authenticationService";
 import { UserService } from "../../services/userService/userService";
 import { ActivatedRoute } from "@angular/router";
 import { HttpErrorResponse } from "@angular/common/http/src/response";
@@ -49,7 +49,7 @@ export class ClanComponent implements OnInit {
 
         this.authenticationService
             .userInfo()
-            .subscribe(userInfo => this.handleUser(userInfo.username));
+            .subscribe(userInfo => this.handleUser(userInfo));
     }
 
     public sendMessage(): void {
@@ -95,16 +95,21 @@ export class ClanComponent implements OnInit {
             });
     }
 
-    private handleUser(userName: string): void {
-        this.userService.getUser(userName)
-            .then(user => {
-                if (!user || !user.clanName) {
-                    return null;
-                }
+    private handleUser(userInfo: IUserInfo): void {
+        if (userInfo.isLoggedIn) {
+            this.userService.getUser(userInfo.username)
+                .then(user => {
+                    if (!user || !user.clanName) {
+                        return null;
+                    }
 
-                this.userClanName = user.clanName;
-                this.refreshMessageBoard();
-            });
+                    this.userClanName = user.clanName;
+                    this.refreshMessageBoard();
+                });
+        } else {
+            this.userClanName = null;
+            this.refreshMessageBoard();
+        }
     }
 
     private refreshMessageBoard(): void {
