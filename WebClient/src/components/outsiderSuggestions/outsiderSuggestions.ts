@@ -106,7 +106,7 @@ export class OutsiderSuggestionsComponent {
             if (this.useBeta) {
                 if (ancientSouls >= 80000) {
                     let b = this.spendAS(1, ancientSouls - 20000);
-                    this.newHze = Math.min(7e6, b * 5000);
+                    this.newHze = Math.min(4.5e6, b * 5000);
                 } else if (ancientSouls >= 20000) {
                     let b = this.spendAS(1, ancientSouls * 0.75);
                     this.newHze = Math.min(7e6, b * 5000);
@@ -123,7 +123,7 @@ export class OutsiderSuggestionsComponent {
             } else {
                 if (ancientSouls >= 80000) {
                     let b = this.spendAS(1, ancientSouls - 20000);
-                    this.newHze = Math.min(2716000, 46500 + b * 5000);
+                    this.newHze = Math.min(4.5e6, 46500 + b * 5000);
                 } else if (ancientSouls >= 20000) {
                     let b = this.spendAS(1, ancientSouls * 0.75);
                     this.newHze = Math.min(2716000, 46500 + b * 5000);
