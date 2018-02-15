@@ -93,22 +93,22 @@ describe("OutsiderSuggestionsComponent", () => {
         newTranscendentPower: number,
     }[] = [
             // Patch e10
-            { ancientSouls: 0, useBeta: false, expectedLevels: [0, 0, 0, 0, 0, 0, 0, 0, 0], expectedRemaining: 0, newHze: 1400, newHeroSouls: "342788", newAncientSouls: 27, newTranscendentPower: 2.185547518071864 },
-            { ancientSouls: 1, useBeta: false, expectedLevels: [0, 0, 0, 1, 0, 0, 0, 0, 0], expectedRemaining: 0, newHze: 1512, newHeroSouls: "6.141e+6", newAncientSouls: 33, newTranscendentPower: 2.2265765952919843 },
-            { ancientSouls: 10, useBeta: false, expectedLevels: [0, 0, 4, 2, 2, 0, 0, 0, 0], expectedRemaining: 0, newHze: 2483, newHeroSouls: "1.367e+9", newAncientSouls: 45, newTranscendentPower: 2.308413524692149 },
-            { ancientSouls: 100, useBeta: false, expectedLevels: [0, 1, 5, 8, 8, 5, 1, 2, 2], expectedRemaining: 0, newHze: 9863, newHeroSouls: "1.274e+28", newAncientSouls: 140, newTranscendentPower: 2.9459950468328557 },
-            { ancientSouls: 1000, useBeta: false, expectedLevels: [0, 22, 57, 29, 15, 11, 6, 9, 2], expectedRemaining: 0, newHze: 50035, newHeroSouls: "3.704e+338", newAncientSouls: 1692, newTranscendentPower: 11.155414522699742 },
-            { ancientSouls: 10000, useBeta: false, expectedLevels: [0, 104, 312, 63, 29, 41, 23, 34, 9], expectedRemaining: 0, newHze: 189402, newHeroSouls: "1.788e+3524", newAncientSouls: 17621, newTranscendentPower: 24.883609665499616 },
-            { ancientSouls: 100000, useBeta: false, expectedLevels: [0, 133, 382, 72, 400, 99, 33, 52, 44], expectedRemaining: 0, newHze: 2041500, newHeroSouls: "2.182e+39574", newAncientSouls: 197871, newTranscendentPower: 25 },
+            { ancientSouls: 0, useBeta: false, expectedLevels: [0, 0, 0, 0, 0, 0, 0, 0, 0], expectedRemaining: 0, newHze: 1400, newHeroSouls: "73205", newAncientSouls: 24, newTranscendentPower: 2.1650052682122904 },
+            { ancientSouls: 1, useBeta: false, expectedLevels: [0, 0, 0, 1, 0, 0, 0, 0, 0], expectedRemaining: 0, newHze: 1512, newHeroSouls: "1.235e+6", newAncientSouls: 30, newTranscendentPower: 2.2060712882236757 },
+            { ancientSouls: 10, useBeta: false, expectedLevels: [0, 0, 4, 2, 2, 0, 0, 0, 0], expectedRemaining: 0, newHze: 2483, newHeroSouls: "2.963e+8", newAncientSouls: 42, newTranscendentPower: 2.2879819040142024 },
+            { ancientSouls: 100, useBeta: false, expectedLevels: [0, 3, 5, 9, 8, 3, 0, 1, 1], expectedRemaining: 0, newHze: 9863, newHeroSouls: "1.282e+28", newAncientSouls: 140, newTranscendentPower: 2.9459950468328557 },
+            { ancientSouls: 1000, useBeta: false, expectedLevels: [0, 22, 55, 30, 15, 11, 4, 7, 2], expectedRemaining: 0, newHze: 50035, newHeroSouls: "3.964e+338", newAncientSouls: 1692, newTranscendentPower: 11.155414522699742 },
+            { ancientSouls: 10000, useBeta: false, expectedLevels: [0, 107, 340, 64, 29, 41, 16, 25, 9], expectedRemaining: 0, newHze: 189402, newHeroSouls: "1.846e+3524", newAncientSouls: 17621, newTranscendentPower: 24.883609665499616 },
+            { ancientSouls: 100000, useBeta: false, expectedLevels: [0, 150, 648, 89, 400, 69, 23, 36, 30], expectedRemaining: 0, newHze: 2041500, newHeroSouls: "8.336e+39571", newAncientSouls: 197859, newTranscendentPower: 25 },
 
             // Patch e11
-            { ancientSouls: 0, useBeta: true, expectedLevels: [0, 0, 0, 0, 0, 0, 0, 0, 0], expectedRemaining: 0, newHze: 1400, newHeroSouls: "355674", newAncientSouls: 27, newTranscendentPower: 2.185547518071864 },
-            { ancientSouls: 1, useBeta: true, expectedLevels: [0, 0, 0, 1, 0, 0, 0, 0, 0], expectedRemaining: 0, newHze: 1512, newHeroSouls: "1.174e+6", newAncientSouls: 30, newTranscendentPower: 2.2060712882236757 },
-            { ancientSouls: 10, useBeta: true, expectedLevels: [0, 0, 4, 2, 2, 0, 0, 0, 0], expectedRemaining: 0, newHze: 2483, newHeroSouls: "1.745e+8", newAncientSouls: 41, newTranscendentPower: 2.2811672764423783 },
-            { ancientSouls: 100, useBeta: true, expectedLevels: [0, 1, 5, 8, 8, 5, 1, 2, 2], expectedRemaining: 0, newHze: 9863, newHeroSouls: "1.292e+27", newAncientSouls: 135, newTranscendentPower: 2.9128892162375024 },
-            { ancientSouls: 1000, useBeta: true, expectedLevels: [0, 23, 62, 30, 10, 11, 7, 9, 2], expectedRemaining: 0, newHze: 50035, newHeroSouls: "3.968e+337", newAncientSouls: 1687, newTranscendentPower: 11.13463206153463 },
-            { ancientSouls: 10000, useBeta: true, expectedLevels: [0, 107, 310, 64, 10, 41, 23, 34, 9], expectedRemaining: 0, newHze: 189402, newHeroSouls: "1.846e+3523", newAncientSouls: 17616, newTranscendentPower: 24.883434948993248 },
-            { ancientSouls: 100000, useBeta: true, expectedLevels: [0, 150, 8705, 348, 46, 107, 76, 117, 71], expectedRemaining: 0, newHze: 2716000, newHeroSouls: "7.382e+52647", newAncientSouls: 263239, newTranscendentPower: 25 },
+            { ancientSouls: 0, useBeta: true, expectedLevels: [0, 0, 0, 0, 0, 0, 0, 0, 0], expectedRemaining: 0, newHze: 1400, newHeroSouls: "69541", newAncientSouls: 24, newTranscendentPower: 2.1650052682122904 },
+            { ancientSouls: 1, useBeta: true, expectedLevels: [0, 0, 0, 1, 0, 0, 0, 0, 0], expectedRemaining: 0, newHze: 1512, newHeroSouls: "213162", newAncientSouls: 26, newTranscendentPower: 2.17870215557425 },
+            { ancientSouls: 10, useBeta: true, expectedLevels: [0, 0, 4, 2, 2, 0, 0, 0, 0], expectedRemaining: 0, newHze: 2483, newHeroSouls: "3.451e+7", newAncientSouls: 37, newTranscendentPower: 2.253888313069563 },
+            { ancientSouls: 100, useBeta: true, expectedLevels: [0, 3, 5, 8, 9, 3, 0, 1, 1], expectedRemaining: 0, newHze: 9863, newHeroSouls: "1.001e+27", newAncientSouls: 135, newTranscendentPower: 2.9128892162375024 },
+            { ancientSouls: 1000, useBeta: true, expectedLevels: [0, 22, 55, 30, 15, 11, 4, 7, 2], expectedRemaining: 0, newHze: 50035, newHeroSouls: "3.968e+337", newAncientSouls: 1687, newTranscendentPower: 11.13463206153463 },
+            { ancientSouls: 10000, useBeta: true, expectedLevels: [0, 103, 312, 63, 44, 41, 15, 24, 9], expectedRemaining: 0, newHze: 189402, newHeroSouls: "1.789e+3523", newAncientSouls: 17616, newTranscendentPower: 24.883434948993248 },
+            { ancientSouls: 100000, useBeta: true, expectedLevels: [0, 150, 613, 92, 399, 70, 24, 37, 31], expectedRemaining: 0, newHze: 1995000, newHeroSouls: "4.860e+38669", newAncientSouls: 193348, newTranscendentPower: 25 },
         ];
     for (let i = 0; i < tests.length; i++) {
         let test = tests[i];

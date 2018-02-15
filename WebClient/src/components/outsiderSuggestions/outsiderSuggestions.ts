@@ -104,8 +104,12 @@ export class OutsiderSuggestionsComponent {
             this.newHze = (1 - Math.exp(-ancientSouls / 3900)) * 200000 + 4800;
         } else {
             if (this.useBeta) {
-                if (ancientSouls >= 27000) {
-                    this.newHze = 2716000;
+                if (ancientSouls >= 80000) {
+                    let b = this.spendAS(1, ancientSouls - 20000);
+                    this.newHze = Math.min(7e6, b * 5000);
+                } else if (ancientSouls >= 20000) {
+                    let b = this.spendAS(1, ancientSouls * 0.75);
+                    this.newHze = Math.min(7e6, b * 5000);
                 } else if (ancientSouls >= 17000) {
                     let a = ancientSouls * 2;
                     this.newHze = (a / 5 - 6) * 51.8 * Math.log(1.25) / Math.log(1 + transcendentPower);
@@ -141,8 +145,10 @@ export class OutsiderSuggestionsComponent {
         let newLogHeroSouls = Math.log10(1 + transcendentPower) * this.newHze / 5 + (this.useBeta ? 5 : 6);
 
         // Ancient effects
-        let ancientLevels = Math.floor(newLogHeroSouls * 3.284) + 11;
-        let kuma = -100 * (1 - Math.exp(-0.0025 * ancientLevels));
+        let ancientLevels = Math.floor(newLogHeroSouls / Math.log10(2)) + -1;
+        let kuma = this.useBeta
+            ? -8 * (1 - Math.exp(-0.01 * ancientLevels))
+            : -100 * (1 - Math.exp(-0.0025 * ancientLevels));
         let atman = 75 * (1 - Math.exp(-0.013 * ancientLevels));
         let bubos = -5 * (1 - Math.exp(-0.002 * ancientLevels));
         let chronos = 30 * (1 - Math.exp(-0.034 * ancientLevels));
@@ -157,16 +163,16 @@ export class OutsiderSuggestionsComponent {
         let unbuffedPrimalBossChance = 25 - nerfs * 2;
 
         // Outsider Caps
-        let borbCap = Math.max(0, Math.ceil(((unbuffedMonstersPerZone - 2) / -kuma - 1) / 0.1));
+        let borbCap = Math.max(0, Math.ceil(((unbuffedMonstersPerZone - 2) / -kuma - 1) / (this.useBeta ? 0.125 : 0.1)));
         let rhageistCap = Math.ceil(((100 - unbuffedPrimalBossChance) / atman - 1) / 0.25);
         let kariquaCap = Math.ceil(((unbuffedBossHealth - 5) / -bubos - 1) / 0.5);
         let orphalasCap = Math.max(1, Math.ceil(((2 - unbuffedBossTimer) / chronos - 1) / 0.75)) + 2;
         let senakhanCap = Math.max(1, Math.ceil((100 / unbuffedTreasureChestChance) / (dora / 100 + 1) - 1));
 
-        let rhageistRatio = 0.25;
-        let kariquaRatio = 0.03;
-        let orphalasRatio = 0.07;
-        let senakhanRatio = 0.05;
+        let rhageistRatio = 0.125;
+        let kariquaRatio = 0.015;
+        let orphalasRatio = 0.035;
+        let senakhanRatio = 0.025;
 
         if (ancientSouls < 100) {
             let ratioChange = ancientSouls / 100;
@@ -185,9 +191,16 @@ export class OutsiderSuggestionsComponent {
         // Outsider Leveling
         this.remainingAncientSouls = ancientSouls;
 
-        let borbLevel = this.useBeta
-            ? Math.max((this.remainingAncientSouls >= 138) ? 10 : this.spendAS(0.4, this.remainingAncientSouls), borbCap)
-            : Math.max((this.remainingAncientSouls >= 300) ? 15 : this.spendAS(0.4, this.remainingAncientSouls), borbCap);
+        let borbLevel: number;
+        if (this.useBeta) {
+            let borb15 = Math.min(15, this.spendAS(0.5, this.remainingAncientSouls));
+            let borb10pc = this.spendAS(0.1, this.remainingAncientSouls);
+            let borbLate = this.remainingAncientSouls >= 10000 ? borbCap : 0;
+            borbLevel = Math.max(borb15, borb10pc, borbLate);
+        } else {
+            borbLevel = Math.max((this.remainingAncientSouls >= 300) ? 15 : this.spendAS(0.4, this.remainingAncientSouls), borbCap);
+        }
+
         if (this.getCostFromLevel(borbLevel) > (this.remainingAncientSouls - 5)) {
             borbLevel = this.spendAS(1, this.remainingAncientSouls - 5);
         }
@@ -231,7 +244,7 @@ export class OutsiderSuggestionsComponent {
         let ponyBonus = Math.pow(ponyLevel, 2) * (this.useBeta ? 1 : 10);
         let series = 1 / (1 - 1 / (1 + transcendentPower));
         let buffedPrimalBossChance = Math.max(5, unbuffedPrimalBossChance + atman * (1 + rhageistLevel * 0.25));
-        let pbcm = 100 / Math.min(buffedPrimalBossChance, 100);
+        let pbcm = Math.min(buffedPrimalBossChance, 100) / 100;
 
         newLogHeroSouls = Math.log10(1 + transcendentPower) * (this.newHze - 105) / 5 + Math.log10(ponyBonus + 1) + Math.log10(20 * series * pbcm);
         this.newHeroSouls = Decimal.pow(10, newLogHeroSouls);
