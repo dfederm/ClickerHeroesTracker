@@ -128,8 +128,8 @@ export class OutsiderSuggestionsComponent {
                     let b = this.spendAS(1, ancientSouls * 0.75);
                     this.newHze = Math.min(2716000, 46500 + b * 5000);
                 } else if (ancientSouls >= 17000) {
-                    let as = ancientSouls * 2;
-                    this.newHze = (as / 5 - 6) * 51.8 * Math.log(1.25) / Math.log(1 + transcendentPower);
+                    let a = ancientSouls * 2;
+                    this.newHze = (a / 5 - 6) * 51.8 * Math.log(1.25) / Math.log(1 + transcendentPower);
                     this.newHze = Math.min(1236000, this.newHze);
                 } else if (ancientSouls >= 14500) {
                     let a = ancientSouls * 1.8;
@@ -231,10 +231,7 @@ export class OutsiderSuggestionsComponent {
         this.remainingAncientSouls -= this.getCostFromLevel(senakhanLevel);
 
         // Chor, Phan, and Pony
-        let levels = this.nOS(this.remainingAncientSouls, transcendentPower, this.newHze);
-        let chorLevel = levels[0];
-        let phanLevel = levels[1];
-        let ponyLevel = levels[2];
+        let [chorLevel, phanLevel, ponyLevel] = this.nOS(this.remainingAncientSouls, transcendentPower, this.newHze);
 
         this.remainingAncientSouls -= this.getCostFromLevel(chorLevel);
         this.remainingAncientSouls -= phanLevel;
