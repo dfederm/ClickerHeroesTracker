@@ -12,6 +12,21 @@ import { ExponentialPipe } from "../../pipes/exponentialPipe";
 import { PercentPipe } from "@angular/common";
 import { Decimal } from "decimal.js";
 
+// To generate these tests is to open https://driej.github.io/Clicker-Heroes-Outsiders/, open the console, and run test()
+// tslint:disable-next-line:no-require-imports no-var-requires
+export const testData: ITestData[] = require("./outsiderSuggestions.testdata.json");
+
+interface ITestData {
+    ancientSouls: number;
+    useBeta: boolean;
+    expectedLevels: [number, number, number, number, number, number, number, number, number];
+    expectedRemaining: number;
+    newHze: number;
+    newLogHeroSouls: number;
+    newAncientSouls: number;
+    newTranscendentPower: number;
+}
+
 describe("OutsiderSuggestionsComponent", () => {
     let fixture: ComponentFixture<OutsiderSuggestionsComponent>;
     let component: OutsiderSuggestionsComponent;
@@ -80,38 +95,8 @@ describe("OutsiderSuggestionsComponent", () => {
             .catch(done.fail);
     });
 
-    // Easy way to generate these tests is to open https://driej.github.io/Clicker-Heroes-Outsiders/, put a breakpoint at the end of calculateClick, and run the following:
-    // JSON.stringify({ ancientSouls: inputAS, useBeta: e11, expectedLevels: [outsiders.xyliqil, outsiders.chor, outsiders.phan, outsiders.pony, outsiders.borb, outsiders.rhageist, outsiders.kariqua, outsiders.orphalas, outsiders.senakhan], expectedRemaining: inputAS-totalAS, newHze: HZE, newHeroSouls: Math.pow(10, logHS).toExponential(3), newAncientSouls: AS, newTranscendentPower: newTP })
-    const tests: {
-        ancientSouls: number,
-        useBeta: boolean,
-        expectedLevels: [number, number, number, number, number, number, number, number, number],
-        expectedRemaining: number,
-        newHze: number,
-        newHeroSouls: string,
-        newAncientSouls: number,
-        newTranscendentPower: number,
-    }[] = [
-            // Patch e10
-            { ancientSouls: 0, useBeta: false, expectedLevels: [0, 0, 0, 0, 0, 0, 0, 0, 0], expectedRemaining: 0, newHze: 1400, newHeroSouls: "73205", newAncientSouls: 24, newTranscendentPower: 2.1650052682122904 },
-            { ancientSouls: 1, useBeta: false, expectedLevels: [0, 0, 0, 1, 0, 0, 0, 0, 0], expectedRemaining: 0, newHze: 1512, newHeroSouls: "1.235e+6", newAncientSouls: 30, newTranscendentPower: 2.2060712882236757 },
-            { ancientSouls: 10, useBeta: false, expectedLevels: [0, 0, 4, 2, 2, 0, 0, 0, 0], expectedRemaining: 0, newHze: 2483, newHeroSouls: "2.963e+8", newAncientSouls: 42, newTranscendentPower: 2.2879819040142024 },
-            { ancientSouls: 100, useBeta: false, expectedLevels: [0, 3, 5, 9, 8, 3, 0, 1, 1], expectedRemaining: 0, newHze: 9863, newHeroSouls: "1.282e+28", newAncientSouls: 140, newTranscendentPower: 2.9459950468328557 },
-            { ancientSouls: 1000, useBeta: false, expectedLevels: [0, 22, 55, 30, 15, 11, 4, 7, 2], expectedRemaining: 0, newHze: 50035, newHeroSouls: "3.964e+338", newAncientSouls: 1692, newTranscendentPower: 11.155414522699742 },
-            { ancientSouls: 10000, useBeta: false, expectedLevels: [0, 107, 340, 64, 29, 41, 16, 25, 9], expectedRemaining: 0, newHze: 189402, newHeroSouls: "1.846e+3524", newAncientSouls: 17621, newTranscendentPower: 24.883609665499616 },
-            { ancientSouls: 100000, useBeta: false, expectedLevels: [0, 150, 648, 89, 400, 69, 23, 36, 30], expectedRemaining: 0, newHze: 2041500, newHeroSouls: "8.336e+39571", newAncientSouls: 197859, newTranscendentPower: 25 },
-
-            // Patch e11
-            { ancientSouls: 0, useBeta: true, expectedLevels: [0, 0, 0, 0, 0, 0, 0, 0, 0], expectedRemaining: 0, newHze: 1400, newHeroSouls: "69541", newAncientSouls: 24, newTranscendentPower: 2.1650052682122904 },
-            { ancientSouls: 1, useBeta: true, expectedLevels: [0, 0, 0, 1, 0, 0, 0, 0, 0], expectedRemaining: 0, newHze: 1512, newHeroSouls: "213162", newAncientSouls: 26, newTranscendentPower: 2.17870215557425 },
-            { ancientSouls: 10, useBeta: true, expectedLevels: [0, 0, 4, 2, 2, 0, 0, 0, 0], expectedRemaining: 0, newHze: 2483, newHeroSouls: "3.451e+7", newAncientSouls: 37, newTranscendentPower: 2.253888313069563 },
-            { ancientSouls: 100, useBeta: true, expectedLevels: [0, 3, 5, 8, 9, 3, 0, 1, 1], expectedRemaining: 0, newHze: 9863, newHeroSouls: "1.001e+27", newAncientSouls: 135, newTranscendentPower: 2.9128892162375024 },
-            { ancientSouls: 1000, useBeta: true, expectedLevels: [0, 22, 55, 30, 15, 11, 4, 7, 2], expectedRemaining: 0, newHze: 50035, newHeroSouls: "3.968e+337", newAncientSouls: 1687, newTranscendentPower: 11.13463206153463 },
-            { ancientSouls: 10000, useBeta: true, expectedLevels: [0, 103, 312, 63, 44, 41, 15, 24, 9], expectedRemaining: 0, newHze: 189402, newHeroSouls: "1.789e+3523", newAncientSouls: 17616, newTranscendentPower: 24.883434948993248 },
-            { ancientSouls: 100000, useBeta: true, expectedLevels: [0, 150, 613, 92, 399, 70, 24, 37, 31], expectedRemaining: 0, newHze: 1995000, newHeroSouls: "4.860e+38669", newAncientSouls: 193348, newTranscendentPower: 25 },
-        ];
-    for (let i = 0; i < tests.length; i++) {
-        let test = tests[i];
+    for (let i = 0; i < testData.length; i++) {
+        let test = testData[i];
         it(`should show correct suggestions for ${test.ancientSouls} ancient souls for patch ${test.useBeta ? "e11" : "e10"}`, () => {
             // Make a copy to avoid affecting other tests
             component.savedGame = JSON.parse(JSON.stringify(savedGame));
@@ -156,7 +141,7 @@ describe("OutsiderSuggestionsComponent", () => {
             expect(getNormalizedTextContent(endOfTransTableRows[0].children[1])).toEqual(exponentialPipe.transform(test.newHze));
 
             expect(endOfTransTableRows[1].children.length).toEqual(2);
-            expect(getNormalizedTextContent(endOfTransTableRows[1].children[1])).toEqual(exponentialPipe.transform(new Decimal(test.newHeroSouls)));
+            expect(getNormalizedTextContent(endOfTransTableRows[1].children[1])).toEqual(exponentialPipe.transform(Decimal.pow(10, test.newLogHeroSouls)));
 
             expect(endOfTransTableRows[2].children.length).toEqual(2);
             let expectedNewAncientSoulsText = `${exponentialPipe.transform(test.newAncientSouls)} (+${exponentialPipe.transform(test.newAncientSouls - test.ancientSouls)})`;
