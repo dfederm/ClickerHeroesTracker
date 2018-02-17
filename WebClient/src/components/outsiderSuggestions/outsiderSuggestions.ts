@@ -104,26 +104,26 @@ export class OutsiderSuggestionsComponent {
             this.newHze = (1 - Math.exp(-ancientSouls / 3900)) * 200000 + 4800;
         } else if (ancientSouls < 14500) {
             // ~ +8000 Ancient Souls
-            this.newHze = ancientSouls*10.32 + 90000;
-        } else if (ancientSouls < 18000 ) {
+            this.newHze = ancientSouls * 10.32 + 90000;
+        } else if (ancientSouls < 18000) {
             // 27k Ancient Souls
             this.newHze = 284000;
-        } else if (ancientSouls < 27000 ) {
+        } else if (ancientSouls < 27000) {
             // +59% Ancient Souls
-            this.newHze =  ancientSouls*16.4;
+            this.newHze = ancientSouls * 16.4;
         } else if (ancientSouls < 60000) {
             let b = this.spendAS(1, ancientSouls * 0.75);
-            this.newHze = b * 5000 + (this.useBeta?0:46500);
+            this.newHze = b * 5000 + (this.useBeta ? 0 : 46500);
         } else {
             let b = this.spendAS(1, ancientSouls - 15000);
-            this.newHze = Math.min(4.5e6, b * 5000 + (this.useBeta?0:46500));
+            this.newHze = Math.min(4.5e6, b * 5000 + (this.useBeta ? 0 : 46500));
         }
 
         this.newHze = Math.floor(this.newHze);
         let newLogHeroSouls = Math.log10(1 + transcendentPower) * this.newHze / 5 + (this.useBeta ? 5 : 6);
 
         // Ancient effects
-        let ancientLevels = Math.floor(newLogHeroSouls / Math.log10(2) - Math.log(25)/Math.log(2)) + -1;
+        let ancientLevels = Math.floor(newLogHeroSouls / Math.log10(2) - Math.log(25) / Math.log(2)) + -1;
         let kuma = this.useBeta
             ? -8 * (1 - Math.exp(-0.01 * ancientLevels))
             : -100 * (1 - Math.exp(-0.0025 * ancientLevels));
@@ -146,7 +146,7 @@ export class OutsiderSuggestionsComponent {
         let kariquaCap = Math.ceil(((unbuffedBossHealth - 5) / -bubos - 1) / 0.5);
         let orphalasCap = Math.max(1, Math.ceil(((2 - unbuffedBossTimer) / chronos - 1) / 0.75)) + 2;
         let senakhanCap = Math.max(1, Math.ceil((100 / unbuffedTreasureChestChance) / (dora / 100 + 1) - 1));
-		
+
         // Outsider Ratios
         let rhageistRatio;
         let kariquaRatio;
@@ -155,10 +155,10 @@ export class OutsiderSuggestionsComponent {
 
         if (ancientSouls < 100) {
             let ratioChange = ancientSouls / 100;
-            rhageistRatio = 0.2*ratioChange;
-            kariquaRatio = 0.01*ratioChange;
-            orphalasRatio = 0.05*ratioChange;
-            senakhanRatio = 0.05*ratioChange;
+            rhageistRatio = 0.2 * ratioChange;
+            kariquaRatio = 0.01 * ratioChange;
+            orphalasRatio = 0.05 * ratioChange;
+            senakhanRatio = 0.05 * ratioChange;
         } else {
             rhageistRatio = 0.2;
             kariquaRatio = 0.01;
