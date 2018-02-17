@@ -159,25 +159,11 @@ export class OutsiderSuggestionsComponent {
             kariquaRatio = 0.01*ratioChange;
             orphalasRatio = 0.05*ratioChange;
             senakhanRatio = 0.05*ratioChange;
-        } else if (ancientSouls < 27000) {
-            rhageistRatio = 0.2;
-            kariquaRatio = 0.01;
-            orphalasRatio = 0.05;
-            senakhanRatio = 0.05;
-        } else if (ancientSouls < 60000) {
-            // TODO: Extrapolate from spreadsheets between 27k and 60k AS
-            let mutiplier = (ancientSouls-27000) / 33000;
-            rhageistRatio = 0.2;
-            kariquaRatio = 0.01;
-            orphalasRatio = 0.05;
-            senakhanRatio = 0.05;
         } else {
-            // TODO: Extrapolate from spreadsheets between 60k and 420k AS
-            let mutiplier = (ancientSouls-60000) / 360000;
-            rhageistRatio = 0.1;
-            kariquaRatio = 0.005;
-            orphalasRatio = 0.025;
-            senakhanRatio = 0.025;
+            rhageistRatio = 0.2;
+            kariquaRatio = 0.01;
+            orphalasRatio = 0.05;
+            senakhanRatio = 0.05;
         }
 
         // Outsider Leveling
