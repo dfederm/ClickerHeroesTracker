@@ -98,54 +98,32 @@ export class OutsiderSuggestionsComponent {
 
         // Figure out goals for this transcendence
         if (ancientSouls < 100) {
-            let a = ancientSouls + 42;
-            this.newHze = (a / 5 - 6) * 51.8 * Math.log(1.25) / Math.log(1 + transcendentPower);
-        } else if (ancientSouls < 10500) {
-            this.newHze = (1 - Math.exp(-ancientSouls / 3900)) * 200000 + 4800;
-        } else {
-            if (this.useBeta) {
-                if (ancientSouls >= 80000) {
-                    let b = this.spendAS(1, ancientSouls - 20000);
-                    this.newHze = Math.min(4.5e6, b * 5000);
-                } else if (ancientSouls >= 20000) {
-                    let b = this.spendAS(1, ancientSouls * 0.75);
-                    this.newHze = Math.min(7e6, b * 5000);
-                } else if (ancientSouls >= 17000) {
-                    let a = ancientSouls * 2;
-                    this.newHze = (a / 5 - 6) * 51.8 * Math.log(1.25) / Math.log(1 + transcendentPower);
-                    this.newHze = Math.min(1236000, this.newHze);
-                } else if (ancientSouls >= 14500) {
-                    let a = Math.max(27000, ancientSouls * 1.8);
-                    this.newHze = (a / 5 - 5) * 51.8 * Math.log(1.25) / Math.log(1 + transcendentPower);
-                } else {
-                    this.newHze = 220000;
-                }
-            } else {
-                if (ancientSouls >= 80000) {
-                    let b = this.spendAS(1, ancientSouls - 20000);
-                    this.newHze = Math.min(4.5e6, 46500 + b * 5000);
-                } else if (ancientSouls >= 20000) {
-                    let b = this.spendAS(1, ancientSouls * 0.75);
-                    this.newHze = Math.min(2716000, 46500 + b * 5000);
-                } else if (ancientSouls >= 17000) {
-                    let a = ancientSouls * 2;
-                    this.newHze = (a / 5 - 6) * 51.8 * Math.log(1.25) / Math.log(1 + transcendentPower);
-                    this.newHze = Math.min(1236000, this.newHze);
-                } else if (ancientSouls >= 14500) {
-                    let a = ancientSouls * 1.8;
-                    this.newHze = (a / 5 - 6) * 51.8 * Math.log(1.25) / Math.log(1 + transcendentPower);
-                    this.newHze = Math.min(1236000, this.newHze);
-                } else {
-                    this.newHze = 220000;
-                }
-            }
-        }
+			let a = ancientSouls + 42;
+			this.newHze = (a / 5 - 6) * 51.8 * Math.log(1.25) / Math.log(1 + transcendentPower);
+		} else if (ancientSouls < 10500) {
+			this.newHze = (1 - Math.exp(-ancientSouls / 3900)) * 200000 + 4800;
+		} else if (ancientSouls < 14500) {
+			// ~ +8000 Ancient Souls
+			this.newHze = ancientSouls*10.32 + 90000;
+		} else if (ancientSouls < 18000 ) {
+			// 27k Ancient Souls
+			this.newHze = 284000;
+		} else if (ancientSouls < 27000 ) {
+			// +59% Ancient Souls
+			this.newHze =  ancientSouls*16.4;
+		} else if (ancientSouls < 60000) {
+			let b = this.spendAS(1, ancientSouls * 0.75);
+			this.newHze = b * 5000 + (this.useBeta?0:46500);
+		} else {
+			let b = this.spendAS(1, ancientSouls - 15000);
+			this.newHze = Math.min(4.5e6, b * 5000 + (this.useBeta?0:46500));
+		}
 
         this.newHze = Math.floor(this.newHze);
         let newLogHeroSouls = Math.log10(1 + transcendentPower) * this.newHze / 5 + (this.useBeta ? 5 : 6);
 
         // Ancient effects
-        let ancientLevels = Math.floor(newLogHeroSouls / Math.log10(2)) + -1;
+        let ancientLevels = Math.floor(newLogHeroSouls / Math.log10(2) - Math.log(25)/Math.log(2)) + -1;
         let kuma = this.useBeta
             ? -8 * (1 - Math.exp(-0.01 * ancientLevels))
             : -100 * (1 - Math.exp(-0.0025 * ancientLevels));
@@ -168,25 +146,39 @@ export class OutsiderSuggestionsComponent {
         let kariquaCap = Math.ceil(((unbuffedBossHealth - 5) / -bubos - 1) / 0.5);
         let orphalasCap = Math.max(1, Math.ceil(((2 - unbuffedBossTimer) / chronos - 1) / 0.75)) + 2;
         let senakhanCap = Math.max(1, Math.ceil((100 / unbuffedTreasureChestChance) / (dora / 100 + 1) - 1));
-
-        let rhageistRatio = 0.125;
-        let kariquaRatio = 0.015;
-        let orphalasRatio = 0.035;
-        let senakhanRatio = 0.025;
-
-        if (ancientSouls < 100) {
-            let ratioChange = ancientSouls / 100;
-            rhageistRatio *= ratioChange;
-            kariquaRatio *= ratioChange;
-            orphalasRatio *= ratioChange;
-            senakhanRatio *= ratioChange;
-        }
-
-        // Apply limits
-        rhageistCap = Math.min(rhageistCap, 107);
-        kariquaCap = Math.min(kariquaCap, 164);
-        orphalasCap = Math.min(orphalasCap, 147);
-        senakhanCap = Math.min(senakhanCap, 71);
+		
+		// Outsider Ratios
+		let rhageistRatio;
+		let kariquaRatio;
+		let orphalasRatio;
+		let senakhanRatio;
+		
+		if (ancientSouls < 100) {
+			let ratioChange = ancientSouls / 100;
+			rhageistRatio = 0.2*ratioChange;
+			kariquaRatio = 0.01*ratioChange;
+			orphalasRatio = 0.05*ratioChange;
+			senakhanRatio = 0.05*ratioChange;
+		} else if (ancientSouls < 27000) {
+			rhageistRatio = 0.2;
+			kariquaRatio = 0.01;
+			orphalasRatio = 0.05;
+			senakhanRatio = 0.05;
+		} else if (ancientSouls < 60000) {
+			// TODO: Extrapolate from spreadsheets between 27k and 60k AS
+			let mutiplier = (ancientSouls-27000) / 33000;
+			rhageistRatio = 0.2;
+			kariquaRatio = 0.01;
+			orphalasRatio = 0.05;
+			senakhanRatio = 0.05;
+		} else {
+			// TODO: Extrapolate from spreadsheets between 60k and 420k AS
+			let mutiplier = (ancientSouls-60000) / 360000;
+			rhageistRatio = 0.1;
+			kariquaRatio = 0.005;
+			orphalasRatio = 0.025;
+			senakhanRatio = 0.025;
+		}
 
         // Outsider Leveling
         this.remainingAncientSouls = ancientSouls;
