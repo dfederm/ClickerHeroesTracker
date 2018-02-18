@@ -130,16 +130,39 @@ export class UserData {
             dpsMultiplier = this.comboer.getDpsBonus().plus(1);
         }
         */
+
         let dpsMultiplier = this.ancients.idleDpsPercent.times(0.01).plus(1)
             .times(this.ancients.idleUnassignedAutoclickerBonusPercent.times(this.getUnassignedAutoClickerMultiplier(this.totalAutoclickers)).times(0.01).plus(1));
 
         let damagePerFrame = this.attributes.currentAttack
             .times(dpsMultiplier)
             .dividedBy(30); // 30 fps
+
+        // Optimization to take larger steps when possible
+        let increments = [100000, 10000, 1000, 100, 10, 1];
+        zone -= zone % 5; // Need round down to the nearest boss to avoid larger steps jumping over bosses
+        for (let i = 0; i < increments.length; i++) {
+            let increment = increments[i];
+
+            while (monster.maxLife.lessThanOrEqualTo(damagePerFrame)) {
+                zone += increment;
+                monster = new Monster(this, this.ancients, zone);
+            }
+
+            // When we're taking a larger step than 1, we overshoot it, so back out the last step.
+            if (increment !== 1) {
+                zone -= increment;
+                monster = new Monster(this, this.ancients, zone);
+            }
+        }
+
+        /*
+        // Original code
         while (monster.maxLife.lessThanOrEqualTo(damagePerFrame)) {
             zone++;
             monster = new Monster(this, this.ancients, zone);
         }
+        */
 
         return zone;
     }
