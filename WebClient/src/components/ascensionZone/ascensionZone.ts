@@ -171,6 +171,7 @@ export class AscensionZoneComponent {
                 didCurrentHeroChange = false;
 
                 let allUpgradesPurchased = true;
+                let anyUpgradePurchased = false;
 
                 // Purchase as much as possible, starting with upgrades.
                 for (let upgradeId in upgradesMap) {
@@ -193,6 +194,7 @@ export class AscensionZoneComponent {
                     // Purchase upgrade
                     if (userData.canAffordUpgrade(upgrade)) {
                         userData.purchaseUpgrade(upgrade);
+                        anyUpgradePurchased = true;
                     } else {
                         allUpgradesPurchased = false;
                         break;
@@ -203,8 +205,20 @@ export class AscensionZoneComponent {
                 // TODO: Handle the weird interaction between Cadu and Ceus. Users should swap between them every upgrade.
                 if (allUpgradesPurchased && userData.gold.greaterThanOrEqualTo(heroCollection.getById(currentHeroId + 1).getCostUpToLevel(1))) {
                     currentHeroId++;
-                    currentHero = heroCollection.getById(currentHeroId);
                     didCurrentHeroChange = true;
+                } else if (anyUpgradePurchased) {
+                    // Special case Cadu and Ceus as they're intended to be swapped back and forth.
+                    if (currentHeroId === 47) {
+                        currentHeroId = 48;
+                        didCurrentHeroChange = true;
+                    } else if (currentHeroId === 48) {
+                        currentHeroId = 47;
+                        didCurrentHeroChange = true;
+                    }
+                }
+
+                if (didCurrentHeroChange) {
+                    currentHero = heroCollection.getById(currentHeroId);
                 }
             }
 
@@ -243,7 +257,9 @@ export class AscensionZoneComponent {
 
             if (userData.currentZoneHeight < instakillStopZone) {
                 // Accumulate gold from finishing these zones
-                for (let i = userData.currentZoneHeight; i < instakillStopZone; i++) {
+                // As an optimization, only care about the last 100 zones. Beyond that the gold would be trivial.
+                let startingZone = Math.max(userData.currentZoneHeight, instakillStopZone - 100);
+                for (let i = startingZone; i < instakillStopZone; i++) {
                     userData.addGold(userData.getGoldFromFinishingZone(i));
                 }
 
