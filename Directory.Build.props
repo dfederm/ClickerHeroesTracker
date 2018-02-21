@@ -17,7 +17,6 @@
   <ItemGroup>
     <!-- Using a specific compiler version to match the APIs the Analyzers require -->
     <PackageReference Include="Microsoft.Net.Compilers" Version="2.8.0" />
-    <PackageReference Include="Microsoft.CodeAnalysis" Version="2.8.0" />
 
     <!-- Analyzers -->
     <PackageReference Include="Microsoft.CodeAnalysis.FxCopAnalyzers" Version="2.6.0-beta2" />

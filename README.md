@@ -57,8 +57,6 @@ To make a user a site admin:
        INSERT INTO AspNetRoles(Id, ConcurrencyStamp, Name, NormalizedName)
        VALUES(NEWID(), NEWID(), 'Admin', 'ADMIN');
 
-*NOTE: for SqlLite, you will have to manually create guids to replace unsupported NEWID()*
-
 1. Add your user to the role. Rememeber to replace the user id below with the one from above.
 
        INSERT INTO AspNetUserRoles(UserId, RoleId)
