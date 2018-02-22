@@ -125,7 +125,7 @@ export class OutsiderSuggestionsComponent {
         // Ancient effects
         let ancientLevels = Math.floor(newLogHeroSouls / Math.log10(2) - Math.log(25) / Math.log(2)) + -1;
         let kuma = this.useBeta
-            ? -8 * (1 - Math.exp(-0.01 * ancientLevels))
+            ? -8 * (1 - Math.exp(-0.025 * ancientLevels))
             : -100 * (1 - Math.exp(-0.0025 * ancientLevels));
         let atman = 75 * (1 - Math.exp(-0.013 * ancientLevels));
         let bubos = -5 * (1 - Math.exp(-0.002 * ancientLevels));
