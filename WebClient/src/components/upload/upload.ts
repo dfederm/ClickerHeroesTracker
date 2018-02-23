@@ -132,7 +132,8 @@ export class UploadComponent implements OnInit {
             ? new Decimal(this.savedGame.data.numAscensionsThisTranscension || 0)
             : this.ascensionsLifetime;
         this.rubies = new Decimal(this.savedGame.data.rubies || 0);
-        this.autoclickers = new Decimal(this.savedGame.data.autoclickers || 0);
+        this.autoclickers = new Decimal(this.savedGame.data.autoclickers || 0)
+            .plus(this.savedGame.data.dlcAutoclickers || 0);
     }
 
     private handleError(errorMessage: string): void {

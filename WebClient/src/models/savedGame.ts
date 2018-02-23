@@ -54,6 +54,7 @@ export interface ISavedGameData {
     numWorldResets: number | string;
     rubies: number | string;
     autoclickers: number | string;
+    dlcAutoclickers: number | string;
 
     items: IItemsData;
     ancients: IAncientsData;

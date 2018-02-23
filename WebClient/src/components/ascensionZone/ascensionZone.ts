@@ -137,7 +137,7 @@ export class AscensionZoneComponent {
         // Set current state.
         userData.heroSouls = new Decimal(this.savedGame.data.heroSouls || 0);
         userData.highestFinishedZonePersist = Number(this.savedGame.data.highestFinishedZonePersist);
-        userData.totalAutoclickers = Number(this.savedGame.data.autoclickers);
+        userData.totalAutoclickers = Number(this.savedGame.data.autoclickers) + Number(this.savedGame.data.dlcAutoclickers);
         userData.transcendent = this.savedGame.data.transcendent;
         userData.paidForRubyMultiplier = this.savedGame.data.paidForRubyMultiplier;
 

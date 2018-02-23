@@ -199,7 +199,8 @@ export class AncientSuggestionsComponent implements OnInit {
         this.transcendentPower = this.savedGame.data.transcendent
             ? new Decimal((2 + (23 * (1 - Math.pow(Math.E, -0.0003 * this.totalAncientSouls.toNumber())))) / 100)
             : new Decimal(0);
-        this.autoclickers = new Decimal(this.savedGame.data.autoclickers || 0);
+        this.autoclickers = new Decimal(this.savedGame.data.autoclickers || 0)
+            .plus(this.savedGame.data.dlcAutoclickers || 0);
 
         // Ancient cost discount multiplier
         // TODO: Use Outsiders.ancientCostModifier
