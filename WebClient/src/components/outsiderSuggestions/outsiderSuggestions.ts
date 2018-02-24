@@ -120,7 +120,7 @@ export class OutsiderSuggestionsComponent {
         }
 
         this.newHze = Math.floor(this.newHze);
-        let newLogHeroSouls = Math.log10(1 + transcendentPower) * this.newHze / 5 + (this.useBeta ? 5 : 6);
+        let newLogHeroSouls = Math.log10(1 + transcendentPower) * this.newHze / 5 + 6;
 
         // Ancient effects
         let ancientLevels = Math.floor(newLogHeroSouls / Math.log10(2) - Math.log(25) / Math.log(2)) + -1;
@@ -228,7 +228,7 @@ export class OutsiderSuggestionsComponent {
         this.remainingAncientSouls -= this.getCostFromLevel(ponyLevel);
 
         // End of transcension estimates
-        let ponyBonus = Math.pow(ponyLevel, 2) * (this.useBeta ? 1 : 10);
+        let ponyBonus = Math.pow(ponyLevel, 2) * 10;
         let series = 1 / (1 - 1 / (1 + transcendentPower));
         let buffedPrimalBossChance = Math.max(5, unbuffedPrimalBossChance + atman * (1 + rhageistLevel * 0.25));
         let pbcm = Math.min(buffedPrimalBossChance, 100) / 100;
@@ -256,6 +256,10 @@ export class OutsiderSuggestionsComponent {
     private nOS(ancientSouls: number, transcendentPower: number, zone: number): [number, number, number] {
         let hpMultiplier = Math.min(1.545, 1.145 + zone / 500000);
         let hsMultiplier = Math.pow(1 + transcendentPower, 0.2);
+        let heroDamageMultiplier = (zone > 1.23e6) ? 1000 : ((zone > 168000) ? 4.5 : 4);
+        let heroCostMultiplier = (zone > 1.23e6) ? 1.22 : 1.07;
+        let goldToDps = Math.log10(heroDamageMultiplier) / Math.log10(heroCostMultiplier) / 25;
+        let dpsToZones = Math.log10(hpMultiplier) - Math.log10(1.15) * goldToDps;
         let chor = 0;
         let phan = 0;
         let pony = 0;
@@ -273,8 +277,8 @@ export class OutsiderSuggestionsComponent {
             }
 
             let damageIncrease = (phan + 2) / (phan + 1);
-            let zoneIncrease = Math.log(damageIncrease) / Math.log(hpMultiplier) * 1.4;
-            let phanBuff = Math.pow(hsMultiplier, zoneIncrease);
+            let zoneIncrease = Math.log(damageIncrease) / dpsToZones;
+            let phanBuff = Math.pow(hsMultiplier, zoneIncrease / 5);
 
             if (phan < 5) {
                 phanBuff *= 1.3;
@@ -284,7 +288,7 @@ export class OutsiderSuggestionsComponent {
                 let chorBpAS = Math.pow(chorBuff, 1 / (chor + 1));
                 if (chorBpAS >= phanBuff) {
                     if (pony < ancientSouls) {
-                        let ponyBuff = (Math.pow(pony + 1, 2) * (this.useBeta ? 1 : 10) + 1) / (Math.pow(pony, 2) * (this.useBeta ? 1 : 10) + 1);
+                        let ponyBuff = (Math.pow(pony + 1, 2) * 10 + 1) / (Math.pow(pony, 2) * 10 + 1);
                         let ponyBpAS = Math.pow(ponyBuff, 1 / (pony + 1));
                         if (ponyBpAS >= chorBpAS) {
                             ancientSouls -= ++pony;
@@ -297,7 +301,7 @@ export class OutsiderSuggestionsComponent {
             }
 
             if (pony < ancientSouls) {
-                let ponyBuff = (Math.pow(pony + 1, 2) * (this.useBeta ? 1 : 10) + 1) / (Math.pow(pony, 2) * (this.useBeta ? 1 : 10) + 1);
+                let ponyBuff = (Math.pow(pony + 1, 2) * 10 + 1) / (Math.pow(pony, 2) * 10 + 1);
                 let ponyBpAS = Math.pow(ponyBuff, 1 / (pony + 1));
                 if (ponyBpAS >= phanBuff) {
                     ancientSouls -= ++pony;
