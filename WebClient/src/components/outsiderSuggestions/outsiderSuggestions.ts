@@ -277,8 +277,8 @@ export class OutsiderSuggestionsComponent {
             }
 
             let damageIncrease = (phan + 2) / (phan + 1);
-            let zoneIncrease = Math.log(damageIncrease) / dpsToZones;
-            let phanBuff = Math.pow(hsMultiplier, zoneIncrease / 5);
+            let zoneIncrease = Math.log10(damageIncrease) / dpsToZones;
+            let phanBuff = Math.pow(hsMultiplier, zoneIncrease);
 
             if (phan < 5) {
                 phanBuff *= 1.3;
