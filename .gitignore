@@ -28,5 +28,5 @@ logs/
 **/wwwroot/*.js
 **/wwwroot/*.js.map
 
-# in-memory database used on dev machines
-cht.db
+# cache-loader cache
+.cache-loader
