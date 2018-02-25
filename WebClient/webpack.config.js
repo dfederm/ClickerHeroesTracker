@@ -58,20 +58,6 @@ module.exports = () => {
   config.module = {
     rules: [
       {
-        test: /\.ts$/,
-        enforce: 'pre',
-        loader: 'tslint-loader',
-        exclude: path.resolve("./node_modules"),
-        options: {
-          configFile: path.resolve('./tslint.json'),
-          tsConfigFile: path.resolve('./tsconfig.json'),
-          emitErrors: true,
-          failOnHint: true,
-          typeCheck: true,
-          fix: true,
-        }
-      },
-      {
         test: /\.html$/,
         loader: 'html-loader'
       },
@@ -138,23 +124,18 @@ module.exports = () => {
 
     new webpack.optimize.ModuleConcatenationPlugin(),
 
-    // TS type checking in parallel
-    new ForkTsCheckerWebpackPlugin({ checkSyntacticErrors: true }),
+    // TS type checking and linting in parallel
+    new ForkTsCheckerWebpackPlugin({
+      checkSyntacticErrors: true,
+      tslint: true,
+    }),
   ];
 
   if (!isTest) {
     config.plugins.push(
       new CleanWebpackPlugin([
-        'app*.js',
-        'app*.js.map',
-        'data*.js',
-        'data*.js.map',
-        'polyfill*.js',
-        'polyfill*.js.map',
-        'runtime*.js',
-        'runtime*.js.map',
-        'vendor*.js',
-        'vendor*.js.map',
+        '*.js',
+        '*.js.map',
         'index.html',
         'manifest.json',
       ], {
