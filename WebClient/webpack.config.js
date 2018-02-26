@@ -33,12 +33,19 @@ module.exports = () => {
     config.devtool = 'cheap-module-eval-source-map';
   }
 
+  config.mode = isProd ? "production" : "development";
+
   if (!isTest) {
     config.entry = {
       'data': './src/data.ts',
-      'polyfills': './src/polyfills.ts',
-      'vendor': './src/vendor.ts',
       'app': './src/main.ts'
+    };
+
+    config.optimization = {
+      splitChunks: {
+        chunks: "all",
+      },
+      runtimeChunk: "single",
     };
 
     config.output = {
@@ -115,15 +122,6 @@ module.exports = () => {
   }
 
   config.plugins = [
-    new webpack.DefinePlugin({
-      // Environment helpers
-      'process.env': {
-        ENV: JSON.stringify(ENV)
-      }
-    }),
-
-    new webpack.optimize.ModuleConcatenationPlugin(),
-
     // TS type checking and linting in parallel
     new ForkTsCheckerWebpackPlugin({
       checkSyntacticErrors: true,
@@ -142,11 +140,6 @@ module.exports = () => {
           root: outputPath,
           allowExternal: true
         }),
-
-      // Creates hierarchy to keep code from one bundle out of others. See: https://angular.io/guide/webpack#commonschunkplugin
-      new webpack.optimize.CommonsChunkPlugin({
-        name: ['app', 'data', 'vendor', 'polyfills', 'runtime']
-      }),
 
       new HtmlWebpackPlugin({
         template: 'src/index.html'
@@ -172,22 +165,10 @@ module.exports = () => {
 
   if (isProd) {
     config.plugins.push(
-      // Only emit files when there are no errors
-      new webpack.NoEmitOnErrorsPlugin(),
-
       new AngularCompilerPlugin({
         tsConfigPath: './tsconfig.json',
         entryModule: './src/app.module#AppModule',
         sourceMap: true,
-      }),
-
-      // Minify all javascript, switch loaders to minimizing mode
-      new webpack.optimize.UglifyJsPlugin({
-        sourceMap: true,
-        // https://github.com/angular/angular/issues/10618
-        mangle: {
-          keep_fnames: true
-        }
       }),
 
       new webpack.LoaderOptionsPlugin({
