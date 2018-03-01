@@ -30,6 +30,10 @@ export class Hero {
         48: new Decimal("5e951"),
         49: new Decimal("5e16237"),
         50: new Decimal("5e26699"),
+        51: new Decimal("5e40600"),
+        52: new Decimal("5e44339"),
+        53: new Decimal("5e50612"),
+        54: new Decimal("5e57546"),
     };
 
     public level = 0;
@@ -57,7 +61,7 @@ export class Hero {
     }
 
     public get currentClickDamage(): Decimal {
-        if (this.definition.attackFormula !== "heroClickDamageFormula1") {
+        if (this.definition.clickDamageFormula !== "heroClickDamageFormula1") {
             return new Decimal(0);
         }
 

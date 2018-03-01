@@ -8,21 +8,22 @@ export function isLinear(levelAmountFormula: string): boolean {
 }
 
 export function linear(levelAmountFormula: string, level: Decimal): Decimal {
+    /*
+    Examples:
+        linear0_25 => 0.25
+        linear01 => 0.01
+        linear5 => 5
+    */
     let linearSuffix = levelAmountFormula.substring(linearStr.length);
-    let linearCoefficient: number;
-    if (linearSuffix[0] === "0") {
-        if (linearSuffix[1] === "_") {
-            // Eg. linear0_25 => 0.25
-            linearCoefficient = Number(linearSuffix.replace("_", "."));
-        } else {
-            // Eg. linear01 => 0.21
-            linearCoefficient = Number("0." + linearSuffix);
-        }
-    } else {
-        // Eg. linear5 => 5
-        linearCoefficient = Number(linearSuffix);
+
+    // Match 01 => 0.01 but not 0_25 => 0.25
+    if (linearSuffix[0] === "0" && linearSuffix[1] !== "_") {
+        linearSuffix = "0." + linearSuffix;
     }
-    return level.times(linearCoefficient);
+
+    linearSuffix = linearSuffix.replace("_", ".");
+
+    return level.times(linearSuffix);
 }
 
 export function isPercent(levelAmountFormula: string): boolean {

@@ -16,6 +16,7 @@ export interface IItemBonusType {
 export interface IHeroData {
     id: number;
     name: string;
+    clickDamageFormula: string;
     attackFormula: string;
     costFormula: string;
     baseCost: number | string;
