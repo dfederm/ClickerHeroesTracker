@@ -277,7 +277,7 @@ describe("ClanComponent", () => {
 
                 spyOn(clanService, "sendMessage").and.callThrough();
                 button.nativeElement.click();
-                expect(clanService.sendMessage).toHaveBeenCalledWith(message, clan.clanName);
+                expect(clanService.sendMessage).toHaveBeenCalledWith(message);
 
                 // Ensure we refresh the UI
                 spyOn(clanService, "getMessages");
@@ -321,7 +321,7 @@ describe("ClanComponent", () => {
 
                 spyOn(clanService, "sendMessage").and.returnValue(Promise.reject("someReason"));
                 button.nativeElement.click();
-                expect(clanService.sendMessage).toHaveBeenCalledWith(message, clan.clanName);
+                expect(clanService.sendMessage).toHaveBeenCalledWith(message);
 
                 return fixture.whenStable();
             })

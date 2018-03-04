@@ -7,11 +7,13 @@ namespace ClickerHeroesTrackerWebsite.Controllers
     using Configuration;
     using Microsoft.AspNetCore.Hosting;
     using Microsoft.AspNetCore.Mvc;
+    using Website.Models.Api.Version;
 
     /// <summary>
     /// A diagnostic controller for the service version
     /// </summary>
     [Route("version")]
+    [ApiController]
     public class VersionController : Controller
     {
         private readonly IBuildInfoProvider buildInfoProvider;
@@ -35,17 +37,12 @@ namespace ClickerHeroesTrackerWebsite.Controllers
         /// <returns>An object with the version information</returns>
         [Route("")]
         [HttpGet]
-        public IActionResult Version()
+        public ActionResult<VersionResponse> Version() => new VersionResponse
         {
-            var model = new
-            {
-                Environment = this.hostingEnvironment.EnvironmentName,
-                Changelist = this.buildInfoProvider.Changelist,
-                BuildId = this.buildInfoProvider.BuildId,
-                Webclient = this.buildInfoProvider.Webclient,
-            };
-
-            return this.Ok(model);
-        }
+            Environment = this.hostingEnvironment.EnvironmentName,
+            Changelist = this.buildInfoProvider.Changelist,
+            BuildId = this.buildInfoProvider.BuildId,
+            Webclient = this.buildInfoProvider.Webclient,
+        };
     }
 }

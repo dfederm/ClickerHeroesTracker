@@ -4,6 +4,8 @@
 
 namespace ClickerHeroesTrackerWebsite.Controllers
 {
+    using System.Collections.Generic;
+    using System.Linq;
     using System.Threading.Tasks;
     using ClickerHeroesTrackerWebsite.Models;
     using ClickerHeroesTrackerWebsite.Models.Api.Clans;
@@ -14,6 +16,7 @@ namespace ClickerHeroesTrackerWebsite.Controllers
 
     [Route("api/clans")]
     [Authorize]
+    [ApiController]
     public class ClansController : Controller
     {
         private readonly UserManager<ApplicationUser> userManager;
@@ -31,27 +34,21 @@ namespace ClickerHeroesTrackerWebsite.Controllers
         [Route("{clanName}")]
         [HttpGet]
         [AllowAnonymous]
-        public async Task<ActionResult> Get(string clanName)
+        public async Task<ActionResult<ClanData>> Get(string clanName)
         {
-            // Validate parameters
-            if (string.IsNullOrEmpty(clanName))
-            {
-                return this.BadRequest();
-            }
-
             var clanData = await this.clanManager.GetClanDataAsync(clanName);
             if (clanData == null)
             {
                 return this.NotFound();
             }
 
-            return this.Ok(clanData);
+            return clanData;
         }
 
         [Route("")]
         [HttpGet]
         [AllowAnonymous]
-        public async Task<IActionResult> List(
+        public async Task<ActionResult<LeaderboardSummaryListResponse>> List(
             int page = ParameterConstants.List.Page.Default,
             int count = ParameterConstants.List.Count.Default)
         {
@@ -74,18 +71,16 @@ namespace ClickerHeroesTrackerWebsite.Controllers
             var paginationTask = this.clanManager.FetchPaginationAsync(this.Request.Path, page, count);
             await Task.WhenAll(leaderboardTask, paginationTask);
 
-            var model = new LeaderboardSummaryListResponse()
+            return new LeaderboardSummaryListResponse
             {
                 LeaderboardClans = leaderboardTask.Result,
                 Pagination = paginationTask.Result,
             };
-
-            return this.Ok(model);
         }
 
         [Route("messages")]
         [HttpGet]
-        public async Task<IActionResult> GetMessages(int count = ParameterConstants.GetMessages.Count.Default)
+        public async Task<ActionResult<List<Message>>> GetMessages(int count = ParameterConstants.GetMessages.Count.Default)
         {
             // Validate parameters
             if (count < ParameterConstants.GetMessages.Count.Min
@@ -102,12 +97,12 @@ namespace ClickerHeroesTrackerWebsite.Controllers
                 return this.NoContent();
             }
 
-            return this.Ok(messages);
+            return messages.ToList();
         }
 
         [Route("messages")]
         [HttpPost]
-        public async Task<IActionResult> SendMessage(string message)
+        public async Task<ActionResult<string>> SendMessage([FromForm] string message)
         {
             var userId = this.userManager.GetUserId(this.User);
             var responseString = await this.clanManager.SendMessage(userId, message);
@@ -116,10 +111,10 @@ namespace ClickerHeroesTrackerWebsite.Controllers
                 return this.NotFound();
             }
 
-            return this.Ok(responseString);
+            return responseString;
         }
 
-        internal static class ParameterConstants
+        private static class ParameterConstants
         {
             internal static class List
             {

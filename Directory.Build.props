@@ -6,7 +6,7 @@
   </PropertyGroup>
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp2.0</TargetFramework>
+    <TargetFramework>netcoreapp2.1</TargetFramework>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <CodeAnalysisRuleSet>$(MSBuildThisFileDirectory)\build\CodeAnalysis.ruleset</CodeAnalysisRuleSet>
     <Deterministic>true</Deterministic>

@@ -72,42 +72,6 @@ namespace UnitTests.Controllers
         }
 
         [Fact]
-        public async Task Create_InvalidModelState()
-        {
-            var createUser = new CreateUserRequest();
-            var gameData = MockGameData.RealData;
-            var telemetryClient = new TelemetryClient();
-            var mockDatabaseCommandFactory = new Mock<IDatabaseCommandFactory>(MockBehavior.Strict);
-            var mockUserSettingsProvider = new Mock<IUserSettingsProvider>(MockBehavior.Strict);
-            var mockUserManager = MockUserManager.CreateMock();
-            var mockEmailSender = new Mock<IEmailSender>(MockBehavior.Strict);
-            var mockClanManager = new Mock<IClanManager>(MockBehavior.Strict);
-
-            var controller = new UserController(
-                gameData,
-                telemetryClient,
-                mockDatabaseCommandFactory.Object,
-                mockUserSettingsProvider.Object,
-                mockUserManager.Object,
-                mockEmailSender.Object,
-                mockClanManager.Object);
-            controller.ModelState.AddModelError("SomeKey", "SomeErrorMessage");
-            var result = await controller.Create(createUser);
-
-            Assert.NotNull(result);
-            Assert.IsType<BadRequestObjectResult>(result);
-
-            mockDatabaseCommandFactory.VerifyAll();
-            mockUserSettingsProvider.VerifyAll();
-            mockEmailSender.VerifyAll();
-            mockClanManager.VerifyAll();
-
-            // Workaround for a Moq bug. See: https://github.com/moq/moq4/issues/456#issuecomment-331692858
-            mockUserManager.Object.Logger = mockUserManager.Object.Logger;
-            mockUserManager.VerifyAll();
-        }
-
-        [Fact]
         public async Task Create_UserCreationFails()
         {
             var createUser = new CreateUserRequest
@@ -192,11 +156,9 @@ namespace UnitTests.Controllers
                 mockClanManager.Object);
 
             var result = await controller.Get(UserName);
-
             Assert.NotNull(result);
-            Assert.IsType<OkObjectResult>(result);
 
-            var model = ((OkObjectResult)result).Value as User;
+            var model = result.Value;
             Assert.NotNull(model);
 
             Assert.Equal(UserName, model.Name);
@@ -214,41 +176,6 @@ namespace UnitTests.Controllers
         }
 
         [Fact]
-        public async Task Get_MissingUserName()
-        {
-            var gameData = MockGameData.RealData;
-            var telemetryClient = new TelemetryClient();
-            var mockDatabaseCommandFactory = new Mock<IDatabaseCommandFactory>(MockBehavior.Strict);
-            var mockUserSettingsProvider = new Mock<IUserSettingsProvider>(MockBehavior.Strict);
-            var mockUserManager = MockUserManager.CreateMock();
-            var mockEmailSender = new Mock<IEmailSender>(MockBehavior.Strict);
-            var mockClanManager = new Mock<IClanManager>(MockBehavior.Strict);
-
-            var controller = new UserController(
-                gameData,
-                telemetryClient,
-                mockDatabaseCommandFactory.Object,
-                mockUserSettingsProvider.Object,
-                mockUserManager.Object,
-                mockEmailSender.Object,
-                mockClanManager.Object);
-
-            var result = await controller.Get(null);
-
-            Assert.NotNull(result);
-            Assert.IsType<BadRequestResult>(result);
-
-            mockDatabaseCommandFactory.VerifyAll();
-            mockUserSettingsProvider.VerifyAll();
-            mockEmailSender.VerifyAll();
-            mockClanManager.VerifyAll();
-
-            // Workaround for a Moq bug. See: https://github.com/moq/moq4/issues/456#issuecomment-331692858
-            mockUserManager.Object.Logger = mockUserManager.Object.Logger;
-            mockUserManager.VerifyAll();
-        }
-
-        [Fact]
         public async Task Get_NotFoundUser()
         {
             const string UserName = "SomeUserName";
@@ -257,8 +184,6 @@ namespace UnitTests.Controllers
             var telemetryClient = new TelemetryClient();
             var mockDatabaseCommandFactory = new Mock<IDatabaseCommandFactory>(MockBehavior.Strict);
             var mockUserSettingsProvider = new Mock<IUserSettingsProvider>(MockBehavior.Strict);
-
-            var mockUser = new ApplicationUser { UserName = UserName };
             var mockCurrentUser = new Mock<ClaimsPrincipal>(MockBehavior.Strict);
 
             var mockUserManager = MockUserManager.CreateMock();
@@ -281,7 +206,7 @@ namespace UnitTests.Controllers
             var result = await controller.Get(UserName);
 
             Assert.NotNull(result);
-            Assert.IsType<NotFoundResult>(result);
+            Assert.IsType<NotFoundResult>(result.Result);
 
             mockDatabaseCommandFactory.VerifyAll();
             mockUserSettingsProvider.VerifyAll();
@@ -330,7 +255,7 @@ namespace UnitTests.Controllers
             var result = await controller.Get(UserName);
 
             Assert.NotNull(result);
-            Assert.IsType<NotFoundResult>(result);
+            Assert.IsType<NotFoundResult>(result.Result);
 
             mockDatabaseCommandFactory.VerifyAll();
             mockUserSettingsProvider.VerifyAll();
@@ -438,11 +363,9 @@ namespace UnitTests.Controllers
             controller.ControllerContext = new ControllerContext { HttpContext = mockHttpContext.Object };
 
             var result = await controller.Uploads(UserName, Page, Count);
-
             Assert.NotNull(result);
-            Assert.IsType<OkObjectResult>(result);
 
-            var model = ((OkObjectResult)result).Value as UploadSummaryListResponse;
+            var model = result.Value;
             Assert.NotNull(model);
 
             Assert.NotNull(model.Uploads);
@@ -475,14 +398,6 @@ namespace UnitTests.Controllers
         }
 
         [Theory]
-        [InlineData(
-            null,
-            UserController.ParameterConstants.Uploads.Page.Default,
-            UserController.ParameterConstants.Uploads.Count.Default)]
-        [InlineData(
-            "",
-            UserController.ParameterConstants.Uploads.Page.Default,
-            UserController.ParameterConstants.Uploads.Count.Default)]
         [InlineData(
             "SomeUserName",
             UserController.ParameterConstants.Uploads.Page.Min - 1,
@@ -517,7 +432,7 @@ namespace UnitTests.Controllers
             var result = await controller.Uploads(userName, page, count);
 
             Assert.NotNull(result);
-            Assert.IsType<BadRequestResult>(result);
+            Assert.IsType<BadRequestResult>(result.Result);
 
             mockDatabaseCommandFactory.VerifyAll();
             mockUserSettingsProvider.VerifyAll();
@@ -561,7 +476,7 @@ namespace UnitTests.Controllers
             var result = await controller.Uploads(UserName, Page, Count);
 
             Assert.NotNull(result);
-            Assert.IsType<NotFoundResult>(result);
+            Assert.IsType<NotFoundResult>(result.Result);
 
             mockDatabaseCommandFactory.VerifyAll();
             mockUserSettingsProvider.VerifyAll();
@@ -608,7 +523,7 @@ namespace UnitTests.Controllers
             var result = await controller.Uploads(UserName, Page, Count);
 
             Assert.NotNull(result);
-            Assert.IsType<NotFoundResult>(result);
+            Assert.IsType<NotFoundResult>(result.Result);
 
             mockDatabaseCommandFactory.VerifyAll();
             mockUserSettingsProvider.VerifyAll();
@@ -674,7 +589,7 @@ namespace UnitTests.Controllers
             var result = await controller.Uploads(UserName, Page, Count);
 
             Assert.NotNull(result);
-            Assert.IsType<ForbidResult>(result);
+            Assert.IsType<ForbidResult>(result.Result);
 
             mockDatabaseCommandFactory.VerifyAll();
             mockUserSettingsProvider.VerifyAll();
@@ -783,11 +698,9 @@ namespace UnitTests.Controllers
             controller.ControllerContext = new ControllerContext { HttpContext = mockHttpContext.Object };
 
             var result = await controller.Uploads(UserName, Page, Count);
-
             Assert.NotNull(result);
-            Assert.IsType<OkObjectResult>(result);
 
-            var model = ((OkObjectResult)result).Value as UploadSummaryListResponse;
+            var model = result.Value;
             Assert.NotNull(model);
 
             Assert.NotNull(model.Uploads);
@@ -914,11 +827,9 @@ namespace UnitTests.Controllers
             controller.ControllerContext = new ControllerContext { HttpContext = mockHttpContext.Object };
 
             var result = await controller.Uploads(UserName, Page, Count);
-
             Assert.NotNull(result);
-            Assert.IsType<OkObjectResult>(result);
 
-            var model = ((OkObjectResult)result).Value as UploadSummaryListResponse;
+            var model = result.Value;
             Assert.NotNull(model);
 
             Assert.NotNull(model.Uploads);
@@ -1010,11 +921,9 @@ namespace UnitTests.Controllers
             controller.ControllerContext = new ControllerContext { HttpContext = mockHttpContext.Object };
 
             var result = await controller.Follows(UserName);
-
             Assert.NotNull(result);
-            Assert.IsType<OkObjectResult>(result);
 
-            var model = ((OkObjectResult)result).Value as FollowsData;
+            var model = result.Value;
             Assert.NotNull(model);
             Assert.Equal(follows.Count, model.Follows.Count);
             for (var i = 0; i < model.Follows.Count; i++)
@@ -1026,41 +935,6 @@ namespace UnitTests.Controllers
             mockUserSettingsProvider.VerifyAll();
             mockCurrentUser.VerifyAll();
             mockHttpContext.VerifyAll();
-            mockEmailSender.VerifyAll();
-            mockClanManager.VerifyAll();
-
-            // Workaround for a Moq bug. See: https://github.com/moq/moq4/issues/456#issuecomment-331692858
-            mockUserManager.Object.Logger = mockUserManager.Object.Logger;
-            mockUserManager.VerifyAll();
-        }
-
-        [Fact]
-        public async Task Follows_MissingUserName()
-        {
-            var gameData = MockGameData.RealData;
-            var telemetryClient = new TelemetryClient();
-            var mockDatabaseCommandFactory = new Mock<IDatabaseCommandFactory>(MockBehavior.Strict);
-            var mockUserSettingsProvider = new Mock<IUserSettingsProvider>(MockBehavior.Strict);
-            var mockUserManager = MockUserManager.CreateMock();
-            var mockEmailSender = new Mock<IEmailSender>(MockBehavior.Strict);
-            var mockClanManager = new Mock<IClanManager>(MockBehavior.Strict);
-
-            var controller = new UserController(
-                gameData,
-                telemetryClient,
-                mockDatabaseCommandFactory.Object,
-                mockUserSettingsProvider.Object,
-                mockUserManager.Object,
-                mockEmailSender.Object,
-                mockClanManager.Object);
-
-            var result = await controller.Follows(null);
-
-            Assert.NotNull(result);
-            Assert.IsType<BadRequestResult>(result);
-
-            mockDatabaseCommandFactory.VerifyAll();
-            mockUserSettingsProvider.VerifyAll();
             mockEmailSender.VerifyAll();
             mockClanManager.VerifyAll();
 
@@ -1097,7 +971,7 @@ namespace UnitTests.Controllers
             var result = await controller.Follows(UserName);
 
             Assert.NotNull(result);
-            Assert.IsType<NotFoundResult>(result);
+            Assert.IsType<NotFoundResult>(result.Result);
 
             mockDatabaseCommandFactory.VerifyAll();
             mockUserSettingsProvider.VerifyAll();
@@ -1141,7 +1015,7 @@ namespace UnitTests.Controllers
             var result = await controller.Follows(UserName);
 
             Assert.NotNull(result);
-            Assert.IsType<NotFoundResult>(result);
+            Assert.IsType<NotFoundResult>(result.Result);
 
             mockDatabaseCommandFactory.VerifyAll();
             mockUserSettingsProvider.VerifyAll();
@@ -1205,7 +1079,7 @@ namespace UnitTests.Controllers
             var result = await controller.Follows(UserName);
 
             Assert.NotNull(result);
-            Assert.IsType<ForbidResult>(result);
+            Assert.IsType<ForbidResult>(result.Result);
 
             mockDatabaseCommandFactory.VerifyAll();
             mockUserSettingsProvider.VerifyAll();
@@ -1279,11 +1153,9 @@ namespace UnitTests.Controllers
             controller.ControllerContext = new ControllerContext { HttpContext = mockHttpContext.Object };
 
             var result = await controller.Follows(UserName);
-
             Assert.NotNull(result);
-            Assert.IsType<OkObjectResult>(result);
 
-            var model = ((OkObjectResult)result).Value as FollowsData;
+            var model = result.Value;
             Assert.NotNull(model);
             Assert.Equal(follows.Count, model.Follows.Count);
             for (var i = 0; i < model.Follows.Count; i++)
@@ -1367,11 +1239,9 @@ namespace UnitTests.Controllers
             controller.ControllerContext = new ControllerContext { HttpContext = mockHttpContext.Object };
 
             var result = await controller.Follows(UserName);
-
             Assert.NotNull(result);
-            Assert.IsType<OkObjectResult>(result);
 
-            var model = ((OkObjectResult)result).Value as FollowsData;
+            var model = result.Value;
             Assert.NotNull(model);
             Assert.Equal(follows.Count, model.Follows.Count);
             for (var i = 0; i < model.Follows.Count; i++)
@@ -1469,88 +1339,6 @@ namespace UnitTests.Controllers
         }
 
         [Fact]
-        public async Task AddFollow_MissingUserName()
-        {
-            var model = new AddFollowRequest
-            {
-                FollowUserName = "SomeFollowUserName",
-            };
-
-            var gameData = MockGameData.RealData;
-            var telemetryClient = new TelemetryClient();
-            var mockDatabaseCommandFactory = new Mock<IDatabaseCommandFactory>(MockBehavior.Strict);
-            var mockUserSettingsProvider = new Mock<IUserSettingsProvider>(MockBehavior.Strict);
-            var mockFollowUser = new ApplicationUser();
-            var mockUserManager = MockUserManager.CreateMock();
-            var mockEmailSender = new Mock<IEmailSender>(MockBehavior.Strict);
-            var mockClanManager = new Mock<IClanManager>(MockBehavior.Strict);
-
-            var controller = new UserController(
-                gameData,
-                telemetryClient,
-                mockDatabaseCommandFactory.Object,
-                mockUserSettingsProvider.Object,
-                mockUserManager.Object,
-                mockEmailSender.Object,
-                mockClanManager.Object);
-            var result = await controller.AddFollow(null, model);
-
-            Assert.NotNull(result);
-            Assert.IsType<BadRequestResult>(result);
-
-            mockDatabaseCommandFactory.VerifyAll();
-            mockUserSettingsProvider.VerifyAll();
-            mockEmailSender.VerifyAll();
-            mockClanManager.VerifyAll();
-
-            // Workaround for a Moq bug. See: https://github.com/moq/moq4/issues/456#issuecomment-331692858
-            mockUserManager.Object.Logger = mockUserManager.Object.Logger;
-            mockUserManager.VerifyAll();
-        }
-
-        [Fact]
-        public async Task AddFollow_MissingFollowUserName()
-        {
-            const string UserId = "SomeUserId";
-
-            var model = new AddFollowRequest
-            {
-                FollowUserName = null,
-            };
-
-            var gameData = MockGameData.RealData;
-            var telemetryClient = new TelemetryClient();
-            var mockDatabaseCommandFactory = new Mock<IDatabaseCommandFactory>(MockBehavior.Strict);
-            var mockUserSettingsProvider = new Mock<IUserSettingsProvider>(MockBehavior.Strict);
-            var mockFollowUser = new ApplicationUser();
-            var mockUserManager = MockUserManager.CreateMock();
-            var mockEmailSender = new Mock<IEmailSender>(MockBehavior.Strict);
-            var mockClanManager = new Mock<IClanManager>(MockBehavior.Strict);
-
-            var controller = new UserController(
-                gameData,
-                telemetryClient,
-                mockDatabaseCommandFactory.Object,
-                mockUserSettingsProvider.Object,
-                mockUserManager.Object,
-                mockEmailSender.Object,
-                mockClanManager.Object);
-            var result = await controller.AddFollow(UserId, model);
-
-            Assert.NotNull(result);
-            Assert.IsType<BadRequestResult>(result);
-
-            mockDatabaseCommandFactory.VerifyAll();
-            mockUserSettingsProvider.VerifyAll();
-            mockEmailSender.VerifyAll();
-            mockClanManager.VerifyAll();
-
-            // Workaround for a Moq bug. See: https://github.com/moq/moq4/issues/456#issuecomment-331692858
-            mockUserManager.Object.Logger = mockUserManager.Object.Logger;
-            mockUserManager.VerifyAll();
-        }
-
-        [Fact]
         public async Task AddFollow_NotFoundUser()
         {
             const string UserName = "SomeUserName";
@@ -1564,8 +1352,6 @@ namespace UnitTests.Controllers
             var telemetryClient = new TelemetryClient();
             var mockDatabaseCommandFactory = new Mock<IDatabaseCommandFactory>(MockBehavior.Strict);
             var mockUserSettingsProvider = new Mock<IUserSettingsProvider>(MockBehavior.Strict);
-            var mockUser = new ApplicationUser();
-            var mockFollowUser = new ApplicationUser();
             var mockCurrentUser = new Mock<ClaimsPrincipal>(MockBehavior.Strict);
             var mockUserManager = MockUserManager.CreateMock();
             mockUserManager
@@ -1666,7 +1452,6 @@ namespace UnitTests.Controllers
             var mockDatabaseCommandFactory = new Mock<IDatabaseCommandFactory>(MockBehavior.Strict);
             var mockUserSettingsProvider = new Mock<IUserSettingsProvider>(MockBehavior.Strict);
             var mockUser = new ApplicationUser();
-            var mockFollowUser = new ApplicationUser();
             var mockCurrentUser = new Mock<ClaimsPrincipal>(MockBehavior.Strict);
             var mockUserManager = MockUserManager.CreateMock();
             mockUserManager
@@ -1796,7 +1581,6 @@ namespace UnitTests.Controllers
             var mockDatabaseCommandFactory = new Mock<IDatabaseCommandFactory>(MockBehavior.Strict);
             var mockUserSettingsProvider = new Mock<IUserSettingsProvider>(MockBehavior.Strict);
             var mockUser = new ApplicationUser();
-            var mockFollowUser = new ApplicationUser();
             var mockCurrentUser = new Mock<ClaimsPrincipal>(MockBehavior.Strict);
             mockCurrentUser
                 .Setup(_ => _.IsInRole("Admin"))
@@ -2001,80 +1785,6 @@ namespace UnitTests.Controllers
         }
 
         [Fact]
-        public async Task RemoveFollow_MissingUserName()
-        {
-            const string FollowUserName = "SomeFollowUserName";
-
-            var gameData = MockGameData.RealData;
-            var telemetryClient = new TelemetryClient();
-            var mockDatabaseCommandFactory = new Mock<IDatabaseCommandFactory>(MockBehavior.Strict);
-            var mockUserSettingsProvider = new Mock<IUserSettingsProvider>(MockBehavior.Strict);
-            var mockFollowUser = new ApplicationUser();
-            var mockUserManager = MockUserManager.CreateMock();
-            var mockEmailSender = new Mock<IEmailSender>(MockBehavior.Strict);
-            var mockClanManager = new Mock<IClanManager>(MockBehavior.Strict);
-
-            var controller = new UserController(
-                gameData,
-                telemetryClient,
-                mockDatabaseCommandFactory.Object,
-                mockUserSettingsProvider.Object,
-                mockUserManager.Object,
-                mockEmailSender.Object,
-                mockClanManager.Object);
-            var result = await controller.RemoveFollow(null, FollowUserName);
-
-            Assert.NotNull(result);
-            Assert.IsType<BadRequestResult>(result);
-
-            mockDatabaseCommandFactory.VerifyAll();
-            mockUserSettingsProvider.VerifyAll();
-            mockEmailSender.VerifyAll();
-            mockClanManager.VerifyAll();
-
-            // Workaround for a Moq bug. See: https://github.com/moq/moq4/issues/456#issuecomment-331692858
-            mockUserManager.Object.Logger = mockUserManager.Object.Logger;
-            mockUserManager.VerifyAll();
-        }
-
-        [Fact]
-        public async Task RemoveFollow_MissingFollowUserName()
-        {
-            const string UserName = "SomeUserName";
-
-            var gameData = MockGameData.RealData;
-            var telemetryClient = new TelemetryClient();
-            var mockDatabaseCommandFactory = new Mock<IDatabaseCommandFactory>(MockBehavior.Strict);
-            var mockUserSettingsProvider = new Mock<IUserSettingsProvider>(MockBehavior.Strict);
-            var mockFollowUser = new ApplicationUser();
-            var mockUserManager = MockUserManager.CreateMock();
-            var mockEmailSender = new Mock<IEmailSender>(MockBehavior.Strict);
-            var mockClanManager = new Mock<IClanManager>(MockBehavior.Strict);
-
-            var controller = new UserController(
-                gameData,
-                telemetryClient,
-                mockDatabaseCommandFactory.Object,
-                mockUserSettingsProvider.Object,
-                mockUserManager.Object,
-                mockEmailSender.Object,
-                mockClanManager.Object);
-            var result = await controller.RemoveFollow(UserName, null);
-
-            Assert.NotNull(result);
-            Assert.IsType<BadRequestResult>(result);
-
-            mockDatabaseCommandFactory.VerifyAll();
-            mockUserSettingsProvider.VerifyAll();
-            mockEmailSender.VerifyAll();
-            mockClanManager.VerifyAll();
-
-            // Workaround for a Moq bug. See: https://github.com/moq/moq4/issues/456#issuecomment-331692858
-            mockUserManager.Object.Logger = mockUserManager.Object.Logger;
-            mockUserManager.VerifyAll();
-        }
-
-        [Fact]
         public async Task RemoveFollow_NotFoundUser()
         {
             const string UserName = "SomeUserName";
@@ -2084,8 +1794,6 @@ namespace UnitTests.Controllers
             var telemetryClient = new TelemetryClient();
             var mockDatabaseCommandFactory = new Mock<IDatabaseCommandFactory>(MockBehavior.Strict);
             var mockUserSettingsProvider = new Mock<IUserSettingsProvider>(MockBehavior.Strict);
-            var mockUser = new ApplicationUser();
-            var mockFollowUser = new ApplicationUser();
             var mockCurrentUser = new Mock<ClaimsPrincipal>(MockBehavior.Strict);
             var mockUserManager = MockUserManager.CreateMock();
             mockUserManager
@@ -2178,7 +1886,6 @@ namespace UnitTests.Controllers
             var mockDatabaseCommandFactory = new Mock<IDatabaseCommandFactory>(MockBehavior.Strict);
             var mockUserSettingsProvider = new Mock<IUserSettingsProvider>(MockBehavior.Strict);
             var mockUser = new ApplicationUser();
-            var mockFollowUser = new ApplicationUser();
             var mockCurrentUser = new Mock<ClaimsPrincipal>(MockBehavior.Strict);
             var mockUserManager = MockUserManager.CreateMock();
             mockUserManager
@@ -2300,7 +2007,6 @@ namespace UnitTests.Controllers
             var mockDatabaseCommandFactory = new Mock<IDatabaseCommandFactory>(MockBehavior.Strict);
             var mockUserSettingsProvider = new Mock<IUserSettingsProvider>(MockBehavior.Strict);
             var mockUser = new ApplicationUser();
-            var mockFollowUser = new ApplicationUser();
             var mockCurrentUser = new Mock<ClaimsPrincipal>(MockBehavior.Strict);
             mockCurrentUser
                 .Setup(_ => _.IsInRole("Admin"))
@@ -2546,50 +2252,13 @@ namespace UnitTests.Controllers
             controller.ControllerContext = new ControllerContext { HttpContext = mockHttpContext.Object };
 
             var result = await controller.GetSettings(UserName);
-
             Assert.NotNull(result);
-            Assert.IsType<OkObjectResult>(result);
-            Assert.Equal(userSettings, ((OkObjectResult)result).Value);
+            Assert.Equal(userSettings, result.Value);
 
             mockDatabaseCommandFactory.VerifyAll();
             mockUserSettingsProvider.VerifyAll();
             mockCurrentUser.VerifyAll();
             mockHttpContext.VerifyAll();
-            mockEmailSender.VerifyAll();
-            mockClanManager.VerifyAll();
-
-            // Workaround for a Moq bug. See: https://github.com/moq/moq4/issues/456#issuecomment-331692858
-            mockUserManager.Object.Logger = mockUserManager.Object.Logger;
-            mockUserManager.VerifyAll();
-        }
-
-        [Fact]
-        public async Task GetSettings_MissingUserName()
-        {
-            var gameData = MockGameData.RealData;
-            var telemetryClient = new TelemetryClient();
-            var mockDatabaseCommandFactory = new Mock<IDatabaseCommandFactory>(MockBehavior.Strict);
-            var mockUserSettingsProvider = new Mock<IUserSettingsProvider>(MockBehavior.Strict);
-            var mockUserManager = MockUserManager.CreateMock();
-            var mockEmailSender = new Mock<IEmailSender>(MockBehavior.Strict);
-            var mockClanManager = new Mock<IClanManager>(MockBehavior.Strict);
-
-            var controller = new UserController(
-                gameData,
-                telemetryClient,
-                mockDatabaseCommandFactory.Object,
-                mockUserSettingsProvider.Object,
-                mockUserManager.Object,
-                mockEmailSender.Object,
-                mockClanManager.Object);
-
-            var result = await controller.GetSettings(null);
-
-            Assert.NotNull(result);
-            Assert.IsType<BadRequestResult>(result);
-
-            mockDatabaseCommandFactory.VerifyAll();
-            mockUserSettingsProvider.VerifyAll();
             mockEmailSender.VerifyAll();
             mockClanManager.VerifyAll();
 
@@ -2607,7 +2276,6 @@ namespace UnitTests.Controllers
             var telemetryClient = new TelemetryClient();
             var mockDatabaseCommandFactory = new Mock<IDatabaseCommandFactory>(MockBehavior.Strict);
             var mockUserSettingsProvider = new Mock<IUserSettingsProvider>(MockBehavior.Strict);
-            var mockUser = new ApplicationUser();
             var mockUserManager = MockUserManager.CreateMock();
             mockUserManager
                 .Setup(_ => _.FindByNameAsync(UserName))
@@ -2628,7 +2296,7 @@ namespace UnitTests.Controllers
             var result = await controller.GetSettings(UserName);
 
             Assert.NotNull(result);
-            Assert.IsType<NotFoundResult>(result);
+            Assert.IsType<NotFoundResult>(result.Result);
 
             mockDatabaseCommandFactory.VerifyAll();
             mockUserSettingsProvider.VerifyAll();
@@ -2674,7 +2342,7 @@ namespace UnitTests.Controllers
             var result = await controller.GetSettings(UserName);
 
             Assert.NotNull(result);
-            Assert.IsType<NotFoundResult>(result);
+            Assert.IsType<NotFoundResult>(result.Result);
 
             mockDatabaseCommandFactory.VerifyAll();
             mockUserSettingsProvider.VerifyAll();
@@ -2732,7 +2400,7 @@ namespace UnitTests.Controllers
             var result = await controller.GetSettings(UserName);
 
             Assert.NotNull(result);
-            Assert.IsType<ForbidResult>(result);
+            Assert.IsType<ForbidResult>(result.Result);
 
             mockDatabaseCommandFactory.VerifyAll();
             mockUserSettingsProvider.VerifyAll();
@@ -2795,10 +2463,8 @@ namespace UnitTests.Controllers
             controller.ControllerContext = new ControllerContext { HttpContext = mockHttpContext.Object };
 
             var result = await controller.GetSettings(UserName);
-
             Assert.NotNull(result);
-            Assert.IsType<OkObjectResult>(result);
-            Assert.Equal(userSettings, ((OkObjectResult)result).Value);
+            Assert.Equal(userSettings, result.Value);
 
             mockDatabaseCommandFactory.VerifyAll();
             mockUserSettingsProvider.VerifyAll();
@@ -2874,79 +2540,6 @@ namespace UnitTests.Controllers
         }
 
         [Fact]
-        public async Task PatchSettings_MissingUserName()
-        {
-            var gameData = MockGameData.RealData;
-            var telemetryClient = new TelemetryClient();
-            var mockDatabaseCommandFactory = new Mock<IDatabaseCommandFactory>(MockBehavior.Strict);
-            var userSettings = new UserSettings();
-            var mockUserSettingsProvider = new Mock<IUserSettingsProvider>(MockBehavior.Strict);
-            var mockUserManager = MockUserManager.CreateMock();
-            var mockEmailSender = new Mock<IEmailSender>(MockBehavior.Strict);
-            var mockClanManager = new Mock<IClanManager>(MockBehavior.Strict);
-
-            var controller = new UserController(
-                gameData,
-                telemetryClient,
-                mockDatabaseCommandFactory.Object,
-                mockUserSettingsProvider.Object,
-                mockUserManager.Object,
-                mockEmailSender.Object,
-                mockClanManager.Object);
-
-            var result = await controller.PatchSettings(null, userSettings);
-
-            Assert.NotNull(result);
-            Assert.IsType<BadRequestResult>(result);
-
-            mockDatabaseCommandFactory.VerifyAll();
-            mockUserSettingsProvider.VerifyAll();
-            mockEmailSender.VerifyAll();
-            mockClanManager.VerifyAll();
-
-            // Workaround for a Moq bug. See: https://github.com/moq/moq4/issues/456#issuecomment-331692858
-            mockUserManager.Object.Logger = mockUserManager.Object.Logger;
-            mockUserManager.VerifyAll();
-        }
-
-        [Fact]
-        public async Task PatchSettings_MissingUserSettings()
-        {
-            const string UserName = "SomeUserName";
-
-            var gameData = MockGameData.RealData;
-            var telemetryClient = new TelemetryClient();
-            var mockDatabaseCommandFactory = new Mock<IDatabaseCommandFactory>(MockBehavior.Strict);
-            var mockUserSettingsProvider = new Mock<IUserSettingsProvider>(MockBehavior.Strict);
-            var mockUserManager = MockUserManager.CreateMock();
-            var mockEmailSender = new Mock<IEmailSender>(MockBehavior.Strict);
-            var mockClanManager = new Mock<IClanManager>(MockBehavior.Strict);
-
-            var controller = new UserController(
-                gameData,
-                telemetryClient,
-                mockDatabaseCommandFactory.Object,
-                mockUserSettingsProvider.Object,
-                mockUserManager.Object,
-                mockEmailSender.Object,
-                mockClanManager.Object);
-
-            var result = await controller.PatchSettings(UserName, null);
-
-            Assert.NotNull(result);
-            Assert.IsType<BadRequestResult>(result);
-
-            mockDatabaseCommandFactory.VerifyAll();
-            mockUserSettingsProvider.VerifyAll();
-            mockEmailSender.VerifyAll();
-            mockClanManager.VerifyAll();
-
-            // Workaround for a Moq bug. See: https://github.com/moq/moq4/issues/456#issuecomment-331692858
-            mockUserManager.Object.Logger = mockUserManager.Object.Logger;
-            mockUserManager.VerifyAll();
-        }
-
-        [Fact]
         public async Task PatchSettings_NotFoundUser()
         {
             const string UserName = "SomeUserName";
@@ -2956,7 +2549,6 @@ namespace UnitTests.Controllers
             var mockDatabaseCommandFactory = new Mock<IDatabaseCommandFactory>(MockBehavior.Strict);
             var userSettings = new UserSettings();
             var mockUserSettingsProvider = new Mock<IUserSettingsProvider>(MockBehavior.Strict);
-            var mockUser = new ApplicationUser();
             var mockUserManager = MockUserManager.CreateMock();
             mockUserManager
                 .Setup(_ => _.FindByNameAsync(UserName))
@@ -3153,11 +2745,9 @@ namespace UnitTests.Controllers
             controller.ControllerContext = new ControllerContext { HttpContext = mockHttpContext.Object };
 
             var result = await controller.GetLogins(UserName);
-
             Assert.NotNull(result);
-            Assert.IsType<OkObjectResult>(result);
 
-            var model = ((OkObjectResult)result).Value as UserLogins;
+            var model = result.Value;
             Assert.True(model.HasPassword);
 
             Assert.Equal(logins.Count, model.ExternalLogins.Count);
@@ -3180,41 +2770,6 @@ namespace UnitTests.Controllers
         }
 
         [Fact]
-        public async Task GetLogins_MissingUserName()
-        {
-            var gameData = MockGameData.RealData;
-            var telemetryClient = new TelemetryClient();
-            var mockDatabaseCommandFactory = new Mock<IDatabaseCommandFactory>(MockBehavior.Strict);
-            var mockUserSettingsProvider = new Mock<IUserSettingsProvider>(MockBehavior.Strict);
-            var mockUserManager = MockUserManager.CreateMock();
-            var mockEmailSender = new Mock<IEmailSender>(MockBehavior.Strict);
-            var mockClanManager = new Mock<IClanManager>(MockBehavior.Strict);
-
-            var controller = new UserController(
-                gameData,
-                telemetryClient,
-                mockDatabaseCommandFactory.Object,
-                mockUserSettingsProvider.Object,
-                mockUserManager.Object,
-                mockEmailSender.Object,
-                mockClanManager.Object);
-
-            var result = await controller.GetLogins(null);
-
-            Assert.NotNull(result);
-            Assert.IsType<BadRequestResult>(result);
-
-            mockDatabaseCommandFactory.VerifyAll();
-            mockUserSettingsProvider.VerifyAll();
-            mockEmailSender.VerifyAll();
-            mockClanManager.VerifyAll();
-
-            // Workaround for a Moq bug. See: https://github.com/moq/moq4/issues/456#issuecomment-331692858
-            mockUserManager.Object.Logger = mockUserManager.Object.Logger;
-            mockUserManager.VerifyAll();
-        }
-
-        [Fact]
         public async Task GetLogins_NotFoundUser()
         {
             const string UserName = "SomeUserName";
@@ -3223,7 +2778,6 @@ namespace UnitTests.Controllers
             var telemetryClient = new TelemetryClient();
             var mockDatabaseCommandFactory = new Mock<IDatabaseCommandFactory>(MockBehavior.Strict);
             var mockUserSettingsProvider = new Mock<IUserSettingsProvider>(MockBehavior.Strict);
-            var mockUser = new ApplicationUser();
             var mockUserManager = MockUserManager.CreateMock();
             mockUserManager
                 .Setup(_ => _.FindByNameAsync(UserName))
@@ -3244,7 +2798,7 @@ namespace UnitTests.Controllers
             var result = await controller.GetLogins(UserName);
 
             Assert.NotNull(result);
-            Assert.IsType<NotFoundResult>(result);
+            Assert.IsType<NotFoundResult>(result.Result);
 
             mockDatabaseCommandFactory.VerifyAll();
             mockUserSettingsProvider.VerifyAll();
@@ -3290,7 +2844,7 @@ namespace UnitTests.Controllers
             var result = await controller.GetLogins(UserName);
 
             Assert.NotNull(result);
-            Assert.IsType<NotFoundResult>(result);
+            Assert.IsType<NotFoundResult>(result.Result);
 
             mockDatabaseCommandFactory.VerifyAll();
             mockUserSettingsProvider.VerifyAll();
@@ -3348,7 +2902,7 @@ namespace UnitTests.Controllers
             var result = await controller.GetLogins(UserName);
 
             Assert.NotNull(result);
-            Assert.IsType<ForbidResult>(result);
+            Assert.IsType<ForbidResult>(result.Result);
 
             mockDatabaseCommandFactory.VerifyAll();
             mockUserSettingsProvider.VerifyAll();
@@ -3418,11 +2972,9 @@ namespace UnitTests.Controllers
             controller.ControllerContext = new ControllerContext { HttpContext = mockHttpContext.Object };
 
             var result = await controller.GetLogins(UserName);
-
             Assert.NotNull(result);
-            Assert.IsType<OkObjectResult>(result);
 
-            var model = ((OkObjectResult)result).Value as UserLogins;
+            var model = result.Value;
             Assert.True(model.HasPassword);
 
             Assert.Equal(logins.Count, model.ExternalLogins.Count);
@@ -3512,86 +3064,6 @@ namespace UnitTests.Controllers
         }
 
         [Fact]
-        public async Task RemoveLogin_MissingUserName()
-        {
-            const string Provider = "SomeProvider";
-            const string ExternalUserId = "SomeExternalUserId";
-
-            var model = new ExternalLogin
-            {
-                ProviderName = Provider,
-                ExternalUserId = ExternalUserId,
-            };
-
-            var gameData = MockGameData.RealData;
-            var telemetryClient = new TelemetryClient();
-            var mockDatabaseCommandFactory = new Mock<IDatabaseCommandFactory>(MockBehavior.Strict);
-            var mockUserSettingsProvider = new Mock<IUserSettingsProvider>(MockBehavior.Strict);
-            var mockUserManager = MockUserManager.CreateMock();
-            var mockEmailSender = new Mock<IEmailSender>(MockBehavior.Strict);
-            var mockClanManager = new Mock<IClanManager>(MockBehavior.Strict);
-
-            var controller = new UserController(
-                gameData,
-                telemetryClient,
-                mockDatabaseCommandFactory.Object,
-                mockUserSettingsProvider.Object,
-                mockUserManager.Object,
-                mockEmailSender.Object,
-                mockClanManager.Object);
-
-            var result = await controller.RemoveLogin(null, model);
-
-            Assert.NotNull(result);
-            Assert.IsType<BadRequestResult>(result);
-
-            mockDatabaseCommandFactory.VerifyAll();
-            mockUserSettingsProvider.VerifyAll();
-            mockEmailSender.VerifyAll();
-            mockClanManager.VerifyAll();
-
-            // Workaround for a Moq bug. See: https://github.com/moq/moq4/issues/456#issuecomment-331692858
-            mockUserManager.Object.Logger = mockUserManager.Object.Logger;
-            mockUserManager.VerifyAll();
-        }
-
-        [Fact]
-        public async Task RemoveLogin_InvalidModelState()
-        {
-            const string UserName = "SomeUserName";
-
-            var model = new ExternalLogin();
-            var gameData = MockGameData.RealData;
-            var telemetryClient = new TelemetryClient();
-            var mockDatabaseCommandFactory = new Mock<IDatabaseCommandFactory>(MockBehavior.Strict);
-            var mockUserSettingsProvider = new Mock<IUserSettingsProvider>(MockBehavior.Strict);
-            var mockUserManager = MockUserManager.CreateMock();
-            var mockEmailSender = new Mock<IEmailSender>(MockBehavior.Strict);
-            var mockClanManager = new Mock<IClanManager>(MockBehavior.Strict);
-
-            var controller = new UserController(
-                gameData,
-                telemetryClient,
-                mockDatabaseCommandFactory.Object,
-                mockUserSettingsProvider.Object,
-                mockUserManager.Object,
-                mockEmailSender.Object,
-                mockClanManager.Object);
-            controller.ModelState.AddModelError("SomeKey", "SomeErrorMessage");
-            var result = await controller.RemoveLogin(UserName, model);
-
-            Assert.NotNull(result);
-            Assert.IsType<BadRequestObjectResult>(result);
-
-            mockDatabaseCommandFactory.VerifyAll();
-            mockUserSettingsProvider.VerifyAll();
-
-            // Workaround for a Moq bug. See: https://github.com/moq/moq4/issues/456#issuecomment-331692858
-            mockUserManager.Object.Logger = mockUserManager.Object.Logger;
-            mockUserManager.VerifyAll();
-        }
-
-        [Fact]
         public async Task RemoveLogin_NotFoundUser()
         {
             const string UserName = "SomeUserName";
@@ -3608,7 +3080,6 @@ namespace UnitTests.Controllers
             var telemetryClient = new TelemetryClient();
             var mockDatabaseCommandFactory = new Mock<IDatabaseCommandFactory>(MockBehavior.Strict);
             var mockUserSettingsProvider = new Mock<IUserSettingsProvider>(MockBehavior.Strict);
-            var mockUser = new ApplicationUser();
             var mockUserManager = MockUserManager.CreateMock();
             mockUserManager
                 .Setup(_ => _.FindByNameAsync(UserName))
@@ -4032,84 +3503,6 @@ namespace UnitTests.Controllers
         }
 
         [Fact]
-        public async Task SetPassword_MissingUserName()
-        {
-            const string NewPassword = "SomeNewPassword";
-
-            var model = new SetPasswordRequest
-            {
-                NewPassword = NewPassword,
-            };
-
-            var gameData = MockGameData.RealData;
-            var telemetryClient = new TelemetryClient();
-            var mockDatabaseCommandFactory = new Mock<IDatabaseCommandFactory>(MockBehavior.Strict);
-            var mockUserSettingsProvider = new Mock<IUserSettingsProvider>(MockBehavior.Strict);
-            var mockUserManager = MockUserManager.CreateMock();
-            var mockEmailSender = new Mock<IEmailSender>(MockBehavior.Strict);
-            var mockClanManager = new Mock<IClanManager>(MockBehavior.Strict);
-
-            var controller = new UserController(
-                gameData,
-                telemetryClient,
-                mockDatabaseCommandFactory.Object,
-                mockUserSettingsProvider.Object,
-                mockUserManager.Object,
-                mockEmailSender.Object,
-                mockClanManager.Object);
-
-            var result = await controller.SetPassword(null, model);
-
-            Assert.NotNull(result);
-            Assert.IsType<BadRequestResult>(result);
-
-            mockDatabaseCommandFactory.VerifyAll();
-            mockUserSettingsProvider.VerifyAll();
-            mockEmailSender.VerifyAll();
-            mockClanManager.VerifyAll();
-
-            // Workaround for a Moq bug. See: https://github.com/moq/moq4/issues/456#issuecomment-331692858
-            mockUserManager.Object.Logger = mockUserManager.Object.Logger;
-            mockUserManager.VerifyAll();
-        }
-
-        [Fact]
-        public async Task SetPassword_InvalidModelState()
-        {
-            const string UserName = "SomeUserName";
-
-            var model = new SetPasswordRequest();
-            var gameData = MockGameData.RealData;
-            var telemetryClient = new TelemetryClient();
-            var mockDatabaseCommandFactory = new Mock<IDatabaseCommandFactory>(MockBehavior.Strict);
-            var mockUserSettingsProvider = new Mock<IUserSettingsProvider>(MockBehavior.Strict);
-            var mockUserManager = MockUserManager.CreateMock();
-            var mockEmailSender = new Mock<IEmailSender>(MockBehavior.Strict);
-            var mockClanManager = new Mock<IClanManager>(MockBehavior.Strict);
-
-            var controller = new UserController(
-                gameData,
-                telemetryClient,
-                mockDatabaseCommandFactory.Object,
-                mockUserSettingsProvider.Object,
-                mockUserManager.Object,
-                mockEmailSender.Object,
-                mockClanManager.Object);
-            controller.ModelState.AddModelError("SomeKey", "SomeErrorMessage");
-            var result = await controller.SetPassword(UserName, model);
-
-            Assert.NotNull(result);
-            Assert.IsType<BadRequestObjectResult>(result);
-
-            mockDatabaseCommandFactory.VerifyAll();
-            mockUserSettingsProvider.VerifyAll();
-
-            // Workaround for a Moq bug. See: https://github.com/moq/moq4/issues/456#issuecomment-331692858
-            mockUserManager.Object.Logger = mockUserManager.Object.Logger;
-            mockUserManager.VerifyAll();
-        }
-
-        [Fact]
         public async Task SetPassword_NotFoundUser()
         {
             const string UserName = "SomeUserName";
@@ -4124,7 +3517,6 @@ namespace UnitTests.Controllers
             var telemetryClient = new TelemetryClient();
             var mockDatabaseCommandFactory = new Mock<IDatabaseCommandFactory>(MockBehavior.Strict);
             var mockUserSettingsProvider = new Mock<IUserSettingsProvider>(MockBehavior.Strict);
-            var mockUser = new ApplicationUser();
             var mockUserManager = MockUserManager.CreateMock();
             mockUserManager
                 .Setup(_ => _.FindByNameAsync(UserName))
@@ -4478,86 +3870,6 @@ namespace UnitTests.Controllers
         }
 
         [Fact]
-        public async Task ChangePassword_MissingUserName()
-        {
-            const string CurrentPassword = "SomeCurrentPassword";
-            const string NewPassword = "SomeNewPassword";
-
-            var model = new ChangePasswordRequest
-            {
-                CurrentPassword = CurrentPassword,
-                NewPassword = NewPassword,
-            };
-
-            var gameData = MockGameData.RealData;
-            var telemetryClient = new TelemetryClient();
-            var mockDatabaseCommandFactory = new Mock<IDatabaseCommandFactory>(MockBehavior.Strict);
-            var mockUserSettingsProvider = new Mock<IUserSettingsProvider>(MockBehavior.Strict);
-            var mockUserManager = MockUserManager.CreateMock();
-            var mockEmailSender = new Mock<IEmailSender>(MockBehavior.Strict);
-            var mockClanManager = new Mock<IClanManager>(MockBehavior.Strict);
-
-            var controller = new UserController(
-                gameData,
-                telemetryClient,
-                mockDatabaseCommandFactory.Object,
-                mockUserSettingsProvider.Object,
-                mockUserManager.Object,
-                mockEmailSender.Object,
-                mockClanManager.Object);
-
-            var result = await controller.ChangePassword(null, model);
-
-            Assert.NotNull(result);
-            Assert.IsType<BadRequestResult>(result);
-
-            mockDatabaseCommandFactory.VerifyAll();
-            mockUserSettingsProvider.VerifyAll();
-            mockEmailSender.VerifyAll();
-            mockClanManager.VerifyAll();
-
-            // Workaround for a Moq bug. See: https://github.com/moq/moq4/issues/456#issuecomment-331692858
-            mockUserManager.Object.Logger = mockUserManager.Object.Logger;
-            mockUserManager.VerifyAll();
-        }
-
-        [Fact]
-        public async Task ChangePassword_InvalidModelState()
-        {
-            const string UserName = "SomeUserName";
-
-            var model = new ChangePasswordRequest();
-            var gameData = MockGameData.RealData;
-            var telemetryClient = new TelemetryClient();
-            var mockDatabaseCommandFactory = new Mock<IDatabaseCommandFactory>(MockBehavior.Strict);
-            var mockUserSettingsProvider = new Mock<IUserSettingsProvider>(MockBehavior.Strict);
-            var mockUserManager = MockUserManager.CreateMock();
-            var mockEmailSender = new Mock<IEmailSender>(MockBehavior.Strict);
-            var mockClanManager = new Mock<IClanManager>(MockBehavior.Strict);
-
-            var controller = new UserController(
-                gameData,
-                telemetryClient,
-                mockDatabaseCommandFactory.Object,
-                mockUserSettingsProvider.Object,
-                mockUserManager.Object,
-                mockEmailSender.Object,
-                mockClanManager.Object);
-            controller.ModelState.AddModelError("SomeKey", "SomeErrorMessage");
-            var result = await controller.ChangePassword(UserName, model);
-
-            Assert.NotNull(result);
-            Assert.IsType<BadRequestObjectResult>(result);
-
-            mockDatabaseCommandFactory.VerifyAll();
-            mockUserSettingsProvider.VerifyAll();
-
-            // Workaround for a Moq bug. See: https://github.com/moq/moq4/issues/456#issuecomment-331692858
-            mockUserManager.Object.Logger = mockUserManager.Object.Logger;
-            mockUserManager.VerifyAll();
-        }
-
-        [Fact]
         public async Task ChangePassword_NotFoundUser()
         {
             const string UserName = "SomeUserName";
@@ -4574,7 +3886,6 @@ namespace UnitTests.Controllers
             var telemetryClient = new TelemetryClient();
             var mockDatabaseCommandFactory = new Mock<IDatabaseCommandFactory>(MockBehavior.Strict);
             var mockUserSettingsProvider = new Mock<IUserSettingsProvider>(MockBehavior.Strict);
-            var mockUser = new ApplicationUser();
             var mockUserManager = MockUserManager.CreateMock();
             mockUserManager
                 .Setup(_ => _.FindByNameAsync(UserName))
@@ -4894,7 +4205,7 @@ namespace UnitTests.Controllers
 
             var mockEmailSender = new Mock<IEmailSender>(MockBehavior.Strict);
             mockEmailSender
-                .Setup(_ => _.SendEmailAsync(model.Email, It.IsAny<string>(), It.Is<string>(str => str.Contains(Code))))
+                .Setup(_ => _.SendEmailAsync(model.Email, It.IsAny<string>(), It.Is<string>(str => str.Contains(Code, StringComparison.Ordinal))))
                 .Returns(Task.CompletedTask);
 
             var mockClanManager = new Mock<IClanManager>(MockBehavior.Strict);
@@ -4954,40 +4265,6 @@ namespace UnitTests.Controllers
 
             Assert.NotNull(result);
             Assert.IsType<OkResult>(result);
-
-            mockDatabaseCommandFactory.VerifyAll();
-            mockUserSettingsProvider.VerifyAll();
-
-            // Workaround for a Moq bug. See: https://github.com/moq/moq4/issues/456#issuecomment-331692858
-            mockUserManager.Object.Logger = mockUserManager.Object.Logger;
-            mockUserManager.VerifyAll();
-        }
-
-        [Fact]
-        public async Task ResetPassword_InvalidModelState()
-        {
-            var model = new ResetPasswordRequest();
-            var gameData = MockGameData.RealData;
-            var telemetryClient = new TelemetryClient();
-            var mockDatabaseCommandFactory = new Mock<IDatabaseCommandFactory>(MockBehavior.Strict);
-            var mockUserSettingsProvider = new Mock<IUserSettingsProvider>(MockBehavior.Strict);
-            var mockUserManager = MockUserManager.CreateMock();
-            var mockEmailSender = new Mock<IEmailSender>(MockBehavior.Strict);
-            var mockClanManager = new Mock<IClanManager>(MockBehavior.Strict);
-
-            var controller = new UserController(
-                gameData,
-                telemetryClient,
-                mockDatabaseCommandFactory.Object,
-                mockUserSettingsProvider.Object,
-                mockUserManager.Object,
-                mockEmailSender.Object,
-                mockClanManager.Object);
-            controller.ModelState.AddModelError("SomeKey", "SomeErrorMessage");
-            var result = await controller.ResetPassword(model);
-
-            Assert.NotNull(result);
-            Assert.IsType<BadRequestObjectResult>(result);
 
             mockDatabaseCommandFactory.VerifyAll();
             mockUserSettingsProvider.VerifyAll();
@@ -5128,40 +4405,6 @@ namespace UnitTests.Controllers
             Assert.NotNull(result);
             Assert.IsType<BadRequestObjectResult>(result);
             Assert.Equal(1, controller.ModelState.ErrorCount);
-
-            mockDatabaseCommandFactory.VerifyAll();
-            mockUserSettingsProvider.VerifyAll();
-
-            // Workaround for a Moq bug. See: https://github.com/moq/moq4/issues/456#issuecomment-331692858
-            mockUserManager.Object.Logger = mockUserManager.Object.Logger;
-            mockUserManager.VerifyAll();
-        }
-
-        [Fact]
-        public async Task ResetPasswordConfirmation_InvalidModelState()
-        {
-            var model = new ResetPasswordConfirmationRequest();
-            var gameData = MockGameData.RealData;
-            var telemetryClient = new TelemetryClient();
-            var mockDatabaseCommandFactory = new Mock<IDatabaseCommandFactory>(MockBehavior.Strict);
-            var mockUserSettingsProvider = new Mock<IUserSettingsProvider>(MockBehavior.Strict);
-            var mockUserManager = MockUserManager.CreateMock();
-            var mockEmailSender = new Mock<IEmailSender>(MockBehavior.Strict);
-            var mockClanManager = new Mock<IClanManager>(MockBehavior.Strict);
-
-            var controller = new UserController(
-                gameData,
-                telemetryClient,
-                mockDatabaseCommandFactory.Object,
-                mockUserSettingsProvider.Object,
-                mockUserManager.Object,
-                mockEmailSender.Object,
-                mockClanManager.Object);
-            controller.ModelState.AddModelError("SomeKey", "SomeErrorMessage");
-            var result = await controller.ResetPasswordConfirmation(model);
-
-            Assert.NotNull(result);
-            Assert.IsType<BadRequestObjectResult>(result);
 
             mockDatabaseCommandFactory.VerifyAll();
             mockUserSettingsProvider.VerifyAll();

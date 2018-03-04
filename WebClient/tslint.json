@@ -233,6 +233,7 @@
     "no-output-named-after-standard-event": true,
     "no-output-on-prefix": true,
     "no-output-rename": true,
+    "no-unused-css": true,
     "pipe-naming": [
       true,
       "camelCase"

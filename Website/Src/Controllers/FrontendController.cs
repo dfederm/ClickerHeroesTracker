@@ -8,9 +8,6 @@ namespace ClickerHeroesTrackerWebsite.Controllers
 
     public class FrontendController : Controller
     {
-        public ActionResult Index()
-        {
-            return this.File("/index.html", "text/html");
-        }
+        public ActionResult Index() => this.File("/index.html", "text/html");
     }
 }

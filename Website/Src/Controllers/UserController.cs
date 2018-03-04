@@ -25,6 +25,7 @@ namespace Website.Controllers
 
     [Route("api/users")]
     [Authorize]
+    [ApiController]
     public class UserController : Controller
     {
         private readonly GameData gameData;
@@ -62,21 +63,18 @@ namespace Website.Controllers
         [Route("")]
         [HttpPost]
         [AllowAnonymous]
-        public async Task<IActionResult> Create([FromBody] CreateUserRequest createUser)
+        public async Task<ActionResult> Create(CreateUserRequest createUser)
         {
-            if (this.ModelState.IsValid)
+            var user = new ApplicationUser { UserName = createUser.UserName, Email = createUser.Email };
+            var result = await this.userManager.CreateAsync(user, createUser.Password);
+            if (result.Succeeded)
             {
-                var user = new ApplicationUser { UserName = createUser.UserName, Email = createUser.Email };
-                var result = await this.userManager.CreateAsync(user, createUser.Password);
-                if (result.Succeeded)
-                {
-                    return this.Ok();
-                }
+                return this.Ok();
+            }
 
-                foreach (var error in result.Errors)
-                {
-                    this.ModelState.AddModelError(string.Empty, error.Description);
-                }
+            foreach (var error in result.Errors)
+            {
+                this.ModelState.AddModelError(string.Empty, error.Description);
             }
 
             return this.BadRequest(this.ModelState);
@@ -85,14 +83,8 @@ namespace Website.Controllers
         [Route("{userName}")]
         [HttpGet]
         [AllowAnonymous]
-        public async Task<IActionResult> Get(string userName)
+        public async Task<ActionResult<User>> Get(string userName)
         {
-            // Validate parameters
-            if (string.IsNullOrEmpty(userName))
-            {
-                return this.BadRequest();
-            }
-
             var user = await this.userManager.FindByNameAsync(userName);
             if (user == null)
             {
@@ -105,29 +97,22 @@ namespace Website.Controllers
                 return this.NotFound();
             }
 
-            var model = new User
+            return new User
             {
                 Name = user.UserName,
                 ClanName = await this.clanManager.GetClanNameAsync(userId),
             };
-
-            return this.Ok(model);
         }
 
         [Route("{userName}/uploads")]
         [HttpGet]
         [AllowAnonymous]
-        public async Task<IActionResult> Uploads(
+        public async Task<ActionResult<UploadSummaryListResponse>> Uploads(
             string userName,
             int page = ParameterConstants.Uploads.Page.Default,
             int count = ParameterConstants.Uploads.Count.Default)
         {
             // Validate parameters
-            if (string.IsNullOrEmpty(userName))
-            {
-                return this.BadRequest();
-            }
-
             if (page < ParameterConstants.Uploads.Page.Min)
             {
                 return this.BadRequest();
@@ -222,50 +207,31 @@ namespace Website.Controllers
                     var currentPath = this.Request.Path;
                     if (page > 1)
                     {
-                        pagination.Previous = string.Format(
-                            "{0}?{1}={2}&{3}={4}",
-                            currentPath,
-                            nameof(page),
-                            page - 1,
-                            nameof(count),
-                            count);
+                        pagination.Previous = $"{currentPath}?{nameof(page)}={page - 1}&{nameof(count)}={count}";
                     }
 
                     if (page <= Math.Ceiling((float)pagination.Count / count))
                     {
-                        pagination.Next = string.Format(
-                            "{0}?{1}={2}&{3}={4}",
-                            currentPath,
-                            nameof(page),
-                            page + 1,
-                            nameof(count),
-                            count);
+                        pagination.Next = $"{currentPath}?{nameof(page)}={page + 1}&{nameof(count)}={count}";
                     }
                 }
             }
 
-            var model = new UploadSummaryListResponse()
+            return new UploadSummaryListResponse
             {
                 Uploads = uploads,
                 Pagination = pagination,
             };
-
-            return this.Ok(model);
         }
 
         [Route("{userName}/progress")]
         [HttpGet]
         [AllowAnonymous]
-        public async Task<IActionResult> Progress(
+        public async Task<ActionResult<ProgressData>> Progress(
             string userName,
-            [FromQuery] DateTime? start,
-            [FromQuery] DateTime? end)
+            DateTime? start,
+            DateTime? end)
         {
-            if (string.IsNullOrEmpty(userName))
-            {
-                return this.BadRequest();
-            }
-
             var user = await this.userManager.FindByNameAsync(userName);
             if (user == null)
             {
@@ -328,19 +294,14 @@ namespace Website.Controllers
                 return this.StatusCode(500);
             }
 
-            return this.Ok(data);
+            return data;
         }
 
         [Route("{userName}/follows")]
         [HttpGet]
         [AllowAnonymous]
-        public async Task<IActionResult> Follows(string userName)
+        public async Task<ActionResult<FollowsData>> Follows(string userName)
         {
-            if (string.IsNullOrEmpty(userName))
-            {
-                return this.BadRequest();
-            }
-
             var user = await this.userManager.FindByNameAsync(userName);
             if (user == null)
             {
@@ -385,28 +346,16 @@ namespace Website.Controllers
                 }
             }
 
-            var data = new FollowsData
+            return new FollowsData
             {
                 Follows = follows,
             };
-
-            return this.Ok(data);
         }
 
         [Route("{userName}/follows")]
         [HttpPost]
-        public async Task<IActionResult> AddFollow(string userName, [FromBody] AddFollowRequest model)
+        public async Task<ActionResult> AddFollow(string userName, AddFollowRequest model)
         {
-            if (string.IsNullOrEmpty(userName))
-            {
-                return this.BadRequest();
-            }
-
-            if (string.IsNullOrEmpty(model.FollowUserName))
-            {
-                return this.BadRequest();
-            }
-
             var user = await this.userManager.FindByNameAsync(userName);
             if (user == null)
             {
@@ -465,18 +414,8 @@ namespace Website.Controllers
 
         [Route("{userName}/follows/{followUserName}")]
         [HttpDelete]
-        public async Task<IActionResult> RemoveFollow(string userName, string followUserName)
+        public async Task<ActionResult> RemoveFollow(string userName, string followUserName)
         {
-            if (string.IsNullOrEmpty(userName))
-            {
-                return this.BadRequest();
-            }
-
-            if (string.IsNullOrEmpty(followUserName))
-            {
-                return this.BadRequest();
-            }
-
             var user = await this.userManager.FindByNameAsync(userName);
             if (user == null)
             {
@@ -535,13 +474,8 @@ namespace Website.Controllers
 
         [Route("{userName}/settings")]
         [HttpGet]
-        public async Task<IActionResult> GetSettings(string userName)
+        public async Task<ActionResult<UserSettings>> GetSettings(string userName)
         {
-            if (string.IsNullOrEmpty(userName))
-            {
-                return this.BadRequest();
-            }
-
             var user = await this.userManager.FindByNameAsync(userName);
             if (user == null)
             {
@@ -561,25 +495,13 @@ namespace Website.Controllers
                 return this.Forbid();
             }
 
-            var userSettings = await this.userSettingsProvider.GetAsync(userId);
-
-            return this.Ok(userSettings);
+            return await this.userSettingsProvider.GetAsync(userId);
         }
 
         [Route("{userName}/settings")]
         [HttpPatch]
-        public async Task<IActionResult> PatchSettings(string userName, [FromBody] UserSettings model)
+        public async Task<ActionResult> PatchSettings(string userName, UserSettings model)
         {
-            if (string.IsNullOrEmpty(userName))
-            {
-                return this.BadRequest();
-            }
-
-            if (model == null)
-            {
-                return this.BadRequest();
-            }
-
             var user = await this.userManager.FindByNameAsync(userName);
             if (user == null)
             {
@@ -606,13 +528,8 @@ namespace Website.Controllers
 
         [Route("{userName}/logins")]
         [HttpGet]
-        public async Task<IActionResult> GetLogins(string userName)
+        public async Task<ActionResult<UserLogins>> GetLogins(string userName)
         {
-            if (string.IsNullOrEmpty(userName))
-            {
-                return this.BadRequest();
-            }
-
             var user = await this.userManager.FindByNameAsync(userName);
             if (user == null)
             {
@@ -632,31 +549,19 @@ namespace Website.Controllers
                 return this.Forbid();
             }
 
-            var model = new UserLogins
+            return new UserLogins
             {
                 HasPassword = await this.userManager.HasPasswordAsync(user),
                 ExternalLogins = (await this.userManager.GetLoginsAsync(user))
                     .Select(loginInfo => new ExternalLogin { ProviderName = loginInfo.LoginProvider, ExternalUserId = loginInfo.ProviderKey })
                     .ToList(),
             };
-
-            return this.Ok(model);
         }
 
         [Route("{userName}/logins")]
         [HttpDelete]
-        public async Task<IActionResult> RemoveLogin(string userName, [FromBody] ExternalLogin model)
+        public async Task<ActionResult> RemoveLogin(string userName, ExternalLogin model)
         {
-            if (string.IsNullOrEmpty(userName))
-            {
-                return this.BadRequest();
-            }
-
-            if (!this.ModelState.IsValid)
-            {
-                return this.BadRequest(this.ModelState);
-            }
-
             var user = await this.userManager.FindByNameAsync(userName);
             if (user == null)
             {
@@ -692,18 +597,8 @@ namespace Website.Controllers
 
         [Route("{userName}/setpassword")]
         [HttpPost]
-        public async Task<IActionResult> SetPassword(string userName, [FromBody] SetPasswordRequest model)
+        public async Task<ActionResult> SetPassword(string userName, SetPasswordRequest model)
         {
-            if (string.IsNullOrEmpty(userName))
-            {
-                return this.BadRequest();
-            }
-
-            if (!this.ModelState.IsValid)
-            {
-                return this.BadRequest(this.ModelState);
-            }
-
             var user = await this.userManager.FindByNameAsync(userName);
             if (user == null)
             {
@@ -739,18 +634,8 @@ namespace Website.Controllers
 
         [Route("{userName}/changepassword")]
         [HttpPost]
-        public async Task<IActionResult> ChangePassword(string userName, [FromBody] ChangePasswordRequest model)
+        public async Task<ActionResult> ChangePassword(string userName, ChangePasswordRequest model)
         {
-            if (string.IsNullOrEmpty(userName))
-            {
-                return this.BadRequest();
-            }
-
-            if (!this.ModelState.IsValid)
-            {
-                return this.BadRequest(this.ModelState);
-            }
-
             var user = await this.userManager.FindByNameAsync(userName);
             if (user == null)
             {
@@ -787,13 +672,8 @@ namespace Website.Controllers
         [Route("resetpassword")]
         [HttpPost]
         [AllowAnonymous]
-        public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordRequest model)
+        public async Task<ActionResult> ResetPassword(ResetPasswordRequest model)
         {
-            if (!this.ModelState.IsValid)
-            {
-                return this.BadRequest(this.ModelState);
-            }
-
             // Using email address since the username is public information
             var user = await this.userManager.FindByEmailAsync(model.Email);
             if (user == null)
@@ -814,28 +694,25 @@ namespace Website.Controllers
         [Route("resetpasswordconfirmation")]
         [HttpPost]
         [AllowAnonymous]
-        public async Task<IActionResult> ResetPasswordConfirmation([FromBody] ResetPasswordConfirmationRequest model)
+        public async Task<ActionResult> ResetPasswordConfirmation(ResetPasswordConfirmationRequest model)
         {
-            if (this.ModelState.IsValid)
+            // Using email address since the username is public information
+            var user = await this.userManager.FindByEmailAsync(model.Email);
+            if (user == null)
             {
-                // Using email address since the username is public information
-                var user = await this.userManager.FindByEmailAsync(model.Email);
-                if (user == null)
-                {
-                    // Don't reveal that the user does not exist
-                    return this.Ok();
-                }
+                // Don't reveal that the user does not exist
+                return this.Ok();
+            }
 
-                var result = await this.userManager.ResetPasswordAsync(user, model.Code, model.Password);
-                if (result.Succeeded)
-                {
-                    return this.Ok();
-                }
+            var result = await this.userManager.ResetPasswordAsync(user, model.Code, model.Password);
+            if (result.Succeeded)
+            {
+                return this.Ok();
+            }
 
-                foreach (var error in result.Errors)
-                {
-                    this.ModelState.AddModelError(string.Empty, error.Description);
-                }
+            foreach (var error in result.Errors)
+            {
+                this.ModelState.AddModelError(string.Empty, error.Description);
             }
 
             return this.BadRequest(this.ModelState);

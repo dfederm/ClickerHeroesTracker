@@ -15,28 +15,27 @@ namespace UnitTests.Services
 
     public class BuildInfoProviderTests
     {
-        private static Dictionary<string, string> buildInfo = new Dictionary<string, string>
+        private static readonly Dictionary<string, string> BuildInfo = new Dictionary<string, string>
         {
             { "changelist", "SomeChangelist" },
             { "buildId", "SomeBuildId" },
         };
 
-        private static Dictionary<string, string> manifestNoHashes = new Dictionary<string, string>
+        private static readonly Dictionary<string, string> Manifest = new Dictionary<string, string>
         {
-            { "bundle0.js", "bundle0.js" },
-            { "bundle1.js", "bundle1.js" },
-            { "bundle2.js", "bundle2.js" },
-        };
-
-        private static Dictionary<string, string> manifestWithHashes = new Dictionary<string, string>
-        {
-            { "bundle0.js", "bundle0.a.js" },
-            { "bundle1.js", "bundle1.b.js" },
-            { "bundle2.js", "bundle2.c.js" },
+            { "runtime.js", "/39caf45e53fcc3060725.js" },
+            { "runtime.js.map", "/39caf45e53fcc3060725.js.map" },
+            { "vendors~app.js", "/7b01886e415366cd2f5c.js" },
+            { "vendors~app.js.map", "/7b01886e415366cd2f5c.js.map" },
+            { "data~app.js", "/20c89b387dbdb102dba5.js" },
+            { "data~app.js.map", "/20c89b387dbdb102dba5.js.map" },
+            { "app.js", "/d8df654c29474da7b106.js" },
+            { "app.js.map", "/d8df654c29474da7b106.js.map" },
+            { "index.html", "/index.html" },
         };
 
         [Fact]
-        public void BuildInfoProvider_NoHashes()
+        public void BuildInfoProvider_Success()
         {
             using (var directory = new TemporaryDirectory())
             {
@@ -44,8 +43,8 @@ namespace UnitTests.Services
                 mockHostingEnvironment.Setup(_ => _.WebRootPath).Returns(directory.Location).Verifiable();
 
                 Directory.CreateDirectory(Path.Combine(directory.Location, "data"));
-                File.WriteAllText(Path.Combine(directory.Location, @"data\BuildInfo.json"), JsonConvert.SerializeObject(buildInfo));
-                File.WriteAllText(Path.Combine(directory.Location, @"manifest.json"), JsonConvert.SerializeObject(manifestNoHashes));
+                File.WriteAllText(Path.Combine(directory.Location, @"data\BuildInfo.json"), JsonConvert.SerializeObject(BuildInfo));
+                File.WriteAllText(Path.Combine(directory.Location, @"manifest.json"), JsonConvert.SerializeObject(Manifest));
 
                 var provider = new BuildInfoProvider(mockHostingEnvironment.Object);
 
@@ -53,37 +52,11 @@ namespace UnitTests.Services
                 Assert.Equal("SomeChangelist", provider.Changelist);
 
                 Assert.NotNull(provider.Webclient);
-                Assert.Equal(manifestNoHashes.Count, provider.Webclient.Count);
-                Assert.Equal(string.Empty, provider.Webclient["bundle0"]);
-                Assert.Equal(string.Empty, provider.Webclient["bundle1"]);
-                Assert.Equal(string.Empty, provider.Webclient["bundle2"]);
-
-                mockHostingEnvironment.Verify();
-            }
-        }
-
-        [Fact]
-        public void BuildInfoProvider_WithHashes()
-        {
-            using (var directory = new TemporaryDirectory())
-            {
-                var mockHostingEnvironment = new Mock<IHostingEnvironment>(MockBehavior.Strict);
-                mockHostingEnvironment.Setup(_ => _.WebRootPath).Returns(directory.Location).Verifiable();
-
-                Directory.CreateDirectory(Path.Combine(directory.Location, "data"));
-                File.WriteAllText(Path.Combine(directory.Location, @"data\BuildInfo.json"), JsonConvert.SerializeObject(buildInfo));
-                File.WriteAllText(Path.Combine(directory.Location, @"manifest.json"), JsonConvert.SerializeObject(manifestWithHashes));
-
-                var provider = new BuildInfoProvider(mockHostingEnvironment.Object);
-
-                Assert.Equal("SomeBuildId", provider.BuildId);
-                Assert.Equal("SomeChangelist", provider.Changelist);
-
-                Assert.NotNull(provider.Webclient);
-                Assert.Equal(manifestWithHashes.Count, provider.Webclient.Count);
-                Assert.Equal("a", provider.Webclient["bundle0"]);
-                Assert.Equal("b", provider.Webclient["bundle1"]);
-                Assert.Equal("c", provider.Webclient["bundle2"]);
+                Assert.Equal(4, provider.Webclient.Count);
+                Assert.Equal("39caf45e53fcc3060725", provider.Webclient["runtime"]);
+                Assert.Equal("7b01886e415366cd2f5c", provider.Webclient["vendors~app"]);
+                Assert.Equal("20c89b387dbdb102dba5", provider.Webclient["data~app"]);
+                Assert.Equal("d8df654c29474da7b106", provider.Webclient["app"]);
 
                 mockHostingEnvironment.Verify();
             }
@@ -99,7 +72,7 @@ namespace UnitTests.Services
 
                 Directory.CreateDirectory(Path.Combine(directory.Location, "data"));
                 File.WriteAllText(Path.Combine(directory.Location, @"data\BuildInfo.json"), "{}");
-                File.WriteAllText(Path.Combine(directory.Location, @"manifest.json"), JsonConvert.SerializeObject(manifestWithHashes));
+                File.WriteAllText(Path.Combine(directory.Location, @"manifest.json"), JsonConvert.SerializeObject(Manifest));
 
                 var provider = new BuildInfoProvider(mockHostingEnvironment.Object);
 
@@ -107,10 +80,11 @@ namespace UnitTests.Services
                 Assert.Null(provider.Changelist);
 
                 Assert.NotNull(provider.Webclient);
-                Assert.Equal(manifestWithHashes.Count, provider.Webclient.Count);
-                Assert.Equal("a", provider.Webclient["bundle0"]);
-                Assert.Equal("b", provider.Webclient["bundle1"]);
-                Assert.Equal("c", provider.Webclient["bundle2"]);
+                Assert.Equal(4, provider.Webclient.Count);
+                Assert.Equal("39caf45e53fcc3060725", provider.Webclient["runtime"]);
+                Assert.Equal("7b01886e415366cd2f5c", provider.Webclient["vendors~app"]);
+                Assert.Equal("20c89b387dbdb102dba5", provider.Webclient["data~app"]);
+                Assert.Equal("d8df654c29474da7b106", provider.Webclient["app"]);
 
                 mockHostingEnvironment.Verify();
             }
@@ -125,7 +99,7 @@ namespace UnitTests.Services
                 mockHostingEnvironment.Setup(_ => _.WebRootPath).Returns(directory.Location).Verifiable();
 
                 Directory.CreateDirectory(Path.Combine(directory.Location, "data"));
-                File.WriteAllText(Path.Combine(directory.Location, @"data\BuildInfo.json"), JsonConvert.SerializeObject(buildInfo));
+                File.WriteAllText(Path.Combine(directory.Location, @"data\BuildInfo.json"), JsonConvert.SerializeObject(BuildInfo));
                 File.WriteAllText(Path.Combine(directory.Location, @"manifest.json"), "{}");
 
                 var provider = new BuildInfoProvider(mockHostingEnvironment.Object);
@@ -148,7 +122,7 @@ namespace UnitTests.Services
                 var mockHostingEnvironment = new Mock<IHostingEnvironment>(MockBehavior.Strict);
                 mockHostingEnvironment.Setup(_ => _.WebRootPath).Returns(directory.Location).Verifiable();
 
-                File.WriteAllText(Path.Combine(directory.Location, @"manifest.json"), JsonConvert.SerializeObject(manifestWithHashes));
+                File.WriteAllText(Path.Combine(directory.Location, @"manifest.json"), JsonConvert.SerializeObject(Manifest));
 
                 Assert.Throws<InvalidDataException>(() => new BuildInfoProvider(mockHostingEnvironment.Object));
 
@@ -165,7 +139,7 @@ namespace UnitTests.Services
                 mockHostingEnvironment.Setup(_ => _.WebRootPath).Returns(directory.Location).Verifiable();
 
                 Directory.CreateDirectory(Path.Combine(directory.Location, "data"));
-                File.WriteAllText(Path.Combine(directory.Location, @"data\BuildInfo.json"), JsonConvert.SerializeObject(buildInfo));
+                File.WriteAllText(Path.Combine(directory.Location, @"data\BuildInfo.json"), JsonConvert.SerializeObject(BuildInfo));
 
                 Assert.Throws<InvalidDataException>(() => new BuildInfoProvider(mockHostingEnvironment.Object));
 

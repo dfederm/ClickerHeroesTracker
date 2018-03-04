@@ -16,14 +16,14 @@ namespace UnitTests.Services.Authentication
     {
         private const string GrantType = "SomeGrantType";
 
-        private static IHttpContextAccessor httpContextAccessor = CreateHttpContextAccessor();
+        private static readonly IHttpContextAccessor HttpContextAccessor = CreateHttpContextAccessor();
 
-        private IOptions<AssertionGrantOptions> options = Options.Create(new AssertionGrantOptions());
+        private readonly IOptions<AssertionGrantOptions> options = Options.Create(new AssertionGrantOptions());
 
         [Fact]
         public void GetHandler_MissingHandler()
         {
-            var provider = new AssertionGrantHandlerProvider(this.options, httpContextAccessor);
+            var provider = new AssertionGrantHandlerProvider(this.options, HttpContextAccessor);
 
             Assert.Null(provider.GetHandler(GrantType));
         }
@@ -33,7 +33,7 @@ namespace UnitTests.Services.Authentication
         {
             this.options.Value.AddAssertionGrantType<MockAssertionGrantHandler>(GrantType);
 
-            var provider = new AssertionGrantHandlerProvider(this.options, httpContextAccessor);
+            var provider = new AssertionGrantHandlerProvider(this.options, HttpContextAccessor);
 
             var handler = provider.GetHandler(GrantType);
             Assert.NotNull(handler);

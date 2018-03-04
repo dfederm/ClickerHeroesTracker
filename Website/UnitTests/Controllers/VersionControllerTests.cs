@@ -8,7 +8,6 @@ namespace ClickerHeroesTrackerWebsite.Tests.Controllers
     using ClickerHeroesTrackerWebsite.Configuration;
     using ClickerHeroesTrackerWebsite.Controllers;
     using Microsoft.AspNetCore.Hosting;
-    using Microsoft.AspNetCore.Mvc;
     using Moq;
     using Xunit;
 
@@ -35,12 +34,9 @@ namespace ClickerHeroesTrackerWebsite.Tests.Controllers
             var controller = new VersionController(mockBuildInfoProvider.Object, mockHostingEnvironment.Object);
 
             var result = controller.Version();
-
             Assert.NotNull(result);
-            Assert.IsType<OkObjectResult>(result);
 
-            // It's an anonymous type, so use dynamic to get the props off it.
-            dynamic model = ((OkObjectResult)result).Value;
+            var model = result.Value;
             Assert.NotNull(model);
             Assert.Equal("SomeEnvironmentName", model.Environment);
             Assert.Equal("SomeChangelist", model.Changelist);

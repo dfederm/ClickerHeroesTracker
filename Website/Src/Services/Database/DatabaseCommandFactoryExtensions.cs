@@ -11,7 +11,7 @@ namespace ClickerHeroesTrackerWebsite.Services.Database
     /// </summary>
     public static class DatabaseCommandFactoryExtensions
     {
-        private static Dictionary<string, object> emptyParameters = new Dictionary<string, object>(0);
+        private static readonly Dictionary<string, object> EmptyParameters = new Dictionary<string, object>(0);
 
         /// <summary>
         /// Creates an <see cref="IDatabaseCommand"/> no parameters.
@@ -23,7 +23,7 @@ namespace ClickerHeroesTrackerWebsite.Services.Database
             this IDatabaseCommandFactory databaseCommandFactory,
             string commandText)
         {
-            return Create(databaseCommandFactory, commandText, emptyParameters);
+            return Create(databaseCommandFactory, commandText, EmptyParameters);
         }
 
         /// <summary>

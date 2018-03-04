@@ -4,6 +4,8 @@
 
 namespace ClickerHeroesTrackerWebsite.Models.Api.Uploads
 {
+    using System.ComponentModel.DataAnnotations;
+
     /// <summary>
     /// Upload request
     /// </summary>
@@ -12,6 +14,7 @@ namespace ClickerHeroesTrackerWebsite.Models.Api.Uploads
         /// <summary>
         /// Gets or sets the encoded saved game data.
         /// </summary>
+        [Required]
         public string EncodedSaveData { get; set; }
 
         /// <summary>

@@ -44,8 +44,7 @@ namespace UnitTests.Controllers
             var result = await controller.Queues();
 
             Assert.NotNull(result);
-            Assert.IsType<OkObjectResult>(result);
-            Assert.Equal(expectedQueues, ((OkObjectResult)result).Value);
+            Assert.Equal(expectedQueues, result.Value);
 
             mockDatabaseCommandFactory.VerifyAll();
             mockUploadScheduler.VerifyAll();
@@ -89,10 +88,7 @@ namespace UnitTests.Controllers
                 mockUserManager.Object);
             controller.ControllerContext = new ControllerContext { HttpContext = mockHttpContext.Object };
 
-            var result = await controller.Recompute(model);
-
-            Assert.NotNull(result);
-            Assert.IsType<OkResult>(result);
+            await controller.Recompute(model);
 
             Assert.Equal(model.UploadIds.Count, messages.Count);
             for (var i = 0; i < messages.Count; i++)
@@ -101,78 +97,6 @@ namespace UnitTests.Controllers
                 Assert.Equal(model.Priority, messages[i].Priority);
                 Assert.Equal(UserId, messages[i].Requester);
             }
-
-            mockDatabaseCommandFactory.VerifyAll();
-            mockUploadScheduler.VerifyAll();
-            mockUser.VerifyAll();
-            mockHttpContext.VerifyAll();
-
-            // Workaround for a Moq bug. See: https://github.com/moq/moq4/issues/456#issuecomment-331692858
-            mockUserManager.Object.Logger = mockUserManager.Object.Logger;
-            mockUserManager.VerifyAll();
-        }
-
-        [Fact]
-        public async Task Recompute_InvalidModelState()
-        {
-            var model = new RecomputeRequest
-            {
-                UploadIds = new[] { 1, 2, 3 },
-                Priority = UploadProcessingMessagePriority.High,
-            };
-
-            var mockDatabaseCommandFactory = new Mock<IDatabaseCommandFactory>(MockBehavior.Strict);
-            var mockUploadScheduler = new Mock<IUploadScheduler>(MockBehavior.Strict);
-            var mockUser = new Mock<ClaimsPrincipal>(MockBehavior.Strict);
-            var mockUserManager = MockUserManager.CreateMock();
-            var mockHttpContext = new Mock<HttpContext>(MockBehavior.Strict);
-
-            var controller = new AdminController(
-                mockDatabaseCommandFactory.Object,
-                mockUploadScheduler.Object,
-                mockUserManager.Object);
-            controller.ModelState.AddModelError("SomeKey", "SomeErrorMessage");
-
-            var result = await controller.Recompute(model);
-
-            Assert.NotNull(result);
-            Assert.IsType<BadRequestObjectResult>(result);
-
-            mockDatabaseCommandFactory.VerifyAll();
-            mockUploadScheduler.VerifyAll();
-            mockUser.VerifyAll();
-            mockHttpContext.VerifyAll();
-
-            // Workaround for a Moq bug. See: https://github.com/moq/moq4/issues/456#issuecomment-331692858
-            mockUserManager.Object.Logger = mockUserManager.Object.Logger;
-            mockUserManager.VerifyAll();
-        }
-
-        [Fact]
-        public async Task Recompute_NoUploadIds()
-        {
-            var model = new RecomputeRequest
-            {
-                UploadIds = Array.Empty<int>(),
-                Priority = UploadProcessingMessagePriority.High,
-            };
-
-            var mockDatabaseCommandFactory = new Mock<IDatabaseCommandFactory>(MockBehavior.Strict);
-            var mockUploadScheduler = new Mock<IUploadScheduler>(MockBehavior.Strict);
-            var mockUser = new Mock<ClaimsPrincipal>(MockBehavior.Strict);
-            var mockUserManager = MockUserManager.CreateMock();
-            var mockHttpContext = new Mock<HttpContext>(MockBehavior.Strict);
-
-            var controller = new AdminController(
-                mockDatabaseCommandFactory.Object,
-                mockUploadScheduler.Object,
-                mockUserManager.Object);
-            controller.ControllerContext = new ControllerContext { HttpContext = mockHttpContext.Object };
-
-            var result = await controller.Recompute(model);
-
-            Assert.NotNull(result);
-            Assert.IsType<BadRequestResult>(result);
 
             mockDatabaseCommandFactory.VerifyAll();
             mockUploadScheduler.VerifyAll();
@@ -207,39 +131,7 @@ namespace UnitTests.Controllers
             var result = await controller.ClearQueue(model);
 
             Assert.NotNull(result);
-            Assert.IsType<OkObjectResult>(result);
-            Assert.Equal(NumMessages, ((OkObjectResult)result).Value);
-
-            mockDatabaseCommandFactory.VerifyAll();
-            mockUploadScheduler.VerifyAll();
-
-            // Workaround for a Moq bug. See: https://github.com/moq/moq4/issues/456#issuecomment-331692858
-            mockUserManager.Object.Logger = mockUserManager.Object.Logger;
-            mockUserManager.VerifyAll();
-        }
-
-        [Fact]
-        public async Task ClearQueue_InvalidModelState()
-        {
-            var model = new ClearQueueRequest
-            {
-                Priority = UploadProcessingMessagePriority.High,
-            };
-
-            var mockDatabaseCommandFactory = new Mock<IDatabaseCommandFactory>(MockBehavior.Strict);
-            var mockUploadScheduler = new Mock<IUploadScheduler>(MockBehavior.Strict);
-            var mockUserManager = MockUserManager.CreateMock();
-
-            var controller = new AdminController(
-                mockDatabaseCommandFactory.Object,
-                mockUploadScheduler.Object,
-                mockUserManager.Object);
-            controller.ModelState.AddModelError("SomeKey", "SomeErrorMessage");
-
-            var result = await controller.ClearQueue(model);
-
-            Assert.NotNull(result);
-            Assert.IsType<BadRequestObjectResult>(result);
+            Assert.Equal(NumMessages, result.Value);
 
             mockDatabaseCommandFactory.VerifyAll();
             mockUploadScheduler.VerifyAll();
@@ -272,9 +164,7 @@ namespace UnitTests.Controllers
             var result = await controller.StaleUploads();
 
             Assert.NotNull(result);
-            Assert.IsType<OkObjectResult>(result);
-
-            var actualIds = ((OkObjectResult)result).Value as List<int>;
+            var actualIds = result.Value;
 
             Assert.Equal(expectedIds.Count, actualIds.Count);
             for (var i = 0; i < actualIds.Count; i++)

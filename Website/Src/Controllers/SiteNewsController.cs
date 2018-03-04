@@ -16,6 +16,7 @@ namespace ClickerHeroesTrackerWebsite.Controllers
     /// This controller handles the set of APIs that manage site news
     /// </summary>
     [Route("api/news")]
+    [ApiController]
     public sealed class SiteNewsController : Controller
     {
         private readonly ISiteNewsProvider siteNewsProvider;
@@ -35,16 +36,10 @@ namespace ClickerHeroesTrackerWebsite.Controllers
         /// <returns>A response with the schema <see cref="SiteNewsEntryListResponse"/></returns>
         [Route("")]
         [HttpGet]
-        public async Task<IActionResult> List()
+        public async Task<ActionResult<SiteNewsEntryListResponse>> List() => new SiteNewsEntryListResponse
         {
-            var entries = await this.siteNewsProvider.RetrieveSiteNewsEntriesAsync();
-            var model = new SiteNewsEntryListResponse
-            {
-                Entries = entries,
-            };
-
-            return this.Ok(model);
-        }
+            Entries = await this.siteNewsProvider.RetrieveSiteNewsEntriesAsync(),
+        };
 
         /// <summary>
         /// Post a news entity
@@ -54,17 +49,10 @@ namespace ClickerHeroesTrackerWebsite.Controllers
         [Route("")]
         [HttpPost]
         [Authorize(Roles = "Admin", AuthenticationSchemes = OAuthValidationDefaults.AuthenticationScheme)]
-        public async Task<IActionResult> Post([FromBody] SiteNewsEntry entry)
+        public async Task<ActionResult> Post(SiteNewsEntry entry)
         {
-            if (entry == null
-                || entry.Messages == null
-                || entry.Messages.Count == 0)
-            {
-                return this.BadRequest();
-            }
-
             await this.siteNewsProvider.AddSiteNewsEntriesAsync(entry.Date, entry.Messages);
-            return this.StatusCode(200);
+            return this.StatusCode(201);
         }
 
         /// <summary>
@@ -75,9 +63,6 @@ namespace ClickerHeroesTrackerWebsite.Controllers
         [Route("{date}")]
         [HttpDelete]
         [Authorize(Roles = "Admin", AuthenticationSchemes = OAuthValidationDefaults.AuthenticationScheme)]
-        public async Task Delete(DateTime date)
-        {
-            await this.siteNewsProvider.DeleteSiteNewsForDateAsync(date);
-        }
+        public async Task Delete(DateTime date) => await this.siteNewsProvider.DeleteSiteNewsForDateAsync(date);
     }
 }

@@ -53,18 +53,15 @@ namespace ClickerHeroesTrackerWebsite.Configuration
                     var name = pair.Key;
                     var file = pair.Value;
 
-                    if (name.EndsWith(".map", StringComparison.OrdinalIgnoreCase))
+                    // We only care about the js files. Ignore things like the source maps and index.html
+                    if (!name.EndsWith(".js", StringComparison.OrdinalIgnoreCase))
                     {
-                        // We don't care about the map files
                         continue;
                     }
 
-                    // each entry looks like "app.js": "app.5efeb981068fadf86ea1.js", but we want them to look like "app": "5efeb981068fadf86ea1".
+                    // each entry looks like { "app.js", "/d8df654c29474da7b106.js" }, but we want them to look like { "app": "d8df654c29474da7b106" }.
                     var bundleName = Path.GetFileNameWithoutExtension(name);
-                    var hashLength = file.Length - name.Length - 1;
-                    var hash = hashLength > 0
-                        ? file.Substring(bundleName.Length + 1, hashLength)
-                        : string.Empty;
+                    var hash = file.Substring(1, file.Length - 4);
 
                     webClient.Add(bundleName, hash);
                 }

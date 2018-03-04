@@ -9,15 +9,24 @@ namespace ClickerHeroesTrackerWebsite
     using ClickerHeroesTrackerWebsite.Utility;
     using Microsoft.AspNetCore.Builder;
     using Microsoft.AspNetCore.Hosting;
-    using Microsoft.AspNetCore.Rewrite;
+    using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
 
     public partial class Startup
     {
+        private readonly IHostingEnvironment environment;
+        private readonly IConfiguration configuration;
+
+        public Startup(IHostingEnvironment environment, IConfiguration configuration)
+        {
+            this.environment = environment;
+            this.configuration = configuration;
+        }
+
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app)
         {
-            if (this.Environment.IsDevelopment() || this.Environment.IsBuddy())
+            if (this.environment.IsDevelopment() || this.environment.IsBuddy())
             {
                 app.UseDeveloperExceptionPage();
                 app.UseDatabaseErrorPage();
@@ -27,18 +36,16 @@ namespace ClickerHeroesTrackerWebsite
                 app.UseExceptionHandler("/Error");
             }
 
-            // Require https on non-devbox
-            if (!this.Environment.IsDevelopment())
-            {
-                var options = new RewriteOptions()
-                    .AddRedirectToHttpsPermanent();
-                app.UseRewriter(options);
-            }
+            // Hint to brower to use https
+            app.UseHsts();
 
-            var staticFileOptions = this.Environment.IsDevelopment()
-                ? new StaticFileOptions()
+            // Force server side to use https
+            app.UseHttpsRedirection();
+
+            var staticFileOptions = this.environment.IsDevelopment()
+                ? new StaticFileOptions
                 {
-                    OnPrepareResponse = (context) =>
+                    OnPrepareResponse = context =>
                     {
                         // Disable caching to help with development
                         context.Context.Response.Headers["Cache-Control"] = "no-cache, no-store";
@@ -46,9 +53,9 @@ namespace ClickerHeroesTrackerWebsite
                         context.Context.Response.Headers["Expires"] = "-1";
                     },
                 }
-                : new StaticFileOptions()
+                : new StaticFileOptions
                 {
-                    OnPrepareResponse = (context) =>
+                    OnPrepareResponse = context =>
                     {
                         // Cache for a year
                         context.Context.Response.Headers["Cache-Control"] = "public,max-age=31536000";

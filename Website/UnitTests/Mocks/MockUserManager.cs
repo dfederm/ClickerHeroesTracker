@@ -9,7 +9,6 @@ namespace ClickerHeroesTrackerWebsite.Tests.Mocks
     using System.Threading.Tasks;
     using ClickerHeroesTrackerWebsite.Models;
     using Microsoft.AspNetCore.Identity;
-    using Microsoft.Extensions.Logging;
     using Moq;
 
     public class MockUserManager : UserManager<ApplicationUser>

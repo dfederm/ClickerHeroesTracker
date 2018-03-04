@@ -10,7 +10,6 @@ namespace ClickerHeroesTracker.UploadProcessor
     using System.Text;
     using System.Threading;
     using System.Threading.Tasks;
-    using ClickerHeroesTrackerWebsite.Models;
     using ClickerHeroesTrackerWebsite.Models.Game;
     using ClickerHeroesTrackerWebsite.Models.SaveData;
     using ClickerHeroesTrackerWebsite.Models.Stats;
@@ -62,11 +61,11 @@ namespace ClickerHeroesTracker.UploadProcessor
                         return;
                     }
 
-                    var message = await queue.GetMessageAsync(visibilityTimeout, null, null);
+                    var message = await queue.GetMessageAsync(visibilityTimeout, null, null, cancellationToken);
                     if (message == null)
                     {
                         // if there was no work to do, wait for a bit to avoid spamming the empty queue with requests
-                        await Task.Delay(10000);
+                        await Task.Delay(10000, cancellationToken);
                     }
                     else
                     {
@@ -87,12 +86,12 @@ namespace ClickerHeroesTracker.UploadProcessor
             return queue;
         }
 
-        private static async Task<(string uploadContent, string userId, PlayStyle playStyle)> GetUploadDetailsAsync(
+        private static async Task<(string uploadContent, string userId)> GetUploadDetailsAsync(
             IDatabaseCommandFactory databaseCommandFactory,
             int uploadId)
         {
             const string CommandText = @"
-	            SELECT UploadContent, UserId, PlayStyle
+	            SELECT UploadContent, UserId
 	            FROM Uploads
 	            WHERE Id = @UploadId";
             var commandParameters = new Dictionary<string, object>
@@ -109,12 +108,7 @@ namespace ClickerHeroesTracker.UploadProcessor
                 var uploadContent = reader["UploadContent"].ToString();
                 var userId = reader["UserId"].ToString();
 
-                if (!Enum.TryParse(reader["PlayStyle"].ToString(), out PlayStyle playStyle))
-                {
-                    playStyle = default(PlayStyle);
-                }
-
-                return (uploadContent, userId, playStyle);
+                return (uploadContent, userId);
             }
         }
 
@@ -130,7 +124,6 @@ namespace ClickerHeroesTracker.UploadProcessor
             this.telemetryClient.TrackEvent("UploadProcessor-Recieved", properties);
 
             var databaseCommandFactory = new DatabaseCommandFactory(this.databaseSettingsOptions);
-            int uploadId = -1;
             try
             {
                 var message = JsonConvert.DeserializeObject<UploadProcessingMessage>(queueMessage.AsString);
@@ -140,12 +133,12 @@ namespace ClickerHeroesTracker.UploadProcessor
                     return false;
                 }
 
-                uploadId = message.UploadId;
+                var uploadId = message.UploadId;
                 properties.Add("UploadId", uploadId.ToString());
 
                 this.CurrentUploadId = uploadId;
 
-                var (uploadContent, userId, playStyle) = await GetUploadDetailsAsync(databaseCommandFactory, uploadId);
+                var (uploadContent, userId) = await GetUploadDetailsAsync(databaseCommandFactory, uploadId);
                 properties.Add("UserId", userId);
                 if (string.IsNullOrWhiteSpace(uploadContent))
                 {

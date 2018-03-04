@@ -138,7 +138,7 @@ namespace Website.Services.SiteNews
             var query = new TableQuery<SiteNewsTableEntity>();
 
             // Group entities by date and sort by order in each group
-            int rawr = 0;
+            var currentOrder = 0;
             var entitiesByDate = new SortedDictionary<DateTime, SortedList<int, string>>();
             TableContinuationToken token = null;
             do
@@ -147,21 +147,18 @@ namespace Website.Services.SiteNews
                 token = segment.ContinuationToken;
                 foreach (var entity in segment)
                 {
-                    DateTime date;
-                    int order;
-                    if (!DateTime.TryParse(entity.PartitionKey, out date))
+                    if (!DateTime.TryParse(entity.PartitionKey, out var date))
                     {
                         this.telemetryClient.TrackInvalidTableEntry(entity);
                         continue;
                     }
 
-                    if (!int.TryParse(entity.RowKey, out order))
+                    if (!int.TryParse(entity.RowKey, out var order))
                     {
-                        order = rawr++;
+                        order = currentOrder++;
                     }
 
-                    SortedList<int, string> entities;
-                    if (!entitiesByDate.TryGetValue(date, out entities))
+                    if (!entitiesByDate.TryGetValue(date, out var entities))
                     {
                         entities = new SortedList<int, string>();
                         entitiesByDate.Add(date, entities);
