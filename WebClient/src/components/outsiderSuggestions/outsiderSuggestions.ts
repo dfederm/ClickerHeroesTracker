@@ -109,14 +109,28 @@ export class OutsiderSuggestionsComponent {
             // 27k Ancient Souls
             this.newHze = 284000;
         } else if (ancientSouls < 27000) {
-            // +59% Ancient Souls
-            this.newHze = ancientSouls * 16.4;
+            // +100% Ancient Souls
+            this.newHze = ancientSouls * 20.68;
         } else if (ancientSouls < 60000) {
+            // 25% Non-borb (7k-15k)
             let b = this.spendAS(1, ancientSouls * 0.75);
-            this.newHze = b * 5000 + (this.useBeta ? 0 : 46500);
+            this.newHze = b * 5000 + (this.useBeta ? 500 : 46500);
         } else {
+            // 15k Non-borb
             let b = this.spendAS(1, ancientSouls - 15000);
-            this.newHze = Math.min(5e6, b * 5000 + (this.useBeta ? 0 : 46500));
+            this.newHze = Math.min(5.5e6, b * 5000 + (this.useBeta ? 500 : 46500));
+        }
+
+        // Push beyond 2mpz
+        let borbTarget = null;
+        if (this.useBeta) {
+            if (this.newHze > 4e6) {
+                borbTarget = this.newHze;
+                this.newHze *= 1.02 + (this.newHze - 4e6) / 5e7;
+            } else if (this.newHze > 1e6) {
+                borbTarget = this.newHze;
+                this.newHze *= 1.02;
+            }
         }
 
         this.newHze = Math.floor(this.newHze);
@@ -135,13 +149,16 @@ export class OutsiderSuggestionsComponent {
         // Unbuffed Stats
         let nerfs = Math.floor(this.newHze / 500) * 500 / 500;
         let unbuffedMonstersPerZone = 10 + nerfs * (this.useBeta ? 0.1 : 1);
+        unbuffedMonstersPerZone = Math.round(unbuffedMonstersPerZone * 10) / 10;
         let unbuffedTreasureChestChance = Math.exp(-0.006 * nerfs);
         let unbuffedBossHealth = 10 + nerfs * 0.4;
         let unbuffedBossTimer = 30 - nerfs * 2;
         let unbuffedPrimalBossChance = 25 - nerfs * 2;
 
         // Outsider Caps
-        let borbCap = Math.max(0, Math.ceil(((unbuffedMonstersPerZone - 2) / -kuma - 1) / (this.useBeta ? 0.125 : 0.1)));
+        let borbCap = borbTarget
+            ? Math.ceil((borbTarget - 500) / 5000)
+            : Math.max(0, Math.ceil(((unbuffedMonstersPerZone - 2.1) / - kuma - 1) / (this.useBeta ? 0.125 : 0.1)));
         let rhageistCap = Math.ceil(((100 - unbuffedPrimalBossChance) / atman - 1) / 0.25);
         let kariquaCap = Math.ceil(((unbuffedBossHealth - 5) / -bubos - 1) / 0.5);
         let orphalasCap = Math.max(1, Math.ceil(((2 - unbuffedBossTimer) / chronos - 1) / 0.75)) + 2;
@@ -164,18 +181,11 @@ export class OutsiderSuggestionsComponent {
             kariquaRatio = 0.01;
             orphalasRatio = 0.05;
             senakhanRatio = 0.05;
-        } else if (ancientSouls < 60000) {
-            // TODO: Extrapolate from spreadsheets between 27k and 60k AS
-            rhageistRatio = 0.2;
-            kariquaRatio = 0.01;
-            orphalasRatio = 0.05;
-            senakhanRatio = 0.05;
         } else {
-            // TODO: Extrapolate from spreadsheets between 60k and 420k AS
-            rhageistRatio = 0.1;
-            kariquaRatio = 0.005;
-            orphalasRatio = 0.025;
-            senakhanRatio = 0.025;
+            rhageistRatio = 0.0015;
+            kariquaRatio = 0.0005;
+            orphalasRatio = 0.0015;
+            senakhanRatio = 0.015;
         }
 
         // Outsider Leveling
@@ -254,6 +264,13 @@ export class OutsiderSuggestionsComponent {
     }
 
     private nOS(ancientSouls: number, transcendentPower: number, zone: number): [number, number, number] {
+        let pony = 0;
+        if (ancientSouls > 20000) {
+            ancientSouls -= 11325;
+            pony = this.spendAS(0.88, ancientSouls);
+            ancientSouls -= this.getCostFromLevel(pony);
+            return [150, ancientSouls, pony];
+        }
         let hpMultiplier = Math.min(1.545, 1.145 + zone / 500000);
         let hsMultiplier = Math.pow(1 + transcendentPower, 0.2);
         let heroDamageMultiplier = (zone > 1.23e6) ? 1000 : ((zone > 168000) ? 4.5 : 4);
@@ -262,7 +279,6 @@ export class OutsiderSuggestionsComponent {
         let dpsToZones = Math.log10(hpMultiplier) - Math.log10(1.15) * goldToDps;
         let chor = 0;
         let phan = 0;
-        let pony = 0;
 
         let chorBuff = 1 / 0.95;
 
