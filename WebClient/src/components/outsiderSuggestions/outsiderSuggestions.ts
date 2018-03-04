@@ -118,7 +118,7 @@ export class OutsiderSuggestionsComponent {
         } else {
             // 15k Non-borb
             let b = this.spendAS(1, ancientSouls - 15000);
-            this.newHze = Math.min(5e6, b * 5000 + (this.useBeta ? 500 : 46500));
+            this.newHze = Math.min(5.5e6, b * 5000 + (this.useBeta ? 500 : 46500));
         }
 
         // Push beyond 2mpz
