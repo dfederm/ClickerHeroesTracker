@@ -30,7 +30,7 @@ namespace ClickerHeroesTrackerWebsite.Tests.Mocks
                 .Setup(_ => _.Dispose())
                 .Verifiable();
 
-            int i = -1;
+            var i = -1;
             mockDataReader.Setup(_ => _.Read())
                 .Returns(() => ++i < dataSets.Count)
                 .Verifiable();

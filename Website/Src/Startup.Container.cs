@@ -49,7 +49,7 @@ namespace ClickerHeroesTrackerWebsite
         public void ConfigureServices(IServiceCollection services)
         {
             // The DevelopmentStorageAccount will only work if you have the Storage emulator v4.3 installed: https://go.microsoft.com/fwlink/?linkid=717179&clcid=0x409
-            var storageConnectionString = this.Configuration["Storage:ConnectionString"];
+            var storageConnectionString = this.configuration["Storage:ConnectionString"];
             var storageAccount = !string.IsNullOrEmpty(storageConnectionString)
                 ? CloudStorageAccount.Parse(storageConnectionString)
                 : null;
@@ -75,7 +75,7 @@ namespace ClickerHeroesTrackerWebsite
             // Add Entity framework services.
             services.AddDbContext<ApplicationDbContext>(options =>
                 {
-                    options.UseSqlServer(this.Configuration["Database:ConnectionString"]);
+                    options.UseSqlServer(this.configuration["Database:ConnectionString"]);
 
                     // Register the entity sets needed by OpenIddict.
                     options.UseOpenIddict();
@@ -130,7 +130,7 @@ namespace ClickerHeroesTrackerWebsite
                 options.UseRollingTokens();
 
                 // Allow Http on devbox
-                if (this.Environment.IsDevelopment())
+                if (this.environment.IsDevelopment())
                 {
                     options.DisableHttpsRequirement();
                 }
@@ -158,12 +158,12 @@ namespace ClickerHeroesTrackerWebsite
                         .Build();
             });
 
-            var buildInfoProvider = new BuildInfoProvider(this.Environment);
+            var buildInfoProvider = new BuildInfoProvider(this.environment);
 
-            services.AddApplicationInsightsTelemetry(this.Configuration);
             services.Configure((ApplicationInsightsServiceOptions options) =>
             {
                 options.ApplicationVersion = buildInfoProvider.BuildId;
+                options.DeveloperMode = this.environment.IsDevelopment();
             });
 
             services.AddCors();
@@ -206,22 +206,22 @@ namespace ClickerHeroesTrackerWebsite
                 services.AddSingleton<ISiteNewsProvider, InMemorySiteNewsProvider>();
             }
 
-            services.AddSingleton<GameData>(_ => GameData.Parse(Path.Combine(this.Environment.WebRootPath, @"data\GameData.json")));
+            services.AddSingleton<GameData>(_ => GameData.Parse(Path.Combine(this.environment.WebRootPath, @"data\GameData.json")));
             services.AddSingleton<HttpClient>(_ => new HttpClient());
             services.AddSingleton<IAssertionGrantHandlerProvider, AssertionGrantHandlerProvider>();
             services.AddSingleton<IBuildInfoProvider>(buildInfoProvider);
-            services.AddSingleton<IClanManager, ClanManager>();
             services.AddSingleton<IEmailSender, EmailSender>();
             services.AddSingleton<IOptions<PasswordHasherOptions>, PasswordHasherOptionsAccessor>();
-            services.AddSingleton<IUserSettingsProvider, UserSettingsProvider>();
 
             // Per request registrations
+            services.AddScoped<IClanManager, ClanManager>();
             services.AddScoped<IDatabaseCommandFactory, DatabaseCommandFactory>();
+            services.AddScoped<IUserSettingsProvider, UserSettingsProvider>();
 
-            // Configuration
-            services.Configure<AuthenticationSettings>(options => this.Configuration.GetSection("Authentication").Bind(options));
-            services.Configure<DatabaseSettings>(options => this.Configuration.GetSection("Database").Bind(options));
-            services.Configure<EmailSenderSettings>(options => this.Configuration.GetSection("EmailSender").Bind(options));
+            // configuration
+            services.Configure<AuthenticationSettings>(options => this.configuration.GetSection("Authentication").Bind(options));
+            services.Configure<DatabaseSettings>(options => this.configuration.GetSection("Database").Bind(options));
+            services.Configure<EmailSenderSettings>(options => this.configuration.GetSection("EmailSender").Bind(options));
         }
     }
 }

@@ -37,13 +37,27 @@ module.exports = () => {
 
   if (!isTest) {
     config.entry = {
-      'data': './src/data.ts',
       'app': './src/main.ts'
     };
 
     config.optimization = {
       splitChunks: {
         chunks: "all",
+        // cacheGroups is close to the default, just with the data group added since it rarely changes.
+        cacheGroups: {
+          default: {
+            minChunks: 2,
+            priority: -20,
+            reuseExistingChunk: true,
+          },
+          data: {
+            test: /\.json$/,
+          },
+          vendors: {
+            test: /[\\/]node_modules[\\/]/,
+            priority: -10
+          }
+        }
       },
       runtimeChunk: "single",
     };
@@ -51,8 +65,8 @@ module.exports = () => {
     config.output = {
       path: outputPath,
       publicPath: '/',
-      filename: isProd ? '[name].[chunkhash].js' : '[name].js',
-      chunkFilename: isProd ? '[id].[chunkhash].chunk.js' : '[id].chunk.js'
+      filename: '[chunkhash].js',
+      chunkFilename: '[chunkhash].js',
     };
   }
 

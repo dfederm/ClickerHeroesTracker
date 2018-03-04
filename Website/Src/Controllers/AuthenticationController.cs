@@ -4,6 +4,7 @@
 
 namespace ClickerHeroesTrackerWebsite.Controllers
 {
+    using System;
     using System.Collections.Generic;
     using System.Linq;
     using System.Security.Claims;
@@ -21,9 +22,10 @@ namespace ClickerHeroesTrackerWebsite.Controllers
     using Website.Services.Authentication;
 
     [Route("api/auth")]
+    [ApiController]
     public class AuthenticationController : Controller
     {
-        private static readonly string[] AllowedRefreshTokenScopes = new[]
+        private static readonly string[] AllowedRefreshTokenScopes =
         {
             OpenIdConnectConstants.Scopes.OpenId,
             OpenIdConnectConstants.Scopes.Email,
@@ -53,13 +55,13 @@ namespace ClickerHeroesTrackerWebsite.Controllers
         [Produces("application/json")]
         [Authorize] // Authorize + AllowAnonymous to basically force authentication to work without requiring it. There's probably a better way for this to work...
         [AllowAnonymous]
-        public async Task<IActionResult> Exchange(OpenIdConnectRequest request)
+        public async Task<ActionResult> Exchange([FromForm] OpenIdConnectRequest request)
         {
             if (request.IsPasswordGrantType())
             {
                 // Allow the user to log in with their email address too.
                 // We already check that usernames are only "word" chars (\w+), so this check is sufficient.
-                var user = request.Username.Contains("@")
+                var user = request.Username.Contains("@", StringComparison.Ordinal)
                     ? await this.userManager.FindByEmailAsync(request.Username)
                     : await this.userManager.FindByNameAsync(request.Username);
                 if (user == null)
@@ -207,7 +209,7 @@ namespace ClickerHeroesTrackerWebsite.Controllers
             });
         }
 
-        private async Task<IActionResult> SignInAsync(OpenIdConnectRequest request, ApplicationUser user, AuthenticationProperties properties = null)
+        private async Task<ActionResult> SignInAsync(OpenIdConnectRequest request, ApplicationUser user, AuthenticationProperties properties = null)
         {
             // Create a new ClaimsPrincipal containing the claims that
             // will be used to create an id_token, a token or a code.

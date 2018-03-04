@@ -4,27 +4,18 @@
 
 namespace ClickerHeroesTrackerWebsite
 {
-    using System.IO;
+    using Microsoft.AspNetCore;
     using Microsoft.AspNetCore.Hosting;
-    using Microsoft.Extensions.Logging;
 
     public static class Program
     {
-        public static void Main()
+        public static void Main(string[] args)
         {
-            var host = new WebHostBuilder()
-                .ConfigureLogging(options =>
-                {
-                    options.AddConsole();
-                    options.AddDebug();
-                })
-                .UseKestrel()
-                .UseContentRoot(Directory.GetCurrentDirectory())
-                .UseIISIntegration()
+            WebHost.CreateDefaultBuilder(args)
                 .UseStartup<Startup>()
-                .Build();
-
-            host.Run();
+                .UseApplicationInsights()
+                .Build()
+                .Run();
         }
     }
 }

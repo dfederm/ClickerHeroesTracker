@@ -55,7 +55,7 @@ export class ClanComponent implements OnInit {
     public sendMessage(): void {
         this.messagesError = "";
         this.isMessagesLoading = true;
-        this.clanService.sendMessage(this.newMessage, this.clanName)
+        this.clanService.sendMessage(this.newMessage)
             .then(() => {
                 this.newMessage = "";
                 this.getMessages();

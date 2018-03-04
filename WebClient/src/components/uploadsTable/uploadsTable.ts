@@ -28,6 +28,7 @@ export class UploadsTableComponent implements OnInit {
 
     private _userName: string;
     private _page = 1;
+    private _isInitialized = false;
 
     public get page(): number {
         return this._page;
@@ -35,7 +36,9 @@ export class UploadsTableComponent implements OnInit {
 
     public set page(page: number) {
         this._page = page;
-        this.populateUploads();
+        if (this._isInitialized) {
+            this.populateUploads();
+        }
     }
 
     public get userName(): string {
@@ -45,13 +48,16 @@ export class UploadsTableComponent implements OnInit {
     @Input()
     public set userName(userName: string) {
         this._userName = userName;
-        this.populateUploads();
+        if (this._isInitialized) {
+            this.populateUploads();
+        }
     }
 
     constructor(private readonly userService: UserService) { }
 
     public ngOnInit(): void {
         this.populateUploads();
+        this._isInitialized = true;
     }
 
     private populateUploads(): void {

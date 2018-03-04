@@ -23,6 +23,7 @@ namespace Website.Controllers
     /// </summary>
     [Route("api/feedback")]
     [Authorize]
+    [ApiController]
     public class FeedbackController : Controller
     {
         private readonly UserManager<ApplicationUser> userManager;
@@ -51,7 +52,7 @@ namespace Website.Controllers
         [Route("")]
         [HttpPost]
         [AllowAnonymous]
-        public async Task<IActionResult> Submit(FeedbackRequest feedback)
+        public async Task<ActionResult> Submit([FromForm] FeedbackRequest feedback)
         {
             string email = null;
             string userName = null;

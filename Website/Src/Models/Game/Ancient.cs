@@ -4,6 +4,7 @@
 
 namespace ClickerHeroesTrackerWebsite.Models.Game
 {
+    using System;
     using Newtonsoft.Json;
 
     /// <summary>
@@ -42,7 +43,7 @@ namespace ClickerHeroesTrackerWebsite.Models.Game
             {
                 if (this.name == null)
                 {
-                    var commaIndex = this.FullName.IndexOf(',');
+                    var commaIndex = this.FullName.IndexOf(',', StringComparison.Ordinal);
                     this.name = commaIndex >= 0
                         ? this.FullName.Substring(0, commaIndex)
                         : this.FullName;

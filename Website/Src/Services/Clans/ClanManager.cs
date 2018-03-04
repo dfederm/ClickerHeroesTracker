@@ -20,7 +20,7 @@ namespace Website.Services.Clans
     {
         private const string BaseUrl = "http://clickerheroes-savedgames3-747864888.us-east-1.elb.amazonaws.com";
 
-        private static readonly char[] MessageDelimeter = new[] { ';' };
+        private static readonly char[] MessageDelimeter = { ';' };
 
         private readonly IDatabaseCommandFactory databaseCommandFactory;
 
@@ -94,7 +94,7 @@ namespace Website.Services.Clans
                 var response = await this.httpClient.PostAsync(BaseUrl + "/clans/getGuildInfo.php", content);
 
                 var responseString = await response.Content.ReadAsStringAsync();
-                if (responseString.Contains("\"success\": false"))
+                if (responseString.Contains("\"success\": false", StringComparison.OrdinalIgnoreCase))
                 {
                     return;
                 }
@@ -212,7 +212,7 @@ namespace Website.Services.Clans
             var clans = new List<LeaderboardClan>();
             var offset = (page - 1) * count;
 
-            const string getLeaderboardDataCommandText = @"
+            const string GetLeaderboardDataCommandText = @"
                 SELECT Name, CurrentRaidLevel, (SELECT COUNT(*) FROM ClanMembers WHERE ClanMembers.ClanName = Name) AS MemberCount
                 FROM Clans
                 ORDER BY CurrentRaidLevel DESC
@@ -223,7 +223,7 @@ namespace Website.Services.Clans
                 { "@Offset", offset },
                 { "@Count", count },
             };
-            using (var command = this.databaseCommandFactory.Create(getLeaderboardDataCommandText, parameters))
+            using (var command = this.databaseCommandFactory.Create(GetLeaderboardDataCommandText, parameters))
             using (var reader = await command.ExecuteReaderAsync())
             {
                 var i = 1;
@@ -267,24 +267,12 @@ namespace Website.Services.Clans
 
                 if (page > 1)
                 {
-                    pagination.Previous = string.Format(
-                        "{0}?{1}={2}&{3}={4}",
-                        pageBasePath,
-                        nameof(page),
-                        page - 1,
-                        nameof(count),
-                        count);
+                    pagination.Previous = $"{pageBasePath}?{nameof(page)}={page - 1}&{nameof(count)}={count}";
                 }
 
                 if (page <= Math.Ceiling((float)pagination.Count / count))
                 {
-                    pagination.Next = string.Format(
-                        "{0}?{1}={2}&{3}={4}",
-                        pageBasePath,
-                        nameof(page),
-                        page + 1,
-                        nameof(count),
-                        count);
+                    pagination.Next = $"{pageBasePath}?{nameof(page)}={page + 1}&{nameof(count)}={count}";
                 }
 
                 return pagination;

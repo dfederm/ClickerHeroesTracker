@@ -222,19 +222,19 @@ describe("ClanService", () => {
         const apiRequest = { method: "post", url: "/api/clans/messages" };
 
         it("should make an api call", fakeAsync(() => {
-            clanService.sendMessage("someMessage", "someClanName");
+            clanService.sendMessage("someMessage");
 
             // Tick the getAuthHeaders call
             tick();
 
             let request = httpMock.expectOne(apiRequest);
-            expect(request.request.body).toEqual("message=someMessage&clanName=someClanName");
+            expect(request.request.body).toEqual("message=someMessage");
             expect(authenticationService.getAuthHeaders).toHaveBeenCalled();
         }));
 
         it("should handle when the api returns a success response", fakeAsync(() => {
             let succeeded = false;
-            clanService.sendMessage("someMessage", "someClanName")
+            clanService.sendMessage("someMessage")
                 .then(() => succeeded = true);
 
             // Tick the getAuthHeaders call
@@ -252,7 +252,7 @@ describe("ClanService", () => {
         it("should handle when the api returns a failed response", fakeAsync(() => {
             let succeeded = false;
             let error: string;
-            clanService.sendMessage("someMessage", "someClanName")
+            clanService.sendMessage("someMessage")
                 .then(() => succeeded = true)
                 .catch((e: string) => error = e);
 
@@ -272,7 +272,7 @@ describe("ClanService", () => {
         it("should handle http errors", fakeAsync(() => {
             let succeeded = false;
             let error: HttpErrorResponse;
-            clanService.sendMessage("someMessage", "someClanName")
+            clanService.sendMessage("someMessage")
                 .then(() => succeeded = true)
                 .catch((e: HttpErrorResponse) => error = e);
 

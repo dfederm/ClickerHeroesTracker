@@ -4,6 +4,8 @@
 
 namespace Website.Models.Api.Feedback
 {
+    using System.ComponentModel.DataAnnotations;
+
     /// <summary>
     /// Represents user-submitted feedback
     /// </summary>
@@ -12,6 +14,8 @@ namespace Website.Models.Api.Feedback
         /// <summary>
         /// Gets or sets the user's feedback text
         /// </summary>
+        [Required]
+        [MinLength(1)]
         public string Comments { get; set; }
 
         /// <summary>

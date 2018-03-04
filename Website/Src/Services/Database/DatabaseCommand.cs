@@ -10,7 +10,7 @@ namespace ClickerHeroesTrackerWebsite.Services.Database
     using System.Data.SqlClient;
     using System.Threading.Tasks;
 
-    internal sealed class DatabaseCommand : IDisposable, IDatabaseCommand
+    internal sealed class DatabaseCommand : IDatabaseCommand
     {
         private readonly string connectionString;
 

@@ -55,8 +55,7 @@ namespace Website.Services.Authentication
                 if (handler.CanReadToken(assertion))
                 {
                     handler.ValidateToken(assertion, validationParameters, out var validatedToken);
-                    var jwtToken = validatedToken as JwtSecurityToken;
-                    if (jwtToken != null && !string.IsNullOrEmpty(jwtToken.Subject))
+                    if (validatedToken is JwtSecurityToken jwtToken && !string.IsNullOrEmpty(jwtToken.Subject))
                     {
                         var email = jwtToken.Claims.FirstOrDefault(claim => claim.Type.Equals("email", StringComparison.OrdinalIgnoreCase))?.Value;
                         return new AssertionGrantResult { ExternalUserId = jwtToken.Subject, ExternalUserEmail = email };

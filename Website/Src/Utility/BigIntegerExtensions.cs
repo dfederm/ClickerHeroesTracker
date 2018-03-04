@@ -28,7 +28,7 @@ namespace ClickerHeroesTrackerWebsite.Utility
         /// <returns>A string representation of the <see cref="BigInteger"/></returns>
         public static BigInteger ToBigInteger(this string str)
         {
-            if (str.Contains("e"))
+            if (str.Contains("e", StringComparison.OrdinalIgnoreCase))
             {
                 // There's an edge case due to floating point arithmatic that a number which should be an integrer isn't,
                 // so we can end up with numbers like 9.250998750999996e9.

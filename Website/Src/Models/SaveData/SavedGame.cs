@@ -37,21 +37,21 @@ namespace ClickerHeroesTrackerWebsite.Models.SaveData
             { ZlibHash, EncodingAlgorithm.Zlib },
         };
 
-        private static readonly Dictionary<EncodingAlgorithm, Func<string, TextReader>> DecodeFuncs = new Dictionary<EncodingAlgorithm, Func<string, TextReader>>()
+        private static readonly Dictionary<EncodingAlgorithm, Func<string, TextReader>> DecodeFuncs = new Dictionary<EncodingAlgorithm, Func<string, TextReader>>
         {
             { EncodingAlgorithm.Sprinkle, DecodeSprinkle },
             { EncodingAlgorithm.Android, DecodeAndroid },
             { EncodingAlgorithm.Zlib, DecodeZlib },
         };
 
-        private static readonly Dictionary<EncodingAlgorithm, Func<string, string>> EncodeFuncs = new Dictionary<EncodingAlgorithm, Func<string, string>>()
+        private static readonly Dictionary<EncodingAlgorithm, Func<string, string>> EncodeFuncs = new Dictionary<EncodingAlgorithm, Func<string, string>>
         {
             { EncodingAlgorithm.Sprinkle, EncodeSprinkle },
             { EncodingAlgorithm.Android, EncodeAndroid },
             { EncodingAlgorithm.Zlib, EncodeZlib },
         };
 
-        private EncodingAlgorithm encoding;
+        private readonly EncodingAlgorithm encoding;
 
         private SavedGame(string content)
         {
@@ -179,10 +179,10 @@ namespace ClickerHeroesTrackerWebsite.Models.SaveData
             var saltedChars = new char[unsprinkledChars.Length + SprinkleSalt.Length];
             unsprinkledChars.CopyTo(saltedChars, 0);
             SprinkleSalt.CopyTo(0, saltedChars, unsprinkledChars.Length, SprinkleSalt.Length);
-            using (MD5 md5 = MD5.Create())
+            using (var md5 = MD5.Create())
             {
-                byte[] data = md5.ComputeHash(Encoding.UTF8.GetBytes(saltedChars));
-                for (int i = 0; i < data.Length; i++)
+                var data = md5.ComputeHash(Encoding.UTF8.GetBytes(saltedChars));
+                for (var i = 0; i < data.Length; i++)
                 {
                     var expectedHashPartIndex = expectedHashStart + (i * 2);
                     var actualHashPart = data[i].ToString("x2");
@@ -222,10 +222,10 @@ namespace ClickerHeroesTrackerWebsite.Models.SaveData
             var hashChars = new char[data.Length + SprinkleSalt.Length];
             data.CopyTo(0, hashChars, 0, data.Length);
             SprinkleSalt.CopyTo(0, hashChars, data.Length, SprinkleSalt.Length);
-            using (MD5 md5 = MD5.Create())
+            using (var md5 = MD5.Create())
             {
-                byte[] hash = md5.ComputeHash(Encoding.UTF8.GetBytes(hashChars));
-                for (int i = 0; i < hash.Length; i++)
+                var hash = md5.ComputeHash(Encoding.UTF8.GetBytes(hashChars));
+                for (var i = 0; i < hash.Length; i++)
                 {
                     sb.Append(hash[i].ToString("x2"));
                 }
@@ -238,7 +238,7 @@ namespace ClickerHeroesTrackerWebsite.Models.SaveData
         {
             // Get the index of the first open brace
             const char BraceCharCode = '{';
-            var firstBrace = encodedSaveData.IndexOf(BraceCharCode);
+            var firstBrace = encodedSaveData.IndexOf(BraceCharCode, StringComparison.Ordinal);
             if (firstBrace < 0)
             {
                 return null;

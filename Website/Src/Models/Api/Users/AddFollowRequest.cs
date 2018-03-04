@@ -4,8 +4,12 @@
 
 namespace Website.Models.Api.Users
 {
+    using System.ComponentModel.DataAnnotations;
+
     public sealed class AddFollowRequest
     {
+        [Required]
+        [MinLength(1)]
         public string FollowUserName { get; set; }
     }
 }

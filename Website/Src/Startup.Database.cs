@@ -13,7 +13,6 @@ namespace ClickerHeroesTrackerWebsite
     using ClickerHeroesTrackerWebsite.Services.Database;
     using Microsoft.AspNetCore.Builder;
     using Microsoft.Extensions.DependencyInjection;
-    using Microsoft.Extensions.Options;
 
     /// <summary>
     /// Ensures the database schemas are created
@@ -28,7 +27,7 @@ namespace ClickerHeroesTrackerWebsite
         /// However, it's important to note that the tables created here may not be optimized. Indicies, foreign keys, etc may be missing.
         /// </remarks>
         /// <returns>Async task</returns>
-        public async Task EnsureDatabaseCreatedAsync(IApplicationBuilder app)
+        private async Task EnsureDatabaseCreatedAsync(IApplicationBuilder app)
         {
             using (var serviceScope = app.ApplicationServices.GetRequiredService<IServiceScopeFactory>().CreateScope())
             {
@@ -38,7 +37,6 @@ namespace ClickerHeroesTrackerWebsite
                 await serviceProvider.GetService<ApplicationDbContext>().Database.EnsureCreatedAsync();
 
                 var databaseCommandFactory = serviceProvider.GetService<IDatabaseCommandFactory>();
-                var databaseSettingsOptions = serviceProvider.GetService<IOptions<DatabaseSettings>>();
 
                 // Get all existing tables so we know what already exists
                 var existingTables = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
@@ -66,7 +64,7 @@ namespace ClickerHeroesTrackerWebsite
                     "ClanMembers",
                     "GameUsers",
                 };
-                var tableFiles = tables.Select(table => Path.Combine(this.Environment.ContentRootPath, @"Services\Database\Schemas", table + ".sql"));
+                var tableFiles = tables.Select(table => Path.Combine(this.environment.ContentRootPath, @"Services\Database\Schemas", table + ".sql"));
                 foreach (var tableFile in tableFiles)
                 {
                     var tableName = Path.GetFileNameWithoutExtension(tableFile);

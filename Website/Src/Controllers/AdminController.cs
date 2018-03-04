@@ -16,9 +16,11 @@ namespace Website.Controllers
     using Microsoft.AspNetCore.Identity;
     using Microsoft.AspNetCore.Mvc;
     using Website.Models.Api.Admin;
+    using Website.Services.UploadProcessing;
 
     [Route("api/admin")]
     [Authorize(Roles = "Admin", AuthenticationSchemes = OAuthValidationDefaults.AuthenticationScheme)]
+    [ApiController]
     public class AdminController : Controller
     {
         private readonly IDatabaseCommandFactory databaseCommandFactory;
@@ -39,49 +41,24 @@ namespace Website.Controllers
 
         [Route("queues")]
         [HttpGet]
-        public async Task<IActionResult> Queues()
-        {
-            var queues = await this.uploadScheduler.RetrieveQueueStatsAsync();
-            return this.Ok(queues);
-        }
+        public async Task<ActionResult<List<UploadQueueStats>>> Queues() => (await this.uploadScheduler.RetrieveQueueStatsAsync()).ToList();
 
         [Route("recompute")]
         [HttpPost]
-        public async Task<IActionResult> Recompute([FromBody] RecomputeRequest model)
+        public Task Recompute(RecomputeRequest model)
         {
-            if (!this.ModelState.IsValid)
-            {
-                return this.BadRequest(this.ModelState);
-            }
-
-            if (model.UploadIds == null || model.UploadIds.Count == 0)
-            {
-                return this.BadRequest();
-            }
-
             var userId = this.userManager.GetUserId(this.User);
             var messages = model.UploadIds.Select(uploadId => new UploadProcessingMessage { UploadId = uploadId, Requester = userId, Priority = model.Priority });
-            await this.uploadScheduler.ScheduleAsync(messages);
-
-            return this.Ok();
+            return this.uploadScheduler.ScheduleAsync(messages);
         }
 
         [Route("clearqueue")]
         [HttpPost]
-        public async Task<IActionResult> ClearQueue([FromBody] ClearQueueRequest model)
-        {
-            if (!this.ModelState.IsValid)
-            {
-                return this.BadRequest(this.ModelState);
-            }
-
-            var numMessages = await this.uploadScheduler.ClearQueueAsync(model.Priority);
-            return this.Ok(numMessages);
-        }
+        public async Task<ActionResult<int>> ClearQueue(ClearQueueRequest model) => await this.uploadScheduler.ClearQueueAsync(model.Priority);
 
         [Route("staleuploads")]
         [HttpGet]
-        public async Task<IActionResult> StaleUploads()
+        public async Task<ActionResult<List<int>>> StaleUploads()
         {
             const string CommandText = @"
                 SELECT Id
@@ -99,7 +76,7 @@ namespace Website.Controllers
                 }
             }
 
-            return this.Ok(uploadIds);
+            return uploadIds;
         }
     }
 }

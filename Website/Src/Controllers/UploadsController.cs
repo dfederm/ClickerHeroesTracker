@@ -23,6 +23,7 @@ namespace ClickerHeroesTrackerWebsite.Controllers
 
     [Route("api/uploads")]
     [Authorize]
+    [ApiController]
     public sealed class UploadsController : Controller
     {
         private readonly IDatabaseCommandFactory databaseCommandFactory;
@@ -56,7 +57,7 @@ namespace ClickerHeroesTrackerWebsite.Controllers
         [Route("{uploadId:int}")]
         [HttpGet]
         [AllowAnonymous]
-        public async Task<IActionResult> Details(int uploadId)
+        public async Task<ActionResult<Upload>> Details(int uploadId)
         {
             if (uploadId < 0)
             {
@@ -132,20 +133,14 @@ namespace ClickerHeroesTrackerWebsite.Controllers
                 upload.IsScrubbed = true;
             }
 
-            return this.Ok(upload);
+            return upload;
         }
 
         [Route("")]
         [HttpPost]
         [AllowAnonymous]
-        public async Task<IActionResult> Add(UploadRequest uploadRequest)
+        public async Task<ActionResult<int>> Add([FromForm] UploadRequest uploadRequest)
         {
-            if (uploadRequest.EncodedSaveData == null)
-            {
-                // Not a valid save
-                return this.BadRequest();
-            }
-
             // Only associate it with the user if they requested that it be added to their progress.
             var userId = uploadRequest.AddToProgress && this.User.Identity.IsAuthenticated
                 ? this.userManager.GetUserId(this.User)
@@ -289,12 +284,12 @@ namespace ClickerHeroesTrackerWebsite.Controllers
                 this.telemetryClient.TrackException(e, properties);
             }
 
-            return this.Ok(uploadId);
+            return uploadId;
         }
 
         [Route("{uploadId:int}")]
         [HttpDelete]
-        public async Task<IActionResult> Delete(int uploadId)
+        public async Task<ActionResult> Delete(int uploadId)
         {
             var parameters = new Dictionary<string, object>
             {

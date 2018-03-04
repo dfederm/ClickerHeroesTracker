@@ -98,7 +98,7 @@ namespace ClickerHeroesTracker.UploadProcessor
                         await uploadScheduler.ScheduleAsync(message);
                     }
 
-                    Console.WriteLine($"Stopped scheduling");
+                    Console.WriteLine("Stopped scheduling");
                 });
             }
 
@@ -121,11 +121,11 @@ namespace ClickerHeroesTracker.UploadProcessor
             Console.WriteLine($"Waiting for up to {DrainTimeMs}ms for processing to drain...");
             if (Task.WaitAll(tasks, DrainTimeMs))
             {
-                Console.WriteLine($"Processing drained successfully");
+                Console.WriteLine("Processing drained successfully");
             }
             else
             {
-                Console.WriteLine($"Some processing was stuck");
+                Console.WriteLine("Some processing was stuck");
                 foreach (var processor in processors)
                 {
                     var currentUploadId = processor.CurrentUploadId;

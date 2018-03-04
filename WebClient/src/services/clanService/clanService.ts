@@ -113,13 +113,12 @@ export class ClanService {
             });
     }
 
-    public sendMessage(message: string, clanName: string): Promise<void> {
+    public sendMessage(message: string): Promise<void> {
         return this.authenticationService.getAuthHeaders()
             .then(headers => {
                 headers = headers.set("Content-Type", "application/x-www-form-urlencoded");
                 let params = new HttpParams()
-                    .set("message", message)
-                    .set("clanName", clanName);
+                    .set("message", message);
 
                 // Angular doesn't encode '+' correctly. See: https://github.com/angular/angular/issues/11058
                 let body = params.toString().replace(/\+/gi, "%2B");

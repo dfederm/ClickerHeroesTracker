@@ -27,8 +27,7 @@ namespace Website.Services.SiteNews
         /// <inheritdoc />
         public Task DeleteSiteNewsForDateAsync(DateTime newsDate)
         {
-            IList<string> currentValues;
-            this.siteNewsDictionary.TryRemove(newsDate, out currentValues);
+            this.siteNewsDictionary.TryRemove(newsDate, out _);
             return Task.CompletedTask;
         }
 

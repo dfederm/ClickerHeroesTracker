@@ -12,14 +12,8 @@ namespace Website.Services.Authentication
 
         public string Error { get; set; }
 
-        public bool IsSuccessful
-        {
-            get
-            {
-                return string.IsNullOrEmpty(this.Error)
-                    && !string.IsNullOrEmpty(this.ExternalUserId)
-                    && !string.IsNullOrEmpty(this.ExternalUserEmail);
-            }
-        }
+        public bool IsSuccessful => string.IsNullOrEmpty(this.Error)
+            && !string.IsNullOrEmpty(this.ExternalUserId)
+            && !string.IsNullOrEmpty(this.ExternalUserEmail);
     }
 }
