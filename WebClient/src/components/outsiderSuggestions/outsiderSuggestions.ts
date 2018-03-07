@@ -97,40 +97,31 @@ export class OutsiderSuggestionsComponent {
         let transcendentPower = (25 - 23 * Math.exp(-0.0003 * ancientSouls)) / 100;
 
         // Figure out goals for this transcendence
+        let nonBorb;
+        let zonePush = 0;
         if (ancientSouls < 100) {
             let a = ancientSouls + 42;
             this.newHze = (a / 5 - 6) * 51.8 * Math.log(1.25) / Math.log(1 + transcendentPower);
         } else if (ancientSouls < 10500) {
             this.newHze = (1 - Math.exp(-ancientSouls / 3900)) * 200000 + 4800;
-        } else if (ancientSouls < 14500) {
-            // ~ +8000 Ancient Souls
-            this.newHze = ancientSouls * 10.32 + 90000;
-        } else if (ancientSouls < 18000) {
-            // 27k Ancient Souls
-            this.newHze = 284000;
+        } else if (ancientSouls < 20000) {
+            // 20k or +8000 Ancient Souls
+            this.newHze = Math.max(215000, ancientSouls * 10.32 + 90000);
         } else if (ancientSouls < 27000) {
-            // +100% Ancient Souls
-            this.newHze = ancientSouls * 20.68;
-        } else if (ancientSouls < 60000) {
-            // 25% Non-borb (7k-15k)
-            let b = this.spendAS(1, ancientSouls * 0.75);
-            this.newHze = b * 5000 + (this.useBeta ? 500 : 46500);
+            // 43.3k Ancient Souls
+            this.newHze =  458000;
         } else {
-            // 15k Non-borb
-            let b = this.spendAS(1, ancientSouls - 15000);
+            // End Game
+            [nonBorb, zonePush] = this.findStrategy(ancientSouls);
+            let b = this.spendAS(1, ancientSouls - nonBorb);
             this.newHze = Math.min(5.5e6, b * 5000 + (this.useBeta ? 500 : 46500));
         }
 
         // Push beyond 2mpz
         let borbTarget = null;
-        if (this.useBeta) {
-            if (this.newHze > 4e6) {
-                borbTarget = this.newHze;
-                this.newHze *= 1.02 + (this.newHze - 4e6) / 5e7;
-            } else if (this.newHze > 1e6) {
-                borbTarget = this.newHze;
-                this.newHze *= 1.02;
-            }
+        if (zonePush > 0) {
+            borbTarget = this.newHze;
+            this.newHze = Math.min(5.5e6, (1 + zonePush / 100) * this.newHze);
         }
 
         this.newHze = Math.floor(this.newHze);
@@ -182,10 +173,10 @@ export class OutsiderSuggestionsComponent {
             orphalasRatio = 0.05;
             senakhanRatio = 0.05;
         } else {
-            rhageistRatio = 0.0015;
-            kariquaRatio = 0.0005;
-            orphalasRatio = 0.0015;
-            senakhanRatio = 0.015;
+            rhageistRatio = 0;
+            kariquaRatio = 0;
+            orphalasRatio = 0;
+            senakhanRatio = 0;
         }
 
         // Outsider Leveling
@@ -344,5 +335,43 @@ export class OutsiderSuggestionsComponent {
         }
 
         return Math.floor(Math.sqrt(8 * spendable + 1) / 2 - 0.5);
+    }
+
+    private findNumTranscensions(ancientSouls: number, nonBorb: number, zonePush: number, targetZone: number): number {
+        let transcensions = 0;
+        let currentZone = 0;
+        let borb;
+        while (currentZone < targetZone) {
+            borb = this.spendAS(1, ancientSouls - nonBorb);
+            currentZone = borb * 5000 + 500;
+            currentZone = Math.floor(currentZone * (1 + zonePush / 100));
+            ancientSouls = Math.log10(1.25) * currentZone;
+            transcensions++;
+        }
+        return transcensions;
+    }
+
+    private findStrategy(ancientSouls: number): [number, number] {
+        if (ancientSouls < 340000) {
+            let targetZone = 4.5e6;
+            let nonBorb = 4500;
+            let zonePush = 1;
+            let numTranscensions = this.findNumTranscensions(ancientSouls, nonBorb, zonePush, targetZone);
+            let newNumTranscensions = numTranscensions;
+            while (zonePush > 0) {
+                zonePush -= 0.1;
+                newNumTranscensions = this.findNumTranscensions(ancientSouls, nonBorb, zonePush, targetZone);
+                if (newNumTranscensions > numTranscensions) {
+                    return [nonBorb, zonePush + 0.1];
+                }
+            }
+            while (newNumTranscensions === numTranscensions) {
+                nonBorb += 500;
+                newNumTranscensions = this.findNumTranscensions(ancientSouls, nonBorb, zonePush, targetZone);
+            }
+            return [nonBorb - 500, 0];
+        } else {
+            return [2000, 2.5];
+        }
     }
 }
