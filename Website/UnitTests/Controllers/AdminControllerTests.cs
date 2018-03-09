@@ -179,5 +179,66 @@ namespace UnitTests.Controllers
             mockUserManager.Object.Logger = mockUserManager.Object.Logger;
             mockUserManager.VerifyAll();
         }
+
+        [Fact]
+        public async Task ListAuthTokens_Success()
+        {
+            const int NumInvalidTokens = 100;
+            var mockDatabaseCommand = MockDatabaseHelper.CreateMockDatabaseCommand(new Dictionary<string, object>(), NumInvalidTokens);
+
+            var mockDatabaseCommandFactory = new Mock<IDatabaseCommandFactory>(MockBehavior.Strict);
+            mockDatabaseCommandFactory.Setup(_ => _.Create()).Returns(mockDatabaseCommand.Object).Verifiable();
+
+            var mockUploadScheduler = new Mock<IUploadScheduler>(MockBehavior.Strict);
+            var mockUserManager = MockUserManager.CreateMock();
+
+            var controller = new AdminController(
+                mockDatabaseCommandFactory.Object,
+                mockUploadScheduler.Object,
+                mockUserManager.Object);
+            var result = await controller.CountInvalidAuthTokens();
+
+            Assert.NotNull(result);
+            var actualCount = result.Value;
+
+            Assert.Equal(NumInvalidTokens, actualCount);
+
+            mockDatabaseCommandFactory.VerifyAll();
+            mockUploadScheduler.VerifyAll();
+
+            // Workaround for a Moq bug. See: https://github.com/moq/moq4/issues/456#issuecomment-331692858
+            mockUserManager.Object.Logger = mockUserManager.Object.Logger;
+            mockUserManager.VerifyAll();
+        }
+
+        [Fact]
+        public async Task PruneInvalidAuthTokens_Success()
+        {
+            var model = new PruneInvalidAuthTokensRequest
+            {
+                BatchSize = 100,
+            };
+
+            var mockDatabaseCommand = MockDatabaseHelper.CreateMockDatabaseCommand(new Dictionary<string, object> { { "BatchSize", model.BatchSize } });
+
+            var mockDatabaseCommandFactory = new Mock<IDatabaseCommandFactory>(MockBehavior.Strict);
+            mockDatabaseCommandFactory.Setup(_ => _.Create()).Returns(mockDatabaseCommand.Object).Verifiable();
+
+            var mockUploadScheduler = new Mock<IUploadScheduler>(MockBehavior.Strict);
+            var mockUserManager = MockUserManager.CreateMock();
+
+            var controller = new AdminController(
+                mockDatabaseCommandFactory.Object,
+                mockUploadScheduler.Object,
+                mockUserManager.Object);
+            await controller.PruneInvalidAuthTokens(model);
+
+            mockDatabaseCommandFactory.VerifyAll();
+            mockUploadScheduler.VerifyAll();
+
+            // Workaround for a Moq bug. See: https://github.com/moq/moq4/issues/456#issuecomment-331692858
+            mockUserManager.Object.Logger = mockUserManager.Object.Logger;
+            mockUserManager.VerifyAll();
+        }
     }
 }

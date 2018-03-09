@@ -20,12 +20,18 @@ export interface IClearQueueRequest {
     priority: string;
 }
 
+export interface IPruneInvalidAuthTokensRequest {
+    batchSize: number;
+}
+
 @Component({
     selector: "admin",
     templateUrl: "./admin.html",
 })
 export class AdminComponent implements OnInit {
     public static numParallelDeletes = 10;
+
+    public static pruneInvalidAuthTokenBatchSize = 10;
 
     public isLoadingQueues: boolean;
 
@@ -56,6 +62,16 @@ export class AdminComponent implements OnInit {
     public deletedStaleUploads: number;
 
     public totalStaleUploads: number;
+
+    public invalidAuthTokensError: string;
+
+    public isInvalidAuthTokensLoading: boolean;
+
+    public prunedInvalidAuthTokens: number;
+
+    public totalInvalidAuthTokens: number;
+
+    public pruningInProgress: boolean;
 
     constructor(
         private readonly authenticationService: AuthenticationService,
@@ -167,6 +183,60 @@ export class AdminComponent implements OnInit {
 
     public cancelDeleteStaleUploads(): void {
         this.deletesInProgress = false;
+    }
+
+    public fetchInvalidAuthTokens(): void {
+        this.invalidAuthTokensError = null;
+        this.isInvalidAuthTokensLoading = true;
+        this.prunedInvalidAuthTokens = 0;
+        this.totalInvalidAuthTokens = 0;
+
+        this.authenticationService.getAuthHeaders()
+            .then(headers => {
+                return this.http.get<number>("/api/admin/countinvalidauthtokens", { headers })
+                    .toPromise();
+            })
+            .then(response => {
+                this.isInvalidAuthTokensLoading = false;
+                this.totalInvalidAuthTokens = response;
+            })
+            .catch((err: HttpErrorResponse) => {
+                this.httpErrorHandlerService.logError("AdminComponent.fetchInvalidAuthTokens.error", err);
+                this.invalidAuthTokensError = "Something went wrong";
+            });
+    }
+
+    public pruneInvalidAuthTokens(): void {
+        this.invalidAuthTokensError = null;
+        this.pruningInProgress = true;
+
+        this.authenticationService.getAuthHeaders()
+            .then(headers => {
+                let body: IPruneInvalidAuthTokensRequest = { batchSize: AdminComponent.pruneInvalidAuthTokenBatchSize };
+                return this.http.post<void>("/api/admin/pruneinvalidauthtokens", body, { headers })
+                    .toPromise();
+            })
+            .then(() => {
+                this.prunedInvalidAuthTokens += AdminComponent.pruneInvalidAuthTokenBatchSize;
+                if (this.prunedInvalidAuthTokens < this.totalInvalidAuthTokens) {
+                    if (this.pruningInProgress) {
+                        // Keep going
+                        this.pruneInvalidAuthTokens();
+                    }
+                } else {
+                    // Finished
+                    this.prunedInvalidAuthTokens = this.totalInvalidAuthTokens;
+                    this.pruningInProgress = false;
+                }
+            })
+            .catch((err: HttpErrorResponse) => {
+                this.httpErrorHandlerService.logError("AdminComponent.pruneInvalidAuthTokens.error", err);
+                this.invalidAuthTokensError = "Something went wrong";
+            });
+    }
+
+    public cancelPruneInvalidAuthTokens(): void {
+        this.pruningInProgress = false;
     }
 
     private refreshQueueData(): Promise<void> {
