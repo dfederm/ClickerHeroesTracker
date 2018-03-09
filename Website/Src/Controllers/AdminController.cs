@@ -78,5 +78,42 @@ namespace Website.Controllers
 
             return uploadIds;
         }
+
+        [Route("countinvalidauthtokens")]
+        [HttpGet]
+        public async Task<ActionResult<int>> CountInvalidAuthTokens()
+        {
+            const string CommandText = @"
+                SELECT COUNT(*) AS Count
+                FROM OpenIddictTokens
+                WHERE ExpirationDate < CAST(GETUTCDATE() AS datetimeoffset)
+                OR Status <> 'valid'
+                OR Status IS NULL";
+            using (var command = this.databaseCommandFactory.Create(CommandText))
+            {
+                return Convert.ToInt32(await command.ExecuteScalarAsync());
+            }
+        }
+
+        [Route("pruneinvalidauthtokens")]
+        [HttpPost]
+        public async Task PruneInvalidAuthTokens(PruneInvalidAuthTokensRequest model)
+        {
+            const string CommandTextFormat = @"
+                DELETE TOP (@BatchSize)
+                FROM OpenIddictTokens
+                WHERE ExpirationDate < CAST(GETUTCDATE() AS datetimeoffset)
+                OR Status <> 'valid'
+                OR Status IS NULL";
+            var parameters = new Dictionary<string, object>
+            {
+                { "BatchSize", model.BatchSize },
+            };
+
+            using (var command = this.databaseCommandFactory.Create(CommandTextFormat, parameters))
+            {
+                await command.ExecuteNonQueryAsync();
+            }
+        }
     }
 }

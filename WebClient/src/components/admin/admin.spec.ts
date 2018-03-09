@@ -18,6 +18,8 @@ describe("AdminComponent", () => {
     const recomputeRequest = { method: "post", url: "/api/admin/recompute" };
     const clearQueueRequest = { method: "post", url: "/api/admin/clearqueue" };
     const staleUploadsRequest = { method: "get", url: "/api/admin/staleuploads" };
+    const countInvalidAuthTokensRequest = { method: "get", url: "/api/admin/countinvalidauthtokens" };
+    const pruneInvalidAuthTokensRequest = { method: "post", url: "/api/admin/pruneinvalidauthtokens" };
 
     const uploadQueueStats: IUploadQueueStats[] = [
         {
@@ -450,7 +452,7 @@ describe("AdminComponent", () => {
 
         beforeEach(done => {
             let containers = fixture.debugElement.queryAll(By.css(".col-md-4"));
-            expect(containers.length).toEqual(3);
+            expect(containers.length).toEqual(4);
             container = containers[2];
 
             authenticationService = TestBed.get(AuthenticationService) as AuthenticationService;
@@ -695,6 +697,251 @@ describe("AdminComponent", () => {
                     expect(buttons.length).toEqual(2);
                     expect(buttons[0].nativeElement.textContent.trim()).toEqual("Fetch");
                     expect(buttons[1].nativeElement.textContent.trim()).toEqual("Delete");
+
+                    let errors = getAllErrors();
+                    expect(errors.length).toEqual(0);
+                })
+                .then(done)
+                .catch(done.fail);
+        });
+    });
+
+    describe("Invalid auth tokens form", () => {
+        let authenticationService: AuthenticationService;
+        let container: DebugElement;
+
+        const countInvalidAuthTokens = 1234;
+
+        beforeEach(done => {
+            let containers = fixture.debugElement.queryAll(By.css(".col-md-4"));
+            expect(containers.length).toEqual(4);
+            container = containers[3];
+
+            authenticationService = TestBed.get(AuthenticationService) as AuthenticationService;
+            spyOn(authenticationService, "getAuthHeaders").and.returnValue(Promise.resolve(new HttpHeaders()));
+
+            fixture.detectChanges();
+            fixture.whenStable()
+                .then(() => {
+                    fixture.detectChanges();
+
+                    expect(authenticationService.getAuthHeaders).toHaveBeenCalled();
+                    (authenticationService.getAuthHeaders as jasmine.Spy).calls.reset();
+
+                    httpMock.expectOne(queuesRequest);
+                })
+                .then(done)
+                .catch(done.fail);
+        });
+
+        it("should initially just show the fetch button", () => {
+            let progressBar = container.query(By.css("ngb-progressbar"));
+            expect(progressBar).toBeNull();
+
+            let buttons = container.queryAll(By.css("button"));
+            expect(buttons.length).toEqual(1);
+            expect(buttons[0].nativeElement.textContent.trim()).toEqual("Fetch");
+
+            let errors = getAllErrors();
+            expect(errors.length).toEqual(0);
+        });
+
+        it("should fetch invalid auth tokens", done => {
+            let fetchButton = container.query(By.css("button"));
+            fetchButton.nativeElement.click();
+
+            fixture.detectChanges();
+            fixture.whenStable()
+                .then(() => {
+                    fixture.detectChanges();
+
+                    expect(authenticationService.getAuthHeaders).toHaveBeenCalled();
+
+                    let request = httpMock.expectOne(countInvalidAuthTokensRequest);
+                    request.flush(countInvalidAuthTokens);
+
+                    fixture.detectChanges();
+                    return fixture.whenStable();
+                })
+                .then(() => {
+                    fixture.detectChanges();
+
+                    let progressBar = container.query(By.css("ngb-progressbar"));
+                    expect(progressBar).not.toBeNull();
+                    expect(progressBar.properties.value).toEqual(0);
+
+                    let buttons = container.queryAll(By.css("button"));
+                    expect(buttons.length).toEqual(2);
+                    expect(buttons[0].nativeElement.textContent.trim()).toEqual("Fetch");
+                    expect(buttons[1].nativeElement.textContent.trim()).toEqual("Prune");
+
+                    let errors = getAllErrors();
+                    expect(errors.length).toEqual(0);
+                })
+                .then(done)
+                .catch(done.fail);
+        });
+
+        it("should show errors when invalid auth tokens fetch fails", done => {
+            let httpErrorHandlerService = TestBed.get(HttpErrorHandlerService) as HttpErrorHandlerService;
+            spyOn(httpErrorHandlerService, "logError");
+
+            let fetchButton = container.query(By.css("button"));
+            fetchButton.nativeElement.click();
+
+            fixture.detectChanges();
+            fixture.whenStable()
+                .then(() => {
+                    let request = httpMock.expectOne(countInvalidAuthTokensRequest);
+                    request.flush(null, { status: 400, statusText: "someStatus" });
+
+                    fixture.detectChanges();
+                    return fixture.whenStable();
+                })
+                .then(() => {
+                    fixture.detectChanges();
+
+                    expect(httpErrorHandlerService.logError).toHaveBeenCalledWith("AdminComponent.fetchInvalidAuthTokens.error", jasmine.any(HttpErrorResponse));
+
+                    let errors = getAllErrors();
+                    expect(errors.length).toEqual(1);
+                    expect(errors[0]).toEqual("Something went wrong");
+                })
+                .then(done)
+                .catch(done.fail);
+        });
+
+        it("should prune invalid auth tokens", done => {
+            let fetchButton = container.query(By.css("button"));
+            fetchButton.nativeElement.click();
+
+            fixture.detectChanges();
+            fixture.whenStable()
+                .then(() => {
+                    let request = httpMock.expectOne(countInvalidAuthTokensRequest);
+                    request.flush(countInvalidAuthTokens);
+
+                    fixture.detectChanges();
+                    return fixture.whenStable();
+                })
+                .then(() => {
+                    fixture.detectChanges();
+
+                    let progressBar = container.query(By.css("ngb-progressbar"));
+                    expect(progressBar).not.toBeNull();
+                    expect(progressBar.properties.value).toEqual(0);
+
+                    let buttons = container.queryAll(By.css("button"));
+                    expect(buttons.length).toEqual(2);
+
+                    let pruneButton = buttons[1];
+                    pruneButton.nativeElement.click();
+
+                    return fixture.whenStable();
+                })
+                .then(async () => {
+                    fixture.detectChanges();
+
+                    for (let i = 0; i < countInvalidAuthTokens; i += AdminComponent.pruneInvalidAuthTokenBatchSize) {
+                        httpMock.expectOne(pruneInvalidAuthTokensRequest).flush(null);
+
+                        fixture.detectChanges();
+                        await fixture.whenStable();
+                        fixture.detectChanges();
+                    }
+
+                    let progressBar = container.query(By.css("ngb-progressbar"));
+                    expect(progressBar).not.toBeNull();
+                    expect(progressBar.properties.value).toEqual(100);
+
+                    let buttons = container.queryAll(By.css("button"));
+                    expect(buttons.length).toEqual(1);
+                    expect(buttons[0].nativeElement.textContent.trim()).toEqual("Fetch");
+
+                    let errors = getAllErrors();
+                    expect(errors.length).toEqual(0);
+                })
+                .then(done)
+                .catch(done.fail);
+        });
+
+        it("should cancel pruning", done => {
+            let numPrunedInvalidAuthTokens = countInvalidAuthTokens / 2;
+            numPrunedInvalidAuthTokens -= numPrunedInvalidAuthTokens % AdminComponent.pruneInvalidAuthTokenBatchSize;
+
+            let fetchButton = container.query(By.css("button"));
+            fetchButton.nativeElement.click();
+
+            fixture.detectChanges();
+            fixture.whenStable()
+                .then(() => {
+                    let request = httpMock.expectOne(countInvalidAuthTokensRequest);
+                    request.flush(countInvalidAuthTokens);
+
+                    fixture.detectChanges();
+                    return fixture.whenStable();
+                })
+                .then(() => {
+                    fixture.detectChanges();
+
+                    let progressBar = container.query(By.css("ngb-progressbar"));
+                    expect(progressBar).not.toBeNull();
+                    expect(progressBar.properties.value).toEqual(0);
+
+                    let buttons = container.queryAll(By.css("button"));
+                    expect(buttons.length).toEqual(2);
+
+                    let pruneButton = buttons[1];
+                    pruneButton.nativeElement.click();
+
+                    return fixture.whenStable();
+                })
+                .then(async () => {
+                    fixture.detectChanges();
+
+                    // Pause half way through
+                    for (let i = 0; i < numPrunedInvalidAuthTokens; i += AdminComponent.pruneInvalidAuthTokenBatchSize) {
+                        httpMock.expectOne(pruneInvalidAuthTokensRequest).flush(null);
+
+                        fixture.detectChanges();
+                        await fixture.whenStable();
+                        fixture.detectChanges();
+                    }
+
+                    let progressBar = container.query(By.css("ngb-progressbar"));
+                    expect(progressBar).not.toBeNull();
+                    expect(progressBar.properties.value).toEqual(100 * numPrunedInvalidAuthTokens / countInvalidAuthTokens);
+
+                    let buttons = container.queryAll(By.css("button"));
+                    expect(buttons.length).toEqual(1);
+
+                    let cancelButton = buttons[0];
+                    expect(cancelButton.nativeElement.textContent.trim()).toEqual("Cancel");
+                    cancelButton.nativeElement.click();
+
+                    // Flush the in-flight request
+                    httpMock.expectOne(pruneInvalidAuthTokensRequest).flush(null);
+                    numPrunedInvalidAuthTokens += AdminComponent.pruneInvalidAuthTokenBatchSize;
+
+                    await fixture.whenStable();
+                })
+                .then(() => {
+                    // Need a 2nd round to update the property
+                    fixture.detectChanges();
+                    return fixture.whenStable();
+                })
+                .then(() => {
+                    fixture.detectChanges();
+
+                    // We will only have let the pending requests finish before stopping
+                    let progressBar = container.query(By.css("ngb-progressbar"));
+                    expect(progressBar).not.toBeNull();
+                    expect(progressBar.properties.value).toEqual(100 * numPrunedInvalidAuthTokens / countInvalidAuthTokens);
+
+                    let buttons = container.queryAll(By.css("button"));
+                    expect(buttons.length).toEqual(2);
+                    expect(buttons[0].nativeElement.textContent.trim()).toEqual("Fetch");
+                    expect(buttons[1].nativeElement.textContent.trim()).toEqual("Prune");
 
                     let errors = getAllErrors();
                     expect(errors.length).toEqual(0);

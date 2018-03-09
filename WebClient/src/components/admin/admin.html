@@ -90,5 +90,33 @@
                     class="btn btn-primary"
                     (click)="cancelDeleteStaleUploads()">Cancel</button>
         </div>
+        <div class="col-md-4">
+            <p>Invalid Auth Tokens</p>
+            <div *ngIf="invalidAuthTokensError"
+                 class="alert alert-danger">
+                {{ invalidAuthTokensError }}
+            </div>
+            <ngx-loading [show]="isInvalidAuthTokensLoading && !invalidAuthTokensError"></ngx-loading>
+            <div *ngIf="totalInvalidAuthTokens !== undefined">
+                <p>{{ totalInvalidAuthTokens - prunedInvalidAuthTokens }} Invalid Auth Tokens</p>
+                <p>
+                    <ngb-progressbar type="info"
+                                     [value]="100 * prunedInvalidAuthTokens / totalInvalidAuthTokens"
+                                     [striped]="true"
+                                     [animated]="true">
+                        <b>{{ (prunedInvalidAuthTokens / totalInvalidAuthTokens) | percent:'.2' }}</b>
+                    </ngb-progressbar>
+                </p>
+            </div>
+            <button *ngIf="!pruningInProgress"
+                    class="btn btn-primary"
+                    (click)="fetchInvalidAuthTokens()">Fetch</button>
+            <button *ngIf="!pruningInProgress && prunedInvalidAuthTokens < totalInvalidAuthTokens"
+                    class="btn btn-primary"
+                    (click)="pruneInvalidAuthTokens()">Prune</button>
+            <button *ngIf="pruningInProgress"
+                    class="btn btn-primary"
+                    (click)="cancelPruneInvalidAuthTokens()">Cancel</button>
+        </div>
     </div>
 </div>
