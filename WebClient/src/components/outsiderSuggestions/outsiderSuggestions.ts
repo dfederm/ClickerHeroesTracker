@@ -44,7 +44,7 @@ export class OutsiderSuggestionsComponent {
     }
 
     private _savedGame: SavedGame;
-    private _useBeta = false;
+    private _useBeta = true;
 
     private readonly outsidersByName: { [name: string]: IOutsiderViewModel } = {};
 
