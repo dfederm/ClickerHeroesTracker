@@ -10,6 +10,9 @@ import { SettingsService } from "../../services/settingsService/settingsService"
 import { SavedGame, ISavedGameData } from "../../models/savedGame";
 import { gameData } from "../../models/gameData";
 import { Decimal } from "decimal.js";
+import { UploadService } from "../../services/uploadService/uploadService";
+import { NgbModal } from "@ng-bootstrap/ng-bootstrap";
+import { Router } from "@angular/router";
 
 describe("AncientSuggestionsComponent", () => {
     let fixture: ComponentFixture<AncientSuggestionsComponent>;
@@ -121,6 +124,10 @@ describe("AncientSuggestionsComponent", () => {
         let settingsService = { settings: () => settingsSubject };
         let changeDetectorRef = { markForCheck: (): void => void 0 };
 
+        let modalService = { open: (): void => void 0 };
+        let router = { navigate: (): void => void 0 };
+        let uploadService = { create: (): void => void 0 };
+
         TestBed.configureTestingModule(
             {
                 imports: [FormsModule],
@@ -133,6 +140,9 @@ describe("AncientSuggestionsComponent", () => {
                     { provide: SettingsService, useValue: settingsService },
                     { provide: ChangeDetectorRef, useValue: changeDetectorRef },
                     ExponentialPipe,
+                    { provide: NgbModal, useValue: modalService },
+                    { provide: Router, useValue: router },
+                    { provide: UploadService, useValue: uploadService },
                 ],
                 schemas: [NO_ERRORS_SCHEMA],
             })
@@ -156,7 +166,7 @@ describe("AncientSuggestionsComponent", () => {
                 .catch(done.fail);
         });
 
-        it("should default to available souls including souls from ascension", () => {
+        it("should default to available souls not including souls from ascension", () => {
             let suggestionTypes = fixture.debugElement.queryAll(By.css("input[type='radio']"));
             expect(suggestionTypes.length).toEqual(2);
 
@@ -165,6 +175,7 @@ describe("AncientSuggestionsComponent", () => {
 
             let useSoulsFromAscension = fixture.debugElement.query(By.css("input[name='useSoulsFromAscension']"));
             expect(useSoulsFromAscension).not.toBeNull("Couldn't find the 'Use souls from ascension' checkbox");
+            expect(useSoulsFromAscension.nativeElement.checked).toEqual(false);
         });
 
         it("should hide souls from ascension after selecting the Rules of Thumb", () => {
@@ -547,6 +558,139 @@ describe("AncientSuggestionsComponent", () => {
                 expect(expectedRemainingSouls.isNegative()).toEqual(false);
             }
         }
+    });
+
+    describe("Autolevel", () => {
+        describe("Button", () => {
+            it("should display when using available souls and not using souls from ascension", () => {
+                component.savedGame = savedGame;
+                component.suggestionType = "AvailableSouls";
+                component.useSoulsFromAscension = false;
+
+                fixture.detectChanges();
+
+                let autolevelButton = fixture.debugElement.query(By.css("button"));
+                expect(autolevelButton).not.toBeNull();
+                expect(autolevelButton.properties.disabled).toEqual(false);
+            });
+
+            it("should not display when using available souls and using souls from ascension", () => {
+                component.savedGame = savedGame;
+                component.suggestionType = "AvailableSouls";
+                component.useSoulsFromAscension = true;
+
+                fixture.detectChanges();
+
+                let autolevelButton = fixture.debugElement.query(By.css("button"));
+                expect(autolevelButton).not.toBeNull();
+                expect(autolevelButton.properties.disabled).toEqual(true);
+            });
+
+            it("should not display when using rules of thumb", () => {
+                component.savedGame = savedGame;
+                component.suggestionType = "RulesOfThumb";
+
+                fixture.detectChanges();
+
+                let autolevelButton = fixture.debugElement.query(By.css("button"));
+                expect(autolevelButton).not.toBeNull();
+                expect(autolevelButton.properties.disabled).toEqual(true);
+            });
+        });
+
+        describe("Modal", () => {
+            it("should show the modal when clicked", () => {
+                let modalService = TestBed.get(NgbModal) as NgbModal;
+                spyOn(modalService, "open").and.returnValue({ result: Promise.resolve() });
+
+                component.savedGame = savedGame;
+                component.suggestionType = "AvailableSouls";
+                component.useSoulsFromAscension = false;
+
+                fixture.detectChanges();
+
+                let autolevelButton = fixture.debugElement.query(By.css("button"));
+                expect(autolevelButton).not.toBeNull();
+                expect(autolevelButton.properties.disabled).toEqual(false);
+
+                autolevelButton.nativeElement.click();
+                expect(modalService.open).toHaveBeenCalled();
+            });
+
+            it("should add to progress", async () => {
+                let modal = jasmine.createSpyObj("modal", ["close"]);
+                let modalService = TestBed.get(NgbModal) as NgbModal;
+                spyOn(modalService, "open").and.returnValue(modal);
+
+                let uploadService = TestBed.get(UploadService) as UploadService;
+                spyOn(uploadService, "create").and.returnValue(Promise.resolve<number>(123));
+
+                let router = TestBed.get(Router) as Router;
+                spyOn(router, "navigate").and.returnValue({ result: Promise.resolve() });
+
+                component.savedGame = savedGame;
+                component.suggestionType = "AvailableSouls";
+                component.useSoulsFromAscension = false;
+
+                fixture.detectChanges();
+
+                let autolevelButton = fixture.debugElement.query(By.css("button"));
+                expect(autolevelButton).not.toBeNull();
+                expect(autolevelButton.properties.disabled).toEqual(false);
+
+                autolevelButton.nativeElement.click();
+                expect(modalService.open).toHaveBeenCalled();
+
+                component.saveAutolevel();
+
+                // Wait for stability from the uploadService promise
+                fixture.detectChanges();
+                await fixture.whenStable();
+                fixture.detectChanges();
+
+                expect(uploadService.create).toHaveBeenCalledWith(component.autoLeveledSavedGame.content, true, component.playStyle);
+                expect(router.navigate).toHaveBeenCalledWith(["/uploads", 123]);
+                expect(modal.close).toHaveBeenCalled();
+                expect(component.modalErrorMessage).toBeNull();
+            });
+
+            it("should show an error when the upload fails", async () => {
+                let modal = jasmine.createSpyObj("modal", ["close"]);
+                let modalService = TestBed.get(NgbModal) as NgbModal;
+                spyOn(modalService, "open").and.returnValue(modal);
+
+                let uploadService = TestBed.get(UploadService) as UploadService;
+                spyOn(uploadService, "create").and.returnValue(Promise.reject({}));
+
+                let router = TestBed.get(Router) as Router;
+                spyOn(router, "navigate");
+
+                component.savedGame = savedGame;
+                component.suggestionType = "AvailableSouls";
+                component.useSoulsFromAscension = false;
+
+                fixture.detectChanges();
+
+                let autolevelButton = fixture.debugElement.query(By.css("button"));
+                expect(autolevelButton).not.toBeNull();
+                expect(autolevelButton.properties.disabled).toEqual(false);
+
+                autolevelButton.nativeElement.click();
+                expect(modalService.open).toHaveBeenCalled();
+
+                component.saveAutolevel();
+
+                // Wait for stability from the uploadService promise
+                fixture.detectChanges();
+                await fixture.whenStable();
+                fixture.detectChanges();
+
+                expect(uploadService.create).toHaveBeenCalledWith(component.autoLeveledSavedGame.content, true, component.playStyle);
+                expect(router.navigate).not.toHaveBeenCalled();
+                expect(modal.close).not.toHaveBeenCalled();
+                expect(component.modalErrorMessage).not.toBeNull();
+            });
+        });
     });
 
     function getNormalizedTextContent(element: DebugElement): string {

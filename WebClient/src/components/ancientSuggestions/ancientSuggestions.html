@@ -46,6 +46,69 @@
         <span>Include souls from ascension (+{{ pendingSouls | exponential }})</span>
     </label>
 </div>
+<div>
+    <button class="btn btn-secondary"
+            [disabled]="suggestionType != 'AvailableSouls' || useSoulsFromAscension"
+            (click)="openAutolevelModal(autolevelModal)">
+        Autolevel
+    </button>
+    <span class="text-muted"
+          placement="right"
+          container="body"
+          ngbTooltip="The Autolevel feature is only enabled when using available souls and without using souls from ascension">(?)</span>
+    <ng-template #autolevelModal
+                 let-c="close"
+                 let-d="dismiss">
+        <div class="modal-header">
+            <h4 class="modal-title">Autolevel ancients</h4>
+            <button type="button"
+                    class="close"
+                    (click)="d()">
+                &times;
+            </button>
+        </div>
+        <div class="modal-body">
+            <div class="form-group">
+                <div *ngIf="modalErrorMessage"
+                     class="alert alert-danger">
+                    {{ modalErrorMessage }}
+                </div>
+                <ngx-loading [show]="isModalLoading && !modalErrorMessage"></ngx-loading>
+                <p class="alert alert-warning">
+                    This feature is experimental and is considered cheating. Please report any problems via the
+                    <a [openDialog]="FeedbackDialogComponent">feedback form</a> or on
+                    <a href="https://github.com/dfederm/ClickerHeroesTracker/issues"
+                       target="_blank">Github</a>.
+                </p>
+                <p *ngIf="autoLeveledSavedGame.isScrubbed"
+                   class="alert alert-warning">
+                    You are either not logged in or this is not your save, so this has been scrubbed of personal data. If used, you will not
+                    be logged in and clan information will be gone.
+                </p>
+                <p>
+                    Import this into Clicker Heroes:
+                </p>
+                <textarea class="form-control"
+                          rows="2"
+                          #rawContent
+                          readonly>{{ autoLeveledSavedGame.content }}</textarea>
+                <button *ngIf="!autoLeveledSavedGame.isScrubbed"
+                        type="button"
+                        class="btn btn-primary"
+                        (click)="saveAutolevel()">Add to Progress</button>
+                <button type="button"
+                        class="btn btn-primary float-right"
+                        [ngxClipboard]="rawContent"
+                        (cbOnSuccess)="c()">Copy to Clipboard</button>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button type="button"
+                    class="btn btn-secondary"
+                    (click)="d()">Close</button>
+        </div>
+    </ng-template>
+</div>
 <table class="table table-sm table-striped">
     <thead>
         <tr>
