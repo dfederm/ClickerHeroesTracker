@@ -18,6 +18,9 @@ namespace Website.Services.SiteNews
         private readonly ConcurrentDictionary<DateTime, IList<string>> siteNewsDictionary = new ConcurrentDictionary<DateTime, IList<string>>();
 
         /// <inheritdoc />
+        public Task EnsureCreatedAsync() => Task.CompletedTask;
+
+        /// <inheritdoc />
         public Task AddSiteNewsEntriesAsync(DateTime newsDate, IList<string> messages)
         {
             this.siteNewsDictionary.AddOrUpdate(newsDate, messages, (c, m) => messages);

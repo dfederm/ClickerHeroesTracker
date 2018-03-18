@@ -5,12 +5,14 @@
 namespace ClickerHeroesTrackerWebsite
 {
     using System;
+    using System.Threading.Tasks;
     using ClickerHeroesTrackerWebsite.Models.Game;
     using ClickerHeroesTrackerWebsite.Utility;
     using Microsoft.AspNetCore.Builder;
     using Microsoft.AspNetCore.Hosting;
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
+    using Website.Services.SiteNews;
 
     public partial class Startup
     {
@@ -75,10 +77,21 @@ namespace ClickerHeroesTrackerWebsite
                     defaults: new { controller = "Frontend", action = "Index" });
             });
 
-            this.EnsureDatabaseCreatedAsync(app).GetAwaiter().GetResult();
+            using (var serviceScope = app.ApplicationServices.GetRequiredService<IServiceScopeFactory>().CreateScope())
+            {
+                var serviceProvider = serviceScope.ServiceProvider;
+                Task.WaitAll(
+                    this.EnsureDatabaseCreatedAsync(serviceProvider),
+                    serviceProvider.GetService<ISiteNewsProvider>().EnsureCreatedAsync(),
+                    Task.Run(async () =>
+                    {
+                        // Break away from the parent content to ensure this happens in parallel.
+                        await Task.Yield();
 
-            // Warm up the game data parsing
-            app.ApplicationServices.GetService<GameData>();
+                        // Warm up the game data parsing
+                        app.ApplicationServices.GetService<GameData>();
+                    }));
+            }
         }
     }
 }

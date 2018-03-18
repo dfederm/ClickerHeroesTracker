@@ -30,10 +30,12 @@ namespace Website.Services.SiteNews
         }
 
         /// <inheritdoc />
+        public Task EnsureCreatedAsync() => this.GetTableReference().CreateIfNotExistsAsync();
+
+        /// <inheritdoc />
         public async Task AddSiteNewsEntriesAsync(DateTime newsDate, IList<string> messages)
         {
-            var table = this.tableClient.GetTableReference("SiteNews");
-            await table.CreateIfNotExistsAsync();
+            var table = this.GetTableReference();
 
             // Delete all rows in the partition first
             var query = new TableQuery<SiteNewsTableEntity>().Where(TableQuery.GenerateFilterCondition("PartitionKey", QueryComparisons.Equal, newsDate.ToString("yyyy-MM-dd")));
@@ -50,10 +52,9 @@ namespace Website.Services.SiteNews
             }
             while (token != null);
 
-            IList<TableResult> results;
             if (batchOperation.Count > 0)
             {
-                results = await table.ExecuteBatchAsync(batchOperation);
+                await table.ExecuteBatchAsync(batchOperation);
                 batchOperation = new TableBatchOperation();
             }
 
@@ -63,7 +64,7 @@ namespace Website.Services.SiteNews
                 batchOperation.Insert(new SiteNewsTableEntity(newsDate, i) { Message = messages[i] });
             }
 
-            results = await table.ExecuteBatchAsync(batchOperation);
+            var results = await table.ExecuteBatchAsync(batchOperation);
             var returnStatusCode = HttpStatusCode.OK;
             foreach (var result in results)
             {
@@ -89,8 +90,7 @@ namespace Website.Services.SiteNews
         /// <inheritdoc />
         public async Task DeleteSiteNewsForDateAsync(DateTime newsDate)
         {
-            var table = this.tableClient.GetTableReference("SiteNews");
-            await table.CreateIfNotExistsAsync();
+            var table = this.GetTableReference();
 
             var query = new TableQuery<SiteNewsTableEntity>().Where(TableQuery.GenerateFilterCondition("PartitionKey", QueryComparisons.Equal, newsDate.ToString("yyyy-MM-dd")));
             var batchOperation = new TableBatchOperation();
@@ -132,8 +132,7 @@ namespace Website.Services.SiteNews
         /// <inheritdoc />
         public async Task<IDictionary<DateTime, IList<string>>> RetrieveSiteNewsEntriesAsync()
         {
-            var table = this.tableClient.GetTableReference("SiteNews");
-            await table.CreateIfNotExistsAsync();
+            var table = this.GetTableReference();
 
             var query = new TableQuery<SiteNewsTableEntity>();
 
@@ -178,5 +177,7 @@ namespace Website.Services.SiteNews
 
             return entries;
         }
+
+        private CloudTable GetTableReference() => this.tableClient.GetTableReference("SiteNews");
     }
 }
