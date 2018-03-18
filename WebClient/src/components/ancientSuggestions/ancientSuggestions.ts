@@ -4,6 +4,11 @@ import { gameData } from "../../models/gameData";
 import { SettingsService, IUserSettings } from "../../services/settingsService/settingsService";
 import { SavedGame } from "../../models/savedGame";
 import { Decimal } from "decimal.js";
+import { NgbModal, NgbModalRef } from "@ng-bootstrap/ng-bootstrap";
+import { FeedbackDialogComponent } from "../feedbackDialog/feedbackDialog";
+import { UploadService } from "../../services/uploadService/uploadService";
+import { Router } from "@angular/router";
+import { HttpErrorResponse } from "@angular/common/http";
 
 interface IAncientViewModel {
     id: string;
@@ -14,6 +19,7 @@ interface IAncientViewModel {
     suggestedLevel?: Decimal;
     diffValue?: Decimal;
     diffCopyValue?: string;
+    costToLevel?: Decimal;
     isBase?: boolean;
     purchaseTime: number;
 }
@@ -39,15 +45,18 @@ export class AncientSuggestionsComponent implements OnInit {
         Vaagur: 1440,
     };
 
+    public FeedbackDialogComponent = FeedbackDialogComponent;
+
     public ancients: IAncientViewModel[] = [];
 
     public availableSouls: Decimal = new Decimal(0);
-
     public spentSouls: Decimal = new Decimal(0);
-
     public remainingSouls: Decimal = new Decimal(0);
-
     public pendingSouls: Decimal = new Decimal(0);
+
+    public autoLeveledSavedGame: SavedGame;
+    public modalErrorMessage: string;
+    public isModalLoading: boolean;
 
     public get playStyle(): string {
         return this._playStyle;
@@ -88,7 +97,7 @@ export class AncientSuggestionsComponent implements OnInit {
     private _playStyle: string;
     private _savedGame: SavedGame;
     private _suggestionType = "AvailableSouls";
-    private _useSoulsFromAscension = true;
+    private _useSoulsFromAscension = false;
 
     // An index for quick lookup of ancient cost formulas.
     // Each formula gets the sum of the cost of the ancient from 1 to N.
@@ -105,9 +114,14 @@ export class AncientSuggestionsComponent implements OnInit {
     private transcendentPower: Decimal = new Decimal(0);
     private autoclickers: Decimal = new Decimal(0);
 
+    private autolevelModal: NgbModalRef;
+
     constructor(
         private readonly appInsights: AppInsightsService,
         private readonly settingsService: SettingsService,
+        private readonly modalService: NgbModal,
+        private readonly router: Router,
+        private readonly uploadService: UploadService,
     ) {
         for (const id in gameData.ancients) {
             const ancientDefinition = gameData.ancients[id];
@@ -146,6 +160,46 @@ export class AncientSuggestionsComponent implements OnInit {
             .subscribe(settings => {
                 this.settings = settings;
                 this.hydrateAncientSuggestions();
+            });
+    }
+
+    public openAutolevelModal(modal: {}): void {
+        this.autoLeveledSavedGame = this.savedGame.clone();
+
+        function formatForSavedGameData(num: Decimal): string {
+            return num.toExponential().replace("+", "");
+        }
+
+        for (let i = 0; i < this.ancients.length; i++) {
+            let ancientViewModel = this.ancients[i];
+            if (ancientViewModel.suggestedLevel) {
+                let ancient = this.autoLeveledSavedGame.data.ancients.ancients[ancientViewModel.id.toString()];
+                ancient.level = formatForSavedGameData(ancientViewModel.suggestedLevel);
+                ancient.spentHeroSouls = formatForSavedGameData(ancientViewModel.costToLevel);
+            }
+        }
+
+        this.autoLeveledSavedGame.data.heroSouls = formatForSavedGameData(this.remainingSouls);
+        this.autoLeveledSavedGame.updateContent();
+
+        this.autolevelModal = this.modalService.open(modal);
+    }
+
+    public saveAutolevel(): void {
+        this.modalErrorMessage = null;
+        this.isModalLoading = true;
+        this.uploadService.create(this.autoLeveledSavedGame.content, true, this.playStyle)
+            .then(uploadId => {
+                return this.router.navigate(["/uploads", uploadId]);
+            })
+            .then(() => {
+                this.autolevelModal.close();
+                this.isModalLoading = false;
+            })
+            .catch((error: HttpErrorResponse) => {
+                this.modalErrorMessage = error.status >= 400 && error.status < 500
+                    ? "The uploaded save was not valid"
+                    : "An unknown error occurred";
             });
     }
 
@@ -289,9 +343,6 @@ export class AncientSuggestionsComponent implements OnInit {
 
             suggestedLevels = this.calculateAncientSuggestions(baseLevel.plus(left));
 
-            this.spentSouls = this.getTotalAncientCost(suggestedLevels).negated();
-            this.remainingSouls = this.availableSouls.plus(this.spentSouls);
-
             // Ensure we don't suggest removing levels
             for (let ancient in suggestedLevels) {
                 suggestedLevels[ancient] = Decimal.max(suggestedLevels[ancient], this.getAncientLevel(ancient));
@@ -301,15 +352,23 @@ export class AncientSuggestionsComponent implements OnInit {
             this.ancientsByName[baseAncient].isBase = true;
         }
 
+        this.spentSouls = new Decimal(0);
+        let ancientCosts = this.getAncientCosts(suggestedLevels);
+
         for (let ancientName in suggestedLevels) {
             let suggestedLevel = suggestedLevels[ancientName];
             let ancient = this.ancientsByName[ancientName];
+            let cost = ancientCosts[ancientName];
+            this.spentSouls = this.spentSouls.minus(cost);
             if (ancient) {
                 ancient.suggestedLevel = suggestedLevel;
                 ancient.diffValue = ancient.suggestedLevel.minus(this.getAncientLevel(ancientName));
                 ancient.diffCopyValue = this.formatForClipboard(ancient.diffValue);
+                ancient.costToLevel = cost;
             }
         }
+
+        this.remainingSouls = this.availableSouls.plus(this.spentSouls);
 
         this.appInsights.stopTrackEvent(
             latencyCounter,
@@ -467,26 +526,39 @@ export class AncientSuggestionsComponent implements OnInit {
             : new Decimal(0);
     }
 
-    private getTotalAncientCost(suggestedLevels: { [key: string]: Decimal }): Decimal {
-        let cost = new Decimal(0);
+    private getAncientCosts(suggestedLevels: { [key: string]: Decimal }): { [key: string]: Decimal } {
+        let costs: { [key: string]: Decimal } = {};
         for (let ancient in suggestedLevels) {
             const suggestedLevel = suggestedLevels[ancient];
             const currentLevel = this.getAncientLevel(ancient);
 
             // If the ancient is over-leveled, no cost
             if (suggestedLevel.lessThan(currentLevel)) {
+                costs[ancient] = new Decimal(0);
                 continue;
             }
 
             const costFormula = this.ancientCostFormulas[ancient];
             if (!costFormula) {
+                costs[ancient] = new Decimal(0);
                 continue;
             }
 
-            cost = cost.plus((costFormula(suggestedLevel).minus(costFormula(currentLevel))).times(this.ancientCostMultiplier).ceil());
+            costs[ancient] = costFormula(suggestedLevel).minus(costFormula(currentLevel)).times(this.ancientCostMultiplier).ceil();
         }
 
-        return cost;
+        return costs;
+    }
+
+    private getTotalAncientCost(suggestedLevels: { [key: string]: Decimal }): Decimal {
+        let costs = this.getAncientCosts(suggestedLevels);
+
+        let totalCost = new Decimal(0);
+        for (let ancient in costs) {
+            totalCost = totalCost.plus(costs[ancient]);
+        }
+
+        return totalCost;
     }
 
     private getAncientCostFormulas(): { [key: string]: (level: Decimal) => Decimal } {

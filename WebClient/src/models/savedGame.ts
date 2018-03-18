@@ -93,7 +93,7 @@ export class SavedGame {
 
     public data: ISavedGameData;
 
-    private readonly encoding: EncodingAlgorithm;
+    private encoding: EncodingAlgorithm;
 
     private _scrubbedContent: string;
 
@@ -129,6 +129,21 @@ export class SavedGame {
         }
 
         return this._scrubbedContent;
+    }
+
+    public clone(): SavedGame {
+        // Passing null content since it's faster to copy the private state than to re-parse
+        let savedGame = new SavedGame(null, this.isScrubbed);
+        savedGame.content = this.content;
+        savedGame.encoding = this.encoding;
+        savedGame.data = JSON.parse(JSON.stringify(this.data));
+        savedGame._scrubbedContent = this._scrubbedContent;
+        return savedGame;
+    }
+
+    public updateContent(): void {
+        this.content = SavedGame.encode(this.data, this.encoding);
+        this._scrubbedContent = null;
     }
 
     private static determineEncodingAlgorithm(content: string): EncodingAlgorithm {
