@@ -1,7 +1,7 @@
 import { NgModule } from "@angular/core";
 import { BrowserModule } from "@angular/platform-browser";
 import { FormsModule } from "@angular/forms";
-import { RouterModule, Routes } from "@angular/router";
+import { RouterModule, Routes, UrlSegment, UrlMatchResult } from "@angular/router";
 import { HttpClientModule } from "@angular/common/http";
 import { NgbModule } from "@ng-bootstrap/ng-bootstrap";
 import { ClipboardModule } from "ngx-clipboard";
@@ -56,6 +56,32 @@ import { SettingsService } from "./services/settingsService/settingsService";
 import { FeedbackService } from "./services/feedbackService/feedbackService";
 import { HttpErrorHandlerService } from "./services/httpErrorHandlerService/httpErrorHandlerService";
 
+// Custom url matching for legacy calculation urls. Angular doesn't have great built-in rules for this.
+// This is an exported function because Angular AOT is terrible and can't handle it otherwise.
+export function legacyCalculatorMatcher(segments: UrlSegment[]): UrlMatchResult {
+  if (segments.length !== 2) {
+    return null;
+  }
+
+  // Matches urls like /Calculator/View?uploadId=195791 and /calculator/view?uploadId=377358
+  if ((segments[0].path === "Calculator" && segments[1].path === "View")
+    || (segments[0].path === "calculator" && segments[1].path === "view")) {
+      // Shenanigans. Angular doesn't seem to give url matchers a way to get at the query params
+      let query = window.location.search;
+      if (query.startsWith("?uploadId=")) {
+        let uploadId = query.substring(10);
+        return {
+          consumed: segments,
+          posParams: {
+            id: new UrlSegment(uploadId, {}),
+          },
+        };
+      }
+  }
+
+  return null;
+}
+
 const routes: Routes =
   [
     { path: "", pathMatch: "full", component: HomeComponent },
@@ -68,6 +94,18 @@ const routes: Routes =
     { path: "users/:userName/progress", component: UserProgressComponent },
     { path: "users/:userName/compare/:compareUserName", component: UserCompareComponent },
     { path: "admin", component: AdminComponent },
+
+    // Legacy route redirection
+    { path: "beta", redirectTo: "/" },
+    { path: "Home/New", redirectTo: "/news" },
+    { path: "Upload", redirectTo: "/" }, // TODO: find a way to open the upload dialog
+    { path: "Manage", redirectTo: "/" }, // TODO: find a way to open the settings dialog
+    { path: "Account/Login", redirectTo: "/" }, // TODO: find a way to open the log in dialog
+    { path: "Account/ForgotPassword", redirectTo: "/" }, // TODO: find a way to open the reset password dialog
+    { path: "Account/Register", redirectTo: "/" }, // TODO: find a way to open the register dialog
+    { matcher: legacyCalculatorMatcher, redirectTo: "uploads/:id" },
+
+    // Catch-all
     { path: "**", component: NotFoundComponent },
   ];
 
