@@ -183,6 +183,7 @@ export class AncientSuggestionsComponent implements OnInit {
         this.autoLeveledSavedGame.updateContent();
 
         this.autolevelModal = this.modalService.open(modal);
+        this.appInsights.trackEvent("Autolevel");
     }
 
     public saveAutolevel(): void {
@@ -190,6 +191,7 @@ export class AncientSuggestionsComponent implements OnInit {
         this.isModalLoading = true;
         this.uploadService.create(this.autoLeveledSavedGame.content, true, this.playStyle)
             .then(uploadId => {
+                this.appInsights.trackEvent("SaveAutolevel");
                 return this.router.navigate(["/uploads", uploadId]);
             })
             .then(() => {
