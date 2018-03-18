@@ -14,6 +14,12 @@ namespace Website.Services.SiteNews
     public interface ISiteNewsProvider
     {
         /// <summary>
+        /// Ensures the backing services are properly created and initialized.
+        /// </summary>
+        /// <returns>Task to await on.</returns>
+        Task EnsureCreatedAsync();
+
+        /// <summary>
         /// Retrieves all the news sorted by date.
         /// </summary>
         /// <returns>The site news ordered by date.</returns>
