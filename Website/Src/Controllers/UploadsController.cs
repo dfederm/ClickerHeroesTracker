@@ -6,6 +6,7 @@ namespace ClickerHeroesTrackerWebsite.Controllers
 {
     using System;
     using System.Collections.Generic;
+    using System.Text;
     using System.Threading.Tasks;
     using ClickerHeroesTrackerWebsite.Models;
     using ClickerHeroesTrackerWebsite.Models.Api.Uploads;
@@ -238,34 +239,70 @@ namespace ClickerHeroesTrackerWebsite.Controllers
                 await command.ExecuteNonQueryAsync();
 
                 // Insert ancient levels
+                var ancientLevelsCommandText = new StringBuilder("INSERT INTO AncientLevels(UploadId, AncientId, Level) VALUES");
+                var ancientLevelsParameters = new Dictionary<string, object>
+                {
+                    { "@UploadId", uploadId },
+                };
+                var isFirstAncient = true;
                 foreach (var pair in ancientLevels.AncientLevels)
                 {
-                    command.CommandText = @"
-                        INSERT INTO AncientLevels(UploadId, AncientId, Level)
-                        VALUES(@UploadId, @AncientId, @Level);";
-                    command.Parameters = new Dictionary<string, object>
+                    if (!isFirstAncient)
                     {
-                        { "@UploadId", uploadId },
-                        { "@AncientId", pair.Key },
-                        { "@Level", pair.Value.ToTransportableString() },
-                    };
-                    await command.ExecuteNonQueryAsync();
+                        ancientLevelsCommandText.Append(',');
+                    }
+
+                    // Looks like: (@UploadId, @AncientId{AncientId}, @AncientLevel{AncientId})
+                    var idParamName = "@AncientId" + pair.Key;
+                    var levelParamName = "@AncientLevel" + pair.Key;
+                    ancientLevelsCommandText.Append("(@UploadId,");
+                    ancientLevelsCommandText.Append(idParamName);
+                    ancientLevelsCommandText.Append(',');
+                    ancientLevelsCommandText.Append(levelParamName);
+                    ancientLevelsCommandText.Append(')');
+
+                    ancientLevelsParameters.Add(idParamName, pair.Key);
+                    ancientLevelsParameters.Add(levelParamName, pair.Value.ToTransportableString());
+
+                    isFirstAncient = false;
                 }
 
+                command.CommandText = ancientLevelsCommandText.ToString();
+                command.Parameters = ancientLevelsParameters;
+                await command.ExecuteNonQueryAsync();
+
                 // Insert outsider levels
+                var outsiderLevelsCommandText = new StringBuilder("INSERT INTO OutsiderLevels(UploadId, OutsiderId, Level) VALUES");
+                var outsiderLevelsParameters = new Dictionary<string, object>
+                {
+                    { "@UploadId", uploadId },
+                };
+                var isFirstOutsider = true;
                 foreach (var pair in outsiderLevels.OutsiderLevels)
                 {
-                    command.CommandText = @"
-                        INSERT INTO OutsiderLevels(UploadId, OutsiderId, Level)
-                        VALUES(@UploadId, @OutsiderId, @Level);";
-                    command.Parameters = new Dictionary<string, object>
+                    if (!isFirstOutsider)
                     {
-                        { "@UploadId", uploadId },
-                        { "@OutsiderId", pair.Key },
-                        { "@Level", pair.Value },
-                    };
-                    await command.ExecuteNonQueryAsync();
+                        outsiderLevelsCommandText.Append(',');
+                    }
+
+                    // Looks like: (@UploadId, @OutsiderId{OutsiderId}, @Level{OutsiderId})
+                    var idParamName = "@OutsiderId" + pair.Key;
+                    var levelParamName = "@OutsiderLevel" + pair.Key;
+                    outsiderLevelsCommandText.Append("(@UploadId,");
+                    outsiderLevelsCommandText.Append(idParamName);
+                    outsiderLevelsCommandText.Append(',');
+                    outsiderLevelsCommandText.Append(levelParamName);
+                    outsiderLevelsCommandText.Append(')');
+
+                    outsiderLevelsParameters.Add(idParamName, pair.Key);
+                    outsiderLevelsParameters.Add(levelParamName, pair.Value);
+
+                    isFirstOutsider = false;
                 }
+
+                command.CommandText = outsiderLevelsCommandText.ToString();
+                command.Parameters = outsiderLevelsParameters;
+                await command.ExecuteNonQueryAsync();
 
                 command.CommitTransaction();
             }
