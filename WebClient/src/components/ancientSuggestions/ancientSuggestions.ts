@@ -276,6 +276,16 @@ export class AncientSuggestionsComponent implements OnInit {
             return;
         }
 
+        // Clear out existing suggestions
+        for (let i = 0; i < this.ancients.length; i++) {
+            let ancient = this.ancients[i];
+            ancient.isBase = false;
+            ancient.suggestedLevel = undefined;
+            ancient.diffValue = undefined;
+            ancient.diffCopyValue = undefined;
+            ancient.costToLevel = undefined;
+        }
+
         const latencyCounter = "AncientSuggestions";
         this.appInsights.startTrackEvent(latencyCounter);
 
