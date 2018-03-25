@@ -48,8 +48,7 @@ export class AscensionZoneComponent {
 
     // tslint:disable-next-line:cyclomatic-complexity
     public calculateAscensionZone(): void {
-        const latencyCounter = "AscensionZone";
-        this.appInsights.startTrackEvent(latencyCounter);
+        let startTime = Date.now();
 
         // There are some circular references, so create the maps as empty first
         let upgradesMap: { [id: string]: Upgrade } = {};
@@ -286,7 +285,7 @@ export class AscensionZoneComponent {
             }
         }
 
-        this.appInsights.stopTrackEvent(latencyCounter);
+        this.appInsights.trackMetric("AscensionZone", Date.now() - startTime);
     }
 
     private getShortName(entity: { name: string }): string {

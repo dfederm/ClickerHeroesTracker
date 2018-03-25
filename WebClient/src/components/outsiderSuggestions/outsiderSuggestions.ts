@@ -90,8 +90,7 @@ export class OutsiderSuggestionsComponent {
             }
         }
 
-        const latencyCounter = "OutsiderSuggestions";
-        this.appInsights.startTrackEvent(latencyCounter);
+        let startTime = Date.now();
 
         let ancientSouls = Number(this.savedGame.data.ancientSoulsTotal) || 0;
         let transcendentPower = (25 - 23 * Math.exp(-0.0003 * ancientSouls)) / 100;
@@ -109,7 +108,7 @@ export class OutsiderSuggestionsComponent {
             this.newHze = Math.max(215000, ancientSouls * 10.32 + 90000);
         } else if (ancientSouls < 27000) {
             // 43.3k Ancient Souls
-            this.newHze =  458000;
+            this.newHze = 458000;
         } else {
             // End Game
             [nonBorb, zonePush] = this.findStrategy(ancientSouls);
@@ -257,7 +256,7 @@ export class OutsiderSuggestionsComponent {
         this.outsidersByName.Orphalas.suggestedLevel = orphalasLevel;
         this.outsidersByName["Sen-Akhan"].suggestedLevel = senakhanLevel;
 
-        this.appInsights.stopTrackEvent(latencyCounter);
+        this.appInsights.trackMetric("OutsiderSuggestions", Date.now() - startTime);
     }
 
     private nOS(ancientSouls: number, transcendentPower: number, zone: number): [number, number, number] {
