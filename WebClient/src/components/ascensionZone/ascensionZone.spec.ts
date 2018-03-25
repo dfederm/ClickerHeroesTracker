@@ -86,8 +86,7 @@ describe("AscensionZoneComponent", () => {
 
     beforeEach(done => {
         let appInsights = {
-            startTrackEvent: (): void => void 0,
-            stopTrackEvent: (): void => void 0,
+            trackMetric: (): void => void 0,
         };
         let settingsService = { settings: () => settingsSubject };
         let changeDetectorRef = { markForCheck: (): void => void 0 };

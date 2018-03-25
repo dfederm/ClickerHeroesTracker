@@ -118,8 +118,7 @@ describe("AncientSuggestionsComponent", () => {
 
     beforeEach(done => {
         let appInsights = {
-            startTrackEvent: (): void => void 0,
-            stopTrackEvent: (): void => void 0,
+            trackMetric: (): void => void 0,
             trackEvent: (): void => void 0,
         };
         let settingsService = { settings: () => settingsSubject };

@@ -5,7 +5,6 @@ import { NO_ERRORS_SCHEMA, DebugElement, ChangeDetectorRef } from "@angular/core
 import { By } from "@angular/platform-browser";
 import { BehaviorSubject } from "rxjs/BehaviorSubject";
 import { DatePipe, PercentPipe } from "@angular/common";
-import { AppInsightsService } from "@markpieszak/ng-application-insights";
 import { NgbModal } from "@ng-bootstrap/ng-bootstrap";
 import { Decimal } from "decimal.js";
 
@@ -19,7 +18,6 @@ describe("UploadComponent", () => {
     let component: UploadComponent;
     let fixture: ComponentFixture<UploadComponent>;
     let routeParams: BehaviorSubject<Params>;
-    let appInsights: AppInsightsService;
     let userInfoSubject: BehaviorSubject<IUserInfo>;
 
     let uploadServiceGetResolve: (upload: IUpload) => Promise<void>;
@@ -70,7 +68,6 @@ describe("UploadComponent", () => {
         let route = { params: routeParams };
         let settingsService = { settings: () => settingsSubject };
         let changeDetectorRef = { markForCheck: (): void => void 0 };
-        appInsights = jasmine.createSpyObj("appInsights", ["trackEvent", "startTrackEvent", "stopTrackEvent"]);
         let modalService = { open: (): void => void 0 };
         TestBed.configureTestingModule(
             {
@@ -88,7 +85,6 @@ describe("UploadComponent", () => {
                         { provide: UploadService, useValue: uploadService },
                         { provide: SettingsService, useValue: settingsService },
                         { provide: ChangeDetectorRef, useValue: changeDetectorRef },
-                        { provide: AppInsightsService, useValue: appInsights },
                         { provide: NgbModal, useValue: modalService },
                         DatePipe,
                         PercentPipe,

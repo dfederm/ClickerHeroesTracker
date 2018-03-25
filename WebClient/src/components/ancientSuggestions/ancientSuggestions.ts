@@ -286,8 +286,7 @@ export class AncientSuggestionsComponent implements OnInit {
             ancient.costToLevel = undefined;
         }
 
-        const latencyCounter = "AncientSuggestions";
-        this.appInsights.startTrackEvent(latencyCounter);
+        let startTime = Date.now();
 
         const isHybridRatioActiveFocused = this.settings.hybridRatio < 1;
         const baseAncient = this.playStyle === "active" || (this.playStyle === "hybrid" && isHybridRatioActiveFocused)
@@ -382,8 +381,12 @@ export class AncientSuggestionsComponent implements OnInit {
 
         this.remainingSouls = this.availableSouls.plus(this.spentSouls);
 
-        this.appInsights.stopTrackEvent(
-            latencyCounter,
+        this.appInsights.trackMetric(
+            "AncientSuggestions",
+            Date.now() - startTime,
+            null,
+            null,
+            null,
             {
                 suggestionType: this.suggestionType,
                 useSoulsFromAscension: this.useSoulsFromAscension.toString(),
