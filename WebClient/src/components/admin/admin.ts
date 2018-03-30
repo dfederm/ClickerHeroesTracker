@@ -31,7 +31,7 @@ export interface IPruneInvalidAuthTokensRequest {
 export class AdminComponent implements OnInit {
     public static numParallelDeletes = 10;
 
-    public static pruneInvalidAuthTokenBatchSize = 10;
+    public static pruneInvalidAuthTokenBatchSize = 1000;
 
     public isLoadingQueues: boolean;
 
