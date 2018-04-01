@@ -30,7 +30,7 @@ describe("AncientSuggestionsComponent", () => {
 
     // Based on upload 566437, but with a few different values to exercise tests better.
     // To help regenerate expected value, put a breakpoint at the end of ancientSuggestions.hydrateAncientSuggestions and run:
-    // Object.keys(suggestedLevels).sort().forEach(name => { console.log(name + ": " + suggestedLevels[name].toString()) })
+    // Object.keys(suggestedLevels).sort().forEach(name => { console.log("{ name: \"" + name + "\", suggested: \"" + suggestedLevels[name].toString() + "\" },") })
     let savedGameData: Partial<ISavedGameData> = {
         primalSouls: "1e750",
         heroSouls: "1e500",
@@ -228,7 +228,7 @@ describe("AncientSuggestionsComponent", () => {
                     { name: "Hecatoncheir" },
                     { name: "Juggernaut", suggested: "7.0993946787669440805e+300" },
                     { name: "Kleptos" },
-                    { name: "Kumawakamaru", suggested: "2460" },
+                    { name: "Kumawakamaru", suggested: "1654.0000000000005" },
                     { name: "Libertas", suggested: "2.1461873623431220264e+376" },
                     { name: "Mammon", suggested: "2.1461873623431220264e+376" },
                     { name: "Mimzee", suggested: "2.1461873623431220264e+376" },
@@ -241,7 +241,7 @@ describe("AncientSuggestionsComponent", () => {
                     { name: "Vaagur" },
                 ];
 
-            verify(expectedValues, "-9.9999352075945758335e+749");
+            verify(expectedValues, "-9.9999352075914615358e+749");
         });
 
         it("should display data based on hybrid playstyle and Available Souls without using souls from ascension", () => {
@@ -309,7 +309,7 @@ describe("AncientSuggestionsComponent", () => {
                     { name: "Hecatoncheir" },
                     { name: "Juggernaut", suggested: "2.0894211381190353384e+201" },
                     { name: "Kleptos" },
-                    { name: "Kumawakamaru", suggested: "1645" },
+                    { name: "Kumawakamaru", suggested: "1498" },
                     { name: "Libertas", suggested: "8.27319884e+251" },
                     { name: "Mammon", suggested: "8.27319884e+251" },
                     { name: "Mimzee", suggested: "8.27319884e+251" },
@@ -386,7 +386,7 @@ describe("AncientSuggestionsComponent", () => {
                     { name: "Hecatoncheir" },
                     { name: "Juggernaut" },
                     { name: "Kleptos" },
-                    { name: "Kumawakamaru", suggested: "1645" },
+                    { name: "Kumawakamaru", suggested: "1498" },
                     { name: "Libertas", suggested: "8.27319884e+251" },
                     { name: "Mammon", suggested: "8.27319884e+251" },
                     { name: "Mimzee", suggested: "8.27319884e+251" },
@@ -463,7 +463,7 @@ describe("AncientSuggestionsComponent", () => {
                     { name: "Hecatoncheir" },
                     { name: "Juggernaut", suggested: "3.8686638838780241295e+201" },
                     { name: "Kleptos" },
-                    { name: "Kumawakamaru", suggested: "1646" },
+                    { name: "Kumawakamaru", suggested: "1498" },
                     { name: "Libertas" },
                     { name: "Mammon", suggested: "8.93433506e+251" },
                     { name: "Mimzee", suggested: "8.93433506e+251" },

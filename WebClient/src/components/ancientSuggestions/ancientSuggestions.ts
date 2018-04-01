@@ -40,7 +40,7 @@ export class AncientSuggestionsComponent implements OnInit {
         Dogcog: 3743,
         Dora: 18715,
         Fortuna: 14972,
-        Kumawakamaru: 14972,
+        Kumawakamaru: 1498,
         Revolc: 3743,
         Vaagur: 1440,
     };
