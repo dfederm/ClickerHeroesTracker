@@ -3,7 +3,8 @@ import { HttpClient, HttpErrorResponse } from "@angular/common/http";
 import { Observable } from "rxjs/Observable";
 import { BehaviorSubject } from "rxjs/BehaviorSubject";
 import { Subscription } from "rxjs/Subscription";
-import { map, distinctUntilChanged } from "rxjs/operators";
+import { map } from "rxjs/operators/map";
+import { distinctUntilChanged } from "rxjs/operators/distinctUntilChanged";
 import { interval } from "rxjs/observable/interval";
 import { HttpErrorHandlerService } from "../httpErrorHandlerService/httpErrorHandlerService";
 

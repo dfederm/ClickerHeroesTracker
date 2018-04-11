@@ -72,7 +72,7 @@ module.exports = () => {
 
   config.resolve = {
     extensions: ['.ts', '.js'],
-    // Use the "alias" key to resolve to an ESM distribution. See https://github.com/ReactiveX/rxjs/blob/master/doc/lettable-operators.md#build-and-treeshaking
+    // Use the "alias" key to resolve to an ESM distribution. See https://github.com/ReactiveX/rxjs/blob/master/doc/pipeable-operators.md#build-and-treeshaking
     alias: rxPaths()
   };
 
