@@ -2,7 +2,8 @@ import { Injectable } from "@angular/core";
 import { HttpClient, HttpErrorResponse } from "@angular/common/http";
 import { Observable } from "rxjs/Observable";
 import { BehaviorSubject } from "rxjs/BehaviorSubject";
-import { filter, distinctUntilChanged } from "rxjs/operators";
+import { filter } from "rxjs/operators/filter";
+import { distinctUntilChanged } from "rxjs/operators/distinctUntilChanged";
 import { interval } from "rxjs/observable/interval";
 import { HttpErrorHandlerService } from "../httpErrorHandlerService/httpErrorHandlerService";
 
