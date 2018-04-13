@@ -9,11 +9,6 @@ namespace Website.Models.Api.Users
     public sealed class UserSettings
     {
         /// <summary>
-        /// Gets or sets a value indicating whether the user's uploads are public.
-        /// </summary>
-        public bool? AreUploadsPublic { get; set; }
-
-        /// <summary>
         /// Gets or sets the user's play style.
         /// </summary>
         public PlayStyle? PlayStyle { get; set; }

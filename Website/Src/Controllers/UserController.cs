@@ -136,17 +136,6 @@ namespace Website.Controllers
                 return this.NotFound();
             }
 
-            var userSettings = await this.userSettingsProvider.GetAsync(userId);
-            var isAdmin = this.User.IsInRole("Admin");
-            var currentUserId = this.userManager.GetUserId(this.User);
-            var isOwn = userId.Equals(currentUserId, StringComparison.OrdinalIgnoreCase);
-            var isPublic = userSettings.AreUploadsPublic.GetValueOrDefault(true);
-            var isPermitted = isOwn || isPublic || isAdmin;
-            if (!isPermitted)
-            {
-                return this.Forbid();
-            }
-
             const string GetUploadsCommandText = @"
                 SELECT Id,
                     UploadTime,
@@ -244,15 +233,6 @@ namespace Website.Controllers
                 return this.NotFound();
             }
 
-            var userSettings = await this.userSettingsProvider.GetAsync(userId);
-            var currentUserId = this.userManager.GetUserId(this.User);
-            if (!userId.Equals(currentUserId, StringComparison.OrdinalIgnoreCase)
-                && !userSettings.AreUploadsPublic.GetValueOrDefault(true)
-                && !this.User.IsInRole("Admin"))
-            {
-                return this.Forbid();
-            }
-
             // Fill in missing range values as needed
             DateTime startDate;
             DateTime endDate;
@@ -312,15 +292,6 @@ namespace Website.Controllers
             if (string.IsNullOrEmpty(userId))
             {
                 return this.NotFound();
-            }
-
-            var userSettings = await this.userSettingsProvider.GetAsync(userId);
-            var currentUserId = this.userManager.GetUserId(this.User);
-            if (!userId.Equals(currentUserId, StringComparison.OrdinalIgnoreCase)
-                && !userSettings.AreUploadsPublic.GetValueOrDefault(true)
-                && !this.User.IsInRole("Admin"))
-            {
-                return this.Forbid();
             }
 
             var follows = new List<string>();

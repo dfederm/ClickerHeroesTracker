@@ -10,7 +10,6 @@ describe("ExponentialPipe", () => {
     let fixture: ComponentFixture<MockComponent>;
 
     let settingsWithScientificNotation: IUserSettings = {
-        areUploadsPublic: true,
         playStyle: "hybrid",
         useScientificNotation: true,
         scientificNotationThreshold: 1000000,
@@ -24,7 +23,6 @@ describe("ExponentialPipe", () => {
     };
 
     let settingsWithoutScientificNotation: IUserSettings = {
-        areUploadsPublic: true,
         playStyle: "hybrid",
         useScientificNotation: false,
         scientificNotationThreshold: 1000000,

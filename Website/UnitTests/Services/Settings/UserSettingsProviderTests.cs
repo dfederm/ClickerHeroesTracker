@@ -153,7 +153,6 @@ namespace UnitTests.Services.Settings
         {
             var settings = new UserSettings
             {
-                AreUploadsPublic = true,
                 PlayStyle = PlayStyle.Hybrid,
                 UseScientificNotation = true,
                 ScientificNotationThreshold = 1,
@@ -169,7 +168,6 @@ namespace UnitTests.Services.Settings
             var parameters = new Dictionary<string, object>
             {
                 { "@UserId", UserId },
-                { "@Value" + UserSettingsConstants.AreUploadsPublic, settings.AreUploadsPublic.ToString() },
                 { "@Value" + UserSettingsConstants.PlayStyle, settings.PlayStyle.ToString() },
                 { "@Value" + UserSettingsConstants.UseScientificNotation, settings.UseScientificNotation.ToString() },
                 { "@Value" + UserSettingsConstants.ScientificNotationThreshold, settings.ScientificNotationThreshold.ToString() },
@@ -254,7 +252,6 @@ namespace UnitTests.Services.Settings
         {
             return new IDictionary<string, object>[]
             {
-                new Dictionary<string, object> { { "SettingId", UserSettingsConstants.AreUploadsPublic }, { "SettingValue", "true" } },
                 new Dictionary<string, object> { { "SettingId", UserSettingsConstants.PlayStyle }, { "SettingValue", "Hybrid" } },
                 new Dictionary<string, object> { { "SettingId", UserSettingsConstants.UseScientificNotation }, { "SettingValue", "true" } },
                 new Dictionary<string, object> { { "SettingId", UserSettingsConstants.ScientificNotationThreshold }, { "SettingValue", "1" } },
@@ -271,7 +268,6 @@ namespace UnitTests.Services.Settings
         private static void VerifyPopulatedSettings(UserSettings settings)
         {
             Assert.NotNull(settings);
-            Assert.True(settings.AreUploadsPublic);
             Assert.Equal(PlayStyle.Hybrid, settings.PlayStyle);
             Assert.True(settings.UseScientificNotation);
             Assert.Equal(1, settings.ScientificNotationThreshold);
@@ -287,7 +283,6 @@ namespace UnitTests.Services.Settings
         private static void VerifyDefaultSettings(UserSettings settings)
         {
             Assert.NotNull(settings);
-            Assert.Null(settings.AreUploadsPublic);
             Assert.Null(settings.PlayStyle);
             Assert.Null(settings.UseScientificNotation);
             Assert.Null(settings.ScientificNotationThreshold);
