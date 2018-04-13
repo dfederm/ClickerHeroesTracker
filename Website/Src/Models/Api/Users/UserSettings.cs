@@ -29,11 +29,6 @@ namespace Website.Models.Api.Users
         public int? ScientificNotationThreshold { get; set; }
 
         /// <summary>
-        /// Gets or sets a value indicating whether the effective level is used for suggestions vs the actual ancient levels.
-        /// </summary>
-        public bool? UseEffectiveLevelForSuggestions { get; set; }
-
-        /// <summary>
         /// Gets or sets a value indicating whether the user wants to see graphs with logarithmic scale
         /// </summary>
         public bool? UseLogarithmicGraphScale { get; set; }

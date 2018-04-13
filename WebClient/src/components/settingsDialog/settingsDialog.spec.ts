@@ -19,7 +19,6 @@ describe("SettingsDialogComponent", () => {
         playStyle: "hybrid",
         useScientificNotation: true,
         scientificNotationThreshold: 1000000,
-        useEffectiveLevelForSuggestions: false,
         useLogarithmicGraphScale: true,
         logarithmicGraphScaleThreshold: 1000000,
         hybridRatio: 2,
@@ -455,41 +454,6 @@ describe("SettingsDialogComponent", () => {
 
         it("should show an error when the patch fails", done => {
             verifyErrorShowWhenPromiseRejects(input, () => setSelectValue(input, input.selectedIndex + 1))
-                .then(done)
-                .catch(done.fail);
-        });
-    });
-
-    describe("Use effective level for suggestions", () => {
-        let input: HTMLInputElement;
-
-        beforeEach(() => {
-            input = getInput(10, "input");
-        });
-
-        it("should be set to the inital value", () => {
-            verifyInitialValue(input, settings.useEffectiveLevelForSuggestions);
-        });
-
-        it("should patch settings when the value changes", () => {
-            verifyServiceCalledWhenSettingChanges(
-                "useEffectiveLevelForSuggestions",
-                () => {
-                    let newValue = !settings.useEffectiveLevelForSuggestions;
-                    setCheckboxValue(input, newValue);
-                    return newValue;
-                },
-            );
-        });
-
-        it("should disable the setting until the patch is complete", done => {
-            verifyDisabledUntilPromiseResolves(input, () => setCheckboxValue(input, !settings.useEffectiveLevelForSuggestions))
-                .then(done)
-                .catch(done.fail);
-        });
-
-        it("should show an error when the patch fails", done => {
-            verifyErrorShowWhenPromiseRejects(input, () => setCheckboxValue(input, !settings.useEffectiveLevelForSuggestions))
                 .then(done)
                 .catch(done.fail);
         });

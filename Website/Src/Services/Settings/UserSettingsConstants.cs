@@ -10,7 +10,6 @@ namespace ClickerHeroesTrackerWebsite.Models.Settings
         public const byte PlayStyle = 4;
         public const byte UseScientificNotation = 6;
         public const byte ScientificNotationThreshold = 7;
-        public const byte UseEffectiveLevelForSuggestions = 8;
         public const byte UseLogarithmicGraphScale = 9;
         public const byte LogarithmicGraphScaleThreshold = 10;
         public const byte HybridRatio = 11;
