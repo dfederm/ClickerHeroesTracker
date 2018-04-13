@@ -157,7 +157,6 @@ namespace UnitTests.Services.Settings
                 PlayStyle = PlayStyle.Hybrid,
                 UseScientificNotation = true,
                 ScientificNotationThreshold = 1,
-                UseEffectiveLevelForSuggestions = true,
                 UseLogarithmicGraphScale = true,
                 LogarithmicGraphScaleThreshold = 2,
                 HybridRatio = 3,
@@ -174,7 +173,6 @@ namespace UnitTests.Services.Settings
                 { "@Value" + UserSettingsConstants.PlayStyle, settings.PlayStyle.ToString() },
                 { "@Value" + UserSettingsConstants.UseScientificNotation, settings.UseScientificNotation.ToString() },
                 { "@Value" + UserSettingsConstants.ScientificNotationThreshold, settings.ScientificNotationThreshold.ToString() },
-                { "@Value" + UserSettingsConstants.UseEffectiveLevelForSuggestions, settings.UseEffectiveLevelForSuggestions.ToString() },
                 { "@Value" + UserSettingsConstants.UseLogarithmicGraphScale, settings.UseLogarithmicGraphScale.ToString() },
                 { "@Value" + UserSettingsConstants.LogarithmicGraphScaleThreshold, settings.LogarithmicGraphScaleThreshold.ToString() },
                 { "@Value" + UserSettingsConstants.HybridRatio, settings.HybridRatio.ToString() },
@@ -260,7 +258,6 @@ namespace UnitTests.Services.Settings
                 new Dictionary<string, object> { { "SettingId", UserSettingsConstants.PlayStyle }, { "SettingValue", "Hybrid" } },
                 new Dictionary<string, object> { { "SettingId", UserSettingsConstants.UseScientificNotation }, { "SettingValue", "true" } },
                 new Dictionary<string, object> { { "SettingId", UserSettingsConstants.ScientificNotationThreshold }, { "SettingValue", "1" } },
-                new Dictionary<string, object> { { "SettingId", UserSettingsConstants.UseEffectiveLevelForSuggestions }, { "SettingValue", "true" } },
                 new Dictionary<string, object> { { "SettingId", UserSettingsConstants.UseLogarithmicGraphScale }, { "SettingValue", "true" } },
                 new Dictionary<string, object> { { "SettingId", UserSettingsConstants.LogarithmicGraphScaleThreshold }, { "SettingValue", "2" } },
                 new Dictionary<string, object> { { "SettingId", UserSettingsConstants.HybridRatio }, { "SettingValue", "3" } },
@@ -278,7 +275,6 @@ namespace UnitTests.Services.Settings
             Assert.Equal(PlayStyle.Hybrid, settings.PlayStyle);
             Assert.True(settings.UseScientificNotation);
             Assert.Equal(1, settings.ScientificNotationThreshold);
-            Assert.True(settings.UseEffectiveLevelForSuggestions);
             Assert.True(settings.UseLogarithmicGraphScale);
             Assert.Equal(2, settings.LogarithmicGraphScaleThreshold);
             Assert.Equal(3, settings.HybridRatio);
@@ -295,7 +291,6 @@ namespace UnitTests.Services.Settings
             Assert.Null(settings.PlayStyle);
             Assert.Null(settings.UseScientificNotation);
             Assert.Null(settings.ScientificNotationThreshold);
-            Assert.Null(settings.UseEffectiveLevelForSuggestions);
             Assert.Null(settings.UseLogarithmicGraphScale);
             Assert.Null(settings.LogarithmicGraphScaleThreshold);
             Assert.Null(settings.HybridRatio);

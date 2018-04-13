@@ -21,7 +21,6 @@ export interface IUserSettings {
     playStyle: PlayStyle;
     useScientificNotation: boolean;
     scientificNotationThreshold: number;
-    useEffectiveLevelForSuggestions: boolean;
     useLogarithmicGraphScale: boolean;
     logarithmicGraphScaleThreshold: number;
     hybridRatio: number;
@@ -43,7 +42,6 @@ export class SettingsService {
         playStyle: "hybrid",
         useScientificNotation: true,
         scientificNotationThreshold: 1000000,
-        useEffectiveLevelForSuggestions: false,
         useLogarithmicGraphScale: true,
         logarithmicGraphScaleThreshold: 1000000,
         hybridRatio: 2,

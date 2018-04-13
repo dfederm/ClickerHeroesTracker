@@ -535,9 +535,7 @@ export class AncientSuggestionsComponent implements OnInit {
     private getAncientLevel(ancientName: string): Decimal {
         let ancient = this.ancientsByName[ancientName];
         return ancient
-            ? this.settings.useEffectiveLevelForSuggestions
-                ? ancient.effectiveLevel
-                : ancient.ancientLevel
+            ? ancient.ancientLevel
             : new Decimal(0);
     }
 

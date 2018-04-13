@@ -185,18 +185,6 @@
         </div>
     </fieldset>
     <div class="form-group row">
-        <label for="useEffectiveLevelForSuggestions"
-               class="col-sm-8 col-form-label">
-            Use the effective level (ancient + relic levels) for ancient suggestions
-        </label>
-        <div class="col-sm-4">
-            <bSwitch [(ngModel)]="settings.useEffectiveLevelForSuggestions"
-                     [switch-size]="'large'"
-                     [switch-disabled]="isSettingPending.useEffectiveLevelForSuggestions"
-                     (onChangeState)="setSetting('useEffectiveLevelForSuggestions', $event.currentValue)"></bSwitch>
-        </div>
-    </div>
-    <div class="form-group row">
         <label for="areUploadsPublic"
                class="col-sm-8 col-form-label">
             Allow your profile, progress, and uploads to be viewed by others

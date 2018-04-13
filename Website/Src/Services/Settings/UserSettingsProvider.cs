@@ -69,9 +69,6 @@ namespace ClickerHeroesTrackerWebsite.Models.Settings
                         case UserSettingsConstants.ScientificNotationThreshold:
                             userSettings.ScientificNotationThreshold = int.TryParse(settingValue, out var scientificNotationThreshold) ? new int?(scientificNotationThreshold) : null;
                             break;
-                        case UserSettingsConstants.UseEffectiveLevelForSuggestions:
-                            userSettings.UseEffectiveLevelForSuggestions = bool.TryParse(settingValue, out var useEffectiveLevelForSuggestions) ? new bool?(useEffectiveLevelForSuggestions) : null;
-                            break;
                         case UserSettingsConstants.UseLogarithmicGraphScale:
                             userSettings.UseLogarithmicGraphScale = bool.TryParse(settingValue, out var useLogarithmicGraphScale) ? new bool?(useLogarithmicGraphScale) : null;
                             break;
@@ -169,7 +166,6 @@ namespace ClickerHeroesTrackerWebsite.Models.Settings
             AppendSetting(UserSettingsConstants.PlayStyle, userSettings.PlayStyle?.ToString());
             AppendSetting(UserSettingsConstants.UseScientificNotation, userSettings.UseScientificNotation?.ToString());
             AppendSetting(UserSettingsConstants.ScientificNotationThreshold, userSettings.ScientificNotationThreshold?.ToString());
-            AppendSetting(UserSettingsConstants.UseEffectiveLevelForSuggestions, userSettings.UseEffectiveLevelForSuggestions?.ToString());
             AppendSetting(UserSettingsConstants.UseLogarithmicGraphScale, userSettings.UseLogarithmicGraphScale?.ToString());
             AppendSetting(UserSettingsConstants.LogarithmicGraphScaleThreshold, userSettings.LogarithmicGraphScaleThreshold?.ToString());
             AppendSetting(UserSettingsConstants.HybridRatio, userSettings.HybridRatio?.ToString());
