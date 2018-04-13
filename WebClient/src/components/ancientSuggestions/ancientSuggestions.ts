@@ -447,7 +447,7 @@ export class AncientSuggestionsComponent implements OnInit {
                 break;
             case "idle":
                 suggestedLevels.Libertas = suggestedLevels.Mammon;
-                suggestedLevels.Nogardnit = this.autoclickers.isZero() ? new Decimal(0) : suggestedLevels.Libertas.pow(0.8);
+                suggestedLevels.Nogardnit = this.autoclickers.isZero() ? new Decimal(0) : currentPrimaryAncientLevel.pow(0.8);
                 break;
             case "hybrid":
                 if (isHybridRatioActiveFocused) {
@@ -458,11 +458,11 @@ export class AncientSuggestionsComponent implements OnInit {
 
                     suggestedLevels.Siyalatas = currentPrimaryAncientLevel.times(hybridRatio);
                     suggestedLevels.Libertas = suggestedLevels.Mammon.times(hybridRatio);
-                    suggestedLevels.Nogardnit = this.autoclickers.isZero() ? new Decimal(0) : suggestedLevels.Libertas.pow(0.8);
+                    suggestedLevels.Nogardnit = this.autoclickers.isZero() ? new Decimal(0) : suggestedLevels.Siyalatas.pow(0.8);
                 } else {
                     // Idle-focused
                     suggestedLevels.Libertas = suggestedLevels.Mammon;
-                    suggestedLevels.Nogardnit = this.autoclickers.isZero() ? new Decimal(0) : suggestedLevels.Libertas.pow(0.8);
+                    suggestedLevels.Nogardnit = this.autoclickers.isZero() ? new Decimal(0) : currentPrimaryAncientLevel.pow(0.8);
 
                     suggestedLevels.Fragsworth = currentPrimaryAncientLevel.times(hybridRatio);
                     suggestedLevels.Bhaal = suggestedLevels.Fragsworth;

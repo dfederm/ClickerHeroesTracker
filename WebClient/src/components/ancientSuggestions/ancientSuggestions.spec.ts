@@ -213,10 +213,10 @@ describe("AncientSuggestionsComponent", () => {
 
             let expectedValues: { name: string, suggested?: string }[] =
                 [
-                    { name: "Argaiv", suggested: "2.3176969355757257304e+376" },
+                    { name: "Argaiv", suggested: "2.3016938442979809074e+376" },
                     { name: "Atman", suggested: "2448" },
                     { name: "Berserker" },
-                    { name: "Bhaal", suggested: "1.1588484677878628652e+376" },
+                    { name: "Bhaal", suggested: "1.1508469221489904537e+376" },
                     { name: "Bubos", suggested: "2421" },
                     { name: "Chawedo" },
                     { name: "Chronos", suggested: "1101" },
@@ -224,24 +224,26 @@ describe("AncientSuggestionsComponent", () => {
                     { name: "Dora", suggested: "2484" },
                     { name: "Energon" },
                     { name: "Fortuna", suggested: "2483" },
-                    { name: "Fragsworth", suggested: "1.1588484677878628652e+376" },
+                    { name: "Fragsworth", suggested: "1.1508469221489904537e+376" },
                     { name: "Hecatoncheir" },
-                    { name: "Juggernaut", suggested: "7.0993946787669440805e+300" },
+                    { name: "Juggernaut", suggested: "7.0601519553208481418e+300" },
                     { name: "Kleptos" },
                     { name: "Kumawakamaru", suggested: "1654.0000000000005" },
-                    { name: "Libertas", suggested: "2.1461873623431220264e+376" },
-                    { name: "Mammon", suggested: "2.1461873623431220264e+376" },
-                    { name: "Mimzee", suggested: "2.1461873623431220264e+376" },
-                    { name: "Morgulis", suggested: "5.3717190851771097468e+752" },
-                    { name: "Nogardnit", suggested: "1.1623424703097457586e+301" },
-                    { name: "Pluto", suggested: "1.0730936811715610132e+376" },
+                    { name: "Libertas", suggested: "2.1313684998199303203e+376" },
+                    { name: "Mammon", suggested: "2.1313684998199303203e+376" },
+                    { name: "Mimzee", suggested: "2.1313684998199303203e+376" },
+                    { name: "Morgulis", suggested: "5.2977945528792179765e+752" },
+                    { name: "Nogardnit", suggested: "1.2292438523321593231e+301" },
+                    { name: "Pluto", suggested: "1.0656842499099651602e+376" },
                     { name: "Revolc" },
-                    { name: "Siyalatas", suggested: "2.3176969355757257304e+376" },
+                    { name: "Siyalatas", suggested: "2.3016938442979809074e+376" },
                     { name: "Sniperino" },
                     { name: "Vaagur" },
+                    /*
+                    */
                 ];
 
-            verify(expectedValues, "-9.9999352075914615358e+749");
+            verify(expectedValues, "-9.999908220570362967e+749");
         });
 
         it("should display data based on hybrid playstyle and Available Souls without using souls from ascension", () => {
@@ -252,7 +254,7 @@ describe("AncientSuggestionsComponent", () => {
 
             let expectedValues: { name: string, suggested?: string }[] =
                 [
-                    { name: "Argaiv", suggested: "9.922212356733026065e+251" },
+                    { name: "Argaiv", suggested: "9.8889858366761709434e+251" },
                     { name: "Atman", suggested: "1655.9999999999995" },
                     { name: "Berserker" },
                     { name: "Bhaal", suggested: "9.64831e+251" },
@@ -269,18 +271,18 @@ describe("AncientSuggestionsComponent", () => {
                     { name: "Kleptos" },
                     { name: "Kumawakamaru", suggested: "1654.0000000000005" },
                     { name: "Libertas", suggested: "9.64831e+251" },
-                    { name: "Mammon", suggested: "9.1879686423347821362e+251" },
-                    { name: "Mimzee", suggested: "9.1879686423347821362e+251" },
-                    { name: "Morgulis", suggested: "9.8450298052105551295e+503" },
-                    { name: "Nogardnit", suggested: "3.86866e+201" },
+                    { name: "Mammon", suggested: "9.1572008847621342936e+251" },
+                    { name: "Mimzee", suggested: "9.1572008847621342936e+251" },
+                    { name: "Morgulis", suggested: "9.779204087798190866e+503" },
+                    { name: "Nogardnit", suggested: "3.9456758519640469322e+201" },
                     { name: "Pluto", suggested: "8.93434e+251" },
                     { name: "Revolc" },
-                    { name: "Siyalatas", suggested: "9.922212356733026065e+251" },
+                    { name: "Siyalatas", suggested: "9.8889858366761709434e+251" },
                     { name: "Sniperino" },
                     { name: "Vaagur" },
                 ];
 
-            verify(expectedValues, "-9.9997843328756843346e+499");
+            verify(expectedValues, "-9.9997849650825805049e+499");
         });
 
         it("should display data based on hybrid playstyle and the Rules of Thumb", () => {
@@ -314,7 +316,7 @@ describe("AncientSuggestionsComponent", () => {
                     { name: "Mammon", suggested: "8.27319884e+251" },
                     { name: "Mimzee", suggested: "8.27319884e+251" },
                     { name: "Morgulis", suggested: "7.98224312356e+503" },
-                    { name: "Nogardnit", suggested: "3.4208873250310610443e+201" },
+                    { name: "Nogardnit", suggested: "3.6378934975047100214e+201" },
                     { name: "Pluto", suggested: "4.13659942e+251" },
                     { name: "Revolc" },
                     { name: "Siyalatas", isPrimary: true },
@@ -333,7 +335,7 @@ describe("AncientSuggestionsComponent", () => {
 
             let expectedValues: { name: string, suggested?: string }[] =
                 [
-                    { name: "Argaiv", suggested: "9.922212356733026065e+251" },
+                    { name: "Argaiv", suggested: "9.8889858366761709434e+251" },
                     { name: "Atman", suggested: "1655.9999999999995" },
                     { name: "Berserker" },
                     { name: "Bhaal" },
@@ -350,18 +352,18 @@ describe("AncientSuggestionsComponent", () => {
                     { name: "Kleptos" },
                     { name: "Kumawakamaru", suggested: "1654.0000000000005" },
                     { name: "Libertas", suggested: "9.64831e+251" },
-                    { name: "Mammon", suggested: "9.1879686423347821362e+251" },
-                    { name: "Mimzee", suggested: "9.1879686423347821362e+251" },
-                    { name: "Morgulis", suggested: "9.8450298052105551295e+503" },
-                    { name: "Nogardnit", suggested: "3.86866e+201" },
+                    { name: "Mammon", suggested: "9.1572008847621342936e+251" },
+                    { name: "Mimzee", suggested: "9.1572008847621342936e+251" },
+                    { name: "Morgulis", suggested: "9.779204087798190866e+503" },
+                    { name: "Nogardnit", suggested: "3.9456758519640469322e+201" },
                     { name: "Pluto" },
                     { name: "Revolc" },
-                    { name: "Siyalatas", suggested: "9.922212356733026065e+251" },
+                    { name: "Siyalatas", suggested: "9.8889858366761709434e+251" },
                     { name: "Sniperino" },
                     { name: "Vaagur" },
                 ];
 
-            verify(expectedValues, "-9.9997843328756843346e+499");
+            verify(expectedValues, "-9.9997849650825805049e+499");
         });
 
         it("should display data based on idle playstyle and the Rules of Thumb", () => {
@@ -391,7 +393,7 @@ describe("AncientSuggestionsComponent", () => {
                     { name: "Mammon", suggested: "8.27319884e+251" },
                     { name: "Mimzee", suggested: "8.27319884e+251" },
                     { name: "Morgulis", suggested: "7.98224312356e+503" },
-                    { name: "Nogardnit", suggested: "3.4208873250310610443e+201" },
+                    { name: "Nogardnit", suggested: "3.6378934975047100214e+201" },
                     { name: "Pluto" },
                     { name: "Revolc" },
                     { name: "Siyalatas", isPrimary: true },
@@ -461,7 +463,7 @@ describe("AncientSuggestionsComponent", () => {
                     { name: "Fortuna", suggested: "1659" },
                     { name: "Fragsworth", isPrimary: true },
                     { name: "Hecatoncheir" },
-                    { name: "Juggernaut", suggested: "3.8686638838780241295e+201" },
+                    { name: "Juggernaut", suggested: "3.86866e+201" },
                     { name: "Kleptos" },
                     { name: "Kumawakamaru", suggested: "1498" },
                     { name: "Libertas" },
