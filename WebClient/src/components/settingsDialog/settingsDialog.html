@@ -184,18 +184,6 @@
             </div>
         </div>
     </fieldset>
-    <div class="form-group row">
-        <label for="areUploadsPublic"
-               class="col-sm-8 col-form-label">
-            Allow your profile, progress, and uploads to be viewed by others
-        </label>
-        <div class="col-sm-4">
-            <bSwitch [(ngModel)]="settings.areUploadsPublic"
-                     [switch-size]="'large'"
-                     [switch-disabled]="isSettingPending.areUploadsPublic"
-                     (onChangeState)="setSetting('areUploadsPublic', $event.currentValue)"></bSwitch>
-        </div>
-    </div>
 </div>
 <div class="modal-footer">
     <p>

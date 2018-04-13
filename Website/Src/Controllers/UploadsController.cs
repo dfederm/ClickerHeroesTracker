@@ -114,14 +114,6 @@ namespace ClickerHeroesTrackerWebsite.Controllers
             var isAdmin = this.User.IsInRole("Admin");
             var isUploadAnonymous = upload.User == null;
             var isOwn = !isUploadAnonymous && string.Equals(this.userManager.GetUserId(this.User), uploadUserId, StringComparison.OrdinalIgnoreCase);
-            var uploadUserSettings = await this.userSettingsProvider.GetAsync(uploadUserId);
-            var isPublic = isUploadAnonymous || uploadUserSettings.AreUploadsPublic.GetValueOrDefault(true);
-            var isPermitted = isOwn || isPublic || isAdmin;
-
-            if (!isPermitted)
-            {
-                return this.Forbid();
-            }
 
             // Only return the raw upload content if it's the requesting user's or an admin requested it.
             if (isOwn || isAdmin)

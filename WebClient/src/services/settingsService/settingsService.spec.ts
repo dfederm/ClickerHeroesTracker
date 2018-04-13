@@ -68,7 +68,6 @@ describe("SettingsService", () => {
 
         it("should return cached settings initially when there is cached data and the user is not logged in", fakeAsync(() => {
             let expectedSettings: IUserSettings = {
-                areUploadsPublic: false,
                 playStyle: "active",
                 useScientificNotation: false,
                 scientificNotationThreshold: 123,
@@ -92,7 +91,6 @@ describe("SettingsService", () => {
 
         it("should return cached settings initially when there is cached data and the user is logged in", fakeAsync(() => {
             let expectedSettings: IUserSettings = {
-                areUploadsPublic: false,
                 playStyle: "active",
                 useScientificNotation: false,
                 scientificNotationThreshold: 123,
@@ -494,7 +492,6 @@ describe("SettingsService", () => {
         }
 
         let settings: IUserSettings = {
-            areUploadsPublic: index % 2 === 0,
             playStyle: (["idle", "hybrid", "active"] as PlayStyle[])[index % 3],
             useScientificNotation: index % 2 === 0,
             scientificNotationThreshold: index,

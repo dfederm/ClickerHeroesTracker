@@ -57,9 +57,6 @@ namespace ClickerHeroesTrackerWebsite.Models.Settings
 
                     switch (settingId)
                     {
-                        case UserSettingsConstants.AreUploadsPublic:
-                            userSettings.AreUploadsPublic = bool.TryParse(settingValue, out var areUploadsPublic) ? new bool?(areUploadsPublic) : null;
-                            break;
                         case UserSettingsConstants.PlayStyle:
                             userSettings.PlayStyle = Enum.TryParse<PlayStyle>(settingValue, out var playStyle) ? new PlayStyle?(playStyle) : null;
                             break;
@@ -162,7 +159,6 @@ namespace ClickerHeroesTrackerWebsite.Models.Settings
                 isFirst = false;
             }
 
-            AppendSetting(UserSettingsConstants.AreUploadsPublic, userSettings.AreUploadsPublic?.ToString());
             AppendSetting(UserSettingsConstants.PlayStyle, userSettings.PlayStyle?.ToString());
             AppendSetting(UserSettingsConstants.UseScientificNotation, userSettings.UseScientificNotation?.ToString());
             AppendSetting(UserSettingsConstants.ScientificNotationThreshold, userSettings.ScientificNotationThreshold?.ToString());

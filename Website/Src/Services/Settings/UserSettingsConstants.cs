@@ -6,7 +6,6 @@ namespace ClickerHeroesTrackerWebsite.Models.Settings
 {
     internal static class UserSettingsConstants
     {
-        public const byte AreUploadsPublic = 2;
         public const byte PlayStyle = 4;
         public const byte UseScientificNotation = 6;
         public const byte ScientificNotationThreshold = 7;

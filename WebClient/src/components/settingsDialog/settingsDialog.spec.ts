@@ -15,7 +15,6 @@ describe("SettingsDialogComponent", () => {
 
     // "Fully expanded" settings, ie, show all possible inputs
     const settings: IUserSettings = {
-        areUploadsPublic: true,
         playStyle: "hybrid",
         useScientificNotation: true,
         scientificNotationThreshold: 1000000,
@@ -459,47 +458,12 @@ describe("SettingsDialogComponent", () => {
         });
     });
 
-    describe("Are uploads public", () => {
-        let input: HTMLInputElement;
-
-        beforeEach(() => {
-            input = getInput(11, "input");
-        });
-
-        it("should be set to the inital value", () => {
-            verifyInitialValue(input, settings.areUploadsPublic);
-        });
-
-        it("should patch settings when the value changes", () => {
-            verifyServiceCalledWhenSettingChanges(
-                "areUploadsPublic",
-                () => {
-                    let newValue = !settings.areUploadsPublic;
-                    setCheckboxValue(input, newValue);
-                    return newValue;
-                },
-            );
-        });
-
-        it("should disable the setting until the patch is complete", done => {
-            verifyDisabledUntilPromiseResolves(input, () => setCheckboxValue(input, !settings.areUploadsPublic))
-                .then(done)
-                .catch(done.fail);
-        });
-
-        it("should show an error when the patch fails", done => {
-            verifyErrorShowWhenPromiseRejects(input, () => setCheckboxValue(input, !settings.areUploadsPublic))
-                .then(done)
-                .catch(done.fail);
-        });
-    });
-
     function getInput<T extends HTMLElement>(i: number, selector: string): T {
         let body = fixture.debugElement.query(By.css(".modal-body"));
         expect(body).not.toBeNull();
 
         let formGroups = body.queryAll(By.css(".form-group"));
-        expect(formGroups.length).toEqual(12);
+        expect(formGroups.length).toEqual(10);
 
         let formGroup = formGroups[i];
         let inputElement = formGroup.query(By.css(selector));

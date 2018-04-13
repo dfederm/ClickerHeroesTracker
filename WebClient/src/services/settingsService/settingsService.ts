@@ -17,7 +17,6 @@ export type PlayStyle = "idle" | "hybrid" | "active";
 export type Theme = "light" | "dark";
 
 export interface IUserSettings {
-    areUploadsPublic: boolean;
     playStyle: PlayStyle;
     useScientificNotation: boolean;
     scientificNotationThreshold: number;
@@ -38,7 +37,6 @@ export class SettingsService {
     public static retryDelay = 1000;
 
     public static readonly defaultSettings: IUserSettings = {
-        areUploadsPublic: true,
         playStyle: "hybrid",
         useScientificNotation: true,
         scientificNotationThreshold: 1000000,
