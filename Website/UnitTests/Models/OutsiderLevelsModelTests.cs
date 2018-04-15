@@ -11,10 +11,10 @@ namespace UnitTests.Models
     using ClickerHeroesTrackerWebsite.Tests.Mocks;
     using Xunit;
 
-    public class OutsiderLevelsModelTests
+    public static class OutsiderLevelsModelTests
     {
         [Fact]
-        public void OutsiderLevelsModel()
+        public static void OutsiderLevelsModel()
         {
             var encodedSaveData = File.ReadAllText("TestData\\ValidZlib.txt");
             var savedGame = SavedGame.Parse(encodedSaveData);

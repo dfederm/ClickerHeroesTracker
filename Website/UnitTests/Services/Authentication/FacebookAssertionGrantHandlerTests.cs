@@ -14,7 +14,7 @@ namespace UnitTests.Services.Authentication
     using Website.Services.Authentication;
     using Xunit;
 
-    public sealed class FacebookAssertionGrantHandlerTests
+    public static class FacebookAssertionGrantHandlerTests
     {
         private const string AppId = "SomeAppId";
         private const string ExternalUserId = "SomeExternalUserId";
@@ -27,7 +27,7 @@ namespace UnitTests.Services.Authentication
         private static readonly HttpClientTestingFactorySettings HttpClientTestingFactorySettings = new HttpClientTestingFactorySettings { ExpectationMatchTimeout = TimeSpan.FromSeconds(1) };
 
         [Fact]
-        public async Task ValidateAsync_Success()
+        public static async Task ValidateAsync_Success()
         {
             var authenticationSettings = new AuthenticationSettings
             {
@@ -57,7 +57,7 @@ namespace UnitTests.Services.Authentication
         }
 
         [Fact]
-        public async Task ValidateAsync_HttpError_AppEndpoint()
+        public static async Task ValidateAsync_HttpError_AppEndpoint()
         {
             var authenticationSettings = new AuthenticationSettings();
             var options = Options.Create(authenticationSettings);
@@ -78,7 +78,7 @@ namespace UnitTests.Services.Authentication
         }
 
         [Fact]
-        public async Task ValidateAsync_HttpError_UserEndpoint()
+        public static async Task ValidateAsync_HttpError_UserEndpoint()
         {
             var authenticationSettings = new AuthenticationSettings
             {
@@ -106,7 +106,7 @@ namespace UnitTests.Services.Authentication
         }
 
         [Fact]
-        public async Task ValidateAsync_WrongApp()
+        public static async Task ValidateAsync_WrongApp()
         {
             var authenticationSettings = new AuthenticationSettings
             {

@@ -10,10 +10,10 @@ namespace UnitTests.Services.Authentication
     using Website.Services.Authentication;
     using Xunit;
 
-    public sealed class AssertionGrantOptionsTests
+    public static class AssertionGrantOptionsTests
     {
         [Fact]
-        public void EmptyByDefault()
+        public static void EmptyByDefault()
         {
             var options = new AssertionGrantOptions();
 
@@ -21,7 +21,7 @@ namespace UnitTests.Services.Authentication
         }
 
         [Fact]
-        public void AddAssertionGrantType_NullGrantTypeThrows()
+        public static void AddAssertionGrantType_NullGrantTypeThrows()
         {
             var options = new AssertionGrantOptions();
 
@@ -30,7 +30,7 @@ namespace UnitTests.Services.Authentication
         }
 
         [Fact]
-        public void AddAssertionGrantType_AddsToCollection()
+        public static void AddAssertionGrantType_AddsToCollection()
         {
             const string GrantType = "SomeGrantType";
             var options = new AssertionGrantOptions();
@@ -41,7 +41,7 @@ namespace UnitTests.Services.Authentication
         }
 
         [Fact]
-        public void AddAssertionGrantType_Multiple()
+        public static void AddAssertionGrantType_Multiple()
         {
             const string GrantType1 = "SomeGrantType1";
             const string GrantType2 = "SomeGrantType2";
@@ -58,7 +58,7 @@ namespace UnitTests.Services.Authentication
         }
 
         [Fact]
-        public void AddAssertionGrantType_DuplicatesThrow()
+        public static void AddAssertionGrantType_DuplicatesThrow()
         {
             const string GrantType = "SomeGrantType";
             var options = new AssertionGrantOptions();

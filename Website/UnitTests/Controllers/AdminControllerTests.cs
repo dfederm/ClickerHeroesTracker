@@ -20,10 +20,10 @@ namespace UnitTests.Controllers
     using Website.Services.UploadProcessing;
     using Xunit;
 
-    public class AdminControllerTests
+    public static class AdminControllerTests
     {
         [Fact]
-        public async Task Queues_Success()
+        public static async Task Queues_Success()
         {
             var priorities = Enum.GetValues(typeof(UploadProcessingMessagePriority)) as UploadProcessingMessagePriority[];
             var expectedQueues = Enumerable.Range(0, priorities.Length * 3)
@@ -55,7 +55,7 @@ namespace UnitTests.Controllers
         }
 
         [Fact]
-        public async Task Recompute_Success()
+        public static async Task Recompute_Success()
         {
             const string UserId = "SomeUserId";
             var model = new RecomputeRequest
@@ -109,7 +109,7 @@ namespace UnitTests.Controllers
         }
 
         [Fact]
-        public async Task ClearQueue_Success()
+        public static async Task ClearQueue_Success()
         {
             const int NumMessages = 123;
             var model = new ClearQueueRequest
@@ -142,7 +142,7 @@ namespace UnitTests.Controllers
         }
 
         [Fact]
-        public async Task StaleUploads_Success()
+        public static async Task StaleUploads_Success()
         {
             var expectedIds = Enumerable.Range(0, 3).ToList();
             var datasets = expectedIds
@@ -181,7 +181,7 @@ namespace UnitTests.Controllers
         }
 
         [Fact]
-        public async Task ListAuthTokens_Success()
+        public static async Task ListAuthTokens_Success()
         {
             const int NumInvalidTokens = 100;
             var mockDatabaseCommand = MockDatabaseHelper.CreateMockDatabaseCommand(new Dictionary<string, object>(), NumInvalidTokens);
@@ -212,7 +212,7 @@ namespace UnitTests.Controllers
         }
 
         [Fact]
-        public async Task PruneInvalidAuthTokens_Success()
+        public static async Task PruneInvalidAuthTokens_Success()
         {
             var model = new PruneInvalidAuthTokensRequest
             {

@@ -11,10 +11,10 @@ namespace ClickerHeroesTrackerWebsite.Tests.Controllers
     using Moq;
     using Xunit;
 
-    public class VersionControllerTests
+    public static class VersionControllerTests
     {
         [Fact]
-        public void Version()
+        public static void Version()
         {
             var mockBuildInfoProvider = new Mock<IBuildInfoProvider>(MockBehavior.Strict);
             mockBuildInfoProvider.SetupGet(_ => _.Changelist).Returns("SomeChangelist").Verifiable();
