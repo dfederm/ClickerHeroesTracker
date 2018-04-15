@@ -24,10 +24,10 @@ namespace UnitTests.Controllers
     using Website.Services.Clans;
     using Xunit;
 
-    public sealed class UserControllerTests
+    public static class UserControllerTests
     {
         [Fact]
-        public async Task Create_Success()
+        public static async Task Create_Success()
         {
             var createUser = new CreateUserRequest
             {
@@ -71,7 +71,7 @@ namespace UnitTests.Controllers
         }
 
         [Fact]
-        public async Task Create_UserCreationFails()
+        public static async Task Create_UserCreationFails()
         {
             var createUser = new CreateUserRequest
             {
@@ -116,7 +116,7 @@ namespace UnitTests.Controllers
         }
 
         [Fact]
-        public async Task Get_Success()
+        public static async Task Get_Success()
         {
             const string UserName = "SomeUserName";
             const string UserId = "SomeUserId";
@@ -175,7 +175,7 @@ namespace UnitTests.Controllers
         }
 
         [Fact]
-        public async Task Get_NotFoundUser()
+        public static async Task Get_NotFoundUser()
         {
             const string UserName = "SomeUserName";
 
@@ -219,7 +219,7 @@ namespace UnitTests.Controllers
         }
 
         [Fact]
-        public async Task Get_NotFoundUserId()
+        public static async Task Get_NotFoundUserId()
         {
             const string UserName = "SomeUserName";
 
@@ -268,7 +268,7 @@ namespace UnitTests.Controllers
         }
 
         [Fact]
-        public async Task Uploads_Success()
+        public static async Task Uploads_Success()
         {
             const string UserName = "SomeUserName";
             const string UserId = "SomeUserId";
@@ -393,7 +393,7 @@ namespace UnitTests.Controllers
             "SomeUserName",
             UserController.ParameterConstants.Uploads.Page.Default,
             UserController.ParameterConstants.Uploads.Count.Max + 1)]
-        public async Task Uploads_ParameterValidation(string userName, int page, int count)
+        public static async Task Uploads_ParameterValidation(string userName, int page, int count)
         {
             var gameData = MockGameData.RealData;
             var telemetryClient = new TelemetryClient();
@@ -428,7 +428,7 @@ namespace UnitTests.Controllers
         }
 
         [Fact]
-        public async Task Uploads_NotFoundUser()
+        public static async Task Uploads_NotFoundUser()
         {
             const string UserName = "SomeUserName";
             const int Page = 12;
@@ -472,7 +472,7 @@ namespace UnitTests.Controllers
         }
 
         [Fact]
-        public async Task Uploads_NotFoundUserId()
+        public static async Task Uploads_NotFoundUserId()
         {
             const string UserName = "SomeUserName";
             const int Page = 12;
@@ -519,7 +519,7 @@ namespace UnitTests.Controllers
         }
 
         [Fact]
-        public async Task Follows_Success()
+        public static async Task Follows_Success()
         {
             const string UserName = "SomeUserName";
             const string UserId = "SomeUserId";
@@ -586,7 +586,7 @@ namespace UnitTests.Controllers
         }
 
         [Fact]
-        public async Task Follows_NotFoundUser()
+        public static async Task Follows_NotFoundUser()
         {
             const string UserName = "SomeUserName";
 
@@ -626,7 +626,7 @@ namespace UnitTests.Controllers
         }
 
         [Fact]
-        public async Task Follows_NotFoundUserId()
+        public static async Task Follows_NotFoundUserId()
         {
             const string UserName = "SomeUserName";
 
@@ -670,7 +670,7 @@ namespace UnitTests.Controllers
         }
 
         [Fact]
-        public async Task AddFollow_Success()
+        public static async Task AddFollow_Success()
         {
             const string UserName = "SomeUserName";
             const string UserId = "SomeUserId";
@@ -747,7 +747,7 @@ namespace UnitTests.Controllers
         }
 
         [Fact]
-        public async Task AddFollow_NotFoundUser()
+        public static async Task AddFollow_NotFoundUser()
         {
             const string UserName = "SomeUserName";
 
@@ -794,7 +794,7 @@ namespace UnitTests.Controllers
         }
 
         [Fact]
-        public async Task AddFollow_NotFoundUserId()
+        public static async Task AddFollow_NotFoundUserId()
         {
             const string UserName = "SomeUserName";
 
@@ -845,7 +845,7 @@ namespace UnitTests.Controllers
         }
 
         [Fact]
-        public async Task AddFollow_NotFoundFollowUser()
+        public static async Task AddFollow_NotFoundFollowUser()
         {
             const string UserName = "SomeUserName";
             const string UserId = "SomeUserId";
@@ -907,7 +907,7 @@ namespace UnitTests.Controllers
         }
 
         [Fact]
-        public async Task AddFollow_NotFoundFollowUserId()
+        public static async Task AddFollow_NotFoundFollowUserId()
         {
             const string UserName = "SomeUserName";
             const string UserId = "SomeUserId";
@@ -974,7 +974,7 @@ namespace UnitTests.Controllers
         }
 
         [Fact]
-        public async Task AddFollow_NotAllowed()
+        public static async Task AddFollow_NotAllowed()
         {
             const string UserName = "SomeUserName";
             const string UserId = "SomeUserId";
@@ -1039,7 +1039,7 @@ namespace UnitTests.Controllers
         }
 
         [Fact]
-        public async Task AddFollow_AdminIsAlwaysAllowed()
+        public static async Task AddFollow_AdminIsAlwaysAllowed()
         {
             const string UserName = "SomeUserName";
             const string UserId = "SomeUserId";
@@ -1120,7 +1120,7 @@ namespace UnitTests.Controllers
         }
 
         [Fact]
-        public async Task RemoveFollow_Success()
+        public static async Task RemoveFollow_Success()
         {
             const string UserName = "SomeUserName";
             const string UserId = "SomeUserId";
@@ -1193,7 +1193,7 @@ namespace UnitTests.Controllers
         }
 
         [Fact]
-        public async Task RemoveFollow_NotFoundUser()
+        public static async Task RemoveFollow_NotFoundUser()
         {
             const string UserName = "SomeUserName";
             const string FollowUserName = "SomeFollowUserName";
@@ -1236,7 +1236,7 @@ namespace UnitTests.Controllers
         }
 
         [Fact]
-        public async Task RemoveFollow_NotFoundUserId()
+        public static async Task RemoveFollow_NotFoundUserId()
         {
             const string UserName = "SomeUserName";
             const string FollowUserName = "SomeFollowUserName";
@@ -1283,7 +1283,7 @@ namespace UnitTests.Controllers
         }
 
         [Fact]
-        public async Task RemoveFollow_NotFoundFollowUser()
+        public static async Task RemoveFollow_NotFoundFollowUser()
         {
             const string UserName = "SomeUserName";
             const string UserId = "SomeUserId";
@@ -1341,7 +1341,7 @@ namespace UnitTests.Controllers
         }
 
         [Fact]
-        public async Task RemoveFollow_NotFoundFollowUserId()
+        public static async Task RemoveFollow_NotFoundFollowUserId()
         {
             const string UserName = "SomeUserName";
             const string UserId = "SomeUserId";
@@ -1404,7 +1404,7 @@ namespace UnitTests.Controllers
         }
 
         [Fact]
-        public async Task RemoveFollow_NotAllowed()
+        public static async Task RemoveFollow_NotAllowed()
         {
             const string UserName = "SomeUserName";
             const string UserId = "SomeUserId";
@@ -1465,7 +1465,7 @@ namespace UnitTests.Controllers
         }
 
         [Fact]
-        public async Task RemoveFollow_AdminIsAlwaysAllowed()
+        public static async Task RemoveFollow_AdminIsAlwaysAllowed()
         {
             const string UserName = "SomeUserName";
             const string UserId = "SomeUserId";
@@ -1542,7 +1542,7 @@ namespace UnitTests.Controllers
         }
 
         [Fact]
-        public async Task RemoveFollow_NoDeletion()
+        public static async Task RemoveFollow_NoDeletion()
         {
             const string UserName = "SomeUserName";
             const string UserId = "SomeUserId";
@@ -1615,7 +1615,7 @@ namespace UnitTests.Controllers
         }
 
         [Fact]
-        public async Task GetSettings_Success()
+        public static async Task GetSettings_Success()
         {
             const string UserName = "SomeUserName";
             const string UserId = "SomeUserId";
@@ -1676,7 +1676,7 @@ namespace UnitTests.Controllers
         }
 
         [Fact]
-        public async Task GetSettings_NotFoundUser()
+        public static async Task GetSettings_NotFoundUser()
         {
             const string UserName = "SomeUserName";
 
@@ -1717,7 +1717,7 @@ namespace UnitTests.Controllers
         }
 
         [Fact]
-        public async Task GetSettings_NotFoundUserId()
+        public static async Task GetSettings_NotFoundUserId()
         {
             const string UserName = "SomeUserName";
 
@@ -1763,7 +1763,7 @@ namespace UnitTests.Controllers
         }
 
         [Fact]
-        public async Task GetSettings_NotAllowed()
+        public static async Task GetSettings_NotAllowed()
         {
             const string UserName = "SomeUserName";
             const string UserId = "SomeUserId";
@@ -1823,7 +1823,7 @@ namespace UnitTests.Controllers
         }
 
         [Fact]
-        public async Task GetSettings_AdminIsAlwaysAllowed()
+        public static async Task GetSettings_AdminIsAlwaysAllowed()
         {
             const string UserName = "SomeUserName";
             const string UserId = "SomeUserId";
@@ -1887,7 +1887,7 @@ namespace UnitTests.Controllers
         }
 
         [Fact]
-        public async Task PatchSettings_Success()
+        public static async Task PatchSettings_Success()
         {
             const string UserName = "SomeUserName";
             const string UserId = "SomeUserId";
@@ -1948,7 +1948,7 @@ namespace UnitTests.Controllers
         }
 
         [Fact]
-        public async Task PatchSettings_NotFoundUser()
+        public static async Task PatchSettings_NotFoundUser()
         {
             const string UserName = "SomeUserName";
 
@@ -1990,7 +1990,7 @@ namespace UnitTests.Controllers
         }
 
         [Fact]
-        public async Task PatchSettings_NotFoundUserId()
+        public static async Task PatchSettings_NotFoundUserId()
         {
             const string UserName = "SomeUserName";
 
@@ -2037,7 +2037,7 @@ namespace UnitTests.Controllers
         }
 
         [Fact]
-        public async Task PatchSettings_NotAllowed()
+        public static async Task PatchSettings_NotAllowed()
         {
             const string UserName = "SomeUserName";
             const string UserId = "SomeUserId";
@@ -2098,7 +2098,7 @@ namespace UnitTests.Controllers
         }
 
         [Fact]
-        public async Task GetLogins_Success()
+        public static async Task GetLogins_Success()
         {
             const string UserName = "SomeUserName";
             const string UserId = "SomeUserId";
@@ -2178,7 +2178,7 @@ namespace UnitTests.Controllers
         }
 
         [Fact]
-        public async Task GetLogins_NotFoundUser()
+        public static async Task GetLogins_NotFoundUser()
         {
             const string UserName = "SomeUserName";
 
@@ -2219,7 +2219,7 @@ namespace UnitTests.Controllers
         }
 
         [Fact]
-        public async Task GetLogins_NotFoundUserId()
+        public static async Task GetLogins_NotFoundUserId()
         {
             const string UserName = "SomeUserName";
 
@@ -2265,7 +2265,7 @@ namespace UnitTests.Controllers
         }
 
         [Fact]
-        public async Task GetLogins_NotAllowed()
+        public static async Task GetLogins_NotAllowed()
         {
             const string UserName = "SomeUserName";
             const string UserId = "SomeUserId";
@@ -2325,7 +2325,7 @@ namespace UnitTests.Controllers
         }
 
         [Fact]
-        public async Task GetLogins_AdminIsAlwaysAllowed()
+        public static async Task GetLogins_AdminIsAlwaysAllowed()
         {
             const string UserName = "SomeUserName";
             const string UserId = "SomeUserId";
@@ -2405,7 +2405,7 @@ namespace UnitTests.Controllers
         }
 
         [Fact]
-        public async Task RemoveLogin_Success()
+        public static async Task RemoveLogin_Success()
         {
             const string UserName = "SomeUserName";
             const string UserId = "SomeUserId";
@@ -2472,7 +2472,7 @@ namespace UnitTests.Controllers
         }
 
         [Fact]
-        public async Task RemoveLogin_NotFoundUser()
+        public static async Task RemoveLogin_NotFoundUser()
         {
             const string UserName = "SomeUserName";
             const string Provider = "SomeProvider";
@@ -2521,7 +2521,7 @@ namespace UnitTests.Controllers
         }
 
         [Fact]
-        public async Task RemoveLogin_NotFoundUserId()
+        public static async Task RemoveLogin_NotFoundUserId()
         {
             const string UserName = "SomeUserName";
             const string Provider = "SomeProvider";
@@ -2575,7 +2575,7 @@ namespace UnitTests.Controllers
         }
 
         [Fact]
-        public async Task RemoveLogin_NotAllowed()
+        public static async Task RemoveLogin_NotAllowed()
         {
             const string UserName = "SomeUserName";
             const string UserId = "SomeUserId";
@@ -2643,7 +2643,7 @@ namespace UnitTests.Controllers
         }
 
         [Fact]
-        public async Task RemoveLogin_AdminIsAlwaysAllowed()
+        public static async Task RemoveLogin_AdminIsAlwaysAllowed()
         {
             const string UserName = "SomeUserName";
             const string UserId = "SomeUserId";
@@ -2714,7 +2714,7 @@ namespace UnitTests.Controllers
         }
 
         [Fact]
-        public async Task RemoveLogin_RemoveLoginFails()
+        public static async Task RemoveLogin_RemoveLoginFails()
         {
             const string UserName = "SomeUserName";
             const string UserId = "SomeUserId";
@@ -2782,7 +2782,7 @@ namespace UnitTests.Controllers
         }
 
         [Fact]
-        public async Task PatchSettings_AdminIsAlwaysAllowed()
+        public static async Task PatchSettings_AdminIsAlwaysAllowed()
         {
             const string UserName = "SomeUserName";
             const string UserId = "SomeUserId";
@@ -2846,7 +2846,7 @@ namespace UnitTests.Controllers
         }
 
         [Fact]
-        public async Task SetPassword_Success()
+        public static async Task SetPassword_Success()
         {
             const string UserName = "SomeUserName";
             const string UserId = "SomeUserId";
@@ -2911,7 +2911,7 @@ namespace UnitTests.Controllers
         }
 
         [Fact]
-        public async Task SetPassword_NotFoundUser()
+        public static async Task SetPassword_NotFoundUser()
         {
             const string UserName = "SomeUserName";
             const string NewPassword = "SomeNewPassword";
@@ -2958,7 +2958,7 @@ namespace UnitTests.Controllers
         }
 
         [Fact]
-        public async Task SetPassword_NotFoundUserId()
+        public static async Task SetPassword_NotFoundUserId()
         {
             const string UserName = "SomeUserName";
             const string NewPassword = "SomeNewPassword";
@@ -3010,7 +3010,7 @@ namespace UnitTests.Controllers
         }
 
         [Fact]
-        public async Task SetPassword_NotAllowed()
+        public static async Task SetPassword_NotAllowed()
         {
             const string UserName = "SomeUserName";
             const string UserId = "SomeUserId";
@@ -3076,7 +3076,7 @@ namespace UnitTests.Controllers
         }
 
         [Fact]
-        public async Task SetPassword_AdminIsAlwaysAllowed()
+        public static async Task SetPassword_AdminIsAlwaysAllowed()
         {
             const string UserName = "SomeUserName";
             const string UserId = "SomeUserId";
@@ -3145,7 +3145,7 @@ namespace UnitTests.Controllers
         }
 
         [Fact]
-        public async Task SetPassword_SetPasswordFails()
+        public static async Task SetPassword_SetPasswordFails()
         {
             const string UserName = "SomeUserName";
             const string UserId = "SomeUserId";
@@ -3211,7 +3211,7 @@ namespace UnitTests.Controllers
         }
 
         [Fact]
-        public async Task ChangePassword_Success()
+        public static async Task ChangePassword_Success()
         {
             const string UserName = "SomeUserName";
             const string UserId = "SomeUserId";
@@ -3278,7 +3278,7 @@ namespace UnitTests.Controllers
         }
 
         [Fact]
-        public async Task ChangePassword_NotFoundUser()
+        public static async Task ChangePassword_NotFoundUser()
         {
             const string UserName = "SomeUserName";
             const string CurrentPassword = "SomeCurrentPassword";
@@ -3327,7 +3327,7 @@ namespace UnitTests.Controllers
         }
 
         [Fact]
-        public async Task ChangePassword_NotFoundUserId()
+        public static async Task ChangePassword_NotFoundUserId()
         {
             const string UserName = "SomeUserName";
             const string CurrentPassword = "SomeCurrentPassword";
@@ -3381,7 +3381,7 @@ namespace UnitTests.Controllers
         }
 
         [Fact]
-        public async Task ChangePassword_NotAllowed()
+        public static async Task ChangePassword_NotAllowed()
         {
             const string UserName = "SomeUserName";
             const string UserId = "SomeUserId";
@@ -3449,7 +3449,7 @@ namespace UnitTests.Controllers
         }
 
         [Fact]
-        public async Task ChangePassword_AdminIsAlwaysAllowed()
+        public static async Task ChangePassword_AdminIsAlwaysAllowed()
         {
             const string UserName = "SomeUserName";
             const string UserId = "SomeUserId";
@@ -3520,7 +3520,7 @@ namespace UnitTests.Controllers
         }
 
         [Fact]
-        public async Task ChangePassword_ChangePasswordFails()
+        public static async Task ChangePassword_ChangePasswordFails()
         {
             const string UserName = "SomeUserName";
             const string UserId = "SomeUserId";
@@ -3588,7 +3588,7 @@ namespace UnitTests.Controllers
         }
 
         [Fact]
-        public async Task ResetPassword_Success()
+        public static async Task ResetPassword_Success()
         {
             const string Code = "SomeCode";
 
@@ -3642,7 +3642,7 @@ namespace UnitTests.Controllers
         }
 
         [Fact]
-        public async Task ResetPassword_UserLookupFails()
+        public static async Task ResetPassword_UserLookupFails()
         {
             var model = new ResetPasswordRequest
             {
@@ -3683,7 +3683,7 @@ namespace UnitTests.Controllers
         }
 
         [Fact]
-        public async Task ResetPasswordConfirmation_Success()
+        public static async Task ResetPasswordConfirmation_Success()
         {
             var model = new ResetPasswordConfirmationRequest
             {
@@ -3732,7 +3732,7 @@ namespace UnitTests.Controllers
         }
 
         [Fact]
-        public async Task ResetPasswordConfirmation_UserLookupFails()
+        public static async Task ResetPasswordConfirmation_UserLookupFails()
         {
             var model = new ResetPasswordConfirmationRequest
             {
@@ -3775,7 +3775,7 @@ namespace UnitTests.Controllers
         }
 
         [Fact]
-        public async Task ResetPasswordConfirmation_ResetPasswordFails()
+        public static async Task ResetPasswordConfirmation_ResetPasswordFails()
         {
             var model = new ResetPasswordConfirmationRequest
             {

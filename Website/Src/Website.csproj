@@ -6,10 +6,6 @@
     <OutputType>Exe</OutputType>
     <PackageId>Website</PackageId>
     <UserSecretsId>aspnet-ClickerHeroesTrackerWebsite-20161025101322</UserSecretsId>
-    <!-- We use gulp to do TypeScript compilation instead -->
-    <TypeScriptEnabled>false</TypeScriptEnabled>
-    <!-- Add this just to get rid of the warning -->
-    <TypeScriptToolsVersion>Latest</TypeScriptToolsVersion>
     <!-- We need this to be self-contained (SCD) since we're using a newer version of .Net Core than is installed on Azure App Service -->
     <RuntimeIdentifiers>win10-x64</RuntimeIdentifiers>
   </PropertyGroup>
@@ -17,12 +13,6 @@
   <ItemGroup>
     <None Include="App.config" />
     <None Include="wwwroot\**\*">
-      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-    </None>
-    <None Include="Views\**\*">
-      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-    </None>
-    <None Include="data\**\*">
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
     </None>
     <None Include="Services\Database\Schemas\**\*">
@@ -34,15 +24,12 @@
     <PackageReference Include="AspNet.Security.OAuth.Validation" Version="2.0.0-rc3-0300" />
     <PackageReference Include="Iconic.Zlib.Netstandard" Version="1.0.0" />
     <PackageReference Include="Microsoft.ApplicationInsights.AspNetCore" Version="2.2.1" />
-    <PackageReference Include="Microsoft.AspNetCore.All" Version="2.1.0-preview1-final" />
+    <PackageReference Include="Microsoft.AspNetCore.All" Version="2.1.0-preview2-final" />
     <PackageReference Include="OpenIddict" Version="2.0.0-rc3-0883" />
     <PackageReference Include="OpenIddict.EntityFrameworkCore" Version="2.0.0-rc3-0883" />
     <PackageReference Include="OpenIddict.Mvc" Version="2.0.0-rc3-0883" />
     <PackageReference Include="Sendgrid" Version="9.9.0" />
-    <PackageReference Include="WindowsAzure.Storage" Version="9.1.0" />
+    <PackageReference Include="WindowsAzure.Storage" Version="9.1.1" />
   </ItemGroup>
-
-  <!-- View compilation happens automatically at publish time, but we want to also run it at build time -->
-  <Target Name="PrecompileRazorViews" AfterTargets="Build" DependsOnTargets="MvcRazorPrecompile" />
 
 </Project>

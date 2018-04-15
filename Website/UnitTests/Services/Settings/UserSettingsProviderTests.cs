@@ -16,12 +16,12 @@ namespace UnitTests.Services.Settings
     using Website.Models.Api.Users;
     using Xunit;
 
-    public sealed class UserSettingsProviderTests
+    public static class UserSettingsProviderTests
     {
         private const string UserId = "SomeUserId";
 
         [Fact]
-        public async Task Get_Success()
+        public static async Task Get_Success()
         {
             var dataSets = CreateDataSetsForAllSettings();
 
@@ -41,7 +41,7 @@ namespace UnitTests.Services.Settings
         }
 
         [Fact]
-        public async Task Get_InvalidSettings()
+        public static async Task Get_InvalidSettings()
         {
             var dataSets = new List<IDictionary<string, object>>();
             foreach (var dataSet in CreateDataSetsForAllSettings())
@@ -66,7 +66,7 @@ namespace UnitTests.Services.Settings
         }
 
         [Fact]
-        public async Task Get_MissingSettings()
+        public static async Task Get_MissingSettings()
         {
             var mockDataReader = MockDatabaseHelper.CreateMockDataReader();
             var mockDatabaseCommand = MockDatabaseHelper.CreateMockDatabaseCommand(new Dictionary<string, object> { { "@UserId", UserId } }, mockDataReader.Object);
@@ -84,7 +84,7 @@ namespace UnitTests.Services.Settings
         }
 
         [Fact]
-        public async Task Get_UnknownSettings()
+        public static async Task Get_UnknownSettings()
         {
             var dataSets = new List<IDictionary<string, object>>();
             var unknownSetting = new Dictionary<string, object> { { "SettingId", byte.MaxValue }, { "SettingValue", "true" } };
@@ -111,7 +111,7 @@ namespace UnitTests.Services.Settings
         }
 
         [Fact]
-        public async Task Get_DuplicateSettings()
+        public static async Task Get_DuplicateSettings()
         {
             var dataSets = new List<IDictionary<string, object>>();
             foreach (var dataSet in CreateDataSetsForAllSettings())
@@ -136,7 +136,7 @@ namespace UnitTests.Services.Settings
         }
 
         [Fact]
-        public async Task Get_NoUser()
+        public static async Task Get_NoUser()
         {
             var mockDatabaseCommandFactory = new Mock<IDatabaseCommandFactory>(MockBehavior.Strict);
 
@@ -149,7 +149,7 @@ namespace UnitTests.Services.Settings
         }
 
         [Fact]
-        public async Task Patch_Success()
+        public static async Task Patch_Success()
         {
             var settings = new UserSettings
             {
@@ -192,7 +192,7 @@ namespace UnitTests.Services.Settings
         }
 
         [Fact]
-        public async Task Patch_PartialSettings()
+        public static async Task Patch_PartialSettings()
         {
             var settings = new UserSettings
             {
@@ -217,7 +217,7 @@ namespace UnitTests.Services.Settings
         }
 
         [Fact]
-        public async Task Patch_EmptySettings()
+        public static async Task Patch_EmptySettings()
         {
             var settings = new UserSettings();
 
@@ -230,7 +230,7 @@ namespace UnitTests.Services.Settings
         }
 
         [Fact]
-        public async Task Patch_NoUser()
+        public static async Task Patch_NoUser()
         {
             var mockDatabaseCommandFactory = new Mock<IDatabaseCommandFactory>(MockBehavior.Strict);
             var provider = new UserSettingsProvider(mockDatabaseCommandFactory.Object);
@@ -240,7 +240,7 @@ namespace UnitTests.Services.Settings
         }
 
         [Fact]
-        public async Task Patch_NoSettings()
+        public static async Task Patch_NoSettings()
         {
             var mockDatabaseCommandFactory = new Mock<IDatabaseCommandFactory>(MockBehavior.Strict);
             var provider = new UserSettingsProvider(mockDatabaseCommandFactory.Object);

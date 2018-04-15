@@ -7,7 +7,7 @@ namespace UnitTests.Utility
     using ClickerHeroesTrackerWebsite.Utility;
     using Xunit;
 
-    public sealed class BigIntegerExtensionsTests
+    public static class BigIntegerExtensionsTests
     {
         // Tests both ToBigInteger and ToTransportableString
         [Theory]
@@ -18,7 +18,7 @@ namespace UnitTests.Utility
         [InlineData("1e10", "1.000000000000000000e+010")]
         [InlineData("1.23456789e100", "1.234567890000000000e+100")]
         [InlineData("1.23456789e1234", "1.234567890000000000e+1234")]
-        public void RoundTrip(string str, string expected)
+        public static void RoundTrip(string str, string expected)
         {
             var bigInt = str.ToBigInteger();
             var transportableString = bigInt.ToTransportableString();

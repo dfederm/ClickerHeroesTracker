@@ -8,7 +8,7 @@ namespace ClickerHeroesTrackerWebsite.Tests.Models
     using ClickerHeroesTrackerWebsite.Models.SaveData;
     using Xunit;
 
-    public class SavedGameTests
+    public static class SavedGameTests
     {
         [Theory]
         [InlineData("ValidSprinkle", true)]
@@ -21,7 +21,7 @@ namespace ClickerHeroesTrackerWebsite.Tests.Models
         [InlineData("InvalidAndroidBadJson", false)]
         [InlineData("ValidZlib", true)]
         [InlineData("InvalidZlibBadData", false)]
-        public void SavedGame_Parse(string testDataName, bool expectedValid)
+        public static void SavedGame_Parse(string testDataName, bool expectedValid)
         {
             var encodedSaveData = File.ReadAllText(Path.Combine("TestData", testDataName + ".txt"));
             var savedGame = SavedGame.Parse(encodedSaveData);
@@ -41,7 +41,7 @@ namespace ClickerHeroesTrackerWebsite.Tests.Models
         [InlineData("ValidSprinkle")]
         [InlineData("ValidAndroid")]
         [InlineData("ValidZlib")]
-        public void SavedGame_ScrubIdentity(string testDataName)
+        public static void SavedGame_ScrubIdentity(string testDataName)
         {
             var encodedSaveData = File.ReadAllText(Path.Combine("TestData", testDataName + ".txt"));
 

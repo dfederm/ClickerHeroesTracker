@@ -13,7 +13,7 @@ namespace UnitTests.Services
     using UnitTests.Mocks;
     using Xunit;
 
-    public class BuildInfoProviderTests
+    public static class BuildInfoProviderTests
     {
         private static readonly Dictionary<string, string> BuildInfo = new Dictionary<string, string>
         {
@@ -35,7 +35,7 @@ namespace UnitTests.Services
         };
 
         [Fact]
-        public void BuildInfoProvider_Success()
+        public static void BuildInfoProvider_Success()
         {
             using (var directory = new TemporaryDirectory())
             {
@@ -63,7 +63,7 @@ namespace UnitTests.Services
         }
 
         [Fact]
-        public void BuildInfoProvider_EmptyBuildInfo()
+        public static void BuildInfoProvider_EmptyBuildInfo()
         {
             using (var directory = new TemporaryDirectory())
             {
@@ -91,7 +91,7 @@ namespace UnitTests.Services
         }
 
         [Fact]
-        public void BuildInfoProvider_EmptyManifest()
+        public static void BuildInfoProvider_EmptyManifest()
         {
             using (var directory = new TemporaryDirectory())
             {
@@ -115,7 +115,7 @@ namespace UnitTests.Services
         }
 
         [Fact]
-        public void BuildInfoProvider_MissingBuildInfo()
+        public static void BuildInfoProvider_MissingBuildInfo()
         {
             using (var directory = new TemporaryDirectory())
             {
@@ -131,7 +131,7 @@ namespace UnitTests.Services
         }
 
         [Fact]
-        public void BuildInfoProvider_MissingManifest()
+        public static void BuildInfoProvider_MissingManifest()
         {
             using (var directory = new TemporaryDirectory())
             {

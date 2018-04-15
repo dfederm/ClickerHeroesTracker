@@ -9,10 +9,10 @@ namespace UnitTests.Models
     using ClickerHeroesTrackerWebsite.Models.Stats;
     using Xunit;
 
-    public class ComputedStatsTests
+    public static class ComputedStatsTests
     {
         [Fact]
-        public void ComputedStats()
+        public static void ComputedStats()
         {
             var encodedSaveData = File.ReadAllText("TestData\\ValidZlib.txt");
             var savedGame = SavedGame.Parse(encodedSaveData);

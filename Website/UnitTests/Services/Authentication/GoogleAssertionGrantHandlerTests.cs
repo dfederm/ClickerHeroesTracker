@@ -13,7 +13,7 @@ namespace UnitTests.Services.Authentication
     using Website.Services.Authentication;
     using Xunit;
 
-    public sealed class GoogleAssertionGrantHandlerTests
+    public static class GoogleAssertionGrantHandlerTests
     {
         private const string ClientId = "SomeClientId";
         private const string ExternalUserId = "SomeExternalUserId";
@@ -22,7 +22,7 @@ namespace UnitTests.Services.Authentication
         private const string ValidationEndpoint = "https://www.googleapis.com/oauth2/v3/tokeninfo?id_token=" + Assertion;
 
         [Fact]
-        public async Task ValidateAsync_Success()
+        public static async Task ValidateAsync_Success()
         {
             var authenticationSettings = new AuthenticationSettings
             {
@@ -56,7 +56,7 @@ namespace UnitTests.Services.Authentication
         }
 
         [Fact]
-        public async Task ValidateAsync_HttpError()
+        public static async Task ValidateAsync_HttpError()
         {
             var authenticationSettings = new AuthenticationSettings();
             var options = Options.Create(authenticationSettings);
@@ -77,7 +77,7 @@ namespace UnitTests.Services.Authentication
         }
 
         [Fact]
-        public async Task ValidateAsync_WrongAudience()
+        public static async Task ValidateAsync_WrongAudience()
         {
             var authenticationSettings = new AuthenticationSettings
             {
