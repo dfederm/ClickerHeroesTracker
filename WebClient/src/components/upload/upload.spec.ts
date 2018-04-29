@@ -3,7 +3,7 @@ import { ActivatedRoute, Router, Params } from "@angular/router";
 import { FormsModule } from "@angular/forms";
 import { NO_ERRORS_SCHEMA, DebugElement, ChangeDetectorRef } from "@angular/core";
 import { By } from "@angular/platform-browser";
-import { BehaviorSubject } from "rxjs/BehaviorSubject";
+import { BehaviorSubject } from "rxjs";
 import { DatePipe, PercentPipe } from "@angular/common";
 import { NgbModal } from "@ng-bootstrap/ng-bootstrap";
 import { Decimal } from "decimal.js";

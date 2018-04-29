@@ -92,7 +92,8 @@ export class ExternalLoginsComponent implements OnInit {
             });
         }
 
-        if (!ExternalLoginsComponent.facebookInitialized) {
+        // tslint:disable-next-line:no-typeof-undefined - Global variable will throw on access
+        if (!ExternalLoginsComponent.facebookInitialized && typeof (FB) !== "undefined") {
             FB.init({
                 appId: "246885142330300",
                 version: "v2.10",

@@ -1,13 +1,8 @@
 import { Injectable } from "@angular/core";
 import { HttpClient, HttpErrorResponse } from "@angular/common/http";
-import { Observable } from "rxjs/Observable";
-import { BehaviorSubject } from "rxjs/BehaviorSubject";
-import { filter } from "rxjs/operators/filter";
-import { distinctUntilChanged } from "rxjs/operators/distinctUntilChanged";
-import { interval } from "rxjs/observable/interval";
+import { Observable, BehaviorSubject, interval } from "rxjs";
+import { filter, distinctUntilChanged } from "rxjs/operators";
 import { HttpErrorHandlerService } from "../httpErrorHandlerService/httpErrorHandlerService";
-
-import "rxjs/add/operator/toPromise";
 
 export interface IVersion {
     environment: string;

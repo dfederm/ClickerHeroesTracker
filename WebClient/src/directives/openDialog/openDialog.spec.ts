@@ -12,12 +12,14 @@ describe("OpenDialogDirective", () => {
 
     @Component({
         template: "someDialogContent",
+        selector: "mockDialog",
     })
     class MockDialogComponent { }
 
     // tslint:disable-next-line:max-classes-per-file - Allow multiple mock classes in a file
     @Component({
         template: "<a [openDialog]=\"MockDialogComponent\" [dismissCurrentDialog]=\"dismissCurrentDialog\" ></a>",
+        selector: "mock",
     })
     class MockComponent {
         public MockDialogComponent = MockDialogComponent;
@@ -30,16 +32,16 @@ describe("OpenDialogDirective", () => {
         fixture = TestBed.configureTestingModule(
             {
                 declarations:
-                [
-                    OpenDialogDirective,
-                    MockComponent,
-                    MockDialogComponent,
-                ],
+                    [
+                        OpenDialogDirective,
+                        MockComponent,
+                        MockDialogComponent,
+                    ],
                 providers:
-                [
-                    { provide: NgbModal, useValue: modalService },
-                    { provide: NgbActiveModal, useValue: activeModal },
-                ],
+                    [
+                        { provide: NgbModal, useValue: modalService },
+                        { provide: NgbActiveModal, useValue: activeModal },
+                    ],
                 schemas: [NO_ERRORS_SCHEMA],
             })
             .createComponent(MockComponent);

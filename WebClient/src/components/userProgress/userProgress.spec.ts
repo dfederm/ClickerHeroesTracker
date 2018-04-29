@@ -2,7 +2,7 @@ import { NO_ERRORS_SCHEMA, LOCALE_ID } from "@angular/core";
 import { ComponentFixture, TestBed, async } from "@angular/core/testing";
 import { By } from "@angular/platform-browser";
 import { ActivatedRoute, Params } from "@angular/router";
-import { BehaviorSubject } from "rxjs/BehaviorSubject";
+import { BehaviorSubject } from "rxjs";
 import Decimal from "decimal.js";
 
 import { UserProgressComponent } from "./userProgress";

@@ -2,7 +2,7 @@ import { Component, Input } from "@angular/core";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { By } from "@angular/platform-browser";
 import { Router, Event as NavigationEvent, NavigationEnd, NavigationCancel } from "@angular/router";
-import { Subject } from "rxjs/Subject";
+import { Subject } from "rxjs";
 
 import { AdComponent } from "./ad";
 

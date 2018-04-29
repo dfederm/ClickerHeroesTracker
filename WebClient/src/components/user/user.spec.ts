@@ -3,7 +3,7 @@ import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { By } from "@angular/platform-browser";
 import Decimal from "decimal.js";
 import { ChartDataSets, ChartOptions, ChartPoint } from "chart.js";
-import { BehaviorSubject } from "rxjs/BehaviorSubject";
+import { BehaviorSubject } from "rxjs";
 
 import { UserComponent } from "./user";
 import { UserService, IProgressData, IFollowsData } from "../../services/userService/userService";

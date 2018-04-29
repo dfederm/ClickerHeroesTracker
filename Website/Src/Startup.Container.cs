@@ -35,6 +35,7 @@ namespace ClickerHeroesTrackerWebsite
     using Newtonsoft.Json;
     using Newtonsoft.Json.Converters;
     using Newtonsoft.Json.Serialization;
+    using OpenIddict.Abstractions;
     using Website.Models.Authentication;
     using Website.Services.Authentication;
     using Website.Services.Clans;
@@ -105,36 +106,63 @@ namespace ClickerHeroesTrackerWebsite
                 .AddDefaultTokenProviders();
 
             // Register the OpenIddict services.
-            services.AddOpenIddict(options =>
-            {
-                // Register the Entity Framework stores.
-                options.AddEntityFrameworkCoreStores<ApplicationDbContext>();
+            services.AddOpenIddict()
 
-                // Register the ASP.NET Core MVC binder used by OpenIddict.
-                // Note: if you don't call this method, you won't be able to
-                // bind OpenIdConnectRequest or OpenIdConnectResponse parameters.
-                options.AddMvcBinders();
-
-                // Enable the token endpoint (required to use the password flow).
-                options.EnableTokenEndpoint("/api/auth/token");
-
-                // Allow client applications to use the grant_type=password flow.
-                options.AllowPasswordFlow()
-                    .AllowRefreshTokenFlow()
-                    .AllowCustomFlow(GoogleAssertionGrantHandler.GrantType)
-                    .AllowCustomFlow(FacebookAssertionGrantHandler.GrantType)
-                    .AllowCustomFlow(MicrosoftAssertionGrantHandler.GrantType);
-
-                // When rolling tokens are enabled, immediately
-                // redeem the refresh token to prevent future reuse.
-                options.UseRollingTokens();
-
-                // Allow Http on devbox
-                if (this.environment.IsDevelopment())
+                // Register the OpenIddict core services.
+                .AddCore(options =>
                 {
-                    options.DisableHttpsRequirement();
-                }
-            });
+                    // Configure OpenIddict to use the default models.
+                    options.UseDefaultModels();
+
+                    // Register the Entity Framework stores.
+                    options.AddEntityFrameworkCoreStores<ApplicationDbContext>();
+                })
+
+                // Register the OpenIddict server handler.
+                .AddServer(options =>
+                {
+                    // Register the ASP.NET Core MVC binder used by OpenIddict.
+                    // Note: if you don't call this method, you won't be able to
+                    // bind OpenIdConnectRequest or OpenIdConnectResponse parameters.
+                    options.AddMvcBinders();
+
+                    // Enable the token endpoint (required to use the password flow).
+                    options.EnableTokenEndpoint("/api/auth/token");
+
+                    // Allow client applications to use the grant_type=password flow.
+                    options.AllowPasswordFlow()
+                        .AllowRefreshTokenFlow()
+                        .AllowCustomFlow(GoogleAssertionGrantHandler.GrantType)
+                        .AllowCustomFlow(FacebookAssertionGrantHandler.GrantType)
+                        .AllowCustomFlow(MicrosoftAssertionGrantHandler.GrantType);
+
+                    // Mark the "email", "profile" and "roles" scopes as supported scopes.
+                    options.RegisterScopes(
+                        OpenIdConnectConstants.Scopes.Email,
+                        OpenIdConnectConstants.Scopes.Profile,
+                        OpenIddictConstants.Scopes.Roles);
+
+                    // When request caching is enabled, authorization and logout requests
+                    // are stored in the distributed cache by OpenIddict and the user agent
+                    // is redirected to the same page with a single parameter (request_id).
+                    // This allows flowing large OpenID Connect requests even when using
+                    // an external authentication provider like Google, Facebook or Twitter.
+                    options.EnableRequestCaching();
+
+                    // Enable scope validation, so that authorization and token requests
+                    // that specify unregistered scopes are automatically rejected.
+                    options.EnableScopeValidation();
+
+                    // When rolling tokens are enabled, immediately
+                    // redeem the refresh token to prevent future reuse.
+                    options.UseRollingTokens();
+                })
+
+                // Register the OpenIddict validation handler.
+                // Note: the OpenIddict validation handler is only compatible with the
+                // default token format or with reference tokens and cannot be used with
+                // JWT tokens. For JWT tokens, use the Microsoft JWT bearer handler.
+                .AddValidation();
 
             services.Configure((AssertionGrantOptions options) =>
             {
@@ -147,16 +175,7 @@ namespace ClickerHeroesTrackerWebsite
             services.AddSingleton<FacebookAssertionGrantHandler>();
             services.AddSingleton<MicrosoftAssertionGrantHandler>();
 
-            services.AddAuthentication()
-                .AddOAuthValidation();
-
-            services.AddAuthorization(options =>
-            {
-                options.DefaultPolicy = new AuthorizationPolicyBuilder()
-                        .AddAuthenticationSchemes(OAuthValidationDefaults.AuthenticationScheme)
-                        .RequireAuthenticatedUser()
-                        .Build();
-            });
+            services.AddAuthentication();
 
             var buildInfoProvider = new BuildInfoProvider(this.environment);
 

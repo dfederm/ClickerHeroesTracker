@@ -3,7 +3,7 @@ import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
 import { By } from "@angular/platform-browser";
 import { FormsModule } from "@angular/forms";
 import { NO_ERRORS_SCHEMA, DebugElement } from "@angular/core";
-import { BehaviorSubject } from "rxjs/BehaviorSubject";
+import { BehaviorSubject } from "rxjs";
 
 import { FeedbackDialogComponent } from "./feedbackDialog";
 import { AuthenticationService, IUserInfo } from "../../services/authenticationService/authenticationService";
@@ -38,11 +38,11 @@ describe("FeedbackDialogComponent", () => {
                 imports: [FormsModule],
                 declarations: [FeedbackDialogComponent],
                 providers:
-                [
-                    { provide: AuthenticationService, useValue: authenticationService },
-                    { provide: FeedbackService, useValue: feedbackService },
-                    { provide: NgbActiveModal, useValue: activeModal },
-                ],
+                    [
+                        { provide: AuthenticationService, useValue: authenticationService },
+                        { provide: FeedbackService, useValue: feedbackService },
+                        { provide: NgbActiveModal, useValue: activeModal },
+                    ],
                 schemas: [NO_ERRORS_SCHEMA],
             })
             .compileComponents()

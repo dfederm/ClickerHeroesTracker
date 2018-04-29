@@ -2,8 +2,6 @@ import { Injectable } from "@angular/core";
 import { HttpClient, HttpHeaders, HttpParams, HttpErrorResponse } from "@angular/common/http";
 import { HttpErrorHandlerService } from "../httpErrorHandlerService/httpErrorHandlerService";
 
-import "rxjs/add/operator/toPromise";
-
 import { AuthenticationService } from "../authenticationService/authenticationService";
 import { IPaginationMetadata, IUser } from "../../models";
 

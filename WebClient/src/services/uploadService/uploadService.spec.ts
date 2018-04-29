@@ -1,6 +1,6 @@
 import { TestBed, fakeAsync, tick } from "@angular/core/testing";
 import { HttpClientTestingModule, HttpTestingController } from "@angular/common/http/testing";
-import { BehaviorSubject } from "rxjs/BehaviorSubject";
+import { BehaviorSubject } from "rxjs";
 import { HttpErrorHandlerService } from "../httpErrorHandlerService/httpErrorHandlerService";
 import { HttpHeaders, HttpErrorResponse } from "@angular/common/http";
 

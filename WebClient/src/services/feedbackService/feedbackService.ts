@@ -3,8 +3,6 @@ import { HttpClient, HttpParams, HttpErrorResponse } from "@angular/common/http"
 import { HttpErrorHandlerService } from "../httpErrorHandlerService/httpErrorHandlerService";
 import { AuthenticationService } from "../authenticationService/authenticationService";
 
-import "rxjs/add/operator/toPromise";
-
 @Injectable()
 export class FeedbackService {
     constructor(
