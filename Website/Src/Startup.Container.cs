@@ -177,6 +177,14 @@ namespace ClickerHeroesTrackerWebsite
 
             services.AddAuthentication();
 
+            services.AddAuthorization(options =>
+            {
+                options.DefaultPolicy = new AuthorizationPolicyBuilder()
+                    .AddAuthenticationSchemes(OAuthValidationDefaults.AuthenticationScheme)
+                    .RequireAuthenticatedUser()
+                    .Build();
+            });
+
             var buildInfoProvider = new BuildInfoProvider(this.environment);
 
             services.Configure((ApplicationInsightsServiceOptions options) =>
