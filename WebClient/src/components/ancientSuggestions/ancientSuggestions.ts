@@ -175,7 +175,7 @@ export class AncientSuggestionsComponent implements OnInit {
             if (ancientViewModel.suggestedLevel) {
                 let ancient = this.autoLeveledSavedGame.data.ancients.ancients[ancientViewModel.id.toString()];
                 ancient.level = formatForSavedGameData(ancientViewModel.suggestedLevel);
-                ancient.spentHeroSouls = formatForSavedGameData(ancientViewModel.costToLevel);
+                ancient.spentHeroSouls = formatForSavedGameData(new Decimal(ancient.spentHeroSouls).plus(ancientViewModel.costToLevel));
             }
         }
 
