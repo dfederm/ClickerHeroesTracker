@@ -39,6 +39,7 @@ describe("ExponentialPipe", () => {
 
     @Component({
         template: "{{ value | exponential }}",
+        selector: "mock",
     })
     class MockComponent {
         public value: number | Decimal;

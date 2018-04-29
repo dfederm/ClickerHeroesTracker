@@ -1,14 +1,8 @@
 import { Injectable } from "@angular/core";
 import { HttpClient, HttpErrorResponse } from "@angular/common/http";
-import { Observable } from "rxjs/Observable";
-import { BehaviorSubject } from "rxjs/BehaviorSubject";
-import { Subscription } from "rxjs/Subscription";
-import { map } from "rxjs/operators/map";
-import { distinctUntilChanged } from "rxjs/operators/distinctUntilChanged";
-import { interval } from "rxjs/observable/interval";
+import { Observable, BehaviorSubject, Subscription, interval } from "rxjs";
+import { map, distinctUntilChanged } from "rxjs/operators";
 import { HttpErrorHandlerService } from "../httpErrorHandlerService/httpErrorHandlerService";
-
-import "rxjs/add/operator/toPromise";
 
 import { AuthenticationService } from "../authenticationService/authenticationService";
 

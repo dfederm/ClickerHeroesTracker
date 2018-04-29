@@ -4,7 +4,7 @@ import { UploadService, IUpload } from "../../services/uploadService/uploadServi
 import { AuthenticationService, IUserInfo } from "../../services/authenticationService/authenticationService";
 import { Decimal } from "decimal.js";
 import { NgbModal } from "@ng-bootstrap/ng-bootstrap";
-import { switchMap } from "rxjs/operators/switchMap";
+import { switchMap } from "rxjs/operators";
 import { SavedGame } from "../../models/savedGame";
 
 @Component({

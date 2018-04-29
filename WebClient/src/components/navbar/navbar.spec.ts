@@ -2,9 +2,8 @@ import { NO_ERRORS_SCHEMA, Type } from "@angular/core";
 import { ComponentFixture, TestBed, async } from "@angular/core/testing";
 import { By } from "@angular/platform-browser";
 import { NgbModal } from "@ng-bootstrap/ng-bootstrap";
-import { BehaviorSubject } from "rxjs/BehaviorSubject";
+import { BehaviorSubject, Subject } from "rxjs";
 import { Router, Event as NavigationEvent, NavigationEnd, NavigationCancel } from "@angular/router";
-import { Subject } from "rxjs/Subject";
 
 import { NavbarComponent } from "./navbar";
 import { AuthenticationService, IUserInfo } from "../../services/authenticationService/authenticationService";

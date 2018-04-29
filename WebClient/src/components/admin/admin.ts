@@ -4,8 +4,6 @@ import { HttpErrorHandlerService } from "../../services/httpErrorHandlerService/
 import { AuthenticationService } from "../../services/authenticationService/authenticationService";
 import { UploadService } from "../../services/uploadService/uploadService";
 
-import "rxjs/add/operator/toPromise";
-
 export interface IUploadQueueStats {
     priority: string;
     numMessages: number;

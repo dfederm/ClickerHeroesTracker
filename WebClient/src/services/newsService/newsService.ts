@@ -3,8 +3,6 @@ import { HttpClient, HttpErrorResponse } from "@angular/common/http";
 import { HttpErrorHandlerService } from "../httpErrorHandlerService/httpErrorHandlerService";
 import { AuthenticationService } from "../authenticationService/authenticationService";
 
-import "rxjs/add/operator/toPromise";
-
 export interface ISiteNewsEntryListResponse {
     entries: { [date: string]: string[] };
 }
