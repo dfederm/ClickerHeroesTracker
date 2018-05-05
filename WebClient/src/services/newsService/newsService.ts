@@ -12,7 +12,9 @@ export interface ISiteNewsEntry {
     messages: string[];
 }
 
-@Injectable()
+@Injectable({
+    providedIn: "root",
+})
 export class NewsService {
     constructor(
         private readonly authenticationService: AuthenticationService,

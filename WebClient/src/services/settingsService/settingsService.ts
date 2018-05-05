@@ -23,7 +23,9 @@ export interface IUserSettings {
     skillAncientLevelDiff: number;
 }
 
-@Injectable()
+@Injectable({
+    providedIn: "root",
+})
 export class SettingsService {
     // Sync settings every hour
     public static syncInterval = 60 * 60 * 1000;

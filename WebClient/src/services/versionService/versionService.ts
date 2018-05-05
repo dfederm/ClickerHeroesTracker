@@ -11,7 +11,9 @@ export interface IVersion {
     webclient: { [bundle: string]: string };
 }
 
-@Injectable()
+@Injectable({
+    providedIn: "root",
+})
 export class VersionService {
     // Poll the version every hour
     public static pollingInterval = 60 * 60 * 1000;

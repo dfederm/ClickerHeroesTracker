@@ -22,7 +22,9 @@ export interface IUserInfo {
     isAdmin?: boolean;
 }
 
-@Injectable()
+@Injectable({
+    providedIn: "root",
+})
 export class AuthenticationService {
     private static readonly tokensKey: string = "auth-tokens";
 

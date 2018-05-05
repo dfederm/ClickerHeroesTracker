@@ -233,7 +233,7 @@ describe("RegisterDialogComponent", () => {
 
                         let errors = getAllErrors();
                         expect(errors.length).toEqual(1);
-                        expect(errors[0]).toEqual("Must be a valid email address");
+                        expect(errors[0]).toEqual("Email address is required");
                     })
                     .then(done)
                     .catch(done.fail);
