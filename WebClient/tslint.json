@@ -135,6 +135,7 @@
     ],
     "prefer-method-signature": true,
     "prefer-readonly": true,
+    "prefer-while": true,
     "quotemark": [
       true,
       "double",

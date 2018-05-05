@@ -22,7 +22,9 @@
   "angularCompilerOptions": {
     "strictInjectionParameters": true,
     "fullTemplateTypeCheck": true,
-    "preserveWhitespaces": false
+    "preserveWhitespaces": false,
+    // Angular tends to be behind in TS versions.
+    "disableTypeScriptVersionCheck": true,
   },
   "exclude": [
     "node_modules/*",

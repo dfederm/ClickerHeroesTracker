@@ -21,7 +21,9 @@ export interface IUpload {
     isScrubbed: boolean;
 }
 
-@Injectable()
+@Injectable({
+    providedIn: "root",
+})
 export class UploadService {
     private readonly cache = new Cache<number, IUpload>(10);
 

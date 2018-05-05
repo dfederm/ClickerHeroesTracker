@@ -6,7 +6,9 @@ export interface IValidationErrorResponse {
     [field: string]: string[];
 }
 
-@Injectable()
+@Injectable({
+    providedIn: "root",
+})
 export class HttpErrorHandlerService {
     constructor(
         private readonly appInsights: AppInsightsService,

@@ -46,16 +46,6 @@ import { OpenDialogDirective } from "./directives/openDialog/openDialog";
 
 import { ExponentialPipe } from "./pipes/exponentialPipe";
 
-import { NewsService } from "./services/newsService/newsService";
-import { AuthenticationService } from "./services/authenticationService/authenticationService";
-import { UploadService } from "./services/uploadService/uploadService";
-import { ClanService } from "./services/clanService/clanService";
-import { UserService } from "./services/userService/userService";
-import { VersionService } from "./services/versionService/versionService";
-import { SettingsService } from "./services/settingsService/settingsService";
-import { FeedbackService } from "./services/feedbackService/feedbackService";
-import { HttpErrorHandlerService } from "./services/httpErrorHandlerService/httpErrorHandlerService";
-
 // Import rxjs operators used throughout the app
 import "rxjs/add/operator/toPromise";
 
@@ -175,16 +165,7 @@ const routes: Routes =
     ],
   providers:
     [
-      NewsService,
-      AuthenticationService,
-      UploadService,
-      ClanService,
       AppInsightsService,
-      UserService,
-      VersionService,
-      SettingsService,
-      FeedbackService,
-      HttpErrorHandlerService,
     ],
   bootstrap: [AppComponent],
 })

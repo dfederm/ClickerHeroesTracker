@@ -56,7 +56,9 @@ export interface ISendMessageResponse {
     reason?: string;
 }
 
-@Injectable()
+@Injectable({
+    providedIn: "root",
+})
 export class ClanService {
     constructor(
         private readonly authenticationService: AuthenticationService,

@@ -3,7 +3,9 @@ import { HttpClient, HttpParams, HttpErrorResponse } from "@angular/common/http"
 import { HttpErrorHandlerService } from "../httpErrorHandlerService/httpErrorHandlerService";
 import { AuthenticationService } from "../authenticationService/authenticationService";
 
-@Injectable()
+@Injectable({
+    providedIn: "root",
+})
 export class FeedbackService {
     constructor(
         private readonly authenticationService: AuthenticationService,

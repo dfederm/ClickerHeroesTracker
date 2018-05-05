@@ -95,7 +95,9 @@ export interface IExternalLogin {
     externalUserId: string;
 }
 
-@Injectable()
+@Injectable({
+    providedIn: "root",
+})
 export class UserService {
     constructor(
         private readonly authenticationService: AuthenticationService,
