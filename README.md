@@ -1,5 +1,7 @@
 # Getting started
 ## Prereqs
+
+[![Greenkeeper badge](https://badges.greenkeeper.io/dfederm/ClickerHeroesTracker.svg)](https://greenkeeper.io/)
 1. **Clone the Repo** - There should be a "Clone" button to the right on this page.
 1. Install [.NET Core](https://www.microsoft.com/net/download/). Match the SDK version listed in [global.json](global.json)
 1. For the API code, you'll want [Visual Studio 2017](https://www.visualstudio.com/vs/). The Community version is free.
