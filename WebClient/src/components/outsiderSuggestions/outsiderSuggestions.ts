@@ -314,7 +314,6 @@ export class OutsiderSuggestionsComponent {
     }
 
     private getBorbFant( ancientSouls: number, transcendentPower: number ): number {
-        transcendentPower = transcendentPower || (25 - 23 * Math.exp(-0.0003 * ancientSouls)) / 100;
         let [chor, , pony] = this.nOS( ancientSouls * 0.5, transcendentPower, 100 );
         let ponyBonus = Math.pow(pony, 2) * 10 + 1;
         let chorBonus = Math.pow(1 / 0.95, chor);
