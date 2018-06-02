@@ -35,16 +35,7 @@ export class OutsiderSuggestionsComponent {
         this.refresh();
     }
 
-    public get useBeta(): boolean {
-        return this._useBeta;
-    }
-    public set useBeta(value: boolean) {
-        this._useBeta = value;
-        this.refresh();
-    }
-
     private _savedGame: SavedGame;
-    private _useBeta = true;
 
     private readonly outsidersByName: { [name: string]: IOutsiderViewModel } = {};
 
@@ -75,7 +66,7 @@ export class OutsiderSuggestionsComponent {
     }
 
     // tslint:disable-next-line:cyclomatic-complexity
-    private refresh(): void {
+    public refresh(): void {
         if (!this.savedGame) {
             return;
         }
@@ -90,7 +81,8 @@ export class OutsiderSuggestionsComponent {
             }
         }
 
-        let startTime = Date.now();
+        const latencyCounter = "OutsiderSuggestions";
+        this.appInsights.startTrackEvent(latencyCounter);
 
         let ancientSouls = Number(this.savedGame.data.ancientSoulsTotal) || 0;
         let transcendentPower = (25 - 23 * Math.exp(-0.0003 * ancientSouls)) / 100;
@@ -107,34 +99,28 @@ export class OutsiderSuggestionsComponent {
             // 20k or +8000 Ancient Souls
             this.newHze = Math.max(215000, ancientSouls * 10.32 + 90000);
         } else if (ancientSouls < 27000) {
-            // 43.3k Ancient Souls
-            this.newHze = 458000;
+            // 44.3k Ancient Souls
+            this.newHze =  458000;
         } else {
             // End Game
             [nonBorb, zonePush] = this.findStrategy(ancientSouls);
             let b = this.spendAS(1, ancientSouls - nonBorb);
-            this.newHze = Math.min(5.5e6, b * 5000 + (this.useBeta ? 500 : 46500));
+            this.newHze = Math.min(5.5e6, b * 5000 + 500);
         }
 
         // Push beyond 2mpz
-        let borbTarget = null;
-        let versionZoneDiff;
+        let borbTarget = 0;
         if (ancientSouls >= 27000) {
-            versionZoneDiff = (this.useBeta ? 0 : 46000);
-            borbTarget = this.newHze - versionZoneDiff;
-            this.newHze = this.useBeta
-                ? Math.min(5.5e6, (1 + zonePush / 100) * this.newHze)
-                : Math.min(5.5e6, this.newHze);
+            borbTarget = this.newHze;
+            this.newHze = Math.min(5.5e6, (1 + zonePush / 100) * this.newHze);
         }
 
         this.newHze = Math.floor(this.newHze);
         let newLogHeroSouls = Math.log10(1 + transcendentPower) * this.newHze / 5 + 6;
 
         // Ancient effects
-        let ancientLevels = Math.floor(newLogHeroSouls / Math.log10(2) - Math.log(25) / Math.log(2)) + -1;
-        let kuma = this.useBeta
-            ? -8 * (1 - Math.exp(-0.025 * ancientLevels))
-            : -100 * (1 - Math.exp(-0.0025 * ancientLevels));
+        let ancientLevels = Math.floor(newLogHeroSouls / Math.log10(2) - 3 / Math.log10(2)) - 1;
+        let kuma = -8 * (1 - Math.exp(-0.025 * ancientLevels));
         let atman = 75 * (1 - Math.exp(-0.013 * ancientLevels));
         let bubos = -5 * (1 - Math.exp(-0.002 * ancientLevels));
         let chronos = 30 * (1 - Math.exp(-0.034 * ancientLevels));
@@ -142,7 +128,7 @@ export class OutsiderSuggestionsComponent {
 
         // Unbuffed Stats
         let nerfs = Math.floor(this.newHze / 500) * 500 / 500;
-        let unbuffedMonstersPerZone = 10 + nerfs * (this.useBeta ? 0.1 : 1);
+        let unbuffedMonstersPerZone = 10 + nerfs * 0.1;
         unbuffedMonstersPerZone = Math.round(unbuffedMonstersPerZone * 10) / 10;
         let unbuffedTreasureChestChance = Math.exp(-0.006 * nerfs);
         let unbuffedBossHealth = 10 + nerfs * 0.4;
@@ -150,11 +136,11 @@ export class OutsiderSuggestionsComponent {
         let unbuffedPrimalBossChance = 25 - nerfs * 2;
 
         // Outsider Caps
-        let borbCap = borbTarget
+        let borbCap = borbTarget > 0
             ? Math.ceil((borbTarget - 500) / 5000)
             : ancientSouls >= 10500
                 ? Math.ceil((this.newHze - 500) / 5000)
-                : Math.max(0, Math.ceil(((unbuffedMonstersPerZone - 2.1) / - kuma - 1) / (this.useBeta ? 0.125 : 0.1)));
+                : Math.max(0, Math.ceil(((unbuffedMonstersPerZone - 2.1) / - kuma - 1) / 0.125));
         let rhageistCap = Math.ceil(((100 - unbuffedPrimalBossChance) / atman - 1) / 0.25);
         let kariquaCap = Math.ceil(((unbuffedBossHealth - 5) / -bubos - 1) / 0.5);
         let orphalasCap = Math.max(1, Math.ceil(((2 - unbuffedBossTimer) / chronos - 1) / 0.75)) + 2;
@@ -187,15 +173,13 @@ export class OutsiderSuggestionsComponent {
         // Outsider Leveling
         this.remainingAncientSouls = ancientSouls;
 
-        let borbLevel: number;
-        if (this.useBeta || ancientSouls >= 10500) {
-            let borb15 = Math.min(15, this.spendAS(0.5, this.remainingAncientSouls));
-            let borb10pc = this.spendAS(0.1, this.remainingAncientSouls);
-            let borbLate = this.remainingAncientSouls >= 10000 ? borbCap : 0;
-            borbLevel = Math.max(borb15, borb10pc, borbLate);
-        } else {
-            borbLevel = Math.max((this.remainingAncientSouls >= 300) ? 15 : this.spendAS(0.4, this.remainingAncientSouls), borbCap);
-        }
+        let borbFant = ancientSouls <= 2000
+            ? Math.min(this.spendAS(0.35, this.remainingAncientSouls), this.getBorbFant(ancientSouls, transcendentPower))
+            : 0;
+        let borbHze = this.remainingAncientSouls >= 27000
+            ? borbCap
+            : Math.min(this.spendAS(0.5, this.remainingAncientSouls), borbCap + 1);
+        let borbLevel = Math.max(borbFant, borbHze);
 
         if (this.getCostFromLevel(borbLevel) > (this.remainingAncientSouls - 5)) {
             borbLevel = this.spendAS(1, this.remainingAncientSouls - 5);
@@ -239,7 +223,7 @@ export class OutsiderSuggestionsComponent {
         let buffedPrimalBossChance = Math.max(5, unbuffedPrimalBossChance + atman * (1 + rhageistLevel * 0.25));
         let pbcm = Math.min(buffedPrimalBossChance, 100) / 100;
 
-        newLogHeroSouls = Math.log10(1 + transcendentPower) * (this.newHze - 105) / 5 + Math.log10(ponyBonus + 1) + Math.log10(20 * series * pbcm);
+        newLogHeroSouls = Math.log10(1 + transcendentPower) * (this.newHze - 100) / 5 + Math.log10(ponyBonus + 1) + Math.log10(20 * series * pbcm);
         this.newHeroSouls = Decimal.pow(10, newLogHeroSouls);
         this.newAncientSouls = Math.max(ancientSouls, Math.floor(newLogHeroSouls * 5));
         this.ancientSoulsDiff = this.newAncientSouls - ancientSouls;
@@ -256,7 +240,7 @@ export class OutsiderSuggestionsComponent {
         this.outsidersByName.Orphalas.suggestedLevel = orphalasLevel;
         this.outsidersByName["Sen-Akhan"].suggestedLevel = senakhanLevel;
 
-        this.appInsights.trackMetric("OutsiderSuggestions", Date.now() - startTime);
+        this.appInsights.stopTrackEvent(latencyCounter);
     }
 
     private nOS(ancientSouls: number, transcendentPower: number, zone: number): [number, number, number] {
@@ -269,8 +253,8 @@ export class OutsiderSuggestionsComponent {
         }
         let hpMultiplier = Math.min(1.545, 1.145 + zone / 500000);
         let hsMultiplier = Math.pow(1 + transcendentPower, 0.2);
-        let heroDamageMultiplier = (zone > 1.23e6) ? 1000 : ((zone > 168000) ? 4.5 : 4);
-        let heroCostMultiplier = (zone > 1.23e6) ? 1.22 : 1.07;
+        let heroDamageMultiplier = (zone > 1.2e6) ? 1000 : ((zone > 168000) ? 4.5 : 4);
+        let heroCostMultiplier = (zone > 1.2e6) ? 1.22 : 1.07;
         let goldToDps = Math.log10(heroDamageMultiplier) / Math.log10(heroCostMultiplier) / 25;
         let dpsToZones = Math.log10(hpMultiplier) - Math.log10(1.15) * goldToDps;
         let chor = 0;
@@ -292,8 +276,9 @@ export class OutsiderSuggestionsComponent {
             let zoneIncrease = Math.log10(damageIncrease) / dpsToZones;
             let phanBuff = Math.pow(hsMultiplier, zoneIncrease);
 
-            if (phan < 5) {
-                phanBuff *= 1.3;
+            // Boost Phandoryss for FANT
+            if (phan < 50) {
+                phanBuff *= Math.pow(1.1, 1 / phan);
             }
 
             if (chor < ancientSouls && chor < 150) {
@@ -327,6 +312,22 @@ export class OutsiderSuggestionsComponent {
         }
 
         return [chor, phan, pony];
+    }
+
+    private getBorbFant( ancientSouls: number, transcendentPower: number ): number {
+        transcendentPower = transcendentPower || (25 - 23 * Math.exp(-0.0003 * ancientSouls)) / 100;
+        let [chor, , pony] = this.nOS( ancientSouls * 0.5, transcendentPower, 100 );
+        let ponyBonus = Math.pow(pony, 2) * 10 + 1;
+        let chorBonus = Math.pow(1 / 0.95, chor);
+        let tp = 1 + transcendentPower;
+        let s = tp * tp;
+        let a = s + s * s + s * s * s;
+        let hsFant = 20 * ponyBonus * a;
+        let logHSFant = Math.log10(Math.max(1, hsFant));
+        logHSFant += Math.log10(chorBonus);
+        let kumaFant = Math.max(1, Math.floor(logHSFant / Math.log10(2) - 3 / Math.log(2)) - 1);
+        let kumaEffect = 8 * (1 - Math.exp(-0.025 * kumaFant));
+        return Math.ceil((8 / kumaEffect - 1) * 8);
     }
 
     private getCostFromLevel(level: number): number {

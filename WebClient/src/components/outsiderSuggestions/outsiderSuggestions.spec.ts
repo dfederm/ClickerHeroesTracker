@@ -18,7 +18,6 @@ export const testData: ITestData[] = require("./outsiderSuggestions.testdata.jso
 
 interface ITestData {
     ancientSouls: number;
-    useBeta: boolean;
     expectedLevels: [number, number, number, number, number, number, number, number, number];
     expectedRemaining: number;
     newHze: number;
@@ -65,7 +64,8 @@ describe("OutsiderSuggestionsComponent", () => {
 
     beforeEach(done => {
         let appInsights = {
-            trackMetric: (): void => void 0,
+            startTrackEvent: (): void => void 0,
+            stopTrackEvent: (): void => void 0,
         };
         let settingsService = { settings: () => settingsSubject };
         let changeDetectorRef = { markForCheck: (): void => void 0 };
@@ -96,11 +96,11 @@ describe("OutsiderSuggestionsComponent", () => {
 
     for (let i = 0; i < testData.length; i++) {
         let test = testData[i];
-        it(`should show correct suggestions for ${test.ancientSouls} ancient souls for patch ${test.useBeta ? "e11" : "e10"}`, () => {
+        it(`should show correct suggestions for ${test.ancientSouls} ancient souls for patch e11`, () => {
             // Make a copy to avoid affecting other tests
             component.savedGame = JSON.parse(JSON.stringify(savedGame));
             component.savedGame.data.ancientSoulsTotal = test.ancientSouls;
-            component.useBeta = test.useBeta;
+            component.refresh();
             fixture.detectChanges();
 
             let exponentialPipe = TestBed.get(ExponentialPipe) as ExponentialPipe;
