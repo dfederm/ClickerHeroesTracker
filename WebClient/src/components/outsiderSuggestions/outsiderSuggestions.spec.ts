@@ -64,6 +64,7 @@ describe("OutsiderSuggestionsComponent", () => {
 
     beforeEach(done => {
         let appInsights = {
+            trackMetric: (): void => void 0,
             startTrackEvent: (): void => void 0,
             stopTrackEvent: (): void => void 0,
         };
