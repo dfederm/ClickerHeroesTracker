@@ -4,7 +4,7 @@ import { HttpHeaders } from "@angular/common/http";
 import { BehaviorSubject } from "rxjs";
 import { HttpErrorHandlerService } from "../httpErrorHandlerService/httpErrorHandlerService";
 
-import { SettingsService, IUserSettings, PlayStyle, Theme } from "./settingsService";
+import { SettingsService, IUserSettings, PlayStyle, Theme, GraphSpacingType } from "./settingsService";
 import { AuthenticationService, IUserInfo } from "../authenticationService/authenticationService";
 
 describe("SettingsService", () => {
@@ -78,6 +78,7 @@ describe("SettingsService", () => {
                 shouldLevelSkillAncients: false,
                 skillAncientBaseAncient: 1,
                 skillAncientLevelDiff: 2,
+                graphSpacingType: "ascension",
             };
             (localStorage.getItem as jasmine.Spy).and.returnValue(JSON.stringify(expectedSettings));
 
@@ -101,6 +102,7 @@ describe("SettingsService", () => {
                 shouldLevelSkillAncients: false,
                 skillAncientBaseAncient: 1,
                 skillAncientLevelDiff: 2,
+                graphSpacingType: "time",
             };
             (localStorage.getItem as jasmine.Spy).and.returnValue(JSON.stringify(expectedSettings));
 
@@ -502,6 +504,7 @@ describe("SettingsService", () => {
             shouldLevelSkillAncients: index % 2 === 0,
             skillAncientBaseAncient: index,
             skillAncientLevelDiff: index,
+            graphSpacingType: (["time", "ascension"] as GraphSpacingType[])[index % 2],
         };
 
         request.flush(settings);

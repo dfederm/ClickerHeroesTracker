@@ -26,12 +26,27 @@ interface IChartViewModel {
     templateUrl: "./userCompare.html",
 })
 export class UserCompareComponent implements OnInit {
+    private static readonly timeRanges = [
+        "1d",
+        "3d",
+        "1w",
+        "1m",
+        "3m",
+        "1y",
+    ];
+    private static readonly ascensionRanges = [
+        "10",
+        "25",
+        "50",
+        "100",
+    ];
+
     public isError: boolean;
     public isLoading: boolean;
     public userName: string;
     public compareUserName: string;
-    public _currentDateRange: string;
-    public dateRanges: string[];
+    public _selectedRange: string;
+    public ranges: string[];
     public charts: IChartViewModel[];
 
     private settings: IUserSettings;
@@ -42,27 +57,17 @@ export class UserCompareComponent implements OnInit {
         private readonly settingsService: SettingsService,
     ) { }
 
-    public get currentDateRange(): string {
-        return this._currentDateRange;
+    public get selectedRange(): string {
+        return this._selectedRange;
     }
-    public set currentDateRange(value: string) {
-        if (this._currentDateRange !== value) {
-            this._currentDateRange = value;
+    public set selectedRange(value: string) {
+        if (this._selectedRange !== value) {
+            this._selectedRange = value;
             this.fetchData();
         }
     }
 
     public ngOnInit(): void {
-        this.dateRanges = [
-            "1d",
-            "3d",
-            "1w",
-            "1m",
-            "3m",
-            "1y",
-        ];
-        this._currentDateRange = "1w";
-
         this.route.params.subscribe(
             (params: Params) => {
                 this.userName = params.userName;
@@ -75,45 +80,60 @@ export class UserCompareComponent implements OnInit {
             .settings()
             .subscribe(settings => {
                 this.settings = settings;
+                switch (this.settings.graphSpacingType) {
+                    case "ascension": {
+                        this.ranges = UserCompareComponent.ascensionRanges;
+                        this._selectedRange = "10";
+                        break;
+                    }
+                    case "time":
+                    default: {
+                        this.ranges = UserCompareComponent.timeRanges;
+                        this._selectedRange = "1w";
+                    }
+                }
                 this.fetchData();
             });
     }
 
     private fetchData(): void {
-        if (!this.userName || !this.compareUserName) {
+        if (!this.userName || !this.compareUserName || !this.settings) {
             return;
         }
 
         let now = Date.now();
-        let end = new Date(now);
-        let start = new Date(now);
+        let startOrPage: number | Date = new Date(now);
+        let endOrCount: number | Date = new Date(now);
 
-        switch (this.currentDateRange) {
+        switch (this.selectedRange) {
             case "1d":
-                start.setDate(start.getDate() - 1);
+                startOrPage.setDate(startOrPage.getDate() - 1);
                 break;
             case "3d":
-                start.setDate(start.getDate() - 3);
+                startOrPage.setDate(startOrPage.getDate() - 3);
                 break;
             case "1m":
-                start.setMonth(start.getMonth() - 1);
+                startOrPage.setMonth(startOrPage.getMonth() - 1);
                 break;
             case "3m":
-                start.setMonth(start.getMonth() - 3);
+                startOrPage.setMonth(startOrPage.getMonth() - 3);
                 break;
             case "1y":
-                start.setFullYear(start.getFullYear() - 1);
+                startOrPage.setFullYear(startOrPage.getFullYear() - 1);
                 break;
             case "1w":
-            default:
-                start.setDate(start.getDate() - 7);
+                startOrPage.setDate(startOrPage.getDate() - 7);
                 break;
+            default:
+                // Using Ascension range
+                startOrPage = 1;
+                endOrCount = Number(this.selectedRange);
         }
 
         this.isLoading = true;
         Promise.all([
-            this.userService.getProgress(this.userName, start, end),
-            this.userService.getProgress(this.compareUserName, start, end),
+            this.userService.getProgress(this.userName, startOrPage, endOrCount),
+            this.userService.getProgress(this.compareUserName, startOrPage, endOrCount),
         ])
             .then(data => this.handleData(data[0], data[1]))
             .catch(() => this.isError = true);
@@ -153,6 +173,7 @@ export class UserCompareComponent implements OnInit {
         this.charts = charts;
     }
 
+    // tslint:disable-next-line:cyclomatic-complexity
     private createChart(
         title: string,
         isProminent: boolean,
@@ -166,10 +187,12 @@ export class UserCompareComponent implements OnInit {
         let min = new Decimal(Infinity);
         let max = new Decimal(0);
         let requiresDecimal = false;
+        let isTime = this.settings.graphSpacingType === "time";
 
         let decimalData1: { x: number, y: Decimal }[] = [];
+        let index = 0; // When not using time, normalize the ascension numbers
         for (let i in data1) {
-            let time = Date.parse(i);
+            let x = isTime ? Date.parse(i) : Number(index++);
             let value = new Decimal(data1[i]);
 
             if (min.greaterThan(value)) {
@@ -182,12 +205,13 @@ export class UserCompareComponent implements OnInit {
 
             requiresDecimal = requiresDecimal || !isFinite(value.toNumber());
 
-            decimalData1.push({ x: time, y: value });
+            decimalData1.push({ x, y: value });
         }
 
         let decimalData2: { x: number, y: Decimal }[] = [];
+        index = 0;
         for (let i in data2) {
-            let time = Date.parse(i);
+            let x = isTime ? Date.parse(i) : Number(index++);
             let value = new Decimal(data2[i]);
 
             if (min.greaterThan(value)) {
@@ -200,18 +224,18 @@ export class UserCompareComponent implements OnInit {
 
             requiresDecimal = requiresDecimal || !isFinite(value.toNumber());
 
-            decimalData2.push({ x: time, y: value });
+            decimalData2.push({ x, y: value });
         }
 
         let isLogarithmic = (this.settings.useLogarithmicGraphScale && max.minus(min).greaterThan(this.settings.logarithmicGraphScaleThreshold)) || requiresDecimal;
 
         let seriesData1: { x: number, y: number }[] = [];
         for (let i = 0; i < decimalData1.length; i++) {
-            let time = decimalData1[i].x;
+            let x = decimalData1[i].x;
             let value = decimalData1[i].y;
 
             seriesData1.push({
-                x: time,
+                x,
                 y: isLogarithmic
                     ? value.log().toNumber()
                     : value.toNumber(),
@@ -275,7 +299,9 @@ export class UserCompareComponent implements OnInit {
                 tooltips: {
                     callbacks: {
                         title: (tooltipItems: ChartTooltipItem[]) => {
-                            return new Date(tooltipItems[0].xLabel).toLocaleString();
+                            return isTime
+                                ? new Date(tooltipItems[0].xLabel).toLocaleString()
+                                : null;
                         },
                         label: (tooltipItem: ChartTooltipItem) => {
                             let tooltipUser = tooltipItem.datasetIndex === 0
@@ -295,7 +321,8 @@ export class UserCompareComponent implements OnInit {
                 scales: {
                     xAxes: [
                         {
-                            type: "time",
+                            display: isTime,
+                            type: isTime ? "time" : "linear",
                         },
                     ],
                     yAxes: [

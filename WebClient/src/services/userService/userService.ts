@@ -152,10 +152,18 @@ export class UserService {
             });
     }
 
-    public getProgress(userName: string, start: Date, end: Date): Promise<IProgressData> {
-        let params = new HttpParams()
-            .set("start", start.toISOString())
-            .set("end", end.toISOString());
+    public getProgress(
+        userName: string,
+        startOrPage: number | Date,
+        endOrCount: number | Date,
+    ): Promise<IProgressData> {
+        let params = new HttpParams();
+        params = typeof startOrPage === "number"
+            ? params.set("page", startOrPage.toString())
+            : params.set("start", startOrPage.toISOString());
+        params = typeof endOrCount === "number"
+            ? params.set("count", endOrCount.toString())
+            : params.set("end", endOrCount.toISOString());
 
         return this.authenticationService.getAuthHeaders()
             .then(headers => {

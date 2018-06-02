@@ -172,6 +172,26 @@
     <fieldset class="form-group">
         <div class="row">
             <div class="col-sm-8 col-form-label">
+                Graph Spacing Type
+                <a class="text-muted"
+                   placement="right"
+                   container="body"
+                   ngbTooltip="This determines the x-axis for graphs. 'Time' will show progress over time while 'Ascension' will show progress per ascension.">(?)</a>
+            </div>
+            <div class="col-sm-4">
+                <select class="form-control"
+                        [(ngModel)]="settings.graphSpacingType"
+                        (change)="setSetting('graphSpacingType', settings.graphSpacingType)"
+                        [disabled]="isSettingPending.graphSpacingType">
+                    <option *ngFor="let t of graphSpacingTypes"
+                            [ngValue]="t">{{ t | titlecase }}</option>
+                </select>
+            </div>
+        </div>
+    </fieldset>
+    <fieldset class="form-group">
+        <div class="row">
+            <div class="col-sm-8 col-form-label">
                 Site theme
             </div>
             <div class="col-sm-4">

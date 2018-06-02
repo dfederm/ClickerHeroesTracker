@@ -27,11 +27,26 @@ interface IChartViewModel {
     templateUrl: "./userProgress.html",
 })
 export class UserProgressComponent implements OnInit {
+    private static readonly timeRanges = [
+        "1d",
+        "3d",
+        "1w",
+        "1m",
+        "3m",
+        "1y",
+    ];
+    private static readonly ascensionRanges = [
+        "10",
+        "25",
+        "50",
+        "100",
+    ];
+
     public isError: boolean;
     public isLoading: boolean;
     public userName: string;
-    public _currentDateRange: string;
-    public dateRanges: string[];
+    public _selectedRange: string;
+    public ranges: string[];
     public charts: IChartViewModel[];
 
     private settings: IUserSettings;
@@ -46,27 +61,17 @@ export class UserProgressComponent implements OnInit {
         this.percentPipe = new PercentPipe(locale);
     }
 
-    public get currentDateRange(): string {
-        return this._currentDateRange;
+    public get selectedRange(): string {
+        return this._selectedRange;
     }
-    public set currentDateRange(value: string) {
-        if (this._currentDateRange !== value) {
-            this._currentDateRange = value;
+    public set selectedRange(value: string) {
+        if (this._selectedRange !== value) {
+            this._selectedRange = value;
             this.fetchData();
         }
     }
 
     public ngOnInit(): void {
-        this.dateRanges = [
-            "1d",
-            "3d",
-            "1w",
-            "1m",
-            "3m",
-            "1y",
-        ];
-        this._currentDateRange = "1w";
-
         this.route.params.subscribe(
             (params: Params) => {
                 this.userName = params.userName;
@@ -78,43 +83,58 @@ export class UserProgressComponent implements OnInit {
             .settings()
             .subscribe(settings => {
                 this.settings = settings;
+                switch (this.settings.graphSpacingType) {
+                    case "ascension": {
+                        this.ranges = UserProgressComponent.ascensionRanges;
+                        this._selectedRange = "10";
+                        break;
+                    }
+                    case "time":
+                    default: {
+                        this.ranges = UserProgressComponent.timeRanges;
+                        this._selectedRange = "1w";
+                    }
+                }
                 this.fetchData();
             });
     }
 
     private fetchData(): void {
-        if (!this.userName) {
+        if (!this.userName || !this.settings) {
             return;
         }
 
         let now = Date.now();
-        let end = new Date(now);
-        let start = new Date(now);
+        let startOrPage: number | Date = new Date(now);
+        let endOrCount: number | Date = new Date(now);
 
-        switch (this.currentDateRange) {
+        switch (this.selectedRange) {
             case "1d":
-                start.setDate(start.getDate() - 1);
+                startOrPage.setDate(startOrPage.getDate() - 1);
                 break;
             case "3d":
-                start.setDate(start.getDate() - 3);
+                startOrPage.setDate(startOrPage.getDate() - 3);
                 break;
             case "1m":
-                start.setMonth(start.getMonth() - 1);
+                startOrPage.setMonth(startOrPage.getMonth() - 1);
                 break;
             case "3m":
-                start.setMonth(start.getMonth() - 3);
+                startOrPage.setMonth(startOrPage.getMonth() - 3);
                 break;
             case "1y":
-                start.setFullYear(start.getFullYear() - 1);
+                startOrPage.setFullYear(startOrPage.getFullYear() - 1);
                 break;
             case "1w":
-            default:
-                start.setDate(start.getDate() - 7);
+                startOrPage.setDate(startOrPage.getDate() - 7);
                 break;
+            default:
+                // Using Ascension range
+                startOrPage = 1;
+                endOrCount = Number(this.selectedRange);
         }
 
         this.isLoading = true;
-        this.userService.getProgress(this.userName, start, end)
+        this.userService.getProgress(this.userName, startOrPage, endOrCount)
             .then(progress => this.handleData(progress))
             .catch(() => this.isError = true);
     }
@@ -169,10 +189,11 @@ export class UserProgressComponent implements OnInit {
         let min = new Decimal(Infinity);
         let max = new Decimal(0);
         let requiresDecimal = false;
+        let isTime = this.settings.graphSpacingType === "time";
 
         let decimalData: { x: number, y: Decimal }[] = [];
         for (let i in data) {
-            let time = Date.parse(i);
+            let x = isTime ? Date.parse(i) : Number(i);
             let value = new Decimal(data[i]);
 
             if (min.greaterThan(value)) {
@@ -185,18 +206,18 @@ export class UserProgressComponent implements OnInit {
 
             requiresDecimal = requiresDecimal || !isFinite(value.toNumber());
 
-            decimalData.push({ x: time, y: value });
+            decimalData.push({ x, y: value });
         }
 
         let isLogarithmic = (this.settings.useLogarithmicGraphScale && max.minus(min).greaterThan(this.settings.logarithmicGraphScaleThreshold)) || requiresDecimal;
 
         let seriesData: { x: number, y: number }[] = [];
         for (let i = 0; i < decimalData.length; i++) {
-            let time = decimalData[i].x;
+            let x = decimalData[i].x;
             let value = decimalData[i].y;
 
             seriesData.push({
-                x: time,
+                x,
                 y: isLogarithmic
                     ? value.log().toNumber()
                     : value.toNumber(),
@@ -232,7 +253,9 @@ export class UserProgressComponent implements OnInit {
                 tooltips: {
                     callbacks: {
                         title: (tooltipItems: ChartTooltipItem[]) => {
-                            return new Date(tooltipItems[0].xLabel).toLocaleString();
+                            return isTime
+                                ? new Date(tooltipItems[0].xLabel).toLocaleString()
+                                : tooltipItems[0].xLabel;
                         },
                         label: (tooltipItem: ChartTooltipItem) => {
                             return formatValue(tooltipItem.yLabel, isLogarithmic);
@@ -248,7 +271,7 @@ export class UserProgressComponent implements OnInit {
                 scales: {
                     xAxes: [
                         {
-                            type: "time",
+                            type: isTime ? "time" : "linear",
                         },
                     ],
                     yAxes: [

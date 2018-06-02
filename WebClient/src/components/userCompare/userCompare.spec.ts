@@ -123,42 +123,42 @@ describe("UserCompareComponent", () => {
         it("should display", () => {
             fixture.detectChanges();
 
-            expect(component.currentDateRange).toEqual("1w");
+            expect(component.selectedRange).toEqual("1w");
 
-            let dateRangeSelector = fixture.debugElement.query(By.css(".btn-group"));
-            expect(dateRangeSelector).not.toBeNull();
+            let rangeSelector = fixture.debugElement.query(By.css(".btn-group"));
+            expect(rangeSelector).not.toBeNull();
 
-            let dateRanges = dateRangeSelector.queryAll(By.css("button"));
-            expect(dateRanges.length).toEqual(component.dateRanges.length);
-            for (let i = 0; i < dateRanges.length; i++) {
-                expect(dateRanges[i].nativeElement.textContent.trim()).toEqual(component.dateRanges[i]);
+            let ranges = rangeSelector.queryAll(By.css("button"));
+            expect(ranges.length).toEqual(component.ranges.length);
+            for (let i = 0; i < ranges.length; i++) {
+                expect(ranges[i].nativeElement.textContent.trim()).toEqual(component.ranges[i]);
             }
 
-            let disabledDateRanges = dateRanges.filter(dateRange => dateRange.classes.disabled);
-            expect(disabledDateRanges.length).toEqual(1);
-            expect(disabledDateRanges[0].nativeElement.textContent.trim()).toEqual(component.currentDateRange);
+            let disabledranges = ranges.filter(range => range.classes.disabled);
+            expect(disabledranges.length).toEqual(1);
+            expect(disabledranges[0].nativeElement.textContent.trim()).toEqual(component.selectedRange);
         });
 
         it("should change the current date range when clicked", () => {
             fixture.detectChanges();
 
-            expect(component.currentDateRange).toEqual("1w");
+            expect(component.selectedRange).toEqual("1w");
 
-            let dateRangeSelector = fixture.debugElement.query(By.css(".btn-group"));
-            expect(dateRangeSelector).not.toBeNull();
+            let rangeSelector = fixture.debugElement.query(By.css(".btn-group"));
+            expect(rangeSelector).not.toBeNull();
 
-            let dateRanges = dateRangeSelector.queryAll(By.css("button"));
-            expect(dateRanges.length).toEqual(component.dateRanges.length);
+            let ranges = rangeSelector.queryAll(By.css("button"));
+            expect(ranges.length).toEqual(component.ranges.length);
 
-            dateRanges[dateRanges.length - 1].nativeElement.click();
+            ranges[ranges.length - 1].nativeElement.click();
 
             fixture.detectChanges();
 
-            expect(component.currentDateRange).toEqual(component.dateRanges[dateRanges.length - 1]);
+            expect(component.selectedRange).toEqual(component.ranges[ranges.length - 1]);
 
-            let disabledDateRanges = dateRanges.filter(dateRange => dateRange.classes.disabled);
-            expect(disabledDateRanges.length).toEqual(1);
-            expect(disabledDateRanges[0].nativeElement.textContent.trim()).toEqual(component.currentDateRange);
+            let disabledranges = ranges.filter(range => range.classes.disabled);
+            expect(disabledranges.length).toEqual(1);
+            expect(disabledranges[0].nativeElement.textContent.trim()).toEqual(component.selectedRange);
         });
 
         it("should request the proper date range", () => {
@@ -171,7 +171,7 @@ describe("UserCompareComponent", () => {
             spyOn(Date, "now").and.returnValue(now);
 
             let expectedEnd = new Date(now);
-            let expectedStarts: { [dateRange: string]: Date } = {
+            let expectedStarts: { [range: string]: Date } = {
                 "1d": new Date(new Date(now).setDate(expectedEnd.getDate() - 1)),
                 "3d": new Date(new Date(now).setDate(expectedEnd.getDate() - 3)),
                 "1w": new Date(new Date(now).setDate(expectedEnd.getDate() - 7)),
@@ -180,15 +180,15 @@ describe("UserCompareComponent", () => {
                 "1y": new Date(new Date(now).setFullYear(expectedEnd.getFullYear() - 1)),
             };
 
-            expect(component.dateRanges.length).toEqual(Object.keys(expectedStarts).length);
+            expect(component.ranges.length).toEqual(Object.keys(expectedStarts).length);
 
-            for (let i = 0; i < component.dateRanges.length; i++) {
-                let dateRange = component.dateRanges[i];
+            for (let i = 0; i < component.ranges.length; i++) {
+                let range = component.ranges[i];
                 (userService.getProgress as jasmine.Spy).calls.reset();
 
-                component.currentDateRange = dateRange;
+                component.selectedRange = range;
 
-                expect(userService.getProgress).toHaveBeenCalledWith("someUserName", expectedStarts[dateRange], expectedEnd);
+                expect(userService.getProgress).toHaveBeenCalledWith("someUserName", expectedStarts[range], expectedEnd);
             }
         });
     });

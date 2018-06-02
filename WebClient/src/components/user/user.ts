@@ -132,14 +132,27 @@ export class UserComponent implements OnInit {
       return;
     }
 
-    // Show the last week's worth
-    let now = Date.now();
-    let end = new Date(now);
-    let start = new Date(now);
-    start.setDate(start.getDate() - 7);
+    let startOrPage: number | Date;
+    let endOrCount: number | Date;
+    switch (this.settings.graphSpacingType) {
+      case "ascension": {
+        // Show the last 10
+        endOrCount = 10;
+        startOrPage = 1;
+        break;
+      }
+      case "time":
+      default: {
+        // Show the last week's worth
+        let now = Date.now();
+        endOrCount = new Date(now);
+        startOrPage = new Date(now);
+        startOrPage.setDate(startOrPage.getDate() - 7);
+      }
+    }
 
     this.isProgressLoading = true;
-    this.userService.getProgress(this.userName, start, end)
+    this.userService.getProgress(this.userName, startOrPage, endOrCount)
       .then(progress => this.handleProgressData(progress))
       .catch(() => this.isProgressError = true);
 
@@ -177,10 +190,11 @@ export class UserComponent implements OnInit {
     let min = new Decimal(Infinity);
     let max = new Decimal(0);
     let requiresDecimal = false;
+    let isTime = this.settings.graphSpacingType === "time";
 
     let decimalData: { x: number, y: Decimal }[] = [];
     for (let i in data) {
-      let time = Date.parse(i);
+      let x = isTime ? Date.parse(i) : Number(i);
       let value = new Decimal(data[i]);
 
       if (min.greaterThan(value)) {
@@ -193,18 +207,18 @@ export class UserComponent implements OnInit {
 
       requiresDecimal = requiresDecimal || !isFinite(value.toNumber());
 
-      decimalData.push({ x: time, y: value });
+      decimalData.push({ x, y: value });
     }
 
     let isLogarithmic = (this.settings.useLogarithmicGraphScale && max.minus(min).greaterThan(this.settings.logarithmicGraphScaleThreshold)) || requiresDecimal;
 
     let seriesData: { x: number, y: number }[] = [];
     for (let i = 0; i < decimalData.length; i++) {
-      let time = decimalData[i].x;
+      let x = decimalData[i].x;
       let value = decimalData[i].y;
 
       seriesData.push({
-        x: time,
+        x,
         y: isLogarithmic
           ? value.log().toNumber()
           : value.toNumber(),
@@ -235,7 +249,9 @@ export class UserComponent implements OnInit {
         tooltips: {
           callbacks: {
             title: (tooltipItems: ChartTooltipItem[]) => {
-              return new Date(tooltipItems[0].xLabel).toLocaleString();
+              return isTime
+                ? new Date(tooltipItems[0].xLabel).toLocaleString()
+                : tooltipItems[0].xLabel;
             },
             label: (tooltipItem: ChartTooltipItem) => {
               return isLogarithmic
@@ -253,7 +269,7 @@ export class UserComponent implements OnInit {
         scales: {
           xAxes: [
             {
-              type: "time",
+              type: isTime ? "time" : "linear",
             },
           ],
           yAxes: [

@@ -16,5 +16,6 @@ namespace ClickerHeroesTrackerWebsite.Models.Settings
         public const byte ShouldLevelSkillAncients = 13;
         public const byte SkillAncientBaseAncient = 14;
         public const byte SkillAncientLevelDiff = 15;
+        public const byte GraphSpacingType = 16;
     }
 }

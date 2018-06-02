@@ -25,6 +25,7 @@ describe("SettingsDialogComponent", () => {
         shouldLevelSkillAncients: true,
         skillAncientBaseAncient: 17,
         skillAncientLevelDiff: 0,
+        graphSpacingType: "time",
     };
 
     beforeEach(done => {
@@ -424,11 +425,45 @@ describe("SettingsDialogComponent", () => {
         });
     });
 
-    describe("Site theme", () => {
+    describe("Graph Spacing Type", () => {
         let input: HTMLSelectElement;
 
         beforeEach(() => {
             input = getInput(9, "select");
+        });
+
+        it("should be set to the inital value", () => {
+            verifyInitialValue(input, `${input.selectedIndex}: ${settings.graphSpacingType}`);
+        });
+
+        it("should patch settings when the value changes", () => {
+            verifyServiceCalledWhenSettingChanges(
+                "graphSpacingType",
+                () => {
+                    setSelectValue(input, input.selectedIndex + 1);
+                    return component.graphSpacingTypes[input.selectedIndex];
+                },
+            );
+        });
+
+        it("should disable the setting until the patch is complete", done => {
+            verifyDisabledUntilPromiseResolves(input, () => setSelectValue(input, input.selectedIndex + 1))
+                .then(done)
+                .catch(done.fail);
+        });
+
+        it("should show an error when the patch fails", done => {
+            verifyErrorShowWhenPromiseRejects(input, () => setSelectValue(input, input.selectedIndex + 1))
+                .then(done)
+                .catch(done.fail);
+        });
+    });
+
+    describe("Site theme", () => {
+        let input: HTMLSelectElement;
+
+        beforeEach(() => {
+            input = getInput(10, "select");
         });
 
         it("should be set to the inital value", () => {
@@ -463,7 +498,7 @@ describe("SettingsDialogComponent", () => {
         expect(body).not.toBeNull();
 
         let formGroups = body.queryAll(By.css(".form-group"));
-        expect(formGroups.length).toEqual(10);
+        expect(formGroups.length).toEqual(11);
 
         let formGroup = formGroups[i];
         let inputElement = formGroup.query(By.css(selector));
