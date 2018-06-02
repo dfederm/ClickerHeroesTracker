@@ -43,7 +43,7 @@ export class SettingsService {
         logarithmicGraphScaleThreshold: 1000000,
         hybridRatio: 2,
         theme: "light",
-        shouldLevelSkillAncients: false,
+        shouldLevelSkillAncients: true,
         skillAncientBaseAncient: 17, // Chronos
         skillAncientLevelDiff: 0,
         graphSpacingType: "time",
