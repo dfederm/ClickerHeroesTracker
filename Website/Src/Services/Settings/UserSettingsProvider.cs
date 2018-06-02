@@ -10,6 +10,7 @@ namespace ClickerHeroesTrackerWebsite.Models.Settings
     using System.Threading.Tasks;
     using ClickerHeroesTrackerWebsite.Services.Database;
     using Website.Models.Api.Users;
+    using Website.Services.Settings;
 
     /// <summary>
     /// An <see cref="IUserSettingsProvider"/> implementation which uses a database as the backing store.
@@ -86,6 +87,9 @@ namespace ClickerHeroesTrackerWebsite.Models.Settings
                             break;
                         case UserSettingsConstants.SkillAncientLevelDiff:
                             userSettings.SkillAncientLevelDiff = int.TryParse(settingValue, out var skillAncientLevelDiff) ? new int?(skillAncientLevelDiff) : null;
+                            break;
+                        case UserSettingsConstants.GraphSpacingType:
+                            userSettings.GraphSpacingType = Enum.TryParse<GraphSpacingType>(settingValue, out var graphSpacingType) ? new GraphSpacingType?(graphSpacingType) : null;
                             break;
                     }
                 }
@@ -169,6 +173,7 @@ namespace ClickerHeroesTrackerWebsite.Models.Settings
             AppendSetting(UserSettingsConstants.ShouldLevelSkillAncients, userSettings.ShouldLevelSkillAncients?.ToString());
             AppendSetting(UserSettingsConstants.SkillAncientBaseAncient, userSettings.SkillAncientBaseAncient?.ToString());
             AppendSetting(UserSettingsConstants.SkillAncientLevelDiff, userSettings.SkillAncientLevelDiff?.ToString());
+            AppendSetting(UserSettingsConstants.GraphSpacingType, userSettings.GraphSpacingType?.ToString());
 
             // If no settings were appended, just short-circuit.
             if (isFirst)

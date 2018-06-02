@@ -10,6 +10,8 @@ export type PlayStyle = "idle" | "hybrid" | "active";
 
 export type Theme = "light" | "dark";
 
+export type GraphSpacingType = "time" | "ascension";
+
 export interface IUserSettings {
     playStyle: PlayStyle;
     useScientificNotation: boolean;
@@ -21,6 +23,7 @@ export interface IUserSettings {
     shouldLevelSkillAncients: boolean;
     skillAncientBaseAncient: number;
     skillAncientLevelDiff: number;
+    graphSpacingType: GraphSpacingType;
 }
 
 @Injectable({
@@ -43,6 +46,7 @@ export class SettingsService {
         shouldLevelSkillAncients: false,
         skillAncientBaseAncient: 17, // Chronos
         skillAncientLevelDiff: 0,
+        graphSpacingType: "time",
     };
 
     public static readonly settingsKey: string = "settings";

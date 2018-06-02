@@ -3,11 +3,11 @@
         <a routerLink="/users/{{userName}}">{{ userName }}</a>'s Progress
     </h2>
     <div class="btn-group">
-        <button *ngFor="let dateRange of dateRanges"
+        <button *ngFor="let range of ranges"
                 class="btn btn-primary"
-                [ngClass]="{'disabled': currentDateRange === dateRange}"
-                (click)="currentDateRange = dateRange">
-            {{ dateRange }}
+                [ngClass]="{'disabled': selectedRange === range}"
+                (click)="selectedRange = range">
+            {{ range }}
         </button>
     </div>
 

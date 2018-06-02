@@ -1,7 +1,7 @@
 import { Component, OnInit } from "@angular/core";
 import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
 
-import { SettingsService, PlayStyle, Theme, IUserSettings } from "../../services/settingsService/settingsService";
+import { SettingsService, PlayStyle, Theme, IUserSettings, GraphSpacingType } from "../../services/settingsService/settingsService";
 import { ChangePasswordDialogComponent } from "../changePasswordDialog/changePasswordDialog";
 
 @Component({
@@ -20,6 +20,8 @@ export class SettingsDialogComponent implements OnInit {
     public playStyles: PlayStyle[] = ["idle", "hybrid", "active"];
 
     public themes: Theme[] = ["light", "dark"];
+
+    public graphSpacingTypes: GraphSpacingType[] = ["time", "ascension"];
 
     public skillAncientBaseAncients: { name: string, id: number }[] = [
         { name: "Atman", id: 13 },

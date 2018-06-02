@@ -20,6 +20,7 @@ describe("ExponentialPipe", () => {
         shouldLevelSkillAncients: false,
         skillAncientBaseAncient: 17,
         skillAncientLevelDiff: 0,
+        graphSpacingType: "time",
     };
 
     let settingsWithoutScientificNotation: IUserSettings = {
@@ -33,6 +34,7 @@ describe("ExponentialPipe", () => {
         shouldLevelSkillAncients: false,
         skillAncientBaseAncient: 17,
         skillAncientLevelDiff: 0,
+        graphSpacingType: "time",
     };
 
     let settingsSubject = new BehaviorSubject(settingsWithScientificNotation);

@@ -5,6 +5,7 @@
 namespace Website.Models.Api.Users
 {
     using ClickerHeroesTrackerWebsite.Models;
+    using Website.Services.Settings;
 
     public sealed class UserSettings
     {
@@ -57,5 +58,10 @@ namespace Website.Models.Api.Users
         /// Gets or sets the preferred number of levels the skill ancients should be in relation to the base ancient.
         /// </summary>
         public int? SkillAncientLevelDiff { get; set; }
+
+        /// <summary>
+        /// Gets or sets the graph spacing type to use.
+        /// </summary>
+        public GraphSpacingType? GraphSpacingType { get; set; }
     }
 }

@@ -7,6 +7,7 @@ namespace Website.Controllers
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Text;
     using System.Threading.Tasks;
     using ClickerHeroesTrackerWebsite.Models;
     using ClickerHeroesTrackerWebsite.Models.Api;
@@ -219,8 +220,16 @@ namespace Website.Controllers
         public async Task<ActionResult<ProgressData>> Progress(
             string userName,
             DateTime? start,
-            DateTime? end)
+            DateTime? end,
+            int? page,
+            int? count)
         {
+            if ((start.HasValue || end.HasValue) && (page.HasValue || count.HasValue))
+            {
+                this.ModelState.AddModelError(string.Empty, "time-based and ascension-based filters are mutually exclusive");
+                return this.BadRequest(this.ModelState);
+            }
+
             var user = await this.userManager.FindByNameAsync(userName);
             if (user == null)
             {
@@ -233,48 +242,238 @@ namespace Website.Controllers
                 return this.NotFound();
             }
 
-            // Fill in missing range values as needed
-            DateTime startDate;
-            DateTime endDate;
-            if (start.HasValue && end.HasValue)
+            var parameters = new Dictionary<string, object>
             {
-                startDate = start.Value;
-                endDate = end.Value;
-            }
-            else if (start.HasValue)
+                { "@UserId", userId },
+            };
+
+            var commandText = new StringBuilder();
+            Func<object, string> parseOrdinal;
+
+            // If either count or skip are set, use ascention-based filtering. Default to time-based in all other cases.
+            // Note that we're inferring the type from the request and don't really care what the user's settings are. The client
+            // should take settings into account and make the appropriate API call.
+            if (page.HasValue || count.HasValue)
             {
-                // Default to a week after the start date
-                startDate = start.Value;
-                endDate = start.Value.AddDays(7);
-            }
-            else if (end.HasValue)
-            {
-                // Default to a week before the end date
-                startDate = end.Value.AddDays(-7);
-                endDate = end.Value;
+                // Fill in missing range values as needed
+                var pageNum = page.GetValueOrDefault(ParameterConstants.Progress.Page.Default);
+                var countNum = count.GetValueOrDefault(ParameterConstants.Progress.Count.Default);
+
+                // Validate parameters
+                if (pageNum < ParameterConstants.Progress.Page.Min)
+                {
+                    return this.BadRequest();
+                }
+
+                if (countNum < ParameterConstants.Progress.Count.Min
+                    || countNum > ParameterConstants.Progress.Count.Max)
+                {
+                    return this.BadRequest();
+                }
+
+                parameters.Add("@Offset", (pageNum - 1) * countNum);
+                parameters.Add("@Count", countNum);
+
+                commandText.Append(@"
+                    -- Create a temp table that scopes the Uploads
+                    CREATE TABLE #ScopedUploads
+                    (
+                        Id  INT NOT NULL,
+                        Ordinal FLOAT (53) NOT NULL,
+                    );
+
+                    -- Populate temp table
+                    INSERT INTO #ScopedUploads (Id, Ordinal)
+                    SELECT Id, AscensionsLifetime AS Ordinal
+                    FROM Uploads
+                    INNER JOIN ComputedStats
+                    ON ComputedStats.UploadId = Uploads.Id
+                    WHERE UserId = @UserId
+                    ORDER BY Ordinal DESC
+                    OFFSET @Offset ROWS
+                    FETCH NEXT @Count ROWS ONLY;");
+
+                parseOrdinal = rawOrdinal => rawOrdinal.ToString();
             }
             else
             {
-                // Default to the past week
-                var now = DateTime.UtcNow;
-                startDate = now.AddDays(-7);
-                endDate = now;
+                // Fill in missing range values as needed
+                DateTime startTime;
+                DateTime endTime;
+                if (start.HasValue && end.HasValue)
+                {
+                    startTime = start.Value;
+                    endTime = end.Value;
+                }
+                else if (start.HasValue)
+                {
+                    // Default to a week after the start date
+                    startTime = start.Value;
+                    endTime = start.Value.AddDays(7);
+                }
+                else if (end.HasValue)
+                {
+                    // Default to a week before the end date
+                    startTime = end.Value.AddDays(-7);
+                    endTime = end.Value;
+                }
+                else
+                {
+                    // Default to the past week
+                    var now = DateTime.UtcNow;
+                    startTime = now.AddDays(-7);
+                    endTime = now;
+                }
+
+                // SQL's datetime2 has no timezone so we need to explicitly convert to UTC
+                startTime = startTime.ToUniversalTime();
+                endTime = endTime.ToUniversalTime();
+
+                parameters.Add("@StartTime", startTime);
+                parameters.Add("@EndTime", endTime);
+
+                commandText.Append(@"
+                    -- Create a temp table that scopes the Uploads
+                    CREATE TABLE #ScopedUploads
+                    (
+                        Id  INT NOT NULL,
+                        Ordinal DATETIME2(0) NOT NULL,
+                    );
+
+                    -- Populate temp table
+                    INSERT INTO #ScopedUploads (Id, Ordinal)
+                    SELECT Id, UploadTime AS Ordinal
+                    FROM Uploads
+                    WHERE UserId = @UserId
+                    AND UploadTime >= ISNULL(@StartTime, '0001-01-01 00:00:00')
+                    AND UploadTime <= ISNULL(@EndTime, '9999-12-31 23:59:59');");
+
+                // The DateTime is a datetime2 which has no timezone so comes out as DateTimeKind.Unknown. Se need to specify the kind so it gets serialized correctly.
+                // For the ToString, use a modified ISO 8601 which excludes the milliseconds.
+                parseOrdinal = rawOrdinal => DateTime.SpecifyKind(Convert.ToDateTime(rawOrdinal), DateTimeKind.Utc).ToString("yyyy-MM-ddTHH:mm:ssK");
             }
 
-            var data = await ProgressData.CreateAsync(
-                this.gameData,
-                this.telemetryClient,
-                this.databaseCommandFactory,
-                userId,
-                startDate,
-                endDate);
+            commandText.Append(@"
+                -- Computed Stats
+                SELECT #ScopedUploads.Ordinal,
+                       RTRIM(ComputedStats.TitanDamage) AS TitanDamage,
+                       RTRIM(ComputedStats.SoulsSpent) AS SoulsSpent,
+                       RTRIM(ComputedStats.HeroSoulsSacrificed) AS HeroSoulsSacrificed,
+                       ComputedStats.TotalAncientSouls,
+                       ComputedStats.TranscendentPower,
+                       ComputedStats.Rubies,
+                       ComputedStats.HighestZoneThisTranscension,
+                       ComputedStats.HighestZoneLifetime,
+                       ComputedStats.AscensionsThisTranscension,
+                       ComputedStats.AscensionsLifetime
+                FROM ComputedStats
+                INNER JOIN #ScopedUploads
+                ON ComputedStats.UploadId = #ScopedUploads.Id;
 
-            if (data == null)
+                -- Ancient Levels
+                SELECT #ScopedUploads.Ordinal, AncientLevels.AncientId, RTRIM(AncientLevels.Level) AS Level
+                FROM AncientLevels
+                INNER JOIN #ScopedUploads
+                ON AncientLevels.UploadId = #ScopedUploads.Id;
+
+                -- Outsider Levels
+                SELECT #ScopedUploads.Ordinal, OutsiderLevels.OutsiderId, OutsiderLevels.Level
+                FROM OutsiderLevels
+                INNER JOIN #ScopedUploads
+                ON OutsiderLevels.UploadId = #ScopedUploads.Id;
+
+                -- Drop the temp table
+                DROP TABLE #ScopedUploads;");
+
+            using (var command = this.databaseCommandFactory.Create(commandText.ToString(), parameters))
+            using (var reader = await command.ExecuteReaderAsync())
             {
-                return this.StatusCode(500);
-            }
+                var progressData = new ProgressData
+                {
+                    TitanDamageData = new SortedDictionary<string, string>(StringComparer.OrdinalIgnoreCase),
+                    SoulsSpentData = new SortedDictionary<string, string>(StringComparer.OrdinalIgnoreCase),
+                    HeroSoulsSacrificedData = new SortedDictionary<string, string>(StringComparer.OrdinalIgnoreCase),
+                    TotalAncientSoulsData = new SortedDictionary<string, string>(StringComparer.OrdinalIgnoreCase),
+                    TranscendentPowerData = new SortedDictionary<string, string>(StringComparer.OrdinalIgnoreCase),
+                    RubiesData = new SortedDictionary<string, string>(StringComparer.OrdinalIgnoreCase),
+                    HighestZoneThisTranscensionData = new SortedDictionary<string, string>(StringComparer.OrdinalIgnoreCase),
+                    HighestZoneLifetimeData = new SortedDictionary<string, string>(StringComparer.OrdinalIgnoreCase),
+                    AscensionsThisTranscensionData = new SortedDictionary<string, string>(StringComparer.OrdinalIgnoreCase),
+                    AscensionsLifetimeData = new SortedDictionary<string, string>(StringComparer.OrdinalIgnoreCase),
+                    AncientLevelData = new SortedDictionary<string, IDictionary<string, string>>(StringComparer.OrdinalIgnoreCase),
+                    OutsiderLevelData = new SortedDictionary<string, IDictionary<string, string>>(StringComparer.OrdinalIgnoreCase),
+                };
 
-            return data;
+                while (reader.Read())
+                {
+                    var ordinal = parseOrdinal(reader["Ordinal"]);
+
+                    progressData.TitanDamageData[ordinal] = reader["TitanDamage"].ToString();
+                    progressData.SoulsSpentData[ordinal] = reader["SoulsSpent"].ToString();
+                    progressData.HeroSoulsSacrificedData[ordinal] = reader["HeroSoulsSacrificed"].ToString();
+                    progressData.TotalAncientSoulsData[ordinal] = reader["TotalAncientSouls"].ToString();
+                    progressData.TranscendentPowerData[ordinal] = (100 * Convert.ToDouble(reader["TranscendentPower"])).ToString();
+                    progressData.RubiesData[ordinal] = reader["Rubies"].ToString();
+                    progressData.HighestZoneThisTranscensionData[ordinal] = reader["HighestZoneThisTranscension"].ToString();
+                    progressData.HighestZoneLifetimeData[ordinal] = reader["HighestZoneLifetime"].ToString();
+                    progressData.AscensionsThisTranscensionData[ordinal] = reader["AscensionsThisTranscension"].ToString();
+                    progressData.AscensionsLifetimeData[ordinal] = reader["AscensionsLifetime"].ToString();
+                }
+
+                if (!reader.NextResult())
+                {
+                    return this.StatusCode(500);
+                }
+
+                while (reader.Read())
+                {
+                    var ordinal = parseOrdinal(reader["Ordinal"]);
+                    var ancientId = Convert.ToInt32(reader["AncientId"]);
+                    var level = reader["Level"].ToString();
+
+                    if (!this.gameData.Ancients.TryGetValue(ancientId, out var ancient))
+                    {
+                        this.telemetryClient.TrackEvent("Unknown Ancient", new Dictionary<string, string> { { "AncientId", ancientId.ToString() } });
+                        continue;
+                    }
+
+                    if (!progressData.AncientLevelData.TryGetValue(ancient.Name, out var levelData))
+                    {
+                        levelData = new SortedDictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+                        progressData.AncientLevelData.Add(ancient.Name, levelData);
+                    }
+
+                    levelData[ordinal] = level;
+                }
+
+                if (!reader.NextResult())
+                {
+                    return this.StatusCode(500);
+                }
+
+                while (reader.Read())
+                {
+                    var ordinal = parseOrdinal(reader["Ordinal"]);
+                    var outsiderId = Convert.ToInt32(reader["OutsiderId"]);
+                    var level = reader["Level"].ToString();
+
+                    if (!this.gameData.Outsiders.TryGetValue(outsiderId, out var outsider))
+                    {
+                        this.telemetryClient.TrackEvent("Unknown Outsider", new Dictionary<string, string> { { "OutsiderId", outsiderId.ToString() } });
+                        continue;
+                    }
+
+                    if (!progressData.OutsiderLevelData.TryGetValue(outsider.Name, out var levelData))
+                    {
+                        levelData = new SortedDictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+                        progressData.OutsiderLevelData.Add(outsider.Name, levelData);
+                    }
+
+                    levelData[ordinal] = level;
+                }
+
+                return progressData;
+            }
         }
 
         [Route("{userName}/follows")]
@@ -692,6 +891,25 @@ namespace Website.Controllers
         internal static class ParameterConstants
         {
             internal static class Uploads
+            {
+                internal static class Page
+                {
+                    internal const int Min = 1;
+
+                    internal const int Default = 1;
+                }
+
+                internal static class Count
+                {
+                    internal const int Min = 1;
+
+                    internal const int Max = 100;
+
+                    internal const int Default = 10;
+                }
+            }
+
+            internal static class Progress
             {
                 internal static class Page
                 {

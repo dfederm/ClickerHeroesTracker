@@ -14,6 +14,7 @@ namespace UnitTests.Services.Settings
     using ClickerHeroesTrackerWebsite.Tests.Mocks;
     using Moq;
     using Website.Models.Api.Users;
+    using Website.Services.Settings;
     using Xunit;
 
     public static class UserSettingsProviderTests
@@ -163,6 +164,7 @@ namespace UnitTests.Services.Settings
                 ShouldLevelSkillAncients = true,
                 SkillAncientBaseAncient = 4,
                 SkillAncientLevelDiff = 5,
+                GraphSpacingType = GraphSpacingType.Ascension,
             };
 
             var parameters = new Dictionary<string, object>
@@ -178,6 +180,7 @@ namespace UnitTests.Services.Settings
                 { "@Value" + UserSettingsConstants.ShouldLevelSkillAncients, settings.ShouldLevelSkillAncients.ToString() },
                 { "@Value" + UserSettingsConstants.SkillAncientBaseAncient, settings.SkillAncientBaseAncient.ToString() },
                 { "@Value" + UserSettingsConstants.SkillAncientLevelDiff, settings.SkillAncientLevelDiff.ToString() },
+                { "@Value" + UserSettingsConstants.GraphSpacingType, settings.GraphSpacingType.ToString() },
             };
 
             var mockDatabaseCommand = MockDatabaseHelper.CreateMockDatabaseCommand(parameters);
@@ -262,6 +265,7 @@ namespace UnitTests.Services.Settings
                 new Dictionary<string, object> { { "SettingId", UserSettingsConstants.ShouldLevelSkillAncients }, { "SettingValue", "true" } },
                 new Dictionary<string, object> { { "SettingId", UserSettingsConstants.SkillAncientBaseAncient }, { "SettingValue", "4" } },
                 new Dictionary<string, object> { { "SettingId", UserSettingsConstants.SkillAncientLevelDiff }, { "SettingValue", "5" } },
+                new Dictionary<string, object> { { "SettingId", UserSettingsConstants.GraphSpacingType }, { "SettingValue", "Ascension" } },
             }.ToList();
         }
 
@@ -278,6 +282,7 @@ namespace UnitTests.Services.Settings
             Assert.True(settings.ShouldLevelSkillAncients);
             Assert.Equal(4, settings.SkillAncientBaseAncient);
             Assert.Equal(5, settings.SkillAncientLevelDiff);
+            Assert.Equal(GraphSpacingType.Ascension, settings.GraphSpacingType);
         }
 
         private static void VerifyDefaultSettings(UserSettings settings)
@@ -293,6 +298,7 @@ namespace UnitTests.Services.Settings
             Assert.Null(settings.ShouldLevelSkillAncients);
             Assert.Null(settings.SkillAncientBaseAncient);
             Assert.Null(settings.SkillAncientLevelDiff);
+            Assert.Null(settings.GraphSpacingType);
         }
     }
 }
