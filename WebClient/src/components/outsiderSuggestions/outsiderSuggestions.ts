@@ -75,9 +75,7 @@ export class OutsiderSuggestionsComponent {
             for (let i = 0; i < this.outsiders.length; i++) {
                 let outsider = this.outsiders[i];
                 let outsiderData = this.savedGame.data.outsiders.outsiders[outsider.id];
-                if (outsiderData) {
-                    outsider.currentLevel = outsiderData.level;
-                }
+                outsider.currentLevel = outsiderData ? outsiderData.level : 0;
             }
         }
 
@@ -99,7 +97,7 @@ export class OutsiderSuggestionsComponent {
             this.newHze = Math.max(215000, ancientSouls * 10.32 + 90000);
         } else if (ancientSouls < 27000) {
             // 44.3k Ancient Souls
-            this.newHze =  458000;
+            this.newHze = 458000;
         } else {
             // End Game
             [nonBorb, zonePush] = this.findStrategy(ancientSouls);
@@ -313,8 +311,8 @@ export class OutsiderSuggestionsComponent {
         return [chor, phan, pony];
     }
 
-    private getBorbFant( ancientSouls: number, transcendentPower: number ): number {
-        let [chor, , pony] = this.nOS( ancientSouls * 0.5, transcendentPower, 100 );
+    private getBorbFant(ancientSouls: number, transcendentPower: number): number {
+        let [chor, , pony] = this.nOS(ancientSouls * 0.5, transcendentPower, 100);
         let ponyBonus = Math.pow(pony, 2) * 10 + 1;
         let chorBonus = Math.pow(1 / 0.95, chor);
         let tp = 1 + transcendentPower;
