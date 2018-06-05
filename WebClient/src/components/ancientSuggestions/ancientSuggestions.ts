@@ -241,10 +241,14 @@ export class AncientSuggestionsComponent implements OnInit {
                 let ancientData = this.savedGame.data.ancients.ancients[ancient.id];
                 if (ancientData) {
                     ancient.ancientLevel = new Decimal(ancientData.level || 0);
-                    ancient.itemLevel = itemLevels[ancient.id] || new Decimal(0);
-                    ancient.effectiveLevel = ancient.ancientLevel.plus(ancient.itemLevel).floor();
                     ancient.purchaseTime = ancientData.purchaseTime;
+                } else {
+                    ancient.ancientLevel = new Decimal(0);
+                    ancient.purchaseTime = 0;
                 }
+
+                ancient.itemLevel = itemLevels[ancient.id] || new Decimal(0);
+                ancient.effectiveLevel = ancient.ancientLevel.plus(ancient.itemLevel).floor();
             }
         }
 
