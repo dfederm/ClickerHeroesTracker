@@ -57,7 +57,8 @@
                    [disabled]="isSettingPending.hybridRatio" />
         </div>
     </div>
-    <div class="form-group row">
+    <div *ngIf="settings.playStyle !== 'idle'"
+         class="form-group row">
         <label for="shouldLevelSkillAncients"
                class="col-sm-8 col-form-label">
             Show suggestions for skill ancients (includes Vaagur and Revolc)
@@ -69,7 +70,7 @@
                      (onChangeState)="setSetting('shouldLevelSkillAncients', $event.currentValue)"></bSwitch>
         </div>
     </div>
-    <fieldset *ngIf="settings.shouldLevelSkillAncients"
+    <fieldset *ngIf="settings.playStyle !== 'idle' && settings.shouldLevelSkillAncients"
               class="form-group">
         <div class="row">
             <div class="col-sm-8 col-form-label">
@@ -86,7 +87,7 @@
             </div>
         </div>
     </fieldset>
-    <div *ngIf="settings.shouldLevelSkillAncients"
+    <div *ngIf="settings.playStyle !== 'idle' && settings.shouldLevelSkillAncients"
          class="form-group row">
         <label for="skillAncientLevelDiff"
                class="col-sm-8 col-form-label">

@@ -397,6 +397,7 @@ export class AncientSuggestionsComponent implements OnInit {
             });
     }
 
+    // tslint:disable-next-line:cyclomatic-complexity
     private calculateAncientSuggestions(currentPrimaryAncientLevel?: Decimal): { [key: string]: Decimal } {
         const suggestedLevels: { [key: string]: Decimal } = {};
 
@@ -478,7 +479,7 @@ export class AncientSuggestionsComponent implements OnInit {
         }
 
         // Skill ancients
-        if (this.settings.shouldLevelSkillAncients) {
+        if (this.playStyle !== "idle" && this.settings.shouldLevelSkillAncients) {
             let skillAncientBaseAncient = gameData.ancients[this.settings.skillAncientBaseAncient];
             let skillAncientBaseAncientShortName = AncientSuggestionsComponent.getShortName(skillAncientBaseAncient);
             let skillAncientBaseAncientLevel = suggestedLevels[skillAncientBaseAncientShortName];
