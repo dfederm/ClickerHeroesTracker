@@ -152,6 +152,16 @@ describe("SettingsDialogComponent", () => {
             verifyInitialValue(input, settings.shouldLevelSkillAncients);
         });
 
+        it("should hide when playStyle is idle", () => {
+            let settingsService = TestBed.get(SettingsService) as SettingsService;
+            spyOn(settingsService, "setSetting").and.returnValue(Promise.resolve());
+
+            let playStyleInput = getInput<HTMLSelectElement>(0, "select");
+            setSelectValue(playStyleInput, 0);
+
+            expect(isInDom(input)).toEqual(false);
+        });
+
         it("should patch settings when the value changes", () => {
             verifyServiceCalledWhenSettingChanges(
                 "shouldLevelSkillAncients",
@@ -185,6 +195,16 @@ describe("SettingsDialogComponent", () => {
 
         it("should be set to the inital value", () => {
             verifyInitialValue(input, `${input.selectedIndex}: ${settings.skillAncientBaseAncient}`);
+        });
+
+        it("should hide when playStyle is idle", () => {
+            let settingsService = TestBed.get(SettingsService) as SettingsService;
+            spyOn(settingsService, "setSetting").and.returnValue(Promise.resolve());
+
+            let playStyleInput = getInput<HTMLSelectElement>(0, "select");
+            setSelectValue(playStyleInput, 0);
+
+            expect(isInDom(input)).toEqual(false);
         });
 
         it("should hide when shouldLevelSkillAncients is off", () => {
@@ -229,6 +249,16 @@ describe("SettingsDialogComponent", () => {
 
         it("should be set to the inital value", () => {
             verifyInitialValue(input, settings.skillAncientLevelDiff.toString());
+        });
+
+        it("should hide when playStyle is idle", () => {
+            let settingsService = TestBed.get(SettingsService) as SettingsService;
+            spyOn(settingsService, "setSetting").and.returnValue(Promise.resolve());
+
+            let playStyleInput = getInput<HTMLSelectElement>(0, "select");
+            setSelectValue(playStyleInput, 0);
+
+            expect(isInDom(input)).toEqual(false);
         });
 
         it("should hide when shouldLevelSkillAncients is off", () => {
