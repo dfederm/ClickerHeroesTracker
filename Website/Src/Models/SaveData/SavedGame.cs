@@ -18,7 +18,7 @@ namespace ClickerHeroesTrackerWebsite.Models.SaveData
     /// Model for top-level save game data.
     /// </summary>
     /// <remarks>
-    /// Ensure the logic here stays in sync with savedGame.ts on the client
+    /// Ensure the logic here stays in sync with savedGame.ts on the client.
     /// </remarks>
     public class SavedGame
     {

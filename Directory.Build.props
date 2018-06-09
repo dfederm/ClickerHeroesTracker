@@ -16,11 +16,13 @@
 
   <ItemGroup>
     <!-- Using a specific compiler version to match the APIs the Analyzers require -->
-    <PackageReference Include="Microsoft.Net.Compilers" Version="2.8.0" />
+    <PackageReference Include="Microsoft.Net.Compilers" Version="2.8.2" />
 
     <!-- Analyzers -->
-    <PackageReference Include="Microsoft.CodeAnalysis.FxCopAnalyzers" Version="2.6.0" />
-    <PackageReference Include="StyleCop.Analyzers" Version="1.1.0-beta006" />
+    <PackageReference Include="Microsoft.CodeQuality.Analyzers" Version="2.6.1" />
+    <PackageReference Include="Microsoft.CodeAnalysis.FxCopAnalyzers" Version="2.6.1" />
+    <PackageReference Include="Microsoft.NetCore.Analyzers" Version="2.6.1" />
+    <PackageReference Include="StyleCop.Analyzers" Version="1.1.0-beta007" />
   </ItemGroup>
   <ItemGroup>
     <AdditionalFiles Include="$(MSBuildThisFileDirectory)\build\stylecop.json" />
