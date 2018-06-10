@@ -4,13 +4,13 @@
 
 namespace ClickerHeroesTrackerWebsite.Controllers
 {
-    using Configuration;
+    using ClickerHeroesTrackerWebsite.Configuration;
     using Microsoft.AspNetCore.Hosting;
     using Microsoft.AspNetCore.Mvc;
     using Website.Models.Api.Version;
 
     /// <summary>
-    /// A diagnostic controller for the service version
+    /// A diagnostic controller for the service version.
     /// </summary>
     [Route("version")]
     [ApiController]
@@ -32,9 +32,9 @@ namespace ClickerHeroesTrackerWebsite.Controllers
         }
 
         /// <summary>
-        /// Displays debug info about the service version
+        /// Displays debug info about the service version.
         /// </summary>
-        /// <returns>An object with the version information</returns>
+        /// <returns>An object with the version information.</returns>
         [Route("")]
         [HttpGet]
         public ActionResult<VersionResponse> Version() => new VersionResponse

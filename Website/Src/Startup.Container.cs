@@ -42,7 +42,7 @@ namespace ClickerHeroesTrackerWebsite
     using Website.Services.SiteNews;
 
     /// <summary>
-    /// Configure the Unity container
+    /// Configure the Unity container.
     /// </summary>
     public partial class Startup
     {
@@ -111,20 +111,18 @@ namespace ClickerHeroesTrackerWebsite
                 // Register the OpenIddict core services.
                 .AddCore(options =>
                 {
-                    // Configure OpenIddict to use the default models.
-                    options.UseDefaultModels();
-
-                    // Register the Entity Framework stores.
-                    options.AddEntityFrameworkCoreStores<ApplicationDbContext>();
+                    // Configure OpenIddict to use the Entity Framework Core stores and models.
+                    options.UseEntityFrameworkCore()
+                        .UseDbContext<ApplicationDbContext>();
                 })
 
                 // Register the OpenIddict server handler.
                 .AddServer(options =>
                 {
-                    // Register the ASP.NET Core MVC binder used by OpenIddict.
+                    // Register the ASP.NET Core MVC services used by OpenIddict.
                     // Note: if you don't call this method, you won't be able to
                     // bind OpenIdConnectRequest or OpenIdConnectResponse parameters.
-                    options.AddMvcBinders();
+                    options.UseMvc();
 
                     // Enable the token endpoint (required to use the password flow).
                     options.EnableTokenEndpoint("/api/auth/token");

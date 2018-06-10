@@ -9,7 +9,6 @@ namespace ClickerHeroesTracker.UploadProcessor
     using System.Collections.Generic;
     using System.Threading;
     using System.Threading.Tasks;
-    using ClickerHeroesTrackerWebsite;
     using ClickerHeroesTrackerWebsite.Models.Game;
     using ClickerHeroesTrackerWebsite.Services.Database;
     using ClickerHeroesTrackerWebsite.Services.UploadProcessing;
@@ -50,7 +49,6 @@ namespace ClickerHeroesTracker.UploadProcessor
             var builder = new ConfigurationBuilder()
                 .SetBasePath(Environment.CurrentDirectory)
                 .AddJsonFile("appsettings.json")
-                .AddUserSecrets<Startup>()
                 .AddApplicationInsightsSettings(developerMode: true);
             var configuration = builder.Build();
 
