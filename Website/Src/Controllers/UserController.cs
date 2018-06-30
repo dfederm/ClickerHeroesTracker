@@ -140,6 +140,7 @@ namespace Website.Controllers
             const string GetUploadsCommandText = @"
                 SELECT Id,
                     UploadTime,
+                    SaveTime,
                     AscensionsLifetime AS AscensionNumber,
                     HighestZoneThisTranscension AS Zone,
                     RTRIM(SoulsSpent) AS Souls
@@ -147,7 +148,7 @@ namespace Website.Controllers
                 INNER JOIN ComputedStats
                 ON ComputedStats.UploadId = Uploads.Id
                 WHERE UserId = @UserId
-                ORDER BY UploadTime DESC
+                ORDER BY SaveTime DESC
                 OFFSET @Offset ROWS
                 FETCH NEXT @Count ROWS ONLY;";
             var getUploadsCommandparameters = new Dictionary<string, object>
@@ -169,6 +170,7 @@ namespace Website.Controllers
 
                         // The DateTime is a datetime2 which has no timezone so comes out as DateTimeKind.Unknown. Se need to specify the kind so it gets serialized correctly.
                         TimeSubmitted = DateTime.SpecifyKind(Convert.ToDateTime(reader["UploadTime"]), DateTimeKind.Utc),
+                        SaveTime = DateTime.SpecifyKind(Convert.ToDateTime(reader["SaveTime"]), DateTimeKind.Utc),
 
                         AscensionNumber = Convert.ToInt32(reader["AscensionNumber"]),
                         Zone = Convert.ToInt32(reader["Zone"]),
@@ -342,11 +344,11 @@ namespace Website.Controllers
 
                     -- Populate temp table
                     INSERT INTO #ScopedUploads (Id, Ordinal)
-                    SELECT Id, UploadTime AS Ordinal
+                    SELECT Id, SaveTime AS Ordinal
                     FROM Uploads
                     WHERE UserId = @UserId
-                    AND UploadTime >= ISNULL(@StartTime, '0001-01-01 00:00:00')
-                    AND UploadTime <= ISNULL(@EndTime, '9999-12-31 23:59:59');");
+                    AND SaveTime >= ISNULL(@StartTime, '0001-01-01 00:00:00')
+                    AND SaveTime <= ISNULL(@EndTime, '9999-12-31 23:59:59');");
 
                 // The DateTime is a datetime2 which has no timezone so comes out as DateTimeKind.Unknown. Se need to specify the kind so it gets serialized correctly.
                 // For the ToString, use a modified ISO 8601 which excludes the milliseconds.

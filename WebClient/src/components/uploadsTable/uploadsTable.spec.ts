@@ -19,7 +19,14 @@ describe("UploadsTableComponent", () => {
 
     let uploads: IUploadSummary[] = [];
     for (let i = 0; i < 8; i++) {
-        uploads.push({ id: i, timeSubmitted: `2017-01-0${i + 1}T00:00:00`, ascensionNumber: i, zone: 100 * i, souls: `1e${100 * i}` });
+        uploads.push({
+            id: i,
+            timeSubmitted: `2017-02-0${i + 1}T00:00:00`,
+            saveTime: `2017-01-0${i + 1}T00:00:00`,
+            ascensionNumber: i,
+            zone: 100 * i,
+            souls: `1e${100 * i}`,
+        });
     }
 
     beforeEach(async(() => {
@@ -27,12 +34,11 @@ describe("UploadsTableComponent", () => {
             getUploads(userName: string, page: number, count: number): Promise<IUploadSummaryListResponse> {
                 expect(userName).toEqual(component.userName);
                 let uploadsResponse: IUploadSummaryListResponse = {
-                    pagination:
-                        {
-                            count: uploads.length,
-                            next: "someNext",
-                            previous: "somePrevious",
-                        },
+                    pagination: {
+                        count: uploads.length,
+                        next: "someNext",
+                        previous: "somePrevious",
+                    },
                     uploads: uploads.slice((page - 1) * count, page * count),
                 };
                 return Promise.resolve(uploadsResponse);
@@ -156,7 +162,8 @@ describe("UploadsTableComponent", () => {
                 expect(soulsCell.nativeElement.textContent.trim()).toEqual(exponentialPipe.transform(new Decimal(expectedUpload.souls)));
 
                 let dateCell = cells[3];
-                expect(dateCell.nativeElement.textContent.trim()).toEqual(datePipe.transform(expectedUpload.timeSubmitted, "short"));
+                expect(dateCell.properties.title).toEqual("Uploaded " + datePipe.transform(expectedUpload.timeSubmitted, "short"));
+                expect(dateCell.nativeElement.textContent.trim()).toEqual(datePipe.transform(expectedUpload.saveTime, "short"));
 
                 let viewCell = cells[4];
                 let link = viewCell.query(By.css("a"));

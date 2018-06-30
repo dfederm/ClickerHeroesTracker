@@ -15,6 +15,8 @@ namespace ClickerHeroesTrackerWebsite.Models.Api.Uploads
 
         public DateTime TimeSubmitted { get; set; }
 
+        public DateTime SaveTime { get; set; }
+
         public int AscensionNumber { get; set; }
 
         public int Zone { get; set; }
