@@ -8,12 +8,12 @@ namespace ClickerHeroesTrackerWebsite.Utility
 
     internal static class DateTimeExtensions
     {
-        private static DateTime javascriptEpoch = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+        private static readonly DateTime JavascriptEpoch = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
 
         public static DateTime UnixTimeStampToDateTime(this double unixTimeStamp)
         {
             // Unix timestamp is seconds past epoch
-            return javascriptEpoch.AddSeconds(unixTimeStamp);
+            return JavascriptEpoch.AddSeconds(unixTimeStamp);
         }
     }
 }

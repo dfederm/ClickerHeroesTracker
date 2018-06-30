@@ -13,6 +13,7 @@ import { ExponentialPipe } from "../../pipes/exponentialPipe";
 import { AuthenticationService, IUserInfo } from "../../services/authenticationService/authenticationService";
 import { UploadService, IUpload } from "../../services/uploadService/uploadService";
 import { SettingsService } from "../../services/settingsService/settingsService";
+import { SavedGame } from "../../models/savedGame";
 
 describe("UploadComponent", () => {
     let component: UploadComponent;
@@ -155,6 +156,7 @@ describe("UploadComponent", () => {
 
             let upload = getUpload();
             delete upload.user;
+            let savedGame = new SavedGame(upload.content, true);
             uploadServiceGetResolve(upload)
                 .then(() => {
                     fixture.detectChanges();
@@ -175,7 +177,8 @@ describe("UploadComponent", () => {
 
                     let uploadTimeItem = items[1];
                     let uploadTimeValueElement = uploadTimeItem.query(By.css("span"));
-                    expect(getNormalizedTextContent(uploadTimeValueElement)).toEqual(datePipe.transform(upload.timeSubmitted, "short"));
+                    expect(getNormalizedTextContent(uploadTimeValueElement)).toEqual(datePipe.transform(savedGame.data.unixTimestamp, "short"));
+                    expect(uploadTimeValueElement.properties.title).toEqual("Uploaded " + datePipe.transform(upload.timeSubmitted, "short"));
 
                     let playStyleItem = items[2];
                     let playStyleValueElement = playStyleItem.query(By.css("span"));
@@ -187,6 +190,7 @@ describe("UploadComponent", () => {
             let datePipe = TestBed.get(DatePipe) as DatePipe;
 
             let upload = getUpload();
+            let savedGame = new SavedGame(upload.content, true);
             uploadServiceGetResolve(upload)
                 .then(() => {
                     fixture.detectChanges();
@@ -208,7 +212,8 @@ describe("UploadComponent", () => {
 
                     let uploadTimeItem = items[1];
                     let uploadTimeValueElement = uploadTimeItem.query(By.css("span"));
-                    expect(getNormalizedTextContent(uploadTimeValueElement)).toEqual(datePipe.transform(upload.timeSubmitted, "short"));
+                    expect(getNormalizedTextContent(uploadTimeValueElement)).toEqual(datePipe.transform(savedGame.data.unixTimestamp, "short"));
+                    expect(uploadTimeValueElement.properties.title).toEqual("Uploaded " + datePipe.transform(upload.timeSubmitted, "short"));
 
                     let playStyleItem = items[2];
                     let playStyleValueElement = playStyleItem.query(By.css("span"));

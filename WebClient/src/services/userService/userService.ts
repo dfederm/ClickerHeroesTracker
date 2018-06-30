@@ -24,6 +24,8 @@ export interface IUploadSummary {
 
     timeSubmitted: string;
 
+    saveTime: string;
+
     ascensionNumber: number;
 
     zone: number;

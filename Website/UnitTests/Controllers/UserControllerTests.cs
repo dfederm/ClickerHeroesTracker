@@ -286,6 +286,7 @@ namespace UnitTests.Controllers
                 {
                     { "Id", id },
                     { "UploadTime", "2017-01-01T00:00:00.000Z" },
+                    { "SaveTime", "2017-01-01T00:00:00.000Z" },
                     { "AscensionNumber", 100 },
                     { "Zone", 200 },
                     { "Souls", "1e300" },

@@ -41,6 +41,7 @@ export interface ISavedGameData {
     transcendent: boolean;
     paidForRubyMultiplier: boolean;
     saveOrigin: string;
+    unixTimestamp: number;
 
     primalSouls: number | string;
     heroSouls: number | string;

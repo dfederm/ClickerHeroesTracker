@@ -4,6 +4,7 @@ import { Decimal } from "decimal.js";
 
 interface IUploadViewModel {
     id: number;
+    saveTime: Date;
     uploadTime: Date;
     ascensionNumber: number;
     zone: number;
@@ -82,6 +83,7 @@ export class UploadsTableComponent implements OnInit {
         for (let upload of uploads) {
             this.uploads.push({
                 id: upload.id,
+                saveTime: new Date(upload.saveTime),
                 uploadTime: new Date(upload.timeSubmitted),
                 ascensionNumber: upload.ascensionNumber,
                 zone: upload.zone,

@@ -19,7 +19,9 @@
       <td>{{ upload.ascensionNumber | exponential }}</td>
       <td>{{ upload.zone | exponential }}</td>
       <td>{{ upload.souls | exponential }}</td>
-      <td>{{ upload.uploadTime | date:'short' }}</td>
+      <td title="Uploaded {{ upload.uploadTime | date:'short' }}">
+        {{ upload.saveTime | date:'short' }}
+      </td>
       <td class="text-right">
         <a routerLink="/uploads/{{upload.id}}">View</a>
       </td>

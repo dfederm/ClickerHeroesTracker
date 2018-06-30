@@ -18,8 +18,10 @@
                        routerLink="/clans/{{clanName}}">&lt;{{ clanName }}&gt;</a>
                 </li>
                 <li>
-                    <label>Upload Time:</label>
-                    <span>{{ uploadTime | date:'short' }}</span>
+                    <label>Save Time:</label>
+                    <span title="Uploaded {{ uploadTime | date:'short' }}">
+                        {{ saveTime | date:'short' }}
+                    </span>
                 </li>
                 <li>
                     <label>Play Style:</label>

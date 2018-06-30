@@ -18,6 +18,7 @@ export class UploadComponent implements OnInit {
 
     public userName: string;
     public clanName: string;
+    public saveTime: Date;
     public uploadTime: string;
     public playStyle: string;
     public savedGame: SavedGame;
@@ -110,6 +111,7 @@ export class UploadComponent implements OnInit {
         this.uploadTime = this.upload.timeSubmitted;
         this.playStyle = this.upload.playStyle;
         this.savedGame = new SavedGame(this.upload.content, this.upload.isScrubbed);
+        this.saveTime = new Date(this.savedGame.data.unixTimestamp);
 
         let heroSoulsSpent = new Decimal(0);
         if (this.savedGame.data.ancients && this.savedGame.data.ancients.ancients) {

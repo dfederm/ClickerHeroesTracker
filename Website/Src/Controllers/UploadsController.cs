@@ -162,6 +162,9 @@ namespace ClickerHeroesTrackerWebsite.Controllers
                 playStyle = userSettings.PlayStyle.GetValueOrDefault(PlayStyle.Hybrid);
             }
 
+            // unixTimestamp is in milliseconds instead of seconds
+            var saveTime = (savedGame.Object.Value<double>("unixTimestamp") / 1000).UnixTimeStampToDateTime();
+
             var ancientLevels = new AncientLevelsModel(
                 this.gameData,
                 savedGame);
@@ -177,14 +180,15 @@ namespace ClickerHeroesTrackerWebsite.Controllers
 
                 // Insert Upload
                 command.CommandText = @"
-	                INSERT INTO Uploads(UserId, UploadContent, PlayStyle)
-                    VALUES(@UserId, @UploadContent, @PlayStyle);
+	                INSERT INTO Uploads(UserId, UploadContent, PlayStyle, SaveTime)
+                    VALUES(@UserId, @UploadContent, @PlayStyle, @SaveTime);
                     SELECT SCOPE_IDENTITY();";
                 command.Parameters = new Dictionary<string, object>
                 {
                     { "@UserId", userId },
                     { "@UploadContent", uploadRequest.EncodedSaveData },
                     { "@PlayStyle", playStyle.ToString() },
+                    { "@SaveTime", saveTime },
                 };
                 uploadId = Convert.ToInt32(await command.ExecuteScalarAsync());
 
