@@ -239,6 +239,7 @@
     "no-output-named-after-standard-event": true,
     "no-output-on-prefix": true,
     "no-output-rename": true,
+    "no-queries-parameter": true,
     "no-unused-css": true,
     "pipe-naming": [
       true,

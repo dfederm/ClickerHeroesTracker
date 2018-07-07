@@ -147,9 +147,8 @@ namespace ClickerHeroesTrackerWebsite
                     // an external authentication provider like Google, Facebook or Twitter.
                     options.EnableRequestCaching();
 
-                    // Enable scope validation, so that authorization and token requests
-                    // that specify unregistered scopes are automatically rejected.
-                    options.EnableScopeValidation();
+                    // We don't want to specify a client_id when sending a token or revocation request.
+                    options.AcceptAnonymousClients();
 
                     // When rolling tokens are enabled, immediately
                     // redeem the refresh token to prevent future reuse.
