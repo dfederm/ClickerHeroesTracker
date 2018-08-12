@@ -78,7 +78,7 @@ export class UploadDialogComponent implements OnInit {
         if (fileList.length > 0) {
             let reader = new FileReader();
             let file: File = fileList[0];
-            reader.onload = () => this.encodedSaveData = reader.result;
+            reader.onload = () => this.encodedSaveData = reader.result as string;
             reader.readAsText(file);
         }
     }
