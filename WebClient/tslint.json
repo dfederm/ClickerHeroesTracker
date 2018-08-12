@@ -30,6 +30,10 @@
     "cyclomatic-complexity": true,
     "deprecation": true,
     "eofline": true,
+    "file-name-casing": [
+      true,
+      "camel-case"
+    ],
     "forin": false,
     "import-spacing": true,
     "indent": [
