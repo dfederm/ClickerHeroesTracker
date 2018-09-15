@@ -25,6 +25,22 @@ export class OutsiderSuggestionsComponent {
     public ancientSoulsDiff: number;
     public newTranscendentPower: number;
 
+    private readonly simulatedAscensions = [
+        4044232,
+        4085089,
+        4155170,
+        4219902,
+        4291233,
+        4357121,
+        4417981,
+        4474197,
+        4537681,
+        4596321,
+        4650485,
+        4700517,
+        4758279,
+    ];
+
     public get savedGame(): SavedGame {
         return this._savedGame;
     }
@@ -87,29 +103,41 @@ export class OutsiderSuggestionsComponent {
         // Figure out goals for this transcendence
         let nonBorb;
         let zonePush = 0;
+        let zoneAdd = 0;
         if (ancientSouls < 100) {
             let a = ancientSouls + 42;
             this.newHze = (a / 5 - 6) * 51.8 * Math.log(1.25) / Math.log(1 + transcendentPower);
         } else if (ancientSouls < 10500) {
             this.newHze = (1 - Math.exp(-ancientSouls / 3900)) * 200000 + 4800;
-        } else if (ancientSouls < 20000) {
-            // 20k or +8000 Ancient Souls
-            this.newHze = Math.max(215000, ancientSouls * 10.32 + 90000);
-        } else if (ancientSouls < 27000) {
-            // 44.3k Ancient Souls
-            this.newHze = 458000;
-        } else {
+        } else if (ancientSouls < 21000) {
+            // 21k or +8000 Ancient Souls
+            this.newHze = Math.max(225000, ancientSouls * 10.32 + 90000);
+        } else if (ancientSouls < 333000) {
             // End Game
-            [nonBorb, zonePush] = this.findStrategy(ancientSouls);
+            if (ancientSouls < 27000) {
+                nonBorb = 3000 + (27000 - ancientSouls) * 1.2;
+            } else {
+                nonBorb = 3000;
+            }
+            zonePush = ancientSouls * ancientSouls / 3e10;
             let b = this.spendAS(1, ancientSouls - nonBorb);
             this.newHze = Math.min(5.5e6, b * 5000 + 500);
+        } else if (ancientSouls < 530000) {
+            // Post zone 4m
+            nonBorb = 2000;
+            zoneAdd = this.post4mStrategy(ancientSouls);
+            let b = this.spendAS(1, ancientSouls - nonBorb);
+            this.newHze = Math.min(5.5e6, b * 5000 + 500);
+        } else {
+            this.newHze = 5.5e6;
         }
 
         // Push beyond 2mpz
         let borbTarget = 0;
-        if (ancientSouls >= 27000) {
+        if (ancientSouls >= 21000) {
             borbTarget = this.newHze;
-            this.newHze = Math.min(5.5e6, (1 + zonePush / 100) * this.newHze);
+            this.newHze = Math.min(5.5e6, (1 + zonePush / 100) * this.newHze + zoneAdd);
+            this.newHze += 500 - this.newHze % 500;
         }
 
         this.newHze = Math.floor(this.newHze);
@@ -155,7 +183,7 @@ export class OutsiderSuggestionsComponent {
             kariquaRatio = 0.01 * ratioChange;
             orphalasRatio = 0.05 * ratioChange;
             senakhanRatio = 0.05 * ratioChange;
-        } else if (ancientSouls < 27000) {
+        } else if (ancientSouls < 21000) {
             rhageistRatio = 0.2;
             kariquaRatio = 0.01;
             orphalasRatio = 0.05;
@@ -173,7 +201,7 @@ export class OutsiderSuggestionsComponent {
         let borbFant = ancientSouls <= 2000
             ? Math.min(this.spendAS(0.35, this.remainingAncientSouls), this.getBorbFant(ancientSouls, transcendentPower))
             : 0;
-        let borbHze = this.remainingAncientSouls >= 27000
+        let borbHze = this.remainingAncientSouls >= 21000
             ? borbCap
             : Math.min(this.spendAS(0.5, this.remainingAncientSouls), borbCap + 1);
         let borbLevel = Math.max(borbFant, borbHze);
@@ -339,41 +367,70 @@ export class OutsiderSuggestionsComponent {
         return Math.floor(Math.sqrt(8 * spendable + 1) / 2 - 0.5);
     }
 
-    private findNumTranscensions(ancientSouls: number, nonBorb: number, zonePush: number, targetZone: number): number {
-        let transcensions = 0;
-        let currentZone = 0;
-        let borb;
-        while (currentZone < targetZone) {
-            borb = this.spendAS(1, ancientSouls - nonBorb);
-            currentZone = borb * 5000 + 500;
-            currentZone = Math.floor(currentZone * (1 + zonePush / 100));
-            ancientSouls = Math.log10(1.25) * currentZone;
-            transcensions++;
-        }
-        return transcensions;
+    private post4mStrategy(ancientSouls: number): number {
+        let oldHZE = Math.round(ancientSouls / 0.09691) - 170;
+        let borb = this.spendAS(1, ancientSouls - 2000);
+        let borbLimit = borb * 5000 + 500;
+        let zonesTraveled = this.getZonesTraveled(borbLimit, 0);
+        let zonesGained = borbLimit - oldHZE;
+        let efficiency = zonesGained / zonesTraveled;
+        let zoneAdd = 0;
+        let addMPZ = 20;
+        do {
+            zonesTraveled = this.getZonesTraveled(borbLimit, zoneAdd + addMPZ * 5000);
+            zonesGained = borbLimit + zoneAdd + addMPZ * 5000 - oldHZE;
+            let newEfficiency = zonesGained / zonesTraveled;
+            if (newEfficiency > efficiency) {
+                efficiency = newEfficiency;
+                zoneAdd += addMPZ * 5000;
+            } else {
+                addMPZ = Math.floor(addMPZ / 2);
+            }
+        } while (addMPZ > 0);
+        return zoneAdd;
     }
 
-    private findStrategy(ancientSouls: number): [number, number] {
-        if (ancientSouls < 340000) {
-            let targetZone = 4.5e6;
-            let nonBorb = 4500;
-            let zonePush = 1;
-            let numTranscensions = this.findNumTranscensions(ancientSouls, nonBorb, zonePush, targetZone);
-            let newNumTranscensions = numTranscensions;
-            while (zonePush > 0) {
-                zonePush -= 0.1;
-                newNumTranscensions = this.findNumTranscensions(ancientSouls, nonBorb, zonePush, targetZone);
-                if (newNumTranscensions > numTranscensions) {
-                    return [nonBorb, zonePush + 0.1];
+    private getZonesTraveled(borbLimit: number, zoneAdd: number): number {
+        let targetZone = borbLimit + zoneAdd;
+        let zonesTraveled = 33600000;
+        for (let i = 0; i < this.simulatedAscensions.length; i++) {
+            let ascZone = this.simulatedAscensions[i];
+            if (ascZone > targetZone) {
+                zonesTraveled += targetZone - Math.round(ascZone * 0.9) + 30000;
+                if (targetZone > borbLimit) {
+                    let zonePush = targetZone - borbLimit;
+                    zonesTraveled += Math.round(zonePush * zonePush / 10000);
+                }
+                break;
+            } else {
+                zonesTraveled += Math.round(ascZone / 10 + 30000);
+                if (ascZone > borbLimit) {
+                    let zonePush = ascZone - borbLimit;
+                    zonesTraveled += Math.round(zonePush * zonePush / 10000);
                 }
             }
-            while (newNumTranscensions === numTranscensions) {
-                nonBorb += 500;
-                newNumTranscensions = this.findNumTranscensions(ancientSouls, nonBorb, zonePush, targetZone);
-            }
-            return [nonBorb - 500, 0];
-        } else {
-            return [2000, 2.5];
         }
+        if (targetZone >= 4811634) {
+            let ascZone = 4811634;
+            let zoneIncrease = 53355;
+            do {
+                if (ascZone > targetZone) {
+                    zonesTraveled += targetZone - Math.round(ascZone * 0.9) + 30000;
+                    if (targetZone > borbLimit) {
+                        let zonePush = targetZone - borbLimit;
+                        zonesTraveled += Math.round(zonePush * zonePush / 10000);
+                    }
+                } else {
+                    zonesTraveled += Math.round(ascZone / 10 + 30000);
+                    if (ascZone > borbLimit) {
+                        let zonePush = ascZone - borbLimit;
+                        zonesTraveled += Math.round(zonePush * zonePush / 10000);
+                    }
+                }
+                ascZone += zoneIncrease;
+                zoneIncrease = Math.round(zoneIncrease * 0.923685);
+            } while (ascZone <= targetZone);
+        }
+        return zonesTraveled;
     }
 }
