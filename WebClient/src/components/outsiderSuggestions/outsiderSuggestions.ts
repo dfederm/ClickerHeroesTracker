@@ -375,14 +375,14 @@ export class OutsiderSuggestionsComponent {
         let zonesGained = borbLimit - oldHZE;
         let efficiency = zonesGained / zonesTraveled;
         let zoneAdd = 0;
-        let addMPZ = 20;
+        let addMPZ = 256;
         do {
-            zonesTraveled = this.getZonesTraveled(borbLimit, zoneAdd + addMPZ * 5000);
-            zonesGained = borbLimit + zoneAdd + addMPZ * 5000 - oldHZE;
+            zonesTraveled = this.getZonesTraveled(borbLimit, zoneAdd + addMPZ * 500);
+            zonesGained = borbLimit + zoneAdd + addMPZ * 500 - oldHZE;
             let newEfficiency = zonesGained / zonesTraveled;
             if (newEfficiency > efficiency) {
                 efficiency = newEfficiency;
-                zoneAdd += addMPZ * 5000;
+                zoneAdd += addMPZ * 500;
             } else {
                 addMPZ = Math.floor(addMPZ / 2);
             }
