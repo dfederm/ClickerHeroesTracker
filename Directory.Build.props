@@ -15,14 +15,14 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <!-- Using a specific compiler version to match the APIs the Analyzers require -->
-    <PackageReference Include="Microsoft.Net.Compilers" Version="2.8.2" />
+    <!-- Using a newer compiler than what comes with MSBuild -->
+    <PackageReference Include="Microsoft.Net.Compilers" Version="2.9.0" IncludeAssets="Analyzers;Build" PrivateAssets="All" />
 
     <!-- Analyzers -->
-    <PackageReference Include="Microsoft.CodeQuality.Analyzers" Version="2.6.2-beta2" />
-    <PackageReference Include="Microsoft.CodeAnalysis.FxCopAnalyzers" Version="2.6.2-beta2" />
-    <PackageReference Include="Microsoft.NetCore.Analyzers" Version="2.6.2-beta2" />
-    <PackageReference Include="StyleCop.Analyzers" Version="1.1.0-beta008" />
+    <PackageReference Include="Microsoft.CodeQuality.Analyzers" Version="2.6.2-beta2" IncludeAssets="Analyzers;Build" PrivateAssets="All" />
+    <PackageReference Include="Microsoft.CodeAnalysis.FxCopAnalyzers" Version="2.6.2-beta2" IncludeAssets="Analyzers;Build" PrivateAssets="All" />
+    <PackageReference Include="Microsoft.NetCore.Analyzers" Version="2.6.2-beta2" IncludeAssets="Analyzers;Build" PrivateAssets="All" />
+    <PackageReference Include="StyleCop.Analyzers" Version="1.1.0-beta009" IncludeAssets="Analyzers;Build" PrivateAssets="All" />
   </ItemGroup>
   <ItemGroup>
     <AdditionalFiles Include="$(MSBuildThisFileDirectory)\build\stylecop.json" />

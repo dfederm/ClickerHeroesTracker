@@ -22,14 +22,14 @@
 
   <ItemGroup>
     <PackageReference Include="Iconic.Zlib.Netstandard" Version="1.0.0" />
-    <PackageReference Include="Microsoft.ApplicationInsights.AspNetCore" Version="2.4.0" />
+    <PackageReference Include="Microsoft.ApplicationInsights.AspNetCore" Version="2.5.0-beta1" />
     <PackageReference Include="Microsoft.AspNetCore.App" />
-    <PackageReference Include="Microsoft.AspNetCore.DataProtection.AzureStorage" Version="2.1.1" />
-    <PackageReference Include="OpenIddict" Version="2.0.0-rtm-1084" />
-    <PackageReference Include="OpenIddict.EntityFrameworkCore" Version="2.0.0-rtm-1084" />
-    <PackageReference Include="OpenIddict.Mvc" Version="2.0.0-rtm-1084" />
-    <PackageReference Include="Sendgrid" Version="9.9.0" />
-    <PackageReference Include="WindowsAzure.Storage" Version="9.3.1" />
+    <PackageReference Include="Microsoft.AspNetCore.DataProtection.AzureStorage" Version="2.2.0-preview2-35157" />
+    <PackageReference Include="OpenIddict" Version="2.0.0-rtm-1116" />
+    <PackageReference Include="OpenIddict.EntityFrameworkCore" Version="2.0.0-rtm-1116" />
+    <PackageReference Include="OpenIddict.Mvc" Version="2.0.0-rtm-1116" />
+    <PackageReference Include="Sendgrid" Version="9.10.0" />
+    <PackageReference Include="WindowsAzure.Storage" Version="9.3.2" />
   </ItemGroup>
 
 </Project>

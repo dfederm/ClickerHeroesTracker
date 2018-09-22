@@ -67,7 +67,7 @@
             <bSwitch [(ngModel)]="settings.shouldLevelSkillAncients"
                      [switch-size]="'large'"
                      [switch-disabled]="isSettingPending.shouldLevelSkillAncients"
-                     (onChangeState)="setSetting('shouldLevelSkillAncients', $event.currentValue)"></bSwitch>
+                     (changeState)="setSetting('shouldLevelSkillAncients', $event.currentValue)"></bSwitch>
         </div>
     </div>
     <fieldset *ngIf="settings.playStyle !== 'idle' && settings.shouldLevelSkillAncients"
@@ -113,7 +113,7 @@
             <bSwitch [(ngModel)]="settings.useScientificNotation"
                      [switch-size]="'large'"
                      [switch-disabled]="isSettingPending.useScientificNotation"
-                     (onChangeState)="setSetting('useScientificNotation', $event.currentValue)"></bSwitch>
+                     (changeState)="setSetting('useScientificNotation', $event.currentValue)"></bSwitch>
         </div>
     </div>
     <div *ngIf="settings.useScientificNotation"
@@ -146,7 +146,7 @@
             <bSwitch [(ngModel)]="settings.useLogarithmicGraphScale"
                      [switch-size]="'large'"
                      [switch-disabled]="isSettingPending.useLogarithmicGraphScale"
-                     (onChangeState)="setSetting('useLogarithmicGraphScale', $event.currentValue)"></bSwitch>
+                     (changeState)="setSetting('useLogarithmicGraphScale', $event.currentValue)"></bSwitch>
         </div>
     </div>
     <div *ngIf="settings.useLogarithmicGraphScale"

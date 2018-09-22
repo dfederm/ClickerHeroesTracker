@@ -245,10 +245,6 @@
     "no-output-rename": true,
     "no-queries-parameter": true,
     "no-unused-css": true,
-    "pipe-naming": [
-      true,
-      "camelCase"
-    ],
     "prefer-output-readonly": true,
     "templates-no-negated-async": true,
     "use-host-property-decorator": true,
