@@ -10,7 +10,7 @@ import { AdsenseModule } from "ng2-adsense";
 import { ApplicationInsightsModule, AppInsightsService } from "@markpieszak/ng-application-insights";
 import { ChartsModule } from "ng2-charts";
 import { CompareValidatorModule } from "angular-compare-validator";
-import { JWBootstrapSwitchModule } from "jw-bootstrap-switch-ng2";
+import { JwBootstrapSwitchNg2Module } from "jw-bootstrap-switch-ng2";
 import { LoadingModule } from "ngx-loading";
 
 import { AppComponent } from "./components/app/app";
@@ -109,14 +109,14 @@ const routes: Routes =
       FormsModule,
       RouterModule.forRoot(routes),
       HttpClientModule,
-      NgbModule.forRoot(),
+      NgbModule,
       ClipboardModule,
       AdsenseModule.forRoot(),
       // Make sure this matches the API settings as well. Is there a better way to do this?
       ApplicationInsightsModule.forRoot({ instrumentationKey: "99fba640-790d-484f-83c4-3c97450d8698" }),
       ChartsModule,
       CompareValidatorModule,
-      JWBootstrapSwitchModule,
+      JwBootstrapSwitchNg2Module,
       LoadingModule,
     ],
   declarations:

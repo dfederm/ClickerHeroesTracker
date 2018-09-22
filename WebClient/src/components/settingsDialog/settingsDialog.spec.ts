@@ -4,7 +4,7 @@ import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
 import { NO_ERRORS_SCHEMA } from "@angular/core";
 import { BehaviorSubject } from "rxjs";
 import { By } from "@angular/platform-browser";
-import { JWBootstrapSwitchModule } from "jw-bootstrap-switch-ng2";
+import { JwBootstrapSwitchNg2Module } from "jw-bootstrap-switch-ng2";
 
 import { SettingsDialogComponent } from "./settingsDialog";
 import { SettingsService, IUserSettings } from "../../services/settingsService/settingsService";
@@ -40,7 +40,7 @@ describe("SettingsDialogComponent", () => {
             {
                 imports: [
                     FormsModule,
-                    JWBootstrapSwitchModule,
+                    JwBootstrapSwitchNg2Module,
                 ],
                 declarations: [
                     SettingsDialogComponent,

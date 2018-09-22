@@ -96,7 +96,7 @@ export class ExternalLoginsComponent implements OnInit {
         if (!ExternalLoginsComponent.facebookInitialized && typeof (FB) !== "undefined") {
             FB.init({
                 appId: "246885142330300",
-                version: "v2.10",
+                version: "v3.1",
             });
             ExternalLoginsComponent.facebookInitialized = true;
         }

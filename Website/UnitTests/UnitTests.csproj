@@ -21,11 +21,11 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.App" Version="2.1.1" />
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.9.0-preview-20180807-05" />
-    <PackageReference Include="Moq" Version="4.9.0" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.9.0-preview-20180816-01" />
+    <PackageReference Include="Moq" Version="4.10.0" />
     <PackageReference Include="Testing.HttpClient" Version="1.0.0" />
-    <PackageReference Include="xunit" Version="2.4.0" />
-    <PackageReference Include="xunit.runner.visualstudio" Version="2.4.0" />
+    <PackageReference Include="xunit" Version="2.4.1-pre.build.4059" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.4.1-pre.build.4059" IncludeAssets="Runtime;Build;Native;Contentfiles;Analyzers" PrivateAssets="All" />
   </ItemGroup>
 
   <ItemGroup>
