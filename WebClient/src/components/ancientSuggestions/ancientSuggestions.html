@@ -82,8 +82,7 @@
                 </p>
                 <p *ngIf="autoLeveledSavedGame.isScrubbed"
                    class="alert alert-warning">
-                    You are either not logged in or this is not your save, so this has been scrubbed of personal data. If used, you will not
-                    be logged in and clan information will be gone.
+                    You are either not logged in or this is not your save, so this has been scrubbed of personal data. If used, you will not be logged in and clan information will be gone.
                 </p>
                 <p>
                     Import this into Clicker Heroes:
@@ -147,11 +146,13 @@
             <td class="text-right"
                 [ngClass]="{'copiable font-weight-bold' : ancient.diffCopyValue}"
                 ngxClipboard
-                [cbContent]="ancient.diffCopyValue"
-                placement="right"
-                container="body"
-                ngbTooltip="{{ancient.diffValue !== undefined ? 'Click to copy to clipboard' : ''}}">
-                {{ ancient.diffValue !== undefined && !ancient.isBase ? (ancient.diffValue | exponential) : "-" }}
+                [cbContent]="ancient.diffCopyValue">
+                <!-- Need to use a separate container as both ngxClipboard and ngbTooltip use the 'container' attribute and they're incompatible -->
+                <div placement="right"
+                     container="body"
+                     ngbTooltip="{{ancient.diffValue !== undefined ? 'Click to copy to clipboard' : ''}}">
+                    {{ ancient.diffValue !== undefined && !ancient.isBase ? (ancient.diffValue | exponential) : "-" }}
+                </div>
             </td>
         </tr>
     </tbody>
