@@ -11,10 +11,10 @@
     {"ancientSouls":15000,"expectedLevels":[0,129,380,71,50,53,16,36,18],"expectedRemaining":0,"newHze":244800,"newLogHeroSouls":4705.992559075164,"newAncientSouls":23529,"newTranscendentPower":24.980222409675992},
     {"ancientSouls":17500,"expectedLevels":[0,139,430,74,56,58,17,39,25],"expectedRemaining":0,"newHze":270600,"newLogHeroSouls":5226.875136312272,"newAncientSouls":26134,"newTranscendentPower":24.990947422761444},
     {"ancientSouls":20000,"expectedLevels":[0,147,479,77,61,64,18,42,34],"expectedRemaining":0,"newHze":296400,"newLogHeroSouls":5737.920400134043,"newAncientSouls":28689,"newTranscendentPower":24.9957938426185},
-    {"ancientSouls":50000,"expectedLevels":[0,57,248,47,306,0,0,0,0],"expectedRemaining":0,"newHze":1535500,"newLogHeroSouls":29764.162473509707,"newAncientSouls":148820,"newTranscendentPower":25},
-    {"ancientSouls":100000,"expectedLevels":[0,62,242,49,439,0,0,0,0],"expectedRemaining":0,"newHze":2209500,"newLogHeroSouls":42827.67592824874,"newAncientSouls":214138,"newTranscendentPower":25},
-    {"ancientSouls":200000,"expectedLevels":[0,58,235,48,627,0,0,0,0],"expectedRemaining":0,"newHze":3175000,"newLogHeroSouls":61540.98153118392,"newAncientSouls":307704,"newTranscendentPower":25},
-    {"ancientSouls":300000,"expectedLevels":[0,59,219,48,770,0,0,0,0],"expectedRemaining":0,"newHze":3923000,"newLogHeroSouls":76038.71947718917,"newAncientSouls":380193,"newTranscendentPower":25},
-    {"ancientSouls":400000,"expectedLevels":[0,52,201,45,891,0,0,0,0],"expectedRemaining":0,"newHze":4595500,"newLogHeroSouls":89073.0601719225,"newAncientSouls":445365,"newTranscendentPower":25},
-    {"ancientSouls":500000,"expectedLevels":[0,50,187,45,997,0,0,0,0],"expectedRemaining":0,"newHze":5245000,"newLogHeroSouls":101661.670861669,"newAncientSouls":508308,"newTranscendentPower":25}
+    {"ancientSouls":50000,"expectedLevels":[0,30,112,34,312,0,0,0,0],"expectedRemaining":0,"newHze":1565500,"newLogHeroSouls":30345.34118491531,"newAncientSouls":151726,"newTranscendentPower":25},
+    {"ancientSouls":100000,"expectedLevels":[0,30,115,35,444,0,0,0,0],"expectedRemaining":0,"newHze":2234500,"newLogHeroSouls":43311.93375458111,"newAncientSouls":216559,"newTranscendentPower":25},
+    {"ancientSouls":200000,"expectedLevels":[0,30,140,35,630,0,0,0,0],"expectedRemaining":0,"newHze":3190000,"newLogHeroSouls":61831.43724042402,"newAncientSouls":309157,"newTranscendentPower":25},
+    {"ancientSouls":300000,"expectedLevels":[0,38,140,38,772,0,0,0,0],"expectedRemaining":0,"newHze":3933000,"newLogHeroSouls":76232.33659914933,"newAncientSouls":381161,"newTranscendentPower":25},
+    {"ancientSouls":400000,"expectedLevels":[0,23,88,30,893,0,0,0,0],"expectedRemaining":0,"newHze":4605000,"newLogHeroSouls":89256.83704092582,"newAncientSouls":446284,"newTranscendentPower":25},
+    {"ancientSouls":500000,"expectedLevels":[0,16,64,24,999,0,0,0,0],"expectedRemaining":0,"newHze":5254500,"newLogHeroSouls":101845.25393778588,"newAncientSouls":509226,"newTranscendentPower":25}
 ]

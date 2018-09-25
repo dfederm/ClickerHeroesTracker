@@ -115,16 +115,16 @@ export class OutsiderSuggestionsComponent {
         } else if (ancientSouls < 333000) {
             // End Game
             if (ancientSouls < 27000) {
-                nonBorb = 3000 + (27000 - ancientSouls) * 1.2;
+                nonBorb = 1000 + (27000 - ancientSouls);
             } else {
-                nonBorb = 3000;
+                nonBorb = 1000;
             }
             zonePush = ancientSouls / 16e4;
             let b = this.spendAS(1, ancientSouls - nonBorb);
             this.newHze = Math.min(5.46e6, b * 5000 + 500);
         } else if (ancientSouls < 530000) {
             // Post zone 4m
-            nonBorb = 2000;
+            nonBorb = 500;
             zoneAdd = this.post4mStrategy(ancientSouls);
             let b = this.spendAS(1, ancientSouls - nonBorb);
             this.newHze = Math.min(5.46e6, b * 5000 + 500);
@@ -137,6 +137,7 @@ export class OutsiderSuggestionsComponent {
         if (ancientSouls >= 21000) {
             borbTarget = this.newHze;
             this.newHze = Math.min(5.5e6, (1 + zonePush / 100) * this.newHze + zoneAdd);
+            this.newHze--;
             this.newHze += 500 - this.newHze % 500;
         }
 
