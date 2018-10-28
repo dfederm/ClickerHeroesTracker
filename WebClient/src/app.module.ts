@@ -11,7 +11,7 @@ import { ApplicationInsightsModule, AppInsightsService } from "@markpieszak/ng-a
 import { ChartsModule } from "ng2-charts";
 import { CompareValidatorModule } from "angular-compare-validator";
 import { JwBootstrapSwitchNg2Module } from "jw-bootstrap-switch-ng2";
-import { LoadingModule } from "ngx-loading";
+import { NgxLoadingModule } from "ngx-loading";
 
 import { AppComponent } from "./components/app/app";
 import { HomeComponent } from "./components/home/home";
@@ -45,9 +45,6 @@ import { ClanComponent } from "./components/clan/clan";
 import { OpenDialogDirective } from "./directives/openDialog/openDialog";
 
 import { ExponentialPipe } from "./pipes/exponentialPipe";
-
-// Import rxjs operators used throughout the app
-import "rxjs/add/operator/toPromise";
 
 // Custom url matching for legacy calculation urls. Angular doesn't have great built-in rules for this.
 // This is an exported function because Angular AOT is terrible and can't handle it otherwise.
@@ -117,7 +114,7 @@ const routes: Routes =
       ChartsModule,
       CompareValidatorModule,
       JwBootstrapSwitchNg2Module,
-      LoadingModule,
+      NgxLoadingModule.forRoot({}),
     ],
   declarations:
     [
