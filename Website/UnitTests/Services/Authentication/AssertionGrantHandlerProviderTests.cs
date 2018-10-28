@@ -43,7 +43,15 @@ namespace UnitTests.Services.Authentication
         private static IHttpContextAccessor CreateHttpContextAccessor()
         {
             var mockHttpContext = new Mock<HttpContext>(MockBehavior.Strict);
-            mockHttpContext.Setup(_ => _.RequestServices.GetService(typeof(MockAssertionGrantHandler))).Returns(() => new MockAssertionGrantHandler());
+            mockHttpContext
+                .Setup(_ => _.RequestServices.GetService(typeof(MockAssertionGrantHandler)))
+                .Returns(() => new MockAssertionGrantHandler());
+
+            // HttpContextAccessor.set_HttpContent calls HttpContext.TraceIdentifier
+            mockHttpContext
+                .Setup(_ => _.TraceIdentifier)
+                .Returns("SomeTraceIdentifier");
+
             return new HttpContextAccessor { HttpContext = mockHttpContext.Object };
         }
 
@@ -51,10 +59,7 @@ namespace UnitTests.Services.Authentication
         {
             public string Name => throw new NotImplementedException();
 
-            public Task<AssertionGrantResult> ValidateAsync(string assertion)
-            {
-                throw new NotImplementedException();
-            }
+            public Task<AssertionGrantResult> ValidateAsync(string assertion) => throw new NotImplementedException();
         }
     }
 }
