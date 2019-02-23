@@ -6,8 +6,9 @@
   </PropertyGroup>
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp2.2</TargetFramework>
+    <TargetFramework>netcoreapp3.0</TargetFramework>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <SuppressNETCoreSdkPreviewMessage>true</SuppressNETCoreSdkPreviewMessage>
     <CodeAnalysisRuleSet>$(MSBuildThisFileDirectory)\build\CodeAnalysis.ruleset</CodeAnalysisRuleSet>
     <Deterministic>true</Deterministic>
     <!-- Enable Code Coverage. This is a temporary workaround for https://github.com/Microsoft/vstest/issues/800 -->
@@ -16,11 +17,11 @@
 
   <ItemGroup>
     <!-- Using a newer compiler than what comes with MSBuild -->
-    <PackageReference Include="Microsoft.Net.Compilers" Version="2.9.0" IncludeAssets="Analyzers;Build" PrivateAssets="All" />
+    <PackageReference Include="Microsoft.Net.Compilers" Version="3.0.0-beta3-final" IncludeAssets="Analyzers;Build" PrivateAssets="All" />
 
     <!-- Analyzers -->
-    <PackageReference Include="Microsoft.CodeAnalysis.FxCopAnalyzers" Version="2.6.2" IncludeAssets="Analyzers;Build" PrivateAssets="All" />
-    <PackageReference Include="StyleCop.Analyzers" Version="1.1.0-beta009" IncludeAssets="Analyzers;Build" PrivateAssets="All" />
+    <PackageReference Include="Microsoft.CodeAnalysis.FxCopAnalyzers" Version="2.6.3" IncludeAssets="Analyzers;Build" PrivateAssets="All" />
+    <PackageReference Include="StyleCop.Analyzers" Version="1.1.1-rc.108" IncludeAssets="Analyzers;Build" PrivateAssets="All" />
   </ItemGroup>
   <ItemGroup>
     <AdditionalFiles Include="$(MSBuildThisFileDirectory)\build\stylecop.json" />
