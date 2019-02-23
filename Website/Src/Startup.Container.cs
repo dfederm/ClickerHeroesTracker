@@ -194,11 +194,11 @@ namespace ClickerHeroesTrackerWebsite
 
             services.AddMvc(options =>
             {
-                var jsonFormatter = options.OutputFormatters.OfType<JsonOutputFormatter>().Single();
+                ////var jsonFormatter = options.OutputFormatters.OfType<NewtonsoftJsonOutputFormatter>().Single();
 
                 // Allow the json formatter to handle requests from the browser
-                jsonFormatter.SupportedMediaTypes.Add(new MediaTypeHeaderValue("text/html"));
-            }).AddJsonOptions(options =>
+                ////jsonFormatter.SupportedMediaTypes.Add(new MediaTypeHeaderValue("text/html"));
+            }).AddNewtonsoftJson(options =>
             {
                 // Beautify by default for debuggability. When gzipping, this barely adds anything to the payload.
                 options.SerializerSettings.Formatting = Formatting.Indented;
@@ -210,7 +210,7 @@ namespace ClickerHeroesTrackerWebsite
                 options.SerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver();
 
                 // Convert enum values to strings
-                options.SerializerSettings.Converters.Add(new StringEnumConverter { CamelCaseText = true });
+                options.SerializerSettings.Converters.Add(new StringEnumConverter { NamingStrategy = new CamelCaseNamingStrategy() });
             });
 
             // Allow IOptions<T> to be available through DI

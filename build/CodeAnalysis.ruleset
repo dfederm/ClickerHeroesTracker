@@ -31,7 +31,13 @@
     <!-- UriParametersShouldNotBeStrings -->
     <Rule Id="CA1054" Action="None" />
     <!-- PassSystemUriObjectsInsteadOfStrings -->
-    <Rule Id="CA2234" Action="None" />    
+    <Rule Id="CA2234" Action="None" />
+  </Rules>
+
+  <!-- It's easier to serialize/deserialize collections. -->
+  <Rules AnalyzerId="Microsoft.ApiDesignGuidelines.Analyzers" RuleNamespace="Microsoft.ApiDesignGuidelines.Analyzers">
+    <!-- CollectionPropertiesShouldBeReadOnly -->
+    <Rule Id="CA2227" Action="None" />
   </Rules>
 
   <!-- Don't worry about documentation -->
@@ -46,6 +52,8 @@
     <Rule Id="SA1602" Action="None" />
     <!-- ElementParametersMustBeDocumented -->
     <Rule Id="SA1611" Action="None" />
+    <!-- DocumentationTextMustEndWithAPeriod -->
+    <Rule Id="SA1629" Action="None" />
   </Rules>
 
   <!-- We'll name things appropriately -->
