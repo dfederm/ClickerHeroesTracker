@@ -17,4 +17,3 @@
     {"ancientSouls":300000,"expectedLevels":[0,38,140,38,772,0,0,0,0],"expectedRemaining":0,"newHze":3974738,"newLogHeroSouls":77041.30262373538,"newAncientSouls":385206,"newTranscendentPower":25},
     {"ancientSouls":400000,"expectedLevels":[0,39,162,39,892,0,0,0,0],"expectedRemaining":0,"newHze":4728173,"newLogHeroSouls":91644.40431437873,"newAncientSouls":458222,"newTranscendentPower":25},
     {"ancientSouls":500000,"expectedLevels":[0,16,64,24,999,0,0,0,0],"expectedRemaining":0,"newHze":5348464,"newLogHeroSouls":103666.46443024368,"newAncientSouls":518332,"newTranscendentPower":25}
-]

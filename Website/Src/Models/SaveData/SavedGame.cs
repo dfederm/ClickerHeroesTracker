@@ -117,13 +117,13 @@ namespace ClickerHeroesTrackerWebsite.Models.SaveData
 
             // Based on https://github.com/Legocro/Clan-stripper/blob/master/script.js
             savedGame.Object.Remove("type");
-            savedGame.Object.Property("email").Value = string.Empty;
-            savedGame.Object.Property("passwordHash").Value = string.Empty;
-            savedGame.Object.Property("prevLoginTimestamp").Value = 0;
+            savedGame.Object.Property("email", StringComparison.OrdinalIgnoreCase).Value = string.Empty;
+            savedGame.Object.Property("passwordHash", StringComparison.OrdinalIgnoreCase).Value = string.Empty;
+            savedGame.Object.Property("prevLoginTimestamp", StringComparison.OrdinalIgnoreCase).Value = 0;
             savedGame.Object.Remove("account");
-            savedGame.Object.Property("accountId").Value = 0;
-            savedGame.Object.Property("loginValidated").Value = false;
-            savedGame.Object.Property("uniqueId").Value = string.Empty;
+            savedGame.Object.Property("accountId", StringComparison.OrdinalIgnoreCase).Value = 0;
+            savedGame.Object.Property("loginValidated", StringComparison.OrdinalIgnoreCase).Value = false;
+            savedGame.Object.Property("uniqueId", StringComparison.OrdinalIgnoreCase).Value = string.Empty;
 
             if (!EncodeFuncs.TryGetValue(savedGame.encoding, out var encodeFunc))
             {

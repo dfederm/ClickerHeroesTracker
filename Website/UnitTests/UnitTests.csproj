@@ -16,16 +16,22 @@
   </ItemGroup>
 
   <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\src\Website.csproj" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.AspNetCore.App" Version="2.1.1" />
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.9.0-preview-20180816-01" />
-    <PackageReference Include="Moq" Version="4.10.0" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.0.0-preview-20190203-03" />
+    <PackageReference Include="Moq" Version="4.10.1" />
     <PackageReference Include="Testing.HttpClient" Version="1.0.0" />
-    <PackageReference Include="xunit" Version="2.4.1-pre.build.4059" />
-    <PackageReference Include="xunit.runner.visualstudio" Version="2.4.1-pre.build.4059" IncludeAssets="Runtime;Build;Native;Contentfiles;Analyzers" PrivateAssets="All" />
+    <PackageReference Include="xunit" Version="2.4.1" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.4.1">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
   </ItemGroup>
 
   <ItemGroup>
