@@ -463,20 +463,17 @@ describe("UploadComponent", () => {
                         let expectedValue = expected.value;
                         let expectedFormattedValue: string;
                         switch (expected.type) {
-                            case "exponential":
-                                {
-                                    expectedFormattedValue = exponentialPipe.transform(new Decimal(expectedValue));
-                                    break;
-                                }
-                            case "percent":
-                                {
-                                    expectedFormattedValue = percentPipe.transform(expectedValue, "1.1-3");
-                                    break;
-                                }
-                            default:
-                                {
-                                    fail();
-                                }
+                            case "exponential": {
+                                expectedFormattedValue = exponentialPipe.transform(new Decimal(expectedValue));
+                                break;
+                            }
+                            case "percent": {
+                                expectedFormattedValue = percentPipe.transform(expectedValue, "1.1-3");
+                                break;
+                            }
+                            default: {
+                                fail();
+                            }
                         }
 
                         expect(getNormalizedTextContent(cells[1])).toEqual(expectedFormattedValue);

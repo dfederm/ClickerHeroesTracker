@@ -18,6 +18,7 @@
     ],
     "arrow-return-shorthand": true,
     "ban-comma-operator": true,
+    "ban-ts-ignore": true,
     "ban-types": true,
     "callable-types": true,
     "class-name": true,
@@ -25,6 +26,11 @@
       true,
       "check-space",
       "check-uppercase"
+    ],
+    "comment-type": [
+      true,
+      "singleline",
+      "multiline"
     ],
     "curly": true,
     "cyclomatic-complexity": true,
@@ -35,6 +41,7 @@
       "camel-case"
     ],
     "forin": false,
+    "function-constructor": true,
     "import-spacing": true,
     "indent": [
       true,
@@ -195,6 +202,8 @@
       }
     ],
     "unified-signatures": true,
+    "unnecessary-bind": true,
+    "unnecessary-constructor": true,
     "use-isnan": true,
     "variable-name": [
       true,
@@ -264,6 +273,7 @@
         "function-regex": "^[a-z][\\w\\d]+$"
       }
     ],
+    "informative-docs": true,
     "no-banned-terms": true,
     "no-constant-condition": true,
     "no-control-regex": true,
@@ -297,10 +307,12 @@
     "no-unsupported-browser-code": true,
     "no-useless-files": true,
     "no-with-statement": true,
+    "non-literal-fs-path": true,
     "non-literal-require": true,
     "possible-timing-attack": true,
     "prefer-array-literal": true,
     "promise-must-complete": true,
-    "use-named-parameter": true
+    "use-named-parameter": true,
+    "use-simple-attributes": true
   }
 }

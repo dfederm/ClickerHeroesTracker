@@ -16,22 +16,22 @@ export class HttpErrorHandlerService {
 
     public logError(eventName: string, err: HttpErrorResponse): void {
         let status = (err.status || 0).toString();
-        let message = err.error instanceof Error
+        let message = err.error instanceof ErrorEvent
             // A client-side or network error occurred.
             ? err.error.message
             // The backend returned an unsuccessful response code.
-            : JSON.stringify(err.error);
+            : err.error;
 
         this.appInsights.trackEvent(eventName, { status, message });
     }
 
     public getValidationErrors(err: HttpErrorResponse): string[] {
-        if (err.error instanceof Error) {
+        if (err.error instanceof ErrorEvent) {
             return [err.error.message];
         }
 
         let errors: string[] = [];
-        let validationErrorResponse: IValidationErrorResponse = err.error;
+        let validationErrorResponse: IValidationErrorResponse = JSON.parse(err.error);
         for (let field in validationErrorResponse) {
             errors.push(...validationErrorResponse[field]);
         }
