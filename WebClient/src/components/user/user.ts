@@ -251,7 +251,7 @@ export class UserComponent implements OnInit {
             title: (tooltipItems: ChartTooltipItem[]) => {
               return isTime
                 ? new Date(tooltipItems[0].xLabel).toLocaleString()
-                : tooltipItems[0].xLabel;
+                : tooltipItems[0].xLabel.toString();
             },
             label: (tooltipItem: ChartTooltipItem) => {
               return isLogarithmic

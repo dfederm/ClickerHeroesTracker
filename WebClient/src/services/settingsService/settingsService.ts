@@ -121,11 +121,11 @@ export class SettingsService {
                     this.handlePatchCompleted();
                     return Promise.reject(err);
                 });
-        } else {
-            let newSettings = Object.assign({}, this.settingsSubject.getValue(), patch);
-            this.handleNewSettings(newSettings);
-            return Promise.resolve();
         }
+
+        let newSettings = Object.assign({}, this.settingsSubject.getValue(), patch);
+        this.handleNewSettings(newSettings);
+        return Promise.resolve();
     }
 
     private fetchSettingsInitial(retryDelay: number = SettingsService.retryDelay): void {

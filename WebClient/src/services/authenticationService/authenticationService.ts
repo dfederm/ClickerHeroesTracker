@@ -110,9 +110,9 @@ export class AuthenticationService {
 
                     return headers;
                 });
-        } else {
-            return Promise.resolve(new HttpHeaders());
         }
+
+        return Promise.resolve(new HttpHeaders());
     }
 
     private fetchTokens(params: HttpParams, headers?: HttpHeaders): Promise<void> {
@@ -178,10 +178,10 @@ export class AuthenticationService {
                 email: claims.email,
                 isAdmin: claims.role === "Admin",
             };
-        } else {
-            return {
-                isLoggedIn: false,
-            };
         }
+
+        return {
+            isLoggedIn: false,
+        };
     }
 }

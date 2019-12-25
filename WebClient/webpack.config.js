@@ -3,7 +3,7 @@ const path = require('path');
 const rxPaths = require('rxjs/_esm5/path-mapping');
 
 // Webpack Plugins
-const CleanWebpackPlugin = require('clean-webpack-plugin');
+const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
 const ManifestPlugin = require('webpack-manifest-plugin');
@@ -88,7 +88,14 @@ module.exports = () => {
       },
       {
         test: /\.css$/,
-        loader: 'raw-loader'
+        use: [
+          {
+            loader: 'raw-loader',
+            options: {
+              esModule: false,
+            },
+          },
+        ],
       }
     ]
   };
@@ -145,15 +152,14 @@ module.exports = () => {
 
   if (!isTest) {
     config.plugins.push(
-      new CleanWebpackPlugin([
-        '*.js',
-        '*.js.map',
-        'index.html',
-        'manifest.json',
-      ], {
-          root: outputPath,
-          allowExternal: true
-        }),
+      new CleanWebpackPlugin({
+        cleanOnceBeforeBuildPatterns: [
+          '*.js',
+          '*.js.map',
+          'index.html',
+          'manifest.json',
+        ]
+      }),
 
       new HtmlWebpackPlugin({
         template: 'src/index.html'

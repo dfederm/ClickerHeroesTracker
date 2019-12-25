@@ -1,8 +1,7 @@
 # Getting started
 ## Prereqs
 1. **Clone the Repo** - There should be a "Clone" button to the right on this page.
-1. Install [.NET Core](https://www.microsoft.com/net/download/). Match the SDK version listed in [global.json](global.json)
-1. For the API code, you'll want [Visual Studio 2017](https://www.visualstudio.com/vs/). The Community version is free.
+1. For the API code, you'll want [Visual Studio 2019](https://www.visualstudio.com/vs/). The Community version is free.
 1. For the frontend code, use an editor like [Visual Studio Code](https://code.visualstudio.com/).
 1. Use **SQL** for the local database:
     1. [SQL LocalDB](https://docs.microsoft.com/en-us/sql/database-engine/configure-windows/sql-server-2016-express-localdb#install-localdb) should work just fine.

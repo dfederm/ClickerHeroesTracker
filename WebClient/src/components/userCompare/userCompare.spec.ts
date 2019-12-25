@@ -90,11 +90,13 @@ describe("UserCompareComponent", () => {
             getProgress(userName: string): Promise<IProgressData> {
                 if (userName === "someUserName") {
                     return Promise.resolve(userProgress);
-                } else if (userName === "someOtherUserName") {
-                    return Promise.resolve(compareProgress);
-                } else {
-                    return Promise.reject("No user: " + userName);
                 }
+
+                if (userName === "someOtherUserName") {
+                    return Promise.resolve(compareProgress);
+                }
+
+                return Promise.reject("No user: " + userName);
             },
         };
 

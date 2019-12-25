@@ -51,7 +51,7 @@ export class AppComponent implements OnInit {
     // See https://github.com/AzureAD/microsoft-authentication-library-for-js/issues/174
     if (location.hash.includes("id_token")) {
       // tslint:disable-next-line:no-unused-expression - Constructing this object has side-effects
-      new UserAgentApplication("4ecf3d26-e844-4855-9158-b8f6c0121b50", null, null);
+      new UserAgentApplication({ auth: { clientId: "4ecf3d26-e844-4855-9158-b8f6c0121b50" } });
     }
   }
 

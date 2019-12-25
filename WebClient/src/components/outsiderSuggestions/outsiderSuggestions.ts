@@ -262,7 +262,9 @@ export class OutsiderSuggestionsComponent {
             if (pony < 1) {
                 ancientSouls -= ++pony;
                 continue;
-            } else if (phan < 3) {
+            }
+
+            if (phan < 3) {
                 phan++;
                 ancientSouls--;
                 continue;

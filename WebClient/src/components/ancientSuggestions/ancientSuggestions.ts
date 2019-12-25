@@ -532,9 +532,9 @@ export class AncientSuggestionsComponent implements OnInit {
             return exponent === 0
                 ? n.toFixed()
                 : (n.toFixed() + "e" + exponent);
-        } else {
-            return num.toFixed(0);
         }
+
+        return num.toFixed(0);
     }
 
     private getAncientLevel(ancientName: string): Decimal {
