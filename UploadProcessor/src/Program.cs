@@ -14,10 +14,11 @@ namespace ClickerHeroesTracker.UploadProcessor
     using ClickerHeroesTrackerWebsite.Services.UploadProcessing;
     using Microsoft.ApplicationInsights;
     using Microsoft.ApplicationInsights.Extensibility;
+    using Microsoft.Azure.Storage;
+    using Microsoft.Azure.Storage.Queue;
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Options;
-    using Microsoft.WindowsAzure.Storage;
 
     /// <summary>
     /// The entrypoint class to the program.

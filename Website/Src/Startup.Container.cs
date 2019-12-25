@@ -6,7 +6,6 @@ namespace ClickerHeroesTrackerWebsite
 {
     using System;
     using System.IO;
-    using System.Linq;
     using System.Net.Http;
     using AspNet.Security.OAuth.Validation;
     using AspNet.Security.OpenIdConnect.Primitives;
@@ -23,15 +22,14 @@ namespace ClickerHeroesTrackerWebsite
     using Microsoft.AspNetCore.DataProtection;
     using Microsoft.AspNetCore.Hosting;
     using Microsoft.AspNetCore.Identity;
-    using Microsoft.AspNetCore.Mvc.Formatters;
+    using Microsoft.Azure.Cosmos.Table;
+    using Microsoft.Azure.Storage.Blob;
+    using Microsoft.Azure.Storage.Queue;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
+    using Microsoft.Extensions.Hosting;
     using Microsoft.Extensions.Options;
-    using Microsoft.Net.Http.Headers;
-    using Microsoft.WindowsAzure.Storage;
-    using Microsoft.WindowsAzure.Storage.Queue;
-    using Microsoft.WindowsAzure.Storage.Table;
     using Newtonsoft.Json;
     using Newtonsoft.Json.Converters;
     using Newtonsoft.Json.Serialization;
@@ -40,6 +38,8 @@ namespace ClickerHeroesTrackerWebsite
     using Website.Services.Authentication;
     using Website.Services.Clans;
     using Website.Services.SiteNews;
+    using CloudStorageAccount = Microsoft.Azure.Storage.CloudStorageAccount;
+    using TableStorageAccount = Microsoft.Azure.Cosmos.Table.CloudStorageAccount;
 
     /// <summary>
     /// Configure the Unity container.
@@ -51,9 +51,13 @@ namespace ClickerHeroesTrackerWebsite
         {
             // The DevelopmentStorageAccount will only work if you have the Storage emulator v4.3 installed: https://go.microsoft.com/fwlink/?linkid=717179&clcid=0x409
             var storageConnectionString = this.configuration["Storage:ConnectionString"];
-            var storageAccount = !string.IsNullOrEmpty(storageConnectionString)
-                ? CloudStorageAccount.Parse(storageConnectionString)
-                : null;
+            CloudStorageAccount storageAccount = null;
+            TableStorageAccount tableStorageAccount = null;
+            if (!string.IsNullOrEmpty(storageConnectionString))
+            {
+                storageAccount = CloudStorageAccount.Parse(storageConnectionString);
+                tableStorageAccount = TableStorageAccount.Parse(storageConnectionString);
+            }
 
             // Nesessary to persist keys (like the ones used to generate auth cookies)
             // By default Azure Websites can persist keys across instances within a slot, but not across slots.
@@ -184,34 +188,29 @@ namespace ClickerHeroesTrackerWebsite
 
             var buildInfoProvider = new BuildInfoProvider(this.environment);
 
-            services.Configure((ApplicationInsightsServiceOptions options) =>
+            services.AddApplicationInsightsTelemetry(new ApplicationInsightsServiceOptions
             {
-                options.ApplicationVersion = buildInfoProvider.BuildId;
-                options.DeveloperMode = this.environment.IsDevelopment();
+                ApplicationVersion = buildInfoProvider.BuildId,
+                DeveloperMode = this.environment.IsDevelopment(),
             });
 
             services.AddCors();
 
-            services.AddMvc(options =>
-            {
-                ////var jsonFormatter = options.OutputFormatters.OfType<NewtonsoftJsonOutputFormatter>().Single();
+            services.AddControllers()
+                .AddNewtonsoftJson(options =>
+                {
+                    // Beautify by default for debuggability. When gzipping, this barely adds anything to the payload.
+                    options.SerializerSettings.Formatting = Formatting.Indented;
 
-                // Allow the json formatter to handle requests from the browser
-                ////jsonFormatter.SupportedMediaTypes.Add(new MediaTypeHeaderValue("text/html"));
-            }).AddNewtonsoftJson(options =>
-            {
-                // Beautify by default for debuggability. When gzipping, this barely adds anything to the payload.
-                options.SerializerSettings.Formatting = Formatting.Indented;
+                    // Omit nulls
+                    options.SerializerSettings.NullValueHandling = NullValueHandling.Ignore;
 
-                // Omit nulls
-                options.SerializerSettings.NullValueHandling = NullValueHandling.Ignore;
+                    // Use camel-casing for fields (lower case first character)
+                    options.SerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver();
 
-                // Use camel-casing for fields (lower case first character)
-                options.SerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver();
-
-                // Convert enum values to strings
-                options.SerializerSettings.Converters.Add(new StringEnumConverter { NamingStrategy = new CamelCaseNamingStrategy() });
-            });
+                    // Convert enum values to strings
+                    options.SerializerSettings.Converters.Add(new StringEnumConverter { NamingStrategy = new CamelCaseNamingStrategy() });
+                });
 
             // Allow IOptions<T> to be available through DI
             services.AddOptions();
@@ -219,7 +218,7 @@ namespace ClickerHeroesTrackerWebsite
             // Container controlled registrations
             if (storageAccount != null)
             {
-                services.AddSingleton<CloudTableClient>(_ => storageAccount.CreateCloudTableClient());
+                services.AddSingleton<CloudTableClient>(_ => tableStorageAccount.CreateCloudTableClient());
                 services.AddSingleton<CloudQueueClient>(_ => storageAccount.CreateCloudQueueClient());
                 services.AddSingleton<IUploadScheduler, AzureStorageUploadScheduler>();
                 services.AddSingleton<ISiteNewsProvider, AzureStorageSiteNewsProvider>();

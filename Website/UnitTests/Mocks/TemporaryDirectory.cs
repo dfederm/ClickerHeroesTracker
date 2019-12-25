@@ -32,7 +32,9 @@ namespace UnitTests.Mocks
                 {
                     Directory.Delete(this.Location, true);
                 }
+#pragma warning disable CA1031 // Do not catch general exception types
                 catch
+#pragma warning restore CA1031 // Do not catch general exception types
                 {
                     // Not the end of the world if we couldn't clean up
                 }

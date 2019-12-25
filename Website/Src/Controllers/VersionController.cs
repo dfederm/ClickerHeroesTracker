@@ -18,17 +18,17 @@ namespace ClickerHeroesTrackerWebsite.Controllers
     {
         private readonly IBuildInfoProvider buildInfoProvider;
 
-        private readonly IHostingEnvironment hostingEnvironment;
+        private readonly IWebHostEnvironment webHostEnvironment;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="VersionController"/> class.
         /// </summary>
         public VersionController(
             IBuildInfoProvider buildInfoProvider,
-            IHostingEnvironment hostingEnvironment)
+            IWebHostEnvironment webHostEnvironment)
         {
             this.buildInfoProvider = buildInfoProvider;
-            this.hostingEnvironment = hostingEnvironment;
+            this.webHostEnvironment = webHostEnvironment;
         }
 
         /// <summary>
@@ -39,7 +39,7 @@ namespace ClickerHeroesTrackerWebsite.Controllers
         [HttpGet]
         public ActionResult<VersionResponse> Version() => new VersionResponse
         {
-            Environment = this.hostingEnvironment.EnvironmentName,
+            Environment = this.webHostEnvironment.EnvironmentName,
             Changelist = this.buildInfoProvider.Changelist,
             BuildId = this.buildInfoProvider.BuildId,
             Webclient = this.buildInfoProvider.Webclient,

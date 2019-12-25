@@ -10,7 +10,7 @@ namespace Website.Services.SiteNews
     using System.Threading.Tasks;
     using ClickerHeroesTrackerWebsite.Utility;
     using Microsoft.ApplicationInsights;
-    using Microsoft.WindowsAzure.Storage.Table;
+    using Microsoft.Azure.Cosmos.Table;
 
     public class AzureStorageSiteNewsProvider : ISiteNewsProvider
     {

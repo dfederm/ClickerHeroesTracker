@@ -5,7 +5,7 @@
 namespace Website.Services.SiteNews
 {
     using System;
-    using Microsoft.WindowsAzure.Storage.Table;
+    using Microsoft.Azure.Cosmos.Table;
 
     /// <summary>
     /// Represents an individual site news entity.

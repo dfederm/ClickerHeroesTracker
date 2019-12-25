@@ -4,10 +4,17 @@
   <Rules AnalyzerId="Microsoft.ApiDesignGuidelines.Analyzers" RuleNamespace="Microsoft.ApiDesignGuidelines.Analyzers">
     <!-- DoNotDirectlyAwaitATask -->
     <Rule Id="CA2007" Action="None" /> 
-  </Rules> 
+  </Rules>
+
+  <Rules AnalyzerId="Microsoft.Design" RuleNamespace="Microsoft.Design">
+    <!-- ValidateArgumentsOfPublicMethods: This isn't a library. -->
+    <Rule Id="CA1062" Action="None" />
+  </Rules>
 
   <!-- We don't really support proper globalization right now. -->
   <Rules AnalyzerId="Microsoft.Globalization" RuleNamespace="Microsoft.Globalization">
+    <!-- DoNotPassLiteralsAsLocalizedParameters -->
+    <Rule Id="CA1303" Action="None" />
     <!-- SpecifyIFormatProvider -->
     <Rule Id="CA1305" Action="None" />
     <!-- NormalizeStringsToUppercase -->
@@ -38,6 +45,12 @@
   <Rules AnalyzerId="Microsoft.ApiDesignGuidelines.Analyzers" RuleNamespace="Microsoft.ApiDesignGuidelines.Analyzers">
     <!-- CollectionPropertiesShouldBeReadOnly -->
     <Rule Id="CA2227" Action="None" />
+  </Rules>
+
+  <!-- Many things are disposeable but not really needed. Maybe should revisit this... -->
+  <Rules AnalyzerId="Microsoft.ApiDesignGuidelines.Analyzers" RuleNamespace="Microsoft.ApiDesignGuidelines.Analyzers">
+    <!-- CollectionPropertiesShouldBeReadOnly -->
+    <Rule Id="CA2000" Action="None" />
   </Rules>
 
   <!-- Don't worry about documentation -->
