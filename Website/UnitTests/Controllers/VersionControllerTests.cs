@@ -28,10 +28,10 @@ namespace ClickerHeroesTrackerWebsite.Tests.Controllers
             };
             mockBuildInfoProvider.SetupGet(_ => _.Webclient).Returns(webclient).Verifiable();
 
-            var mockHostingEnvironment = new Mock<IHostingEnvironment>(MockBehavior.Strict);
-            mockHostingEnvironment.SetupGet(_ => _.EnvironmentName).Returns("SomeEnvironmentName").Verifiable();
+            var mockWebHostEnvironment = new Mock<IWebHostEnvironment>(MockBehavior.Strict);
+            mockWebHostEnvironment.SetupGet(_ => _.EnvironmentName).Returns("SomeEnvironmentName").Verifiable();
 
-            var controller = new VersionController(mockBuildInfoProvider.Object, mockHostingEnvironment.Object);
+            var controller = new VersionController(mockBuildInfoProvider.Object, mockWebHostEnvironment.Object);
 
             var result = controller.Version();
             Assert.NotNull(result);
@@ -44,7 +44,7 @@ namespace ClickerHeroesTrackerWebsite.Tests.Controllers
             Assert.Equal(webclient, model.Webclient);
 
             mockBuildInfoProvider.Verify();
-            mockHostingEnvironment.Verify();
+            mockWebHostEnvironment.Verify();
         }
     }
 }

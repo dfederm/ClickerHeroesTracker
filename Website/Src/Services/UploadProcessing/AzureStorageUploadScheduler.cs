@@ -8,7 +8,7 @@ namespace ClickerHeroesTrackerWebsite.Services.UploadProcessing
     using System.Globalization;
     using System.Linq;
     using System.Threading.Tasks;
-    using Microsoft.WindowsAzure.Storage.Queue;
+    using Microsoft.Azure.Storage.Queue;
     using Newtonsoft.Json;
     using Website.Services.UploadProcessing;
 

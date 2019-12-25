@@ -12,14 +12,15 @@ namespace ClickerHeroesTrackerWebsite
     using Microsoft.AspNetCore.Hosting;
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
+    using Microsoft.Extensions.Hosting;
     using Website.Services.SiteNews;
 
     public partial class Startup
     {
-        private readonly IHostingEnvironment environment;
+        private readonly IWebHostEnvironment environment;
         private readonly IConfiguration configuration;
 
-        public Startup(IHostingEnvironment environment, IConfiguration configuration)
+        public Startup(IWebHostEnvironment environment, IConfiguration configuration)
         {
             this.environment = environment;
             this.configuration = configuration;
@@ -66,15 +67,20 @@ namespace ClickerHeroesTrackerWebsite
                 };
             app.UseStaticFiles(staticFileOptions);
 
-            app.UseAuthentication();
+            // The point at which the routing decision is made.
+            app.UseRouting();
 
-            app.UseMvc(routes =>
+            app.UseAuthentication();
+            app.UseAuthorization();
+            app.UseCors();
+
+            // Executes the endpoint that was selected by routing.
+            app.UseEndpoints(endpoints =>
             {
-                // All other controllers use attribute routing, so fallback everything else to the Angular app
-                routes.MapRoute(
-                    name: "frontend",
-                    template: "{*path}",
-                    defaults: new { controller = "Frontend", action = "Index" });
+                endpoints.MapControllers();
+
+                // Fallback to the Angular app
+                endpoints.MapFallbackToFile("/index.html");
             });
 
             using (var serviceScope = app.ApplicationServices.GetRequiredService<IServiceScopeFactory>().CreateScope())

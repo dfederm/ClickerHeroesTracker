@@ -97,7 +97,9 @@ namespace ClickerHeroesTrackerWebsite.Models.SaveData
                         savedGame.Object = JObject.Load(jsonTextReader);
                     }
                 }
+#pragma warning disable CA1031 // Do not catch general exception types
                 catch (Exception)
+#pragma warning restore CA1031 // Do not catch general exception types
                 {
                     // Just return null for any invalid save
                     return null;

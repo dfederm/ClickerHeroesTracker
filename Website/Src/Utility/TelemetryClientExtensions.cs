@@ -6,7 +6,7 @@ namespace ClickerHeroesTrackerWebsite.Utility
 {
     using System.Collections.Generic;
     using Microsoft.ApplicationInsights;
-    using Microsoft.WindowsAzure.Storage.Table;
+    using Microsoft.Azure.Cosmos.Table;
 
     internal static class TelemetryClientExtensions
     {

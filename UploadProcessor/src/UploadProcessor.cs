@@ -17,8 +17,8 @@ namespace ClickerHeroesTracker.UploadProcessor
     using ClickerHeroesTrackerWebsite.Services.UploadProcessing;
     using ClickerHeroesTrackerWebsite.Utility;
     using Microsoft.ApplicationInsights;
+    using Microsoft.Azure.Storage.Queue;
     using Microsoft.Extensions.Options;
-    using Microsoft.WindowsAzure.Storage.Queue;
     using Newtonsoft.Json;
 
     internal sealed class UploadProcessor
@@ -86,7 +86,7 @@ namespace ClickerHeroesTracker.UploadProcessor
             return queue;
         }
 
-        private static async Task<(string uploadContent, string userId)> GetUploadDetailsAsync(
+        private static async Task<(string UploadContent, string UserId)> GetUploadDetailsAsync(
             IDatabaseCommandFactory databaseCommandFactory,
             int uploadId)
         {
@@ -395,7 +395,9 @@ namespace ClickerHeroesTracker.UploadProcessor
                     {
                         command.CommitTransaction();
                     }
+#pragma warning disable CA1031 // Do not catch general exception types
                     catch (Exception)
+#pragma warning restore CA1031 // Do not catch general exception types
                     {
                         this.telemetryClient.TrackEvent("UploadProcessor-Abandoned-CommitTransaction", properties);
                         return false;
@@ -405,7 +407,9 @@ namespace ClickerHeroesTracker.UploadProcessor
                 this.telemetryClient.TrackEvent("UploadProcessor-Complete", properties);
                 return true;
             }
+#pragma warning disable CA1031 // Do not catch general exception types
             catch (Exception e)
+#pragma warning restore CA1031 // Do not catch general exception types
             {
                 this.telemetryClient.TrackException(e, properties);
                 return false;

@@ -112,7 +112,9 @@ namespace ClickerHeroesTrackerWebsite.Services.Database
 
             await this.EnsureCommandCreated();
 
+#pragma warning disable CA2100 // Review SQL queries for security vulnerabilities
             this.command.CommandText = this.CommandText;
+#pragma warning restore CA2100 // Review SQL queries for security vulnerabilities
 
             this.command.Parameters.Clear();
             if (this.Parameters != null)

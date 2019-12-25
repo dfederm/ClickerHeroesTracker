@@ -64,7 +64,9 @@ namespace Website.Services.Authentication
             }
 
             // It's not great to catch all exceptions, but the Jwt middleware does the same thing
+#pragma warning disable CA1031 // Do not catch general exception types
             catch (Exception)
+#pragma warning restore CA1031 // Do not catch general exception types
             {
                 // Just swallow and fall through to returning the error below
             }

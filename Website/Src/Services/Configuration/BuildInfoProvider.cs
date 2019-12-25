@@ -19,9 +19,9 @@ namespace ClickerHeroesTrackerWebsite.Configuration
         /// <summary>
         /// Initializes a new instance of the <see cref="BuildInfoProvider"/> class.
         /// </summary>
-        public BuildInfoProvider(IHostingEnvironment hostingEnvironment)
+        public BuildInfoProvider(IWebHostEnvironment webHostEnvironment)
         {
-            var buildInfoFile = Path.Combine(hostingEnvironment.WebRootPath, @"data\BuildInfo.json");
+            var buildInfoFile = Path.Combine(webHostEnvironment.WebRootPath, @"data\BuildInfo.json");
             if (!File.Exists(buildInfoFile))
             {
                 throw new InvalidDataException("Could not find build info file: " + buildInfoFile);
@@ -36,7 +36,7 @@ namespace ClickerHeroesTrackerWebsite.Configuration
                 this.BuildId = (string)buildInfo["buildId"];
             }
 
-            var webclientManifestFile = Path.Combine(hostingEnvironment.WebRootPath, @"manifest.json");
+            var webclientManifestFile = Path.Combine(webHostEnvironment.WebRootPath, @"manifest.json");
             if (!File.Exists(webclientManifestFile))
             {
                 throw new InvalidDataException("Could not find Webclient manifest file: " + webclientManifestFile);
