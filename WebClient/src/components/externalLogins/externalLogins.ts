@@ -101,10 +101,7 @@ export class ExternalLoginsComponent implements OnInit {
             ExternalLoginsComponent.facebookInitialized = true;
         }
 
-        this.microsoftApp = new UserAgentApplication(
-            "4ecf3d26-e844-4855-9158-b8f6c0121b50",
-            null,
-            null);
+        this.microsoftApp = new UserAgentApplication({ auth: { clientId: "4ecf3d26-e844-4855-9158-b8f6c0121b50" } });
     }
 
     public googleLogIn(): void {
@@ -151,8 +148,8 @@ export class ExternalLoginsComponent implements OnInit {
 
         // There is no signal when the user closes the popup. The promise just never resoles.
         // See: https://github.com/AzureAD/microsoft-authentication-library-for-js/issues/129
-        this.microsoftApp.loginPopup(["openid", "email"])
-            .then(token => this.logIn("urn:ietf:params:oauth:grant-type:microsoft_identity_token", token))
+        this.microsoftApp.loginPopup({ scopes: ["openid", "email"] })
+            .then(loginResponse => this.logIn("urn:ietf:params:oauth:grant-type:microsoft_identity_token", loginResponse.idToken.rawIdToken))
             .catch((error: string) => {
                 if (error && error.startsWith("user_cancelled:")) {
                     return;
@@ -199,10 +196,10 @@ export class ExternalLoginsComponent implements OnInit {
                 this.isLoading = false;
                 if (this.isManageMode) {
                     return this.fetchLoginData();
-                } else {
-                    this.activeModal.close();
-                    return Promise.resolve();
                 }
+
+                this.activeModal.close();
+                return Promise.resolve();
             })
             .catch(error => {
                 this.isLoading = false;

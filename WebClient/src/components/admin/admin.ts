@@ -211,7 +211,7 @@ export class AdminComponent implements OnInit {
         this.authenticationService.getAuthHeaders()
             .then(headers => {
                 let body: IPruneInvalidAuthTokensRequest = { batchSize: AdminComponent.pruneInvalidAuthTokenBatchSize };
-                return this.http.post<void>("/api/admin/pruneinvalidauthtokens", body, { headers })
+                return this.http.post("/api/admin/pruneinvalidauthtokens", body, { headers })
                     .toPromise();
             })
             .then(() => {

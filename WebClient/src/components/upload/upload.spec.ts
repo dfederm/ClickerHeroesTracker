@@ -5,7 +5,7 @@ import { NO_ERRORS_SCHEMA, DebugElement, ChangeDetectorRef } from "@angular/core
 import { By } from "@angular/platform-browser";
 import { BehaviorSubject } from "rxjs";
 import { DatePipe, PercentPipe } from "@angular/common";
-import { NgbModal } from "@ng-bootstrap/ng-bootstrap";
+import { NgbModal, NgbModalRef } from "@ng-bootstrap/ng-bootstrap";
 import { Decimal } from "decimal.js";
 
 import { UploadComponent } from "./upload";
@@ -246,7 +246,7 @@ describe("UploadComponent", () => {
 
         it("should show the modal when clicked", async(() => {
             let modalService = TestBed.get(NgbModal) as NgbModal;
-            spyOn(modalService, "open").and.returnValue({ result: Promise.resolve() });
+            spyOn(modalService, "open").and.returnValue({ result: Promise.resolve() } as NgbModalRef);
 
             let upload = getUpload();
             uploadServiceGetResolve(upload)
@@ -302,7 +302,7 @@ describe("UploadComponent", () => {
 
         it("should show the modal when clicked", async(() => {
             let modalService = TestBed.get(NgbModal) as NgbModal;
-            spyOn(modalService, "open").and.returnValue({ result: Promise.resolve() });
+            spyOn(modalService, "open").and.returnValue({ result: Promise.resolve() } as NgbModalRef);
 
             let upload = getUpload();
             userInfoSubject.next({
@@ -335,7 +335,7 @@ describe("UploadComponent", () => {
 
         it("should delete the upload when confirmed", async(() => {
             let router = TestBed.get(Router) as Router;
-            spyOn(router, "navigate").and.returnValue(Promise.resolve());
+            spyOn(router, "navigate").and.returnValue(Promise.resolve(true));
 
             let upload = getUpload();
             uploadServiceGetResolve(upload)

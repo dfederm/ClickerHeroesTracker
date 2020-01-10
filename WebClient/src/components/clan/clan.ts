@@ -3,7 +3,7 @@ import { ClanService, IGuildMember, IMessage } from "../../services/clanService/
 import { AuthenticationService, IUserInfo } from "../../services/authenticationService/authenticationService";
 import { UserService } from "../../services/userService/userService";
 import { ActivatedRoute } from "@angular/router";
-import { HttpErrorResponse } from "@angular/common/http/src/response";
+import { HttpErrorResponse } from "@angular/common/http";
 
 @Component({
     selector: "clan",

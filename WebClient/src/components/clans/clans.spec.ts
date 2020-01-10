@@ -61,11 +61,11 @@ describe("ClansComponent", () => {
             getLeaderboard(page: number, count: number): Promise<ILeaderboardSummaryListResponse> {
                 let leaderboardSummaryListResponse: ILeaderboardSummaryListResponse = {
                     pagination:
-                        {
-                            count: clans.length,
-                            next: "someNext",
-                            previous: "somePrevious",
-                        },
+                    {
+                        count: clans.length,
+                        next: "someNext",
+                        previous: "somePrevious",
+                    },
                     leaderboardClans: clans.slice((page - 1) * count, page * count),
                 };
                 return Promise.resolve(leaderboardSummaryListResponse);

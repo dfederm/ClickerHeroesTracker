@@ -52,6 +52,7 @@
       "always-prefix"
     ],
     "interface-over-type-literal": true,
+    "invalid-void": true,
     "max-classes-per-file": [
       true,
       1
@@ -83,6 +84,7 @@
     "no-angle-bracket-type-assertion": true,
     "no-any": true,
     "no-arg": true,
+    "no-async-without-await": true,
     "no-bitwise": true,
     "no-conditional-assignment": true,
     "no-consecutive-blank-lines": true,
@@ -108,16 +110,19 @@
     "no-misused-new": true,
     "no-namespace": true,
     "no-non-null-assertion": true,
+    "no-null-undefined-union": true,
     "no-parameter-properties": false,
     "no-reference": true,
     "no-reference-import": true,
     "no-require-imports": true,
+    "no-restricted-globals": true,
     "no-return-await": true,
     "no-shadowed-variable": true,
     "no-sparse-arrays": true,
     "no-string-literal": true,
     "no-string-throw": true,
     "no-switch-case-fall-through": true,
+    "no-tautology-expression": true,
     "no-trailing-whitespace": true,
     "no-unnecessary-callback-wrapper": true,
     "no-unnecessary-initializer": true,
@@ -166,6 +171,14 @@
         "named": "never"
       }
     ],
+    "static-this": true,
+    "strict-comparisons": [
+      true,
+      {
+        "allow-object-equal-comparison": true,
+        "allow-string-order-comparison": true
+      }
+    ],
     "trailing-comma": [
       true,
       {
@@ -204,6 +217,7 @@
     "unified-signatures": true,
     "unnecessary-bind": true,
     "unnecessary-constructor": true,
+    "unnecessary-else": true,
     "use-isnan": true,
     "variable-name": [
       true,
@@ -227,8 +241,8 @@
       "check-interpolation",
       "check-semicolon"
     ],
-    "banana-in-box": true,
     "component-class-suffix": true,
+    "component-max-inline-declarations": true,
     "component-selector": [
       true,
       "element",
@@ -242,26 +256,31 @@
       null,
       "camelCase"
     ],
-    "enforce-component-selector": true,
-    "max-inline-declarations": true,
-    "no-attribute-parameter-decorator": true,
-    "no-conflicting-life-cycle-hooks": true,
+    "no-attribute-decorator": true,
+    "no-conflicting-lifecycle": true,
     "no-forward-ref": true,
+    "no-host-metadata-property": true,
+    "no-inputs-metadata-property": true,
     "no-input-rename": true,
-    "no-life-cycle-call": true,
-    "no-output-named-after-standard-event": true,
+    "no-lifecycle-call": true,
+    "no-output-native": true,
     "no-output-on-prefix": true,
     "no-output-rename": true,
-    "no-queries-parameter": true,
+    "no-outputs-metadata-property": true,
+    "no-queries-metadata-property": true,
     "no-unused-css": true,
     "prefer-output-readonly": true,
-    "templates-no-negated-async": true,
-    "use-host-property-decorator": true,
-    "use-input-property-decorator": true,
-    "use-life-cycle-interface": true,
+    "relative-url-prefix": true,
+    "template-accessibility-elements-content": true,
+    "template-banana-in-box": true,
+    "template-no-any": true,
+    "template-no-distracting-elements": true,
+    "template-no-negated-async": true,
+    "use-component-selector": true,
+    "use-component-view-encapsulation": true,
+    "use-injectable-provided-in": true,
+    "use-lifecycle-interface": true,
     "use-pipe-transform-interface": true,
-    "use-output-property-decorator": true,
-    "use-view-encapsulation": true,
     // tslint-microsoft-contrib rules: https://github.com/Microsoft/tslint-microsoft-contrib
     "function-name": [
       true,
@@ -284,7 +303,6 @@
     "no-document-write": true,
     "no-empty-line-after-opening-brace": true,
     "no-exec-script": true,
-    "no-function-constructor-with-string-args": true,
     "no-function-expression": true,
     "no-http-string": true,
     "no-inner-html": true,
@@ -299,7 +317,6 @@
     "no-string-based-set-timeout": true,
     "no-this-assignment": true,
     "no-typeof-undefined": true,
-    "no-unnecessary-bind": true,
     "no-unnecessary-field-initialization": true,
     "no-unnecessary-local-variable": true,
     "no-unnecessary-override": true,

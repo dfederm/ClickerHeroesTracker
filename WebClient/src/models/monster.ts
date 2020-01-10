@@ -148,12 +148,12 @@ export class Monster {
     private monsterLifeByFiveHundreds(param1: number): Decimal {
         if (Monster.cachedMonsterLife[param1] != null) {
             return Monster.cachedMonsterLife[param1];
-        } else {
-            let loc3 = Math.floor(param1 / 500);
-            let loc4 = Monster.lateBase + (loc3 - 1) * Monster.increasePerFiveHundredLevels;
-            let loc2 = new Decimal(loc4).pow(500).times(this.monsterLifeByFiveHundreds(param1 - 500));
-            Monster.cachedMonsterLife[param1] = loc2;
-            return loc2;
         }
+
+        let loc3 = Math.floor(param1 / 500);
+        let loc4 = Monster.lateBase + (loc3 - 1) * Monster.increasePerFiveHundredLevels;
+        let loc2 = new Decimal(loc4).pow(500).times(this.monsterLifeByFiveHundreds(param1 - 500));
+        Monster.cachedMonsterLife[param1] = loc2;
+        return loc2;
     }
 }

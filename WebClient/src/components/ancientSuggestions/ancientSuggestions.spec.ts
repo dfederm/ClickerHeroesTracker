@@ -11,7 +11,7 @@ import { SavedGame, ISavedGameData } from "../../models/savedGame";
 import { gameData } from "../../models/gameData";
 import { Decimal } from "decimal.js";
 import { UploadService } from "../../services/uploadService/uploadService";
-import { NgbModal } from "@ng-bootstrap/ng-bootstrap";
+import { NgbModal, NgbModalRef } from "@ng-bootstrap/ng-bootstrap";
 import { Router } from "@angular/router";
 
 describe("AncientSuggestionsComponent", () => {
@@ -601,7 +601,7 @@ describe("AncientSuggestionsComponent", () => {
         describe("Modal", () => {
             it("should show the modal when clicked", () => {
                 let modalService = TestBed.get(NgbModal) as NgbModal;
-                spyOn(modalService, "open").and.returnValue({ result: Promise.resolve() });
+                spyOn(modalService, "open").and.returnValue({ result: Promise.resolve() } as NgbModalRef);
 
                 component.savedGame = savedGame;
                 component.suggestionType = "AvailableSouls";
@@ -626,7 +626,7 @@ describe("AncientSuggestionsComponent", () => {
                 spyOn(uploadService, "create").and.returnValue(Promise.resolve<number>(123));
 
                 let router = TestBed.get(Router) as Router;
-                spyOn(router, "navigate").and.returnValue({ result: Promise.resolve() });
+                spyOn(router, "navigate").and.returnValue(Promise.resolve(true));
 
                 component.savedGame = savedGame;
                 component.suggestionType = "AvailableSouls";
@@ -643,8 +643,9 @@ describe("AncientSuggestionsComponent", () => {
 
                 component.saveAutolevel();
 
-                // Wait for stability from the uploadService promise
+                // Wait for stability from the uploadService promise. Not sure why we have to wait twice...
                 fixture.detectChanges();
+                await fixture.whenStable();
                 await fixture.whenStable();
                 fixture.detectChanges();
 
@@ -680,8 +681,9 @@ describe("AncientSuggestionsComponent", () => {
 
                 component.saveAutolevel();
 
-                // Wait for stability from the uploadService promise
+                // Wait for stability from the uploadService promise. Not sure why we have to wait twice...
                 fixture.detectChanges();
+                await fixture.whenStable();
                 await fixture.whenStable();
                 fixture.detectChanges();
 

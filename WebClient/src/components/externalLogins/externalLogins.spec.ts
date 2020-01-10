@@ -8,6 +8,7 @@ import { ExternalLoginsComponent, IErrorResponse } from "./externalLogins";
 import { AuthenticationService, IUserInfo } from "../../services/authenticationService/authenticationService";
 import { UserService, IUserLogins } from "../../services/userService/userService";
 import { BehaviorSubject } from "rxjs";
+import { AuthResponse } from "msal";
 
 // tslint:disable-next-line:no-namespace
 declare global {
@@ -30,6 +31,9 @@ describe("ExternalLoginsComponent", () => {
         email: "someEmail",
     };
 
+    let gapiSpy: jasmine.SpyObj<typeof gapi>;
+    let fbSpy: jasmine.SpyObj<typeof FB>;
+
     beforeEach(done => {
         userInfo = new BehaviorSubject(loggedInUser);
 
@@ -44,18 +48,17 @@ describe("ExternalLoginsComponent", () => {
             removeLogin: (): void => void 0,
         };
 
-        // Mock the global variables. We should figure out a better way to both inject this in the product and mock this in tests.
-        window.gapi = { load: (): void => void 0 };
-        window.FB = { init: (): void => void 0 };
+        gapiSpy = jasmine.createSpyObj<typeof gapi>(["load"]);
+        fbSpy = jasmine.createSpyObj<typeof FB>(["init"]);
 
-        spyOn(gapi, "load").and.callFake((_apiName: string, callback: gapi.LoadCallback) => {
-            // tslint:disable-next-line:no-any
-            gapi.auth2 = { init: jasmine.createSpy("init") } as any;
-
+        gapiSpy.load.and.callFake((_apiName: string, callback: gapi.LoadCallback) => {
+            gapi.auth2 = jasmine.createSpyObj(["init"]);
             callback();
         });
 
-        spyOn(FB, "init");
+        // Mock the global variables. We should figure out a better way to both inject this in the product and mock this in tests.
+        window.gapi = gapiSpy;
+        window.FB = fbSpy;
 
         TestBed.configureTestingModule(
             {
@@ -134,10 +137,18 @@ describe("ExternalLoginsComponent", () => {
             let activeModal = TestBed.get(NgbActiveModal) as NgbActiveModal;
             spyOn(activeModal, "close");
 
-            let authResponse = { id_token: "someIdToken" };
-            let googleUser = { getAuthResponse: jasmine.createSpy("getAuthResponse", () => authResponse).and.callThrough() };
-            let googleAuth = { signIn: jasmine.createSpy("signIn", () => Promise.resolve(googleUser)).and.callThrough() };
-            gapi.auth2.getAuthInstance = jasmine.createSpy("getAuthInstance", () => googleAuth).and.callThrough();
+            let authResponse = { id_token: "someIdToken" } as gapi.auth2.AuthResponse;
+
+            let googleUser = jasmine.createSpyObj<gapi.auth2.GoogleUser>(["getAuthResponse"]);
+            googleUser.getAuthResponse.and.returnValue(authResponse);
+
+            let googleAuth = jasmine.createSpyObj<gapi.auth2.GoogleAuth>(["signIn"]);
+            googleAuth.signIn.and.returnValue(Promise.resolve(googleUser));
+
+            let auth2 = jasmine.createSpyObj<typeof gapi.auth2>(["getAuthInstance"]);
+            auth2.getAuthInstance.and.returnValue(googleAuth);
+
+            gapiSpy.auth2 = auth2;
 
             let buttons = fixture.debugElement.queryAll(By.css("button"));
             expect(buttons.length).toEqual(3);
@@ -150,7 +161,7 @@ describe("ExternalLoginsComponent", () => {
                 .then(() => {
                     fixture.detectChanges();
 
-                    expect(gapi.auth2.getAuthInstance).toHaveBeenCalled();
+                    expect(auth2.getAuthInstance).toHaveBeenCalled();
                     expect(googleAuth.signIn).toHaveBeenCalled();
                     expect(googleUser.getAuthResponse).toHaveBeenCalled();
                     expect(authenticationService.logInWithAssertion).toHaveBeenCalledWith("urn:ietf:params:oauth:grant-type:google_identity_token", authResponse.id_token, undefined);
@@ -171,8 +182,13 @@ describe("ExternalLoginsComponent", () => {
             let activeModal = TestBed.get(NgbActiveModal) as NgbActiveModal;
             spyOn(activeModal, "close");
 
-            let googleAuth = { signIn: jasmine.createSpy("signIn", () => Promise.reject("")).and.callThrough() };
-            gapi.auth2.getAuthInstance = jasmine.createSpy("getAuthInstance", () => googleAuth).and.callThrough();
+            let googleAuth = jasmine.createSpyObj<gapi.auth2.GoogleAuth>(["signIn"]);
+            googleAuth.signIn.and.returnValue(Promise.reject());
+
+            let auth2 = jasmine.createSpyObj<typeof gapi.auth2>(["getAuthInstance"]);
+            auth2.getAuthInstance.and.returnValue(googleAuth);
+
+            gapiSpy.auth2 = auth2;
 
             let buttons = fixture.debugElement.queryAll(By.css("button"));
             expect(buttons.length).toEqual(3);
@@ -185,7 +201,7 @@ describe("ExternalLoginsComponent", () => {
                 .then(() => {
                     fixture.detectChanges();
 
-                    expect(gapi.auth2.getAuthInstance).toHaveBeenCalled();
+                    expect(auth2.getAuthInstance).toHaveBeenCalled();
                     expect(googleAuth.signIn).toHaveBeenCalled();
                     expect(authenticationService.logInWithAssertion).not.toHaveBeenCalled();
                     expect(activeModal.close).not.toHaveBeenCalled();
@@ -205,10 +221,18 @@ describe("ExternalLoginsComponent", () => {
             let activeModal = TestBed.get(NgbActiveModal) as NgbActiveModal;
             spyOn(activeModal, "close");
 
-            let authResponse = { id_token: "someIdToken" };
-            let googleUser = { getAuthResponse: jasmine.createSpy("getAuthResponse", () => authResponse).and.callThrough() };
-            let googleAuth = { signIn: jasmine.createSpy("signIn", () => Promise.resolve(googleUser)).and.callThrough() };
-            gapi.auth2.getAuthInstance = jasmine.createSpy("getAuthInstance", () => googleAuth).and.callThrough();
+            let authResponse = { id_token: "someIdToken" } as gapi.auth2.AuthResponse;
+
+            let googleUser = jasmine.createSpyObj<gapi.auth2.GoogleUser>(["getAuthResponse"]);
+            googleUser.getAuthResponse.and.returnValue(authResponse);
+
+            let googleAuth = jasmine.createSpyObj<gapi.auth2.GoogleAuth>(["signIn"]);
+            googleAuth.signIn.and.returnValue(Promise.resolve(googleUser));
+
+            let auth2 = jasmine.createSpyObj<typeof gapi.auth2>(["getAuthInstance"]);
+            auth2.getAuthInstance.and.returnValue(googleAuth);
+
+            gapiSpy.auth2 = auth2;
 
             let buttons = fixture.debugElement.queryAll(By.css("button"));
             expect(buttons.length).toEqual(3);
@@ -221,7 +245,7 @@ describe("ExternalLoginsComponent", () => {
                 .then(() => {
                     fixture.detectChanges();
 
-                    expect(gapi.auth2.getAuthInstance).toHaveBeenCalled();
+                    expect(auth2.getAuthInstance).toHaveBeenCalled();
                     expect(googleAuth.signIn).toHaveBeenCalled();
                     expect(googleUser.getAuthResponse).toHaveBeenCalled();
                     expect(authenticationService.logInWithAssertion).toHaveBeenCalledWith("urn:ietf:params:oauth:grant-type:google_identity_token", authResponse.id_token, undefined);
@@ -242,8 +266,13 @@ describe("ExternalLoginsComponent", () => {
             let activeModal = TestBed.get(NgbActiveModal) as NgbActiveModal;
             spyOn(activeModal, "close");
 
-            let googleAuth = { signIn: jasmine.createSpy("signIn", () => Promise.reject({ error: "popup_closed_by_user" })).and.callThrough() };
-            gapi.auth2.getAuthInstance = jasmine.createSpy("getAuthInstance", () => googleAuth).and.callThrough();
+            let googleAuth = jasmine.createSpyObj<gapi.auth2.GoogleAuth>(["signIn"]);
+            googleAuth.signIn.and.returnValue(Promise.reject({ error: "popup_closed_by_user" }));
+
+            let auth2 = jasmine.createSpyObj<typeof gapi.auth2>(["getAuthInstance"]);
+            auth2.getAuthInstance.and.returnValue(googleAuth);
+
+            gapiSpy.auth2 = auth2;
 
             let buttons = fixture.debugElement.queryAll(By.css("button"));
             expect(buttons.length).toEqual(3);
@@ -256,7 +285,7 @@ describe("ExternalLoginsComponent", () => {
                 .then(() => {
                     fixture.detectChanges();
 
-                    expect(gapi.auth2.getAuthInstance).toHaveBeenCalled();
+                    expect(auth2.getAuthInstance).toHaveBeenCalled();
                     expect(googleAuth.signIn).toHaveBeenCalled();
                     expect(authenticationService.logInWithAssertion).not.toHaveBeenCalled();
                     expect(activeModal.close).not.toHaveBeenCalled();
@@ -285,8 +314,8 @@ describe("ExternalLoginsComponent", () => {
             let loginResponse = {
                 status: "connected",
                 authResponse: { accessToken: "someAccessToken" },
-            };
-            FB.login = jasmine.createSpy("login", (handler: (response: {}) => void) => handler(loginResponse)).and.callThrough();
+            } as FB.LoginStatusResponse;
+            FB.login = jasmine.createSpy("login", (handler: (response: FB.LoginStatusResponse) => void) => handler(loginResponse)).and.callThrough();
 
             let buttons = fixture.debugElement.queryAll(By.css("button"));
             expect(buttons.length).toEqual(3);
@@ -321,8 +350,8 @@ describe("ExternalLoginsComponent", () => {
             let loginResponse = {
                 status: "somethingInvalid",
                 authResponse: {},
-            };
-            FB.login = jasmine.createSpy("login", (handler: (response: {}) => void) => handler(loginResponse)).and.callThrough();
+            } as unknown as FB.LoginStatusResponse;
+            FB.login = jasmine.createSpy("login", (handler: (response: FB.LoginStatusResponse) => void) => handler(loginResponse)).and.callThrough();
 
             let buttons = fixture.debugElement.queryAll(By.css("button"));
             expect(buttons.length).toEqual(3);
@@ -357,8 +386,8 @@ describe("ExternalLoginsComponent", () => {
             let loginResponse = {
                 status: "connected",
                 authResponse: { accessToken: "someAccessToken" },
-            };
-            FB.login = jasmine.createSpy("login", (handler: (response: {}) => void) => handler(loginResponse)).and.callThrough();
+            } as FB.LoginStatusResponse;
+            FB.login = jasmine.createSpy("login", (handler: (response: FB.LoginStatusResponse) => void) => handler(loginResponse)).and.callThrough();
 
             let buttons = fixture.debugElement.queryAll(By.css("button"));
             expect(buttons.length).toEqual(3);
@@ -390,8 +419,8 @@ describe("ExternalLoginsComponent", () => {
             let activeModal = TestBed.get(NgbActiveModal) as NgbActiveModal;
             spyOn(activeModal, "close");
 
-            let loginResponse = {};
-            FB.login = jasmine.createSpy("login", (handler: (response: {}) => void) => handler(loginResponse)).and.callThrough();
+            let loginResponse = {} as FB.LoginStatusResponse;
+            FB.login = jasmine.createSpy("login", (handler: (response: FB.LoginStatusResponse) => void) => handler(loginResponse)).and.callThrough();
 
             let buttons = fixture.debugElement.queryAll(By.css("button"));
             expect(buttons.length).toEqual(3);
@@ -430,7 +459,12 @@ describe("ExternalLoginsComponent", () => {
             spyOn(activeModal, "close");
 
             const token = "someToken";
-            spyOn(component.microsoftApp, "loginPopup").and.returnValue(Promise.resolve(token));
+            let authResponse = {
+                idToken: {
+                    rawIdToken: token,
+                },
+            } as AuthResponse;
+            spyOn(component.microsoftApp, "loginPopup").and.returnValue(Promise.resolve(authResponse));
 
             let buttons = fixture.debugElement.queryAll(By.css("button"));
             expect(buttons.length).toEqual(3);
@@ -443,7 +477,7 @@ describe("ExternalLoginsComponent", () => {
                 .then(() => {
                     fixture.detectChanges();
 
-                    expect(component.microsoftApp.loginPopup).toHaveBeenCalledWith(["openid", "email"]);
+                    expect(component.microsoftApp.loginPopup).toHaveBeenCalledWith({ scopes: ["openid", "email"] });
                     expect(authenticationService.logInWithAssertion).toHaveBeenCalledWith("urn:ietf:params:oauth:grant-type:microsoft_identity_token", token, undefined);
                     expect(activeModal.close).toHaveBeenCalled();
 
@@ -475,7 +509,7 @@ describe("ExternalLoginsComponent", () => {
                 .then(() => {
                     fixture.detectChanges();
 
-                    expect(component.microsoftApp.loginPopup).toHaveBeenCalledWith(["openid", "email"]);
+                    expect(component.microsoftApp.loginPopup).toHaveBeenCalledWith({ scopes: ["openid", "email"] });
                     expect(authenticationService.logInWithAssertion).not.toHaveBeenCalled();
                     expect(activeModal.close).not.toHaveBeenCalled();
 
@@ -495,7 +529,12 @@ describe("ExternalLoginsComponent", () => {
             spyOn(activeModal, "close");
 
             const token = "someToken";
-            spyOn(component.microsoftApp, "loginPopup").and.returnValue(Promise.resolve(token));
+            let authResponse = {
+                idToken: {
+                    rawIdToken: token,
+                },
+            } as AuthResponse;
+            spyOn(component.microsoftApp, "loginPopup").and.returnValue(Promise.resolve(authResponse));
 
             let buttons = fixture.debugElement.queryAll(By.css("button"));
             expect(buttons.length).toEqual(3);
@@ -508,7 +547,7 @@ describe("ExternalLoginsComponent", () => {
                 .then(() => {
                     fixture.detectChanges();
 
-                    expect(component.microsoftApp.loginPopup).toHaveBeenCalledWith(["openid", "email"]);
+                    expect(component.microsoftApp.loginPopup).toHaveBeenCalledWith({ scopes: ["openid", "email"] });
                     expect(authenticationService.logInWithAssertion).toHaveBeenCalledWith("urn:ietf:params:oauth:grant-type:microsoft_identity_token", token, undefined);
                     expect(activeModal.close).not.toHaveBeenCalled();
 
@@ -540,7 +579,7 @@ describe("ExternalLoginsComponent", () => {
                 .then(() => {
                     fixture.detectChanges();
 
-                    expect(component.microsoftApp.loginPopup).toHaveBeenCalledWith(["openid", "email"]);
+                    expect(component.microsoftApp.loginPopup).toHaveBeenCalledWith({ scopes: ["openid", "email"] });
                     expect(authenticationService.logInWithAssertion).not.toHaveBeenCalled();
                     expect(activeModal.close).not.toHaveBeenCalled();
 
@@ -565,7 +604,13 @@ describe("ExternalLoginsComponent", () => {
             spyOn(authenticationService, "logInWithAssertion").and.returnValue(Promise.reject({ json: () => errorResponse }));
 
             // Using Microsoft login since it's easy to mock, but they should all apply equally
-            spyOn(component.microsoftApp, "loginPopup").and.returnValue(Promise.resolve("someToken"));
+            const token = "someToken";
+            let authResponse = {
+                idToken: {
+                    rawIdToken: token,
+                },
+            } as AuthResponse;
+            spyOn(component.microsoftApp, "loginPopup").and.returnValue(Promise.resolve(authResponse));
 
             let buttons = fixture.debugElement.queryAll(By.css("button"));
             expect(buttons.length).toEqual(3);
