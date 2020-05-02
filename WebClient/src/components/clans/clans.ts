@@ -62,7 +62,7 @@ export class ClansComponent implements OnInit {
                     return this.clanService.getClan(user.clanName);
                 })
                 .then(response => {
-                    if (!response) {
+                    if (!response || response.isBlocked) {
                         return;
                     }
 

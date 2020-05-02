@@ -302,12 +302,14 @@ namespace Website.Services.Clans
             {
                 if (reader.Read())
                 {
+                    var isBlocked = Convert.ToBoolean(reader["IsBlocked"]);
+
                     return new ClanData
                     {
-                        Rank = Convert.ToInt32(reader["RowNumber"]),
+                        Rank = isBlocked ? -1 : Convert.ToInt32(reader["RowNumber"]),
                         CurrentRaidLevel = Convert.ToInt32(reader["CurrentRaidLevel"]),
                         ClanName = reader["ClanName"].ToString(),
-                        IsBlocked = Convert.ToBoolean(reader["IsBlocked"]),
+                        IsBlocked = isBlocked,
                     };
                 }
 
