@@ -23,6 +23,8 @@ export interface IClanData {
     guildMembers: IGuildMember[];
 
     rank: number;
+
+    isBlocked: boolean;
 }
 
 export interface IMessage {

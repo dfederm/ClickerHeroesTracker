@@ -60,7 +60,7 @@ describe("ClanService", () => {
             // Tick the getAuthHeaders call
             tick();
 
-            let expectedResponse: IClanData = { clanName: "", currentRaidLevel: 0, guildMembers: [], rank: 0 };
+            let expectedResponse: IClanData = { clanName: "", currentRaidLevel: 0, guildMembers: [], rank: 0, isBlocked: false };
             let request = httpMock.expectOne(apiRequest);
             request.flush(expectedResponse);
             tick();

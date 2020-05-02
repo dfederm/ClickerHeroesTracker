@@ -11,6 +11,10 @@
                class="alert alert-danger">
                 This clan does not exist
             </p>
+            <p *ngIf="isBlocked && !isClanInformationError && !isClanInformationLoading"
+               class="alert alert-warning">
+                This clan is blocked from the leaderboard
+            </p>
             <ul *ngIf="guildMembers && !isClanInformationError && !isClanInformationLoading"
                 class="list-inline">
                 <li>
@@ -22,6 +26,20 @@
                     <span>{{ currentRaidLevel | number }}</span>
                 </li>
             </ul>
+        </div>
+    </div>
+    <div *ngIf="isAdmin && !isClanInformationError && !isClanInformationLoading"
+         class="row">
+        <div class="col-md-6">
+            <p *ngIf="isActionsError"
+               class="alert alert-danger">
+                Oops! Something went wrong.
+            </p>
+            <ngx-loading [show]="isActionsLoading && !isActionsError"></ngx-loading>
+            <button class="btn btn-secondary"
+                    (click)="toggleBlock()">
+                {{ isBlocked ? "Unblock" : "Block" }}
+            </button>
         </div>
     </div>
     <div class="row">

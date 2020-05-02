@@ -3,6 +3,7 @@ import { HttpClient, HttpErrorResponse } from "@angular/common/http";
 import { HttpErrorHandlerService } from "../../services/httpErrorHandlerService/httpErrorHandlerService";
 import { AuthenticationService } from "../../services/authenticationService/authenticationService";
 import { UploadService } from "../../services/uploadService/uploadService";
+import { IBlockClanRequest } from "../../models";
 
 export interface IUploadQueueStats {
     priority: string;
@@ -71,6 +72,16 @@ export class AdminComponent implements OnInit {
 
     public pruningInProgress: boolean;
 
+    public blockedClansError: string;
+
+    public isLoadingBlockedClans: boolean;
+
+    public blockedClans: string[];
+
+    public unblockClanName: string;
+
+    public isUnblockClansLoading: boolean;
+
     constructor(
         private readonly authenticationService: AuthenticationService,
         private readonly http: HttpClient,
@@ -82,6 +93,10 @@ export class AdminComponent implements OnInit {
         this.refreshQueueData()
             .catch(() => {
                 this.recomputeError = this.clearQueueError = "Could not fetch queue data";
+            });
+        this.refreshBlockedClans()
+            .catch(() => {
+                this.blockedClansError = "Could not fetch blocked queues";
             });
     }
 
@@ -143,6 +158,32 @@ export class AdminComponent implements OnInit {
             })
             .catch((err: HttpErrorResponse) => {
                 this.httpErrorHandlerService.logError("AdminComponent.clearQueue.error", err);
+                let errors = this.httpErrorHandlerService.getValidationErrors(err);
+                this.clearQueueError = errors.join(";");
+            });
+    }
+
+    public unblockClan(): void {
+        this.blockedClansError = null;
+        this.isUnblockClansLoading = true;
+
+        this.authenticationService.getAuthHeaders()
+            .then(headers => {
+                headers = headers.set("Content-Type", "application/json");
+                let body: IBlockClanRequest = {
+                    clanName: this.unblockClanName,
+                    isBlocked: false,
+                };
+                return this.http
+                    .post("/api/admin/blockclan", body, { headers })
+                    .toPromise();
+            })
+            .then(() => {
+                this.isUnblockClansLoading = false;
+                this.refreshBlockedClans();
+            })
+            .catch((err: HttpErrorResponse) => {
+                this.httpErrorHandlerService.logError("AdminComponent.unblockClan.error", err);
                 let errors = this.httpErrorHandlerService.getValidationErrors(err);
                 this.clearQueueError = errors.join(";");
             });
@@ -250,6 +291,22 @@ export class AdminComponent implements OnInit {
                 if (this.queues.length > 0) {
                     this.recomputePriority = this.queues[0].priority;
                     this.clearQueuePriority = this.queues[0].priority;
+                }
+            });
+    }
+
+    private refreshBlockedClans(): Promise<void> {
+        this.isLoadingBlockedClans = true;
+        return this.authenticationService.getAuthHeaders()
+            .then(headers => {
+                return this.http.get<string[]>("/api/admin/blockedclans", { headers })
+                    .toPromise();
+            })
+            .then(response => {
+                this.isLoadingBlockedClans = false;
+                this.blockedClans = response;
+                if (this.blockedClans.length > 0) {
+                    this.unblockClanName = this.blockedClans[0];
                 }
             });
     }

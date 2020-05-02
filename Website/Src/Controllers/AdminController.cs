@@ -115,5 +115,48 @@ namespace Website.Controllers
                 await command.ExecuteNonQueryAsync();
             }
         }
+
+        [Route("blockedclans")]
+        [HttpGet]
+        public async Task<ActionResult<List<string>>> BlockedClans()
+        {
+            var blockedClans = new List<string>();
+
+            const string CommandText = @"
+                SELECT Name
+                FROM Clans
+                WHERE IsBlocked = 1
+                ORDER BY Name ASC;";
+            using (var command = this.databaseCommandFactory.Create(CommandText))
+            using (var reader = await command.ExecuteReaderAsync())
+            {
+                while (reader.Read())
+                {
+                    var clanName = reader["Name"].ToString();
+                    blockedClans.Add(clanName);
+                }
+            }
+
+            return blockedClans;
+        }
+
+        [Route("blockclan")]
+        [HttpPost]
+        public async Task BlockClan(BlockClanRequest model)
+        {
+            const string CommandText = @"
+                UPDATE Clans
+                SET IsBlocked = @IsBlocked
+                WHERE Name = @Name;";
+            var parameters = new Dictionary<string, object>
+            {
+                { "@Name", model.ClanName },
+                { "@IsBlocked", model.IsBlocked },
+            };
+            using (var command = this.databaseCommandFactory.Create(CommandText, parameters))
+            {
+                await command.ExecuteNonQueryAsync();
+            }
+        }
     }
 }

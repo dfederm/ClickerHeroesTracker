@@ -12,3 +12,9 @@ export interface IUser {
 
     clanName: string;
 }
+
+export interface IBlockClanRequest {
+    clanName: string;
+
+    isBlocked: boolean;
+}

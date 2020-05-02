@@ -20,6 +20,7 @@ describe("AdminComponent", () => {
     const staleUploadsRequest = { method: "get", url: "/api/admin/staleuploads" };
     const countInvalidAuthTokensRequest = { method: "get", url: "/api/admin/countinvalidauthtokens" };
     const pruneInvalidAuthTokensRequest = { method: "post", url: "/api/admin/pruneinvalidauthtokens" };
+    const blockedClansRequest = { method: "get", url: "/api/admin/blockedclans" };
 
     const uploadQueueStats: IUploadQueueStats[] = [
         {
@@ -34,6 +35,12 @@ describe("AdminComponent", () => {
             priority: "somePriority2",
             numMessages: 2,
         },
+    ];
+
+    const blockedClans: string[] = [
+        "clan1",
+        "clan2",
+        "clan3",
     ];
 
     beforeEach(done => {
@@ -89,8 +96,9 @@ describe("AdminComponent", () => {
                 .catch(done.fail);
         });
 
-        it("should make api call", () => {
+        it("should make api calls", () => {
             httpMock.expectOne(queuesRequest);
+            httpMock.expectOne(blockedClansRequest);
             expect(authenticationService.getAuthHeaders).toHaveBeenCalled();
         });
 
@@ -98,8 +106,12 @@ describe("AdminComponent", () => {
         for (let i = 0; i < queueDropdownIds.length; i++) {
             let queueDropdownId = queueDropdownIds[i];
             it(`should populate the ${queueDropdownId} input with queue data`, done => {
-                let request = httpMock.expectOne(queuesRequest);
-                request.flush(uploadQueueStats);
+                httpMock
+                    .expectOne(queuesRequest)
+                    .flush(uploadQueueStats);
+                httpMock
+                    .expectOne(blockedClansRequest)
+                    .flush(blockedClans);
 
                 fixture.detectChanges();
                 fixture.whenStable()
@@ -129,8 +141,13 @@ describe("AdminComponent", () => {
         }
 
         it("should show errors when queue data fetch fails", done => {
-            let request = httpMock.expectOne(queuesRequest);
-            request.flush(null, { status: 500, statusText: "someStatus" });
+            httpMock
+                .expectOne(queuesRequest)
+                .flush(null, { status: 500, statusText: "someStatus" });
+
+            httpMock
+                .expectOne(blockedClansRequest)
+                .flush(null, { status: 500, statusText: "someStatus" });
 
             fixture.detectChanges();
             fixture.whenStable()
@@ -138,9 +155,10 @@ describe("AdminComponent", () => {
                     fixture.detectChanges();
 
                     let errors = getAllErrors();
-                    expect(errors.length).toEqual(2);
+                    expect(errors.length).toEqual(3);
                     expect(errors[0]).toEqual("Could not fetch queue data");
                     expect(errors[1]).toEqual("Could not fetch queue data");
+                    expect(errors[2]).toEqual("Could not fetch blocked queues");
                 })
                 .then(done)
                 .catch(done.fail);
@@ -161,15 +179,19 @@ describe("AdminComponent", () => {
                     expect(authenticationService.getAuthHeaders).toHaveBeenCalled();
                     (authenticationService.getAuthHeaders as jasmine.Spy).calls.reset();
 
-                    let request = httpMock.expectOne(queuesRequest);
-                    request.flush(uploadQueueStats);
+                    httpMock
+                        .expectOne(queuesRequest)
+                        .flush(uploadQueueStats);
+                    httpMock
+                        .expectOne(blockedClansRequest)
+                        .flush(blockedClans);
 
                     fixture.detectChanges();
                     return fixture.whenStable();
                 })
                 .then(() => {
                     let forms = fixture.debugElement.queryAll(By.css("form"));
-                    expect(forms.length).toEqual(2);
+                    expect(forms.length).toEqual(3);
                     form = forms[0];
 
                     // Need to wait for stability again since ngModel is async
@@ -337,15 +359,19 @@ describe("AdminComponent", () => {
                     expect(authenticationService.getAuthHeaders).toHaveBeenCalled();
                     (authenticationService.getAuthHeaders as jasmine.Spy).calls.reset();
 
-                    let request = httpMock.expectOne(queuesRequest);
-                    request.flush(uploadQueueStats);
+                    httpMock
+                        .expectOne(queuesRequest)
+                        .flush(uploadQueueStats);
+                    httpMock
+                        .expectOne(blockedClansRequest)
+                        .flush(blockedClans);
 
                     fixture.detectChanges();
                     return fixture.whenStable();
                 })
                 .then(() => {
                     let forms = fixture.debugElement.queryAll(By.css("form"));
-                    expect(forms.length).toEqual(2);
+                    expect(forms.length).toEqual(3);
                     form = forms[1];
 
                     // Need to wait for stability again since ngModel is async
@@ -452,7 +478,7 @@ describe("AdminComponent", () => {
 
         beforeEach(done => {
             let containers = fixture.debugElement.queryAll(By.css(".col-md-4"));
-            expect(containers.length).toEqual(4);
+            expect(containers.length).toEqual(5);
             container = containers[2];
 
             authenticationService = TestBed.get(AuthenticationService) as AuthenticationService;
@@ -467,6 +493,7 @@ describe("AdminComponent", () => {
                     (authenticationService.getAuthHeaders as jasmine.Spy).calls.reset();
 
                     httpMock.expectOne(queuesRequest);
+                    httpMock.expectOne(blockedClansRequest);
                 })
                 .then(done)
                 .catch(done.fail);
@@ -714,7 +741,7 @@ describe("AdminComponent", () => {
 
         beforeEach(done => {
             let containers = fixture.debugElement.queryAll(By.css(".col-md-4"));
-            expect(containers.length).toEqual(4);
+            expect(containers.length).toEqual(5);
             container = containers[3];
 
             authenticationService = TestBed.get(AuthenticationService) as AuthenticationService;
@@ -729,6 +756,7 @@ describe("AdminComponent", () => {
                     (authenticationService.getAuthHeaders as jasmine.Spy).calls.reset();
 
                     httpMock.expectOne(queuesRequest);
+                    httpMock.expectOne(blockedClansRequest);
                 })
                 .then(done)
                 .catch(done.fail);

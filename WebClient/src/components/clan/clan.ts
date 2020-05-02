@@ -3,7 +3,9 @@ import { ClanService, IGuildMember, IMessage } from "../../services/clanService/
 import { AuthenticationService, IUserInfo } from "../../services/authenticationService/authenticationService";
 import { UserService } from "../../services/userService/userService";
 import { ActivatedRoute } from "@angular/router";
-import { HttpErrorResponse } from "@angular/common/http";
+import { HttpClient, HttpErrorResponse } from "@angular/common/http";
+import { HttpErrorHandlerService } from "../../services/httpErrorHandlerService/httpErrorHandlerService";
+import { IBlockClanRequest } from "../../models";
 
 @Component({
     selector: "clan",
@@ -25,6 +27,8 @@ export class ClanComponent implements OnInit {
 
     public rank: number;
 
+    public isBlocked: boolean;
+
     public guildMembers: IGuildMember[];
 
     public messages: IMessage[];
@@ -33,6 +37,12 @@ export class ClanComponent implements OnInit {
 
     public isUserClan: boolean;
 
+    public isAdmin: boolean;
+
+    public isActionsError: boolean;
+
+    public isActionsLoading: boolean;
+
     private userClanName: string;
 
     constructor(
@@ -40,6 +50,8 @@ export class ClanComponent implements OnInit {
         private readonly authenticationService: AuthenticationService,
         private readonly userService: UserService,
         private readonly route: ActivatedRoute,
+        private readonly http: HttpClient,
+        private readonly httpErrorHandlerService: HttpErrorHandlerService,
     ) { }
 
     public ngOnInit(): void {
@@ -65,6 +77,29 @@ export class ClanComponent implements OnInit {
             });
     }
 
+    public toggleBlock(): void {
+        this.isActionsLoading = true;
+        this.authenticationService.getAuthHeaders()
+            .then(headers => {
+                headers = headers.set("Content-Type", "application/json");
+                let body: IBlockClanRequest = {
+                    clanName: this.clanName,
+                    isBlocked: !this.isBlocked,
+                };
+                return this.http
+                    .post("/api/admin/blockclan", body, { headers })
+                    .toPromise();
+            })
+            .then(() => {
+                this.isActionsLoading = false;
+                this.isBlocked = !this.isBlocked;
+            })
+            .catch((err: HttpErrorResponse) => {
+                this.isActionsError = true;
+                this.httpErrorHandlerService.logError("ClanComponent.toggleBlock.error", err);
+            });
+    }
+
     private handleClan(clanName: string): void {
         this.isClanInformationError = false;
         this.isClanInformationLoading = true;
@@ -83,6 +118,7 @@ export class ClanComponent implements OnInit {
 
                 this.currentRaidLevel = response.currentRaidLevel;
                 this.rank = response.rank;
+                this.isBlocked = response.isBlocked;
                 this.guildMembers = response.guildMembers;
             })
             .catch((err: HttpErrorResponse) => {
@@ -110,6 +146,8 @@ export class ClanComponent implements OnInit {
             this.userClanName = null;
             this.refreshMessageBoard();
         }
+
+        this.isAdmin = userInfo.isLoggedIn && userInfo.isAdmin;
     }
 
     private refreshMessageBoard(): void {

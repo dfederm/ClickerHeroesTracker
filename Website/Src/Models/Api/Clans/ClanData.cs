@@ -15,5 +15,7 @@ namespace ClickerHeroesTrackerWebsite.Models.Api.Clans
         public IList<GuildMember> GuildMembers { get; set; }
 
         public int Rank { get; set; }
+
+        public bool IsBlocked { get; set; }
     }
 }
