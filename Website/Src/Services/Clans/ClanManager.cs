@@ -215,6 +215,7 @@ namespace Website.Services.Clans
             const string GetLeaderboardDataCommandText = @"
                 SELECT Name, CurrentRaidLevel, (SELECT COUNT(*) FROM ClanMembers WHERE ClanMembers.ClanName = Name) AS MemberCount
                 FROM Clans
+                WHERE IsBlocked = 0
                 ORDER BY CurrentRaidLevel DESC
                     OFFSET @Offset ROWS
                     FETCH NEXT @Count ROWS ONLY;";
@@ -250,7 +251,8 @@ namespace Website.Services.Clans
         {
             const string GetLeaderboardCountCommandText = @"
                 SELECT COUNT(*) AS TotalClans
-                FROM Clans";
+                FROM Clans
+                WHERE IsBlocked = 0";
 
             using (var command = this.databaseCommandFactory.Create(GetLeaderboardCountCommandText))
             using (var reader = await command.ExecuteReaderAsync())
