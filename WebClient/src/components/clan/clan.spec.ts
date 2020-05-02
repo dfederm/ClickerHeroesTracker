@@ -2,6 +2,7 @@ import { NO_ERRORS_SCHEMA, ChangeDetectorRef, DebugElement } from "@angular/core
 import { By } from "@angular/platform-browser";
 import { FormsModule } from "@angular/forms";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
+import { HttpClientTestingModule } from "@angular/common/http/testing";
 import { TimeAgoPipe } from "time-ago-pipe";
 import { ClanComponent } from "./clan";
 import { ClanService, IClanData, IMessage } from "../../services/clanService/clanService";
@@ -10,6 +11,7 @@ import { BehaviorSubject } from "rxjs";
 import { UserService } from "../../services/userService/userService";
 import { IUser } from "../../models";
 import { Params, ActivatedRoute } from "@angular/router";
+import { HttpErrorHandlerService } from "../../services/httpErrorHandlerService/httpErrorHandlerService";
 
 describe("ClanComponent", () => {
     let fixture: ComponentFixture<ClanComponent>;
@@ -25,6 +27,7 @@ describe("ClanComponent", () => {
         clanName: "someClanName",
         currentRaidLevel: 456,
         guildMembers: clanMembers,
+        isBlocked: false,
     };
 
     let clanMessages = [
@@ -69,9 +72,17 @@ describe("ClanComponent", () => {
         routeParams = new BehaviorSubject({ clanName: clan.clanName });
         let route = { params: routeParams };
 
+        let httpErrorHandlerService = {
+            logError: (): void => void 0,
+            getValidationErrors: (): void => void 0,
+        };
+
         TestBed.configureTestingModule(
             {
-                imports: [FormsModule],
+                imports: [
+                    FormsModule,
+                    HttpClientTestingModule,
+                ],
                 declarations:
                     [
                         ClanComponent,
@@ -83,6 +94,7 @@ describe("ClanComponent", () => {
                         { provide: AuthenticationService, useValue: authenticationService },
                         { provide: UserService, useValue: userService },
                         { provide: ActivatedRoute, useValue: route },
+                        { provide: HttpErrorHandlerService, useValue: httpErrorHandlerService },
                         TimeAgoPipe,
                         ChangeDetectorRef, // Needed for TimeAgoPipe
                     ],

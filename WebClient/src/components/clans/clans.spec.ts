@@ -39,6 +39,7 @@ describe("ClansComponent", () => {
         clanName: userClan.name,
         currentRaidLevel: userClan.currentRaidLevel,
         guildMembers: clanMembers,
+        isBlocked: false,
     };
 
     const userInfo: IUserInfo = {

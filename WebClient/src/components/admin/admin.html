@@ -118,5 +118,28 @@
                     class="btn btn-primary"
                     (click)="cancelPruneInvalidAuthTokens()">Cancel</button>
         </div>
+        <div class="col-md-4">
+            <p>Blocked clans</p>
+            <div *ngIf="blockedClansError"
+                 class="alert alert-danger">
+                {{ blockedClansError }}
+            </div>
+            <ngx-loading [show]="(isLoadingBlockedClans || isUnblockClansLoading) && !blockedClansError"></ngx-loading>
+            <form (ngSubmit)="unblockClan()"
+                  #unblockClanForm="ngForm">
+                <div class="form-group">
+                    <label for="unblockClanName">Clan Name</label>
+                    <select class="form-control"
+                            id="unblockClanName"
+                            name="unblockClanName"
+                            [(ngModel)]="unblockClanName">
+                        <option *ngFor="let clanName of blockedClans"
+                                [ngValue]="clanName">{{ clanName }}</option>
+                    </select>
+                </div>
+                <button type="submit"
+                        class="btn btn-primary">Clear</button>
+            </form>
+        </div>
     </div>
 </div>

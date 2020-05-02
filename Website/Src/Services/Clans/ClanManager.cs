@@ -287,10 +287,10 @@ namespace Website.Services.Clans
                 WITH NumberedRows
                 AS
                 (
-                    SELECT ROW_NUMBER() OVER (ORDER BY CurrentRaidLevel DESC) AS RowNumber, CurrentRaidLevel, Name
+                    SELECT ROW_NUMBER() OVER (ORDER BY CurrentRaidLevel DESC) AS RowNumber, CurrentRaidLevel, Name, IsBlocked
                     FROM Clans
                 )
-                SELECT RowNumber, CurrentRaidLevel, @ClanName AS ClanName
+                SELECT RowNumber, CurrentRaidLevel, @ClanName AS ClanName, IsBlocked
                 FROM NumberedRows
                 WHERE Name = @ClanName;";
             var parameters = new Dictionary<string, object>
@@ -307,6 +307,7 @@ namespace Website.Services.Clans
                         Rank = Convert.ToInt32(reader["RowNumber"]),
                         CurrentRaidLevel = Convert.ToInt32(reader["CurrentRaidLevel"]),
                         ClanName = reader["ClanName"].ToString(),
+                        IsBlocked = Convert.ToBoolean(reader["IsBlocked"]),
                     };
                 }
 
