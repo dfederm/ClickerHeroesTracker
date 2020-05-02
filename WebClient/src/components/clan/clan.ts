@@ -92,7 +92,7 @@ export class ClanComponent implements OnInit {
             })
             .then(() => {
                 this.isActionsLoading = false;
-                this.isBlocked = !this.isBlocked;
+                this.refreshClanData();
             })
             .catch((err: HttpErrorResponse) => {
                 this.isActionsError = true;
@@ -101,34 +101,9 @@ export class ClanComponent implements OnInit {
     }
 
     private handleClan(clanName: string): void {
-        this.isClanInformationError = false;
-        this.isClanInformationLoading = true;
-
         this.clanName = clanName;
-        this.clanService.getClan(clanName)
-            .then(response => {
-                this.isClanInformationLoading = false;
-                if (!response) {
-                    return;
-                }
-
-                // Set the clan name again since it will be normalized
-                this.clanName = response.clanName;
-                this.refreshMessageBoard();
-
-                this.currentRaidLevel = response.currentRaidLevel;
-                this.rank = response.rank;
-                this.isBlocked = response.isBlocked;
-                this.guildMembers = response.guildMembers;
-            })
-            .catch((err: HttpErrorResponse) => {
-                if (!err || err.status !== 404) {
-                    this.isClanInformationError = true;
-                }
-
-                this.isClanInformationLoading = false;
-                this.refreshMessageBoard();
-            });
+        this.refreshClanData()
+            .finally(() => this.refreshMessageBoard());
     }
 
     private handleUser(userInfo: IUserInfo): void {
@@ -148,6 +123,34 @@ export class ClanComponent implements OnInit {
         }
 
         this.isAdmin = userInfo.isLoggedIn && userInfo.isAdmin;
+    }
+
+    private refreshClanData(): Promise<void> {
+        this.isClanInformationError = false;
+        this.isClanInformationLoading = true;
+
+        return this.clanService.getClan(this.clanName)
+            .then(response => {
+                this.isClanInformationLoading = false;
+                if (!response) {
+                    return;
+                }
+
+                // Set the clan name again since it will be normalized
+                this.clanName = response.clanName;
+
+                this.currentRaidLevel = response.currentRaidLevel;
+                this.rank = response.rank;
+                this.isBlocked = response.isBlocked;
+                this.guildMembers = response.guildMembers;
+            })
+            .catch((err: HttpErrorResponse) => {
+                if (!err || err.status !== 404) {
+                    this.isClanInformationError = true;
+                }
+
+                this.isClanInformationLoading = false;
+            });
     }
 
     private refreshMessageBoard(): void {

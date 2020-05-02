@@ -17,7 +17,7 @@
             </p>
             <ul *ngIf="guildMembers && !isClanInformationError && !isClanInformationLoading"
                 class="list-inline">
-                <li>
+                <li *ngIf="!isBlocked">
                     <label>Rank:</label>
                     <span>{{ rank | number }}</span>
                 </li>
