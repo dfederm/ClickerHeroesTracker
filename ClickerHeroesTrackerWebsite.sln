@@ -18,7 +18,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build", "build", "{3D49839D
 	ProjectSection(SolutionItems) = preProject
 		build\CodeAnalysis.ruleset = build\CodeAnalysis.ruleset
 		build\PostDeploy.ps1 = build\PostDeploy.ps1
-		build\SetEnvironment.bat = build\SetEnvironment.bat
 		build\stylecop.json = build\stylecop.json
 		build\UpdateBuildInfo.ps1 = build\UpdateBuildInfo.ps1
 	EndProjectSection

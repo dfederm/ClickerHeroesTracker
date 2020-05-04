@@ -22,7 +22,6 @@ namespace ClickerHeroesTrackerWebsite
     using Microsoft.AspNetCore.Hosting;
     using Microsoft.AspNetCore.Identity;
     using Microsoft.Azure.Cosmos.Table;
-    using Microsoft.Azure.Storage.Blob;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
@@ -36,8 +35,6 @@ namespace ClickerHeroesTrackerWebsite
     using Website.Services.Authentication;
     using Website.Services.Clans;
     using Website.Services.SiteNews;
-    using CloudStorageAccount = Microsoft.Azure.Storage.CloudStorageAccount;
-    using TableStorageAccount = Microsoft.Azure.Cosmos.Table.CloudStorageAccount;
 
     /// <summary>
     /// Configure the Unity container.
@@ -50,29 +47,19 @@ namespace ClickerHeroesTrackerWebsite
             // The DevelopmentStorageAccount will only work if you have the Storage emulator v4.3 installed: https://go.microsoft.com/fwlink/?linkid=717179&clcid=0x409
             var storageConnectionString = this.configuration["Storage:ConnectionString"];
             CloudStorageAccount storageAccount = null;
-            TableStorageAccount tableStorageAccount = null;
             if (!string.IsNullOrEmpty(storageConnectionString))
             {
                 storageAccount = CloudStorageAccount.Parse(storageConnectionString);
-                tableStorageAccount = TableStorageAccount.Parse(storageConnectionString);
             }
 
-            // Nesessary to persist keys (like the ones used to generate auth cookies)
+            // Necessary to persist keys (like the ones used to generate auth cookies)
             // By default Azure Websites can persist keys across instances within a slot, but not across slots.
             // This means a slot swap will require users to re-log in.
             // See https://github.com/aspnet/Home/issues/466 and https://github.com/aspnet/DataProtection/issues/92 for details.
             var dataProtectionBuilder = services.AddDataProtection();
-            if (storageAccount != null)
+            if (!string.IsNullOrEmpty(storageConnectionString))
             {
-                var client = storageAccount.CreateCloudBlobClient();
-                var container = client.GetContainerReference("key-container");
-
-                // The container must exist before calling the DataProtection APIs.
-                // The specific file within the container does not have to exist,
-                // as it will be created on-demand.
-                container.CreateIfNotExistsAsync().Wait();
-
-                dataProtectionBuilder.PersistKeysToAzureBlobStorage(container, "keys.xml");
+                dataProtectionBuilder.PersistKeysToAzureBlobStorage(storageConnectionString, "key-container", "keys.xml");
             }
 
             // Add Entity framework services.
@@ -214,9 +201,9 @@ namespace ClickerHeroesTrackerWebsite
             services.AddOptions();
 
             // Container controlled registrations
-            if (tableStorageAccount != null)
+            if (storageAccount != null)
             {
-                services.AddSingleton<CloudTableClient>(_ => tableStorageAccount.CreateCloudTableClient());
+                services.AddSingleton<CloudTableClient>(_ => storageAccount.CreateCloudTableClient());
                 services.AddSingleton<ISiteNewsProvider, AzureStorageSiteNewsProvider>();
             }
             else
