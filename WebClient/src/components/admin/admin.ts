@@ -5,20 +5,6 @@ import { AuthenticationService } from "../../services/authenticationService/auth
 import { UploadService } from "../../services/uploadService/uploadService";
 import { IBlockClanRequest } from "../../models";
 
-export interface IUploadQueueStats {
-    priority: string;
-    numMessages: number;
-}
-
-export interface IRecomputeRequest {
-    uploadIds: number[];
-    priority: string;
-}
-
-export interface IClearQueueRequest {
-    priority: string;
-}
-
 export interface IPruneInvalidAuthTokensRequest {
     batchSize: number;
 }
@@ -31,24 +17,6 @@ export class AdminComponent implements OnInit {
     public static numParallelDeletes = 10;
 
     public static pruneInvalidAuthTokenBatchSize = 1000;
-
-    public isLoadingQueues: boolean;
-
-    public queues: IUploadQueueStats[];
-
-    public recomputeError: string;
-
-    public isRecomputeLoading: boolean;
-
-    public recomputeUploadIds: string;
-
-    public recomputePriority: string;
-
-    public clearQueueError: string;
-
-    public isClearQueueLoading: boolean;
-
-    public clearQueuePriority: string;
 
     public staleUploadError: string;
 
@@ -90,76 +58,9 @@ export class AdminComponent implements OnInit {
     ) { }
 
     public ngOnInit(): void {
-        this.refreshQueueData()
-            .catch(() => {
-                this.recomputeError = this.clearQueueError = "Could not fetch queue data";
-            });
         this.refreshBlockedClans()
             .catch(() => {
-                this.blockedClansError = "Could not fetch blocked queues";
-            });
-    }
-
-    public recompute(): void {
-        this.recomputeError = null;
-
-        let uploadIds: number[] = [];
-        let uploadIdsRaw = this.recomputeUploadIds.split(",");
-        for (let i = 0; i < uploadIdsRaw.length; i++) {
-            let uploadId = parseInt(uploadIdsRaw[i]);
-            if (isNaN(uploadId)) {
-                this.recomputeError = `${uploadIdsRaw[i]} is not a number.`;
-                return;
-            }
-
-            uploadIds.push(uploadId);
-        }
-
-        this.isRecomputeLoading = true;
-        this.authenticationService.getAuthHeaders()
-            .then(headers => {
-                headers = headers.set("Content-Type", "application/json");
-                let body: IRecomputeRequest = {
-                    uploadIds,
-                    priority: this.recomputePriority,
-                };
-                return this.http
-                    .post("/api/admin/recompute", body, { headers })
-                    .toPromise();
-            })
-            .then(() => {
-                this.isRecomputeLoading = false;
-                this.refreshQueueData();
-            })
-            .catch((err: HttpErrorResponse) => {
-                this.httpErrorHandlerService.logError("AdminComponent.recompute.error", err);
-                let errors = this.httpErrorHandlerService.getValidationErrors(err);
-                this.recomputeError = errors.join(";");
-            });
-    }
-
-    public clearQueue(): void {
-        this.clearQueueError = null;
-        this.isClearQueueLoading = true;
-
-        this.authenticationService.getAuthHeaders()
-            .then(headers => {
-                headers = headers.set("Content-Type", "application/json");
-                let body: IClearQueueRequest = {
-                    priority: this.clearQueuePriority,
-                };
-                return this.http
-                    .post("/api/admin/clearqueue", body, { headers })
-                    .toPromise();
-            })
-            .then(() => {
-                this.isClearQueueLoading = false;
-                this.refreshQueueData();
-            })
-            .catch((err: HttpErrorResponse) => {
-                this.httpErrorHandlerService.logError("AdminComponent.clearQueue.error", err);
-                let errors = this.httpErrorHandlerService.getValidationErrors(err);
-                this.clearQueueError = errors.join(";");
+                this.blockedClansError = "Could not fetch blocked clans";
             });
     }
 
@@ -185,7 +86,7 @@ export class AdminComponent implements OnInit {
             .catch((err: HttpErrorResponse) => {
                 this.httpErrorHandlerService.logError("AdminComponent.unblockClan.error", err);
                 let errors = this.httpErrorHandlerService.getValidationErrors(err);
-                this.clearQueueError = errors.join(";");
+                this.blockedClansError = errors.join(";");
             });
     }
 
@@ -276,23 +177,6 @@ export class AdminComponent implements OnInit {
 
     public cancelPruneInvalidAuthTokens(): void {
         this.pruningInProgress = false;
-    }
-
-    private refreshQueueData(): Promise<void> {
-        this.isLoadingQueues = true;
-        return this.authenticationService.getAuthHeaders()
-            .then(headers => {
-                return this.http.get<IUploadQueueStats[]>("/api/admin/queues", { headers })
-                    .toPromise();
-            })
-            .then(response => {
-                this.isLoadingQueues = false;
-                this.queues = response;
-                if (this.queues.length > 0) {
-                    this.recomputePriority = this.queues[0].priority;
-                    this.clearQueuePriority = this.queues[0].priority;
-                }
-            });
     }
 
     private refreshBlockedClans(): Promise<void> {
