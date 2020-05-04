@@ -3,66 +3,6 @@
     <h3>Commands</h3>
     <div class="row">
         <div class="col-md-4">
-            <p>Recalculate computed stats for an upload.</p>
-            <div *ngIf="recomputeError"
-                 class="alert alert-danger">
-                {{ recomputeError }}
-            </div>
-            <ngx-loading [show]="(isLoadingQueues || isRecomputeLoading) && !recomputeError"></ngx-loading>
-            <form (ngSubmit)="recompute()"
-                  #recomputeForm="ngForm">
-                <div class="form-group">
-                    <label for="recomputeUploadIds">Upload Ids</label>
-                    <input type="text"
-                           class="form-control"
-                           id="recomputeUploadIds"
-                           name="recomputeUploadIds"
-                           [(ngModel)]="recomputeUploadIds"
-                           #formRecomputeUploadIds="ngModel"
-                           required />
-                    <small class="form-text text-muted">
-                        Use commas to separate the Ids.
-                    </small>
-                </div>
-                <div class="form-group">
-                    <label for="recomputePriority">Queue Priority</label>
-                    <select class="form-control"
-                            id="recomputePriority"
-                            name="recomputePriority"
-                            [(ngModel)]="recomputePriority">
-                        <option *ngFor="let queue of queues"
-                                [ngValue]="queue.priority">{{ queue.priority }} (~{{ queue.numMessages }} messages)</option>
-                    </select>
-                </div>
-                <button type="submit"
-                        [disabled]="!recomputeForm.form.valid"
-                        class="btn btn-primary">Recompute</button>
-            </form>
-        </div>
-        <div class="col-md-4">
-            <p>Clear upload processing queue.</p>
-            <div *ngIf="clearQueueError"
-                 class="alert alert-danger">
-                {{ clearQueueError }}
-            </div>
-            <ngx-loading [show]="(isLoadingQueues || isClearQueueLoading) && !clearQueueError"></ngx-loading>
-            <form (ngSubmit)="clearQueue()"
-                  #clearQueueForm="ngForm">
-                <div class="form-group">
-                    <label for="clearQueuePriority">Queue Priority</label>
-                    <select class="form-control"
-                            id="clearQueuePriority"
-                            name="clearQueuePriority"
-                            [(ngModel)]="clearQueuePriority">
-                        <option *ngFor="let queue of queues"
-                                [ngValue]="queue.priority">{{ queue.priority }} (~{{ queue.numMessages }} messages)</option>
-                    </select>
-                </div>
-                <button type="submit"
-                        class="btn btn-primary">Clear</button>
-            </form>
-        </div>
-        <div class="col-md-4">
             <p>Stale uploads (anonymous only).</p>
             <div *ngIf="staleUploadError"
                  class="alert alert-danger">

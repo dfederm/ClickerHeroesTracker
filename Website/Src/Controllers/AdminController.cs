@@ -6,17 +6,14 @@ namespace Website.Controllers
 {
     using System;
     using System.Collections.Generic;
-    using System.Linq;
     using System.Threading.Tasks;
     using AspNet.Security.OAuth.Validation;
     using ClickerHeroesTrackerWebsite.Models;
     using ClickerHeroesTrackerWebsite.Services.Database;
-    using ClickerHeroesTrackerWebsite.Services.UploadProcessing;
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Identity;
     using Microsoft.AspNetCore.Mvc;
     using Website.Models.Api.Admin;
-    using Website.Services.UploadProcessing;
 
     [Route("api/admin")]
     [Authorize(Roles = "Admin", AuthenticationSchemes = OAuthValidationDefaults.AuthenticationScheme)]
@@ -25,36 +22,15 @@ namespace Website.Controllers
     {
         private readonly IDatabaseCommandFactory databaseCommandFactory;
 
-        private readonly IUploadScheduler uploadScheduler;
-
         private readonly UserManager<ApplicationUser> userManager;
 
         public AdminController(
             IDatabaseCommandFactory databaseCommandFactory,
-            IUploadScheduler uploadScheduler,
             UserManager<ApplicationUser> userManager)
         {
             this.databaseCommandFactory = databaseCommandFactory;
-            this.uploadScheduler = uploadScheduler;
             this.userManager = userManager;
         }
-
-        [Route("queues")]
-        [HttpGet]
-        public async Task<ActionResult<List<UploadQueueStats>>> Queues() => (await this.uploadScheduler.RetrieveQueueStatsAsync()).ToList();
-
-        [Route("recompute")]
-        [HttpPost]
-        public Task Recompute(RecomputeRequest model)
-        {
-            var userId = this.userManager.GetUserId(this.User);
-            var messages = model.UploadIds.Select(uploadId => new UploadProcessingMessage { UploadId = uploadId, Requester = userId, Priority = model.Priority });
-            return this.uploadScheduler.ScheduleAsync(messages);
-        }
-
-        [Route("clearqueue")]
-        [HttpPost]
-        public async Task<ActionResult<int>> ClearQueue(ClearQueueRequest model) => await this.uploadScheduler.ClearQueueAsync(model.Priority);
 
         [Route("staleuploads")]
         [HttpGet]

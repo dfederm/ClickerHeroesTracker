@@ -16,7 +16,6 @@ namespace ClickerHeroesTrackerWebsite
     using ClickerHeroesTrackerWebsite.Services.Authentication;
     using ClickerHeroesTrackerWebsite.Services.Database;
     using ClickerHeroesTrackerWebsite.Services.Email;
-    using ClickerHeroesTrackerWebsite.Services.UploadProcessing;
     using Microsoft.ApplicationInsights.AspNetCore.Extensions;
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.DataProtection;
@@ -24,7 +23,6 @@ namespace ClickerHeroesTrackerWebsite
     using Microsoft.AspNetCore.Identity;
     using Microsoft.Azure.Cosmos.Table;
     using Microsoft.Azure.Storage.Blob;
-    using Microsoft.Azure.Storage.Queue;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
@@ -216,16 +214,13 @@ namespace ClickerHeroesTrackerWebsite
             services.AddOptions();
 
             // Container controlled registrations
-            if (storageAccount != null)
+            if (tableStorageAccount != null)
             {
                 services.AddSingleton<CloudTableClient>(_ => tableStorageAccount.CreateCloudTableClient());
-                services.AddSingleton<CloudQueueClient>(_ => storageAccount.CreateCloudQueueClient());
-                services.AddSingleton<IUploadScheduler, AzureStorageUploadScheduler>();
                 services.AddSingleton<ISiteNewsProvider, AzureStorageSiteNewsProvider>();
             }
             else
             {
-                services.AddSingleton<IUploadScheduler, NoOpUploadScheduler>();
                 services.AddSingleton<ISiteNewsProvider, InMemorySiteNewsProvider>();
             }
 
