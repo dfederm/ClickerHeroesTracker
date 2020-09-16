@@ -126,9 +126,14 @@ namespace ClickerHeroesTrackerWebsite
                     // Accept anonymous clients (i.e clients that don't send a client_id).
                     options.AcceptAnonymousClients();
 
+                    // Use ASP.NET Core data protection
+                    options.UseDataProtection();
+
                     // Register the signing and encryption credentials.
-                    options.AddDevelopmentEncryptionCertificate()
-                           .AddDevelopmentSigningCertificate();
+                    // Use ephemeral keys since we're using Data Protection to validate and issue tokens anyway,
+                    // but OpenIddict doesn't allow us to not register anything.
+                    options.AddEphemeralEncryptionKey()
+                           .AddEphemeralSigningKey();
 
                     // When rolling tokens are enabled, immediately
                     // redeem the refresh token to prevent future reuse.
@@ -147,6 +152,9 @@ namespace ClickerHeroesTrackerWebsite
 
                     // Register the ASP.NET Core host.
                     options.UseAspNetCore();
+
+                    // Use ASP.NET Core data protection
+                    options.UseDataProtection();
                 });
 
             services.Configure((AssertionGrantOptions options) =>
