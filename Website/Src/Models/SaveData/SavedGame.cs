@@ -153,7 +153,7 @@ namespace ClickerHeroesTrackerWebsite.Models.SaveData
             }
 
             // Legacy encodings
-            return content.IndexOf(AndroidPrefix, StringComparison.OrdinalIgnoreCase) >= 0
+            return content.Contains(AndroidPrefix, StringComparison.OrdinalIgnoreCase)
                 ? EncodingAlgorithm.Android
                 : EncodingAlgorithm.Sprinkle;
         }
@@ -216,7 +216,7 @@ namespace ClickerHeroesTrackerWebsite.Models.SaveData
             for (var i = 0; i < data.Length; i++)
             {
                 sb.Append(data[i]);
-                sb.Append("0");
+                sb.Append('0');
             }
 
             sb.Append(SprinkleAntiCheatCode);

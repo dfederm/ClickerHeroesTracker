@@ -7,29 +7,22 @@ namespace Website.Controllers
     using System;
     using System.Collections.Generic;
     using System.Threading.Tasks;
-    using AspNet.Security.OAuth.Validation;
-    using ClickerHeroesTrackerWebsite.Models;
     using ClickerHeroesTrackerWebsite.Services.Database;
     using Microsoft.AspNetCore.Authorization;
-    using Microsoft.AspNetCore.Identity;
     using Microsoft.AspNetCore.Mvc;
+    using OpenIddict.Validation.AspNetCore;
     using Website.Models.Api.Admin;
 
     [Route("api/admin")]
-    [Authorize(Roles = "Admin", AuthenticationSchemes = OAuthValidationDefaults.AuthenticationScheme)]
+    [Authorize(Roles = "Admin", AuthenticationSchemes = OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme)]
     [ApiController]
     public class AdminController : Controller
     {
         private readonly IDatabaseCommandFactory databaseCommandFactory;
 
-        private readonly UserManager<ApplicationUser> userManager;
-
-        public AdminController(
-            IDatabaseCommandFactory databaseCommandFactory,
-            UserManager<ApplicationUser> userManager)
+        public AdminController(IDatabaseCommandFactory databaseCommandFactory)
         {
             this.databaseCommandFactory = databaseCommandFactory;
-            this.userManager = userManager;
         }
 
         [Route("staleuploads")]

@@ -6,10 +6,10 @@ namespace ClickerHeroesTrackerWebsite.Controllers
 {
     using System;
     using System.Threading.Tasks;
-    using AspNet.Security.OAuth.Validation;
     using ClickerHeroesTrackerWebsite.Models.Api.SiteNews;
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Mvc;
+    using OpenIddict.Validation.AspNetCore;
     using Website.Services.SiteNews;
 
     /// <summary>
@@ -48,7 +48,7 @@ namespace ClickerHeroesTrackerWebsite.Controllers
         /// <returns>A status code representing the result</returns>
         [Route("")]
         [HttpPost]
-        [Authorize(Roles = "Admin", AuthenticationSchemes = OAuthValidationDefaults.AuthenticationScheme)]
+        [Authorize(Roles = "Admin", AuthenticationSchemes = OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme)]
         public async Task<ActionResult> Post(SiteNewsEntry entry)
         {
             await this.siteNewsProvider.AddSiteNewsEntriesAsync(entry.Date, entry.Messages);
@@ -62,7 +62,7 @@ namespace ClickerHeroesTrackerWebsite.Controllers
         /// <returns>A status code representing the result</returns>
         [Route("{date}")]
         [HttpDelete]
-        [Authorize(Roles = "Admin", AuthenticationSchemes = OAuthValidationDefaults.AuthenticationScheme)]
+        [Authorize(Roles = "Admin", AuthenticationSchemes = OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme)]
         public async Task Delete(DateTime date) => await this.siteNewsProvider.DeleteSiteNewsForDateAsync(date);
     }
 }
