@@ -29,11 +29,7 @@ namespace UnitTests.Controllers
             var mockDatabaseCommandFactory = new Mock<IDatabaseCommandFactory>(MockBehavior.Strict);
             mockDatabaseCommandFactory.Setup(_ => _.Create()).Returns(mockDatabaseCommand.Object).Verifiable();
 
-            var mockUserManager = MockUserManager.CreateMock();
-
-            var controller = new AdminController(
-                mockDatabaseCommandFactory.Object,
-                mockUserManager.Object);
+            var controller = new AdminController(mockDatabaseCommandFactory.Object);
             var result = await controller.StaleUploads();
 
             Assert.NotNull(result);
@@ -46,10 +42,6 @@ namespace UnitTests.Controllers
             }
 
             mockDatabaseCommandFactory.VerifyAll();
-
-            // Workaround for a Moq bug. See: https://github.com/moq/moq4/issues/456#issuecomment-331692858
-            mockUserManager.Object.Logger = mockUserManager.Object.Logger;
-            mockUserManager.VerifyAll();
         }
 
         [Fact]
@@ -61,11 +53,7 @@ namespace UnitTests.Controllers
             var mockDatabaseCommandFactory = new Mock<IDatabaseCommandFactory>(MockBehavior.Strict);
             mockDatabaseCommandFactory.Setup(_ => _.Create()).Returns(mockDatabaseCommand.Object).Verifiable();
 
-            var mockUserManager = MockUserManager.CreateMock();
-
-            var controller = new AdminController(
-                mockDatabaseCommandFactory.Object,
-                mockUserManager.Object);
+            var controller = new AdminController(mockDatabaseCommandFactory.Object);
             var result = await controller.CountInvalidAuthTokens();
 
             Assert.NotNull(result);
@@ -74,10 +62,6 @@ namespace UnitTests.Controllers
             Assert.Equal(NumInvalidTokens, actualCount);
 
             mockDatabaseCommandFactory.VerifyAll();
-
-            // Workaround for a Moq bug. See: https://github.com/moq/moq4/issues/456#issuecomment-331692858
-            mockUserManager.Object.Logger = mockUserManager.Object.Logger;
-            mockUserManager.VerifyAll();
         }
 
         [Fact]
@@ -93,18 +77,10 @@ namespace UnitTests.Controllers
             var mockDatabaseCommandFactory = new Mock<IDatabaseCommandFactory>(MockBehavior.Strict);
             mockDatabaseCommandFactory.Setup(_ => _.Create()).Returns(mockDatabaseCommand.Object).Verifiable();
 
-            var mockUserManager = MockUserManager.CreateMock();
-
-            var controller = new AdminController(
-                mockDatabaseCommandFactory.Object,
-                mockUserManager.Object);
+            var controller = new AdminController(mockDatabaseCommandFactory.Object);
             await controller.PruneInvalidAuthTokens(model);
 
             mockDatabaseCommandFactory.VerifyAll();
-
-            // Workaround for a Moq bug. See: https://github.com/moq/moq4/issues/456#issuecomment-331692858
-            mockUserManager.Object.Logger = mockUserManager.Object.Logger;
-            mockUserManager.VerifyAll();
         }
     }
 }

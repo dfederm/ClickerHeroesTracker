@@ -9,16 +9,15 @@ namespace ClickerHeroesTrackerWebsite.Controllers
     using System.Linq;
     using System.Security.Claims;
     using System.Threading.Tasks;
-    using AspNet.Security.OpenIdConnect.Extensions;
-    using AspNet.Security.OpenIdConnect.Primitives;
-    using AspNet.Security.OpenIdConnect.Server;
     using ClickerHeroesTrackerWebsite.Models;
+    using Microsoft.AspNetCore;
     using Microsoft.AspNetCore.Authentication;
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Identity;
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.Extensions.Options;
     using OpenIddict.Abstractions;
+    using OpenIddict.Server.AspNetCore;
     using Website.Services.Authentication;
 
     [Route("api/auth")]
@@ -27,10 +26,10 @@ namespace ClickerHeroesTrackerWebsite.Controllers
     {
         private static readonly string[] AllowedRefreshTokenScopes =
         {
-            OpenIdConnectConstants.Scopes.OpenId,
-            OpenIdConnectConstants.Scopes.Email,
-            OpenIdConnectConstants.Scopes.Profile,
-            OpenIdConnectConstants.Scopes.OfflineAccess,
+            OpenIddictConstants.Scopes.OpenId,
+            OpenIddictConstants.Scopes.Email,
+            OpenIddictConstants.Scopes.Profile,
+            OpenIddictConstants.Scopes.OfflineAccess,
             OpenIddictConstants.Scopes.Roles,
         };
 
@@ -55,8 +54,10 @@ namespace ClickerHeroesTrackerWebsite.Controllers
         [Produces("application/json")]
         [Authorize] // Authorize + AllowAnonymous to basically force authentication to work without requiring it. There's probably a better way for this to work...
         [AllowAnonymous]
-        public async Task<ActionResult> Exchange([FromForm] OpenIdConnectRequest request)
+        public async Task<ActionResult> Exchange()
         {
+            var request = this.HttpContext.GetOpenIddictServerRequest();
+
             if (request.IsPasswordGrantType())
             {
                 // Allow the user to log in with their email address too.
@@ -66,22 +67,26 @@ namespace ClickerHeroesTrackerWebsite.Controllers
                     : await this.userManager.FindByNameAsync(request.Username);
                 if (user == null)
                 {
-                    return this.BadRequest(new OpenIdConnectResponse
+                    var properties = new AuthenticationProperties(new Dictionary<string, string>
                     {
-                        Error = OpenIdConnectConstants.Errors.InvalidGrant,
-                        ErrorDescription = "Incorrect username or password.",
+                        [OpenIddictServerAspNetCoreConstants.Properties.Error] = OpenIddictConstants.Errors.InvalidGrant,
+                        [OpenIddictServerAspNetCoreConstants.Properties.ErrorDescription] = "The username/password couple is invalid.",
                     });
+
+                    return this.Forbid(properties, OpenIddictServerAspNetCoreDefaults.AuthenticationScheme);
                 }
 
                 // Validate the username/password parameters and ensure the account is not locked out.
                 var result = await this.signInManager.CheckPasswordSignInAsync(user, request.Password, lockoutOnFailure: false);
                 if (!result.Succeeded)
                 {
-                    return this.BadRequest(new OpenIdConnectResponse
+                    var properties = new AuthenticationProperties(new Dictionary<string, string>
                     {
-                        Error = OpenIdConnectConstants.Errors.InvalidGrant,
-                        ErrorDescription = "The username/password couple is invalid.",
+                        [OpenIddictServerAspNetCoreConstants.Properties.Error] = OpenIddictConstants.Errors.InvalidGrant,
+                        [OpenIddictServerAspNetCoreConstants.Properties.ErrorDescription] = "The username/password couple is invalid.",
                     });
+
+                    return this.Forbid(properties, OpenIddictServerAspNetCoreDefaults.AuthenticationScheme);
                 }
 
                 return await this.SignInAsync(request, user);
@@ -90,31 +95,35 @@ namespace ClickerHeroesTrackerWebsite.Controllers
             if (request.IsRefreshTokenGrantType())
             {
                 // Retrieve the claims principal stored in the refresh token.
-                var result = await this.HttpContext.AuthenticateAsync(OpenIdConnectServerDefaults.AuthenticationScheme);
+                var result = await this.HttpContext.AuthenticateAsync(OpenIddictServerAspNetCoreDefaults.AuthenticationScheme);
 
                 // Retrieve the user profile corresponding to the refresh token.
                 var user = await this.signInManager.ValidateSecurityStampAsync(result.Principal);
                 if (user == null)
                 {
-                    return this.BadRequest(new OpenIdConnectResponse
+                    var properties = new AuthenticationProperties(new Dictionary<string, string>
                     {
-                        Error = OpenIdConnectConstants.Errors.InvalidGrant,
-                        ErrorDescription = "The refresh token is no longer valid.",
+                        [OpenIddictServerAspNetCoreConstants.Properties.Error] = OpenIddictConstants.Errors.InvalidGrant,
+                        [OpenIddictServerAspNetCoreConstants.Properties.ErrorDescription] = "The refresh token is no longer valid.",
                     });
+
+                    return this.Forbid(properties, OpenIddictServerAspNetCoreDefaults.AuthenticationScheme);
                 }
 
                 // Ensure the user is still allowed to sign in.
                 if (!await this.signInManager.CanSignInAsync(user))
                 {
-                    return this.BadRequest(new OpenIdConnectResponse
+                    var properties = new AuthenticationProperties(new Dictionary<string, string>
                     {
-                        Error = OpenIdConnectConstants.Errors.InvalidGrant,
-                        ErrorDescription = "The user is no longer allowed to sign in.",
+                        [OpenIddictServerAspNetCoreConstants.Properties.Error] = OpenIddictConstants.Errors.InvalidGrant,
+                        [OpenIddictServerAspNetCoreConstants.Properties.ErrorDescription] = "The user is no longer allowed to sign in.",
                     });
+
+                    return this.Forbid(properties, OpenIddictServerAspNetCoreDefaults.AuthenticationScheme);
                 }
 
                 // Reuse the properties stored in the refresh token, including the scopes originally granted.
-                return await this.SignInAsync(request, user, result.Properties);
+                return await this.SignInAsync(request, user);
             }
 
             var assertionGrantHandler = this.assertionGrantHandlerProvider.GetHandler(request.GrantType);
@@ -123,21 +132,25 @@ namespace ClickerHeroesTrackerWebsite.Controllers
                 // Reject the request if the "assertion" parameter is missing.
                 if (string.IsNullOrEmpty(request.Assertion))
                 {
-                    return this.BadRequest(new OpenIdConnectResponse
+                    var properties = new AuthenticationProperties(new Dictionary<string, string>
                     {
-                        Error = OpenIdConnectConstants.Errors.InvalidRequest,
-                        ErrorDescription = "The mandatory 'assertion' parameter was missing.",
+                        [OpenIddictServerAspNetCoreConstants.Properties.Error] = OpenIddictConstants.Errors.InvalidRequest,
+                        [OpenIddictServerAspNetCoreConstants.Properties.ErrorDescription] = "The mandatory 'assertion' parameter was missing.",
                     });
+
+                    return this.Forbid(properties, OpenIddictServerAspNetCoreDefaults.AuthenticationScheme);
                 }
 
                 var validationResult = await assertionGrantHandler.ValidateAsync(request.Assertion);
                 if (!validationResult.IsSuccessful)
                 {
-                    return this.BadRequest(new OpenIdConnectResponse
+                    var properties = new AuthenticationProperties(new Dictionary<string, string>
                     {
-                        Error = OpenIdConnectConstants.Errors.InvalidGrant,
-                        ErrorDescription = validationResult.Error,
+                        [OpenIddictServerAspNetCoreConstants.Properties.Error] = OpenIddictConstants.Errors.InvalidGrant,
+                        [OpenIddictServerAspNetCoreConstants.Properties.ErrorDescription] = validationResult.Error,
                     });
+
+                    return this.Forbid(properties, OpenIddictServerAspNetCoreDefaults.AuthenticationScheme);
                 }
 
                 // Find the user associated with this external log in
@@ -151,11 +164,13 @@ namespace ClickerHeroesTrackerWebsite.Controllers
                         var creationResult = await this.userManager.CreateAsync(user);
                         if (!creationResult.Succeeded)
                         {
-                            return this.BadRequest(new OpenIdConnectResponse
+                            var properties = new AuthenticationProperties(new Dictionary<string, string>
                             {
-                                Error = OpenIdConnectConstants.Errors.InvalidGrant,
-                                ErrorDescription = string.Join(" ", creationResult.Errors.Select(error => error.Description)),
+                                [OpenIddictServerAspNetCoreConstants.Properties.Error] = OpenIddictConstants.Errors.InvalidGrant,
+                                [OpenIddictServerAspNetCoreConstants.Properties.ErrorDescription] = string.Join(" ", creationResult.Errors.Select(error => error.Description)),
                             });
+
+                            return this.Forbid(properties, OpenIddictServerAspNetCoreDefaults.AuthenticationScheme);
                         }
                     }
 
@@ -172,70 +187,60 @@ namespace ClickerHeroesTrackerWebsite.Controllers
                         var addLoginResult = await this.userManager.AddLoginAsync(user, login);
                         if (!addLoginResult.Succeeded)
                         {
-                            return this.BadRequest(new OpenIdConnectResponse
+                            var properties = new AuthenticationProperties(new Dictionary<string, string>
                             {
-                                Error = OpenIdConnectConstants.Errors.InvalidGrant,
-                                ErrorDescription = string.Join(" ", addLoginResult.Errors.Select(error => error.Description)),
+                                [OpenIddictServerAspNetCoreConstants.Properties.Error] = OpenIddictConstants.Errors.InvalidGrant,
+                                [OpenIddictServerAspNetCoreConstants.Properties.ErrorDescription] = string.Join(" ", addLoginResult.Errors.Select(error => error.Description)),
                             });
+
+                            return this.Forbid(properties, OpenIddictServerAspNetCoreDefaults.AuthenticationScheme);
                         }
                     }
                     else
                     {
                         // Ask the user to create an account.
-                        return this.BadRequest(new OpenIdConnectResponse
+                        var properties = new AuthenticationProperties(new Dictionary<string, string>
                         {
-                            Error = OpenIdConnectConstants.Errors.AccountSelectionRequired,
+                            [OpenIddictServerAspNetCoreConstants.Properties.Error] = OpenIddictConstants.Errors.AccountSelectionRequired,
                         });
+
+                        return this.Forbid(properties, OpenIddictServerAspNetCoreDefaults.AuthenticationScheme);
                     }
                 }
 
                 // Ensure the user is allowed to sign in.
                 if (!await this.signInManager.CanSignInAsync(user))
                 {
-                    return this.BadRequest(new OpenIdConnectResponse
+                    var properties = new AuthenticationProperties(new Dictionary<string, string>
                     {
-                        Error = OpenIdConnectConstants.Errors.InvalidGrant,
-                        ErrorDescription = "The user is not allowed to sign in.",
+                        [OpenIddictServerAspNetCoreConstants.Properties.Error] = OpenIddictConstants.Errors.InvalidGrant,
+                        [OpenIddictServerAspNetCoreConstants.Properties.ErrorDescription] = "The user is no longer allowed to sign in.",
                     });
+
+                    return this.Forbid(properties, OpenIddictServerAspNetCoreDefaults.AuthenticationScheme);
                 }
 
                 return await this.SignInAsync(request, user);
             }
 
-            return this.BadRequest(new OpenIdConnectResponse
-            {
-                Error = OpenIdConnectConstants.Errors.UnsupportedGrantType,
-                ErrorDescription = "The specified grant type is not supported.",
-            });
+            throw new NotImplementedException("The specified grant type is not implemented.");
         }
 
-        private async Task<ActionResult> SignInAsync(OpenIdConnectRequest request, ApplicationUser user, AuthenticationProperties properties = null)
+        private async Task<ActionResult> SignInAsync(OpenIddictRequest request, ApplicationUser user)
         {
             // Create a new ClaimsPrincipal containing the claims that
             // will be used to create an id_token, a token or a code.
             var principal = await this.signInManager.CreateUserPrincipalAsync(user);
 
-            // Add email claim as SignInManager weirdly doesn't add it even though it's right there.
-            var identity = (ClaimsIdentity)principal.Identity;
-            identity.AddClaim(OpenIdConnectConstants.Claims.Email, user.Email);
-
-            // Create a new authentication ticket holding the user identity.
-            var ticket = new AuthenticationTicket(principal, properties, OpenIdConnectServerDefaults.AuthenticationScheme);
-
-            if (!request.IsRefreshTokenGrantType())
-            {
-                // Set the list of scopes granted to the client application.
-                // Note: the offline_access scope must be granted
-                // to allow OpenIddict to return a refresh token.
-                ticket.SetScopes(AllowedRefreshTokenScopes.Intersect(request.GetScopes()));
-            }
-
-            ticket.SetResources("resource-server");
+            // Set the list of scopes granted to the client application.
+            // Note: the offline_access scope must be granted
+            // to allow OpenIddict to return a refresh token.
+            principal.SetScopes(AllowedRefreshTokenScopes.Intersect(request.GetScopes()));
 
             // Note: by default, claims are NOT automatically included in the access and identity tokens.
             // To allow OpenIddict to serialize them, you must attach them a destination, that specifies
             // whether they should be included in access tokens, in identity tokens or in both.
-            foreach (var claim in ticket.Principal.Claims)
+            foreach (var claim in principal.Claims)
             {
                 // Never include the security stamp in the access and identity tokens, as it's a secret value.
                 if (claim.Type == this.identityOptions.Value.ClaimsIdentity.SecurityStampClaimType)
@@ -245,22 +250,22 @@ namespace ClickerHeroesTrackerWebsite.Controllers
 
                 var destinations = new List<string>
                 {
-                    OpenIdConnectConstants.Destinations.AccessToken,
+                    OpenIddictConstants.Destinations.AccessToken,
                 };
 
                 // Only add the iterated claim to the id_token if the corresponding scope was granted to the client application.
                 // The other claims will only be added to the access_token, which is encrypted when using the default format.
-                if ((claim.Type == OpenIdConnectConstants.Claims.Name && ticket.HasScope(OpenIdConnectConstants.Scopes.Profile))
-                    || (claim.Type == OpenIdConnectConstants.Claims.Email && ticket.HasScope(OpenIdConnectConstants.Scopes.Email))
-                    || (claim.Type == OpenIdConnectConstants.Claims.Role && ticket.HasScope(OpenIddictConstants.Claims.Roles)))
+                if ((claim.Type == OpenIddictConstants.Claims.Name && principal.HasScope(OpenIddictConstants.Scopes.Profile))
+                    || (claim.Type == OpenIddictConstants.Claims.Email && principal.HasScope(OpenIddictConstants.Scopes.Email))
+                    || (claim.Type == OpenIddictConstants.Claims.Role && principal.HasScope(OpenIddictConstants.Scopes.Roles)))
                 {
-                    destinations.Add(OpenIdConnectConstants.Destinations.IdentityToken);
+                    destinations.Add(OpenIddictConstants.Destinations.IdentityToken);
                 }
 
                 claim.SetDestinations(destinations);
             }
 
-            return this.SignIn(ticket.Principal, ticket.Properties, ticket.AuthenticationScheme);
+            return this.SignIn(principal, OpenIddictServerAspNetCoreDefaults.AuthenticationScheme);
         }
     }
 }

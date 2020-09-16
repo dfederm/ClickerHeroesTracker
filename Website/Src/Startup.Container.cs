@@ -7,8 +7,8 @@ namespace ClickerHeroesTrackerWebsite
     using System;
     using System.IO;
     using System.Net.Http;
-    using AspNet.Security.OAuth.Validation;
-    using AspNet.Security.OpenIdConnect.Primitives;
+    using System.Text.Json;
+    using System.Text.Json.Serialization;
     using ClickerHeroesTrackerWebsite.Configuration;
     using ClickerHeroesTrackerWebsite.Models;
     using ClickerHeroesTrackerWebsite.Models.Game;
@@ -27,10 +27,8 @@ namespace ClickerHeroesTrackerWebsite
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Hosting;
     using Microsoft.Extensions.Options;
-    using Newtonsoft.Json;
-    using Newtonsoft.Json.Converters;
-    using Newtonsoft.Json.Serialization;
     using OpenIddict.Abstractions;
+    using OpenIddict.Validation.AspNetCore;
     using Website.Models.Authentication;
     using Website.Services.Authentication;
     using Website.Services.Clans;
@@ -87,9 +85,10 @@ namespace ClickerHeroesTrackerWebsite
                     // Configure Identity to use the same JWT claims as OpenIddict instead
                     // of the legacy WS-Federation claims it uses by default (ClaimTypes),
                     // which saves you from doing the mapping in your authorization controller.
-                    options.ClaimsIdentity.UserNameClaimType = OpenIdConnectConstants.Claims.Name;
-                    options.ClaimsIdentity.UserIdClaimType = OpenIdConnectConstants.Claims.Subject;
-                    options.ClaimsIdentity.RoleClaimType = OpenIdConnectConstants.Claims.Role;
+                    options.ClaimsIdentity.UserNameClaimType = OpenIddictConstants.Claims.Name;
+                    options.ClaimsIdentity.UserIdClaimType = OpenIddictConstants.Claims.Subject;
+                    options.ClaimsIdentity.EmailClaimType = OpenIddictConstants.Claims.Email;
+                    options.ClaimsIdentity.RoleClaimType = OpenIddictConstants.Claims.Role;
                 })
                 .AddEntityFrameworkStores<ApplicationDbContext>()
                 .AddDefaultTokenProviders();
@@ -108,13 +107,8 @@ namespace ClickerHeroesTrackerWebsite
                 // Register the OpenIddict server handler.
                 .AddServer(options =>
                 {
-                    // Register the ASP.NET Core MVC services used by OpenIddict.
-                    // Note: if you don't call this method, you won't be able to
-                    // bind OpenIdConnectRequest or OpenIdConnectResponse parameters.
-                    options.UseMvc();
-
                     // Enable the token endpoint (required to use the password flow).
-                    options.EnableTokenEndpoint("/api/auth/token");
+                    options.SetTokenEndpointUris("/api/auth/token");
 
                     // Allow client applications to use the grant_type=password flow.
                     options.AllowPasswordFlow()
@@ -125,30 +119,35 @@ namespace ClickerHeroesTrackerWebsite
 
                     // Mark the "email", "profile" and "roles" scopes as supported scopes.
                     options.RegisterScopes(
-                        OpenIdConnectConstants.Scopes.Email,
-                        OpenIdConnectConstants.Scopes.Profile,
+                        OpenIddictConstants.Scopes.Email,
+                        OpenIddictConstants.Scopes.Profile,
                         OpenIddictConstants.Scopes.Roles);
 
-                    // When request caching is enabled, authorization and logout requests
-                    // are stored in the distributed cache by OpenIddict and the user agent
-                    // is redirected to the same page with a single parameter (request_id).
-                    // This allows flowing large OpenID Connect requests even when using
-                    // an external authentication provider like Google, Facebook or Twitter.
-                    options.EnableRequestCaching();
-
-                    // We don't want to specify a client_id when sending a token or revocation request.
+                    // Accept anonymous clients (i.e clients that don't send a client_id).
                     options.AcceptAnonymousClients();
+
+                    // Register the signing and encryption credentials.
+                    options.AddDevelopmentEncryptionCertificate()
+                           .AddDevelopmentSigningCertificate();
 
                     // When rolling tokens are enabled, immediately
                     // redeem the refresh token to prevent future reuse.
-                    options.UseRollingTokens();
+                    options.UseRollingRefreshTokens();
+
+                    // Register the ASP.NET Core host and configure the ASP.NET Core-specific options.
+                    options.UseAspNetCore()
+                           .EnableTokenEndpointPassthrough();
                 })
 
-                // Register the OpenIddict validation handler.
-                // Note: the OpenIddict validation handler is only compatible with the
-                // default token format or with reference tokens and cannot be used with
-                // JWT tokens. For JWT tokens, use the Microsoft JWT bearer handler.
-                .AddValidation();
+                // Register the OpenIddict validation components.
+                .AddValidation(options =>
+                {
+                    // Import the configuration from the local OpenIddict server instance.
+                    options.UseLocalServer();
+
+                    // Register the ASP.NET Core host.
+                    options.UseAspNetCore();
+                });
 
             services.Configure((AssertionGrantOptions options) =>
             {
@@ -161,12 +160,10 @@ namespace ClickerHeroesTrackerWebsite
             services.AddSingleton<FacebookAssertionGrantHandler>();
             services.AddSingleton<MicrosoftAssertionGrantHandler>();
 
-            services.AddAuthentication();
-
             services.AddAuthorization(options =>
             {
                 options.DefaultPolicy = new AuthorizationPolicyBuilder()
-                    .AddAuthenticationSchemes(OAuthValidationDefaults.AuthenticationScheme)
+                    .AddAuthenticationSchemes(OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme)
                     .RequireAuthenticatedUser()
                     .Build();
             });
@@ -182,19 +179,19 @@ namespace ClickerHeroesTrackerWebsite
             services.AddCors();
 
             services.AddControllers()
-                .AddNewtonsoftJson(options =>
+                .AddJsonOptions(options =>
                 {
                     // Beautify by default for debuggability. When gzipping, this barely adds anything to the payload.
-                    options.SerializerSettings.Formatting = Formatting.Indented;
+                    options.JsonSerializerOptions.WriteIndented = true;
 
                     // Omit nulls
-                    options.SerializerSettings.NullValueHandling = NullValueHandling.Ignore;
+                    options.JsonSerializerOptions.IgnoreNullValues = true;
 
                     // Use camel-casing for fields (lower case first character)
-                    options.SerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver();
+                    options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
 
                     // Convert enum values to strings
-                    options.SerializerSettings.Converters.Add(new StringEnumConverter { NamingStrategy = new CamelCaseNamingStrategy() });
+                    options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter(JsonNamingPolicy.CamelCase));
                 });
 
             // Allow IOptions<T> to be available through DI

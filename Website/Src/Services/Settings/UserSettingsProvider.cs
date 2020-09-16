@@ -148,7 +148,7 @@ namespace ClickerHeroesTrackerWebsite.Models.Settings
 
                 if (!isFirst)
                 {
-                    setUserSettingsCommandText.Append(",");
+                    setUserSettingsCommandText.Append(',');
                 }
 
                 // No need to sanitize settingId as it's just a number
@@ -156,7 +156,7 @@ namespace ClickerHeroesTrackerWebsite.Models.Settings
                 setUserSettingsCommandText.Append(settingId);
                 setUserSettingsCommandText.Append(",@Value");
                 setUserSettingsCommandText.Append(settingId);
-                setUserSettingsCommandText.Append(")");
+                setUserSettingsCommandText.Append(')');
 
                 parameters.Add("@Value" + settingId, settingValue);
 

@@ -420,7 +420,7 @@ namespace Website.Services.Clans
 
                 if (!isFirst)
                 {
-                    commandText.Append(",");
+                    commandText.Append(',');
                 }
 
                 commandText.AppendFormat("(@Id{0}, @Nickname{0}, @HighestZone{0}, @ClanName)", i);
