@@ -1,0 +1,45 @@
+name: Website - Build and Test
+
+on:
+  pull_request:
+    branches: $default-branch
+
+defaults:
+  run:
+    working-directory: Website
+
+jobs:
+  website:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: Website
+    steps:
+    - uses: actions/checkout@main
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: '5.x'
+    - name: Restore NuGet packages
+      run: dotnet restore
+    - name: Build
+      run: dotnet build --configuration Release --no-restore
+    - name: Test
+      run: dotnet test --no-restore --verbosity normal
+  webclient:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: WebClient
+    steps:
+    - uses: actions/checkout@main
+    - name: Setup Node.js
+      uses: actions/setup-node@v1
+      with:
+        node-version: '14.x'
+    - name: Install npm packages
+      run: npm ci
+    - name: Build
+      run: npm run build
+    - name: Test
+      run: npm run test
