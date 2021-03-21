@@ -2,7 +2,7 @@
 // Copyright (c) Clicker Heroes Tracker. All rights reserved.
 // </copyright>
 
-namespace ClickerHeroesTrackerWebsite.Tests.Models
+namespace UnitTests.Models
 {
     using System.IO;
     using ClickerHeroesTrackerWebsite.Models.SaveData;
@@ -23,7 +23,7 @@ namespace ClickerHeroesTrackerWebsite.Tests.Models
         [InlineData("InvalidZlibBadData", false)]
         public static void SavedGame_Parse(string testDataName, bool expectedValid)
         {
-            var encodedSaveData = File.ReadAllText(Path.Combine("TestData", testDataName + ".txt"));
+            var encodedSaveData = TestData.ReadAllText(testDataName + ".txt");
             var savedGame = SavedGame.Parse(encodedSaveData);
 
             if (expectedValid)

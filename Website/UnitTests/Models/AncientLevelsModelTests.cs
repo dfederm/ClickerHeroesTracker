@@ -5,7 +5,6 @@
 namespace UnitTests.Models
 {
     using System.Collections.Generic;
-    using System.IO;
     using System.Numerics;
     using ClickerHeroesTrackerWebsite.Models.SaveData;
     using ClickerHeroesTrackerWebsite.Models.Stats;
@@ -17,7 +16,7 @@ namespace UnitTests.Models
         [Fact]
         public static void AncientLevelsModel()
         {
-            var encodedSaveData = File.ReadAllText("TestData\\ValidZlib.txt");
+            var encodedSaveData = TestData.ReadAllText("ValidZlib.txt");
             var savedGame = SavedGame.Parse(encodedSaveData);
             var ancientLevels = new AncientLevelsModel(MockGameData.RealData, savedGame);
 
