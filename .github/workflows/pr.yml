@@ -1,32 +1,26 @@
-name: Website - Build and Test
+name: Build and Test
 
 on:
   pull_request:
-    branches: $default-branch
-
-defaults:
-  run:
-    working-directory: Website
+    branches:
+      - master
 
 jobs:
-  website:
+  Website:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: Website
     steps:
     - uses: actions/checkout@main
     - name: Setup .NET
-      uses: actions/setup-dotnet@v1
+      uses: actions/setup-dotnet@v1.7.2
       with:
-        dotnet-version: '5.x'
+        dotnet-version: '5.0.x'
     - name: Restore NuGet packages
       run: dotnet restore
     - name: Build
       run: dotnet build --configuration Release --no-restore
     - name: Test
-      run: dotnet test --no-restore --verbosity normal
-  webclient:
+      run: dotnet test --configuration Release --no-build
+  WebClient:
     runs-on: ubuntu-latest
     defaults:
       run:

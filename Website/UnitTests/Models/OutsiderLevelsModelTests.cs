@@ -5,7 +5,6 @@
 namespace UnitTests.Models
 {
     using System.Collections.Generic;
-    using System.IO;
     using ClickerHeroesTrackerWebsite.Models.SaveData;
     using ClickerHeroesTrackerWebsite.Models.Stats;
     using ClickerHeroesTrackerWebsite.Tests.Mocks;
@@ -16,7 +15,7 @@ namespace UnitTests.Models
         [Fact]
         public static void OutsiderLevelsModel()
         {
-            var encodedSaveData = File.ReadAllText("TestData\\ValidZlib.txt");
+            var encodedSaveData = TestData.ReadAllText("ValidZlib.txt");
             var savedGame = SavedGame.Parse(encodedSaveData);
             var outsiderLevels = new OutsiderLevelsModel(MockGameData.RealData, savedGame);
 

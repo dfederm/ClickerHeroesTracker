@@ -4,7 +4,6 @@
 
 namespace UnitTests.Models
 {
-    using System.IO;
     using ClickerHeroesTrackerWebsite.Models.SaveData;
     using ClickerHeroesTrackerWebsite.Models.Stats;
     using Xunit;
@@ -14,7 +13,7 @@ namespace UnitTests.Models
         [Fact]
         public static void ComputedStats()
         {
-            var encodedSaveData = File.ReadAllText("TestData\\ValidZlib.txt");
+            var encodedSaveData = TestData.ReadAllText("ValidZlib.txt");
             var savedGame = SavedGame.Parse(encodedSaveData);
             var computedStats = new ComputedStats(savedGame);
 

@@ -22,7 +22,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build", "build", "{3D49839D
 		build\UpdateBuildInfo.ps1 = build\UpdateBuildInfo.ps1
 	EndProjectSection
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Website", "Website\src\Website.csproj", "{DECD0F75-D8E0-41D4-B39B-A439E8022C74}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Website", "Website\Src\Website.csproj", "{DECD0F75-D8E0-41D4-B39B-A439E8022C74}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UnitTests", "Website\UnitTests\UnitTests.csproj", "{6CB42835-1C1F-46F3-B92F-C4EEF165595A}"
 EndProject
