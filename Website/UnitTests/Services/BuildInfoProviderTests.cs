@@ -43,8 +43,8 @@ namespace UnitTests.Services
                 mockWebHostEnvironment.Setup(_ => _.WebRootPath).Returns(directory.Location).Verifiable();
 
                 Directory.CreateDirectory(Path.Combine(directory.Location, "data"));
-                File.WriteAllText(Path.Combine(directory.Location, @"data\BuildInfo.json"), JsonConvert.SerializeObject(BuildInfo));
-                File.WriteAllText(Path.Combine(directory.Location, @"manifest.json"), JsonConvert.SerializeObject(Manifest));
+                File.WriteAllText(Path.Combine(directory.Location, "data", "BuildInfo.json"), JsonConvert.SerializeObject(BuildInfo));
+                File.WriteAllText(Path.Combine(directory.Location, "manifest.json"), JsonConvert.SerializeObject(Manifest));
 
                 var provider = new BuildInfoProvider(mockWebHostEnvironment.Object);
 
@@ -71,8 +71,8 @@ namespace UnitTests.Services
                 mockWebHostEnvironment.Setup(_ => _.WebRootPath).Returns(directory.Location).Verifiable();
 
                 Directory.CreateDirectory(Path.Combine(directory.Location, "data"));
-                File.WriteAllText(Path.Combine(directory.Location, @"data\BuildInfo.json"), "{}");
-                File.WriteAllText(Path.Combine(directory.Location, @"manifest.json"), JsonConvert.SerializeObject(Manifest));
+                File.WriteAllText(Path.Combine(directory.Location, "data", "BuildInfo.json"), "{}");
+                File.WriteAllText(Path.Combine(directory.Location, "manifest.json"), JsonConvert.SerializeObject(Manifest));
 
                 var provider = new BuildInfoProvider(mockWebHostEnvironment.Object);
 
@@ -99,8 +99,8 @@ namespace UnitTests.Services
                 mockWebHostEnvironment.Setup(_ => _.WebRootPath).Returns(directory.Location).Verifiable();
 
                 Directory.CreateDirectory(Path.Combine(directory.Location, "data"));
-                File.WriteAllText(Path.Combine(directory.Location, @"data\BuildInfo.json"), JsonConvert.SerializeObject(BuildInfo));
-                File.WriteAllText(Path.Combine(directory.Location, @"manifest.json"), "{}");
+                File.WriteAllText(Path.Combine(directory.Location, "data", "BuildInfo.json"), JsonConvert.SerializeObject(BuildInfo));
+                File.WriteAllText(Path.Combine(directory.Location, "manifest.json"), "{}");
 
                 var provider = new BuildInfoProvider(mockWebHostEnvironment.Object);
 
@@ -122,7 +122,7 @@ namespace UnitTests.Services
                 var mockWebHostEnvironment = new Mock<IWebHostEnvironment>(MockBehavior.Strict);
                 mockWebHostEnvironment.Setup(_ => _.WebRootPath).Returns(directory.Location).Verifiable();
 
-                File.WriteAllText(Path.Combine(directory.Location, @"manifest.json"), JsonConvert.SerializeObject(Manifest));
+                File.WriteAllText(Path.Combine(directory.Location, "manifest.json"), JsonConvert.SerializeObject(Manifest));
 
                 Assert.Throws<InvalidDataException>(() => new BuildInfoProvider(mockWebHostEnvironment.Object));
 
@@ -139,7 +139,7 @@ namespace UnitTests.Services
                 mockWebHostEnvironment.Setup(_ => _.WebRootPath).Returns(directory.Location).Verifiable();
 
                 Directory.CreateDirectory(Path.Combine(directory.Location, "data"));
-                File.WriteAllText(Path.Combine(directory.Location, @"data\BuildInfo.json"), JsonConvert.SerializeObject(BuildInfo));
+                File.WriteAllText(Path.Combine(directory.Location, "data", "BuildInfo.json"), JsonConvert.SerializeObject(BuildInfo));
 
                 Assert.Throws<InvalidDataException>(() => new BuildInfoProvider(mockWebHostEnvironment.Object));
 

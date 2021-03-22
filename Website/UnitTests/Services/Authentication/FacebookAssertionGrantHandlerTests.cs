@@ -24,7 +24,7 @@ namespace UnitTests.Services.Authentication
         private const string UserEndpoint = "https://graph.facebook.com/me?fields=id,email&access_token=" + Assertion;
 
         // Upping the match timeout since this makes sequential http calls which for some reason may take more than the default of 100ms to chain together.
-        private static readonly HttpClientTestingFactorySettings HttpClientTestingFactorySettings = new HttpClientTestingFactorySettings { ExpectationMatchTimeout = TimeSpan.FromSeconds(1) };
+        private static readonly HttpClientTestingFactorySettings HttpClientTestingFactorySettings = new HttpClientTestingFactorySettings { ExpectationMatchTimeout = TimeSpan.FromSeconds(10) };
 
         [Fact]
         public static async Task ValidateAsync_Success()

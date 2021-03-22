@@ -21,7 +21,7 @@ namespace ClickerHeroesTrackerWebsite.Configuration
         /// </summary>
         public BuildInfoProvider(IWebHostEnvironment webHostEnvironment)
         {
-            var buildInfoFile = Path.Combine(webHostEnvironment.WebRootPath, @"data\BuildInfo.json");
+            var buildInfoFile = Path.Combine(webHostEnvironment.WebRootPath, "data", "BuildInfo.json");
             if (!File.Exists(buildInfoFile))
             {
                 throw new InvalidDataException("Could not find build info file: " + buildInfoFile);
