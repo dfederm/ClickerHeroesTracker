@@ -19,12 +19,15 @@ jobs:
     - name: Build
       run: dotnet build --configuration Release --no-restore
     - name: Test
-      run: dotnet test --configuration Release --no-build
+      run: dotnet test --configuration Release --no-build --logger trx --results-directory TestResults
+    - name: Upload test results
+      uses: actions/upload-artifact@v2
+      with:
+        name: website-test-results
+        path: ./TestResults
+      if: ${{ always() }} # Always run this step even on failure
   WebClient:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: WebClient
     steps:
     - uses: actions/checkout@main
     - name: Setup Node.js
@@ -33,7 +36,16 @@ jobs:
         node-version: '14.x'
     - name: Install npm packages
       run: npm ci
+      working-directory: ./WebClient
     - name: Build
       run: npm run build
+      working-directory: ./WebClient
     - name: Test
       run: npm run test
+      working-directory: ./WebClient
+    - name: Upload logs
+      uses: actions/upload-artifact@v2
+      with:
+        name: webclient-logs
+        path: ./logs
+      if: ${{ always() }} # Always run this step even on failure

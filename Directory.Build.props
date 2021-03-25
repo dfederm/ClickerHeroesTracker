@@ -8,6 +8,7 @@
     <CodeAnalysisRuleSet>$(MSBuildThisFileDirectory)\build\CodeAnalysis.ruleset</CodeAnalysisRuleSet>
     <Deterministic>true</Deterministic>
     <LangVersion>latest</LangVersion>
+    <DebugType>embedded</DebugType>
   </PropertyGroup>
 
   <ItemGroup>
