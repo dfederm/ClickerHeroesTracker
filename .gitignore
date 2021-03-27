@@ -10,6 +10,9 @@
 [Bb]in/
 [Oo]bj/
 
+# MSBuild Binary and Structured Log
+*.binlog
+
 # MSTest test Results
 [Tt]est[Rr]esult*/
 
@@ -22,7 +25,10 @@ node_modules/
 # WebClient logs
 logs/
 
-# WebClient-generated
+# WebClient outputs
+dist/
+
+# WebClient outputs copied to WebSite
 **/wwwroot/index.html
 **/wwwroot/manifest.json
 **/wwwroot/*.js

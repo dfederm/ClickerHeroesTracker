@@ -20,7 +20,7 @@ var isTestWatch = ENV === 'test-watch';
 var isTest = ENV === 'test' || isTestWatch;
 var isProd = ENV === 'prod';
 
-var outputPath = path.resolve('../Website/Src/wwwroot');
+var outputPath = path.resolve('./dist');
 
 module.exports = () => {
   var config = {};

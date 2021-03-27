@@ -83,7 +83,7 @@ jobs:
       uses: actions/upload-artifact@v2
       with:
         name: webclient-artifacts
-        path: ./Website/Src/wwwroot
+        path: ./WebClient/dist
       if: ${{ always() }} # Always run this step even on failure
   Deploy:
     runs-on: ubuntu-latest
