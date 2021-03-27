@@ -12,7 +12,7 @@ namespace Website.Models.Api.Version
 
         public string Changelist { get; set; }
 
-        public string BuildId { get; set; }
+        public string BuildUrl { get; set; }
 
         public IDictionary<string, string> Webclient { get; set; }
     }

@@ -180,7 +180,7 @@ namespace ClickerHeroesTrackerWebsite
 
             services.AddApplicationInsightsTelemetry(new ApplicationInsightsServiceOptions
             {
-                ApplicationVersion = buildInfoProvider.BuildId,
+                ApplicationVersion = buildInfoProvider.BuildUrl,
                 DeveloperMode = this.environment.IsDevelopment(),
             });
 

@@ -7,7 +7,7 @@ import { HttpErrorHandlerService } from "../httpErrorHandlerService/httpErrorHan
 export interface IVersion {
     environment: string;
     changelist: string;
-    buildId: string;
+    buildUrl: string;
     webclient: { [bundle: string]: string };
 }
 

@@ -33,7 +33,7 @@ namespace ClickerHeroesTrackerWebsite.Configuration
                 var buildInfo = JObject.Load(reader);
 
                 this.Changelist = (string)buildInfo["changelist"];
-                this.BuildId = (string)buildInfo["buildId"];
+                this.BuildUrl = (string)buildInfo["buildUrl"];
             }
 
             var webclientManifestFile = Path.Combine(webHostEnvironment.WebRootPath, @"manifest.json");
@@ -74,7 +74,7 @@ namespace ClickerHeroesTrackerWebsite.Configuration
         public string Changelist { get; }
 
         /// <inheritdoc/>
-        public string BuildId { get; }
+        public string BuildUrl { get; }
 
         public IDictionary<string, string> Webclient { get; }
     }
