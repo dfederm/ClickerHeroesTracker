@@ -7,6 +7,8 @@
   </Rules>
 
   <Rules AnalyzerId="Microsoft.Design" RuleNamespace="Microsoft.Design">
+    <!-- URI properties should not be strings. Not worth it in many cases. -->
+    <Rule Id="CA1056" Action="None" />
     <!-- ValidateArgumentsOfPublicMethods: This isn't a library. -->
     <Rule Id="CA1062" Action="None" />
   </Rules>

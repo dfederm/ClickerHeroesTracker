@@ -18,7 +18,7 @@ namespace ClickerHeroesTrackerWebsite.Tests.Controllers
         {
             var mockBuildInfoProvider = new Mock<IBuildInfoProvider>(MockBehavior.Strict);
             mockBuildInfoProvider.SetupGet(_ => _.Changelist).Returns("SomeChangelist").Verifiable();
-            mockBuildInfoProvider.SetupGet(_ => _.BuildId).Returns("SomeBuildId").Verifiable();
+            mockBuildInfoProvider.SetupGet(_ => _.BuildUrl).Returns("SomeBuildUrl").Verifiable();
 
             var webclient = new Dictionary<string, string>
             {
@@ -40,7 +40,7 @@ namespace ClickerHeroesTrackerWebsite.Tests.Controllers
             Assert.NotNull(model);
             Assert.Equal("SomeEnvironmentName", model.Environment);
             Assert.Equal("SomeChangelist", model.Changelist);
-            Assert.Equal("SomeBuildId", model.BuildId);
+            Assert.Equal("SomeBuildUrl", model.BuildUrl);
             Assert.Equal(webclient, model.Webclient);
 
             mockBuildInfoProvider.Verify();

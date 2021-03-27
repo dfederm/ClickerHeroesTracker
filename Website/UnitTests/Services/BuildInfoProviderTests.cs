@@ -18,7 +18,7 @@ namespace UnitTests.Services
         private static readonly Dictionary<string, string> BuildInfo = new Dictionary<string, string>
         {
             { "changelist", "SomeChangelist" },
-            { "buildId", "SomeBuildId" },
+            { "buildUrl", "SomeBuildUrl" },
         };
 
         private static readonly Dictionary<string, string> Manifest = new Dictionary<string, string>
@@ -48,7 +48,7 @@ namespace UnitTests.Services
 
                 var provider = new BuildInfoProvider(mockWebHostEnvironment.Object);
 
-                Assert.Equal("SomeBuildId", provider.BuildId);
+                Assert.Equal("SomeBuildUrl", provider.BuildUrl);
                 Assert.Equal("SomeChangelist", provider.Changelist);
 
                 Assert.NotNull(provider.Webclient);
@@ -76,7 +76,7 @@ namespace UnitTests.Services
 
                 var provider = new BuildInfoProvider(mockWebHostEnvironment.Object);
 
-                Assert.Null(provider.BuildId);
+                Assert.Null(provider.BuildUrl);
                 Assert.Null(provider.Changelist);
 
                 Assert.NotNull(provider.Webclient);
@@ -104,7 +104,7 @@ namespace UnitTests.Services
 
                 var provider = new BuildInfoProvider(mockWebHostEnvironment.Object);
 
-                Assert.Equal("SomeBuildId", provider.BuildId);
+                Assert.Equal("SomeBuildUrl", provider.BuildUrl);
                 Assert.Equal("SomeChangelist", provider.Changelist);
 
                 Assert.NotNull(provider.Webclient);

@@ -152,7 +152,7 @@ describe("VersionService", () => {
             let version = {
                 environment: "environment_" + index,
                 changelist: "changelist_" + index,
-                buildId: "buildId_" + index,
+                buildUrl: "buildUrl_" + index,
                 webclient: {
                     bundle1: "bundle1_" + index,
                     bundle2: "bundle2_" + index,

@@ -17,9 +17,9 @@ namespace ClickerHeroesTrackerWebsite.Configuration
         string Changelist { get; }
 
         /// <summary>
-        /// Gets the build id of the running service.
+        /// Gets the build url which produced the binaries for the running build.
         /// </summary>
-        string BuildId { get; }
+        string BuildUrl { get; }
 
         /// <summary>
         /// Gets a mapping of each Webclient file to its version.
