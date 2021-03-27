@@ -30,4 +30,25 @@
     <PackageReference Include="Sendgrid" Version="9.21.0" />
   </ItemGroup>
 
+  <!-- For developer builds, copy the WebClient outputs to the web root -->
+  <ItemGroup>
+    <_WebClientOutputs Include="..\..\WebClient\dist\*" />
+  </ItemGroup>
+  <Target Name="CopyWebClientOutputs"
+          AfterTargets="GetCopyToOutputDirectoryItems"
+          Condition="'$(Configuration)' == 'Debug'"
+          Inputs="@(_WebClientOutputs)"
+          Outputs="@(_WebClientOutputs->'wwwroot\%(Filename)%(Extension)')">
+    <Copy SourceFiles="@(_WebClientOutputs)"
+          DestinationFiles="@(_WebClientOutputs->'wwwroot\%(Filename)%(Extension)')"
+          SkipUnchangedFiles="$(SkipCopyUnchangedFiles)"
+          OverwriteReadOnlyFiles="$(OverwriteReadOnlyFiles)"
+          Retries="$(CopyRetryCount)"
+          RetryDelayMilliseconds="$(CopyRetryDelayMilliseconds)"
+          UseHardlinksIfPossible="$(CreateHardLinksForAdditionalFilesIfPossible)"
+          UseSymboliclinksIfPossible="$(CreateSymbolicLinksForAdditionalFilesIfPossible)">
+      <Output TaskParameter="DestinationFiles" ItemName="FileWrites" />
+    </Copy>
+  </Target>
+
 </Project>
