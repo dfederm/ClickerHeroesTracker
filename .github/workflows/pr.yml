@@ -47,5 +47,5 @@ jobs:
       uses: actions/upload-artifact@v2
       with:
         name: webclient-logs
-        path: ./logs
+        path: ./WebClient/logs
       if: ${{ always() }} # Always run this step even on failure
