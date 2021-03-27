@@ -13,7 +13,13 @@ jobs:
     steps:
     - name: Checkout repository
       uses: actions/checkout@main
-    # TODO: update build info
+    - name: Update build info
+      shell: pwsh
+      run: |
+        ./build/UpdateBuildInfo.ps1 `
+          -SourceDirectory "$Env:GITHUB_WORKSPACE" `
+          -SourceVersion "$Env:GITHUB_SHA" `
+          -BuildUrl "$Env:GITHUB_SERVER_URL/$Env:GITHUB_REPOSITORY/actions/runs/$Env:GITHUB_RUN_ID"
     - name: Setup .NET
       uses: actions/setup-dotnet@v1.7.2
       with:
@@ -72,6 +78,8 @@ jobs:
     runs-on: ubuntu-latest
     needs: [Website, WebClient]
     steps:
+    - name: Checkout repository
+      uses: actions/checkout@main
     - name: Download website
       uses: actions/download-artifact@v2
       with:
@@ -89,7 +97,12 @@ jobs:
         slot-name: staging
         publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE_STAGING }}
         package: ./deploy
-    # TODO: Add warmup
+    - name: Post-deploy
+      shell: pwsh
+      run: |
+        ./build/PostDeploy.ps1 `
+          -WebsiteName ClickerHeroesTracker `
+          -Slot staging
     # There is not an action to directly slot-swap, so use the Azure CLI
     - name: Log into Azure CLI
       uses: azure/login@v1
