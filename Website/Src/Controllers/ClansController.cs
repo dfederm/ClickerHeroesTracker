@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using ClickerHeroesTrackerWebsite.Models;
+using ClickerHeroesTrackerWebsite.Models.Api;
 using ClickerHeroesTrackerWebsite.Models.Api.Clans;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -66,7 +67,7 @@ namespace ClickerHeroesTrackerWebsite.Controllers
 
             // Fetch in parallel
             Task<IList<LeaderboardClan>> leaderboardTask = _clanManager.FetchLeaderboardAsync(userId, page, count);
-            Task<Models.Api.PaginationMetadata> paginationTask = _clanManager.FetchPaginationAsync(Request.Path, page, count);
+            Task<PaginationMetadata> paginationTask = _clanManager.FetchPaginationAsync(Request.Path, page, count);
             await Task.WhenAll(leaderboardTask, paginationTask);
 
             return new LeaderboardSummaryListResponse

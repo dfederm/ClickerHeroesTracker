@@ -15,6 +15,7 @@ using Microsoft.Extensions.Options;
 using OpenIddict.Abstractions;
 using OpenIddict.Server.AspNetCore;
 using Website.Services.Authentication;
+using SignInResult = Microsoft.AspNetCore.Identity.SignInResult;
 
 namespace ClickerHeroesTrackerWebsite.Controllers
 {
@@ -75,7 +76,7 @@ namespace ClickerHeroesTrackerWebsite.Controllers
                 }
 
                 // Validate the username/password parameters and ensure the account is not locked out.
-                Microsoft.AspNetCore.Identity.SignInResult result = await _signInManager.CheckPasswordSignInAsync(user, request.Password, lockoutOnFailure: false);
+                SignInResult result = await _signInManager.CheckPasswordSignInAsync(user, request.Password, lockoutOnFailure: false);
                 if (!result.Succeeded)
                 {
                     AuthenticationProperties properties = new(new Dictionary<string, string>

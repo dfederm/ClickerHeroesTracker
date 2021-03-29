@@ -2,6 +2,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Net.Http;
 using System.Text;
@@ -223,7 +224,7 @@ namespace Website.Services.Clans
                 { "@Count", count },
             };
             using (IDatabaseCommand command = _databaseCommandFactory.Create(GetLeaderboardDataCommandText, parameters))
-            using (System.Data.IDataReader reader = await command.ExecuteReaderAsync())
+            using (IDataReader reader = await command.ExecuteReaderAsync())
             {
                 int i = 1;
                 while (reader.Read())
@@ -253,7 +254,7 @@ namespace Website.Services.Clans
                 WHERE IsBlocked = 0";
 
             using (IDatabaseCommand command = _databaseCommandFactory.Create(GetLeaderboardCountCommandText))
-            using (System.Data.IDataReader reader = await command.ExecuteReaderAsync())
+            using (IDataReader reader = await command.ExecuteReaderAsync())
             {
                 if (!reader.Read())
                 {
@@ -296,7 +297,7 @@ namespace Website.Services.Clans
                 { "@ClanName", clanName },
             };
             using (IDatabaseCommand command = _databaseCommandFactory.Create(CommandText, parameters))
-            using (System.Data.IDataReader reader = await command.ExecuteReaderAsync())
+            using (IDataReader reader = await command.ExecuteReaderAsync())
             {
                 if (reader.Read())
                 {
@@ -330,7 +331,7 @@ namespace Website.Services.Clans
                 { "@ClanName", clanName },
             };
             using (IDatabaseCommand command = _databaseCommandFactory.Create(CommandText, parameters))
-            using (System.Data.IDataReader reader = await command.ExecuteReaderAsync())
+            using (IDataReader reader = await command.ExecuteReaderAsync())
             {
                 List<GuildMember> guildMembers = new();
                 while (reader.Read())
@@ -499,7 +500,7 @@ namespace Website.Services.Clans
                 { "@UserId", userId },
             };
             using (IDatabaseCommand command = _databaseCommandFactory.Create(CommandText, parameters))
-            using (System.Data.IDataReader reader = await command.ExecuteReaderAsync())
+            using (IDataReader reader = await command.ExecuteReaderAsync())
             {
                 if (reader.Read())
                 {

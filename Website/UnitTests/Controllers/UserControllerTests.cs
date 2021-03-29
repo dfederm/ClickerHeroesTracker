@@ -2,10 +2,13 @@
 
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using ClickerHeroesTrackerWebsite.Models;
+using ClickerHeroesTrackerWebsite.Models.Api.Uploads;
+using ClickerHeroesTrackerWebsite.Models.Game;
 using ClickerHeroesTrackerWebsite.Models.Settings;
 using ClickerHeroesTrackerWebsite.Services.Database;
 using ClickerHeroesTrackerWebsite.Services.Email;
@@ -35,7 +38,7 @@ namespace UnitTests.Controllers
                 Password = "SomePassword",
             };
 
-            ClickerHeroesTrackerWebsite.Models.Game.GameData gameData = MockGameData.RealData;
+            GameData gameData = MockGameData.RealData;
             TelemetryClient telemetryClient = new(new TelemetryConfiguration());
             Mock<IDatabaseCommandFactory> mockDatabaseCommandFactory = new(MockBehavior.Strict);
             Mock<IUserSettingsProvider> mockUserSettingsProvider = new(MockBehavior.Strict);
@@ -79,7 +82,7 @@ namespace UnitTests.Controllers
                 Password = "SomePassword",
             };
 
-            ClickerHeroesTrackerWebsite.Models.Game.GameData gameData = MockGameData.RealData;
+            GameData gameData = MockGameData.RealData;
             TelemetryClient telemetryClient = new(new TelemetryConfiguration());
             Mock<IDatabaseCommandFactory> mockDatabaseCommandFactory = new(MockBehavior.Strict);
             Mock<IUserSettingsProvider> mockUserSettingsProvider = new(MockBehavior.Strict);
@@ -121,7 +124,7 @@ namespace UnitTests.Controllers
             const string UserId = "SomeUserId";
             const string ClanName = "SomeClanName";
 
-            ClickerHeroesTrackerWebsite.Models.Game.GameData gameData = MockGameData.RealData;
+            GameData gameData = MockGameData.RealData;
             TelemetryClient telemetryClient = new(new TelemetryConfiguration());
             Mock<IDatabaseCommandFactory> mockDatabaseCommandFactory = new(MockBehavior.Strict);
             Mock<IUserSettingsProvider> mockUserSettingsProvider = new(MockBehavior.Strict);
@@ -153,10 +156,10 @@ namespace UnitTests.Controllers
                 mockEmailSender.Object,
                 mockClanManager.Object);
 
-            ActionResult<ClickerHeroesTrackerWebsite.Models.Api.Uploads.User> result = await controller.GetAsync(UserName);
+            ActionResult<User> result = await controller.GetAsync(UserName);
             Assert.NotNull(result);
 
-            ClickerHeroesTrackerWebsite.Models.Api.Uploads.User model = result.Value;
+            User model = result.Value;
             Assert.NotNull(model);
 
             Assert.Equal(UserName, model.Name);
@@ -178,7 +181,7 @@ namespace UnitTests.Controllers
         {
             const string UserName = "SomeUserName";
 
-            ClickerHeroesTrackerWebsite.Models.Game.GameData gameData = MockGameData.RealData;
+            GameData gameData = MockGameData.RealData;
             TelemetryClient telemetryClient = new(new TelemetryConfiguration());
             Mock<IDatabaseCommandFactory> mockDatabaseCommandFactory = new(MockBehavior.Strict);
             Mock<IUserSettingsProvider> mockUserSettingsProvider = new(MockBehavior.Strict);
@@ -201,7 +204,7 @@ namespace UnitTests.Controllers
                 mockEmailSender.Object,
                 mockClanManager.Object);
 
-            ActionResult<ClickerHeroesTrackerWebsite.Models.Api.Uploads.User> result = await controller.GetAsync(UserName);
+            ActionResult<User> result = await controller.GetAsync(UserName);
 
             Assert.NotNull(result);
             Assert.IsType<NotFoundResult>(result.Result);
@@ -222,7 +225,7 @@ namespace UnitTests.Controllers
         {
             const string UserName = "SomeUserName";
 
-            ClickerHeroesTrackerWebsite.Models.Game.GameData gameData = MockGameData.RealData;
+            GameData gameData = MockGameData.RealData;
             TelemetryClient telemetryClient = new(new TelemetryConfiguration());
             Mock<IDatabaseCommandFactory> mockDatabaseCommandFactory = new(MockBehavior.Strict);
             Mock<IUserSettingsProvider> mockUserSettingsProvider = new(MockBehavior.Strict);
@@ -250,7 +253,7 @@ namespace UnitTests.Controllers
                 mockEmailSender.Object,
                 mockClanManager.Object);
 
-            ActionResult<ClickerHeroesTrackerWebsite.Models.Api.Uploads.User> result = await controller.GetAsync(UserName);
+            ActionResult<User> result = await controller.GetAsync(UserName);
 
             Assert.NotNull(result);
             Assert.IsType<NotFoundResult>(result.Result);
@@ -276,7 +279,7 @@ namespace UnitTests.Controllers
             const int TotalUploads = 1234;
             const string RequestPath = "/SomeRequestPath";
 
-            ClickerHeroesTrackerWebsite.Models.Game.GameData gameData = MockGameData.RealData;
+            GameData gameData = MockGameData.RealData;
             TelemetryClient telemetryClient = new(new TelemetryConfiguration());
 
             List<int> expectedUploadIds = Enumerable.Range(0, 3).ToList();
@@ -291,12 +294,12 @@ namespace UnitTests.Controllers
                     { "Souls", "1e300" },
                 })
                 .ToList();
-            Mock<System.Data.IDataReader> mockGetUploadsDataReader = MockDatabaseHelper.CreateMockDataReader(getUploadsDatasets);
+            Mock<IDataReader> mockGetUploadsDataReader = MockDatabaseHelper.CreateMockDataReader(getUploadsDatasets);
             Dictionary<string, object> mockGetUploadsDatabaseCommandParameters = new() { { "@UserId", UserId }, { "@Offset", (Page - 1) * Count }, { "@Count", Count } };
             Mock<IDatabaseCommand> mockGetUploadsDatabaseCommand = MockDatabaseHelper.CreateMockDatabaseCommand(mockGetUploadsDatabaseCommandParameters, mockGetUploadsDataReader.Object);
 
             Dictionary<string, object> paginationDataset = new() { { "TotalUploads", TotalUploads } };
-            Mock<System.Data.IDataReader> mockPaginationDataReader = MockDatabaseHelper.CreateMockDataReader(paginationDataset);
+            Mock<IDataReader> mockPaginationDataReader = MockDatabaseHelper.CreateMockDataReader(paginationDataset);
             Dictionary<string, object> mockPaginationDatabaseCommandParameters = new() { { "@UserId", UserId } };
             Mock<IDatabaseCommand> mockPaginationDatabaseCommand = MockDatabaseHelper.CreateMockDatabaseCommand(mockPaginationDatabaseCommandParameters, mockPaginationDataReader.Object);
 
@@ -306,15 +309,12 @@ namespace UnitTests.Controllers
                 .Setup(_ => _.Create())
                 .Returns(() =>
                 {
-                    switch (commandCreationCount++)
+                    return commandCreationCount++ switch
                     {
-                        case 0:
-                            return mockGetUploadsDatabaseCommand.Object;
-                        case 1:
-                            return mockPaginationDatabaseCommand.Object;
-                        default:
-                            throw new InvalidOperationException("Unexpected call to DatabaseCommandFactory.Create");
-                    }
+                        0 => mockGetUploadsDatabaseCommand.Object,
+                        1 => mockPaginationDatabaseCommand.Object,
+                        _ => throw new InvalidOperationException("Unexpected call to DatabaseCommandFactory.Create"),
+                    };
                 });
 
             Mock<IUserSettingsProvider> mockUserSettingsProvider = new(MockBehavior.Strict);
@@ -347,10 +347,10 @@ namespace UnitTests.Controllers
                 mockClanManager.Object);
             controller.ControllerContext = new ControllerContext { HttpContext = mockHttpContext.Object };
 
-            ActionResult<ClickerHeroesTrackerWebsite.Models.Api.Uploads.UploadSummaryListResponse> result = await controller.UploadsAsync(UserName, Page, Count);
+            ActionResult<UploadSummaryListResponse> result = await controller.UploadsAsync(UserName, Page, Count);
             Assert.NotNull(result);
 
-            ClickerHeroesTrackerWebsite.Models.Api.Uploads.UploadSummaryListResponse model = result.Value;
+            UploadSummaryListResponse model = result.Value;
             Assert.NotNull(model);
 
             Assert.NotNull(model.Uploads);
@@ -395,7 +395,7 @@ namespace UnitTests.Controllers
             UserController.ParameterConstants.Uploads.Count.Max + 1)]
         public static async Task Uploads_ParameterValidation(string userName, int page, int count)
         {
-            ClickerHeroesTrackerWebsite.Models.Game.GameData gameData = MockGameData.RealData;
+            GameData gameData = MockGameData.RealData;
             TelemetryClient telemetryClient = new(new TelemetryConfiguration());
             Mock<IDatabaseCommandFactory> mockDatabaseCommandFactory = new(MockBehavior.Strict);
             Mock<IUserSettingsProvider> mockUserSettingsProvider = new(MockBehavior.Strict);
@@ -412,7 +412,7 @@ namespace UnitTests.Controllers
                 mockEmailSender.Object,
                 mockClanManager.Object);
 
-            ActionResult<ClickerHeroesTrackerWebsite.Models.Api.Uploads.UploadSummaryListResponse> result = await controller.UploadsAsync(userName, page, count);
+            ActionResult<UploadSummaryListResponse> result = await controller.UploadsAsync(userName, page, count);
 
             Assert.NotNull(result);
             Assert.IsType<BadRequestResult>(result.Result);
@@ -434,7 +434,7 @@ namespace UnitTests.Controllers
             const int Page = 12;
             const int Count = 34;
 
-            ClickerHeroesTrackerWebsite.Models.Game.GameData gameData = MockGameData.RealData;
+            GameData gameData = MockGameData.RealData;
             TelemetryClient telemetryClient = new(new TelemetryConfiguration());
             Mock<IDatabaseCommandFactory> mockDatabaseCommandFactory = new(MockBehavior.Strict);
             Mock<IUserSettingsProvider> mockUserSettingsProvider = new(MockBehavior.Strict);
@@ -456,7 +456,7 @@ namespace UnitTests.Controllers
                 mockEmailSender.Object,
                 mockClanManager.Object);
 
-            ActionResult<ClickerHeroesTrackerWebsite.Models.Api.Uploads.UploadSummaryListResponse> result = await controller.UploadsAsync(UserName, Page, Count);
+            ActionResult<UploadSummaryListResponse> result = await controller.UploadsAsync(UserName, Page, Count);
 
             Assert.NotNull(result);
             Assert.IsType<NotFoundResult>(result.Result);
@@ -478,7 +478,7 @@ namespace UnitTests.Controllers
             const int Page = 12;
             const int Count = 34;
 
-            ClickerHeroesTrackerWebsite.Models.Game.GameData gameData = MockGameData.RealData;
+            GameData gameData = MockGameData.RealData;
             TelemetryClient telemetryClient = new(new TelemetryConfiguration());
             Mock<IDatabaseCommandFactory> mockDatabaseCommandFactory = new(MockBehavior.Strict);
             Mock<IUserSettingsProvider> mockUserSettingsProvider = new(MockBehavior.Strict);
@@ -503,7 +503,7 @@ namespace UnitTests.Controllers
                 mockUserManager.Object,
                 mockEmailSender.Object,
                 mockClanManager.Object);
-            ActionResult<ClickerHeroesTrackerWebsite.Models.Api.Uploads.UploadSummaryListResponse> result = await controller.UploadsAsync(UserName, Page, Count);
+            ActionResult<UploadSummaryListResponse> result = await controller.UploadsAsync(UserName, Page, Count);
 
             Assert.NotNull(result);
             Assert.IsType<NotFoundResult>(result.Result);
@@ -524,7 +524,7 @@ namespace UnitTests.Controllers
             const string UserName = "SomeUserName";
             const string UserId = "SomeUserId";
 
-            ClickerHeroesTrackerWebsite.Models.Game.GameData gameData = MockGameData.RealData;
+            GameData gameData = MockGameData.RealData;
             TelemetryClient telemetryClient = new(new TelemetryConfiguration());
 
             List<string> follows = Enumerable.Range(0, 3)
@@ -533,7 +533,7 @@ namespace UnitTests.Controllers
             List<IDictionary<string, object>> datasets = follows
                 .Select<string, IDictionary<string, object>>(follow => new Dictionary<string, object> { { "UserName", follow } })
                 .ToList();
-            Mock<System.Data.IDataReader> mockDataReader = MockDatabaseHelper.CreateMockDataReader(datasets);
+            Mock<IDataReader> mockDataReader = MockDatabaseHelper.CreateMockDataReader(datasets);
             Dictionary<string, object> mockDatabaseCommandParameters = new() { { "@UserId", UserId } };
             Mock<IDatabaseCommand> mockDatabaseCommand = MockDatabaseHelper.CreateMockDatabaseCommand(mockDatabaseCommandParameters, mockDataReader.Object);
 
@@ -590,7 +590,7 @@ namespace UnitTests.Controllers
         {
             const string UserName = "SomeUserName";
 
-            ClickerHeroesTrackerWebsite.Models.Game.GameData gameData = MockGameData.RealData;
+            GameData gameData = MockGameData.RealData;
             TelemetryClient telemetryClient = new(new TelemetryConfiguration());
             Mock<IDatabaseCommandFactory> mockDatabaseCommandFactory = new(MockBehavior.Strict);
             Mock<IUserSettingsProvider> mockUserSettingsProvider = new(MockBehavior.Strict);
@@ -630,7 +630,7 @@ namespace UnitTests.Controllers
         {
             const string UserName = "SomeUserName";
 
-            ClickerHeroesTrackerWebsite.Models.Game.GameData gameData = MockGameData.RealData;
+            GameData gameData = MockGameData.RealData;
             TelemetryClient telemetryClient = new(new TelemetryConfiguration());
             Mock<IDatabaseCommandFactory> mockDatabaseCommandFactory = new(MockBehavior.Strict);
             Mock<IUserSettingsProvider> mockUserSettingsProvider = new(MockBehavior.Strict);
@@ -681,7 +681,7 @@ namespace UnitTests.Controllers
                 FollowUserName = "SomeFollowUserName",
             };
 
-            ClickerHeroesTrackerWebsite.Models.Game.GameData gameData = MockGameData.RealData;
+            GameData gameData = MockGameData.RealData;
             TelemetryClient telemetryClient = new(new TelemetryConfiguration());
 
             Dictionary<string, object> mockDatabaseCommandParameters = new() { { "@UserId", UserId }, { "@FollowUserId", FollowUserId } };
@@ -756,7 +756,7 @@ namespace UnitTests.Controllers
                 FollowUserName = "SomeFollowUserName",
             };
 
-            ClickerHeroesTrackerWebsite.Models.Game.GameData gameData = MockGameData.RealData;
+            GameData gameData = MockGameData.RealData;
             TelemetryClient telemetryClient = new(new TelemetryConfiguration());
             Mock<IDatabaseCommandFactory> mockDatabaseCommandFactory = new(MockBehavior.Strict);
             Mock<IUserSettingsProvider> mockUserSettingsProvider = new(MockBehavior.Strict);
@@ -803,7 +803,7 @@ namespace UnitTests.Controllers
                 FollowUserName = "SomeFollowUserName",
             };
 
-            ClickerHeroesTrackerWebsite.Models.Game.GameData gameData = MockGameData.RealData;
+            GameData gameData = MockGameData.RealData;
             TelemetryClient telemetryClient = new(new TelemetryConfiguration());
             Mock<IDatabaseCommandFactory> mockDatabaseCommandFactory = new(MockBehavior.Strict);
             Mock<IUserSettingsProvider> mockUserSettingsProvider = new(MockBehavior.Strict);
@@ -855,7 +855,7 @@ namespace UnitTests.Controllers
                 FollowUserName = "SomeFollowUserName",
             };
 
-            ClickerHeroesTrackerWebsite.Models.Game.GameData gameData = MockGameData.RealData;
+            GameData gameData = MockGameData.RealData;
             TelemetryClient telemetryClient = new(new TelemetryConfiguration());
             Mock<IDatabaseCommandFactory> mockDatabaseCommandFactory = new(MockBehavior.Strict);
             Mock<IUserSettingsProvider> mockUserSettingsProvider = new(MockBehavior.Strict);
@@ -917,7 +917,7 @@ namespace UnitTests.Controllers
                 FollowUserName = "SomeFollowUserName",
             };
 
-            ClickerHeroesTrackerWebsite.Models.Game.GameData gameData = MockGameData.RealData;
+            GameData gameData = MockGameData.RealData;
             TelemetryClient telemetryClient = new(new TelemetryConfiguration());
             Mock<IDatabaseCommandFactory> mockDatabaseCommandFactory = new(MockBehavior.Strict);
             Mock<IUserSettingsProvider> mockUserSettingsProvider = new(MockBehavior.Strict);
@@ -984,7 +984,7 @@ namespace UnitTests.Controllers
                 FollowUserName = "SomeFollowUserName",
             };
 
-            ClickerHeroesTrackerWebsite.Models.Game.GameData gameData = MockGameData.RealData;
+            GameData gameData = MockGameData.RealData;
             TelemetryClient telemetryClient = new(new TelemetryConfiguration());
             Mock<IDatabaseCommandFactory> mockDatabaseCommandFactory = new(MockBehavior.Strict);
             Mock<IUserSettingsProvider> mockUserSettingsProvider = new(MockBehavior.Strict);
@@ -1050,7 +1050,7 @@ namespace UnitTests.Controllers
                 FollowUserName = "SomeFollowUserName",
             };
 
-            ClickerHeroesTrackerWebsite.Models.Game.GameData gameData = MockGameData.RealData;
+            GameData gameData = MockGameData.RealData;
             TelemetryClient telemetryClient = new(new TelemetryConfiguration());
 
             Dictionary<string, object> mockDatabaseCommandParameters = new() { { "@UserId", UserId }, { "@FollowUserId", FollowUserId } };
@@ -1127,7 +1127,7 @@ namespace UnitTests.Controllers
             const string FollowUserName = "SomeFollowUserName";
             const string FollowUserId = "SomeFollowUserId";
 
-            ClickerHeroesTrackerWebsite.Models.Game.GameData gameData = MockGameData.RealData;
+            GameData gameData = MockGameData.RealData;
             TelemetryClient telemetryClient = new(new TelemetryConfiguration());
 
             Dictionary<string, object> mockDatabaseCommandParameters = new() { { "@UserId", UserId }, { "@FollowUserId", FollowUserId } };
@@ -1198,7 +1198,7 @@ namespace UnitTests.Controllers
             const string UserName = "SomeUserName";
             const string FollowUserName = "SomeFollowUserName";
 
-            ClickerHeroesTrackerWebsite.Models.Game.GameData gameData = MockGameData.RealData;
+            GameData gameData = MockGameData.RealData;
             TelemetryClient telemetryClient = new(new TelemetryConfiguration());
             Mock<IDatabaseCommandFactory> mockDatabaseCommandFactory = new(MockBehavior.Strict);
             Mock<IUserSettingsProvider> mockUserSettingsProvider = new(MockBehavior.Strict);
@@ -1241,7 +1241,7 @@ namespace UnitTests.Controllers
             const string UserName = "SomeUserName";
             const string FollowUserName = "SomeFollowUserName";
 
-            ClickerHeroesTrackerWebsite.Models.Game.GameData gameData = MockGameData.RealData;
+            GameData gameData = MockGameData.RealData;
             TelemetryClient telemetryClient = new(new TelemetryConfiguration());
             Mock<IDatabaseCommandFactory> mockDatabaseCommandFactory = new(MockBehavior.Strict);
             Mock<IUserSettingsProvider> mockUserSettingsProvider = new(MockBehavior.Strict);
@@ -1289,7 +1289,7 @@ namespace UnitTests.Controllers
             const string UserId = "SomeUserId";
             const string FollowUserName = "SomeFollowUserName";
 
-            ClickerHeroesTrackerWebsite.Models.Game.GameData gameData = MockGameData.RealData;
+            GameData gameData = MockGameData.RealData;
             TelemetryClient telemetryClient = new(new TelemetryConfiguration());
             Mock<IDatabaseCommandFactory> mockDatabaseCommandFactory = new(MockBehavior.Strict);
             Mock<IUserSettingsProvider> mockUserSettingsProvider = new(MockBehavior.Strict);
@@ -1347,7 +1347,7 @@ namespace UnitTests.Controllers
             const string UserId = "SomeUserId";
             const string FollowUserName = "SomeFollowUserName";
 
-            ClickerHeroesTrackerWebsite.Models.Game.GameData gameData = MockGameData.RealData;
+            GameData gameData = MockGameData.RealData;
             TelemetryClient telemetryClient = new(new TelemetryConfiguration());
             Mock<IDatabaseCommandFactory> mockDatabaseCommandFactory = new(MockBehavior.Strict);
             Mock<IUserSettingsProvider> mockUserSettingsProvider = new(MockBehavior.Strict);
@@ -1410,7 +1410,7 @@ namespace UnitTests.Controllers
             const string UserId = "SomeUserId";
             const string FollowUserName = "SomeFollowUserName";
 
-            ClickerHeroesTrackerWebsite.Models.Game.GameData gameData = MockGameData.RealData;
+            GameData gameData = MockGameData.RealData;
             TelemetryClient telemetryClient = new(new TelemetryConfiguration());
             Mock<IDatabaseCommandFactory> mockDatabaseCommandFactory = new(MockBehavior.Strict);
             Mock<IUserSettingsProvider> mockUserSettingsProvider = new(MockBehavior.Strict);
@@ -1472,7 +1472,7 @@ namespace UnitTests.Controllers
             const string FollowUserName = "SomeFollowUserName";
             const string FollowUserId = "SomeFollowUserId";
 
-            ClickerHeroesTrackerWebsite.Models.Game.GameData gameData = MockGameData.RealData;
+            GameData gameData = MockGameData.RealData;
             TelemetryClient telemetryClient = new(new TelemetryConfiguration());
 
             Dictionary<string, object> mockDatabaseCommandParameters = new() { { "@UserId", UserId }, { "@FollowUserId", FollowUserId } };
@@ -1549,7 +1549,7 @@ namespace UnitTests.Controllers
             const string FollowUserName = "SomeFollowUserName";
             const string FollowUserId = "SomeFollowUserId";
 
-            ClickerHeroesTrackerWebsite.Models.Game.GameData gameData = MockGameData.RealData;
+            GameData gameData = MockGameData.RealData;
             TelemetryClient telemetryClient = new(new TelemetryConfiguration());
 
             Dictionary<string, object> mockDatabaseCommandParameters = new() { { "@UserId", UserId }, { "@FollowUserId", FollowUserId } };
@@ -1620,7 +1620,7 @@ namespace UnitTests.Controllers
             const string UserName = "SomeUserName";
             const string UserId = "SomeUserId";
 
-            ClickerHeroesTrackerWebsite.Models.Game.GameData gameData = MockGameData.RealData;
+            GameData gameData = MockGameData.RealData;
             TelemetryClient telemetryClient = new(new TelemetryConfiguration());
             Mock<IDatabaseCommandFactory> mockDatabaseCommandFactory = new(MockBehavior.Strict);
 
@@ -1680,7 +1680,7 @@ namespace UnitTests.Controllers
         {
             const string UserName = "SomeUserName";
 
-            ClickerHeroesTrackerWebsite.Models.Game.GameData gameData = MockGameData.RealData;
+            GameData gameData = MockGameData.RealData;
             TelemetryClient telemetryClient = new(new TelemetryConfiguration());
             Mock<IDatabaseCommandFactory> mockDatabaseCommandFactory = new(MockBehavior.Strict);
             Mock<IUserSettingsProvider> mockUserSettingsProvider = new(MockBehavior.Strict);
@@ -1721,7 +1721,7 @@ namespace UnitTests.Controllers
         {
             const string UserName = "SomeUserName";
 
-            ClickerHeroesTrackerWebsite.Models.Game.GameData gameData = MockGameData.RealData;
+            GameData gameData = MockGameData.RealData;
             TelemetryClient telemetryClient = new(new TelemetryConfiguration());
             Mock<IDatabaseCommandFactory> mockDatabaseCommandFactory = new(MockBehavior.Strict);
             Mock<IUserSettingsProvider> mockUserSettingsProvider = new(MockBehavior.Strict);
@@ -1768,7 +1768,7 @@ namespace UnitTests.Controllers
             const string UserName = "SomeUserName";
             const string UserId = "SomeUserId";
 
-            ClickerHeroesTrackerWebsite.Models.Game.GameData gameData = MockGameData.RealData;
+            GameData gameData = MockGameData.RealData;
             TelemetryClient telemetryClient = new(new TelemetryConfiguration());
             Mock<IDatabaseCommandFactory> mockDatabaseCommandFactory = new(MockBehavior.Strict);
             Mock<IUserSettingsProvider> mockUserSettingsProvider = new(MockBehavior.Strict);
@@ -1828,7 +1828,7 @@ namespace UnitTests.Controllers
             const string UserName = "SomeUserName";
             const string UserId = "SomeUserId";
 
-            ClickerHeroesTrackerWebsite.Models.Game.GameData gameData = MockGameData.RealData;
+            GameData gameData = MockGameData.RealData;
             TelemetryClient telemetryClient = new(new TelemetryConfiguration());
             Mock<IDatabaseCommandFactory> mockDatabaseCommandFactory = new(MockBehavior.Strict);
 
@@ -1892,7 +1892,7 @@ namespace UnitTests.Controllers
             const string UserName = "SomeUserName";
             const string UserId = "SomeUserId";
 
-            ClickerHeroesTrackerWebsite.Models.Game.GameData gameData = MockGameData.RealData;
+            GameData gameData = MockGameData.RealData;
             TelemetryClient telemetryClient = new(new TelemetryConfiguration());
             Mock<IDatabaseCommandFactory> mockDatabaseCommandFactory = new(MockBehavior.Strict);
             UserSettings userSettings = new();
@@ -1952,7 +1952,7 @@ namespace UnitTests.Controllers
         {
             const string UserName = "SomeUserName";
 
-            ClickerHeroesTrackerWebsite.Models.Game.GameData gameData = MockGameData.RealData;
+            GameData gameData = MockGameData.RealData;
             TelemetryClient telemetryClient = new(new TelemetryConfiguration());
             Mock<IDatabaseCommandFactory> mockDatabaseCommandFactory = new(MockBehavior.Strict);
             UserSettings userSettings = new();
@@ -1994,7 +1994,7 @@ namespace UnitTests.Controllers
         {
             const string UserName = "SomeUserName";
 
-            ClickerHeroesTrackerWebsite.Models.Game.GameData gameData = MockGameData.RealData;
+            GameData gameData = MockGameData.RealData;
             TelemetryClient telemetryClient = new(new TelemetryConfiguration());
             Mock<IDatabaseCommandFactory> mockDatabaseCommandFactory = new(MockBehavior.Strict);
             UserSettings userSettings = new();
@@ -2042,7 +2042,7 @@ namespace UnitTests.Controllers
             const string UserName = "SomeUserName";
             const string UserId = "SomeUserId";
 
-            ClickerHeroesTrackerWebsite.Models.Game.GameData gameData = MockGameData.RealData;
+            GameData gameData = MockGameData.RealData;
             TelemetryClient telemetryClient = new(new TelemetryConfiguration());
             Mock<IDatabaseCommandFactory> mockDatabaseCommandFactory = new(MockBehavior.Strict);
             UserSettings userSettings = new();
@@ -2103,7 +2103,7 @@ namespace UnitTests.Controllers
             const string UserName = "SomeUserName";
             const string UserId = "SomeUserId";
 
-            ClickerHeroesTrackerWebsite.Models.Game.GameData gameData = MockGameData.RealData;
+            GameData gameData = MockGameData.RealData;
             TelemetryClient telemetryClient = new(new TelemetryConfiguration());
             Mock<IDatabaseCommandFactory> mockDatabaseCommandFactory = new(MockBehavior.Strict);
             Mock<IUserSettingsProvider> mockUserSettingsProvider = new(MockBehavior.Strict);
@@ -2182,7 +2182,7 @@ namespace UnitTests.Controllers
         {
             const string UserName = "SomeUserName";
 
-            ClickerHeroesTrackerWebsite.Models.Game.GameData gameData = MockGameData.RealData;
+            GameData gameData = MockGameData.RealData;
             TelemetryClient telemetryClient = new(new TelemetryConfiguration());
             Mock<IDatabaseCommandFactory> mockDatabaseCommandFactory = new(MockBehavior.Strict);
             Mock<IUserSettingsProvider> mockUserSettingsProvider = new(MockBehavior.Strict);
@@ -2223,7 +2223,7 @@ namespace UnitTests.Controllers
         {
             const string UserName = "SomeUserName";
 
-            ClickerHeroesTrackerWebsite.Models.Game.GameData gameData = MockGameData.RealData;
+            GameData gameData = MockGameData.RealData;
             TelemetryClient telemetryClient = new(new TelemetryConfiguration());
             Mock<IDatabaseCommandFactory> mockDatabaseCommandFactory = new(MockBehavior.Strict);
             Mock<IUserSettingsProvider> mockUserSettingsProvider = new(MockBehavior.Strict);
@@ -2270,7 +2270,7 @@ namespace UnitTests.Controllers
             const string UserName = "SomeUserName";
             const string UserId = "SomeUserId";
 
-            ClickerHeroesTrackerWebsite.Models.Game.GameData gameData = MockGameData.RealData;
+            GameData gameData = MockGameData.RealData;
             TelemetryClient telemetryClient = new(new TelemetryConfiguration());
             Mock<IDatabaseCommandFactory> mockDatabaseCommandFactory = new(MockBehavior.Strict);
             Mock<IUserSettingsProvider> mockUserSettingsProvider = new(MockBehavior.Strict);
@@ -2330,7 +2330,7 @@ namespace UnitTests.Controllers
             const string UserName = "SomeUserName";
             const string UserId = "SomeUserId";
 
-            ClickerHeroesTrackerWebsite.Models.Game.GameData gameData = MockGameData.RealData;
+            GameData gameData = MockGameData.RealData;
             TelemetryClient telemetryClient = new(new TelemetryConfiguration());
             Mock<IDatabaseCommandFactory> mockDatabaseCommandFactory = new(MockBehavior.Strict);
             Mock<IUserSettingsProvider> mockUserSettingsProvider = new(MockBehavior.Strict);
@@ -2418,7 +2418,7 @@ namespace UnitTests.Controllers
                 ExternalUserId = ExternalUserId,
             };
 
-            ClickerHeroesTrackerWebsite.Models.Game.GameData gameData = MockGameData.RealData;
+            GameData gameData = MockGameData.RealData;
             TelemetryClient telemetryClient = new(new TelemetryConfiguration());
             Mock<IDatabaseCommandFactory> mockDatabaseCommandFactory = new(MockBehavior.Strict);
             Mock<IUserSettingsProvider> mockUserSettingsProvider = new(MockBehavior.Strict);
@@ -2484,7 +2484,7 @@ namespace UnitTests.Controllers
                 ExternalUserId = ExternalUserId,
             };
 
-            ClickerHeroesTrackerWebsite.Models.Game.GameData gameData = MockGameData.RealData;
+            GameData gameData = MockGameData.RealData;
             TelemetryClient telemetryClient = new(new TelemetryConfiguration());
             Mock<IDatabaseCommandFactory> mockDatabaseCommandFactory = new(MockBehavior.Strict);
             Mock<IUserSettingsProvider> mockUserSettingsProvider = new(MockBehavior.Strict);
@@ -2533,7 +2533,7 @@ namespace UnitTests.Controllers
                 ExternalUserId = ExternalUserId,
             };
 
-            ClickerHeroesTrackerWebsite.Models.Game.GameData gameData = MockGameData.RealData;
+            GameData gameData = MockGameData.RealData;
             TelemetryClient telemetryClient = new(new TelemetryConfiguration());
             Mock<IDatabaseCommandFactory> mockDatabaseCommandFactory = new(MockBehavior.Strict);
             Mock<IUserSettingsProvider> mockUserSettingsProvider = new(MockBehavior.Strict);
@@ -2588,7 +2588,7 @@ namespace UnitTests.Controllers
                 ExternalUserId = ExternalUserId,
             };
 
-            ClickerHeroesTrackerWebsite.Models.Game.GameData gameData = MockGameData.RealData;
+            GameData gameData = MockGameData.RealData;
             TelemetryClient telemetryClient = new(new TelemetryConfiguration());
             Mock<IDatabaseCommandFactory> mockDatabaseCommandFactory = new(MockBehavior.Strict);
             Mock<IUserSettingsProvider> mockUserSettingsProvider = new(MockBehavior.Strict);
@@ -2656,7 +2656,7 @@ namespace UnitTests.Controllers
                 ExternalUserId = ExternalUserId,
             };
 
-            ClickerHeroesTrackerWebsite.Models.Game.GameData gameData = MockGameData.RealData;
+            GameData gameData = MockGameData.RealData;
             TelemetryClient telemetryClient = new(new TelemetryConfiguration());
             Mock<IDatabaseCommandFactory> mockDatabaseCommandFactory = new(MockBehavior.Strict);
             Mock<IUserSettingsProvider> mockUserSettingsProvider = new(MockBehavior.Strict);
@@ -2727,7 +2727,7 @@ namespace UnitTests.Controllers
                 ExternalUserId = ExternalUserId,
             };
 
-            ClickerHeroesTrackerWebsite.Models.Game.GameData gameData = MockGameData.RealData;
+            GameData gameData = MockGameData.RealData;
             TelemetryClient telemetryClient = new(new TelemetryConfiguration());
             Mock<IDatabaseCommandFactory> mockDatabaseCommandFactory = new(MockBehavior.Strict);
             Mock<IUserSettingsProvider> mockUserSettingsProvider = new(MockBehavior.Strict);
@@ -2787,7 +2787,7 @@ namespace UnitTests.Controllers
             const string UserName = "SomeUserName";
             const string UserId = "SomeUserId";
 
-            ClickerHeroesTrackerWebsite.Models.Game.GameData gameData = MockGameData.RealData;
+            GameData gameData = MockGameData.RealData;
             TelemetryClient telemetryClient = new(new TelemetryConfiguration());
             Mock<IDatabaseCommandFactory> mockDatabaseCommandFactory = new(MockBehavior.Strict);
             UserSettings userSettings = new();
@@ -2857,7 +2857,7 @@ namespace UnitTests.Controllers
                 NewPassword = NewPassword,
             };
 
-            ClickerHeroesTrackerWebsite.Models.Game.GameData gameData = MockGameData.RealData;
+            GameData gameData = MockGameData.RealData;
             TelemetryClient telemetryClient = new(new TelemetryConfiguration());
             Mock<IDatabaseCommandFactory> mockDatabaseCommandFactory = new(MockBehavior.Strict);
             Mock<IUserSettingsProvider> mockUserSettingsProvider = new(MockBehavior.Strict);
@@ -2921,7 +2921,7 @@ namespace UnitTests.Controllers
                 NewPassword = NewPassword,
             };
 
-            ClickerHeroesTrackerWebsite.Models.Game.GameData gameData = MockGameData.RealData;
+            GameData gameData = MockGameData.RealData;
             TelemetryClient telemetryClient = new(new TelemetryConfiguration());
             Mock<IDatabaseCommandFactory> mockDatabaseCommandFactory = new(MockBehavior.Strict);
             Mock<IUserSettingsProvider> mockUserSettingsProvider = new(MockBehavior.Strict);
@@ -2968,7 +2968,7 @@ namespace UnitTests.Controllers
                 NewPassword = NewPassword,
             };
 
-            ClickerHeroesTrackerWebsite.Models.Game.GameData gameData = MockGameData.RealData;
+            GameData gameData = MockGameData.RealData;
             TelemetryClient telemetryClient = new(new TelemetryConfiguration());
             Mock<IDatabaseCommandFactory> mockDatabaseCommandFactory = new(MockBehavior.Strict);
             Mock<IUserSettingsProvider> mockUserSettingsProvider = new(MockBehavior.Strict);
@@ -3021,7 +3021,7 @@ namespace UnitTests.Controllers
                 NewPassword = NewPassword,
             };
 
-            ClickerHeroesTrackerWebsite.Models.Game.GameData gameData = MockGameData.RealData;
+            GameData gameData = MockGameData.RealData;
             TelemetryClient telemetryClient = new(new TelemetryConfiguration());
             Mock<IDatabaseCommandFactory> mockDatabaseCommandFactory = new(MockBehavior.Strict);
             Mock<IUserSettingsProvider> mockUserSettingsProvider = new(MockBehavior.Strict);
@@ -3087,7 +3087,7 @@ namespace UnitTests.Controllers
                 NewPassword = NewPassword,
             };
 
-            ClickerHeroesTrackerWebsite.Models.Game.GameData gameData = MockGameData.RealData;
+            GameData gameData = MockGameData.RealData;
             TelemetryClient telemetryClient = new(new TelemetryConfiguration());
             Mock<IDatabaseCommandFactory> mockDatabaseCommandFactory = new(MockBehavior.Strict);
             Mock<IUserSettingsProvider> mockUserSettingsProvider = new(MockBehavior.Strict);
@@ -3156,7 +3156,7 @@ namespace UnitTests.Controllers
                 NewPassword = NewPassword,
             };
 
-            ClickerHeroesTrackerWebsite.Models.Game.GameData gameData = MockGameData.RealData;
+            GameData gameData = MockGameData.RealData;
             TelemetryClient telemetryClient = new(new TelemetryConfiguration());
             Mock<IDatabaseCommandFactory> mockDatabaseCommandFactory = new(MockBehavior.Strict);
             Mock<IUserSettingsProvider> mockUserSettingsProvider = new(MockBehavior.Strict);
@@ -3224,7 +3224,7 @@ namespace UnitTests.Controllers
                 NewPassword = NewPassword,
             };
 
-            ClickerHeroesTrackerWebsite.Models.Game.GameData gameData = MockGameData.RealData;
+            GameData gameData = MockGameData.RealData;
             TelemetryClient telemetryClient = new(new TelemetryConfiguration());
             Mock<IDatabaseCommandFactory> mockDatabaseCommandFactory = new(MockBehavior.Strict);
             Mock<IUserSettingsProvider> mockUserSettingsProvider = new(MockBehavior.Strict);
@@ -3290,7 +3290,7 @@ namespace UnitTests.Controllers
                 NewPassword = NewPassword,
             };
 
-            ClickerHeroesTrackerWebsite.Models.Game.GameData gameData = MockGameData.RealData;
+            GameData gameData = MockGameData.RealData;
             TelemetryClient telemetryClient = new(new TelemetryConfiguration());
             Mock<IDatabaseCommandFactory> mockDatabaseCommandFactory = new(MockBehavior.Strict);
             Mock<IUserSettingsProvider> mockUserSettingsProvider = new(MockBehavior.Strict);
@@ -3339,7 +3339,7 @@ namespace UnitTests.Controllers
                 NewPassword = NewPassword,
             };
 
-            ClickerHeroesTrackerWebsite.Models.Game.GameData gameData = MockGameData.RealData;
+            GameData gameData = MockGameData.RealData;
             TelemetryClient telemetryClient = new(new TelemetryConfiguration());
             Mock<IDatabaseCommandFactory> mockDatabaseCommandFactory = new(MockBehavior.Strict);
             Mock<IUserSettingsProvider> mockUserSettingsProvider = new(MockBehavior.Strict);
@@ -3394,7 +3394,7 @@ namespace UnitTests.Controllers
                 NewPassword = NewPassword,
             };
 
-            ClickerHeroesTrackerWebsite.Models.Game.GameData gameData = MockGameData.RealData;
+            GameData gameData = MockGameData.RealData;
             TelemetryClient telemetryClient = new(new TelemetryConfiguration());
             Mock<IDatabaseCommandFactory> mockDatabaseCommandFactory = new(MockBehavior.Strict);
             Mock<IUserSettingsProvider> mockUserSettingsProvider = new(MockBehavior.Strict);
@@ -3462,7 +3462,7 @@ namespace UnitTests.Controllers
                 NewPassword = NewPassword,
             };
 
-            ClickerHeroesTrackerWebsite.Models.Game.GameData gameData = MockGameData.RealData;
+            GameData gameData = MockGameData.RealData;
             TelemetryClient telemetryClient = new(new TelemetryConfiguration());
             Mock<IDatabaseCommandFactory> mockDatabaseCommandFactory = new(MockBehavior.Strict);
             Mock<IUserSettingsProvider> mockUserSettingsProvider = new(MockBehavior.Strict);
@@ -3533,7 +3533,7 @@ namespace UnitTests.Controllers
                 NewPassword = NewPassword,
             };
 
-            ClickerHeroesTrackerWebsite.Models.Game.GameData gameData = MockGameData.RealData;
+            GameData gameData = MockGameData.RealData;
             TelemetryClient telemetryClient = new(new TelemetryConfiguration());
             Mock<IDatabaseCommandFactory> mockDatabaseCommandFactory = new(MockBehavior.Strict);
             Mock<IUserSettingsProvider> mockUserSettingsProvider = new(MockBehavior.Strict);
@@ -3597,7 +3597,7 @@ namespace UnitTests.Controllers
                 Email = "SomeEmail",
             };
 
-            ClickerHeroesTrackerWebsite.Models.Game.GameData gameData = MockGameData.RealData;
+            GameData gameData = MockGameData.RealData;
             TelemetryClient telemetryClient = new(new TelemetryConfiguration());
             Mock<IDatabaseCommandFactory> mockDatabaseCommandFactory = new(MockBehavior.Strict);
             Mock<IUserSettingsProvider> mockUserSettingsProvider = new(MockBehavior.Strict);
@@ -3649,7 +3649,7 @@ namespace UnitTests.Controllers
                 Email = "SomeEmail",
             };
 
-            ClickerHeroesTrackerWebsite.Models.Game.GameData gameData = MockGameData.RealData;
+            GameData gameData = MockGameData.RealData;
             TelemetryClient telemetryClient = new(new TelemetryConfiguration());
             Mock<IDatabaseCommandFactory> mockDatabaseCommandFactory = new(MockBehavior.Strict);
             Mock<IUserSettingsProvider> mockUserSettingsProvider = new(MockBehavior.Strict);
@@ -3692,7 +3692,7 @@ namespace UnitTests.Controllers
                 Code = "SomeCode",
             };
 
-            ClickerHeroesTrackerWebsite.Models.Game.GameData gameData = MockGameData.RealData;
+            GameData gameData = MockGameData.RealData;
             TelemetryClient telemetryClient = new(new TelemetryConfiguration());
             Mock<IDatabaseCommandFactory> mockDatabaseCommandFactory = new(MockBehavior.Strict);
             Mock<IUserSettingsProvider> mockUserSettingsProvider = new(MockBehavior.Strict);
@@ -3741,7 +3741,7 @@ namespace UnitTests.Controllers
                 Code = "SomeCode",
             };
 
-            ClickerHeroesTrackerWebsite.Models.Game.GameData gameData = MockGameData.RealData;
+            GameData gameData = MockGameData.RealData;
             TelemetryClient telemetryClient = new(new TelemetryConfiguration());
             Mock<IDatabaseCommandFactory> mockDatabaseCommandFactory = new(MockBehavior.Strict);
             Mock<IUserSettingsProvider> mockUserSettingsProvider = new(MockBehavior.Strict);
@@ -3784,7 +3784,7 @@ namespace UnitTests.Controllers
                 Code = "SomeCode",
             };
 
-            ClickerHeroesTrackerWebsite.Models.Game.GameData gameData = MockGameData.RealData;
+            GameData gameData = MockGameData.RealData;
             TelemetryClient telemetryClient = new(new TelemetryConfiguration());
             Mock<IDatabaseCommandFactory> mockDatabaseCommandFactory = new(MockBehavior.Strict);
             Mock<IUserSettingsProvider> mockUserSettingsProvider = new(MockBehavior.Strict);

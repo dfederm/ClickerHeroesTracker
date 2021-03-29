@@ -2,6 +2,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
 using ClickerHeroesTrackerWebsite.Models;
@@ -24,7 +25,7 @@ namespace UnitTests.Services.Settings
         {
             List<IDictionary<string, object>> dataSets = CreateDataSetsForAllSettings();
 
-            Mock<System.Data.IDataReader> mockDataReader = MockDatabaseHelper.CreateMockDataReader(dataSets);
+            Mock<IDataReader> mockDataReader = MockDatabaseHelper.CreateMockDataReader(dataSets);
             Mock<IDatabaseCommand> mockDatabaseCommand = MockDatabaseHelper.CreateMockDatabaseCommand(new Dictionary<string, object> { { "@UserId", UserId } }, mockDataReader.Object);
             Mock<IDatabaseCommandFactory> mockDatabaseCommandFactory = new(MockBehavior.Strict);
             mockDatabaseCommandFactory.Setup(_ => _.Create()).Returns(mockDatabaseCommand.Object).Verifiable();
@@ -49,7 +50,7 @@ namespace UnitTests.Services.Settings
                 dataSets.Add(dataSet);
             }
 
-            Mock<System.Data.IDataReader> mockDataReader = MockDatabaseHelper.CreateMockDataReader(dataSets);
+            Mock<IDataReader> mockDataReader = MockDatabaseHelper.CreateMockDataReader(dataSets);
             Mock<IDatabaseCommand> mockDatabaseCommand = MockDatabaseHelper.CreateMockDatabaseCommand(new Dictionary<string, object> { { "@UserId", UserId } }, mockDataReader.Object);
             Mock<IDatabaseCommandFactory> mockDatabaseCommandFactory = new(MockBehavior.Strict);
             mockDatabaseCommandFactory.Setup(_ => _.Create()).Returns(mockDatabaseCommand.Object).Verifiable();
@@ -67,7 +68,7 @@ namespace UnitTests.Services.Settings
         [Fact]
         public static async Task Get_MissingSettings()
         {
-            Mock<System.Data.IDataReader> mockDataReader = MockDatabaseHelper.CreateMockDataReader();
+            Mock<IDataReader> mockDataReader = MockDatabaseHelper.CreateMockDataReader();
             Mock<IDatabaseCommand> mockDatabaseCommand = MockDatabaseHelper.CreateMockDatabaseCommand(new Dictionary<string, object> { { "@UserId", UserId } }, mockDataReader.Object);
             Mock<IDatabaseCommandFactory> mockDatabaseCommandFactory = new(MockBehavior.Strict);
             mockDatabaseCommandFactory.Setup(_ => _.Create()).Returns(mockDatabaseCommand.Object).Verifiable();
@@ -94,7 +95,7 @@ namespace UnitTests.Services.Settings
                 dataSets.Add(unknownSetting);
             }
 
-            Mock<System.Data.IDataReader> mockDataReader = MockDatabaseHelper.CreateMockDataReader(dataSets);
+            Mock<IDataReader> mockDataReader = MockDatabaseHelper.CreateMockDataReader(dataSets);
             Mock<IDatabaseCommand> mockDatabaseCommand = MockDatabaseHelper.CreateMockDatabaseCommand(new Dictionary<string, object> { { "@UserId", UserId } }, mockDataReader.Object);
             Mock<IDatabaseCommandFactory> mockDatabaseCommandFactory = new(MockBehavior.Strict);
             mockDatabaseCommandFactory.Setup(_ => _.Create()).Returns(mockDatabaseCommand.Object).Verifiable();
@@ -119,7 +120,7 @@ namespace UnitTests.Services.Settings
                 dataSets.Add(dataSet);
             }
 
-            Mock<System.Data.IDataReader> mockDataReader = MockDatabaseHelper.CreateMockDataReader(dataSets);
+            Mock<IDataReader> mockDataReader = MockDatabaseHelper.CreateMockDataReader(dataSets);
             Mock<IDatabaseCommand> mockDatabaseCommand = MockDatabaseHelper.CreateMockDatabaseCommand(new Dictionary<string, object> { { "@UserId", UserId } }, mockDataReader.Object);
             Mock<IDatabaseCommandFactory> mockDatabaseCommandFactory = new(MockBehavior.Strict);
             mockDatabaseCommandFactory.Setup(_ => _.Create()).Returns(mockDatabaseCommand.Object).Verifiable();

@@ -1,6 +1,7 @@
 ﻿// Copyright (C) Clicker Heroes Tracker. All Rights Reserved.
 
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
 using ClickerHeroesTrackerWebsite.Services.Database;
@@ -21,7 +22,7 @@ namespace UnitTests.Controllers
             List<IDictionary<string, object>> datasets = expectedIds
                 .Select<int, IDictionary<string, object>>(id => new Dictionary<string, object> { { "Id", id } })
                 .ToList();
-            Mock<System.Data.IDataReader> mockDataReader = MockDatabaseHelper.CreateMockDataReader(datasets);
+            Mock<IDataReader> mockDataReader = MockDatabaseHelper.CreateMockDataReader(datasets);
             Mock<IDatabaseCommand> mockDatabaseCommand = MockDatabaseHelper.CreateMockDatabaseCommand(new Dictionary<string, object>(), mockDataReader.Object);
 
             Mock<IDatabaseCommandFactory> mockDatabaseCommandFactory = new(MockBehavior.Strict);

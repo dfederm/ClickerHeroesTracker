@@ -2,6 +2,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -35,7 +36,7 @@ namespace ClickerHeroesTrackerWebsite
             HashSet<string> existingTables = new(StringComparer.OrdinalIgnoreCase);
             using (IDatabaseCommand command = databaseCommandFactory.Create("SELECT Name FROM sys.Tables WHERE Type = N'U'"))
             {
-                using (System.Data.IDataReader reader = await command.ExecuteReaderAsync())
+                using (IDataReader reader = await command.ExecuteReaderAsync())
                 {
                     while (reader.Read())
                     {

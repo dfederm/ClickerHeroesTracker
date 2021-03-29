@@ -2,6 +2,8 @@
 
 using System;
 using System.Collections.Generic;
+using System.Data;
+using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
 using ClickerHeroesTrackerWebsite.Models;
@@ -80,7 +82,7 @@ namespace ClickerHeroesTrackerWebsite.Controllers
             using (IDatabaseCommand command = _databaseCommandFactory.Create(
                 GetUploadDataCommandText,
                 uploadIdParameters))
-            using (System.Data.IDataReader reader = await command.ExecuteReaderAsync())
+            using (IDataReader reader = await command.ExecuteReaderAsync())
             {
                 if (reader.Read())
                 {
@@ -239,7 +241,7 @@ namespace ClickerHeroesTrackerWebsite.Controllers
                     { "@UploadId", uploadId },
                 };
                 bool isFirstAncient = true;
-                foreach (KeyValuePair<int, System.Numerics.BigInteger> pair in ancientLevels.AncientLevels)
+                foreach (KeyValuePair<int, BigInteger> pair in ancientLevels.AncientLevels)
                 {
                     if (!isFirstAncient)
                     {
@@ -335,7 +337,7 @@ namespace ClickerHeroesTrackerWebsite.Controllers
             using (IDatabaseCommand command = _databaseCommandFactory.Create(
                 GetUploadUserCommandText,
                 parameters))
-            using (System.Data.IDataReader reader = await command.ExecuteReaderAsync())
+            using (IDataReader reader = await command.ExecuteReaderAsync())
             {
                 if (reader.Read())
                 {

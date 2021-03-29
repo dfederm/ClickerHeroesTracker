@@ -9,7 +9,7 @@ namespace ClickerHeroesTrackerWebsite.Utility
         public static TEnum SafeParseEnum<TEnum>(this string str)
             where TEnum : struct
         {
-            return Enum.TryParse<TEnum>(str, out TEnum value) ? value : default(TEnum);
+            return Enum.TryParse(str, out TEnum value) ? value : default(TEnum);
         }
     }
 }
