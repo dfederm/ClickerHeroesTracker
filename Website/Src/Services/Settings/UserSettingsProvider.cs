@@ -57,7 +57,7 @@ namespace ClickerHeroesTrackerWebsite.Models.Settings
                     switch (settingId)
                     {
                         case UserSettingsConstants.PlayStyle:
-                            userSettings.PlayStyle = Enum.TryParse<PlayStyle>(settingValue, out PlayStyle playStyle) ? new PlayStyle?(playStyle) : null;
+                            userSettings.PlayStyle = Enum.TryParse(settingValue, out PlayStyle playStyle) ? new PlayStyle?(playStyle) : null;
                             break;
                         case UserSettingsConstants.UseScientificNotation:
                             userSettings.UseScientificNotation = bool.TryParse(settingValue, out bool useScientificNotation) ? new bool?(useScientificNotation) : null;
@@ -75,7 +75,7 @@ namespace ClickerHeroesTrackerWebsite.Models.Settings
                             userSettings.HybridRatio = double.TryParse(settingValue, out double hybridRatio) ? new double?(hybridRatio) : null;
                             break;
                         case UserSettingsConstants.Theme:
-                            userSettings.Theme = Enum.TryParse<SiteThemeType>(settingValue, out SiteThemeType theme) ? new SiteThemeType?(theme) : null;
+                            userSettings.Theme = Enum.TryParse(settingValue, out SiteThemeType theme) ? new SiteThemeType?(theme) : null;
                             break;
                         case UserSettingsConstants.ShouldLevelSkillAncients:
                             userSettings.ShouldLevelSkillAncients = bool.TryParse(settingValue, out bool shouldLevelSkillAncients) ? new bool?(shouldLevelSkillAncients) : null;
@@ -87,7 +87,7 @@ namespace ClickerHeroesTrackerWebsite.Models.Settings
                             userSettings.SkillAncientLevelDiff = int.TryParse(settingValue, out int skillAncientLevelDiff) ? new int?(skillAncientLevelDiff) : null;
                             break;
                         case UserSettingsConstants.GraphSpacingType:
-                            userSettings.GraphSpacingType = Enum.TryParse<GraphSpacingType>(settingValue, out GraphSpacingType graphSpacingType) ? new GraphSpacingType?(graphSpacingType) : null;
+                            userSettings.GraphSpacingType = Enum.TryParse(settingValue, out GraphSpacingType graphSpacingType) ? new GraphSpacingType?(graphSpacingType) : null;
                             break;
                     }
                 }
@@ -191,9 +191,7 @@ namespace ClickerHeroesTrackerWebsite.Models.Settings
                 WHEN NOT MATCHED THEN
                     INSERT (UserId, SettingId, SettingValue)
                     VALUES (Input.UserId, Input.SettingId, Input.SettingValue);");
-            using (IDatabaseCommand command = _databaseCommandFactory.Create(
-                setUserSettingsCommandText.ToString(),
-                parameters))
+            using (IDatabaseCommand command = _databaseCommandFactory.Create(setUserSettingsCommandText.ToString(), parameters))
             {
                 await command.ExecuteNonQueryAsync();
             }

@@ -2,6 +2,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Threading.Tasks;
 using ClickerHeroesTrackerWebsite.Services.Database;
 using Microsoft.AspNetCore.Authorization;
@@ -34,7 +35,7 @@ namespace Website.Controllers
                 AND UploadTime < DATEADD(day, -30, GETDATE())";
             List<int> uploadIds = new();
             using (IDatabaseCommand command = _databaseCommandFactory.Create(CommandText))
-            using (System.Data.IDataReader reader = await command.ExecuteReaderAsync())
+            using (IDataReader reader = await command.ExecuteReaderAsync())
             {
                 while (reader.Read())
                 {
@@ -95,7 +96,7 @@ namespace Website.Controllers
                 WHERE IsBlocked = 1
                 ORDER BY Name ASC;";
             using (IDatabaseCommand command = _databaseCommandFactory.Create(CommandText))
-            using (System.Data.IDataReader reader = await command.ExecuteReaderAsync())
+            using (IDataReader reader = await command.ExecuteReaderAsync())
             {
                 while (reader.Read())
                 {

@@ -2,6 +2,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -158,7 +159,7 @@ namespace Website.Controllers
 
             List<UploadSummary> uploads = new(count);
             using (IDatabaseCommand command = _databaseCommandFactory.Create(GetUploadsCommandText, getUploadsCommandparameters))
-            using (System.Data.IDataReader reader = await command.ExecuteReaderAsync())
+            using (IDataReader reader = await command.ExecuteReaderAsync())
             {
                 while (reader.Read())
                 {
@@ -188,7 +189,7 @@ namespace Website.Controllers
 
             PaginationMetadata pagination = new();
             using (IDatabaseCommand command = _databaseCommandFactory.Create(GetUploadCountCommandText, getUploadCountparameters))
-            using (System.Data.IDataReader reader = await command.ExecuteReaderAsync())
+            using (IDataReader reader = await command.ExecuteReaderAsync())
             {
                 if (reader.Read())
                 {
@@ -386,7 +387,7 @@ namespace Website.Controllers
                 DROP TABLE #ScopedUploads;");
 
             using (IDatabaseCommand command = _databaseCommandFactory.Create(commandText.ToString(), parameters))
-            using (System.Data.IDataReader reader = await command.ExecuteReaderAsync())
+            using (IDataReader reader = await command.ExecuteReaderAsync())
             {
                 ProgressData progressData = new()
                 {
@@ -508,7 +509,7 @@ namespace Website.Controllers
             using (IDatabaseCommand command = _databaseCommandFactory.Create(
                 GetUserFollowsCommandText,
                 parameters))
-            using (System.Data.IDataReader reader = await command.ExecuteReaderAsync())
+            using (IDataReader reader = await command.ExecuteReaderAsync())
             {
                 while (reader.Read())
                 {

@@ -1,5 +1,6 @@
 ﻿// Copyright (C) Clicker Heroes Tracker. All Rights Reserved.
 
+using System;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Options;
 
@@ -17,7 +18,7 @@ namespace Website.Services.Authentication
         }
 
         public IAssertionGrantHandler GetHandler(string grantType)
-            => _options.AssertionGrantTypeMap.TryGetValue(grantType, out System.Type handlerType)
+            => _options.AssertionGrantTypeMap.TryGetValue(grantType, out Type handlerType)
                 ? _httpContextAccessor.HttpContext.RequestServices.GetService(handlerType) as IAssertionGrantHandler
                 : null;
     }

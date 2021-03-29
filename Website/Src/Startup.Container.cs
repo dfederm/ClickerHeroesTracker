@@ -206,7 +206,7 @@ namespace ClickerHeroesTrackerWebsite
             // Container controlled registrations
             if (storageAccount != null)
             {
-                services.AddSingleton<CloudTableClient>(_ => storageAccount.CreateCloudTableClient());
+                services.AddSingleton(_ => storageAccount.CreateCloudTableClient());
                 services.AddSingleton<ISiteNewsProvider, AzureStorageSiteNewsProvider>();
             }
             else
@@ -214,8 +214,8 @@ namespace ClickerHeroesTrackerWebsite
                 services.AddSingleton<ISiteNewsProvider, InMemorySiteNewsProvider>();
             }
 
-            services.AddSingleton<GameData>(_ => GameData.Parse(Path.Combine(_environment.WebRootPath, "data", "GameData.json")));
-            services.AddSingleton<HttpClient>(_ => new HttpClient());
+            services.AddSingleton(_ => GameData.Parse(Path.Combine(_environment.WebRootPath, "data", "GameData.json")));
+            services.AddSingleton(_ => new HttpClient());
             services.AddSingleton<IAssertionGrantHandlerProvider, AssertionGrantHandlerProvider>();
             services.AddSingleton<IBuildInfoProvider>(buildInfoProvider);
             services.AddSingleton<IEmailSender, EmailSender>();

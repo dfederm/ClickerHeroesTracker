@@ -1,5 +1,6 @@
 ﻿// Copyright (C) Clicker Heroes Tracker. All Rights Reserved.
 
+using System.Numerics;
 using ClickerHeroesTrackerWebsite.Utility;
 using Xunit;
 
@@ -18,7 +19,7 @@ namespace UnitTests.Utility
         [InlineData("1.23456789e1234", "1.234567890000000000e+1234")]
         public static void RoundTrip(string str, string expected)
         {
-            System.Numerics.BigInteger bigInt = str.ToBigInteger();
+            BigInteger bigInt = str.ToBigInteger();
             string transportableString = bigInt.ToTransportableString();
 
             Assert.Equal(expected, transportableString);

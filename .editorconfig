@@ -201,8 +201,14 @@ dotnet_naming_style.pascal_case_style.capitalization                            
 #                                  Code analysis                                      #
 #######################################################################################
 
+# IDE0001: Simplify Names
+dotnet_diagnostic.IDE0001.severity = error
+
 # IDE0003: Remove qualification
 dotnet_diagnostic.IDE0003.severity = error
+
+# IDE0005: Using directive is unnecessary.
+dotnet_diagnostic.IDE0005.severity = error
 
 # IDE0008: Use explicit type
 dotnet_diagnostic.IDE0008.severity = error
@@ -224,5 +230,6 @@ dotnet_diagnostic.SA1309.severity = none
 
 # We don't need documentation on everything
 dotnet_diagnostic.SA1600.severity = none
+dotnet_diagnostic.SA1601.severity = none
 dotnet_diagnostic.SA1602.severity = none
 dotnet_diagnostic.SA1611.severity = none
