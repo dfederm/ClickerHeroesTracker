@@ -1,20 +1,18 @@
-﻿// <copyright file="Startup.Database.cs" company="Clicker Heroes Tracker">
-// Copyright (c) Clicker Heroes Tracker. All rights reserved.
-// </copyright>
+﻿// Copyright (C) Clicker Heroes Tracker. All Rights Reserved.
+
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Threading.Tasks;
+using ClickerHeroesTrackerWebsite.Models;
+using ClickerHeroesTrackerWebsite.Services.Database;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace ClickerHeroesTrackerWebsite
 {
-    using System;
-    using System.Collections.Generic;
-    using System.IO;
-    using System.Linq;
-    using System.Threading.Tasks;
-    using ClickerHeroesTrackerWebsite.Models;
-    using ClickerHeroesTrackerWebsite.Services.Database;
-    using Microsoft.Extensions.DependencyInjection;
-
     /// <summary>
-    /// Ensures the database schemas are created
+    /// Ensures the database schemas are created.
     /// </summary>
     public partial class Startup
     {
@@ -25,19 +23,19 @@ namespace ClickerHeroesTrackerWebsite
         /// This is mostly for the in-memory database used in dev mode, but could be useful for new databases too.
         /// However, it's important to note that the tables created here may not be optimized. Indicies, foreign keys, etc may be missing.
         /// </remarks>
-        /// <returns>Async task</returns>
+        /// <returns>Async task.</returns>
         private async Task EnsureDatabaseCreatedAsync(IServiceProvider serviceProvider)
         {
             // Handle the EntityFramework tables
             await serviceProvider.GetService<ApplicationDbContext>().Database.EnsureCreatedAsync();
 
-            var databaseCommandFactory = serviceProvider.GetService<IDatabaseCommandFactory>();
+            IDatabaseCommandFactory databaseCommandFactory = serviceProvider.GetService<IDatabaseCommandFactory>();
 
             // Get all existing tables so we know what already exists
-            var existingTables = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-            using (var command = databaseCommandFactory.Create("SELECT Name FROM sys.Tables WHERE Type = N'U'"))
+            HashSet<string> existingTables = new(StringComparer.OrdinalIgnoreCase);
+            using (IDatabaseCommand command = databaseCommandFactory.Create("SELECT Name FROM sys.Tables WHERE Type = N'U'"))
             {
-                using (var reader = await command.ExecuteReaderAsync())
+                using (System.Data.IDataReader reader = await command.ExecuteReaderAsync())
                 {
                     while (reader.Read())
                     {
@@ -47,7 +45,7 @@ namespace ClickerHeroesTrackerWebsite
             }
 
             // Read sql files and execute their contents in order if required.
-            var tables = new[]
+            string[] tables = new[]
             {
                 "Uploads",
                 "AncientLevels",
@@ -59,14 +57,14 @@ namespace ClickerHeroesTrackerWebsite
                 "ClanMembers",
                 "GameUsers",
             };
-            var tableFiles = tables.Select(table => Path.Combine(this.environment.ContentRootPath, "Services", "Database", "Schemas", table + ".sql"));
-            foreach (var tableFile in tableFiles)
+            IEnumerable<string> tableFiles = tables.Select(table => Path.Combine(_environment.ContentRootPath, "Services", "Database", "Schemas", table + ".sql"));
+            foreach (string tableFile in tableFiles)
             {
-                var tableName = Path.GetFileNameWithoutExtension(tableFile);
+                string tableName = Path.GetFileNameWithoutExtension(tableFile);
                 if (!existingTables.Contains(tableName))
                 {
-                    var tableCreateCommand = File.ReadAllText(tableFile);
-                    using (var command = databaseCommandFactory.Create(tableCreateCommand))
+                    string tableCreateCommand = File.ReadAllText(tableFile);
+                    using (IDatabaseCommand command = databaseCommandFactory.Create(tableCreateCommand))
                     {
                         await command.ExecuteNonQueryAsync();
                     }

@@ -1,25 +1,23 @@
-﻿// <copyright file="OutsiderLevelsModelTests.cs" company="Clicker Heroes Tracker">
-// Copyright (c) Clicker Heroes Tracker. All rights reserved.
-// </copyright>
+﻿// Copyright (C) Clicker Heroes Tracker. All Rights Reserved.
+
+using System.Collections.Generic;
+using ClickerHeroesTrackerWebsite.Models.SaveData;
+using ClickerHeroesTrackerWebsite.Models.Stats;
+using ClickerHeroesTrackerWebsite.Tests.Mocks;
+using Xunit;
 
 namespace UnitTests.Models
 {
-    using System.Collections.Generic;
-    using ClickerHeroesTrackerWebsite.Models.SaveData;
-    using ClickerHeroesTrackerWebsite.Models.Stats;
-    using ClickerHeroesTrackerWebsite.Tests.Mocks;
-    using Xunit;
-
     public static class OutsiderLevelsModelTests
     {
         [Fact]
         public static void OutsiderLevelsModel()
         {
-            var encodedSaveData = TestData.ReadAllText("ValidZlib.txt");
-            var savedGame = SavedGame.Parse(encodedSaveData);
-            var outsiderLevels = new OutsiderLevelsModel(MockGameData.RealData, savedGame);
+            string encodedSaveData = TestData.ReadAllText("ValidZlib.txt");
+            SavedGame savedGame = SavedGame.Parse(encodedSaveData);
+            OutsiderLevelsModel outsiderLevels = new(MockGameData.RealData, savedGame);
 
-            var expectedOutsiderLevels = new Dictionary<int, long>
+            Dictionary<int, long> expectedOutsiderLevels = new()
             {
                 { 1, 0 },
                 { 2, 0 },
@@ -34,7 +32,7 @@ namespace UnitTests.Models
 
             Assert.NotNull(outsiderLevels.OutsiderLevels);
             Assert.Equal(expectedOutsiderLevels.Count, outsiderLevels.OutsiderLevels.Count);
-            foreach (var pair in expectedOutsiderLevels)
+            foreach (KeyValuePair<int, long> pair in expectedOutsiderLevels)
             {
                 Assert.Equal(pair.Value, outsiderLevels.OutsiderLevels[pair.Key]);
             }

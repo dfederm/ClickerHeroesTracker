@@ -1,29 +1,27 @@
-﻿// <copyright file="AssertionGrantHandlerProviderTests.cs" company="Clicker Heroes Tracker">
-// Copyright (c) Clicker Heroes Tracker. All rights reserved.
-// </copyright>
+﻿// Copyright (C) Clicker Heroes Tracker. All Rights Reserved.
+
+using System;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Options;
+using Moq;
+using Website.Services.Authentication;
+using Xunit;
 
 namespace UnitTests.Services.Authentication
 {
-    using System;
-    using System.Threading.Tasks;
-    using Microsoft.AspNetCore.Http;
-    using Microsoft.Extensions.Options;
-    using Moq;
-    using Website.Services.Authentication;
-    using Xunit;
-
     public sealed class AssertionGrantHandlerProviderTests
     {
         private const string GrantType = "SomeGrantType";
 
         private static readonly IHttpContextAccessor HttpContextAccessor = CreateHttpContextAccessor();
 
-        private readonly IOptions<AssertionGrantOptions> options = Options.Create(new AssertionGrantOptions());
+        private readonly IOptions<AssertionGrantOptions> _options = Options.Create(new AssertionGrantOptions());
 
         [Fact]
         public void GetHandler_MissingHandler()
         {
-            var provider = new AssertionGrantHandlerProvider(this.options, HttpContextAccessor);
+            AssertionGrantHandlerProvider provider = new(_options, HttpContextAccessor);
 
             Assert.Null(provider.GetHandler(GrantType));
         }
@@ -31,18 +29,18 @@ namespace UnitTests.Services.Authentication
         [Fact]
         public void GetHandler_FoundHandler()
         {
-            this.options.Value.AddAssertionGrantType<MockAssertionGrantHandler>(GrantType);
+            _options.Value.AddAssertionGrantType<MockAssertionGrantHandler>(GrantType);
 
-            var provider = new AssertionGrantHandlerProvider(this.options, HttpContextAccessor);
+            AssertionGrantHandlerProvider provider = new(_options, HttpContextAccessor);
 
-            var handler = provider.GetHandler(GrantType);
+            IAssertionGrantHandler handler = provider.GetHandler(GrantType);
             Assert.NotNull(handler);
             Assert.IsType<MockAssertionGrantHandler>(handler);
         }
 
         private static IHttpContextAccessor CreateHttpContextAccessor()
         {
-            var mockHttpContext = new Mock<HttpContext>(MockBehavior.Strict);
+            Mock<HttpContext> mockHttpContext = new(MockBehavior.Strict);
             mockHttpContext
                 .Setup(_ => _.RequestServices.GetService(typeof(MockAssertionGrantHandler)))
                 .Returns(() => new MockAssertionGrantHandler());

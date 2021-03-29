@@ -1,13 +1,11 @@
-﻿// <copyright file="SavedGameTests.cs" company="Clicker Heroes Tracker">
-// Copyright (c) Clicker Heroes Tracker. All rights reserved.
-// </copyright>
+﻿// Copyright (C) Clicker Heroes Tracker. All Rights Reserved.
+
+using System.IO;
+using ClickerHeroesTrackerWebsite.Models.SaveData;
+using Xunit;
 
 namespace UnitTests.Models
 {
-    using System.IO;
-    using ClickerHeroesTrackerWebsite.Models.SaveData;
-    using Xunit;
-
     public static class SavedGameTests
     {
         [Theory]
@@ -23,8 +21,8 @@ namespace UnitTests.Models
         [InlineData("InvalidZlibBadData", false)]
         public static void SavedGame_Parse(string testDataName, bool expectedValid)
         {
-            var encodedSaveData = TestData.ReadAllText(testDataName + ".txt");
-            var savedGame = SavedGame.Parse(encodedSaveData);
+            string encodedSaveData = TestData.ReadAllText(testDataName + ".txt");
+            SavedGame savedGame = SavedGame.Parse(encodedSaveData);
 
             if (expectedValid)
             {
@@ -43,13 +41,13 @@ namespace UnitTests.Models
         [InlineData("ValidZlib")]
         public static void SavedGame_ScrubIdentity(string testDataName)
         {
-            var encodedSaveData = File.ReadAllText(Path.Combine("TestData", testDataName + ".txt"));
+            string encodedSaveData = File.ReadAllText(Path.Combine("TestData", testDataName + ".txt"));
 
-            var scrubbedSaveData = SavedGame.ScrubIdentity(encodedSaveData);
+            string scrubbedSaveData = SavedGame.ScrubIdentity(encodedSaveData);
             Assert.NotNull(scrubbedSaveData);
 
             // Ensure it can be round-tripped
-            var savedGame = SavedGame.Parse(scrubbedSaveData);
+            SavedGame savedGame = SavedGame.Parse(scrubbedSaveData);
             Assert.NotNull(savedGame);
         }
     }

@@ -1,12 +1,10 @@
-﻿// <copyright file="DateTimeExtensionTests.cs" company="Clicker Heroes Tracker">
-// Copyright (c) Clicker Heroes Tracker. All rights reserved.
-// </copyright>
+﻿// Copyright (C) Clicker Heroes Tracker. All Rights Reserved.
+
+using ClickerHeroesTrackerWebsite.Utility;
+using Xunit;
 
 namespace ClickerHeroesTrackerWebsite.Tests.Utility
 {
-    using ClickerHeroesTrackerWebsite.Utility;
-    using Xunit;
-
     public static class DateTimeExtensionTests
     {
         [Theory]

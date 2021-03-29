@@ -1,13 +1,11 @@
-﻿// <copyright file="OutsiderLevelsModel.cs" company="Clicker Heroes Tracker">
-// Copyright (c) Clicker Heroes Tracker. All rights reserved.
-// </copyright>
+﻿// Copyright (C) Clicker Heroes Tracker. All Rights Reserved.
+
+using System.Collections.Generic;
+using ClickerHeroesTrackerWebsite.Models.Game;
+using ClickerHeroesTrackerWebsite.Models.SaveData;
 
 namespace ClickerHeroesTrackerWebsite.Models.Stats
 {
-    using System.Collections.Generic;
-    using ClickerHeroesTrackerWebsite.Models.Game;
-    using ClickerHeroesTrackerWebsite.Models.SaveData;
-
     /// <summary>
     /// The model for the outsider level summary view.
     /// </summary>
@@ -20,9 +18,9 @@ namespace ClickerHeroesTrackerWebsite.Models.Stats
             GameData gameData,
             SavedGame savedGame)
         {
-            var outsiderLevels = new Dictionary<int, long>();
-            var outsidersData = savedGame.Object["outsiders"]?["outsiders"];
-            foreach (var outsider in gameData.Outsiders.Values)
+            Dictionary<int, long> outsiderLevels = new();
+            Newtonsoft.Json.Linq.JToken outsidersData = savedGame.Object["outsiders"]?["outsiders"];
+            foreach (Outsider outsider in gameData.Outsiders.Values)
             {
                 // Skip outsiders no longer in the game. Unfortunately there is no field that tells whether it's active
                 if (outsider.Id == 4)
@@ -30,11 +28,11 @@ namespace ClickerHeroesTrackerWebsite.Models.Stats
                     continue;
                 }
 
-                var outsiderLevel = (outsidersData?[outsider.Id.ToString()]?.Value<long>("level")).GetValueOrDefault(0);
+                long outsiderLevel = (outsidersData?[outsider.Id.ToString()]?.Value<long>("level")).GetValueOrDefault(0);
                 outsiderLevels.Add(outsider.Id, outsiderLevel);
             }
 
-            this.OutsiderLevels = outsiderLevels;
+            OutsiderLevels = outsiderLevels;
         }
 
         /// <summary>

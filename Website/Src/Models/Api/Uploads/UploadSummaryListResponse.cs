@@ -1,11 +1,9 @@
-﻿// <copyright file="UploadSummaryListResponse.cs" company="Clicker Heroes Tracker">
-// Copyright (c) Clicker Heroes Tracker. All rights reserved.
-// </copyright>
+﻿// Copyright (C) Clicker Heroes Tracker. All Rights Reserved.
+
+using System.Collections.Generic;
 
 namespace ClickerHeroesTrackerWebsite.Models.Api.Uploads
 {
-    using System.Collections.Generic;
-
     /// <summary>
     /// Response data envelope for the upload list API.
     /// </summary>

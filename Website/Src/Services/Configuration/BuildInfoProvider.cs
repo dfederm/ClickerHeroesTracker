@@ -1,16 +1,14 @@
-﻿// <copyright file="BuildInfoProvider.cs" company="Clicker Heroes Tracker">
-// Copyright (c) Clicker Heroes Tracker. All rights reserved.
-// </copyright>
+﻿// Copyright (C) Clicker Heroes Tracker. All Rights Reserved.
+
+using System;
+using System.Collections.Generic;
+using System.IO;
+using Microsoft.AspNetCore.Hosting;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace ClickerHeroesTrackerWebsite.Configuration
 {
-    using System;
-    using System.Collections.Generic;
-    using System.IO;
-    using Microsoft.AspNetCore.Hosting;
-    using Newtonsoft.Json;
-    using Newtonsoft.Json.Linq;
-
     /// <summary>
     /// Basic implementation for retrieving the environment information from application settings, the build info files, and other sources.
     /// </summary>
@@ -21,37 +19,37 @@ namespace ClickerHeroesTrackerWebsite.Configuration
         /// </summary>
         public BuildInfoProvider(IWebHostEnvironment webHostEnvironment)
         {
-            var buildInfoFile = Path.Combine(webHostEnvironment.WebRootPath, "data", "BuildInfo.json");
+            string buildInfoFile = Path.Combine(webHostEnvironment.WebRootPath, "data", "BuildInfo.json");
             if (!File.Exists(buildInfoFile))
             {
                 throw new InvalidDataException("Could not find build info file: " + buildInfoFile);
             }
 
             // PreBuild.ps1 writes over this file during cloud build.
-            using (var reader = new JsonTextReader(new StreamReader(buildInfoFile)))
+            using (JsonTextReader reader = new(new StreamReader(buildInfoFile)))
             {
-                var buildInfo = JObject.Load(reader);
+                JObject buildInfo = JObject.Load(reader);
 
-                this.Changelist = (string)buildInfo["changelist"];
-                this.BuildUrl = (string)buildInfo["buildUrl"];
+                Changelist = (string)buildInfo["changelist"];
+                BuildUrl = (string)buildInfo["buildUrl"];
             }
 
-            var webclientManifestFile = Path.Combine(webHostEnvironment.WebRootPath, @"manifest.json");
+            string webclientManifestFile = Path.Combine(webHostEnvironment.WebRootPath, @"manifest.json");
             if (!File.Exists(webclientManifestFile))
             {
                 throw new InvalidDataException("Could not find Webclient manifest file: " + webclientManifestFile);
             }
 
-            var webClient = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-            using (var reader = new JsonTextReader(new StreamReader(webclientManifestFile)))
+            Dictionary<string, string> webClient = new(StringComparer.OrdinalIgnoreCase);
+            using (JsonTextReader reader = new(new StreamReader(webclientManifestFile)))
             {
-                var serializer = new JsonSerializer();
-                var manifest = serializer.Deserialize<Dictionary<string, string>>(reader);
+                JsonSerializer serializer = new();
+                Dictionary<string, string> manifest = serializer.Deserialize<Dictionary<string, string>>(reader);
 
-                foreach (var pair in manifest)
+                foreach (KeyValuePair<string, string> pair in manifest)
                 {
-                    var name = pair.Key;
-                    var file = pair.Value;
+                    string name = pair.Key;
+                    string file = pair.Value;
 
                     // We only care about the js files. Ignore things like the source maps and index.html
                     if (!name.EndsWith(".js", StringComparison.OrdinalIgnoreCase))
@@ -60,14 +58,14 @@ namespace ClickerHeroesTrackerWebsite.Configuration
                     }
 
                     // each entry looks like { "app.js", "/d8df654c29474da7b106.js" }, but we want them to look like { "app": "d8df654c29474da7b106" }.
-                    var bundleName = Path.GetFileNameWithoutExtension(name);
-                    var hash = file.Substring(1, file.Length - 4);
+                    string bundleName = Path.GetFileNameWithoutExtension(name);
+                    string hash = file.Substring(1, file.Length - 4);
 
                     webClient.Add(bundleName, hash);
                 }
             }
 
-            this.Webclient = webClient;
+            Webclient = webClient;
         }
 
         /// <inheritdoc/>

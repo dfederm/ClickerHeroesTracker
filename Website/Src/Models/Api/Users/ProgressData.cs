@@ -1,12 +1,9 @@
-﻿// <copyright file="ProgressData.cs" company="Clicker Heroes Tracker">
-// Copyright (c) Clicker Heroes Tracker. All rights reserved.
-// </copyright>
+﻿// Copyright (C) Clicker Heroes Tracker. All Rights Reserved.
+
+using System.Collections.Generic;
 
 namespace ClickerHeroesTrackerWebsite.Models.Api.Users
 {
-    using System;
-    using System.Collections.Generic;
-
     /// <summary>
     /// An aggregation of progress data for a user.
     /// </summary>

@@ -1,12 +1,10 @@
-﻿// <copyright file="AssertionGrantResultTests.cs" company="Clicker Heroes Tracker">
-// Copyright (c) Clicker Heroes Tracker. All rights reserved.
-// </copyright>
+﻿// Copyright (C) Clicker Heroes Tracker. All Rights Reserved.
+
+using Website.Services.Authentication;
+using Xunit;
 
 namespace UnitTests.Services.Authentication
 {
-    using Website.Services.Authentication;
-    using Xunit;
-
     public sealed class AssertionGrantResultTests
     {
         [Theory]
@@ -20,7 +18,7 @@ namespace UnitTests.Services.Authentication
         [InlineData(false, "SomeExternalUserId", "SomeExternalUserEmail", "SomeError")]
         public void IsSuccessful(bool isSuccessful, string externalUserId, string externalUserEmail, string error)
         {
-            var result = new AssertionGrantResult
+            AssertionGrantResult result = new()
             {
                 ExternalUserId = externalUserId,
                 ExternalUserEmail = externalUserEmail,

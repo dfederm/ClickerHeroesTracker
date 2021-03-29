@@ -1,0 +1,5 @@
+# Test-specific rules
+[*.cs]
+
+# SA1600: Elements should be documented
+dotnet_diagnostic.SA1600.severity = none

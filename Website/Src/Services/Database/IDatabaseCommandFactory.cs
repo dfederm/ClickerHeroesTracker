@@ -1,6 +1,4 @@
-﻿// <copyright file="IDatabaseCommandFactory.cs" company="Clicker Heroes Tracker">
-// Copyright (c) Clicker Heroes Tracker. All rights reserved.
-// </copyright>
+﻿// Copyright (C) Clicker Heroes Tracker. All Rights Reserved.
 
 namespace ClickerHeroesTrackerWebsite.Services.Database
 {
@@ -12,7 +10,7 @@ namespace ClickerHeroesTrackerWebsite.Services.Database
         /// <summary>
         /// Creates an <see cref="IDatabaseCommand"/>.
         /// </summary>
-        /// <returns>An <see cref="IDatabaseCommand"/></returns>
+        /// <returns>An <see cref="IDatabaseCommand"/>.</returns>
         IDatabaseCommand Create();
     }
 }

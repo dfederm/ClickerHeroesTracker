@@ -1,16 +1,14 @@
-﻿// <copyright file="MockUserManager.cs" company="Clicker Heroes Tracker">
-// Copyright (c) Clicker Heroes Tracker. All rights reserved.
-// </copyright>
+﻿// Copyright (C) Clicker Heroes Tracker. All Rights Reserved.
+
+using System;
+using System.Threading;
+using System.Threading.Tasks;
+using ClickerHeroesTrackerWebsite.Models;
+using Microsoft.AspNetCore.Identity;
+using Moq;
 
 namespace ClickerHeroesTrackerWebsite.Tests.Mocks
 {
-    using System;
-    using System.Threading;
-    using System.Threading.Tasks;
-    using ClickerHeroesTrackerWebsite.Models;
-    using Microsoft.AspNetCore.Identity;
-    using Moq;
-
     public class MockUserManager : UserManager<ApplicationUser>
     {
         public MockUserManager()
@@ -20,8 +18,8 @@ namespace ClickerHeroesTrackerWebsite.Tests.Mocks
 
         public static Mock<UserManager<ApplicationUser>> CreateMock()
         {
-            var mockUserStore = new Mock<IUserStore<ApplicationUser>>();
-            var mockUserManager = new Mock<UserManager<ApplicationUser>>(
+            Mock<IUserStore<ApplicationUser>> mockUserStore = new();
+            Mock<UserManager<ApplicationUser>> mockUserManager = new(
                 MockBehavior.Strict,
                 mockUserStore.Object,
                 null,

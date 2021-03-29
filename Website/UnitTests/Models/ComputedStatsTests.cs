@@ -1,21 +1,19 @@
-﻿// <copyright file="ComputedStatsTests.cs" company="Clicker Heroes Tracker">
-// Copyright (c) Clicker Heroes Tracker. All rights reserved.
-// </copyright>
+﻿// Copyright (C) Clicker Heroes Tracker. All Rights Reserved.
+
+using ClickerHeroesTrackerWebsite.Models.SaveData;
+using ClickerHeroesTrackerWebsite.Models.Stats;
+using Xunit;
 
 namespace UnitTests.Models
 {
-    using ClickerHeroesTrackerWebsite.Models.SaveData;
-    using ClickerHeroesTrackerWebsite.Models.Stats;
-    using Xunit;
-
     public static class ComputedStatsTests
     {
         [Fact]
         public static void ComputedStats()
         {
-            var encodedSaveData = TestData.ReadAllText("ValidZlib.txt");
-            var savedGame = SavedGame.Parse(encodedSaveData);
-            var computedStats = new ComputedStats(savedGame);
+            string encodedSaveData = TestData.ReadAllText("ValidZlib.txt");
+            SavedGame savedGame = SavedGame.Parse(encodedSaveData);
+            ComputedStats computedStats = new(savedGame);
 
             Assert.Equal("1.002390000000000000e+005", computedStats.HeroSoulsSpent);
             Assert.Equal("5.223865765430567e99", computedStats.HeroSoulsSacrificed);

@@ -1,14 +1,12 @@
-﻿// <copyright file="VersionController.cs" company="Clicker Heroes Tracker">
-// Copyright (c) Clicker Heroes Tracker. All rights reserved.
-// </copyright>
+﻿// Copyright (C) Clicker Heroes Tracker. All Rights Reserved.
+
+using ClickerHeroesTrackerWebsite.Configuration;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Mvc;
+using Website.Models.Api.Version;
 
 namespace ClickerHeroesTrackerWebsite.Controllers
 {
-    using ClickerHeroesTrackerWebsite.Configuration;
-    using Microsoft.AspNetCore.Hosting;
-    using Microsoft.AspNetCore.Mvc;
-    using Website.Models.Api.Version;
-
     /// <summary>
     /// A diagnostic controller for the service version.
     /// </summary>
@@ -16,9 +14,9 @@ namespace ClickerHeroesTrackerWebsite.Controllers
     [ApiController]
     public class VersionController : Controller
     {
-        private readonly IBuildInfoProvider buildInfoProvider;
+        private readonly IBuildInfoProvider _buildInfoProvider;
 
-        private readonly IWebHostEnvironment webHostEnvironment;
+        private readonly IWebHostEnvironment _webHostEnvironment;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="VersionController"/> class.
@@ -27,8 +25,8 @@ namespace ClickerHeroesTrackerWebsite.Controllers
             IBuildInfoProvider buildInfoProvider,
             IWebHostEnvironment webHostEnvironment)
         {
-            this.buildInfoProvider = buildInfoProvider;
-            this.webHostEnvironment = webHostEnvironment;
+            _buildInfoProvider = buildInfoProvider;
+            _webHostEnvironment = webHostEnvironment;
         }
 
         /// <summary>
@@ -39,10 +37,10 @@ namespace ClickerHeroesTrackerWebsite.Controllers
         [HttpGet]
         public ActionResult<VersionResponse> Version() => new VersionResponse
         {
-            Environment = this.webHostEnvironment.EnvironmentName,
-            Changelist = this.buildInfoProvider.Changelist,
-            BuildUrl = this.buildInfoProvider.BuildUrl,
-            Webclient = this.buildInfoProvider.Webclient,
+            Environment = _webHostEnvironment.EnvironmentName,
+            Changelist = _buildInfoProvider.Changelist,
+            BuildUrl = _buildInfoProvider.BuildUrl,
+            Webclient = _buildInfoProvider.Webclient,
         };
     }
 }

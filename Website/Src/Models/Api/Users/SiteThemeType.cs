@@ -1,11 +1,9 @@
-﻿// <copyright file="SiteThemeType.cs" company="Clicker Heroes Tracker">
-// Copyright (c) Clicker Heroes Tracker. All rights reserved.
-// </copyright>
+﻿// Copyright (C) Clicker Heroes Tracker. All Rights Reserved.
 
 namespace Website.Models.Api.Users
 {
     /// <summary>
-    /// The type of site theme
+    /// The type of site theme.
     /// </summary>
     public enum SiteThemeType
     {

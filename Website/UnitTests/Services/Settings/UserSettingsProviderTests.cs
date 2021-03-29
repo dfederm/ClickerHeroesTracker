@@ -1,22 +1,20 @@
-﻿// <copyright file="UserSettingsProviderTests.cs" company="Clicker Heroes Tracker">
-// Copyright (c) Clicker Heroes Tracker. All rights reserved.
-// </copyright>
+﻿// Copyright (C) Clicker Heroes Tracker. All Rights Reserved.
+
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using ClickerHeroesTrackerWebsite.Models;
+using ClickerHeroesTrackerWebsite.Models.Settings;
+using ClickerHeroesTrackerWebsite.Services.Database;
+using ClickerHeroesTrackerWebsite.Tests.Mocks;
+using Moq;
+using Website.Models.Api.Users;
+using Website.Services.Settings;
+using Xunit;
 
 namespace UnitTests.Services.Settings
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Threading.Tasks;
-    using ClickerHeroesTrackerWebsite.Models;
-    using ClickerHeroesTrackerWebsite.Models.Settings;
-    using ClickerHeroesTrackerWebsite.Services.Database;
-    using ClickerHeroesTrackerWebsite.Tests.Mocks;
-    using Moq;
-    using Website.Models.Api.Users;
-    using Website.Services.Settings;
-    using Xunit;
-
     public static class UserSettingsProviderTests
     {
         private const string UserId = "SomeUserId";
@@ -24,15 +22,15 @@ namespace UnitTests.Services.Settings
         [Fact]
         public static async Task Get_Success()
         {
-            var dataSets = CreateDataSetsForAllSettings();
+            List<IDictionary<string, object>> dataSets = CreateDataSetsForAllSettings();
 
-            var mockDataReader = MockDatabaseHelper.CreateMockDataReader(dataSets);
-            var mockDatabaseCommand = MockDatabaseHelper.CreateMockDatabaseCommand(new Dictionary<string, object> { { "@UserId", UserId } }, mockDataReader.Object);
-            var mockDatabaseCommandFactory = new Mock<IDatabaseCommandFactory>(MockBehavior.Strict);
+            Mock<System.Data.IDataReader> mockDataReader = MockDatabaseHelper.CreateMockDataReader(dataSets);
+            Mock<IDatabaseCommand> mockDatabaseCommand = MockDatabaseHelper.CreateMockDatabaseCommand(new Dictionary<string, object> { { "@UserId", UserId } }, mockDataReader.Object);
+            Mock<IDatabaseCommandFactory> mockDatabaseCommandFactory = new(MockBehavior.Strict);
             mockDatabaseCommandFactory.Setup(_ => _.Create()).Returns(mockDatabaseCommand.Object).Verifiable();
 
-            var provider = new UserSettingsProvider(mockDatabaseCommandFactory.Object);
-            var settings = await provider.GetAsync(UserId);
+            UserSettingsProvider provider = new(mockDatabaseCommandFactory.Object);
+            UserSettings settings = await provider.GetAsync(UserId);
 
             VerifyPopulatedSettings(settings);
 
@@ -44,20 +42,20 @@ namespace UnitTests.Services.Settings
         [Fact]
         public static async Task Get_InvalidSettings()
         {
-            var dataSets = new List<IDictionary<string, object>>();
-            foreach (var dataSet in CreateDataSetsForAllSettings())
+            List<IDictionary<string, object>> dataSets = new();
+            foreach (IDictionary<string, object> dataSet in CreateDataSetsForAllSettings())
             {
                 dataSet["SettingValue"] = "SomethingInvalid";
                 dataSets.Add(dataSet);
             }
 
-            var mockDataReader = MockDatabaseHelper.CreateMockDataReader(dataSets);
-            var mockDatabaseCommand = MockDatabaseHelper.CreateMockDatabaseCommand(new Dictionary<string, object> { { "@UserId", UserId } }, mockDataReader.Object);
-            var mockDatabaseCommandFactory = new Mock<IDatabaseCommandFactory>(MockBehavior.Strict);
+            Mock<System.Data.IDataReader> mockDataReader = MockDatabaseHelper.CreateMockDataReader(dataSets);
+            Mock<IDatabaseCommand> mockDatabaseCommand = MockDatabaseHelper.CreateMockDatabaseCommand(new Dictionary<string, object> { { "@UserId", UserId } }, mockDataReader.Object);
+            Mock<IDatabaseCommandFactory> mockDatabaseCommandFactory = new(MockBehavior.Strict);
             mockDatabaseCommandFactory.Setup(_ => _.Create()).Returns(mockDatabaseCommand.Object).Verifiable();
 
-            var provider = new UserSettingsProvider(mockDatabaseCommandFactory.Object);
-            var settings = await provider.GetAsync(UserId);
+            UserSettingsProvider provider = new(mockDatabaseCommandFactory.Object);
+            UserSettings settings = await provider.GetAsync(UserId);
 
             VerifyDefaultSettings(settings);
 
@@ -69,13 +67,13 @@ namespace UnitTests.Services.Settings
         [Fact]
         public static async Task Get_MissingSettings()
         {
-            var mockDataReader = MockDatabaseHelper.CreateMockDataReader();
-            var mockDatabaseCommand = MockDatabaseHelper.CreateMockDatabaseCommand(new Dictionary<string, object> { { "@UserId", UserId } }, mockDataReader.Object);
-            var mockDatabaseCommandFactory = new Mock<IDatabaseCommandFactory>(MockBehavior.Strict);
+            Mock<System.Data.IDataReader> mockDataReader = MockDatabaseHelper.CreateMockDataReader();
+            Mock<IDatabaseCommand> mockDatabaseCommand = MockDatabaseHelper.CreateMockDatabaseCommand(new Dictionary<string, object> { { "@UserId", UserId } }, mockDataReader.Object);
+            Mock<IDatabaseCommandFactory> mockDatabaseCommandFactory = new(MockBehavior.Strict);
             mockDatabaseCommandFactory.Setup(_ => _.Create()).Returns(mockDatabaseCommand.Object).Verifiable();
 
-            var provider = new UserSettingsProvider(mockDatabaseCommandFactory.Object);
-            var settings = await provider.GetAsync(UserId);
+            UserSettingsProvider provider = new(mockDatabaseCommandFactory.Object);
+            UserSettings settings = await provider.GetAsync(UserId);
 
             VerifyDefaultSettings(settings);
 
@@ -87,22 +85,22 @@ namespace UnitTests.Services.Settings
         [Fact]
         public static async Task Get_UnknownSettings()
         {
-            var dataSets = new List<IDictionary<string, object>>();
-            var unknownSetting = new Dictionary<string, object> { { "SettingId", byte.MaxValue }, { "SettingValue", "true" } };
+            List<IDictionary<string, object>> dataSets = new();
+            Dictionary<string, object> unknownSetting = new() { { "SettingId", byte.MaxValue }, { "SettingValue", "true" } };
             dataSets.Add(unknownSetting);
-            foreach (var dataSet in CreateDataSetsForAllSettings())
+            foreach (IDictionary<string, object> dataSet in CreateDataSetsForAllSettings())
             {
                 dataSets.Add(dataSet);
                 dataSets.Add(unknownSetting);
             }
 
-            var mockDataReader = MockDatabaseHelper.CreateMockDataReader(dataSets);
-            var mockDatabaseCommand = MockDatabaseHelper.CreateMockDatabaseCommand(new Dictionary<string, object> { { "@UserId", UserId } }, mockDataReader.Object);
-            var mockDatabaseCommandFactory = new Mock<IDatabaseCommandFactory>(MockBehavior.Strict);
+            Mock<System.Data.IDataReader> mockDataReader = MockDatabaseHelper.CreateMockDataReader(dataSets);
+            Mock<IDatabaseCommand> mockDatabaseCommand = MockDatabaseHelper.CreateMockDatabaseCommand(new Dictionary<string, object> { { "@UserId", UserId } }, mockDataReader.Object);
+            Mock<IDatabaseCommandFactory> mockDatabaseCommandFactory = new(MockBehavior.Strict);
             mockDatabaseCommandFactory.Setup(_ => _.Create()).Returns(mockDatabaseCommand.Object).Verifiable();
 
-            var provider = new UserSettingsProvider(mockDatabaseCommandFactory.Object);
-            var settings = await provider.GetAsync(UserId);
+            UserSettingsProvider provider = new(mockDatabaseCommandFactory.Object);
+            UserSettings settings = await provider.GetAsync(UserId);
 
             VerifyPopulatedSettings(settings);
 
@@ -114,20 +112,20 @@ namespace UnitTests.Services.Settings
         [Fact]
         public static async Task Get_DuplicateSettings()
         {
-            var dataSets = new List<IDictionary<string, object>>();
-            foreach (var dataSet in CreateDataSetsForAllSettings())
+            List<IDictionary<string, object>> dataSets = new();
+            foreach (IDictionary<string, object> dataSet in CreateDataSetsForAllSettings())
             {
                 dataSets.Add(dataSet);
                 dataSets.Add(dataSet);
             }
 
-            var mockDataReader = MockDatabaseHelper.CreateMockDataReader(dataSets);
-            var mockDatabaseCommand = MockDatabaseHelper.CreateMockDatabaseCommand(new Dictionary<string, object> { { "@UserId", UserId } }, mockDataReader.Object);
-            var mockDatabaseCommandFactory = new Mock<IDatabaseCommandFactory>(MockBehavior.Strict);
+            Mock<System.Data.IDataReader> mockDataReader = MockDatabaseHelper.CreateMockDataReader(dataSets);
+            Mock<IDatabaseCommand> mockDatabaseCommand = MockDatabaseHelper.CreateMockDatabaseCommand(new Dictionary<string, object> { { "@UserId", UserId } }, mockDataReader.Object);
+            Mock<IDatabaseCommandFactory> mockDatabaseCommandFactory = new(MockBehavior.Strict);
             mockDatabaseCommandFactory.Setup(_ => _.Create()).Returns(mockDatabaseCommand.Object).Verifiable();
 
-            var provider = new UserSettingsProvider(mockDatabaseCommandFactory.Object);
-            var settings = await provider.GetAsync(UserId);
+            UserSettingsProvider provider = new(mockDatabaseCommandFactory.Object);
+            UserSettings settings = await provider.GetAsync(UserId);
 
             VerifyPopulatedSettings(settings);
 
@@ -139,10 +137,10 @@ namespace UnitTests.Services.Settings
         [Fact]
         public static async Task Get_NoUser()
         {
-            var mockDatabaseCommandFactory = new Mock<IDatabaseCommandFactory>(MockBehavior.Strict);
+            Mock<IDatabaseCommandFactory> mockDatabaseCommandFactory = new(MockBehavior.Strict);
 
-            var provider = new UserSettingsProvider(mockDatabaseCommandFactory.Object);
-            var settings = await provider.GetAsync(null);
+            UserSettingsProvider provider = new(mockDatabaseCommandFactory.Object);
+            UserSettings settings = await provider.GetAsync(null);
 
             VerifyDefaultSettings(settings);
 
@@ -152,7 +150,7 @@ namespace UnitTests.Services.Settings
         [Fact]
         public static async Task Patch_Success()
         {
-            var settings = new UserSettings
+            UserSettings settings = new()
             {
                 PlayStyle = PlayStyle.Hybrid,
                 UseScientificNotation = true,
@@ -167,7 +165,7 @@ namespace UnitTests.Services.Settings
                 GraphSpacingType = GraphSpacingType.Ascension,
             };
 
-            var parameters = new Dictionary<string, object>
+            Dictionary<string, object> parameters = new()
             {
                 { "@UserId", UserId },
                 { "@Value" + UserSettingsConstants.PlayStyle, settings.PlayStyle.ToString() },
@@ -183,11 +181,11 @@ namespace UnitTests.Services.Settings
                 { "@Value" + UserSettingsConstants.GraphSpacingType, settings.GraphSpacingType.ToString() },
             };
 
-            var mockDatabaseCommand = MockDatabaseHelper.CreateMockDatabaseCommand(parameters);
-            var mockDatabaseCommandFactory = new Mock<IDatabaseCommandFactory>(MockBehavior.Strict);
+            Mock<IDatabaseCommand> mockDatabaseCommand = MockDatabaseHelper.CreateMockDatabaseCommand(parameters);
+            Mock<IDatabaseCommandFactory> mockDatabaseCommandFactory = new(MockBehavior.Strict);
             mockDatabaseCommandFactory.Setup(_ => _.Create()).Returns(mockDatabaseCommand.Object).Verifiable();
 
-            var provider = new UserSettingsProvider(mockDatabaseCommandFactory.Object);
+            UserSettingsProvider provider = new(mockDatabaseCommandFactory.Object);
             await provider.PatchAsync(UserId, settings);
 
             mockDatabaseCommand.VerifyAll();
@@ -197,22 +195,22 @@ namespace UnitTests.Services.Settings
         [Fact]
         public static async Task Patch_PartialSettings()
         {
-            var settings = new UserSettings
+            UserSettings settings = new()
             {
                 PlayStyle = PlayStyle.Hybrid,
             };
 
-            var parameters = new Dictionary<string, object>
+            Dictionary<string, object> parameters = new()
             {
                 { "@UserId", UserId },
                 { "@Value" + UserSettingsConstants.PlayStyle, settings.PlayStyle.ToString() },
             };
 
-            var mockDatabaseCommand = MockDatabaseHelper.CreateMockDatabaseCommand(parameters);
-            var mockDatabaseCommandFactory = new Mock<IDatabaseCommandFactory>(MockBehavior.Strict);
+            Mock<IDatabaseCommand> mockDatabaseCommand = MockDatabaseHelper.CreateMockDatabaseCommand(parameters);
+            Mock<IDatabaseCommandFactory> mockDatabaseCommandFactory = new(MockBehavior.Strict);
             mockDatabaseCommandFactory.Setup(_ => _.Create()).Returns(mockDatabaseCommand.Object).Verifiable();
 
-            var provider = new UserSettingsProvider(mockDatabaseCommandFactory.Object);
+            UserSettingsProvider provider = new(mockDatabaseCommandFactory.Object);
             await provider.PatchAsync(UserId, settings);
 
             mockDatabaseCommand.VerifyAll();
@@ -222,11 +220,11 @@ namespace UnitTests.Services.Settings
         [Fact]
         public static async Task Patch_EmptySettings()
         {
-            var settings = new UserSettings();
+            UserSettings settings = new();
 
-            var mockDatabaseCommandFactory = new Mock<IDatabaseCommandFactory>(MockBehavior.Strict);
+            Mock<IDatabaseCommandFactory> mockDatabaseCommandFactory = new(MockBehavior.Strict);
 
-            var provider = new UserSettingsProvider(mockDatabaseCommandFactory.Object);
+            UserSettingsProvider provider = new(mockDatabaseCommandFactory.Object);
             await provider.PatchAsync(UserId, settings);
 
             mockDatabaseCommandFactory.VerifyAll();
@@ -235,9 +233,9 @@ namespace UnitTests.Services.Settings
         [Fact]
         public static async Task Patch_NoUser()
         {
-            var mockDatabaseCommandFactory = new Mock<IDatabaseCommandFactory>(MockBehavior.Strict);
-            var provider = new UserSettingsProvider(mockDatabaseCommandFactory.Object);
-            var settings = new UserSettings();
+            Mock<IDatabaseCommandFactory> mockDatabaseCommandFactory = new(MockBehavior.Strict);
+            UserSettingsProvider provider = new(mockDatabaseCommandFactory.Object);
+            UserSettings settings = new();
 
             await Assert.ThrowsAsync<ArgumentNullException>("userId", () => provider.PatchAsync(null, settings));
         }
@@ -245,8 +243,8 @@ namespace UnitTests.Services.Settings
         [Fact]
         public static async Task Patch_NoSettings()
         {
-            var mockDatabaseCommandFactory = new Mock<IDatabaseCommandFactory>(MockBehavior.Strict);
-            var provider = new UserSettingsProvider(mockDatabaseCommandFactory.Object);
+            Mock<IDatabaseCommandFactory> mockDatabaseCommandFactory = new(MockBehavior.Strict);
+            UserSettingsProvider provider = new(mockDatabaseCommandFactory.Object);
 
             await Assert.ThrowsAsync<ArgumentNullException>("userSettings", () => provider.PatchAsync(UserId, null));
         }

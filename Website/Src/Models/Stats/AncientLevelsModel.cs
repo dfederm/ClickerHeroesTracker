@@ -1,15 +1,13 @@
-﻿// <copyright file="AncientLevelsModel.cs" company="Clicker Heroes Tracker">
-// Copyright (c) Clicker Heroes Tracker. All rights reserved.
-// </copyright>
+﻿// Copyright (C) Clicker Heroes Tracker. All Rights Reserved.
+
+using System.Collections.Generic;
+using System.Numerics;
+using ClickerHeroesTrackerWebsite.Models.Game;
+using ClickerHeroesTrackerWebsite.Models.SaveData;
+using ClickerHeroesTrackerWebsite.Utility;
 
 namespace ClickerHeroesTrackerWebsite.Models.Stats
 {
-    using System.Collections.Generic;
-    using System.Numerics;
-    using ClickerHeroesTrackerWebsite.Models.Game;
-    using ClickerHeroesTrackerWebsite.Models.SaveData;
-    using ClickerHeroesTrackerWebsite.Utility;
-
     /// <summary>
     /// The model for the ancient level summary view.
     /// </summary>
@@ -22,9 +20,9 @@ namespace ClickerHeroesTrackerWebsite.Models.Stats
             GameData gameData,
             SavedGame savedGame)
         {
-            var ancientLevels = new Dictionary<int, BigInteger>();
-            var ancientsData = savedGame.Object["ancients"]["ancients"];
-            foreach (var ancient in gameData.Ancients.Values)
+            Dictionary<int, BigInteger> ancientLevels = new();
+            Newtonsoft.Json.Linq.JToken ancientsData = savedGame.Object["ancients"]["ancients"];
+            foreach (Ancient ancient in gameData.Ancients.Values)
             {
                 // Skip ancients no longer in the game.
                 if (ancient.NonTranscendent)
@@ -32,12 +30,12 @@ namespace ClickerHeroesTrackerWebsite.Models.Stats
                     continue;
                 }
 
-                var ancientLevel = ancientsData[ancient.Id.ToString()]?.Value<string>("level")?.ToBigInteger() ?? BigInteger.Zero;
+                BigInteger ancientLevel = ancientsData[ancient.Id.ToString()]?.Value<string>("level")?.ToBigInteger() ?? BigInteger.Zero;
 
                 ancientLevels.Add(ancient.Id, ancientLevel);
             }
 
-            this.AncientLevels = ancientLevels;
+            AncientLevels = ancientLevels;
         }
 
         /// <summary>

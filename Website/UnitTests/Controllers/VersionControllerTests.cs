@@ -1,26 +1,24 @@
-﻿// <copyright file="VersionControllerTests.cs" company="Clicker Heroes Tracker">
-// Copyright (c) Clicker Heroes Tracker. All rights reserved.
-// </copyright>
+﻿// Copyright (C) Clicker Heroes Tracker. All Rights Reserved.
+
+using System.Collections.Generic;
+using ClickerHeroesTrackerWebsite.Configuration;
+using ClickerHeroesTrackerWebsite.Controllers;
+using Microsoft.AspNetCore.Hosting;
+using Moq;
+using Xunit;
 
 namespace ClickerHeroesTrackerWebsite.Tests.Controllers
 {
-    using System.Collections.Generic;
-    using ClickerHeroesTrackerWebsite.Configuration;
-    using ClickerHeroesTrackerWebsite.Controllers;
-    using Microsoft.AspNetCore.Hosting;
-    using Moq;
-    using Xunit;
-
     public static class VersionControllerTests
     {
         [Fact]
         public static void Version()
         {
-            var mockBuildInfoProvider = new Mock<IBuildInfoProvider>(MockBehavior.Strict);
+            Mock<IBuildInfoProvider> mockBuildInfoProvider = new(MockBehavior.Strict);
             mockBuildInfoProvider.SetupGet(_ => _.Changelist).Returns("SomeChangelist").Verifiable();
             mockBuildInfoProvider.SetupGet(_ => _.BuildUrl).Returns("SomeBuildUrl").Verifiable();
 
-            var webclient = new Dictionary<string, string>
+            Dictionary<string, string> webclient = new()
             {
                 { "bundle0", "version0" },
                 { "bundle1", "version1" },
@@ -28,15 +26,15 @@ namespace ClickerHeroesTrackerWebsite.Tests.Controllers
             };
             mockBuildInfoProvider.SetupGet(_ => _.Webclient).Returns(webclient).Verifiable();
 
-            var mockWebHostEnvironment = new Mock<IWebHostEnvironment>(MockBehavior.Strict);
+            Mock<IWebHostEnvironment> mockWebHostEnvironment = new(MockBehavior.Strict);
             mockWebHostEnvironment.SetupGet(_ => _.EnvironmentName).Returns("SomeEnvironmentName").Verifiable();
 
-            var controller = new VersionController(mockBuildInfoProvider.Object, mockWebHostEnvironment.Object);
+            VersionController controller = new(mockBuildInfoProvider.Object, mockWebHostEnvironment.Object);
 
-            var result = controller.Version();
+            Microsoft.AspNetCore.Mvc.ActionResult<Website.Models.Api.Version.VersionResponse> result = controller.Version();
             Assert.NotNull(result);
 
-            var model = result.Value;
+            Website.Models.Api.Version.VersionResponse model = result.Value;
             Assert.NotNull(model);
             Assert.Equal("SomeEnvironmentName", model.Environment);
             Assert.Equal("SomeChangelist", model.Changelist);

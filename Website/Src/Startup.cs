@@ -1,35 +1,32 @@
-﻿// <copyright file="Startup.cs" company="Clicker Heroes Tracker">
-// Copyright (c) Clicker Heroes Tracker. All rights reserved.
-// </copyright>
+﻿// Copyright (C) Clicker Heroes Tracker. All Rights Reserved.
+
+using System;
+using System.Threading.Tasks;
+using ClickerHeroesTrackerWebsite.Models.Game;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using Website.Services.SiteNews;
 
 namespace ClickerHeroesTrackerWebsite
 {
-    using System;
-    using System.Threading.Tasks;
-    using ClickerHeroesTrackerWebsite.Models.Game;
-    using ClickerHeroesTrackerWebsite.Utility;
-    using Microsoft.AspNetCore.Builder;
-    using Microsoft.AspNetCore.Hosting;
-    using Microsoft.Extensions.Configuration;
-    using Microsoft.Extensions.DependencyInjection;
-    using Microsoft.Extensions.Hosting;
-    using Website.Services.SiteNews;
-
     public partial class Startup
     {
-        private readonly IWebHostEnvironment environment;
-        private readonly IConfiguration configuration;
+        private readonly IWebHostEnvironment _environment;
+        private readonly IConfiguration _configuration;
 
         public Startup(IWebHostEnvironment environment, IConfiguration configuration)
         {
-            this.environment = environment;
-            this.configuration = configuration;
+            _environment = environment;
+            _configuration = configuration;
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app)
         {
-            if (this.environment.IsDevelopment())
+            if (_environment.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
                 app.UseDatabaseErrorPage();
@@ -45,7 +42,7 @@ namespace ClickerHeroesTrackerWebsite
             // Force server side to use https
             app.UseHttpsRedirection();
 
-            var staticFileOptions = this.environment.IsDevelopment()
+            StaticFileOptions staticFileOptions = _environment.IsDevelopment()
                 ? new StaticFileOptions
                 {
                     OnPrepareResponse = context =>
@@ -83,11 +80,11 @@ namespace ClickerHeroesTrackerWebsite
                 endpoints.MapFallbackToFile("/index.html");
             });
 
-            using (var serviceScope = app.ApplicationServices.GetRequiredService<IServiceScopeFactory>().CreateScope())
+            using (IServiceScope serviceScope = app.ApplicationServices.GetRequiredService<IServiceScopeFactory>().CreateScope())
             {
-                var serviceProvider = serviceScope.ServiceProvider;
+                IServiceProvider serviceProvider = serviceScope.ServiceProvider;
                 Task.WaitAll(
-                    this.EnsureDatabaseCreatedAsync(serviceProvider),
+                    EnsureDatabaseCreatedAsync(serviceProvider),
                     serviceProvider.GetService<ISiteNewsProvider>().EnsureCreatedAsync(),
                     Task.Run(async () =>
                     {

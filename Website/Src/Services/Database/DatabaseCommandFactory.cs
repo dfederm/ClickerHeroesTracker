@@ -1,27 +1,22 @@
-﻿// <copyright file="DatabaseCommandFactory.cs" company="Clicker Heroes Tracker">
-// Copyright (c) Clicker Heroes Tracker. All rights reserved.
-// </copyright>
+﻿// Copyright (C) Clicker Heroes Tracker. All Rights Reserved.
+
+using Microsoft.Extensions.Options;
 
 namespace ClickerHeroesTrackerWebsite.Services.Database
 {
-    using Microsoft.Extensions.Options;
-
     /// <summary>
-    /// A SQL command provider for the default connection string
+    /// A SQL command provider for the default connection string.
     /// </summary>
     public sealed class DatabaseCommandFactory : IDatabaseCommandFactory
     {
-        private readonly DatabaseSettings databaseSettings;
+        private readonly DatabaseSettings _databaseSettings;
 
         public DatabaseCommandFactory(IOptions<DatabaseSettings> databaseSettingsOptions)
         {
-            this.databaseSettings = databaseSettingsOptions.Value;
+            _databaseSettings = databaseSettingsOptions.Value;
         }
 
         /// <inheritdoc/>
-        public IDatabaseCommand Create()
-        {
-            return new DatabaseCommand(this.databaseSettings.ConnectionString);
-        }
+        public IDatabaseCommand Create() => new DatabaseCommand(_databaseSettings.ConnectionString);
     }
 }

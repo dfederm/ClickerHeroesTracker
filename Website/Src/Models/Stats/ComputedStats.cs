@@ -1,38 +1,36 @@
-﻿// <copyright file="ComputedStats.cs" company="Clicker Heroes Tracker">
-// Copyright (c) Clicker Heroes Tracker. All rights reserved.
-// </copyright>
+﻿// Copyright (C) Clicker Heroes Tracker. All Rights Reserved.
+
+using System;
+using System.Linq;
+using System.Numerics;
+using ClickerHeroesTrackerWebsite.Models.SaveData;
+using ClickerHeroesTrackerWebsite.Utility;
+using Newtonsoft.Json.Linq;
 
 namespace ClickerHeroesTrackerWebsite.Models.Stats
 {
-    using System;
-    using System.Linq;
-    using System.Numerics;
-    using ClickerHeroesTrackerWebsite.Models.SaveData;
-    using ClickerHeroesTrackerWebsite.Utility;
-    using Newtonsoft.Json.Linq;
-
     public class ComputedStats
     {
         public ComputedStats(SavedGame savedGame)
         {
-            var transcendent = savedGame.Object.Value<bool>("transcendent");
+            bool transcendent = savedGame.Object.Value<bool>("transcendent");
 
-            this.HeroSoulsSpent = savedGame.Object["ancients"]["ancients"]
+            HeroSoulsSpent = savedGame.Object["ancients"]["ancients"]
                 .OfType<JProperty>()
                 .Aggregate(BigInteger.Zero, (count, ancientData) => count + ancientData.Value.Value<string>("spentHeroSouls").ToBigInteger())
                 .ToTransportableString();
 
-            this.HeroSoulsSacrificed = savedGame.Object.Value<string>("heroSoulsSacrificed");
-            this.TitanDamage = savedGame.Object.Value<string>("titanDamage");
-            this.TotalAncientSouls = savedGame.Object.Value<long>("ancientSoulsTotal");
-            this.Rubies = savedGame.Object.Value<long>("rubies");
-            this.HighestZoneThisTranscension = savedGame.Object.Value<long>("highestFinishedZonePersist");
-            this.HighestZoneLifetime = Math.Max(savedGame.Object.Value<long>("pretranscendentHighestFinishedZone"), Math.Max(savedGame.Object.Value<long>("transcendentHighestFinishedZone"), this.HighestZoneThisTranscension));
+            HeroSoulsSacrificed = savedGame.Object.Value<string>("heroSoulsSacrificed");
+            TitanDamage = savedGame.Object.Value<string>("titanDamage");
+            TotalAncientSouls = savedGame.Object.Value<long>("ancientSoulsTotal");
+            Rubies = savedGame.Object.Value<long>("rubies");
+            HighestZoneThisTranscension = savedGame.Object.Value<long>("highestFinishedZonePersist");
+            HighestZoneLifetime = Math.Max(savedGame.Object.Value<long>("pretranscendentHighestFinishedZone"), Math.Max(savedGame.Object.Value<long>("transcendentHighestFinishedZone"), HighestZoneThisTranscension));
 
-            this.AscensionsThisTranscension = savedGame.Object.Value<long>(transcendent ? "numAscensionsThisTranscension" : "numWorldResets");
-            this.AscensionsLifetime = savedGame.Object.Value<long>("numWorldResets");
-            this.TranscendentPower = transcendent
-                ? (2 + (23 * (1 - Math.Pow(Math.E, -0.0003 * this.TotalAncientSouls)))) / 100
+            AscensionsThisTranscension = savedGame.Object.Value<long>(transcendent ? "numAscensionsThisTranscension" : "numWorldResets");
+            AscensionsLifetime = savedGame.Object.Value<long>("numWorldResets");
+            TranscendentPower = transcendent
+                ? (2 + (23 * (1 - Math.Pow(Math.E, -0.0003 * TotalAncientSouls)))) / 100
                 : 0;
         }
 

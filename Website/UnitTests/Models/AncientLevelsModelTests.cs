@@ -1,26 +1,24 @@
-﻿// <copyright file="AncientLevelsModelTests.cs" company="Clicker Heroes Tracker">
-// Copyright (c) Clicker Heroes Tracker. All rights reserved.
-// </copyright>
+﻿// Copyright (C) Clicker Heroes Tracker. All Rights Reserved.
+
+using System.Collections.Generic;
+using System.Numerics;
+using ClickerHeroesTrackerWebsite.Models.SaveData;
+using ClickerHeroesTrackerWebsite.Models.Stats;
+using ClickerHeroesTrackerWebsite.Tests.Mocks;
+using Xunit;
 
 namespace UnitTests.Models
 {
-    using System.Collections.Generic;
-    using System.Numerics;
-    using ClickerHeroesTrackerWebsite.Models.SaveData;
-    using ClickerHeroesTrackerWebsite.Models.Stats;
-    using ClickerHeroesTrackerWebsite.Tests.Mocks;
-    using Xunit;
-
     public static class AncientLevelsModelTests
     {
         [Fact]
         public static void AncientLevelsModel()
         {
-            var encodedSaveData = TestData.ReadAllText("ValidZlib.txt");
-            var savedGame = SavedGame.Parse(encodedSaveData);
-            var ancientLevels = new AncientLevelsModel(MockGameData.RealData, savedGame);
+            string encodedSaveData = TestData.ReadAllText("ValidZlib.txt");
+            SavedGame savedGame = SavedGame.Parse(encodedSaveData);
+            AncientLevelsModel ancientLevels = new(MockGameData.RealData, savedGame);
 
-            var expectedAncientLevels = new Dictionary<int, BigInteger>
+            Dictionary<int, BigInteger> expectedAncientLevels = new()
             {
                 { 4, 200 },
                 { 5, 200 },
@@ -52,7 +50,7 @@ namespace UnitTests.Models
 
             Assert.NotNull(ancientLevels.AncientLevels);
             Assert.Equal(expectedAncientLevels.Count, ancientLevels.AncientLevels.Count);
-            foreach (var pair in expectedAncientLevels)
+            foreach (KeyValuePair<int, BigInteger> pair in expectedAncientLevels)
             {
                 Assert.Equal(pair.Value, ancientLevels.AncientLevels[pair.Key]);
             }

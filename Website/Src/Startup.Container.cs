@@ -1,39 +1,37 @@
-﻿// <copyright file="Startup.Container.cs" company="Clicker Heroes Tracker">
-// Copyright (c) Clicker Heroes Tracker. All rights reserved.
-// </copyright>
+﻿// Copyright (C) Clicker Heroes Tracker. All Rights Reserved.
+
+using System;
+using System.IO;
+using System.Net.Http;
+using System.Text.Json;
+using System.Text.Json.Serialization;
+using ClickerHeroesTrackerWebsite.Configuration;
+using ClickerHeroesTrackerWebsite.Models;
+using ClickerHeroesTrackerWebsite.Models.Game;
+using ClickerHeroesTrackerWebsite.Models.Settings;
+using ClickerHeroesTrackerWebsite.Services.Authentication;
+using ClickerHeroesTrackerWebsite.Services.Database;
+using ClickerHeroesTrackerWebsite.Services.Email;
+using Microsoft.ApplicationInsights.AspNetCore.Extensions;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.DataProtection;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.Azure.Cosmos.Table;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Options;
+using OpenIddict.Abstractions;
+using OpenIddict.Validation.AspNetCore;
+using Website.Models.Authentication;
+using Website.Services.Authentication;
+using Website.Services.Clans;
+using Website.Services.SiteNews;
 
 namespace ClickerHeroesTrackerWebsite
 {
-    using System;
-    using System.IO;
-    using System.Net.Http;
-    using System.Text.Json;
-    using System.Text.Json.Serialization;
-    using ClickerHeroesTrackerWebsite.Configuration;
-    using ClickerHeroesTrackerWebsite.Models;
-    using ClickerHeroesTrackerWebsite.Models.Game;
-    using ClickerHeroesTrackerWebsite.Models.Settings;
-    using ClickerHeroesTrackerWebsite.Services.Authentication;
-    using ClickerHeroesTrackerWebsite.Services.Database;
-    using ClickerHeroesTrackerWebsite.Services.Email;
-    using Microsoft.ApplicationInsights.AspNetCore.Extensions;
-    using Microsoft.AspNetCore.Authorization;
-    using Microsoft.AspNetCore.DataProtection;
-    using Microsoft.AspNetCore.Hosting;
-    using Microsoft.AspNetCore.Identity;
-    using Microsoft.Azure.Cosmos.Table;
-    using Microsoft.EntityFrameworkCore;
-    using Microsoft.Extensions.Configuration;
-    using Microsoft.Extensions.DependencyInjection;
-    using Microsoft.Extensions.Hosting;
-    using Microsoft.Extensions.Options;
-    using OpenIddict.Abstractions;
-    using OpenIddict.Validation.AspNetCore;
-    using Website.Models.Authentication;
-    using Website.Services.Authentication;
-    using Website.Services.Clans;
-    using Website.Services.SiteNews;
-
     /// <summary>
     /// Configure the Unity container.
     /// </summary>
@@ -43,7 +41,7 @@ namespace ClickerHeroesTrackerWebsite
         public void ConfigureServices(IServiceCollection services)
         {
             // The DevelopmentStorageAccount will only work if you have the Storage emulator v4.3 installed: https://go.microsoft.com/fwlink/?linkid=717179&clcid=0x409
-            var storageConnectionString = this.configuration["Storage:ConnectionString"];
+            string storageConnectionString = _configuration["Storage:ConnectionString"];
             CloudStorageAccount storageAccount = null;
             if (!string.IsNullOrEmpty(storageConnectionString))
             {
@@ -54,7 +52,7 @@ namespace ClickerHeroesTrackerWebsite
             // By default Azure Websites can persist keys across instances within a slot, but not across slots.
             // This means a slot swap will require users to re-log in.
             // See https://github.com/aspnet/Home/issues/466 and https://github.com/aspnet/DataProtection/issues/92 for details.
-            var dataProtectionBuilder = services.AddDataProtection();
+            IDataProtectionBuilder dataProtectionBuilder = services.AddDataProtection();
             if (!string.IsNullOrEmpty(storageConnectionString))
             {
                 dataProtectionBuilder.PersistKeysToAzureBlobStorage(storageConnectionString, "key-container", "keys.xml");
@@ -63,7 +61,7 @@ namespace ClickerHeroesTrackerWebsite
             // Add Entity framework services.
             services.AddDbContext<ApplicationDbContext>(options =>
                 {
-                    options.UseSqlServer(this.configuration["Database:ConnectionString"]);
+                    options.UseSqlServer(_configuration["Database:ConnectionString"]);
 
                     // Register the entity sets needed by OpenIddict.
                     options.UseOpenIddict();
@@ -176,12 +174,12 @@ namespace ClickerHeroesTrackerWebsite
                     .Build();
             });
 
-            var buildInfoProvider = new BuildInfoProvider(this.environment);
+            BuildInfoProvider buildInfoProvider = new(_environment);
 
             services.AddApplicationInsightsTelemetry(new ApplicationInsightsServiceOptions
             {
                 ApplicationVersion = buildInfoProvider.BuildUrl,
-                DeveloperMode = this.environment.IsDevelopment(),
+                DeveloperMode = _environment.IsDevelopment(),
             });
 
             services.AddCors();
@@ -216,7 +214,7 @@ namespace ClickerHeroesTrackerWebsite
                 services.AddSingleton<ISiteNewsProvider, InMemorySiteNewsProvider>();
             }
 
-            services.AddSingleton<GameData>(_ => GameData.Parse(Path.Combine(this.environment.WebRootPath, "data", "GameData.json")));
+            services.AddSingleton<GameData>(_ => GameData.Parse(Path.Combine(_environment.WebRootPath, "data", "GameData.json")));
             services.AddSingleton<HttpClient>(_ => new HttpClient());
             services.AddSingleton<IAssertionGrantHandlerProvider, AssertionGrantHandlerProvider>();
             services.AddSingleton<IBuildInfoProvider>(buildInfoProvider);
@@ -229,9 +227,9 @@ namespace ClickerHeroesTrackerWebsite
             services.AddScoped<IUserSettingsProvider, UserSettingsProvider>();
 
             // configuration
-            services.Configure<AuthenticationSettings>(options => this.configuration.GetSection("Authentication").Bind(options));
-            services.Configure<DatabaseSettings>(options => this.configuration.GetSection("Database").Bind(options));
-            services.Configure<EmailSenderSettings>(options => this.configuration.GetSection("EmailSender").Bind(options));
+            services.Configure<AuthenticationSettings>(options => _configuration.GetSection("Authentication").Bind(options));
+            services.Configure<DatabaseSettings>(options => _configuration.GetSection("Database").Bind(options));
+            services.Configure<EmailSenderSettings>(options => _configuration.GetSection("EmailSender").Bind(options));
         }
     }
 }

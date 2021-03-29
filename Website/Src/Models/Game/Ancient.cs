@@ -1,22 +1,20 @@
-﻿// <copyright file="Ancient.cs" company="Clicker Heroes Tracker">
-// Copyright (c) Clicker Heroes Tracker. All rights reserved.
-// </copyright>
+﻿// Copyright (C) Clicker Heroes Tracker. All Rights Reserved.
+
+using System;
+using Newtonsoft.Json;
 
 namespace ClickerHeroesTrackerWebsite.Models.Game
 {
-    using System;
-    using Newtonsoft.Json;
-
     /// <summary>
     /// Represents the data for an ancient in the game.
     /// </summary>
     [JsonObject]
     public class Ancient
     {
-        private string name;
+        private string _name;
 
         /// <summary>
-        /// Gets or sets the ancient id
+        /// Gets or sets the ancient id.
         /// </summary>
         [JsonProperty(PropertyName = "id", Required = Required.Always)]
         public int Id { get; set; }
@@ -41,15 +39,15 @@ namespace ClickerHeroesTrackerWebsite.Models.Game
         {
             get
             {
-                if (this.name == null)
+                if (_name == null)
                 {
-                    var commaIndex = this.FullName.IndexOf(',', StringComparison.Ordinal);
-                    this.name = commaIndex >= 0
-                        ? this.FullName.Substring(0, commaIndex)
-                        : this.FullName;
+                    int commaIndex = FullName.IndexOf(',', StringComparison.Ordinal);
+                    _name = commaIndex >= 0
+                        ? FullName.Substring(0, commaIndex)
+                        : FullName;
                 }
 
-                return this.name;
+                return _name;
             }
         }
     }

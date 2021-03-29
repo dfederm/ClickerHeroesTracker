@@ -1,6 +1,4 @@
-﻿// <copyright file="AssertionGrantResult.cs" company="Clicker Heroes Tracker">
-// Copyright (c) Clicker Heroes Tracker. All rights reserved.
-// </copyright>
+﻿// Copyright (C) Clicker Heroes Tracker. All Rights Reserved.
 
 namespace Website.Services.Authentication
 {
@@ -12,8 +10,8 @@ namespace Website.Services.Authentication
 
         public string Error { get; set; }
 
-        public bool IsSuccessful => string.IsNullOrEmpty(this.Error)
-            && !string.IsNullOrEmpty(this.ExternalUserId)
-            && !string.IsNullOrEmpty(this.ExternalUserEmail);
+        public bool IsSuccessful => string.IsNullOrEmpty(Error)
+            && !string.IsNullOrEmpty(ExternalUserId)
+            && !string.IsNullOrEmpty(ExternalUserEmail);
     }
 }
