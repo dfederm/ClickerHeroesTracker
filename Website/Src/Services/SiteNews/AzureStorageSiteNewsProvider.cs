@@ -1,22 +1,20 @@
-﻿// <copyright file="AzureStorageSiteNewsProvider.cs" company="Clicker Heroes Tracker">
-// Copyright (c) Clicker Heroes Tracker. All rights reserved.
-// </copyright>
+﻿// Copyright (C) Clicker Heroes Tracker. All Rights Reserved.
+
+using System;
+using System.Collections.Generic;
+using System.Net;
+using System.Threading.Tasks;
+using ClickerHeroesTrackerWebsite.Utility;
+using Microsoft.ApplicationInsights;
+using Microsoft.Azure.Cosmos.Table;
 
 namespace Website.Services.SiteNews
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Net;
-    using System.Threading.Tasks;
-    using ClickerHeroesTrackerWebsite.Utility;
-    using Microsoft.ApplicationInsights;
-    using Microsoft.Azure.Cosmos.Table;
-
     public class AzureStorageSiteNewsProvider : ISiteNewsProvider
     {
-        private readonly CloudTableClient tableClient;
+        private readonly CloudTableClient _tableClient;
 
-        private readonly TelemetryClient telemetryClient;
+        private readonly TelemetryClient _telemetryClient;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="AzureStorageSiteNewsProvider"/> class.
@@ -25,27 +23,27 @@ namespace Website.Services.SiteNews
         /// <param name="telemetryClient">The telemetry client to log errors.</param>
         public AzureStorageSiteNewsProvider(CloudTableClient tableClient, TelemetryClient telemetryClient)
         {
-            this.tableClient = tableClient ?? throw new ArgumentNullException(nameof(tableClient));
-            this.telemetryClient = telemetryClient ?? throw new ArgumentNullException(nameof(telemetryClient));
+            _tableClient = tableClient ?? throw new ArgumentNullException(nameof(tableClient));
+            _telemetryClient = telemetryClient ?? throw new ArgumentNullException(nameof(telemetryClient));
         }
 
         /// <inheritdoc />
-        public Task EnsureCreatedAsync() => this.GetTableReference().CreateIfNotExistsAsync();
+        public Task EnsureCreatedAsync() => GetTableReference().CreateIfNotExistsAsync();
 
         /// <inheritdoc />
         public async Task AddSiteNewsEntriesAsync(DateTime newsDate, IList<string> messages)
         {
-            var table = this.GetTableReference();
+            CloudTable table = GetTableReference();
 
             // Delete all rows in the partition first
-            var query = new TableQuery<SiteNewsTableEntity>().Where(TableQuery.GenerateFilterCondition("PartitionKey", QueryComparisons.Equal, newsDate.ToString("yyyy-MM-dd")));
-            var batchOperation = new TableBatchOperation();
+            TableQuery<SiteNewsTableEntity> query = new TableQuery<SiteNewsTableEntity>().Where(TableQuery.GenerateFilterCondition("PartitionKey", QueryComparisons.Equal, newsDate.ToString("yyyy-MM-dd")));
+            TableBatchOperation batchOperation = new();
             TableContinuationToken token = null;
             do
             {
-                var segment = await table.ExecuteQuerySegmentedAsync(query, token);
+                TableQuerySegment<SiteNewsTableEntity> segment = await table.ExecuteQuerySegmentedAsync(query, token);
                 token = segment.ContinuationToken;
-                foreach (var entity in segment)
+                foreach (SiteNewsTableEntity entity in segment)
                 {
                     batchOperation.Delete(entity);
                 }
@@ -64,19 +62,19 @@ namespace Website.Services.SiteNews
                 batchOperation.Insert(new SiteNewsTableEntity(newsDate, i) { Message = messages[i] });
             }
 
-            var results = await table.ExecuteBatchAsync(batchOperation);
-            var returnStatusCode = HttpStatusCode.OK;
-            foreach (var result in results)
+            TableBatchResult results = await table.ExecuteBatchAsync(batchOperation);
+            HttpStatusCode returnStatusCode = HttpStatusCode.OK;
+            foreach (TableResult result in results)
             {
                 if (result.HttpStatusCode >= 400 && result.HttpStatusCode <= 499)
                 {
-                    this.telemetryClient.TrackFailedTableResult(result);
+                    _telemetryClient.TrackFailedTableResult(result);
                     returnStatusCode = HttpStatusCode.BadRequest;
                 }
 
                 if (result.HttpStatusCode >= 500 && result.HttpStatusCode <= 599)
                 {
-                    this.telemetryClient.TrackFailedTableResult(result);
+                    _telemetryClient.TrackFailedTableResult(result);
                     returnStatusCode = HttpStatusCode.InternalServerError;
                 }
             }
@@ -90,35 +88,35 @@ namespace Website.Services.SiteNews
         /// <inheritdoc />
         public async Task DeleteSiteNewsForDateAsync(DateTime newsDate)
         {
-            var table = this.GetTableReference();
+            CloudTable table = GetTableReference();
 
-            var query = new TableQuery<SiteNewsTableEntity>().Where(TableQuery.GenerateFilterCondition("PartitionKey", QueryComparisons.Equal, newsDate.ToString("yyyy-MM-dd")));
-            var batchOperation = new TableBatchOperation();
+            TableQuery<SiteNewsTableEntity> query = new TableQuery<SiteNewsTableEntity>().Where(TableQuery.GenerateFilterCondition("PartitionKey", QueryComparisons.Equal, newsDate.ToString("yyyy-MM-dd")));
+            TableBatchOperation batchOperation = new();
             TableContinuationToken token = null;
             do
             {
-                var segment = await table.ExecuteQuerySegmentedAsync(query, token);
+                TableQuerySegment<SiteNewsTableEntity> segment = await table.ExecuteQuerySegmentedAsync(query, token);
                 token = segment.ContinuationToken;
-                foreach (var entity in segment)
+                foreach (SiteNewsTableEntity entity in segment)
                 {
                     batchOperation.Delete(entity);
                 }
             }
             while (token != null);
 
-            var results = await table.ExecuteBatchAsync(batchOperation);
-            var returnStatusCode = HttpStatusCode.OK;
-            foreach (var result in results)
+            TableBatchResult results = await table.ExecuteBatchAsync(batchOperation);
+            HttpStatusCode returnStatusCode = HttpStatusCode.OK;
+            foreach (TableResult result in results)
             {
                 if (result.HttpStatusCode >= 400 && result.HttpStatusCode <= 499)
                 {
-                    this.telemetryClient.TrackFailedTableResult(result);
+                    _telemetryClient.TrackFailedTableResult(result);
                     returnStatusCode = HttpStatusCode.BadRequest;
                 }
 
                 if (result.HttpStatusCode >= 500 && result.HttpStatusCode <= 599)
                 {
-                    this.telemetryClient.TrackFailedTableResult(result);
+                    _telemetryClient.TrackFailedTableResult(result);
                     returnStatusCode = HttpStatusCode.InternalServerError;
                 }
             }
@@ -132,32 +130,32 @@ namespace Website.Services.SiteNews
         /// <inheritdoc />
         public async Task<IDictionary<DateTime, IList<string>>> RetrieveSiteNewsEntriesAsync()
         {
-            var table = this.GetTableReference();
+            CloudTable table = GetTableReference();
 
-            var query = new TableQuery<SiteNewsTableEntity>();
+            TableQuery<SiteNewsTableEntity> query = new();
 
             // Group entities by date and sort by order in each group
-            var currentOrder = 0;
-            var entitiesByDate = new SortedDictionary<DateTime, SortedList<int, string>>();
+            int currentOrder = 0;
+            SortedDictionary<DateTime, SortedList<int, string>> entitiesByDate = new();
             TableContinuationToken token = null;
             do
             {
-                var segment = await table.ExecuteQuerySegmentedAsync(query, token);
+                TableQuerySegment<SiteNewsTableEntity> segment = await table.ExecuteQuerySegmentedAsync(query, token);
                 token = segment.ContinuationToken;
-                foreach (var entity in segment)
+                foreach (SiteNewsTableEntity entity in segment)
                 {
-                    if (!DateTime.TryParse(entity.PartitionKey, out var date))
+                    if (!DateTime.TryParse(entity.PartitionKey, out DateTime date))
                     {
-                        this.telemetryClient.TrackInvalidTableEntry(entity);
+                        _telemetryClient.TrackInvalidTableEntry(entity);
                         continue;
                     }
 
-                    if (!int.TryParse(entity.RowKey, out var order))
+                    if (!int.TryParse(entity.RowKey, out int order))
                     {
                         order = currentOrder++;
                     }
 
-                    if (!entitiesByDate.TryGetValue(date, out var entities))
+                    if (!entitiesByDate.TryGetValue(date, out SortedList<int, string> entities))
                     {
                         entities = new SortedList<int, string>();
                         entitiesByDate.Add(date, entities);
@@ -169,8 +167,8 @@ namespace Website.Services.SiteNews
             while (token != null);
 
             // Select only the messages
-            var entries = new SortedDictionary<DateTime, IList<string>>();
-            foreach (var entities in entitiesByDate)
+            SortedDictionary<DateTime, IList<string>> entries = new();
+            foreach (KeyValuePair<DateTime, SortedList<int, string>> entities in entitiesByDate)
             {
                 entries.Add(entities.Key, entities.Value.Values);
             }
@@ -178,6 +176,6 @@ namespace Website.Services.SiteNews
             return entries;
         }
 
-        private CloudTable GetTableReference() => this.tableClient.GetTableReference("SiteNews");
+        private CloudTable GetTableReference() => _tableClient.GetTableReference("SiteNews");
     }
 }

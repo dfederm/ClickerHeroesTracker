@@ -7,6 +7,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Website", "Website", "{D77F
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{6ADD8E67-6F76-4AC3-A1A6-F92F3AA664CE}"
 	ProjectSection(SolutionItems) = preProject
+		.editorconfig = .editorconfig
 		.gitignore = .gitignore
 		Directory.Build.props = Directory.Build.props
 		Directory.Build.rsp = Directory.Build.rsp
@@ -16,7 +17,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build", "build", "{3D49839D-F575-4B78-917D-05495AA9B946}"
 	ProjectSection(SolutionItems) = preProject
-		build\CodeAnalysis.ruleset = build\CodeAnalysis.ruleset
 		build\PostDeploy.ps1 = build\PostDeploy.ps1
 		build\stylecop.json = build\stylecop.json
 		build\UpdateBuildInfo.ps1 = build\UpdateBuildInfo.ps1

@@ -1,15 +1,13 @@
-﻿// <copyright file="ISiteNewsProvider.cs" company="Clicker Heroes Tracker">
-// Copyright (c) Clicker Heroes Tracker. All rights reserved.
-// </copyright>
+﻿// Copyright (C) Clicker Heroes Tracker. All Rights Reserved.
+
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace Website.Services.SiteNews
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Threading.Tasks;
-
     /// <summary>
-    /// Handles retrieving and updating site news
+    /// Handles retrieving and updating site news.
     /// </summary>
     public interface ISiteNewsProvider
     {

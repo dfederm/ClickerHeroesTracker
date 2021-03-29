@@ -1,11 +1,9 @@
-﻿// <copyright file="MockGameData.cs" company="Clicker Heroes Tracker">
-// Copyright (c) Clicker Heroes Tracker. All rights reserved.
-// </copyright>
+﻿// Copyright (C) Clicker Heroes Tracker. All Rights Reserved.
+
+using ClickerHeroesTrackerWebsite.Models.Game;
 
 namespace ClickerHeroesTrackerWebsite.Tests.Mocks
 {
-    using ClickerHeroesTrackerWebsite.Models.Game;
-
     internal static class MockGameData
     {
         public static readonly GameData RealData = GameData.Parse("GameData.json");

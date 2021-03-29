@@ -1,13 +1,11 @@
-﻿// <copyright file="Upload.cs" company="Clicker Heroes Tracker">
-// Copyright (c) Clicker Heroes Tracker. All rights reserved.
-// </copyright>
+﻿// Copyright (C) Clicker Heroes Tracker. All Rights Reserved.
+
+using System;
 
 namespace ClickerHeroesTrackerWebsite.Models.Api.Uploads
 {
-    using System;
-
     /// <summary>
-    /// The details about a specific upload
+    /// The details about a specific upload.
     /// </summary>
     public sealed class Upload
     {

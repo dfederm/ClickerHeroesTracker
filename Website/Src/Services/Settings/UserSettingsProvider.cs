@@ -1,30 +1,28 @@
-﻿// <copyright file="UserSettingsProvider.cs" company="Clicker Heroes Tracker">
-// Copyright (c) Clicker Heroes Tracker. All rights reserved.
-// </copyright>
+﻿// Copyright (C) Clicker Heroes Tracker. All Rights Reserved.
+
+using System;
+using System.Collections.Generic;
+using System.Text;
+using System.Threading.Tasks;
+using ClickerHeroesTrackerWebsite.Services.Database;
+using Website.Models.Api.Users;
+using Website.Services.Settings;
 
 namespace ClickerHeroesTrackerWebsite.Models.Settings
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Text;
-    using System.Threading.Tasks;
-    using ClickerHeroesTrackerWebsite.Services.Database;
-    using Website.Models.Api.Users;
-    using Website.Services.Settings;
-
     /// <summary>
     /// An <see cref="IUserSettingsProvider"/> implementation which uses a database as the backing store.
     /// </summary>
     public class UserSettingsProvider : IUserSettingsProvider
     {
-        private readonly IDatabaseCommandFactory databaseCommandFactory;
+        private readonly IDatabaseCommandFactory _databaseCommandFactory;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="UserSettingsProvider"/> class.
         /// </summary>
         public UserSettingsProvider(IDatabaseCommandFactory databaseCommandFactory)
         {
-            this.databaseCommandFactory = databaseCommandFactory;
+            _databaseCommandFactory = databaseCommandFactory;
         }
 
         /// <inheritdoc/>
@@ -36,9 +34,9 @@ namespace ClickerHeroesTrackerWebsite.Models.Settings
                 return new UserSettings();
             }
 
-            var userSettings = new UserSettings();
+            UserSettings userSettings = new();
 
-            var parameters = new Dictionary<string, object>
+            Dictionary<string, object> parameters = new()
             {
                 { "@UserId", userId },
             };
@@ -46,50 +44,50 @@ namespace ClickerHeroesTrackerWebsite.Models.Settings
                 SELECT SettingId, SettingValue
                 FROM UserSettings
                 WHERE UserId = @UserId";
-            using (var command = this.databaseCommandFactory.Create(
+            using (IDatabaseCommand command = _databaseCommandFactory.Create(
                 GetUserSettingsCommandText,
                 parameters))
-            using (var reader = await command.ExecuteReaderAsync())
+            using (System.Data.IDataReader reader = await command.ExecuteReaderAsync())
             {
                 while (reader.Read())
                 {
-                    var settingId = Convert.ToByte(reader["SettingId"]);
-                    var settingValue = reader["SettingValue"].ToString();
+                    byte settingId = Convert.ToByte(reader["SettingId"]);
+                    string settingValue = reader["SettingValue"].ToString();
 
                     switch (settingId)
                     {
                         case UserSettingsConstants.PlayStyle:
-                            userSettings.PlayStyle = Enum.TryParse<PlayStyle>(settingValue, out var playStyle) ? new PlayStyle?(playStyle) : null;
+                            userSettings.PlayStyle = Enum.TryParse<PlayStyle>(settingValue, out PlayStyle playStyle) ? new PlayStyle?(playStyle) : null;
                             break;
                         case UserSettingsConstants.UseScientificNotation:
-                            userSettings.UseScientificNotation = bool.TryParse(settingValue, out var useScientificNotation) ? new bool?(useScientificNotation) : null;
+                            userSettings.UseScientificNotation = bool.TryParse(settingValue, out bool useScientificNotation) ? new bool?(useScientificNotation) : null;
                             break;
                         case UserSettingsConstants.ScientificNotationThreshold:
-                            userSettings.ScientificNotationThreshold = int.TryParse(settingValue, out var scientificNotationThreshold) ? new int?(scientificNotationThreshold) : null;
+                            userSettings.ScientificNotationThreshold = int.TryParse(settingValue, out int scientificNotationThreshold) ? new int?(scientificNotationThreshold) : null;
                             break;
                         case UserSettingsConstants.UseLogarithmicGraphScale:
-                            userSettings.UseLogarithmicGraphScale = bool.TryParse(settingValue, out var useLogarithmicGraphScale) ? new bool?(useLogarithmicGraphScale) : null;
+                            userSettings.UseLogarithmicGraphScale = bool.TryParse(settingValue, out bool useLogarithmicGraphScale) ? new bool?(useLogarithmicGraphScale) : null;
                             break;
                         case UserSettingsConstants.LogarithmicGraphScaleThreshold:
-                            userSettings.LogarithmicGraphScaleThreshold = int.TryParse(settingValue, out var logarithmicGraphScaleThreshold) ? new int?(logarithmicGraphScaleThreshold) : null;
+                            userSettings.LogarithmicGraphScaleThreshold = int.TryParse(settingValue, out int logarithmicGraphScaleThreshold) ? new int?(logarithmicGraphScaleThreshold) : null;
                             break;
                         case UserSettingsConstants.HybridRatio:
-                            userSettings.HybridRatio = double.TryParse(settingValue, out var hybridRatio) ? new double?(hybridRatio) : null;
+                            userSettings.HybridRatio = double.TryParse(settingValue, out double hybridRatio) ? new double?(hybridRatio) : null;
                             break;
                         case UserSettingsConstants.Theme:
-                            userSettings.Theme = Enum.TryParse<SiteThemeType>(settingValue, out var theme) ? new SiteThemeType?(theme) : null;
+                            userSettings.Theme = Enum.TryParse<SiteThemeType>(settingValue, out SiteThemeType theme) ? new SiteThemeType?(theme) : null;
                             break;
                         case UserSettingsConstants.ShouldLevelSkillAncients:
-                            userSettings.ShouldLevelSkillAncients = bool.TryParse(settingValue, out var shouldLevelSkillAncients) ? new bool?(shouldLevelSkillAncients) : null;
+                            userSettings.ShouldLevelSkillAncients = bool.TryParse(settingValue, out bool shouldLevelSkillAncients) ? new bool?(shouldLevelSkillAncients) : null;
                             break;
                         case UserSettingsConstants.SkillAncientBaseAncient:
-                            userSettings.SkillAncientBaseAncient = int.TryParse(settingValue, out var skillAncientBaseAncient) ? new int?(skillAncientBaseAncient) : null;
+                            userSettings.SkillAncientBaseAncient = int.TryParse(settingValue, out int skillAncientBaseAncient) ? new int?(skillAncientBaseAncient) : null;
                             break;
                         case UserSettingsConstants.SkillAncientLevelDiff:
-                            userSettings.SkillAncientLevelDiff = int.TryParse(settingValue, out var skillAncientLevelDiff) ? new int?(skillAncientLevelDiff) : null;
+                            userSettings.SkillAncientLevelDiff = int.TryParse(settingValue, out int skillAncientLevelDiff) ? new int?(skillAncientLevelDiff) : null;
                             break;
                         case UserSettingsConstants.GraphSpacingType:
-                            userSettings.GraphSpacingType = Enum.TryParse<GraphSpacingType>(settingValue, out var graphSpacingType) ? new GraphSpacingType?(graphSpacingType) : null;
+                            userSettings.GraphSpacingType = Enum.TryParse<GraphSpacingType>(settingValue, out GraphSpacingType graphSpacingType) ? new GraphSpacingType?(graphSpacingType) : null;
                             break;
                     }
                 }
@@ -126,13 +124,13 @@ namespace ClickerHeroesTrackerWebsite.Models.Settings
                     INSERT (UserId, SettingId, SettingValue)
                     VALUES (Input.UserId, Input.SettingId, Input.SettingValue);");
             */
-            var setUserSettingsCommandText = new StringBuilder();
-            var parameters = new Dictionary<string, object>()
+            StringBuilder setUserSettingsCommandText = new();
+            Dictionary<string, object> parameters = new()
             {
                 { "@UserId", userId },
             };
 
-            var isFirst = true;
+            bool isFirst = true;
 
             setUserSettingsCommandText.Append(@"
                 MERGE INTO UserSettings WITH (HOLDLOCK)
@@ -193,7 +191,7 @@ namespace ClickerHeroesTrackerWebsite.Models.Settings
                 WHEN NOT MATCHED THEN
                     INSERT (UserId, SettingId, SettingValue)
                     VALUES (Input.UserId, Input.SettingId, Input.SettingValue);");
-            using (var command = this.databaseCommandFactory.Create(
+            using (IDatabaseCommand command = _databaseCommandFactory.Create(
                 setUserSettingsCommandText.ToString(),
                 parameters))
             {

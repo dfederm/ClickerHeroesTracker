@@ -1,11 +1,9 @@
-﻿// <copyright file="VersionResponse.cs" company="Clicker Heroes Tracker">
-// Copyright (c) Clicker Heroes Tracker. All rights reserved.
-// </copyright>
+﻿// Copyright (C) Clicker Heroes Tracker. All Rights Reserved.
+
+using System.Collections.Generic;
 
 namespace Website.Models.Api.Version
 {
-    using System.Collections.Generic;
-
     public sealed class VersionResponse
     {
         public string Environment { get; set; }

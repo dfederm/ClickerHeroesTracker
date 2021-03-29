@@ -1,28 +1,24 @@
-﻿// <copyright file="AssertionGrantHandlerProvider.cs" company="Clicker Heroes Tracker">
-// Copyright (c) Clicker Heroes Tracker. All rights reserved.
-// </copyright>
+﻿// Copyright (C) Clicker Heroes Tracker. All Rights Reserved.
+
+using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Options;
 
 namespace Website.Services.Authentication
 {
-    using Microsoft.AspNetCore.Http;
-    using Microsoft.Extensions.Options;
-
     public sealed class AssertionGrantHandlerProvider : IAssertionGrantHandlerProvider
     {
-        private readonly AssertionGrantOptions options;
-        private readonly IHttpContextAccessor httpContextAccessor;
+        private readonly AssertionGrantOptions _options;
+        private readonly IHttpContextAccessor _httpContextAccessor;
 
         public AssertionGrantHandlerProvider(IOptions<AssertionGrantOptions> options, IHttpContextAccessor httpContextAccessor)
         {
-            this.options = options.Value;
-            this.httpContextAccessor = httpContextAccessor;
+            _options = options.Value;
+            _httpContextAccessor = httpContextAccessor;
         }
 
         public IAssertionGrantHandler GetHandler(string grantType)
-        {
-            return this.options.AssertionGrantTypeMap.TryGetValue(grantType, out var handlerType)
-                ? this.httpContextAccessor.HttpContext.RequestServices.GetService(handlerType) as IAssertionGrantHandler
+            => _options.AssertionGrantTypeMap.TryGetValue(grantType, out System.Type handlerType)
+                ? _httpContextAccessor.HttpContext.RequestServices.GetService(handlerType) as IAssertionGrantHandler
                 : null;
-        }
     }
 }

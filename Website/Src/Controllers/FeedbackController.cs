@@ -1,23 +1,21 @@
-﻿// <copyright file="FeedbackController.cs" company="Clicker Heroes Tracker">
-// Copyright (c) Clicker Heroes Tracker. All rights reserved.
-// </copyright>
+﻿// Copyright (C) Clicker Heroes Tracker. All Rights Reserved.
+
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using ClickerHeroesTrackerWebsite.Models;
+using ClickerHeroesTrackerWebsite.Services.Email;
+using Microsoft.ApplicationInsights;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
+using Newtonsoft.Json;
+using SendGrid;
+using SendGrid.Helpers.Mail;
+using Website.Models.Api.Feedback;
 
 namespace Website.Controllers
 {
-    using System.Collections.Generic;
-    using System.Threading.Tasks;
-    using ClickerHeroesTrackerWebsite.Models;
-    using ClickerHeroesTrackerWebsite.Services.Email;
-    using Microsoft.ApplicationInsights;
-    using Microsoft.AspNetCore.Authorization;
-    using Microsoft.AspNetCore.Identity;
-    using Microsoft.AspNetCore.Mvc;
-    using Microsoft.Extensions.Options;
-    using Newtonsoft.Json;
-    using SendGrid;
-    using SendGrid.Helpers.Mail;
-    using Website.Models.Api.Feedback;
-
     /// <summary>
     /// This controller handles processing feedback.
     /// </summary>
@@ -26,11 +24,11 @@ namespace Website.Controllers
     [ApiController]
     public class FeedbackController : Controller
     {
-        private readonly UserManager<ApplicationUser> userManager;
+        private readonly UserManager<ApplicationUser> _userManager;
 
-        private readonly TelemetryClient telemetryClient;
+        private readonly TelemetryClient _telemetryClient;
 
-        private readonly EmailSenderSettings emailSenderSettings;
+        private readonly EmailSenderSettings _emailSenderSettings;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="FeedbackController"/> class.
@@ -40,26 +38,26 @@ namespace Website.Controllers
             TelemetryClient telemetryClient,
             IOptions<EmailSenderSettings> emailSenderSettingsOptions)
         {
-            this.userManager = userManager;
-            this.telemetryClient = telemetryClient;
-            this.emailSenderSettings = emailSenderSettingsOptions.Value;
+            _userManager = userManager;
+            _telemetryClient = telemetryClient;
+            _emailSenderSettings = emailSenderSettingsOptions.Value;
         }
 
         /// <summary>
-        /// Submits user feedback
+        /// Submits user feedback.
         /// </summary>
-        /// <returns>An empty response with a status code representing the result</returns>
+        /// <returns>An empty response with a status code representing the result.</returns>
         [Route("")]
         [HttpPost]
         [AllowAnonymous]
-        public async Task<ActionResult> Submit([FromForm] FeedbackRequest feedback)
+        public async Task<ActionResult> SubmitAsync([FromForm] FeedbackRequest feedback)
         {
             string email = null;
             string userName = null;
-            if (this.User.Identity.IsAuthenticated)
+            if (User.Identity.IsAuthenticated)
             {
-                var user = await this.userManager.GetUserAsync(this.User);
-                email = await this.userManager.GetEmailAsync(user);
+                ApplicationUser user = await _userManager.GetUserAsync(User);
+                email = await _userManager.GetEmailAsync(user);
                 userName = user.UserName;
             }
             else if (!string.IsNullOrWhiteSpace(feedback.Email))
@@ -67,33 +65,33 @@ namespace Website.Controllers
                 email = feedback.Email;
             }
 
-            var feedbackData = new Dictionary<string, string>
+            Dictionary<string, string> feedbackData = new()
             {
                 { "Email", email ?? "<anonymous>" },
                 { "UserName", userName ?? "<anonymous>" },
-                { "Page", this.Request.Headers["Referer"] },
+                { "Page", Request.Headers["Referer"] },
                 { "Comments", feedback.Comments },
             };
 
-            this.telemetryClient.TrackEvent("FeedbackSubmit", feedbackData);
+            _telemetryClient.TrackEvent("FeedbackSubmit", feedbackData);
 
-            var client = new SendGridClient(this.emailSenderSettings.ApiKey);
+            SendGridClient client = new(_emailSenderSettings.ApiKey);
 
-            var message = new SendGridMessage
+            SendGridMessage message = new()
             {
                 From = new EmailAddress(email ?? "do-not-reply@clickerheroestracker.azurewebsites.net", userName ?? "Clicker Heroes Tracker"),
                 Subject = $"Clicker Heroes Tracker Feedback from {userName ?? "<anonymous>"}",
                 PlainTextContent = JsonConvert.SerializeObject(feedbackData, Formatting.Indented),
             };
 
-            foreach (var feedbackReciever in this.emailSenderSettings.FeedbackRecievers)
+            foreach (string feedbackReciever in _emailSenderSettings.FeedbackRecievers)
             {
                 message.AddTo(new EmailAddress(feedbackReciever));
             }
 
             await client.SendEmailAsync(message);
 
-            return this.Ok();
+            return Ok();
         }
     }
 }

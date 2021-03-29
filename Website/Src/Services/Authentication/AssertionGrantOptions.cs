@@ -1,12 +1,10 @@
-﻿// <copyright file="AssertionGrantOptions.cs" company="Clicker Heroes Tracker">
-// Copyright (c) Clicker Heroes Tracker. All rights reserved.
-// </copyright>
+﻿// Copyright (C) Clicker Heroes Tracker. All Rights Reserved.
+
+using System;
+using System.Collections.Generic;
 
 namespace Website.Services.Authentication
 {
-    using System;
-    using System.Collections.Generic;
-
     public sealed class AssertionGrantOptions
     {
         public IDictionary<string, Type> AssertionGrantTypeMap { get; } = new Dictionary<string, Type>(StringComparer.Ordinal);
@@ -19,12 +17,12 @@ namespace Website.Services.Authentication
                 throw new ArgumentNullException(nameof(grantType));
             }
 
-            if (this.AssertionGrantTypeMap.ContainsKey(grantType))
+            if (AssertionGrantTypeMap.ContainsKey(grantType))
             {
                 throw new InvalidOperationException("Grant type already exists: " + grantType);
             }
 
-            this.AssertionGrantTypeMap.Add(grantType, typeof(THandler));
+            AssertionGrantTypeMap.Add(grantType, typeof(THandler));
         }
     }
 }

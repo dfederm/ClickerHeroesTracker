@@ -1,18 +1,16 @@
-﻿// <copyright file="TelemetryClientExtensions.cs" company="Clicker Heroes Tracker">
-// Copyright (c) Clicker Heroes Tracker. All rights reserved.
-// </copyright>
+﻿// Copyright (C) Clicker Heroes Tracker. All Rights Reserved.
+
+using System.Collections.Generic;
+using Microsoft.ApplicationInsights;
+using Microsoft.Azure.Cosmos.Table;
 
 namespace ClickerHeroesTrackerWebsite.Utility
 {
-    using System.Collections.Generic;
-    using Microsoft.ApplicationInsights;
-    using Microsoft.Azure.Cosmos.Table;
-
     internal static class TelemetryClientExtensions
     {
         public static void TrackInvalidTableEntry(this TelemetryClient telemetryClient, ITableEntity entity)
         {
-            var properties = new Dictionary<string, string>
+            Dictionary<string, string> properties = new()
             {
                 { "PartitionKey", entity.PartitionKey },
                 { "RowKey", entity.RowKey },
@@ -22,8 +20,8 @@ namespace ClickerHeroesTrackerWebsite.Utility
 
         public static void TrackFailedTableResult(this TelemetryClient telemetryClient, TableResult result, ITableEntity operationEntity = null)
         {
-            var resultEntity = result.Result as ITableEntity;
-            var properties = new Dictionary<string, string>
+            ITableEntity resultEntity = result.Result as ITableEntity;
+            Dictionary<string, string> properties = new()
             {
                 { "OperationEntity-PartitionKey", operationEntity?.PartitionKey ?? "<none>" },
                 { "OperationEntity-RowKey", operationEntity?.RowKey ?? "<none>" },

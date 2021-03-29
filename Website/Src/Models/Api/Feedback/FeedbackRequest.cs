@@ -1,18 +1,16 @@
-﻿// <copyright file="FeedbackRequest.cs" company="Clicker Heroes Tracker">
-// Copyright (c) Clicker Heroes Tracker. All rights reserved.
-// </copyright>
+﻿// Copyright (C) Clicker Heroes Tracker. All Rights Reserved.
+
+using System.ComponentModel.DataAnnotations;
 
 namespace Website.Models.Api.Feedback
 {
-    using System.ComponentModel.DataAnnotations;
-
     /// <summary>
-    /// Represents user-submitted feedback
+    /// Represents user-submitted feedback.
     /// </summary>
     public class FeedbackRequest
     {
         /// <summary>
-        /// Gets or sets the user's feedback text
+        /// Gets or sets the user's feedback text.
         /// </summary>
         [Required]
         [MinLength(1)]

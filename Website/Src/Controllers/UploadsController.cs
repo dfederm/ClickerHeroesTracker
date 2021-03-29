@@ -1,43 +1,41 @@
-﻿// <copyright file="UploadsController.cs" company="Clicker Heroes Tracker">
-// Copyright (c) Clicker Heroes Tracker. All rights reserved.
-// </copyright>
+﻿// Copyright (C) Clicker Heroes Tracker. All Rights Reserved.
+
+using System;
+using System.Collections.Generic;
+using System.Text;
+using System.Threading.Tasks;
+using ClickerHeroesTrackerWebsite.Models;
+using ClickerHeroesTrackerWebsite.Models.Api.Uploads;
+using ClickerHeroesTrackerWebsite.Models.Game;
+using ClickerHeroesTrackerWebsite.Models.SaveData;
+using ClickerHeroesTrackerWebsite.Models.Settings;
+using ClickerHeroesTrackerWebsite.Models.Stats;
+using ClickerHeroesTrackerWebsite.Services.Database;
+using ClickerHeroesTrackerWebsite.Utility;
+using Microsoft.ApplicationInsights;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
+using Website.Services.Clans;
 
 namespace ClickerHeroesTrackerWebsite.Controllers
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Text;
-    using System.Threading.Tasks;
-    using ClickerHeroesTrackerWebsite.Models;
-    using ClickerHeroesTrackerWebsite.Models.Api.Uploads;
-    using ClickerHeroesTrackerWebsite.Models.Game;
-    using ClickerHeroesTrackerWebsite.Models.SaveData;
-    using ClickerHeroesTrackerWebsite.Models.Settings;
-    using ClickerHeroesTrackerWebsite.Models.Stats;
-    using ClickerHeroesTrackerWebsite.Services.Database;
-    using ClickerHeroesTrackerWebsite.Utility;
-    using Microsoft.ApplicationInsights;
-    using Microsoft.AspNetCore.Authorization;
-    using Microsoft.AspNetCore.Identity;
-    using Microsoft.AspNetCore.Mvc;
-    using Website.Services.Clans;
-
     [Route("api/uploads")]
     [Authorize]
     [ApiController]
     public sealed class UploadsController : Controller
     {
-        private readonly IDatabaseCommandFactory databaseCommandFactory;
+        private readonly IDatabaseCommandFactory _databaseCommandFactory;
 
-        private readonly GameData gameData;
+        private readonly GameData _gameData;
 
-        private readonly IUserSettingsProvider userSettingsProvider;
+        private readonly IUserSettingsProvider _userSettingsProvider;
 
-        private readonly UserManager<ApplicationUser> userManager;
+        private readonly UserManager<ApplicationUser> _userManager;
 
-        private readonly IClanManager clanManager;
+        private readonly IClanManager _clanManager;
 
-        private readonly TelemetryClient telemetryClient;
+        private readonly TelemetryClient _telemetryClient;
 
         public UploadsController(
             IDatabaseCommandFactory databaseCommandFactory,
@@ -47,54 +45,54 @@ namespace ClickerHeroesTrackerWebsite.Controllers
             IClanManager clanManager,
             TelemetryClient telemetryClient)
         {
-            this.databaseCommandFactory = databaseCommandFactory;
-            this.gameData = gameData;
-            this.userSettingsProvider = userSettingsProvider;
-            this.userManager = userManager;
-            this.clanManager = clanManager;
-            this.telemetryClient = telemetryClient;
+            _databaseCommandFactory = databaseCommandFactory;
+            _gameData = gameData;
+            _userSettingsProvider = userSettingsProvider;
+            _userManager = userManager;
+            _clanManager = clanManager;
+            _telemetryClient = telemetryClient;
         }
 
         [Route("{uploadId:int}")]
         [HttpGet]
         [AllowAnonymous]
-        public async Task<ActionResult<Upload>> Details(int uploadId)
+        public async Task<ActionResult<Upload>> DetailsAsync(int uploadId)
         {
             if (uploadId < 0)
             {
-                return this.BadRequest();
+                return BadRequest();
             }
 
-            var uploadIdParameters = new Dictionary<string, object>
+            Dictionary<string, object> uploadIdParameters = new()
             {
                 { "@UploadId", uploadId },
             };
 
             string uploadUserId;
             string uploadContent;
-            var upload = new Upload { Id = uploadId };
+            Upload upload = new() { Id = uploadId };
             const string GetUploadDataCommandText = @"
 	            SELECT UserId, UserName, UploadTime, UploadContent, PlayStyle
                 FROM Uploads
                 LEFT JOIN AspNetUsers
                 ON Uploads.UserId = AspNetUsers.Id
                 WHERE Uploads.Id = @UploadId";
-            using (var command = this.databaseCommandFactory.Create(
+            using (IDatabaseCommand command = _databaseCommandFactory.Create(
                 GetUploadDataCommandText,
                 uploadIdParameters))
-            using (var reader = await command.ExecuteReaderAsync())
+            using (System.Data.IDataReader reader = await command.ExecuteReaderAsync())
             {
                 if (reader.Read())
                 {
                     uploadUserId = reader["UserId"].ToString();
 
-                    var uploadUserName = reader["UserName"].ToString();
+                    string uploadUserName = reader["UserName"].ToString();
                     if (!string.IsNullOrEmpty(uploadUserName))
                     {
                         upload.User = new User
                         {
                             Name = uploadUserName,
-                            ClanName = await this.clanManager.GetClanNameAsync(uploadUserId),
+                            ClanName = await _clanManager.GetClanNameAsync(uploadUserId),
                         };
                     }
 
@@ -107,13 +105,13 @@ namespace ClickerHeroesTrackerWebsite.Controllers
                 else
                 {
                     // If we didn't get data, it's an upload that doesn't exist
-                    return this.NotFound();
+                    return NotFound();
                 }
             }
 
-            var isAdmin = this.User.IsInRole("Admin");
-            var isUploadAnonymous = upload.User == null;
-            var isOwn = !isUploadAnonymous && string.Equals(this.userManager.GetUserId(this.User), uploadUserId, StringComparison.OrdinalIgnoreCase);
+            bool isAdmin = User.IsInRole("Admin");
+            bool isUploadAnonymous = upload.User == null;
+            bool isOwn = !isUploadAnonymous && string.Equals(_userManager.GetUserId(User), uploadUserId, StringComparison.OrdinalIgnoreCase);
 
             // Only return the raw upload content if it's the requesting user's or an admin requested it.
             if (isOwn || isAdmin)
@@ -132,24 +130,24 @@ namespace ClickerHeroesTrackerWebsite.Controllers
         [Route("")]
         [HttpPost]
         [AllowAnonymous]
-        public async Task<ActionResult<int>> Add([FromForm] UploadRequest uploadRequest)
+        public async Task<ActionResult<int>> AddAsync([FromForm] UploadRequest uploadRequest)
         {
             // Only associate it with the user if they requested that it be added to their progress.
-            var userId = uploadRequest.AddToProgress && this.User.Identity.IsAuthenticated
-                ? this.userManager.GetUserId(this.User)
+            string userId = uploadRequest.AddToProgress && User.Identity.IsAuthenticated
+                ? _userManager.GetUserId(User)
                 : null;
 
-            var savedGame = SavedGame.Parse(uploadRequest.EncodedSaveData);
+            SavedGame savedGame = SavedGame.Parse(uploadRequest.EncodedSaveData);
             if (savedGame == null)
             {
                 // Not a valid save
-                return this.BadRequest();
+                return BadRequest();
             }
 
             // Kick off a clan update in parallel
-            var gameUserId = savedGame.Object.Value<string>("uniqueId");
-            var passwordHash = savedGame.Object.Value<string>("passwordHash");
-            var updateClanTask = this.clanManager.UpdateClanAsync(userId, gameUserId, passwordHash);
+            string gameUserId = savedGame.Object.Value<string>("uniqueId");
+            string passwordHash = savedGame.Object.Value<string>("passwordHash");
+            Task updateClanTask = _clanManager.UpdateClanAsync(userId, gameUserId, passwordHash);
 
             PlayStyle playStyle;
             if (uploadRequest.PlayStyle.HasValue)
@@ -158,23 +156,23 @@ namespace ClickerHeroesTrackerWebsite.Controllers
             }
             else
             {
-                var userSettings = await this.userSettingsProvider.GetAsync(userId);
+                Website.Models.Api.Users.UserSettings userSettings = await _userSettingsProvider.GetAsync(userId);
                 playStyle = userSettings.PlayStyle.GetValueOrDefault(PlayStyle.Hybrid);
             }
 
             // unixTimestamp is in milliseconds instead of seconds
-            var saveTime = (savedGame.Object.Value<double>("unixTimestamp") / 1000).UnixTimeStampToDateTime();
+            DateTime saveTime = (savedGame.Object.Value<double>("unixTimestamp") / 1000).UnixTimeStampToDateTime();
 
-            var ancientLevels = new AncientLevelsModel(
-                this.gameData,
+            AncientLevelsModel ancientLevels = new(
+                _gameData,
                 savedGame);
-            var outsiderLevels = new OutsiderLevelsModel(
-                this.gameData,
+            OutsiderLevelsModel outsiderLevels = new(
+                _gameData,
                 savedGame);
-            var computedStats = new ComputedStats(savedGame);
+            ComputedStats computedStats = new(savedGame);
 
             int uploadId;
-            using (var command = this.databaseCommandFactory.Create())
+            using (IDatabaseCommand command = _databaseCommandFactory.Create())
             {
                 await command.BeginTransactionAsync();
 
@@ -235,13 +233,13 @@ namespace ClickerHeroesTrackerWebsite.Controllers
                 await command.ExecuteNonQueryAsync();
 
                 // Insert ancient levels
-                var ancientLevelsCommandText = new StringBuilder("INSERT INTO AncientLevels(UploadId, AncientId, Level) VALUES");
-                var ancientLevelsParameters = new Dictionary<string, object>
+                StringBuilder ancientLevelsCommandText = new("INSERT INTO AncientLevels(UploadId, AncientId, Level) VALUES");
+                Dictionary<string, object> ancientLevelsParameters = new()
                 {
                     { "@UploadId", uploadId },
                 };
-                var isFirstAncient = true;
-                foreach (var pair in ancientLevels.AncientLevels)
+                bool isFirstAncient = true;
+                foreach (KeyValuePair<int, System.Numerics.BigInteger> pair in ancientLevels.AncientLevels)
                 {
                     if (!isFirstAncient)
                     {
@@ -249,8 +247,8 @@ namespace ClickerHeroesTrackerWebsite.Controllers
                     }
 
                     // Looks like: (@UploadId, @AncientId{AncientId}, @AncientLevel{AncientId})
-                    var idParamName = "@AncientId" + pair.Key;
-                    var levelParamName = "@AncientLevel" + pair.Key;
+                    string idParamName = "@AncientId" + pair.Key;
+                    string levelParamName = "@AncientLevel" + pair.Key;
                     ancientLevelsCommandText.Append("(@UploadId,");
                     ancientLevelsCommandText.Append(idParamName);
                     ancientLevelsCommandText.Append(',');
@@ -268,13 +266,13 @@ namespace ClickerHeroesTrackerWebsite.Controllers
                 await command.ExecuteNonQueryAsync();
 
                 // Insert outsider levels
-                var outsiderLevelsCommandText = new StringBuilder("INSERT INTO OutsiderLevels(UploadId, OutsiderId, Level) VALUES");
-                var outsiderLevelsParameters = new Dictionary<string, object>
+                StringBuilder outsiderLevelsCommandText = new("INSERT INTO OutsiderLevels(UploadId, OutsiderId, Level) VALUES");
+                Dictionary<string, object> outsiderLevelsParameters = new()
                 {
                     { "@UploadId", uploadId },
                 };
-                var isFirstOutsider = true;
-                foreach (var pair in outsiderLevels.OutsiderLevels)
+                bool isFirstOutsider = true;
+                foreach (KeyValuePair<int, long> pair in outsiderLevels.OutsiderLevels)
                 {
                     if (!isFirstOutsider)
                     {
@@ -282,8 +280,8 @@ namespace ClickerHeroesTrackerWebsite.Controllers
                     }
 
                     // Looks like: (@UploadId, @OutsiderId{OutsiderId}, @Level{OutsiderId})
-                    var idParamName = "@OutsiderId" + pair.Key;
-                    var levelParamName = "@OutsiderLevel" + pair.Key;
+                    string idParamName = "@OutsiderId" + pair.Key;
+                    string levelParamName = "@OutsiderLevel" + pair.Key;
                     outsiderLevelsCommandText.Append("(@UploadId,");
                     outsiderLevelsCommandText.Append(idParamName);
                     outsiderLevelsCommandText.Append(',');
@@ -308,15 +306,13 @@ namespace ClickerHeroesTrackerWebsite.Controllers
             {
                 await updateClanTask;
             }
-#pragma warning disable CA1031 // Do not catch general exception types
             catch (Exception e)
-#pragma warning restore CA1031 // Do not catch general exception types
             {
-                var properties = new Dictionary<string, string>
+                Dictionary<string, string> properties = new()
                 {
                     { "UploadId", uploadId.ToString() },
                 };
-                this.telemetryClient.TrackException(e, properties);
+                _telemetryClient.TrackException(e, properties);
             }
 
             return uploadId;
@@ -324,9 +320,9 @@ namespace ClickerHeroesTrackerWebsite.Controllers
 
         [Route("{uploadId:int}")]
         [HttpDelete]
-        public async Task<ActionResult> Delete(int uploadId)
+        public async Task<ActionResult> DeleteAsync(int uploadId)
         {
-            var parameters = new Dictionary<string, object>
+            Dictionary<string, object> parameters = new()
             {
                 { "@UploadId", uploadId },
             };
@@ -336,28 +332,28 @@ namespace ClickerHeroesTrackerWebsite.Controllers
 	            SELECT UserId
                 FROM Uploads
                 WHERE Id = @UploadId";
-            using (var command = this.databaseCommandFactory.Create(
+            using (IDatabaseCommand command = _databaseCommandFactory.Create(
                 GetUploadUserCommandText,
                 parameters))
-            using (var reader = await command.ExecuteReaderAsync())
+            using (System.Data.IDataReader reader = await command.ExecuteReaderAsync())
             {
                 if (reader.Read())
                 {
-                    var uploadUserId = reader["UserId"].ToString();
+                    string uploadUserId = reader["UserId"].ToString();
 
-                    var userId = this.userManager.GetUserId(this.User);
-                    var isAdmin = this.User.IsInRole("Admin");
+                    string userId = _userManager.GetUserId(User);
+                    bool isAdmin = User.IsInRole("Admin");
 
                     if (!string.Equals(uploadUserId, userId, StringComparison.OrdinalIgnoreCase) && !isAdmin)
                     {
                         // Not this user's, so not allowed
-                        return this.Forbid();
+                        return Forbid();
                     }
                 }
                 else
                 {
                     // If we didn't get data, it's an upload that doesn't exist
-                    return this.NotFound();
+                    return NotFound();
                 }
             }
 
@@ -378,14 +374,14 @@ namespace ClickerHeroesTrackerWebsite.Controllers
                 DELETE
                 FROM Uploads
                 WHERE Id = @UploadId;";
-            using (var command = this.databaseCommandFactory.Create(
+            using (IDatabaseCommand command = _databaseCommandFactory.Create(
                 DeleteUploadCommandText,
                 parameters))
             {
                 await command.ExecuteNonQueryAsync();
             }
 
-            return this.Ok();
+            return Ok();
         }
     }
 }

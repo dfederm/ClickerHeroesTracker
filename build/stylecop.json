@@ -2,7 +2,10 @@
   "$schema": "https://raw.githubusercontent.com/DotNetAnalyzers/StyleCopAnalyzers/master/StyleCop.Analyzers/StyleCop.Analyzers/Settings/stylecop.schema.json",
   "settings": {
     "documentationRules": {
-      "companyName": "Clicker Heroes Tracker"
+      "companyName": "Clicker Heroes Tracker",
+      "copyrightText": "Copyright (C) Clicker Heroes Tracker. All Rights Reserved.",
+      "xmlHeader": false,
+      "documentInternalElements": false
     }
   }
 }

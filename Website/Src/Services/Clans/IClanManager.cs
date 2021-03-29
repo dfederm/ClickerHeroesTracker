@@ -1,14 +1,12 @@
-﻿// <copyright file="IClanManager.cs" company="Clicker Heroes Tracker">
-// Copyright (c) Clicker Heroes Tracker. All rights reserved.
-// </copyright>
+﻿// Copyright (C) Clicker Heroes Tracker. All Rights Reserved.
+
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using ClickerHeroesTrackerWebsite.Models.Api;
+using ClickerHeroesTrackerWebsite.Models.Api.Clans;
 
 namespace Website.Services.Clans
 {
-    using System.Collections.Generic;
-    using System.Threading.Tasks;
-    using ClickerHeroesTrackerWebsite.Models.Api;
-    using ClickerHeroesTrackerWebsite.Models.Api.Clans;
-
     public interface IClanManager
     {
         Task<string> GetClanNameAsync(string userId);

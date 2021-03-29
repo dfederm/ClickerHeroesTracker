@@ -1,14 +1,12 @@
-﻿// <copyright file="PasswordHasherOptionsAccessor.cs" company="Clicker Heroes Tracker">
-// Copyright (c) Clicker Heroes Tracker. All rights reserved.
-// </copyright>
+﻿// Copyright (C) Clicker Heroes Tracker. All Rights Reserved.
+
+using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Options;
 
 namespace ClickerHeroesTrackerWebsite.Services.Authentication
 {
-    using Microsoft.AspNetCore.Identity;
-    using Microsoft.Extensions.Options;
-
     /// <summary>
-    /// Represents the password hashing options
+    /// Represents the password hashing options.
     /// </summary>
     public sealed class PasswordHasherOptionsAccessor : IOptions<PasswordHasherOptions>
     {

@@ -1,13 +1,11 @@
-﻿// <copyright file="IBuildInfoProvider.cs" company="Clicker Heroes Tracker">
-// Copyright (c) Clicker Heroes Tracker. All rights reserved.
-// </copyright>
+﻿// Copyright (C) Clicker Heroes Tracker. All Rights Reserved.
+
+using System.Collections.Generic;
 
 namespace ClickerHeroesTrackerWebsite.Configuration
 {
-    using System.Collections.Generic;
-
     /// <summary>
-    /// Provides information about the currently running environment
+    /// Provides information about the currently running environment.
     /// </summary>
     public interface IBuildInfoProvider
     {

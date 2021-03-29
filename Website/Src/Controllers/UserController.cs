@@ -1,47 +1,45 @@
-﻿// <copyright file="UserController.cs" company="Clicker Heroes Tracker">
-// Copyright (c) Clicker Heroes Tracker. All rights reserved.
-// </copyright>
+﻿// Copyright (C) Clicker Heroes Tracker. All Rights Reserved.
+
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using ClickerHeroesTrackerWebsite.Models;
+using ClickerHeroesTrackerWebsite.Models.Api;
+using ClickerHeroesTrackerWebsite.Models.Api.Uploads;
+using ClickerHeroesTrackerWebsite.Models.Api.Users;
+using ClickerHeroesTrackerWebsite.Models.Game;
+using ClickerHeroesTrackerWebsite.Models.Settings;
+using ClickerHeroesTrackerWebsite.Services.Database;
+using ClickerHeroesTrackerWebsite.Services.Email;
+using Microsoft.ApplicationInsights;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
+using Website.Models.Api.Users;
+using Website.Services.Clans;
 
 namespace Website.Controllers
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
-    using System.Threading.Tasks;
-    using ClickerHeroesTrackerWebsite.Models;
-    using ClickerHeroesTrackerWebsite.Models.Api;
-    using ClickerHeroesTrackerWebsite.Models.Api.Uploads;
-    using ClickerHeroesTrackerWebsite.Models.Api.Users;
-    using ClickerHeroesTrackerWebsite.Models.Game;
-    using ClickerHeroesTrackerWebsite.Models.Settings;
-    using ClickerHeroesTrackerWebsite.Services.Database;
-    using ClickerHeroesTrackerWebsite.Services.Email;
-    using Microsoft.ApplicationInsights;
-    using Microsoft.AspNetCore.Authorization;
-    using Microsoft.AspNetCore.Identity;
-    using Microsoft.AspNetCore.Mvc;
-    using Website.Models.Api.Users;
-    using Website.Services.Clans;
-
     [Route("api/users")]
     [Authorize]
     [ApiController]
     public class UserController : Controller
     {
-        private readonly GameData gameData;
+        private readonly GameData _gameData;
 
-        private readonly TelemetryClient telemetryClient;
+        private readonly TelemetryClient _telemetryClient;
 
-        private readonly IDatabaseCommandFactory databaseCommandFactory;
+        private readonly IDatabaseCommandFactory _databaseCommandFactory;
 
-        private readonly IUserSettingsProvider userSettingsProvider;
+        private readonly IUserSettingsProvider _userSettingsProvider;
 
-        private readonly UserManager<ApplicationUser> userManager;
+        private readonly UserManager<ApplicationUser> _userManager;
 
-        private readonly IEmailSender emailSender;
+        private readonly IEmailSender _emailSender;
 
-        private readonly IClanManager clanManager;
+        private readonly IClanManager _clanManager;
 
         public UserController(
             GameData gameData,
@@ -52,63 +50,63 @@ namespace Website.Controllers
             IEmailSender emailSender,
             IClanManager clanManager)
         {
-            this.gameData = gameData;
-            this.telemetryClient = telemetryClient;
-            this.databaseCommandFactory = databaseCommandFactory;
-            this.userSettingsProvider = userSettingsProvider;
-            this.userManager = userManager;
-            this.emailSender = emailSender;
-            this.clanManager = clanManager;
+            _gameData = gameData;
+            _telemetryClient = telemetryClient;
+            _databaseCommandFactory = databaseCommandFactory;
+            _userSettingsProvider = userSettingsProvider;
+            _userManager = userManager;
+            _emailSender = emailSender;
+            _clanManager = clanManager;
         }
 
         [Route("")]
         [HttpPost]
         [AllowAnonymous]
-        public async Task<ActionResult> Create(CreateUserRequest createUser)
+        public async Task<ActionResult> CreateAsync(CreateUserRequest createUser)
         {
-            var user = new ApplicationUser { UserName = createUser.UserName, Email = createUser.Email };
-            var result = await this.userManager.CreateAsync(user, createUser.Password);
+            ApplicationUser user = new() { UserName = createUser.UserName, Email = createUser.Email };
+            IdentityResult result = await _userManager.CreateAsync(user, createUser.Password);
             if (result.Succeeded)
             {
-                return this.Ok();
+                return Ok();
             }
 
-            foreach (var error in result.Errors)
+            foreach (IdentityError error in result.Errors)
             {
-                this.ModelState.AddModelError(string.Empty, error.Description);
+                ModelState.AddModelError(string.Empty, error.Description);
             }
 
-            return this.BadRequest(this.ModelState);
+            return BadRequest(ModelState);
         }
 
         [Route("{userName}")]
         [HttpGet]
         [AllowAnonymous]
-        public async Task<ActionResult<User>> Get(string userName)
+        public async Task<ActionResult<User>> GetAsync(string userName)
         {
-            var user = await this.userManager.FindByNameAsync(userName);
+            ApplicationUser user = await _userManager.FindByNameAsync(userName);
             if (user == null)
             {
-                return this.NotFound();
+                return NotFound();
             }
 
-            var userId = await this.userManager.GetUserIdAsync(user);
+            string userId = await _userManager.GetUserIdAsync(user);
             if (string.IsNullOrEmpty(userId))
             {
-                return this.NotFound();
+                return NotFound();
             }
 
             return new User
             {
                 Name = user.UserName,
-                ClanName = await this.clanManager.GetClanNameAsync(userId),
+                ClanName = await _clanManager.GetClanNameAsync(userId),
             };
         }
 
         [Route("{userName}/uploads")]
         [HttpGet]
         [AllowAnonymous]
-        public async Task<ActionResult<UploadSummaryListResponse>> Uploads(
+        public async Task<ActionResult<UploadSummaryListResponse>> UploadsAsync(
             string userName,
             int page = ParameterConstants.Uploads.Page.Default,
             int count = ParameterConstants.Uploads.Count.Default)
@@ -116,25 +114,25 @@ namespace Website.Controllers
             // Validate parameters
             if (page < ParameterConstants.Uploads.Page.Min)
             {
-                return this.BadRequest();
+                return BadRequest();
             }
 
             if (count < ParameterConstants.Uploads.Count.Min
                 || count > ParameterConstants.Uploads.Count.Max)
             {
-                return this.BadRequest();
+                return BadRequest();
             }
 
-            var user = await this.userManager.FindByNameAsync(userName);
+            ApplicationUser user = await _userManager.FindByNameAsync(userName);
             if (user == null)
             {
-                return this.NotFound();
+                return NotFound();
             }
 
-            var userId = await this.userManager.GetUserIdAsync(user);
+            string userId = await _userManager.GetUserIdAsync(user);
             if (string.IsNullOrEmpty(userId))
             {
-                return this.NotFound();
+                return NotFound();
             }
 
             const string GetUploadsCommandText = @"
@@ -151,16 +149,16 @@ namespace Website.Controllers
                 ORDER BY SaveTime DESC
                 OFFSET @Offset ROWS
                 FETCH NEXT @Count ROWS ONLY;";
-            var getUploadsCommandparameters = new Dictionary<string, object>
+            Dictionary<string, object> getUploadsCommandparameters = new()
             {
                 { "@UserId", userId },
                 { "@Offset", (page - 1) * count },
                 { "@Count", count },
             };
 
-            var uploads = new List<UploadSummary>(count);
-            using (var command = this.databaseCommandFactory.Create(GetUploadsCommandText, getUploadsCommandparameters))
-            using (var reader = await command.ExecuteReaderAsync())
+            List<UploadSummary> uploads = new(count);
+            using (IDatabaseCommand command = _databaseCommandFactory.Create(GetUploadsCommandText, getUploadsCommandparameters))
+            using (System.Data.IDataReader reader = await command.ExecuteReaderAsync())
             {
                 while (reader.Read())
                 {
@@ -183,20 +181,20 @@ namespace Website.Controllers
                 SELECT COUNT(*) AS TotalUploads
                 FROM Uploads
                 WHERE UserId = @UserId";
-            var getUploadCountparameters = new Dictionary<string, object>
+            Dictionary<string, object> getUploadCountparameters = new()
             {
                 { "@UserId", userId },
             };
 
-            var pagination = new PaginationMetadata();
-            using (var command = this.databaseCommandFactory.Create(GetUploadCountCommandText, getUploadCountparameters))
-            using (var reader = await command.ExecuteReaderAsync())
+            PaginationMetadata pagination = new();
+            using (IDatabaseCommand command = _databaseCommandFactory.Create(GetUploadCountCommandText, getUploadCountparameters))
+            using (System.Data.IDataReader reader = await command.ExecuteReaderAsync())
             {
                 if (reader.Read())
                 {
                     pagination.Count = Convert.ToInt32(reader["TotalUploads"]);
 
-                    var currentPath = this.Request.Path;
+                    Microsoft.AspNetCore.Http.PathString currentPath = Request.Path;
                     if (page > 1)
                     {
                         pagination.Previous = $"{currentPath}?{nameof(page)}={page - 1}&{nameof(count)}={count}";
@@ -219,7 +217,7 @@ namespace Website.Controllers
         [Route("{userName}/progress")]
         [HttpGet]
         [AllowAnonymous]
-        public async Task<ActionResult<ProgressData>> Progress(
+        public async Task<ActionResult<ProgressData>> ProgressAsync(
             string userName,
             DateTime? start,
             DateTime? end,
@@ -228,28 +226,28 @@ namespace Website.Controllers
         {
             if ((start.HasValue || end.HasValue) && (page.HasValue || count.HasValue))
             {
-                this.ModelState.AddModelError(string.Empty, "time-based and ascension-based filters are mutually exclusive");
-                return this.BadRequest(this.ModelState);
+                ModelState.AddModelError(string.Empty, "time-based and ascension-based filters are mutually exclusive");
+                return BadRequest(ModelState);
             }
 
-            var user = await this.userManager.FindByNameAsync(userName);
+            ApplicationUser user = await _userManager.FindByNameAsync(userName);
             if (user == null)
             {
-                return this.NotFound();
+                return NotFound();
             }
 
-            var userId = await this.userManager.GetUserIdAsync(user);
+            string userId = await _userManager.GetUserIdAsync(user);
             if (string.IsNullOrEmpty(userId))
             {
-                return this.NotFound();
+                return NotFound();
             }
 
-            var parameters = new Dictionary<string, object>
+            Dictionary<string, object> parameters = new()
             {
                 { "@UserId", userId },
             };
 
-            var commandText = new StringBuilder();
+            StringBuilder commandText = new();
             Func<object, string> parseOrdinal;
 
             // If either count or skip are set, use ascention-based filtering. Default to time-based in all other cases.
@@ -258,19 +256,19 @@ namespace Website.Controllers
             if (page.HasValue || count.HasValue)
             {
                 // Fill in missing range values as needed
-                var pageNum = page.GetValueOrDefault(ParameterConstants.Progress.Page.Default);
-                var countNum = count.GetValueOrDefault(ParameterConstants.Progress.Count.Default);
+                int pageNum = page.GetValueOrDefault(ParameterConstants.Progress.Page.Default);
+                int countNum = count.GetValueOrDefault(ParameterConstants.Progress.Count.Default);
 
                 // Validate parameters
                 if (pageNum < ParameterConstants.Progress.Page.Min)
                 {
-                    return this.BadRequest();
+                    return BadRequest();
                 }
 
                 if (countNum < ParameterConstants.Progress.Count.Min
                     || countNum > ParameterConstants.Progress.Count.Max)
                 {
-                    return this.BadRequest();
+                    return BadRequest();
                 }
 
                 parameters.Add("@Offset", (pageNum - 1) * countNum);
@@ -322,7 +320,7 @@ namespace Website.Controllers
                 else
                 {
                     // Default to the past week
-                    var now = DateTime.UtcNow;
+                    DateTime now = DateTime.UtcNow;
                     startTime = now.AddDays(-7);
                     endTime = now;
                 }
@@ -387,10 +385,10 @@ namespace Website.Controllers
                 -- Drop the temp table
                 DROP TABLE #ScopedUploads;");
 
-            using (var command = this.databaseCommandFactory.Create(commandText.ToString(), parameters))
-            using (var reader = await command.ExecuteReaderAsync())
+            using (IDatabaseCommand command = _databaseCommandFactory.Create(commandText.ToString(), parameters))
+            using (System.Data.IDataReader reader = await command.ExecuteReaderAsync())
             {
-                var progressData = new ProgressData
+                ProgressData progressData = new()
                 {
                     TitanDamageData = new SortedDictionary<string, string>(StringComparer.OrdinalIgnoreCase),
                     SoulsSpentData = new SortedDictionary<string, string>(StringComparer.OrdinalIgnoreCase),
@@ -408,7 +406,7 @@ namespace Website.Controllers
 
                 while (reader.Read())
                 {
-                    var ordinal = parseOrdinal(reader["Ordinal"]);
+                    string ordinal = parseOrdinal(reader["Ordinal"]);
 
                     progressData.TitanDamageData[ordinal] = reader["TitanDamage"].ToString();
                     progressData.SoulsSpentData[ordinal] = reader["SoulsSpent"].ToString();
@@ -424,22 +422,22 @@ namespace Website.Controllers
 
                 if (!reader.NextResult())
                 {
-                    return this.StatusCode(500);
+                    return StatusCode(500);
                 }
 
                 while (reader.Read())
                 {
-                    var ordinal = parseOrdinal(reader["Ordinal"]);
-                    var ancientId = Convert.ToInt32(reader["AncientId"]);
-                    var level = reader["Level"].ToString();
+                    string ordinal = parseOrdinal(reader["Ordinal"]);
+                    int ancientId = Convert.ToInt32(reader["AncientId"]);
+                    string level = reader["Level"].ToString();
 
-                    if (!this.gameData.Ancients.TryGetValue(ancientId, out var ancient))
+                    if (!_gameData.Ancients.TryGetValue(ancientId, out Ancient ancient))
                     {
-                        this.telemetryClient.TrackEvent("Unknown Ancient", new Dictionary<string, string> { { "AncientId", ancientId.ToString() } });
+                        _telemetryClient.TrackEvent("Unknown Ancient", new Dictionary<string, string> { { "AncientId", ancientId.ToString() } });
                         continue;
                     }
 
-                    if (!progressData.AncientLevelData.TryGetValue(ancient.Name, out var levelData))
+                    if (!progressData.AncientLevelData.TryGetValue(ancient.Name, out IDictionary<string, string> levelData))
                     {
                         levelData = new SortedDictionary<string, string>(StringComparer.OrdinalIgnoreCase);
                         progressData.AncientLevelData.Add(ancient.Name, levelData);
@@ -450,22 +448,22 @@ namespace Website.Controllers
 
                 if (!reader.NextResult())
                 {
-                    return this.StatusCode(500);
+                    return StatusCode(500);
                 }
 
                 while (reader.Read())
                 {
-                    var ordinal = parseOrdinal(reader["Ordinal"]);
-                    var outsiderId = Convert.ToInt32(reader["OutsiderId"]);
-                    var level = reader["Level"].ToString();
+                    string ordinal = parseOrdinal(reader["Ordinal"]);
+                    int outsiderId = Convert.ToInt32(reader["OutsiderId"]);
+                    string level = reader["Level"].ToString();
 
-                    if (!this.gameData.Outsiders.TryGetValue(outsiderId, out var outsider))
+                    if (!_gameData.Outsiders.TryGetValue(outsiderId, out Outsider outsider))
                     {
-                        this.telemetryClient.TrackEvent("Unknown Outsider", new Dictionary<string, string> { { "OutsiderId", outsiderId.ToString() } });
+                        _telemetryClient.TrackEvent("Unknown Outsider", new Dictionary<string, string> { { "OutsiderId", outsiderId.ToString() } });
                         continue;
                     }
 
-                    if (!progressData.OutsiderLevelData.TryGetValue(outsider.Name, out var levelData))
+                    if (!progressData.OutsiderLevelData.TryGetValue(outsider.Name, out IDictionary<string, string> levelData))
                     {
                         levelData = new SortedDictionary<string, string>(StringComparer.OrdinalIgnoreCase);
                         progressData.OutsiderLevelData.Add(outsider.Name, levelData);
@@ -481,22 +479,22 @@ namespace Website.Controllers
         [Route("{userName}/follows")]
         [HttpGet]
         [AllowAnonymous]
-        public async Task<ActionResult<FollowsData>> Follows(string userName)
+        public async Task<ActionResult<FollowsData>> FollowsAsync(string userName)
         {
-            var user = await this.userManager.FindByNameAsync(userName);
+            ApplicationUser user = await _userManager.FindByNameAsync(userName);
             if (user == null)
             {
-                return this.NotFound();
+                return NotFound();
             }
 
-            var userId = await this.userManager.GetUserIdAsync(user);
+            string userId = await _userManager.GetUserIdAsync(user);
             if (string.IsNullOrEmpty(userId))
             {
-                return this.NotFound();
+                return NotFound();
             }
 
-            var follows = new List<string>();
-            var parameters = new Dictionary<string, object>
+            List<string> follows = new();
+            Dictionary<string, object> parameters = new()
             {
                 { "@UserId", userId },
             };
@@ -507,10 +505,10 @@ namespace Website.Controllers
                 ON UserFollows.FollowUserId = AspNetUsers.Id
                 WHERE UserId = @UserId
                 ORDER BY UserName ASC";
-            using (var command = this.databaseCommandFactory.Create(
+            using (IDatabaseCommand command = _databaseCommandFactory.Create(
                 GetUserFollowsCommandText,
                 parameters))
-            using (var reader = await command.ExecuteReaderAsync())
+            using (System.Data.IDataReader reader = await command.ExecuteReaderAsync())
             {
                 while (reader.Read())
                 {
@@ -526,40 +524,40 @@ namespace Website.Controllers
 
         [Route("{userName}/follows")]
         [HttpPost]
-        public async Task<ActionResult> AddFollow(string userName, AddFollowRequest model)
+        public async Task<ActionResult> AddFollowAsync(string userName, AddFollowRequest model)
         {
-            var user = await this.userManager.FindByNameAsync(userName);
+            ApplicationUser user = await _userManager.FindByNameAsync(userName);
             if (user == null)
             {
-                return this.NotFound();
+                return NotFound();
             }
 
-            var userId = await this.userManager.GetUserIdAsync(user);
+            string userId = await _userManager.GetUserIdAsync(user);
             if (string.IsNullOrEmpty(userId))
             {
-                return this.NotFound();
+                return NotFound();
             }
 
-            var currentUserId = this.userManager.GetUserId(this.User);
+            string currentUserId = _userManager.GetUserId(User);
             if (!userId.Equals(currentUserId, StringComparison.OrdinalIgnoreCase)
-                && !this.User.IsInRole("Admin"))
+                && !User.IsInRole("Admin"))
             {
-                return this.Forbid();
+                return Forbid();
             }
 
-            var followUser = await this.userManager.FindByNameAsync(model.FollowUserName);
+            ApplicationUser followUser = await _userManager.FindByNameAsync(model.FollowUserName);
             if (followUser == null)
             {
-                return this.NotFound();
+                return NotFound();
             }
 
-            var followUserId = await this.userManager.GetUserIdAsync(followUser);
+            string followUserId = await _userManager.GetUserIdAsync(followUser);
             if (string.IsNullOrEmpty(followUserId))
             {
-                return this.NotFound();
+                return NotFound();
             }
 
-            var parameters = new Dictionary<string, object>
+            Dictionary<string, object> parameters = new()
             {
                 { "@UserId", userId },
                 { "@FollowUserId", followUserId },
@@ -574,52 +572,52 @@ namespace Website.Controllers
                 WHEN NOT MATCHED THEN
                     INSERT (UserId, FollowUserId)
                     VALUES(@UserId, @FollowUserId);";
-            using (var command = this.databaseCommandFactory.Create(
+            using (IDatabaseCommand command = _databaseCommandFactory.Create(
                 CommandText,
                 parameters))
             {
                 await command.ExecuteNonQueryAsync();
             }
 
-            return this.Ok();
+            return Ok();
         }
 
         [Route("{userName}/follows/{followUserName}")]
         [HttpDelete]
-        public async Task<ActionResult> RemoveFollow(string userName, string followUserName)
+        public async Task<ActionResult> RemoveFollowAsync(string userName, string followUserName)
         {
-            var user = await this.userManager.FindByNameAsync(userName);
+            ApplicationUser user = await _userManager.FindByNameAsync(userName);
             if (user == null)
             {
-                return this.NotFound();
+                return NotFound();
             }
 
-            var userId = await this.userManager.GetUserIdAsync(user);
+            string userId = await _userManager.GetUserIdAsync(user);
             if (string.IsNullOrEmpty(userId))
             {
-                return this.NotFound();
+                return NotFound();
             }
 
-            var currentUserId = this.userManager.GetUserId(this.User);
+            string currentUserId = _userManager.GetUserId(User);
             if (!userId.Equals(currentUserId, StringComparison.OrdinalIgnoreCase)
-                && !this.User.IsInRole("Admin"))
+                && !User.IsInRole("Admin"))
             {
-                return this.Forbid();
+                return Forbid();
             }
 
-            var followUser = await this.userManager.FindByNameAsync(followUserName);
+            ApplicationUser followUser = await _userManager.FindByNameAsync(followUserName);
             if (followUser == null)
             {
-                return this.NotFound();
+                return NotFound();
             }
 
-            var followUserId = await this.userManager.GetUserIdAsync(followUser);
+            string followUserId = await _userManager.GetUserIdAsync(followUser);
             if (string.IsNullOrEmpty(followUserId))
             {
-                return this.NotFound();
+                return NotFound();
             }
 
-            var parameters = new Dictionary<string, object>
+            Dictionary<string, object> parameters = new()
             {
                 { "@UserId", userId },
                 { "@FollowUserId", followUserId },
@@ -630,101 +628,101 @@ namespace Website.Controllers
                 WHERE UserId = @UserId
                 AND FollowUserId = @FollowUserId;
                 SELECT @@ROWCOUNT;";
-            using (var command = this.databaseCommandFactory.Create(
+            using (IDatabaseCommand command = _databaseCommandFactory.Create(
                 CommandText,
                 parameters))
             {
-                var numDeletions = Convert.ToInt32(await command.ExecuteScalarAsync());
+                int numDeletions = Convert.ToInt32(await command.ExecuteScalarAsync());
                 if (numDeletions == 0)
                 {
-                    return this.NotFound();
+                    return NotFound();
                 }
             }
 
-            return this.Ok();
+            return Ok();
         }
 
         [Route("{userName}/settings")]
         [HttpGet]
-        public async Task<ActionResult<UserSettings>> GetSettings(string userName)
+        public async Task<ActionResult<UserSettings>> GetSettingsAsync(string userName)
         {
-            var user = await this.userManager.FindByNameAsync(userName);
+            ApplicationUser user = await _userManager.FindByNameAsync(userName);
             if (user == null)
             {
-                return this.NotFound();
+                return NotFound();
             }
 
-            var userId = await this.userManager.GetUserIdAsync(user);
+            string userId = await _userManager.GetUserIdAsync(user);
             if (string.IsNullOrEmpty(userId))
             {
-                return this.NotFound();
+                return NotFound();
             }
 
-            var currentUserId = this.userManager.GetUserId(this.User);
+            string currentUserId = _userManager.GetUserId(User);
             if (!userId.Equals(currentUserId, StringComparison.OrdinalIgnoreCase)
-                && !this.User.IsInRole("Admin"))
+                && !User.IsInRole("Admin"))
             {
-                return this.Forbid();
+                return Forbid();
             }
 
-            return await this.userSettingsProvider.GetAsync(userId);
+            return await _userSettingsProvider.GetAsync(userId);
         }
 
         [Route("{userName}/settings")]
         [HttpPatch]
-        public async Task<ActionResult> PatchSettings(string userName, UserSettings model)
+        public async Task<ActionResult> PatchSettingsAsync(string userName, UserSettings model)
         {
-            var user = await this.userManager.FindByNameAsync(userName);
+            ApplicationUser user = await _userManager.FindByNameAsync(userName);
             if (user == null)
             {
-                return this.NotFound();
+                return NotFound();
             }
 
-            var userId = await this.userManager.GetUserIdAsync(user);
+            string userId = await _userManager.GetUserIdAsync(user);
             if (string.IsNullOrEmpty(userId))
             {
-                return this.NotFound();
+                return NotFound();
             }
 
-            var currentUserId = this.userManager.GetUserId(this.User);
+            string currentUserId = _userManager.GetUserId(User);
             if (!userId.Equals(currentUserId, StringComparison.OrdinalIgnoreCase)
-                && !this.User.IsInRole("Admin"))
+                && !User.IsInRole("Admin"))
             {
-                return this.Forbid();
+                return Forbid();
             }
 
-            await this.userSettingsProvider.PatchAsync(userId, model);
+            await _userSettingsProvider.PatchAsync(userId, model);
 
-            return this.Ok();
+            return Ok();
         }
 
         [Route("{userName}/logins")]
         [HttpGet]
-        public async Task<ActionResult<UserLogins>> GetLogins(string userName)
+        public async Task<ActionResult<UserLogins>> GetLoginsAsync(string userName)
         {
-            var user = await this.userManager.FindByNameAsync(userName);
+            ApplicationUser user = await _userManager.FindByNameAsync(userName);
             if (user == null)
             {
-                return this.NotFound();
+                return NotFound();
             }
 
-            var userId = await this.userManager.GetUserIdAsync(user);
+            string userId = await _userManager.GetUserIdAsync(user);
             if (string.IsNullOrEmpty(userId))
             {
-                return this.NotFound();
+                return NotFound();
             }
 
-            var currentUserId = this.userManager.GetUserId(this.User);
+            string currentUserId = _userManager.GetUserId(User);
             if (!userId.Equals(currentUserId, StringComparison.OrdinalIgnoreCase)
-                && !this.User.IsInRole("Admin"))
+                && !User.IsInRole("Admin"))
             {
-                return this.Forbid();
+                return Forbid();
             }
 
             return new UserLogins
             {
-                HasPassword = await this.userManager.HasPasswordAsync(user),
-                ExternalLogins = (await this.userManager.GetLoginsAsync(user))
+                HasPassword = await _userManager.HasPasswordAsync(user),
+                ExternalLogins = (await _userManager.GetLoginsAsync(user))
                     .Select(loginInfo => new ExternalLogin { ProviderName = loginInfo.LoginProvider, ExternalUserId = loginInfo.ProviderKey })
                     .ToList(),
             };
@@ -732,162 +730,162 @@ namespace Website.Controllers
 
         [Route("{userName}/logins")]
         [HttpDelete]
-        public async Task<ActionResult> RemoveLogin(string userName, ExternalLogin model)
+        public async Task<ActionResult> RemoveLoginAsync(string userName, ExternalLogin model)
         {
-            var user = await this.userManager.FindByNameAsync(userName);
+            ApplicationUser user = await _userManager.FindByNameAsync(userName);
             if (user == null)
             {
-                return this.NotFound();
+                return NotFound();
             }
 
-            var userId = await this.userManager.GetUserIdAsync(user);
+            string userId = await _userManager.GetUserIdAsync(user);
             if (string.IsNullOrEmpty(userId))
             {
-                return this.NotFound();
+                return NotFound();
             }
 
-            var currentUserId = this.userManager.GetUserId(this.User);
+            string currentUserId = _userManager.GetUserId(User);
             if (!userId.Equals(currentUserId, StringComparison.OrdinalIgnoreCase)
-                && !this.User.IsInRole("Admin"))
+                && !User.IsInRole("Admin"))
             {
-                return this.Forbid();
+                return Forbid();
             }
 
-            var result = await this.userManager.RemoveLoginAsync(user, model.ProviderName, model.ExternalUserId);
+            IdentityResult result = await _userManager.RemoveLoginAsync(user, model.ProviderName, model.ExternalUserId);
             if (!result.Succeeded)
             {
-                foreach (var error in result.Errors)
+                foreach (IdentityError error in result.Errors)
                 {
-                    this.ModelState.AddModelError(string.Empty, error.Description);
+                    ModelState.AddModelError(string.Empty, error.Description);
                 }
 
-                return this.BadRequest(this.ModelState);
+                return BadRequest(ModelState);
             }
 
-            return this.Ok();
+            return Ok();
         }
 
         [Route("{userName}/setpassword")]
         [HttpPost]
-        public async Task<ActionResult> SetPassword(string userName, SetPasswordRequest model)
+        public async Task<ActionResult> SetPasswordAsync(string userName, SetPasswordRequest model)
         {
-            var user = await this.userManager.FindByNameAsync(userName);
+            ApplicationUser user = await _userManager.FindByNameAsync(userName);
             if (user == null)
             {
-                return this.NotFound();
+                return NotFound();
             }
 
-            var userId = await this.userManager.GetUserIdAsync(user);
+            string userId = await _userManager.GetUserIdAsync(user);
             if (string.IsNullOrEmpty(userId))
             {
-                return this.NotFound();
+                return NotFound();
             }
 
-            var currentUserId = this.userManager.GetUserId(this.User);
+            string currentUserId = _userManager.GetUserId(User);
             if (!userId.Equals(currentUserId, StringComparison.OrdinalIgnoreCase)
-                && !this.User.IsInRole("Admin"))
+                && !User.IsInRole("Admin"))
             {
-                return this.Forbid();
+                return Forbid();
             }
 
-            var result = await this.userManager.AddPasswordAsync(user, model.NewPassword);
+            IdentityResult result = await _userManager.AddPasswordAsync(user, model.NewPassword);
             if (!result.Succeeded)
             {
-                foreach (var error in result.Errors)
+                foreach (IdentityError error in result.Errors)
                 {
-                    this.ModelState.AddModelError(string.Empty, error.Description);
+                    ModelState.AddModelError(string.Empty, error.Description);
                 }
 
-                return this.BadRequest(this.ModelState);
+                return BadRequest(ModelState);
             }
 
-            return this.Ok();
+            return Ok();
         }
 
         [Route("{userName}/changepassword")]
         [HttpPost]
-        public async Task<ActionResult> ChangePassword(string userName, ChangePasswordRequest model)
+        public async Task<ActionResult> ChangePasswordAsync(string userName, ChangePasswordRequest model)
         {
-            var user = await this.userManager.FindByNameAsync(userName);
+            ApplicationUser user = await _userManager.FindByNameAsync(userName);
             if (user == null)
             {
-                return this.NotFound();
+                return NotFound();
             }
 
-            var userId = await this.userManager.GetUserIdAsync(user);
+            string userId = await _userManager.GetUserIdAsync(user);
             if (string.IsNullOrEmpty(userId))
             {
-                return this.NotFound();
+                return NotFound();
             }
 
-            var currentUserId = this.userManager.GetUserId(this.User);
+            string currentUserId = _userManager.GetUserId(User);
             if (!userId.Equals(currentUserId, StringComparison.OrdinalIgnoreCase)
-                && !this.User.IsInRole("Admin"))
+                && !User.IsInRole("Admin"))
             {
-                return this.Forbid();
+                return Forbid();
             }
 
-            var result = await this.userManager.ChangePasswordAsync(user, model.CurrentPassword, model.NewPassword);
+            IdentityResult result = await _userManager.ChangePasswordAsync(user, model.CurrentPassword, model.NewPassword);
             if (!result.Succeeded)
             {
-                foreach (var error in result.Errors)
+                foreach (IdentityError error in result.Errors)
                 {
-                    this.ModelState.AddModelError(string.Empty, error.Description);
+                    ModelState.AddModelError(string.Empty, error.Description);
                 }
 
-                return this.BadRequest(this.ModelState);
+                return BadRequest(ModelState);
             }
 
-            return this.Ok();
+            return Ok();
         }
 
         [Route("resetpassword")]
         [HttpPost]
         [AllowAnonymous]
-        public async Task<ActionResult> ResetPassword(ResetPasswordRequest model)
+        public async Task<ActionResult> ResetPasswordAsync(ResetPasswordRequest model)
         {
             // Using email address since the username is public information
-            var user = await this.userManager.FindByEmailAsync(model.Email);
+            ApplicationUser user = await _userManager.FindByEmailAsync(model.Email);
             if (user == null)
             {
                 // Don't reveal that the user does not exist
-                return this.Ok();
+                return Ok();
             }
 
-            var code = await this.userManager.GeneratePasswordResetTokenAsync(user);
-            await this.emailSender.SendEmailAsync(
+            string code = await _userManager.GeneratePasswordResetTokenAsync(user);
+            await _emailSender.SendEmailAsync(
                 model.Email,
                 "Password Reset",
                 $"There was a request to reset your Clicker Heroes Tracker password. If this was not you, please ignore this email.<br /><br />To reset your password, please enter this verification code:<br /><br />{code}");
 
-            return this.Ok();
+            return Ok();
         }
 
         [Route("resetpasswordconfirmation")]
         [HttpPost]
         [AllowAnonymous]
-        public async Task<ActionResult> ResetPasswordConfirmation(ResetPasswordConfirmationRequest model)
+        public async Task<ActionResult> ResetPasswordConfirmationAsync(ResetPasswordConfirmationRequest model)
         {
             // Using email address since the username is public information
-            var user = await this.userManager.FindByEmailAsync(model.Email);
+            ApplicationUser user = await _userManager.FindByEmailAsync(model.Email);
             if (user == null)
             {
                 // Don't reveal that the user does not exist
-                return this.Ok();
+                return Ok();
             }
 
-            var result = await this.userManager.ResetPasswordAsync(user, model.Code, model.Password);
+            IdentityResult result = await _userManager.ResetPasswordAsync(user, model.Code, model.Password);
             if (result.Succeeded)
             {
-                return this.Ok();
+                return Ok();
             }
 
-            foreach (var error in result.Errors)
+            foreach (IdentityError error in result.Errors)
             {
-                this.ModelState.AddModelError(string.Empty, error.Description);
+                ModelState.AddModelError(string.Empty, error.Description);
             }
 
-            return this.BadRequest(this.ModelState);
+            return BadRequest(ModelState);
         }
 
         internal static class ParameterConstants

@@ -1,13 +1,11 @@
-﻿// <copyright file="ApplicationUser.cs" company="Clicker Heroes Tracker">
-// Copyright (c) Clicker Heroes Tracker. All rights reserved.
-// </copyright>
+﻿// Copyright (C) Clicker Heroes Tracker. All Rights Reserved.
+
+using Microsoft.AspNetCore.Identity;
 
 namespace ClickerHeroesTrackerWebsite.Models
 {
-    using Microsoft.AspNetCore.Identity;
-
     /// <summary>
-    /// A user for the application
+    /// A user for the application.
     /// </summary>
     /// <remarks>
     /// You can add profile data for the user by adding more properties to your ApplicationUser class, please visit http://go.microsoft.com/fwlink/?LinkID=317594 to learn more.

@@ -1,28 +1,26 @@
-﻿// <copyright file="JsonWebToken.cs" company="Clicker Heroes Tracker">
-// Copyright (c) Clicker Heroes Tracker. All rights reserved.
-// </copyright>
+﻿// Copyright (C) Clicker Heroes Tracker. All Rights Reserved.
 
 namespace Website.Models.Authentication
 {
     public sealed class JsonWebToken
     {
         /// <summary>
-        /// Gets or sets the principal that issued the JWT
+        /// Gets or sets the principal that issued the JWT.
         /// </summary>
         public string Iss { get; set; }
 
         /// <summary>
-        /// Gets or sets the subject of the JWT
+        /// Gets or sets the subject of the JWT.
         /// </summary>
         public string Sub { get; set; }
 
         /// <summary>
-        /// Gets or sets the recipients ("audience") that the JWT is intended for
+        /// Gets or sets the recipients ("audience") that the JWT is intended for.
         /// </summary>
         public string Aud { get; set; }
 
         /// <summary>
-        /// Gets or sets the time at which the JWT was issued ("issued at")
+        /// Gets or sets the time at which the JWT was issued ("issued at").
         /// </summary>
         public string Iat { get; set; }
 

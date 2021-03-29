@@ -1,13 +1,11 @@
-﻿// <copyright file="GameData.cs" company="Clicker Heroes Tracker">
-// Copyright (c) Clicker Heroes Tracker. All rights reserved.
-// </copyright>
+﻿// Copyright (C) Clicker Heroes Tracker. All Rights Reserved.
+
+using System.Collections.Generic;
+using System.IO;
+using Newtonsoft.Json;
 
 namespace ClickerHeroesTrackerWebsite.Models.Game
 {
-    using System.Collections.Generic;
-    using System.IO;
-    using Newtonsoft.Json;
-
     /// <summary>
     /// Represents the root game data object.
     /// </summary>
@@ -42,11 +40,11 @@ namespace ClickerHeroesTrackerWebsite.Models.Game
         /// <summary>
         /// Parses a <see cref="GameData"/> from a json file.
         /// </summary>
-        /// <param name="file">The file with the data</param>
-        /// <returns>An <see cref="GameData"/> object</returns>
+        /// <param name="file">The file with the data.</param>
+        /// <returns>An <see cref="GameData"/> object.</returns>
         public static GameData Parse(string file)
         {
-            using (var reader = new StreamReader(file))
+            using (StreamReader reader = new(file))
             {
                 return Serializer.Deserialize<GameData>(new JsonTextReader(reader));
             }
@@ -54,7 +52,7 @@ namespace ClickerHeroesTrackerWebsite.Models.Game
 
         private static JsonSerializer CreateSerializer()
         {
-            var settings = new JsonSerializerSettings();
+            JsonSerializerSettings settings = new();
             return JsonSerializer.Create(settings);
         }
     }

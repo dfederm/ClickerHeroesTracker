@@ -1,16 +1,14 @@
-﻿// <copyright file="MockDatabaseHelper.cs" company="Clicker Heroes Tracker">
-// Copyright (c) Clicker Heroes Tracker. All rights reserved.
-// </copyright>
+﻿// Copyright (C) Clicker Heroes Tracker. All Rights Reserved.
+
+using System;
+using System.Collections.Generic;
+using System.Data;
+using System.Threading.Tasks;
+using ClickerHeroesTrackerWebsite.Services.Database;
+using Moq;
 
 namespace ClickerHeroesTrackerWebsite.Tests.Mocks
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Data;
-    using System.Threading.Tasks;
-    using ClickerHeroesTrackerWebsite.Services.Database;
-    using Moq;
-
     internal static class MockDatabaseHelper
     {
         public static Mock<IDataReader> CreateMockDataReader()
@@ -25,12 +23,12 @@ namespace ClickerHeroesTrackerWebsite.Tests.Mocks
 
         public static Mock<IDataReader> CreateMockDataReader(IList<IDictionary<string, object>> dataSets)
         {
-            var mockDataReader = new Mock<IDataReader>(MockBehavior.Strict);
+            Mock<IDataReader> mockDataReader = new(MockBehavior.Strict);
             mockDataReader
                 .Setup(_ => _.Dispose())
                 .Verifiable();
 
-            var i = -1;
+            int i = -1;
             mockDataReader.Setup(_ => _.Read())
                 .Returns(() => ++i < dataSets.Count)
                 .Verifiable();
@@ -39,7 +37,7 @@ namespace ClickerHeroesTrackerWebsite.Tests.Mocks
             {
                 mockDataReader
                     .Setup(_ => _[It.IsAny<string>()])
-                    .Returns((string key) => dataSets[i].TryGetValue(key, out var value) ? value : DBNull.Value)
+                    .Returns((string key) => dataSets[i].TryGetValue(key, out object value) ? value : DBNull.Value)
                     .Verifiable();
             }
 
@@ -50,7 +48,7 @@ namespace ClickerHeroesTrackerWebsite.Tests.Mocks
             IDictionary<string, object> expectedParameters,
             IDataReader dataReader)
         {
-            var mockDatabaseCommand = CreateMockDatabaseCommandWithoutExecution(expectedParameters);
+            Mock<IDatabaseCommand> mockDatabaseCommand = CreateMockDatabaseCommandWithoutExecution(expectedParameters);
             mockDatabaseCommand.Setup(_ => _.ExecuteReaderAsync()).Returns(Task.FromResult(dataReader));
             return mockDatabaseCommand;
         }
@@ -59,7 +57,7 @@ namespace ClickerHeroesTrackerWebsite.Tests.Mocks
             IDictionary<string, object> expectedParameters,
             object scalar)
         {
-            var mockDatabaseCommand = CreateMockDatabaseCommandWithoutExecution(expectedParameters);
+            Mock<IDatabaseCommand> mockDatabaseCommand = CreateMockDatabaseCommandWithoutExecution(expectedParameters);
             mockDatabaseCommand.Setup(_ => _.ExecuteScalarAsync()).Returns(Task.FromResult(scalar));
             return mockDatabaseCommand;
         }
@@ -67,14 +65,14 @@ namespace ClickerHeroesTrackerWebsite.Tests.Mocks
         public static Mock<IDatabaseCommand> CreateMockDatabaseCommand(
             IDictionary<string, object> expectedParameters)
         {
-            var mockDatabaseCommand = CreateMockDatabaseCommandWithoutExecution(expectedParameters);
+            Mock<IDatabaseCommand> mockDatabaseCommand = CreateMockDatabaseCommandWithoutExecution(expectedParameters);
             mockDatabaseCommand.Setup(_ => _.ExecuteNonQueryAsync()).Returns(Task.CompletedTask);
             return mockDatabaseCommand;
         }
 
         private static Mock<IDatabaseCommand> CreateMockDatabaseCommandWithoutExecution(IDictionary<string, object> expectedParameters)
         {
-            var mockDatabaseCommand = new Mock<IDatabaseCommand>(MockBehavior.Strict);
+            Mock<IDatabaseCommand> mockDatabaseCommand = new(MockBehavior.Strict);
             mockDatabaseCommand.SetupSet(_ => _.CommandText = It.IsAny<string>());
             mockDatabaseCommand.SetupSet(_ => _.Parameters = It.Is<IDictionary<string, object>>(parameters => DictionaryEquals(parameters, expectedParameters)));
             mockDatabaseCommand.Setup(_ => _.Dispose());
@@ -88,9 +86,9 @@ namespace ClickerHeroesTrackerWebsite.Tests.Mocks
                 return false;
             }
 
-            foreach (var pair in dict1)
+            foreach (KeyValuePair<string, object> pair in dict1)
             {
-                if (dict2.TryGetValue(pair.Key, out var value))
+                if (dict2.TryGetValue(pair.Key, out object value))
                 {
                     if (!value.Equals(pair.Value))
                     {

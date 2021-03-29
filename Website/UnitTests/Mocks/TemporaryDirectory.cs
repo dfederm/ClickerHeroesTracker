@@ -1,45 +1,41 @@
-﻿// <copyright file="TemporaryDirectory.cs" company="Clicker Heroes Tracker">
-// Copyright (c) Clicker Heroes Tracker. All rights reserved.
-// </copyright>
+﻿// Copyright (C) Clicker Heroes Tracker. All Rights Reserved.
+
+using System;
+using System.IO;
 
 namespace UnitTests.Mocks
 {
-    using System;
-    using System.IO;
-
     internal sealed class TemporaryDirectory : IDisposable
     {
         private const string BaseDir = ".tmp";
 
-        private bool isDisposed;
+        private bool _isDisposed;
 
         public TemporaryDirectory()
         {
-            var guid = Guid.NewGuid().ToString();
-            this.Location = Path.Combine(BaseDir, guid);
+            string guid = Guid.NewGuid().ToString();
+            Location = Path.Combine(BaseDir, guid);
 
             Directory.CreateDirectory(BaseDir);
-            Directory.CreateDirectory(this.Location);
+            Directory.CreateDirectory(Location);
         }
 
         public string Location { get; }
 
         public void Dispose()
         {
-            if (!this.isDisposed)
+            if (!_isDisposed)
             {
                 try
                 {
-                    Directory.Delete(this.Location, true);
+                    Directory.Delete(Location, true);
                 }
-#pragma warning disable CA1031 // Do not catch general exception types
                 catch
-#pragma warning restore CA1031 // Do not catch general exception types
                 {
                     // Not the end of the world if we couldn't clean up
                 }
 
-                this.isDisposed = true;
+                _isDisposed = true;
             }
         }
     }

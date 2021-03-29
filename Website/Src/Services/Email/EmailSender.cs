@@ -1,32 +1,30 @@
-﻿// <copyright file="EmailSender.cs" company="Clicker Heroes Tracker">
-// Copyright (c) Clicker Heroes Tracker. All rights reserved.
-// </copyright>
+﻿// Copyright (C) Clicker Heroes Tracker. All Rights Reserved.
+
+using System.Threading.Tasks;
+using Microsoft.Extensions.Options;
+using SendGrid;
+using SendGrid.Helpers.Mail;
 
 namespace ClickerHeroesTrackerWebsite.Services.Email
 {
-    using System.Threading.Tasks;
-    using Microsoft.Extensions.Options;
-    using SendGrid;
-    using SendGrid.Helpers.Mail;
-
     /// <summary>
-    /// Service that sends emails
+    /// Service that sends emails.
     /// </summary>
     public class EmailSender : IEmailSender
     {
-        private readonly EmailSenderSettings emailSenderSettings;
+        private readonly EmailSenderSettings _emailSenderSettings;
 
         public EmailSender(IOptions<EmailSenderSettings> emailSenderSettingsOptions)
         {
-            this.emailSenderSettings = emailSenderSettingsOptions.Value;
+            _emailSenderSettings = emailSenderSettingsOptions.Value;
         }
 
         /// <inheritdoc />
         public async Task SendEmailAsync(string email, string subject, string message)
         {
-            var client = new SendGridClient(this.emailSenderSettings.ApiKey);
+            SendGridClient client = new(_emailSenderSettings.ApiKey);
 
-            var emailMessage = new SendGridMessage
+            SendGridMessage emailMessage = new()
             {
                 From = new EmailAddress("do-not-reply@clickerheroestracker.azurewebsites.net", "Clicker Heroes Tracker"),
                 Subject = subject,

@@ -1,17 +1,15 @@
-﻿// <copyright file="StringExtensions.cs" company="Clicker Heroes Tracker">
-// Copyright (c) Clicker Heroes Tracker. All rights reserved.
-// </copyright>
+﻿// Copyright (C) Clicker Heroes Tracker. All Rights Reserved.
+
+using System;
 
 namespace ClickerHeroesTrackerWebsite.Utility
 {
-    using System;
-
     internal static class StringExtensions
     {
         public static TEnum SafeParseEnum<TEnum>(this string str)
             where TEnum : struct
         {
-            return Enum.TryParse<TEnum>(str, out var value) ? value : default(TEnum);
+            return Enum.TryParse<TEnum>(str, out TEnum value) ? value : default(TEnum);
         }
     }
 }

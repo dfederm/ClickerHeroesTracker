@@ -1,21 +1,19 @@
-﻿// <copyright file="MicrosoftAssertionGrantHandlerTests.cs" company="Clicker Heroes Tracker">
-// Copyright (c) Clicker Heroes Tracker. All rights reserved.
-// </copyright>
+﻿// Copyright (C) Clicker Heroes Tracker. All Rights Reserved.
+
+using System;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Threading.Tasks;
+using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.Protocols.OpenIdConnect;
+using Microsoft.IdentityModel.Tokens;
+using Testing.HttpClient;
+using Website.Models.Authentication;
+using Website.Services.Authentication;
+using Xunit;
 
 namespace UnitTests.Services.Authentication
 {
-    using System;
-    using System.IdentityModel.Tokens.Jwt;
-    using System.Security.Claims;
-    using System.Threading.Tasks;
-    using Microsoft.Extensions.Options;
-    using Microsoft.IdentityModel.Protocols.OpenIdConnect;
-    using Microsoft.IdentityModel.Tokens;
-    using Testing.HttpClient;
-    using Website.Models.Authentication;
-    using Website.Services.Authentication;
-    using Xunit;
-
     public sealed class MicrosoftAssertionGrantHandlerTests
     {
         private const string ClientId = "SomeClientId";
@@ -24,7 +22,7 @@ namespace UnitTests.Services.Authentication
         private const string ConfigurationEndpoint = "https://login.microsoftonline.com/common/v2.0/.well-known/openid-configuration";
 
         // Taken from http://self-issued.info/docs/draft-ietf-jose-json-web-key.html#rfc.appendix.A.2
-        private static JsonWebKey jsonWebKey = new JsonWebKey
+        private static readonly JsonWebKey JsonWebKey = new()
         {
             Kty = "RSA",
             N = "0vx7agoebGcQSuuPiLJXZptN9nndrQmbXEps2aiAFbWhM78LhWx4cbbfAAtVT86zwu1RK7aPFFxuhDR1L6tSoc_BJECPebWKRXjBZCiFV4n3oknjhMstn64tZ_2W-5JsGY4Hc5n9yBXArwl93lqt7_RN5w6Cf0h4QyQ5v-65YGjQR0_FDW2QvzqY368QQMicAtaSqzs8KJZgnYb9c7d0zgdAZHzu6qMQvRL5hajrn1n91CbOpbISD08qNLyrdkt-bFTWhAI4vMQFh6WeZu0fM4lFd2NcRwr3XPksINHaQ-G_xBniIqbw0Ls1jF44-csFCur-kEgU8awapJzKnqDKgw",
@@ -42,35 +40,35 @@ namespace UnitTests.Services.Authentication
         [Fact]
         public async Task ValidateAsync_Success()
         {
-            var authenticationSettings = new AuthenticationSettings
+            AuthenticationSettings authenticationSettings = new()
             {
                 Microsoft = new MicrosoftAuthenticationSettings
                 {
                     ClientId = ClientId,
                 },
             };
-            var options = Options.Create(authenticationSettings);
+            IOptions<AuthenticationSettings> options = Options.Create(authenticationSettings);
 
-            var configuration = new OpenIdConnectConfiguration();
+            OpenIdConnectConfiguration configuration = new();
             configuration.JsonWebKeySet = new JsonWebKeySet();
-            configuration.JsonWebKeySet.Keys.Add(jsonWebKey);
+            configuration.JsonWebKeySet.Keys.Add(JsonWebKey);
 
-            using (var http = new HttpClientTestingFactory())
+            using (HttpClientTestingFactory http = new())
             {
-                var tokenHandler = new JwtSecurityTokenHandler();
-                var token = new JwtSecurityToken(
+                JwtSecurityTokenHandler tokenHandler = new();
+                JwtSecurityToken token = new(
                     audience: ClientId,
                     claims: new[] { new Claim("sub", ExternalUserId), new Claim("email", ExternalUserEmail) },
                     notBefore: DateTime.UtcNow,
                     expires: DateTime.UtcNow + TimeSpan.FromHours(1),
-                    signingCredentials: new SigningCredentials(jsonWebKey, jsonWebKey.Alg));
+                    signingCredentials: new SigningCredentials(JsonWebKey, JsonWebKey.Alg));
 
-                var handler = new MicrosoftAssertionGrantHandler(options, http.HttpClient);
-                var resultTask = handler.ValidateAsync(tokenHandler.WriteToken(token));
+                MicrosoftAssertionGrantHandler handler = new(options, http.HttpClient);
+                Task<AssertionGrantResult> resultTask = handler.ValidateAsync(tokenHandler.WriteToken(token));
 
                 http.Expect(ConfigurationEndpoint).Respond(OpenIdConnectConfiguration.Write(configuration));
 
-                var result = await resultTask;
+                AssertionGrantResult result = await resultTask;
                 Assert.NotNull(result);
                 Assert.True(result.IsSuccessful);
                 Assert.Equal(ExternalUserId, result.ExternalUserId);
@@ -83,35 +81,35 @@ namespace UnitTests.Services.Authentication
         [Fact]
         public async Task ValidateAsync_WrongAudience()
         {
-            var authenticationSettings = new AuthenticationSettings
+            AuthenticationSettings authenticationSettings = new()
             {
                 Microsoft = new MicrosoftAuthenticationSettings
                 {
                     ClientId = ClientId,
                 },
             };
-            var options = Options.Create(authenticationSettings);
+            IOptions<AuthenticationSettings> options = Options.Create(authenticationSettings);
 
-            var configuration = new OpenIdConnectConfiguration();
+            OpenIdConnectConfiguration configuration = new();
             configuration.JsonWebKeySet = new JsonWebKeySet();
-            configuration.JsonWebKeySet.Keys.Add(jsonWebKey);
+            configuration.JsonWebKeySet.Keys.Add(JsonWebKey);
 
-            using (var http = new HttpClientTestingFactory())
+            using (HttpClientTestingFactory http = new())
             {
-                var tokenHandler = new JwtSecurityTokenHandler();
-                var token = new JwtSecurityToken(
+                JwtSecurityTokenHandler tokenHandler = new();
+                JwtSecurityToken token = new(
                     audience: "SomeOtherClientId",
                     claims: new[] { new Claim("sub", ExternalUserId), new Claim("email", ExternalUserEmail) },
                     notBefore: DateTime.UtcNow,
                     expires: DateTime.UtcNow + TimeSpan.FromHours(1),
-                    signingCredentials: new SigningCredentials(jsonWebKey, jsonWebKey.Alg));
+                    signingCredentials: new SigningCredentials(JsonWebKey, JsonWebKey.Alg));
 
-                var handler = new MicrosoftAssertionGrantHandler(options, http.HttpClient);
-                var resultTask = handler.ValidateAsync(tokenHandler.WriteToken(token));
+                MicrosoftAssertionGrantHandler handler = new(options, http.HttpClient);
+                Task<AssertionGrantResult> resultTask = handler.ValidateAsync(tokenHandler.WriteToken(token));
 
                 http.Expect(ConfigurationEndpoint).Respond(OpenIdConnectConfiguration.Write(configuration));
 
-                var result = await resultTask;
+                AssertionGrantResult result = await resultTask;
                 Assert.NotNull(result);
                 Assert.False(result.IsSuccessful);
 
@@ -122,27 +120,27 @@ namespace UnitTests.Services.Authentication
         [Fact]
         public async Task ValidateAsync_InvalidToken()
         {
-            var authenticationSettings = new AuthenticationSettings
+            AuthenticationSettings authenticationSettings = new()
             {
                 Microsoft = new MicrosoftAuthenticationSettings
                 {
                     ClientId = ClientId,
                 },
             };
-            var options = Options.Create(authenticationSettings);
+            IOptions<AuthenticationSettings> options = Options.Create(authenticationSettings);
 
-            var configuration = new OpenIdConnectConfiguration();
+            OpenIdConnectConfiguration configuration = new();
             configuration.JsonWebKeySet = new JsonWebKeySet();
-            configuration.JsonWebKeySet.Keys.Add(jsonWebKey);
+            configuration.JsonWebKeySet.Keys.Add(JsonWebKey);
 
-            using (var http = new HttpClientTestingFactory())
+            using (HttpClientTestingFactory http = new())
             {
-                var handler = new MicrosoftAssertionGrantHandler(options, http.HttpClient);
-                var resultTask = handler.ValidateAsync("SomeBadAssertion");
+                MicrosoftAssertionGrantHandler handler = new(options, http.HttpClient);
+                Task<AssertionGrantResult> resultTask = handler.ValidateAsync("SomeBadAssertion");
 
                 http.Expect(ConfigurationEndpoint).Respond(OpenIdConnectConfiguration.Write(configuration));
 
-                var result = await resultTask;
+                AssertionGrantResult result = await resultTask;
                 Assert.NotNull(result);
                 Assert.False(result.IsSuccessful);
 

@@ -1,54 +1,52 @@
-﻿// <copyright file="UserControllerTests.cs" company="Clicker Heroes Tracker">
-// Copyright (c) Clicker Heroes Tracker. All rights reserved.
-// </copyright>
+﻿// Copyright (C) Clicker Heroes Tracker. All Rights Reserved.
+
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Security.Claims;
+using System.Threading.Tasks;
+using ClickerHeroesTrackerWebsite.Models;
+using ClickerHeroesTrackerWebsite.Models.Settings;
+using ClickerHeroesTrackerWebsite.Services.Database;
+using ClickerHeroesTrackerWebsite.Services.Email;
+using ClickerHeroesTrackerWebsite.Tests.Mocks;
+using Microsoft.ApplicationInsights;
+using Microsoft.ApplicationInsights.Extensibility;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
+using Moq;
+using Website.Controllers;
+using Website.Models.Api.Users;
+using Website.Services.Clans;
+using Xunit;
 
 namespace UnitTests.Controllers
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Security.Claims;
-    using System.Threading.Tasks;
-    using ClickerHeroesTrackerWebsite.Models;
-    using ClickerHeroesTrackerWebsite.Models.Settings;
-    using ClickerHeroesTrackerWebsite.Services.Database;
-    using ClickerHeroesTrackerWebsite.Services.Email;
-    using ClickerHeroesTrackerWebsite.Tests.Mocks;
-    using Microsoft.ApplicationInsights;
-    using Microsoft.ApplicationInsights.Extensibility;
-    using Microsoft.AspNetCore.Http;
-    using Microsoft.AspNetCore.Identity;
-    using Microsoft.AspNetCore.Mvc;
-    using Moq;
-    using Website.Controllers;
-    using Website.Models.Api.Users;
-    using Website.Services.Clans;
-    using Xunit;
-
     public static class UserControllerTests
     {
         [Fact]
         public static async Task Create_Success()
         {
-            var createUser = new CreateUserRequest
+            CreateUserRequest createUser = new()
             {
                 UserName = "SomeUserName",
                 Email = "SomeEmail",
                 Password = "SomePassword",
             };
 
-            var gameData = MockGameData.RealData;
-            var telemetryClient = new TelemetryClient(new TelemetryConfiguration());
-            var mockDatabaseCommandFactory = new Mock<IDatabaseCommandFactory>(MockBehavior.Strict);
-            var mockUserSettingsProvider = new Mock<IUserSettingsProvider>(MockBehavior.Strict);
-            var mockUserManager = MockUserManager.CreateMock();
+            ClickerHeroesTrackerWebsite.Models.Game.GameData gameData = MockGameData.RealData;
+            TelemetryClient telemetryClient = new(new TelemetryConfiguration());
+            Mock<IDatabaseCommandFactory> mockDatabaseCommandFactory = new(MockBehavior.Strict);
+            Mock<IUserSettingsProvider> mockUserSettingsProvider = new(MockBehavior.Strict);
+            Mock<UserManager<ApplicationUser>> mockUserManager = MockUserManager.CreateMock();
             mockUserManager
                 .Setup(_ => _.CreateAsync(It.Is<ApplicationUser>(user => user.UserName == createUser.UserName && user.Email == createUser.Email), createUser.Password))
                 .Returns(Task.FromResult(IdentityResult.Success));
-            var mockEmailSender = new Mock<IEmailSender>(MockBehavior.Strict);
-            var mockClanManager = new Mock<IClanManager>(MockBehavior.Strict);
+            Mock<IEmailSender> mockEmailSender = new(MockBehavior.Strict);
+            Mock<IClanManager> mockClanManager = new(MockBehavior.Strict);
 
-            var controller = new UserController(
+            UserController controller = new(
                 gameData,
                 telemetryClient,
                 mockDatabaseCommandFactory.Object,
@@ -56,7 +54,7 @@ namespace UnitTests.Controllers
                 mockUserManager.Object,
                 mockEmailSender.Object,
                 mockClanManager.Object);
-            var result = await controller.Create(createUser);
+            ActionResult result = await controller.CreateAsync(createUser);
 
             Assert.NotNull(result);
             Assert.IsType<OkResult>(result);
@@ -74,25 +72,25 @@ namespace UnitTests.Controllers
         [Fact]
         public static async Task Create_UserCreationFails()
         {
-            var createUser = new CreateUserRequest
+            CreateUserRequest createUser = new()
             {
                 UserName = "SomeUserName",
                 Email = "SomeEmail",
                 Password = "SomePassword",
             };
 
-            var gameData = MockGameData.RealData;
-            var telemetryClient = new TelemetryClient(new TelemetryConfiguration());
-            var mockDatabaseCommandFactory = new Mock<IDatabaseCommandFactory>(MockBehavior.Strict);
-            var mockUserSettingsProvider = new Mock<IUserSettingsProvider>(MockBehavior.Strict);
-            var mockUserManager = MockUserManager.CreateMock();
+            ClickerHeroesTrackerWebsite.Models.Game.GameData gameData = MockGameData.RealData;
+            TelemetryClient telemetryClient = new(new TelemetryConfiguration());
+            Mock<IDatabaseCommandFactory> mockDatabaseCommandFactory = new(MockBehavior.Strict);
+            Mock<IUserSettingsProvider> mockUserSettingsProvider = new(MockBehavior.Strict);
+            Mock<UserManager<ApplicationUser>> mockUserManager = MockUserManager.CreateMock();
             mockUserManager
                 .Setup(_ => _.CreateAsync(It.Is<ApplicationUser>(user => user.UserName == createUser.UserName && user.Email == createUser.Email), createUser.Password))
                 .Returns(Task.FromResult(IdentityResult.Failed(new IdentityError { Description = "SomeDescription" })));
-            var mockEmailSender = new Mock<IEmailSender>(MockBehavior.Strict);
-            var mockClanManager = new Mock<IClanManager>(MockBehavior.Strict);
+            Mock<IEmailSender> mockEmailSender = new(MockBehavior.Strict);
+            Mock<IClanManager> mockClanManager = new(MockBehavior.Strict);
 
-            var controller = new UserController(
+            UserController controller = new(
                 gameData,
                 telemetryClient,
                 mockDatabaseCommandFactory.Object,
@@ -100,7 +98,7 @@ namespace UnitTests.Controllers
                 mockUserManager.Object,
                 mockEmailSender.Object,
                 mockClanManager.Object);
-            var result = await controller.Create(createUser);
+            ActionResult result = await controller.CreateAsync(createUser);
 
             Assert.NotNull(result);
             Assert.IsType<BadRequestObjectResult>(result);
@@ -123,15 +121,15 @@ namespace UnitTests.Controllers
             const string UserId = "SomeUserId";
             const string ClanName = "SomeClanName";
 
-            var gameData = MockGameData.RealData;
-            var telemetryClient = new TelemetryClient(new TelemetryConfiguration());
-            var mockDatabaseCommandFactory = new Mock<IDatabaseCommandFactory>(MockBehavior.Strict);
-            var mockUserSettingsProvider = new Mock<IUserSettingsProvider>(MockBehavior.Strict);
+            ClickerHeroesTrackerWebsite.Models.Game.GameData gameData = MockGameData.RealData;
+            TelemetryClient telemetryClient = new(new TelemetryConfiguration());
+            Mock<IDatabaseCommandFactory> mockDatabaseCommandFactory = new(MockBehavior.Strict);
+            Mock<IUserSettingsProvider> mockUserSettingsProvider = new(MockBehavior.Strict);
 
-            var mockUser = new ApplicationUser { UserName = UserName };
-            var mockCurrentUser = new Mock<ClaimsPrincipal>(MockBehavior.Strict);
+            ApplicationUser mockUser = new() { UserName = UserName };
+            Mock<ClaimsPrincipal> mockCurrentUser = new(MockBehavior.Strict);
 
-            var mockUserManager = MockUserManager.CreateMock();
+            Mock<UserManager<ApplicationUser>> mockUserManager = MockUserManager.CreateMock();
             mockUserManager
                 .Setup(_ => _.FindByNameAsync(UserName))
                 .Returns(Task.FromResult(mockUser));
@@ -139,14 +137,14 @@ namespace UnitTests.Controllers
                 .Setup(_ => _.GetUserIdAsync(mockUser))
                 .Returns(Task.FromResult(UserId));
 
-            var mockEmailSender = new Mock<IEmailSender>(MockBehavior.Strict);
+            Mock<IEmailSender> mockEmailSender = new(MockBehavior.Strict);
 
-            var mockClanManager = new Mock<IClanManager>(MockBehavior.Strict);
+            Mock<IClanManager> mockClanManager = new(MockBehavior.Strict);
             mockClanManager
                 .Setup(_ => _.GetClanNameAsync(UserId))
                 .Returns(Task.FromResult(ClanName));
 
-            var controller = new UserController(
+            UserController controller = new(
                 gameData,
                 telemetryClient,
                 mockDatabaseCommandFactory.Object,
@@ -155,10 +153,10 @@ namespace UnitTests.Controllers
                 mockEmailSender.Object,
                 mockClanManager.Object);
 
-            var result = await controller.Get(UserName);
+            ActionResult<ClickerHeroesTrackerWebsite.Models.Api.Uploads.User> result = await controller.GetAsync(UserName);
             Assert.NotNull(result);
 
-            var model = result.Value;
+            ClickerHeroesTrackerWebsite.Models.Api.Uploads.User model = result.Value;
             Assert.NotNull(model);
 
             Assert.Equal(UserName, model.Name);
@@ -180,21 +178,21 @@ namespace UnitTests.Controllers
         {
             const string UserName = "SomeUserName";
 
-            var gameData = MockGameData.RealData;
-            var telemetryClient = new TelemetryClient(new TelemetryConfiguration());
-            var mockDatabaseCommandFactory = new Mock<IDatabaseCommandFactory>(MockBehavior.Strict);
-            var mockUserSettingsProvider = new Mock<IUserSettingsProvider>(MockBehavior.Strict);
-            var mockCurrentUser = new Mock<ClaimsPrincipal>(MockBehavior.Strict);
+            ClickerHeroesTrackerWebsite.Models.Game.GameData gameData = MockGameData.RealData;
+            TelemetryClient telemetryClient = new(new TelemetryConfiguration());
+            Mock<IDatabaseCommandFactory> mockDatabaseCommandFactory = new(MockBehavior.Strict);
+            Mock<IUserSettingsProvider> mockUserSettingsProvider = new(MockBehavior.Strict);
+            Mock<ClaimsPrincipal> mockCurrentUser = new(MockBehavior.Strict);
 
-            var mockUserManager = MockUserManager.CreateMock();
+            Mock<UserManager<ApplicationUser>> mockUserManager = MockUserManager.CreateMock();
             mockUserManager
                 .Setup(_ => _.FindByNameAsync(UserName))
                 .Returns(Task.FromResult<ApplicationUser>(null));
 
-            var mockEmailSender = new Mock<IEmailSender>(MockBehavior.Strict);
-            var mockClanManager = new Mock<IClanManager>(MockBehavior.Strict);
+            Mock<IEmailSender> mockEmailSender = new(MockBehavior.Strict);
+            Mock<IClanManager> mockClanManager = new(MockBehavior.Strict);
 
-            var controller = new UserController(
+            UserController controller = new(
                 gameData,
                 telemetryClient,
                 mockDatabaseCommandFactory.Object,
@@ -203,7 +201,7 @@ namespace UnitTests.Controllers
                 mockEmailSender.Object,
                 mockClanManager.Object);
 
-            var result = await controller.Get(UserName);
+            ActionResult<ClickerHeroesTrackerWebsite.Models.Api.Uploads.User> result = await controller.GetAsync(UserName);
 
             Assert.NotNull(result);
             Assert.IsType<NotFoundResult>(result.Result);
@@ -224,15 +222,15 @@ namespace UnitTests.Controllers
         {
             const string UserName = "SomeUserName";
 
-            var gameData = MockGameData.RealData;
-            var telemetryClient = new TelemetryClient(new TelemetryConfiguration());
-            var mockDatabaseCommandFactory = new Mock<IDatabaseCommandFactory>(MockBehavior.Strict);
-            var mockUserSettingsProvider = new Mock<IUserSettingsProvider>(MockBehavior.Strict);
+            ClickerHeroesTrackerWebsite.Models.Game.GameData gameData = MockGameData.RealData;
+            TelemetryClient telemetryClient = new(new TelemetryConfiguration());
+            Mock<IDatabaseCommandFactory> mockDatabaseCommandFactory = new(MockBehavior.Strict);
+            Mock<IUserSettingsProvider> mockUserSettingsProvider = new(MockBehavior.Strict);
 
-            var mockUser = new ApplicationUser { UserName = UserName };
-            var mockCurrentUser = new Mock<ClaimsPrincipal>(MockBehavior.Strict);
+            ApplicationUser mockUser = new() { UserName = UserName };
+            Mock<ClaimsPrincipal> mockCurrentUser = new(MockBehavior.Strict);
 
-            var mockUserManager = MockUserManager.CreateMock();
+            Mock<UserManager<ApplicationUser>> mockUserManager = MockUserManager.CreateMock();
             mockUserManager
                 .Setup(_ => _.FindByNameAsync(UserName))
                 .Returns(Task.FromResult(mockUser));
@@ -240,10 +238,10 @@ namespace UnitTests.Controllers
                 .Setup(_ => _.GetUserIdAsync(mockUser))
                 .Returns(Task.FromResult<string>(null));
 
-            var mockEmailSender = new Mock<IEmailSender>(MockBehavior.Strict);
-            var mockClanManager = new Mock<IClanManager>(MockBehavior.Strict);
+            Mock<IEmailSender> mockEmailSender = new(MockBehavior.Strict);
+            Mock<IClanManager> mockClanManager = new(MockBehavior.Strict);
 
-            var controller = new UserController(
+            UserController controller = new(
                 gameData,
                 telemetryClient,
                 mockDatabaseCommandFactory.Object,
@@ -252,7 +250,7 @@ namespace UnitTests.Controllers
                 mockEmailSender.Object,
                 mockClanManager.Object);
 
-            var result = await controller.Get(UserName);
+            ActionResult<ClickerHeroesTrackerWebsite.Models.Api.Uploads.User> result = await controller.GetAsync(UserName);
 
             Assert.NotNull(result);
             Assert.IsType<NotFoundResult>(result.Result);
@@ -278,11 +276,11 @@ namespace UnitTests.Controllers
             const int TotalUploads = 1234;
             const string RequestPath = "/SomeRequestPath";
 
-            var gameData = MockGameData.RealData;
-            var telemetryClient = new TelemetryClient(new TelemetryConfiguration());
+            ClickerHeroesTrackerWebsite.Models.Game.GameData gameData = MockGameData.RealData;
+            TelemetryClient telemetryClient = new(new TelemetryConfiguration());
 
-            var expectedUploadIds = Enumerable.Range(0, 3).ToList();
-            var getUploadsDatasets = expectedUploadIds
+            List<int> expectedUploadIds = Enumerable.Range(0, 3).ToList();
+            List<IDictionary<string, object>> getUploadsDatasets = expectedUploadIds
                 .Select<int, IDictionary<string, object>>(id => new Dictionary<string, object>
                 {
                     { "Id", id },
@@ -293,17 +291,17 @@ namespace UnitTests.Controllers
                     { "Souls", "1e300" },
                 })
                 .ToList();
-            var mockGetUploadsDataReader = MockDatabaseHelper.CreateMockDataReader(getUploadsDatasets);
-            var mockGetUploadsDatabaseCommandParameters = new Dictionary<string, object>() { { "@UserId", UserId }, { "@Offset", (Page - 1) * Count }, { "@Count", Count } };
-            var mockGetUploadsDatabaseCommand = MockDatabaseHelper.CreateMockDatabaseCommand(mockGetUploadsDatabaseCommandParameters, mockGetUploadsDataReader.Object);
+            Mock<System.Data.IDataReader> mockGetUploadsDataReader = MockDatabaseHelper.CreateMockDataReader(getUploadsDatasets);
+            Dictionary<string, object> mockGetUploadsDatabaseCommandParameters = new() { { "@UserId", UserId }, { "@Offset", (Page - 1) * Count }, { "@Count", Count } };
+            Mock<IDatabaseCommand> mockGetUploadsDatabaseCommand = MockDatabaseHelper.CreateMockDatabaseCommand(mockGetUploadsDatabaseCommandParameters, mockGetUploadsDataReader.Object);
 
-            var paginationDataset = new Dictionary<string, object> { { "TotalUploads", TotalUploads } };
-            var mockPaginationDataReader = MockDatabaseHelper.CreateMockDataReader(paginationDataset);
-            var mockPaginationDatabaseCommandParameters = new Dictionary<string, object>() { { "@UserId", UserId } };
-            var mockPaginationDatabaseCommand = MockDatabaseHelper.CreateMockDatabaseCommand(mockPaginationDatabaseCommandParameters, mockPaginationDataReader.Object);
+            Dictionary<string, object> paginationDataset = new() { { "TotalUploads", TotalUploads } };
+            Mock<System.Data.IDataReader> mockPaginationDataReader = MockDatabaseHelper.CreateMockDataReader(paginationDataset);
+            Dictionary<string, object> mockPaginationDatabaseCommandParameters = new() { { "@UserId", UserId } };
+            Mock<IDatabaseCommand> mockPaginationDatabaseCommand = MockDatabaseHelper.CreateMockDatabaseCommand(mockPaginationDatabaseCommandParameters, mockPaginationDataReader.Object);
 
-            var mockDatabaseCommandFactory = new Mock<IDatabaseCommandFactory>(MockBehavior.Strict);
-            var commandCreationCount = 0;
+            Mock<IDatabaseCommandFactory> mockDatabaseCommandFactory = new(MockBehavior.Strict);
+            int commandCreationCount = 0;
             mockDatabaseCommandFactory
                 .Setup(_ => _.Create())
                 .Returns(() =>
@@ -319,9 +317,9 @@ namespace UnitTests.Controllers
                     }
                 });
 
-            var mockUserSettingsProvider = new Mock<IUserSettingsProvider>(MockBehavior.Strict);
-            var mockUser = new ApplicationUser();
-            var mockUserManager = MockUserManager.CreateMock();
+            Mock<IUserSettingsProvider> mockUserSettingsProvider = new(MockBehavior.Strict);
+            ApplicationUser mockUser = new();
+            Mock<UserManager<ApplicationUser>> mockUserManager = MockUserManager.CreateMock();
             mockUserManager
                 .Setup(_ => _.FindByNameAsync(UserName))
                 .Returns(Task.FromResult(mockUser));
@@ -330,16 +328,16 @@ namespace UnitTests.Controllers
                 .Returns(Task.FromResult(UserId));
 
             // Use loose behavior since this is accessed a bunch internally in a controller
-            var mockHttpRequest = new Mock<HttpRequest>(MockBehavior.Loose);
+            Mock<HttpRequest> mockHttpRequest = new(MockBehavior.Loose);
             mockHttpRequest.SetupGet(_ => _.Path).Returns(RequestPath);
 
-            var mockHttpContext = new Mock<HttpContext>(MockBehavior.Strict);
+            Mock<HttpContext> mockHttpContext = new(MockBehavior.Strict);
             mockHttpContext.SetupGet(_ => _.Request).Returns(mockHttpRequest.Object);
 
-            var mockEmailSender = new Mock<IEmailSender>(MockBehavior.Strict);
-            var mockClanManager = new Mock<IClanManager>(MockBehavior.Strict);
+            Mock<IEmailSender> mockEmailSender = new(MockBehavior.Strict);
+            Mock<IClanManager> mockClanManager = new(MockBehavior.Strict);
 
-            var controller = new UserController(
+            UserController controller = new(
                 gameData,
                 telemetryClient,
                 mockDatabaseCommandFactory.Object,
@@ -349,15 +347,15 @@ namespace UnitTests.Controllers
                 mockClanManager.Object);
             controller.ControllerContext = new ControllerContext { HttpContext = mockHttpContext.Object };
 
-            var result = await controller.Uploads(UserName, Page, Count);
+            ActionResult<ClickerHeroesTrackerWebsite.Models.Api.Uploads.UploadSummaryListResponse> result = await controller.UploadsAsync(UserName, Page, Count);
             Assert.NotNull(result);
 
-            var model = result.Value;
+            ClickerHeroesTrackerWebsite.Models.Api.Uploads.UploadSummaryListResponse model = result.Value;
             Assert.NotNull(model);
 
             Assert.NotNull(model.Uploads);
             Assert.Equal(expectedUploadIds.Count, model.Uploads.Count);
-            for (var i = 0; i < model.Uploads.Count; i++)
+            for (int i = 0; i < model.Uploads.Count; i++)
             {
                 Assert.Equal(expectedUploadIds[i], model.Uploads[i].Id);
             }
@@ -397,15 +395,15 @@ namespace UnitTests.Controllers
             UserController.ParameterConstants.Uploads.Count.Max + 1)]
         public static async Task Uploads_ParameterValidation(string userName, int page, int count)
         {
-            var gameData = MockGameData.RealData;
-            var telemetryClient = new TelemetryClient(new TelemetryConfiguration());
-            var mockDatabaseCommandFactory = new Mock<IDatabaseCommandFactory>(MockBehavior.Strict);
-            var mockUserSettingsProvider = new Mock<IUserSettingsProvider>(MockBehavior.Strict);
-            var mockUserManager = MockUserManager.CreateMock();
-            var mockEmailSender = new Mock<IEmailSender>(MockBehavior.Strict);
-            var mockClanManager = new Mock<IClanManager>(MockBehavior.Strict);
+            ClickerHeroesTrackerWebsite.Models.Game.GameData gameData = MockGameData.RealData;
+            TelemetryClient telemetryClient = new(new TelemetryConfiguration());
+            Mock<IDatabaseCommandFactory> mockDatabaseCommandFactory = new(MockBehavior.Strict);
+            Mock<IUserSettingsProvider> mockUserSettingsProvider = new(MockBehavior.Strict);
+            Mock<UserManager<ApplicationUser>> mockUserManager = MockUserManager.CreateMock();
+            Mock<IEmailSender> mockEmailSender = new(MockBehavior.Strict);
+            Mock<IClanManager> mockClanManager = new(MockBehavior.Strict);
 
-            var controller = new UserController(
+            UserController controller = new(
                 gameData,
                 telemetryClient,
                 mockDatabaseCommandFactory.Object,
@@ -414,7 +412,7 @@ namespace UnitTests.Controllers
                 mockEmailSender.Object,
                 mockClanManager.Object);
 
-            var result = await controller.Uploads(userName, page, count);
+            ActionResult<ClickerHeroesTrackerWebsite.Models.Api.Uploads.UploadSummaryListResponse> result = await controller.UploadsAsync(userName, page, count);
 
             Assert.NotNull(result);
             Assert.IsType<BadRequestResult>(result.Result);
@@ -436,20 +434,20 @@ namespace UnitTests.Controllers
             const int Page = 12;
             const int Count = 34;
 
-            var gameData = MockGameData.RealData;
-            var telemetryClient = new TelemetryClient(new TelemetryConfiguration());
-            var mockDatabaseCommandFactory = new Mock<IDatabaseCommandFactory>(MockBehavior.Strict);
-            var mockUserSettingsProvider = new Mock<IUserSettingsProvider>(MockBehavior.Strict);
+            ClickerHeroesTrackerWebsite.Models.Game.GameData gameData = MockGameData.RealData;
+            TelemetryClient telemetryClient = new(new TelemetryConfiguration());
+            Mock<IDatabaseCommandFactory> mockDatabaseCommandFactory = new(MockBehavior.Strict);
+            Mock<IUserSettingsProvider> mockUserSettingsProvider = new(MockBehavior.Strict);
 
-            var mockUserManager = MockUserManager.CreateMock();
+            Mock<UserManager<ApplicationUser>> mockUserManager = MockUserManager.CreateMock();
             mockUserManager
                 .Setup(_ => _.FindByNameAsync(UserName))
                 .Returns(Task.FromResult<ApplicationUser>(null));
 
-            var mockEmailSender = new Mock<IEmailSender>(MockBehavior.Strict);
-            var mockClanManager = new Mock<IClanManager>(MockBehavior.Strict);
+            Mock<IEmailSender> mockEmailSender = new(MockBehavior.Strict);
+            Mock<IClanManager> mockClanManager = new(MockBehavior.Strict);
 
-            var controller = new UserController(
+            UserController controller = new(
                 gameData,
                 telemetryClient,
                 mockDatabaseCommandFactory.Object,
@@ -458,7 +456,7 @@ namespace UnitTests.Controllers
                 mockEmailSender.Object,
                 mockClanManager.Object);
 
-            var result = await controller.Uploads(UserName, Page, Count);
+            ActionResult<ClickerHeroesTrackerWebsite.Models.Api.Uploads.UploadSummaryListResponse> result = await controller.UploadsAsync(UserName, Page, Count);
 
             Assert.NotNull(result);
             Assert.IsType<NotFoundResult>(result.Result);
@@ -480,13 +478,13 @@ namespace UnitTests.Controllers
             const int Page = 12;
             const int Count = 34;
 
-            var gameData = MockGameData.RealData;
-            var telemetryClient = new TelemetryClient(new TelemetryConfiguration());
-            var mockDatabaseCommandFactory = new Mock<IDatabaseCommandFactory>(MockBehavior.Strict);
-            var mockUserSettingsProvider = new Mock<IUserSettingsProvider>(MockBehavior.Strict);
-            var mockUser = new ApplicationUser();
+            ClickerHeroesTrackerWebsite.Models.Game.GameData gameData = MockGameData.RealData;
+            TelemetryClient telemetryClient = new(new TelemetryConfiguration());
+            Mock<IDatabaseCommandFactory> mockDatabaseCommandFactory = new(MockBehavior.Strict);
+            Mock<IUserSettingsProvider> mockUserSettingsProvider = new(MockBehavior.Strict);
+            ApplicationUser mockUser = new();
 
-            var mockUserManager = MockUserManager.CreateMock();
+            Mock<UserManager<ApplicationUser>> mockUserManager = MockUserManager.CreateMock();
             mockUserManager
                 .Setup(_ => _.FindByNameAsync(UserName))
                 .Returns(Task.FromResult(mockUser));
@@ -494,10 +492,10 @@ namespace UnitTests.Controllers
                 .Setup(_ => _.GetUserIdAsync(mockUser))
                 .Returns(Task.FromResult<string>(null));
 
-            var mockEmailSender = new Mock<IEmailSender>(MockBehavior.Strict);
-            var mockClanManager = new Mock<IClanManager>(MockBehavior.Strict);
+            Mock<IEmailSender> mockEmailSender = new(MockBehavior.Strict);
+            Mock<IClanManager> mockClanManager = new(MockBehavior.Strict);
 
-            var controller = new UserController(
+            UserController controller = new(
                 gameData,
                 telemetryClient,
                 mockDatabaseCommandFactory.Object,
@@ -505,7 +503,7 @@ namespace UnitTests.Controllers
                 mockUserManager.Object,
                 mockEmailSender.Object,
                 mockClanManager.Object);
-            var result = await controller.Uploads(UserName, Page, Count);
+            ActionResult<ClickerHeroesTrackerWebsite.Models.Api.Uploads.UploadSummaryListResponse> result = await controller.UploadsAsync(UserName, Page, Count);
 
             Assert.NotNull(result);
             Assert.IsType<NotFoundResult>(result.Result);
@@ -526,27 +524,27 @@ namespace UnitTests.Controllers
             const string UserName = "SomeUserName";
             const string UserId = "SomeUserId";
 
-            var gameData = MockGameData.RealData;
-            var telemetryClient = new TelemetryClient(new TelemetryConfiguration());
+            ClickerHeroesTrackerWebsite.Models.Game.GameData gameData = MockGameData.RealData;
+            TelemetryClient telemetryClient = new(new TelemetryConfiguration());
 
-            var follows = Enumerable.Range(0, 3)
+            List<string> follows = Enumerable.Range(0, 3)
                 .Select(i => "SomeUser" + i)
                 .ToList();
-            var datasets = follows
+            List<IDictionary<string, object>> datasets = follows
                 .Select<string, IDictionary<string, object>>(follow => new Dictionary<string, object> { { "UserName", follow } })
                 .ToList();
-            var mockDataReader = MockDatabaseHelper.CreateMockDataReader(datasets);
-            var mockDatabaseCommandParameters = new Dictionary<string, object>() { { "@UserId", UserId } };
-            var mockDatabaseCommand = MockDatabaseHelper.CreateMockDatabaseCommand(mockDatabaseCommandParameters, mockDataReader.Object);
+            Mock<System.Data.IDataReader> mockDataReader = MockDatabaseHelper.CreateMockDataReader(datasets);
+            Dictionary<string, object> mockDatabaseCommandParameters = new() { { "@UserId", UserId } };
+            Mock<IDatabaseCommand> mockDatabaseCommand = MockDatabaseHelper.CreateMockDatabaseCommand(mockDatabaseCommandParameters, mockDataReader.Object);
 
-            var mockDatabaseCommandFactory = new Mock<IDatabaseCommandFactory>(MockBehavior.Strict);
+            Mock<IDatabaseCommandFactory> mockDatabaseCommandFactory = new(MockBehavior.Strict);
             mockDatabaseCommandFactory
                 .Setup(_ => _.Create())
                 .Returns(mockDatabaseCommand.Object);
 
-            var mockUserSettingsProvider = new Mock<IUserSettingsProvider>(MockBehavior.Strict);
-            var mockUser = new ApplicationUser();
-            var mockUserManager = MockUserManager.CreateMock();
+            Mock<IUserSettingsProvider> mockUserSettingsProvider = new(MockBehavior.Strict);
+            ApplicationUser mockUser = new();
+            Mock<UserManager<ApplicationUser>> mockUserManager = MockUserManager.CreateMock();
             mockUserManager
                 .Setup(_ => _.FindByNameAsync(UserName))
                 .Returns(Task.FromResult(mockUser));
@@ -554,10 +552,10 @@ namespace UnitTests.Controllers
                 .Setup(_ => _.GetUserIdAsync(mockUser))
                 .Returns(Task.FromResult(UserId));
 
-            var mockEmailSender = new Mock<IEmailSender>(MockBehavior.Strict);
-            var mockClanManager = new Mock<IClanManager>(MockBehavior.Strict);
+            Mock<IEmailSender> mockEmailSender = new(MockBehavior.Strict);
+            Mock<IClanManager> mockClanManager = new(MockBehavior.Strict);
 
-            var controller = new UserController(
+            UserController controller = new(
                 gameData,
                 telemetryClient,
                 mockDatabaseCommandFactory.Object,
@@ -566,13 +564,13 @@ namespace UnitTests.Controllers
                 mockEmailSender.Object,
                 mockClanManager.Object);
 
-            var result = await controller.Follows(UserName);
+            ActionResult<FollowsData> result = await controller.FollowsAsync(UserName);
             Assert.NotNull(result);
 
-            var model = result.Value;
+            FollowsData model = result.Value;
             Assert.NotNull(model);
             Assert.Equal(follows.Count, model.Follows.Count);
-            for (var i = 0; i < model.Follows.Count; i++)
+            for (int i = 0; i < model.Follows.Count; i++)
             {
                 Assert.Equal(follows[i], model.Follows[i]);
             }
@@ -592,19 +590,19 @@ namespace UnitTests.Controllers
         {
             const string UserName = "SomeUserName";
 
-            var gameData = MockGameData.RealData;
-            var telemetryClient = new TelemetryClient(new TelemetryConfiguration());
-            var mockDatabaseCommandFactory = new Mock<IDatabaseCommandFactory>(MockBehavior.Strict);
-            var mockUserSettingsProvider = new Mock<IUserSettingsProvider>(MockBehavior.Strict);
-            var mockUserManager = MockUserManager.CreateMock();
+            ClickerHeroesTrackerWebsite.Models.Game.GameData gameData = MockGameData.RealData;
+            TelemetryClient telemetryClient = new(new TelemetryConfiguration());
+            Mock<IDatabaseCommandFactory> mockDatabaseCommandFactory = new(MockBehavior.Strict);
+            Mock<IUserSettingsProvider> mockUserSettingsProvider = new(MockBehavior.Strict);
+            Mock<UserManager<ApplicationUser>> mockUserManager = MockUserManager.CreateMock();
             mockUserManager
                 .Setup(_ => _.FindByNameAsync(UserName))
                 .Returns(Task.FromResult<ApplicationUser>(null));
 
-            var mockEmailSender = new Mock<IEmailSender>(MockBehavior.Strict);
-            var mockClanManager = new Mock<IClanManager>(MockBehavior.Strict);
+            Mock<IEmailSender> mockEmailSender = new(MockBehavior.Strict);
+            Mock<IClanManager> mockClanManager = new(MockBehavior.Strict);
 
-            var controller = new UserController(
+            UserController controller = new(
                 gameData,
                 telemetryClient,
                 mockDatabaseCommandFactory.Object,
@@ -612,7 +610,7 @@ namespace UnitTests.Controllers
                 mockUserManager.Object,
                 mockEmailSender.Object,
                 mockClanManager.Object);
-            var result = await controller.Follows(UserName);
+            ActionResult<FollowsData> result = await controller.FollowsAsync(UserName);
 
             Assert.NotNull(result);
             Assert.IsType<NotFoundResult>(result.Result);
@@ -632,12 +630,12 @@ namespace UnitTests.Controllers
         {
             const string UserName = "SomeUserName";
 
-            var gameData = MockGameData.RealData;
-            var telemetryClient = new TelemetryClient(new TelemetryConfiguration());
-            var mockDatabaseCommandFactory = new Mock<IDatabaseCommandFactory>(MockBehavior.Strict);
-            var mockUserSettingsProvider = new Mock<IUserSettingsProvider>(MockBehavior.Strict);
-            var mockUser = new ApplicationUser();
-            var mockUserManager = MockUserManager.CreateMock();
+            ClickerHeroesTrackerWebsite.Models.Game.GameData gameData = MockGameData.RealData;
+            TelemetryClient telemetryClient = new(new TelemetryConfiguration());
+            Mock<IDatabaseCommandFactory> mockDatabaseCommandFactory = new(MockBehavior.Strict);
+            Mock<IUserSettingsProvider> mockUserSettingsProvider = new(MockBehavior.Strict);
+            ApplicationUser mockUser = new();
+            Mock<UserManager<ApplicationUser>> mockUserManager = MockUserManager.CreateMock();
             mockUserManager
                 .Setup(_ => _.FindByNameAsync(UserName))
                 .Returns(Task.FromResult(mockUser));
@@ -645,10 +643,10 @@ namespace UnitTests.Controllers
                 .Setup(_ => _.GetUserIdAsync(mockUser))
                 .Returns(Task.FromResult<string>(null));
 
-            var mockEmailSender = new Mock<IEmailSender>(MockBehavior.Strict);
-            var mockClanManager = new Mock<IClanManager>(MockBehavior.Strict);
+            Mock<IEmailSender> mockEmailSender = new(MockBehavior.Strict);
+            Mock<IClanManager> mockClanManager = new(MockBehavior.Strict);
 
-            var controller = new UserController(
+            UserController controller = new(
                 gameData,
                 telemetryClient,
                 mockDatabaseCommandFactory.Object,
@@ -656,7 +654,7 @@ namespace UnitTests.Controllers
                 mockUserManager.Object,
                 mockEmailSender.Object,
                 mockClanManager.Object);
-            var result = await controller.Follows(UserName);
+            ActionResult<FollowsData> result = await controller.FollowsAsync(UserName);
 
             Assert.NotNull(result);
             Assert.IsType<NotFoundResult>(result.Result);
@@ -678,27 +676,27 @@ namespace UnitTests.Controllers
             const string UserId = "SomeUserId";
             const string FollowUserId = "SomeFollowUserId";
 
-            var model = new AddFollowRequest
+            AddFollowRequest model = new()
             {
                 FollowUserName = "SomeFollowUserName",
             };
 
-            var gameData = MockGameData.RealData;
-            var telemetryClient = new TelemetryClient(new TelemetryConfiguration());
+            ClickerHeroesTrackerWebsite.Models.Game.GameData gameData = MockGameData.RealData;
+            TelemetryClient telemetryClient = new(new TelemetryConfiguration());
 
-            var mockDatabaseCommandParameters = new Dictionary<string, object>() { { "@UserId", UserId }, { "@FollowUserId", FollowUserId } };
-            var mockDatabaseCommand = MockDatabaseHelper.CreateMockDatabaseCommand(mockDatabaseCommandParameters);
+            Dictionary<string, object> mockDatabaseCommandParameters = new() { { "@UserId", UserId }, { "@FollowUserId", FollowUserId } };
+            Mock<IDatabaseCommand> mockDatabaseCommand = MockDatabaseHelper.CreateMockDatabaseCommand(mockDatabaseCommandParameters);
 
-            var mockDatabaseCommandFactory = new Mock<IDatabaseCommandFactory>(MockBehavior.Strict);
+            Mock<IDatabaseCommandFactory> mockDatabaseCommandFactory = new(MockBehavior.Strict);
             mockDatabaseCommandFactory
                 .Setup(_ => _.Create())
                 .Returns(mockDatabaseCommand.Object);
 
-            var mockUserSettingsProvider = new Mock<IUserSettingsProvider>(MockBehavior.Strict);
-            var mockUser = new ApplicationUser();
-            var mockFollowUser = new ApplicationUser();
-            var mockCurrentUser = new Mock<ClaimsPrincipal>(MockBehavior.Strict);
-            var mockUserManager = MockUserManager.CreateMock();
+            Mock<IUserSettingsProvider> mockUserSettingsProvider = new(MockBehavior.Strict);
+            ApplicationUser mockUser = new();
+            ApplicationUser mockFollowUser = new();
+            Mock<ClaimsPrincipal> mockCurrentUser = new(MockBehavior.Strict);
+            Mock<UserManager<ApplicationUser>> mockUserManager = MockUserManager.CreateMock();
             mockUserManager
                 .Setup(_ => _.FindByNameAsync(UserName))
                 .Returns(Task.FromResult(mockUser));
@@ -715,13 +713,13 @@ namespace UnitTests.Controllers
                 .Setup(_ => _.GetUserId(mockCurrentUser.Object))
                 .Returns(UserId);
 
-            var mockHttpContext = new Mock<HttpContext>(MockBehavior.Strict);
+            Mock<HttpContext> mockHttpContext = new(MockBehavior.Strict);
             mockHttpContext.SetupGet(_ => _.User).Returns(mockCurrentUser.Object).Verifiable();
 
-            var mockEmailSender = new Mock<IEmailSender>(MockBehavior.Strict);
-            var mockClanManager = new Mock<IClanManager>(MockBehavior.Strict);
+            Mock<IEmailSender> mockEmailSender = new(MockBehavior.Strict);
+            Mock<IClanManager> mockClanManager = new(MockBehavior.Strict);
 
-            var controller = new UserController(
+            UserController controller = new(
                 gameData,
                 telemetryClient,
                 mockDatabaseCommandFactory.Object,
@@ -731,7 +729,7 @@ namespace UnitTests.Controllers
                 mockClanManager.Object);
             controller.ControllerContext = new ControllerContext { HttpContext = mockHttpContext.Object };
 
-            var result = await controller.AddFollow(UserName, model);
+            ActionResult result = await controller.AddFollowAsync(UserName, model);
 
             Assert.NotNull(result);
             Assert.IsType<OkResult>(result);
@@ -753,25 +751,25 @@ namespace UnitTests.Controllers
         {
             const string UserName = "SomeUserName";
 
-            var model = new AddFollowRequest
+            AddFollowRequest model = new()
             {
                 FollowUserName = "SomeFollowUserName",
             };
 
-            var gameData = MockGameData.RealData;
-            var telemetryClient = new TelemetryClient(new TelemetryConfiguration());
-            var mockDatabaseCommandFactory = new Mock<IDatabaseCommandFactory>(MockBehavior.Strict);
-            var mockUserSettingsProvider = new Mock<IUserSettingsProvider>(MockBehavior.Strict);
-            var mockCurrentUser = new Mock<ClaimsPrincipal>(MockBehavior.Strict);
-            var mockUserManager = MockUserManager.CreateMock();
+            ClickerHeroesTrackerWebsite.Models.Game.GameData gameData = MockGameData.RealData;
+            TelemetryClient telemetryClient = new(new TelemetryConfiguration());
+            Mock<IDatabaseCommandFactory> mockDatabaseCommandFactory = new(MockBehavior.Strict);
+            Mock<IUserSettingsProvider> mockUserSettingsProvider = new(MockBehavior.Strict);
+            Mock<ClaimsPrincipal> mockCurrentUser = new(MockBehavior.Strict);
+            Mock<UserManager<ApplicationUser>> mockUserManager = MockUserManager.CreateMock();
             mockUserManager
                 .Setup(_ => _.FindByNameAsync(UserName))
                 .Returns(Task.FromResult<ApplicationUser>(null));
 
-            var mockEmailSender = new Mock<IEmailSender>(MockBehavior.Strict);
-            var mockClanManager = new Mock<IClanManager>(MockBehavior.Strict);
+            Mock<IEmailSender> mockEmailSender = new(MockBehavior.Strict);
+            Mock<IClanManager> mockClanManager = new(MockBehavior.Strict);
 
-            var controller = new UserController(
+            UserController controller = new(
                 gameData,
                 telemetryClient,
                 mockDatabaseCommandFactory.Object,
@@ -779,7 +777,7 @@ namespace UnitTests.Controllers
                 mockUserManager.Object,
                 mockEmailSender.Object,
                 mockClanManager.Object);
-            var result = await controller.AddFollow(UserName, model);
+            ActionResult result = await controller.AddFollowAsync(UserName, model);
 
             Assert.NotNull(result);
             Assert.IsType<NotFoundResult>(result);
@@ -800,18 +798,18 @@ namespace UnitTests.Controllers
         {
             const string UserName = "SomeUserName";
 
-            var model = new AddFollowRequest
+            AddFollowRequest model = new()
             {
                 FollowUserName = "SomeFollowUserName",
             };
 
-            var gameData = MockGameData.RealData;
-            var telemetryClient = new TelemetryClient(new TelemetryConfiguration());
-            var mockDatabaseCommandFactory = new Mock<IDatabaseCommandFactory>(MockBehavior.Strict);
-            var mockUserSettingsProvider = new Mock<IUserSettingsProvider>(MockBehavior.Strict);
-            var mockUser = new ApplicationUser();
-            var mockCurrentUser = new Mock<ClaimsPrincipal>(MockBehavior.Strict);
-            var mockUserManager = MockUserManager.CreateMock();
+            ClickerHeroesTrackerWebsite.Models.Game.GameData gameData = MockGameData.RealData;
+            TelemetryClient telemetryClient = new(new TelemetryConfiguration());
+            Mock<IDatabaseCommandFactory> mockDatabaseCommandFactory = new(MockBehavior.Strict);
+            Mock<IUserSettingsProvider> mockUserSettingsProvider = new(MockBehavior.Strict);
+            ApplicationUser mockUser = new();
+            Mock<ClaimsPrincipal> mockCurrentUser = new(MockBehavior.Strict);
+            Mock<UserManager<ApplicationUser>> mockUserManager = MockUserManager.CreateMock();
             mockUserManager
                 .Setup(_ => _.FindByNameAsync(UserName))
                 .Returns(Task.FromResult(mockUser));
@@ -819,10 +817,10 @@ namespace UnitTests.Controllers
                 .Setup(_ => _.GetUserIdAsync(mockUser))
                 .Returns(Task.FromResult<string>(null));
 
-            var mockEmailSender = new Mock<IEmailSender>(MockBehavior.Strict);
-            var mockClanManager = new Mock<IClanManager>(MockBehavior.Strict);
+            Mock<IEmailSender> mockEmailSender = new(MockBehavior.Strict);
+            Mock<IClanManager> mockClanManager = new(MockBehavior.Strict);
 
-            var controller = new UserController(
+            UserController controller = new(
                 gameData,
                 telemetryClient,
                 mockDatabaseCommandFactory.Object,
@@ -830,7 +828,7 @@ namespace UnitTests.Controllers
                 mockUserManager.Object,
                 mockEmailSender.Object,
                 mockClanManager.Object);
-            var result = await controller.AddFollow(UserName, model);
+            ActionResult result = await controller.AddFollowAsync(UserName, model);
 
             Assert.NotNull(result);
             Assert.IsType<NotFoundResult>(result);
@@ -852,18 +850,18 @@ namespace UnitTests.Controllers
             const string UserName = "SomeUserName";
             const string UserId = "SomeUserId";
 
-            var model = new AddFollowRequest
+            AddFollowRequest model = new()
             {
                 FollowUserName = "SomeFollowUserName",
             };
 
-            var gameData = MockGameData.RealData;
-            var telemetryClient = new TelemetryClient(new TelemetryConfiguration());
-            var mockDatabaseCommandFactory = new Mock<IDatabaseCommandFactory>(MockBehavior.Strict);
-            var mockUserSettingsProvider = new Mock<IUserSettingsProvider>(MockBehavior.Strict);
-            var mockUser = new ApplicationUser();
-            var mockCurrentUser = new Mock<ClaimsPrincipal>(MockBehavior.Strict);
-            var mockUserManager = MockUserManager.CreateMock();
+            ClickerHeroesTrackerWebsite.Models.Game.GameData gameData = MockGameData.RealData;
+            TelemetryClient telemetryClient = new(new TelemetryConfiguration());
+            Mock<IDatabaseCommandFactory> mockDatabaseCommandFactory = new(MockBehavior.Strict);
+            Mock<IUserSettingsProvider> mockUserSettingsProvider = new(MockBehavior.Strict);
+            ApplicationUser mockUser = new();
+            Mock<ClaimsPrincipal> mockCurrentUser = new(MockBehavior.Strict);
+            Mock<UserManager<ApplicationUser>> mockUserManager = MockUserManager.CreateMock();
             mockUserManager
                 .Setup(_ => _.FindByNameAsync(UserName))
                 .Returns(Task.FromResult(mockUser));
@@ -877,13 +875,13 @@ namespace UnitTests.Controllers
                 .Setup(_ => _.GetUserId(mockCurrentUser.Object))
                 .Returns(UserId);
 
-            var mockHttpContext = new Mock<HttpContext>(MockBehavior.Strict);
+            Mock<HttpContext> mockHttpContext = new(MockBehavior.Strict);
             mockHttpContext.SetupGet(_ => _.User).Returns(mockCurrentUser.Object).Verifiable();
 
-            var mockEmailSender = new Mock<IEmailSender>(MockBehavior.Strict);
-            var mockClanManager = new Mock<IClanManager>(MockBehavior.Strict);
+            Mock<IEmailSender> mockEmailSender = new(MockBehavior.Strict);
+            Mock<IClanManager> mockClanManager = new(MockBehavior.Strict);
 
-            var controller = new UserController(
+            UserController controller = new(
                 gameData,
                 telemetryClient,
                 mockDatabaseCommandFactory.Object,
@@ -892,7 +890,7 @@ namespace UnitTests.Controllers
                 mockEmailSender.Object,
                 mockClanManager.Object);
             controller.ControllerContext = new ControllerContext { HttpContext = mockHttpContext.Object };
-            var result = await controller.AddFollow(UserName, model);
+            ActionResult result = await controller.AddFollowAsync(UserName, model);
 
             Assert.NotNull(result);
             Assert.IsType<NotFoundResult>(result);
@@ -914,19 +912,19 @@ namespace UnitTests.Controllers
             const string UserName = "SomeUserName";
             const string UserId = "SomeUserId";
 
-            var model = new AddFollowRequest
+            AddFollowRequest model = new()
             {
                 FollowUserName = "SomeFollowUserName",
             };
 
-            var gameData = MockGameData.RealData;
-            var telemetryClient = new TelemetryClient(new TelemetryConfiguration());
-            var mockDatabaseCommandFactory = new Mock<IDatabaseCommandFactory>(MockBehavior.Strict);
-            var mockUserSettingsProvider = new Mock<IUserSettingsProvider>(MockBehavior.Strict);
-            var mockUser = new ApplicationUser();
-            var mockFollowUser = new ApplicationUser();
-            var mockCurrentUser = new Mock<ClaimsPrincipal>(MockBehavior.Strict);
-            var mockUserManager = MockUserManager.CreateMock();
+            ClickerHeroesTrackerWebsite.Models.Game.GameData gameData = MockGameData.RealData;
+            TelemetryClient telemetryClient = new(new TelemetryConfiguration());
+            Mock<IDatabaseCommandFactory> mockDatabaseCommandFactory = new(MockBehavior.Strict);
+            Mock<IUserSettingsProvider> mockUserSettingsProvider = new(MockBehavior.Strict);
+            ApplicationUser mockUser = new();
+            ApplicationUser mockFollowUser = new();
+            Mock<ClaimsPrincipal> mockCurrentUser = new(MockBehavior.Strict);
+            Mock<UserManager<ApplicationUser>> mockUserManager = MockUserManager.CreateMock();
             mockUserManager
                 .Setup(_ => _.FindByNameAsync(UserName))
                 .Returns(Task.FromResult(mockUser));
@@ -943,13 +941,13 @@ namespace UnitTests.Controllers
                 .Setup(_ => _.GetUserId(mockCurrentUser.Object))
                 .Returns(UserId);
 
-            var mockHttpContext = new Mock<HttpContext>(MockBehavior.Strict);
+            Mock<HttpContext> mockHttpContext = new(MockBehavior.Strict);
             mockHttpContext.SetupGet(_ => _.User).Returns(mockCurrentUser.Object).Verifiable();
 
-            var mockEmailSender = new Mock<IEmailSender>(MockBehavior.Strict);
-            var mockClanManager = new Mock<IClanManager>(MockBehavior.Strict);
+            Mock<IEmailSender> mockEmailSender = new(MockBehavior.Strict);
+            Mock<IClanManager> mockClanManager = new(MockBehavior.Strict);
 
-            var controller = new UserController(
+            UserController controller = new(
                 gameData,
                 telemetryClient,
                 mockDatabaseCommandFactory.Object,
@@ -959,7 +957,7 @@ namespace UnitTests.Controllers
                 mockClanManager.Object);
             controller.ControllerContext = new ControllerContext { HttpContext = mockHttpContext.Object };
 
-            var result = await controller.AddFollow(UserName, model);
+            ActionResult result = await controller.AddFollowAsync(UserName, model);
 
             Assert.NotNull(result);
             Assert.IsType<NotFoundResult>(result);
@@ -981,22 +979,22 @@ namespace UnitTests.Controllers
             const string UserName = "SomeUserName";
             const string UserId = "SomeUserId";
 
-            var model = new AddFollowRequest
+            AddFollowRequest model = new()
             {
                 FollowUserName = "SomeFollowUserName",
             };
 
-            var gameData = MockGameData.RealData;
-            var telemetryClient = new TelemetryClient(new TelemetryConfiguration());
-            var mockDatabaseCommandFactory = new Mock<IDatabaseCommandFactory>(MockBehavior.Strict);
-            var mockUserSettingsProvider = new Mock<IUserSettingsProvider>(MockBehavior.Strict);
-            var mockUser = new ApplicationUser();
-            var mockCurrentUser = new Mock<ClaimsPrincipal>(MockBehavior.Strict);
+            ClickerHeroesTrackerWebsite.Models.Game.GameData gameData = MockGameData.RealData;
+            TelemetryClient telemetryClient = new(new TelemetryConfiguration());
+            Mock<IDatabaseCommandFactory> mockDatabaseCommandFactory = new(MockBehavior.Strict);
+            Mock<IUserSettingsProvider> mockUserSettingsProvider = new(MockBehavior.Strict);
+            ApplicationUser mockUser = new();
+            Mock<ClaimsPrincipal> mockCurrentUser = new(MockBehavior.Strict);
             mockCurrentUser
                 .Setup(_ => _.IsInRole("Admin"))
                 .Returns(false);
 
-            var mockUserManager = MockUserManager.CreateMock();
+            Mock<UserManager<ApplicationUser>> mockUserManager = MockUserManager.CreateMock();
             mockUserManager
                 .Setup(_ => _.FindByNameAsync(UserName))
                 .Returns(Task.FromResult(mockUser));
@@ -1007,13 +1005,13 @@ namespace UnitTests.Controllers
                 .Setup(_ => _.GetUserId(mockCurrentUser.Object))
                 .Returns("SomeOtherUserId");
 
-            var mockHttpContext = new Mock<HttpContext>(MockBehavior.Strict);
+            Mock<HttpContext> mockHttpContext = new(MockBehavior.Strict);
             mockHttpContext.SetupGet(_ => _.User).Returns(mockCurrentUser.Object).Verifiable();
 
-            var mockEmailSender = new Mock<IEmailSender>(MockBehavior.Strict);
-            var mockClanManager = new Mock<IClanManager>(MockBehavior.Strict);
+            Mock<IEmailSender> mockEmailSender = new(MockBehavior.Strict);
+            Mock<IClanManager> mockClanManager = new(MockBehavior.Strict);
 
-            var controller = new UserController(
+            UserController controller = new(
                 gameData,
                 telemetryClient,
                 mockDatabaseCommandFactory.Object,
@@ -1023,7 +1021,7 @@ namespace UnitTests.Controllers
                 mockClanManager.Object);
             controller.ControllerContext = new ControllerContext { HttpContext = mockHttpContext.Object };
 
-            var result = await controller.AddFollow(UserName, model);
+            ActionResult result = await controller.AddFollowAsync(UserName, model);
 
             Assert.NotNull(result);
             Assert.IsType<ForbidResult>(result);
@@ -1047,31 +1045,31 @@ namespace UnitTests.Controllers
             const string UserId = "SomeUserId";
             const string FollowUserId = "SomeFollowUserId";
 
-            var model = new AddFollowRequest
+            AddFollowRequest model = new()
             {
                 FollowUserName = "SomeFollowUserName",
             };
 
-            var gameData = MockGameData.RealData;
-            var telemetryClient = new TelemetryClient(new TelemetryConfiguration());
+            ClickerHeroesTrackerWebsite.Models.Game.GameData gameData = MockGameData.RealData;
+            TelemetryClient telemetryClient = new(new TelemetryConfiguration());
 
-            var mockDatabaseCommandParameters = new Dictionary<string, object>() { { "@UserId", UserId }, { "@FollowUserId", FollowUserId } };
-            var mockDatabaseCommand = MockDatabaseHelper.CreateMockDatabaseCommand(mockDatabaseCommandParameters);
+            Dictionary<string, object> mockDatabaseCommandParameters = new() { { "@UserId", UserId }, { "@FollowUserId", FollowUserId } };
+            Mock<IDatabaseCommand> mockDatabaseCommand = MockDatabaseHelper.CreateMockDatabaseCommand(mockDatabaseCommandParameters);
 
-            var mockDatabaseCommandFactory = new Mock<IDatabaseCommandFactory>(MockBehavior.Strict);
+            Mock<IDatabaseCommandFactory> mockDatabaseCommandFactory = new(MockBehavior.Strict);
             mockDatabaseCommandFactory
                 .Setup(_ => _.Create())
                 .Returns(mockDatabaseCommand.Object);
 
-            var mockUserSettingsProvider = new Mock<IUserSettingsProvider>(MockBehavior.Strict);
-            var mockUser = new ApplicationUser();
-            var mockFollowUser = new ApplicationUser();
-            var mockCurrentUser = new Mock<ClaimsPrincipal>(MockBehavior.Strict);
+            Mock<IUserSettingsProvider> mockUserSettingsProvider = new(MockBehavior.Strict);
+            ApplicationUser mockUser = new();
+            ApplicationUser mockFollowUser = new();
+            Mock<ClaimsPrincipal> mockCurrentUser = new(MockBehavior.Strict);
             mockCurrentUser
                 .Setup(_ => _.IsInRole("Admin"))
                 .Returns(true);
 
-            var mockUserManager = MockUserManager.CreateMock();
+            Mock<UserManager<ApplicationUser>> mockUserManager = MockUserManager.CreateMock();
             mockUserManager
                 .Setup(_ => _.FindByNameAsync(UserName))
                 .Returns(Task.FromResult(mockUser));
@@ -1088,13 +1086,13 @@ namespace UnitTests.Controllers
                 .Setup(_ => _.GetUserId(mockCurrentUser.Object))
                 .Returns("SomeOtherUserId");
 
-            var mockHttpContext = new Mock<HttpContext>(MockBehavior.Strict);
+            Mock<HttpContext> mockHttpContext = new(MockBehavior.Strict);
             mockHttpContext.SetupGet(_ => _.User).Returns(mockCurrentUser.Object).Verifiable();
 
-            var mockEmailSender = new Mock<IEmailSender>(MockBehavior.Strict);
-            var mockClanManager = new Mock<IClanManager>(MockBehavior.Strict);
+            Mock<IEmailSender> mockEmailSender = new(MockBehavior.Strict);
+            Mock<IClanManager> mockClanManager = new(MockBehavior.Strict);
 
-            var controller = new UserController(
+            UserController controller = new(
                 gameData,
                 telemetryClient,
                 mockDatabaseCommandFactory.Object,
@@ -1104,7 +1102,7 @@ namespace UnitTests.Controllers
                 mockClanManager.Object);
             controller.ControllerContext = new ControllerContext { HttpContext = mockHttpContext.Object };
 
-            var result = await controller.AddFollow(UserName, model);
+            ActionResult result = await controller.AddFollowAsync(UserName, model);
 
             Assert.NotNull(result);
             Assert.IsType<OkResult>(result);
@@ -1129,22 +1127,22 @@ namespace UnitTests.Controllers
             const string FollowUserName = "SomeFollowUserName";
             const string FollowUserId = "SomeFollowUserId";
 
-            var gameData = MockGameData.RealData;
-            var telemetryClient = new TelemetryClient(new TelemetryConfiguration());
+            ClickerHeroesTrackerWebsite.Models.Game.GameData gameData = MockGameData.RealData;
+            TelemetryClient telemetryClient = new(new TelemetryConfiguration());
 
-            var mockDatabaseCommandParameters = new Dictionary<string, object>() { { "@UserId", UserId }, { "@FollowUserId", FollowUserId } };
-            var mockDatabaseCommand = MockDatabaseHelper.CreateMockDatabaseCommand(mockDatabaseCommandParameters, 1);
+            Dictionary<string, object> mockDatabaseCommandParameters = new() { { "@UserId", UserId }, { "@FollowUserId", FollowUserId } };
+            Mock<IDatabaseCommand> mockDatabaseCommand = MockDatabaseHelper.CreateMockDatabaseCommand(mockDatabaseCommandParameters, 1);
 
-            var mockDatabaseCommandFactory = new Mock<IDatabaseCommandFactory>(MockBehavior.Strict);
+            Mock<IDatabaseCommandFactory> mockDatabaseCommandFactory = new(MockBehavior.Strict);
             mockDatabaseCommandFactory
                 .Setup(_ => _.Create())
                 .Returns(mockDatabaseCommand.Object);
 
-            var mockUserSettingsProvider = new Mock<IUserSettingsProvider>(MockBehavior.Strict);
-            var mockUser = new ApplicationUser();
-            var mockFollowUser = new ApplicationUser();
-            var mockCurrentUser = new Mock<ClaimsPrincipal>(MockBehavior.Strict);
-            var mockUserManager = MockUserManager.CreateMock();
+            Mock<IUserSettingsProvider> mockUserSettingsProvider = new(MockBehavior.Strict);
+            ApplicationUser mockUser = new();
+            ApplicationUser mockFollowUser = new();
+            Mock<ClaimsPrincipal> mockCurrentUser = new(MockBehavior.Strict);
+            Mock<UserManager<ApplicationUser>> mockUserManager = MockUserManager.CreateMock();
             mockUserManager
                 .Setup(_ => _.FindByNameAsync(UserName))
                 .Returns(Task.FromResult(mockUser));
@@ -1161,13 +1159,13 @@ namespace UnitTests.Controllers
                 .Setup(_ => _.GetUserId(mockCurrentUser.Object))
                 .Returns(UserId);
 
-            var mockHttpContext = new Mock<HttpContext>(MockBehavior.Strict);
+            Mock<HttpContext> mockHttpContext = new(MockBehavior.Strict);
             mockHttpContext.SetupGet(_ => _.User).Returns(mockCurrentUser.Object).Verifiable();
 
-            var mockEmailSender = new Mock<IEmailSender>(MockBehavior.Strict);
-            var mockClanManager = new Mock<IClanManager>(MockBehavior.Strict);
+            Mock<IEmailSender> mockEmailSender = new(MockBehavior.Strict);
+            Mock<IClanManager> mockClanManager = new(MockBehavior.Strict);
 
-            var controller = new UserController(
+            UserController controller = new(
                 gameData,
                 telemetryClient,
                 mockDatabaseCommandFactory.Object,
@@ -1177,7 +1175,7 @@ namespace UnitTests.Controllers
                 mockClanManager.Object);
             controller.ControllerContext = new ControllerContext { HttpContext = mockHttpContext.Object };
 
-            var result = await controller.RemoveFollow(UserName, FollowUserName);
+            ActionResult result = await controller.RemoveFollowAsync(UserName, FollowUserName);
 
             Assert.NotNull(result);
             Assert.IsType<OkResult>(result);
@@ -1200,20 +1198,20 @@ namespace UnitTests.Controllers
             const string UserName = "SomeUserName";
             const string FollowUserName = "SomeFollowUserName";
 
-            var gameData = MockGameData.RealData;
-            var telemetryClient = new TelemetryClient(new TelemetryConfiguration());
-            var mockDatabaseCommandFactory = new Mock<IDatabaseCommandFactory>(MockBehavior.Strict);
-            var mockUserSettingsProvider = new Mock<IUserSettingsProvider>(MockBehavior.Strict);
-            var mockCurrentUser = new Mock<ClaimsPrincipal>(MockBehavior.Strict);
-            var mockUserManager = MockUserManager.CreateMock();
+            ClickerHeroesTrackerWebsite.Models.Game.GameData gameData = MockGameData.RealData;
+            TelemetryClient telemetryClient = new(new TelemetryConfiguration());
+            Mock<IDatabaseCommandFactory> mockDatabaseCommandFactory = new(MockBehavior.Strict);
+            Mock<IUserSettingsProvider> mockUserSettingsProvider = new(MockBehavior.Strict);
+            Mock<ClaimsPrincipal> mockCurrentUser = new(MockBehavior.Strict);
+            Mock<UserManager<ApplicationUser>> mockUserManager = MockUserManager.CreateMock();
             mockUserManager
                 .Setup(_ => _.FindByNameAsync(UserName))
                 .Returns(Task.FromResult<ApplicationUser>(null));
 
-            var mockEmailSender = new Mock<IEmailSender>(MockBehavior.Strict);
-            var mockClanManager = new Mock<IClanManager>(MockBehavior.Strict);
+            Mock<IEmailSender> mockEmailSender = new(MockBehavior.Strict);
+            Mock<IClanManager> mockClanManager = new(MockBehavior.Strict);
 
-            var controller = new UserController(
+            UserController controller = new(
                 gameData,
                 telemetryClient,
                 mockDatabaseCommandFactory.Object,
@@ -1221,7 +1219,7 @@ namespace UnitTests.Controllers
                 mockUserManager.Object,
                 mockEmailSender.Object,
                 mockClanManager.Object);
-            var result = await controller.RemoveFollow(UserName, FollowUserName);
+            ActionResult result = await controller.RemoveFollowAsync(UserName, FollowUserName);
 
             Assert.NotNull(result);
             Assert.IsType<NotFoundResult>(result);
@@ -1243,13 +1241,13 @@ namespace UnitTests.Controllers
             const string UserName = "SomeUserName";
             const string FollowUserName = "SomeFollowUserName";
 
-            var gameData = MockGameData.RealData;
-            var telemetryClient = new TelemetryClient(new TelemetryConfiguration());
-            var mockDatabaseCommandFactory = new Mock<IDatabaseCommandFactory>(MockBehavior.Strict);
-            var mockUserSettingsProvider = new Mock<IUserSettingsProvider>(MockBehavior.Strict);
-            var mockUser = new ApplicationUser();
-            var mockCurrentUser = new Mock<ClaimsPrincipal>(MockBehavior.Strict);
-            var mockUserManager = MockUserManager.CreateMock();
+            ClickerHeroesTrackerWebsite.Models.Game.GameData gameData = MockGameData.RealData;
+            TelemetryClient telemetryClient = new(new TelemetryConfiguration());
+            Mock<IDatabaseCommandFactory> mockDatabaseCommandFactory = new(MockBehavior.Strict);
+            Mock<IUserSettingsProvider> mockUserSettingsProvider = new(MockBehavior.Strict);
+            ApplicationUser mockUser = new();
+            Mock<ClaimsPrincipal> mockCurrentUser = new(MockBehavior.Strict);
+            Mock<UserManager<ApplicationUser>> mockUserManager = MockUserManager.CreateMock();
             mockUserManager
                 .Setup(_ => _.FindByNameAsync(UserName))
                 .Returns(Task.FromResult(mockUser));
@@ -1257,10 +1255,10 @@ namespace UnitTests.Controllers
                 .Setup(_ => _.GetUserIdAsync(mockUser))
                 .Returns(Task.FromResult<string>(null));
 
-            var mockEmailSender = new Mock<IEmailSender>(MockBehavior.Strict);
-            var mockClanManager = new Mock<IClanManager>(MockBehavior.Strict);
+            Mock<IEmailSender> mockEmailSender = new(MockBehavior.Strict);
+            Mock<IClanManager> mockClanManager = new(MockBehavior.Strict);
 
-            var controller = new UserController(
+            UserController controller = new(
                 gameData,
                 telemetryClient,
                 mockDatabaseCommandFactory.Object,
@@ -1268,7 +1266,7 @@ namespace UnitTests.Controllers
                 mockUserManager.Object,
                 mockEmailSender.Object,
                 mockClanManager.Object);
-            var result = await controller.RemoveFollow(UserName, FollowUserName);
+            ActionResult result = await controller.RemoveFollowAsync(UserName, FollowUserName);
 
             Assert.NotNull(result);
             Assert.IsType<NotFoundResult>(result);
@@ -1291,13 +1289,13 @@ namespace UnitTests.Controllers
             const string UserId = "SomeUserId";
             const string FollowUserName = "SomeFollowUserName";
 
-            var gameData = MockGameData.RealData;
-            var telemetryClient = new TelemetryClient(new TelemetryConfiguration());
-            var mockDatabaseCommandFactory = new Mock<IDatabaseCommandFactory>(MockBehavior.Strict);
-            var mockUserSettingsProvider = new Mock<IUserSettingsProvider>(MockBehavior.Strict);
-            var mockUser = new ApplicationUser();
-            var mockCurrentUser = new Mock<ClaimsPrincipal>(MockBehavior.Strict);
-            var mockUserManager = MockUserManager.CreateMock();
+            ClickerHeroesTrackerWebsite.Models.Game.GameData gameData = MockGameData.RealData;
+            TelemetryClient telemetryClient = new(new TelemetryConfiguration());
+            Mock<IDatabaseCommandFactory> mockDatabaseCommandFactory = new(MockBehavior.Strict);
+            Mock<IUserSettingsProvider> mockUserSettingsProvider = new(MockBehavior.Strict);
+            ApplicationUser mockUser = new();
+            Mock<ClaimsPrincipal> mockCurrentUser = new(MockBehavior.Strict);
+            Mock<UserManager<ApplicationUser>> mockUserManager = MockUserManager.CreateMock();
             mockUserManager
                 .Setup(_ => _.FindByNameAsync(UserName))
                 .Returns(Task.FromResult(mockUser));
@@ -1311,13 +1309,13 @@ namespace UnitTests.Controllers
                 .Setup(_ => _.GetUserId(mockCurrentUser.Object))
                 .Returns(UserId);
 
-            var mockHttpContext = new Mock<HttpContext>(MockBehavior.Strict);
+            Mock<HttpContext> mockHttpContext = new(MockBehavior.Strict);
             mockHttpContext.SetupGet(_ => _.User).Returns(mockCurrentUser.Object).Verifiable();
 
-            var mockEmailSender = new Mock<IEmailSender>(MockBehavior.Strict);
-            var mockClanManager = new Mock<IClanManager>(MockBehavior.Strict);
+            Mock<IEmailSender> mockEmailSender = new(MockBehavior.Strict);
+            Mock<IClanManager> mockClanManager = new(MockBehavior.Strict);
 
-            var controller = new UserController(
+            UserController controller = new(
                 gameData,
                 telemetryClient,
                 mockDatabaseCommandFactory.Object,
@@ -1326,7 +1324,7 @@ namespace UnitTests.Controllers
                 mockEmailSender.Object,
                 mockClanManager.Object);
             controller.ControllerContext = new ControllerContext { HttpContext = mockHttpContext.Object };
-            var result = await controller.RemoveFollow(UserName, FollowUserName);
+            ActionResult result = await controller.RemoveFollowAsync(UserName, FollowUserName);
 
             Assert.NotNull(result);
             Assert.IsType<NotFoundResult>(result);
@@ -1349,14 +1347,14 @@ namespace UnitTests.Controllers
             const string UserId = "SomeUserId";
             const string FollowUserName = "SomeFollowUserName";
 
-            var gameData = MockGameData.RealData;
-            var telemetryClient = new TelemetryClient(new TelemetryConfiguration());
-            var mockDatabaseCommandFactory = new Mock<IDatabaseCommandFactory>(MockBehavior.Strict);
-            var mockUserSettingsProvider = new Mock<IUserSettingsProvider>(MockBehavior.Strict);
-            var mockUser = new ApplicationUser();
-            var mockFollowUser = new ApplicationUser();
-            var mockCurrentUser = new Mock<ClaimsPrincipal>(MockBehavior.Strict);
-            var mockUserManager = MockUserManager.CreateMock();
+            ClickerHeroesTrackerWebsite.Models.Game.GameData gameData = MockGameData.RealData;
+            TelemetryClient telemetryClient = new(new TelemetryConfiguration());
+            Mock<IDatabaseCommandFactory> mockDatabaseCommandFactory = new(MockBehavior.Strict);
+            Mock<IUserSettingsProvider> mockUserSettingsProvider = new(MockBehavior.Strict);
+            ApplicationUser mockUser = new();
+            ApplicationUser mockFollowUser = new();
+            Mock<ClaimsPrincipal> mockCurrentUser = new(MockBehavior.Strict);
+            Mock<UserManager<ApplicationUser>> mockUserManager = MockUserManager.CreateMock();
             mockUserManager
                 .Setup(_ => _.FindByNameAsync(UserName))
                 .Returns(Task.FromResult(mockUser));
@@ -1373,13 +1371,13 @@ namespace UnitTests.Controllers
                 .Setup(_ => _.GetUserId(mockCurrentUser.Object))
                 .Returns(UserId);
 
-            var mockHttpContext = new Mock<HttpContext>(MockBehavior.Strict);
+            Mock<HttpContext> mockHttpContext = new(MockBehavior.Strict);
             mockHttpContext.SetupGet(_ => _.User).Returns(mockCurrentUser.Object).Verifiable();
 
-            var mockEmailSender = new Mock<IEmailSender>(MockBehavior.Strict);
-            var mockClanManager = new Mock<IClanManager>(MockBehavior.Strict);
+            Mock<IEmailSender> mockEmailSender = new(MockBehavior.Strict);
+            Mock<IClanManager> mockClanManager = new(MockBehavior.Strict);
 
-            var controller = new UserController(
+            UserController controller = new(
                 gameData,
                 telemetryClient,
                 mockDatabaseCommandFactory.Object,
@@ -1389,7 +1387,7 @@ namespace UnitTests.Controllers
                 mockClanManager.Object);
             controller.ControllerContext = new ControllerContext { HttpContext = mockHttpContext.Object };
 
-            var result = await controller.RemoveFollow(UserName, FollowUserName);
+            ActionResult result = await controller.RemoveFollowAsync(UserName, FollowUserName);
 
             Assert.NotNull(result);
             Assert.IsType<NotFoundResult>(result);
@@ -1412,17 +1410,17 @@ namespace UnitTests.Controllers
             const string UserId = "SomeUserId";
             const string FollowUserName = "SomeFollowUserName";
 
-            var gameData = MockGameData.RealData;
-            var telemetryClient = new TelemetryClient(new TelemetryConfiguration());
-            var mockDatabaseCommandFactory = new Mock<IDatabaseCommandFactory>(MockBehavior.Strict);
-            var mockUserSettingsProvider = new Mock<IUserSettingsProvider>(MockBehavior.Strict);
-            var mockUser = new ApplicationUser();
-            var mockCurrentUser = new Mock<ClaimsPrincipal>(MockBehavior.Strict);
+            ClickerHeroesTrackerWebsite.Models.Game.GameData gameData = MockGameData.RealData;
+            TelemetryClient telemetryClient = new(new TelemetryConfiguration());
+            Mock<IDatabaseCommandFactory> mockDatabaseCommandFactory = new(MockBehavior.Strict);
+            Mock<IUserSettingsProvider> mockUserSettingsProvider = new(MockBehavior.Strict);
+            ApplicationUser mockUser = new();
+            Mock<ClaimsPrincipal> mockCurrentUser = new(MockBehavior.Strict);
             mockCurrentUser
                 .Setup(_ => _.IsInRole("Admin"))
                 .Returns(false);
 
-            var mockUserManager = MockUserManager.CreateMock();
+            Mock<UserManager<ApplicationUser>> mockUserManager = MockUserManager.CreateMock();
             mockUserManager
                 .Setup(_ => _.FindByNameAsync(UserName))
                 .Returns(Task.FromResult(mockUser));
@@ -1433,13 +1431,13 @@ namespace UnitTests.Controllers
                 .Setup(_ => _.GetUserId(mockCurrentUser.Object))
                 .Returns("SomeOtherUserId");
 
-            var mockHttpContext = new Mock<HttpContext>(MockBehavior.Strict);
+            Mock<HttpContext> mockHttpContext = new(MockBehavior.Strict);
             mockHttpContext.SetupGet(_ => _.User).Returns(mockCurrentUser.Object).Verifiable();
 
-            var mockEmailSender = new Mock<IEmailSender>(MockBehavior.Strict);
-            var mockClanManager = new Mock<IClanManager>(MockBehavior.Strict);
+            Mock<IEmailSender> mockEmailSender = new(MockBehavior.Strict);
+            Mock<IClanManager> mockClanManager = new(MockBehavior.Strict);
 
-            var controller = new UserController(
+            UserController controller = new(
                 gameData,
                 telemetryClient,
                 mockDatabaseCommandFactory.Object,
@@ -1449,7 +1447,7 @@ namespace UnitTests.Controllers
                 mockClanManager.Object);
             controller.ControllerContext = new ControllerContext { HttpContext = mockHttpContext.Object };
 
-            var result = await controller.RemoveFollow(UserName, FollowUserName);
+            ActionResult result = await controller.RemoveFollowAsync(UserName, FollowUserName);
 
             Assert.NotNull(result);
             Assert.IsType<ForbidResult>(result);
@@ -1474,26 +1472,26 @@ namespace UnitTests.Controllers
             const string FollowUserName = "SomeFollowUserName";
             const string FollowUserId = "SomeFollowUserId";
 
-            var gameData = MockGameData.RealData;
-            var telemetryClient = new TelemetryClient(new TelemetryConfiguration());
+            ClickerHeroesTrackerWebsite.Models.Game.GameData gameData = MockGameData.RealData;
+            TelemetryClient telemetryClient = new(new TelemetryConfiguration());
 
-            var mockDatabaseCommandParameters = new Dictionary<string, object>() { { "@UserId", UserId }, { "@FollowUserId", FollowUserId } };
-            var mockDatabaseCommand = MockDatabaseHelper.CreateMockDatabaseCommand(mockDatabaseCommandParameters, 1);
+            Dictionary<string, object> mockDatabaseCommandParameters = new() { { "@UserId", UserId }, { "@FollowUserId", FollowUserId } };
+            Mock<IDatabaseCommand> mockDatabaseCommand = MockDatabaseHelper.CreateMockDatabaseCommand(mockDatabaseCommandParameters, 1);
 
-            var mockDatabaseCommandFactory = new Mock<IDatabaseCommandFactory>(MockBehavior.Strict);
+            Mock<IDatabaseCommandFactory> mockDatabaseCommandFactory = new(MockBehavior.Strict);
             mockDatabaseCommandFactory
                 .Setup(_ => _.Create())
                 .Returns(mockDatabaseCommand.Object);
 
-            var mockUserSettingsProvider = new Mock<IUserSettingsProvider>(MockBehavior.Strict);
-            var mockUser = new ApplicationUser();
-            var mockFollowUser = new ApplicationUser();
-            var mockCurrentUser = new Mock<ClaimsPrincipal>(MockBehavior.Strict);
+            Mock<IUserSettingsProvider> mockUserSettingsProvider = new(MockBehavior.Strict);
+            ApplicationUser mockUser = new();
+            ApplicationUser mockFollowUser = new();
+            Mock<ClaimsPrincipal> mockCurrentUser = new(MockBehavior.Strict);
             mockCurrentUser
                 .Setup(_ => _.IsInRole("Admin"))
                 .Returns(true);
 
-            var mockUserManager = MockUserManager.CreateMock();
+            Mock<UserManager<ApplicationUser>> mockUserManager = MockUserManager.CreateMock();
             mockUserManager
                 .Setup(_ => _.FindByNameAsync(UserName))
                 .Returns(Task.FromResult(mockUser));
@@ -1510,13 +1508,13 @@ namespace UnitTests.Controllers
                 .Setup(_ => _.GetUserId(mockCurrentUser.Object))
                 .Returns("SomeOtherUserId");
 
-            var mockHttpContext = new Mock<HttpContext>(MockBehavior.Strict);
+            Mock<HttpContext> mockHttpContext = new(MockBehavior.Strict);
             mockHttpContext.SetupGet(_ => _.User).Returns(mockCurrentUser.Object).Verifiable();
 
-            var mockEmailSender = new Mock<IEmailSender>(MockBehavior.Strict);
-            var mockClanManager = new Mock<IClanManager>(MockBehavior.Strict);
+            Mock<IEmailSender> mockEmailSender = new(MockBehavior.Strict);
+            Mock<IClanManager> mockClanManager = new(MockBehavior.Strict);
 
-            var controller = new UserController(
+            UserController controller = new(
                 gameData,
                 telemetryClient,
                 mockDatabaseCommandFactory.Object,
@@ -1526,7 +1524,7 @@ namespace UnitTests.Controllers
                 mockClanManager.Object);
             controller.ControllerContext = new ControllerContext { HttpContext = mockHttpContext.Object };
 
-            var result = await controller.RemoveFollow(UserName, FollowUserName);
+            ActionResult result = await controller.RemoveFollowAsync(UserName, FollowUserName);
 
             Assert.NotNull(result);
             Assert.IsType<OkResult>(result);
@@ -1551,22 +1549,22 @@ namespace UnitTests.Controllers
             const string FollowUserName = "SomeFollowUserName";
             const string FollowUserId = "SomeFollowUserId";
 
-            var gameData = MockGameData.RealData;
-            var telemetryClient = new TelemetryClient(new TelemetryConfiguration());
+            ClickerHeroesTrackerWebsite.Models.Game.GameData gameData = MockGameData.RealData;
+            TelemetryClient telemetryClient = new(new TelemetryConfiguration());
 
-            var mockDatabaseCommandParameters = new Dictionary<string, object>() { { "@UserId", UserId }, { "@FollowUserId", FollowUserId } };
-            var mockDatabaseCommand = MockDatabaseHelper.CreateMockDatabaseCommand(mockDatabaseCommandParameters, 0);
+            Dictionary<string, object> mockDatabaseCommandParameters = new() { { "@UserId", UserId }, { "@FollowUserId", FollowUserId } };
+            Mock<IDatabaseCommand> mockDatabaseCommand = MockDatabaseHelper.CreateMockDatabaseCommand(mockDatabaseCommandParameters, 0);
 
-            var mockDatabaseCommandFactory = new Mock<IDatabaseCommandFactory>(MockBehavior.Strict);
+            Mock<IDatabaseCommandFactory> mockDatabaseCommandFactory = new(MockBehavior.Strict);
             mockDatabaseCommandFactory
                 .Setup(_ => _.Create())
                 .Returns(mockDatabaseCommand.Object);
 
-            var mockUserSettingsProvider = new Mock<IUserSettingsProvider>(MockBehavior.Strict);
-            var mockUser = new ApplicationUser();
-            var mockFollowUser = new ApplicationUser();
-            var mockCurrentUser = new Mock<ClaimsPrincipal>(MockBehavior.Strict);
-            var mockUserManager = MockUserManager.CreateMock();
+            Mock<IUserSettingsProvider> mockUserSettingsProvider = new(MockBehavior.Strict);
+            ApplicationUser mockUser = new();
+            ApplicationUser mockFollowUser = new();
+            Mock<ClaimsPrincipal> mockCurrentUser = new(MockBehavior.Strict);
+            Mock<UserManager<ApplicationUser>> mockUserManager = MockUserManager.CreateMock();
             mockUserManager
                 .Setup(_ => _.FindByNameAsync(UserName))
                 .Returns(Task.FromResult(mockUser));
@@ -1583,13 +1581,13 @@ namespace UnitTests.Controllers
                 .Setup(_ => _.GetUserId(mockCurrentUser.Object))
                 .Returns(UserId);
 
-            var mockHttpContext = new Mock<HttpContext>(MockBehavior.Strict);
+            Mock<HttpContext> mockHttpContext = new(MockBehavior.Strict);
             mockHttpContext.SetupGet(_ => _.User).Returns(mockCurrentUser.Object).Verifiable();
 
-            var mockEmailSender = new Mock<IEmailSender>(MockBehavior.Strict);
-            var mockClanManager = new Mock<IClanManager>(MockBehavior.Strict);
+            Mock<IEmailSender> mockEmailSender = new(MockBehavior.Strict);
+            Mock<IClanManager> mockClanManager = new(MockBehavior.Strict);
 
-            var controller = new UserController(
+            UserController controller = new(
                 gameData,
                 telemetryClient,
                 mockDatabaseCommandFactory.Object,
@@ -1599,7 +1597,7 @@ namespace UnitTests.Controllers
                 mockClanManager.Object);
             controller.ControllerContext = new ControllerContext { HttpContext = mockHttpContext.Object };
 
-            var result = await controller.RemoveFollow(UserName, FollowUserName);
+            ActionResult result = await controller.RemoveFollowAsync(UserName, FollowUserName);
 
             Assert.NotNull(result);
             Assert.IsType<NotFoundResult>(result);
@@ -1622,19 +1620,19 @@ namespace UnitTests.Controllers
             const string UserName = "SomeUserName";
             const string UserId = "SomeUserId";
 
-            var gameData = MockGameData.RealData;
-            var telemetryClient = new TelemetryClient(new TelemetryConfiguration());
-            var mockDatabaseCommandFactory = new Mock<IDatabaseCommandFactory>(MockBehavior.Strict);
+            ClickerHeroesTrackerWebsite.Models.Game.GameData gameData = MockGameData.RealData;
+            TelemetryClient telemetryClient = new(new TelemetryConfiguration());
+            Mock<IDatabaseCommandFactory> mockDatabaseCommandFactory = new(MockBehavior.Strict);
 
-            var userSettings = new UserSettings();
-            var mockUserSettingsProvider = new Mock<IUserSettingsProvider>(MockBehavior.Strict);
+            UserSettings userSettings = new();
+            Mock<IUserSettingsProvider> mockUserSettingsProvider = new(MockBehavior.Strict);
             mockUserSettingsProvider
                 .Setup(_ => _.GetAsync(UserId))
                 .Returns(Task.FromResult(userSettings));
 
-            var mockUser = new ApplicationUser();
-            var mockCurrentUser = new Mock<ClaimsPrincipal>(MockBehavior.Strict);
-            var mockUserManager = MockUserManager.CreateMock();
+            ApplicationUser mockUser = new();
+            Mock<ClaimsPrincipal> mockCurrentUser = new(MockBehavior.Strict);
+            Mock<UserManager<ApplicationUser>> mockUserManager = MockUserManager.CreateMock();
             mockUserManager
                 .Setup(_ => _.FindByNameAsync(UserName))
                 .Returns(Task.FromResult(mockUser));
@@ -1645,13 +1643,13 @@ namespace UnitTests.Controllers
                 .Setup(_ => _.GetUserId(mockCurrentUser.Object))
                 .Returns(UserId);
 
-            var mockHttpContext = new Mock<HttpContext>(MockBehavior.Strict);
+            Mock<HttpContext> mockHttpContext = new(MockBehavior.Strict);
             mockHttpContext.SetupGet(_ => _.User).Returns(mockCurrentUser.Object).Verifiable();
 
-            var mockEmailSender = new Mock<IEmailSender>(MockBehavior.Strict);
-            var mockClanManager = new Mock<IClanManager>(MockBehavior.Strict);
+            Mock<IEmailSender> mockEmailSender = new(MockBehavior.Strict);
+            Mock<IClanManager> mockClanManager = new(MockBehavior.Strict);
 
-            var controller = new UserController(
+            UserController controller = new(
                 gameData,
                 telemetryClient,
                 mockDatabaseCommandFactory.Object,
@@ -1661,7 +1659,7 @@ namespace UnitTests.Controllers
                 mockClanManager.Object);
             controller.ControllerContext = new ControllerContext { HttpContext = mockHttpContext.Object };
 
-            var result = await controller.GetSettings(UserName);
+            ActionResult<UserSettings> result = await controller.GetSettingsAsync(UserName);
             Assert.NotNull(result);
             Assert.Equal(userSettings, result.Value);
 
@@ -1682,19 +1680,19 @@ namespace UnitTests.Controllers
         {
             const string UserName = "SomeUserName";
 
-            var gameData = MockGameData.RealData;
-            var telemetryClient = new TelemetryClient(new TelemetryConfiguration());
-            var mockDatabaseCommandFactory = new Mock<IDatabaseCommandFactory>(MockBehavior.Strict);
-            var mockUserSettingsProvider = new Mock<IUserSettingsProvider>(MockBehavior.Strict);
-            var mockUserManager = MockUserManager.CreateMock();
+            ClickerHeroesTrackerWebsite.Models.Game.GameData gameData = MockGameData.RealData;
+            TelemetryClient telemetryClient = new(new TelemetryConfiguration());
+            Mock<IDatabaseCommandFactory> mockDatabaseCommandFactory = new(MockBehavior.Strict);
+            Mock<IUserSettingsProvider> mockUserSettingsProvider = new(MockBehavior.Strict);
+            Mock<UserManager<ApplicationUser>> mockUserManager = MockUserManager.CreateMock();
             mockUserManager
                 .Setup(_ => _.FindByNameAsync(UserName))
                 .Returns(Task.FromResult<ApplicationUser>(null));
 
-            var mockEmailSender = new Mock<IEmailSender>(MockBehavior.Strict);
-            var mockClanManager = new Mock<IClanManager>(MockBehavior.Strict);
+            Mock<IEmailSender> mockEmailSender = new(MockBehavior.Strict);
+            Mock<IClanManager> mockClanManager = new(MockBehavior.Strict);
 
-            var controller = new UserController(
+            UserController controller = new(
                 gameData,
                 telemetryClient,
                 mockDatabaseCommandFactory.Object,
@@ -1703,7 +1701,7 @@ namespace UnitTests.Controllers
                 mockEmailSender.Object,
                 mockClanManager.Object);
 
-            var result = await controller.GetSettings(UserName);
+            ActionResult<UserSettings> result = await controller.GetSettingsAsync(UserName);
 
             Assert.NotNull(result);
             Assert.IsType<NotFoundResult>(result.Result);
@@ -1723,13 +1721,13 @@ namespace UnitTests.Controllers
         {
             const string UserName = "SomeUserName";
 
-            var gameData = MockGameData.RealData;
-            var telemetryClient = new TelemetryClient(new TelemetryConfiguration());
-            var mockDatabaseCommandFactory = new Mock<IDatabaseCommandFactory>(MockBehavior.Strict);
-            var mockUserSettingsProvider = new Mock<IUserSettingsProvider>(MockBehavior.Strict);
+            ClickerHeroesTrackerWebsite.Models.Game.GameData gameData = MockGameData.RealData;
+            TelemetryClient telemetryClient = new(new TelemetryConfiguration());
+            Mock<IDatabaseCommandFactory> mockDatabaseCommandFactory = new(MockBehavior.Strict);
+            Mock<IUserSettingsProvider> mockUserSettingsProvider = new(MockBehavior.Strict);
 
-            var mockUser = new ApplicationUser();
-            var mockUserManager = MockUserManager.CreateMock();
+            ApplicationUser mockUser = new();
+            Mock<UserManager<ApplicationUser>> mockUserManager = MockUserManager.CreateMock();
             mockUserManager
                 .Setup(_ => _.FindByNameAsync(UserName))
                 .Returns(Task.FromResult(mockUser));
@@ -1737,10 +1735,10 @@ namespace UnitTests.Controllers
                 .Setup(_ => _.GetUserIdAsync(mockUser))
                 .Returns(Task.FromResult<string>(null));
 
-            var mockEmailSender = new Mock<IEmailSender>(MockBehavior.Strict);
-            var mockClanManager = new Mock<IClanManager>(MockBehavior.Strict);
+            Mock<IEmailSender> mockEmailSender = new(MockBehavior.Strict);
+            Mock<IClanManager> mockClanManager = new(MockBehavior.Strict);
 
-            var controller = new UserController(
+            UserController controller = new(
                 gameData,
                 telemetryClient,
                 mockDatabaseCommandFactory.Object,
@@ -1749,7 +1747,7 @@ namespace UnitTests.Controllers
                 mockEmailSender.Object,
                 mockClanManager.Object);
 
-            var result = await controller.GetSettings(UserName);
+            ActionResult<UserSettings> result = await controller.GetSettingsAsync(UserName);
 
             Assert.NotNull(result);
             Assert.IsType<NotFoundResult>(result.Result);
@@ -1770,17 +1768,17 @@ namespace UnitTests.Controllers
             const string UserName = "SomeUserName";
             const string UserId = "SomeUserId";
 
-            var gameData = MockGameData.RealData;
-            var telemetryClient = new TelemetryClient(new TelemetryConfiguration());
-            var mockDatabaseCommandFactory = new Mock<IDatabaseCommandFactory>(MockBehavior.Strict);
-            var mockUserSettingsProvider = new Mock<IUserSettingsProvider>(MockBehavior.Strict);
+            ClickerHeroesTrackerWebsite.Models.Game.GameData gameData = MockGameData.RealData;
+            TelemetryClient telemetryClient = new(new TelemetryConfiguration());
+            Mock<IDatabaseCommandFactory> mockDatabaseCommandFactory = new(MockBehavior.Strict);
+            Mock<IUserSettingsProvider> mockUserSettingsProvider = new(MockBehavior.Strict);
 
-            var mockUser = new ApplicationUser();
-            var mockCurrentUser = new Mock<ClaimsPrincipal>(MockBehavior.Strict);
+            ApplicationUser mockUser = new();
+            Mock<ClaimsPrincipal> mockCurrentUser = new(MockBehavior.Strict);
             mockCurrentUser
                 .Setup(_ => _.IsInRole("Admin"))
                 .Returns(false);
-            var mockUserManager = MockUserManager.CreateMock();
+            Mock<UserManager<ApplicationUser>> mockUserManager = MockUserManager.CreateMock();
             mockUserManager
                 .Setup(_ => _.FindByNameAsync(UserName))
                 .Returns(Task.FromResult(mockUser));
@@ -1791,13 +1789,13 @@ namespace UnitTests.Controllers
                 .Setup(_ => _.GetUserId(mockCurrentUser.Object))
                 .Returns("SomeOtherUserId");
 
-            var mockHttpContext = new Mock<HttpContext>(MockBehavior.Strict);
+            Mock<HttpContext> mockHttpContext = new(MockBehavior.Strict);
             mockHttpContext.SetupGet(_ => _.User).Returns(mockCurrentUser.Object).Verifiable();
 
-            var mockEmailSender = new Mock<IEmailSender>(MockBehavior.Strict);
-            var mockClanManager = new Mock<IClanManager>(MockBehavior.Strict);
+            Mock<IEmailSender> mockEmailSender = new(MockBehavior.Strict);
+            Mock<IClanManager> mockClanManager = new(MockBehavior.Strict);
 
-            var controller = new UserController(
+            UserController controller = new(
                 gameData,
                 telemetryClient,
                 mockDatabaseCommandFactory.Object,
@@ -1807,7 +1805,7 @@ namespace UnitTests.Controllers
                 mockClanManager.Object);
             controller.ControllerContext = new ControllerContext { HttpContext = mockHttpContext.Object };
 
-            var result = await controller.GetSettings(UserName);
+            ActionResult<UserSettings> result = await controller.GetSettingsAsync(UserName);
 
             Assert.NotNull(result);
             Assert.IsType<ForbidResult>(result.Result);
@@ -1830,22 +1828,22 @@ namespace UnitTests.Controllers
             const string UserName = "SomeUserName";
             const string UserId = "SomeUserId";
 
-            var gameData = MockGameData.RealData;
-            var telemetryClient = new TelemetryClient(new TelemetryConfiguration());
-            var mockDatabaseCommandFactory = new Mock<IDatabaseCommandFactory>(MockBehavior.Strict);
+            ClickerHeroesTrackerWebsite.Models.Game.GameData gameData = MockGameData.RealData;
+            TelemetryClient telemetryClient = new(new TelemetryConfiguration());
+            Mock<IDatabaseCommandFactory> mockDatabaseCommandFactory = new(MockBehavior.Strict);
 
-            var userSettings = new UserSettings();
-            var mockUserSettingsProvider = new Mock<IUserSettingsProvider>(MockBehavior.Strict);
+            UserSettings userSettings = new();
+            Mock<IUserSettingsProvider> mockUserSettingsProvider = new(MockBehavior.Strict);
             mockUserSettingsProvider
                 .Setup(_ => _.GetAsync(UserId))
                 .Returns(Task.FromResult(userSettings));
 
-            var mockUser = new ApplicationUser();
-            var mockCurrentUser = new Mock<ClaimsPrincipal>(MockBehavior.Strict);
+            ApplicationUser mockUser = new();
+            Mock<ClaimsPrincipal> mockCurrentUser = new(MockBehavior.Strict);
             mockCurrentUser
                 .Setup(_ => _.IsInRole("Admin"))
                 .Returns(true);
-            var mockUserManager = MockUserManager.CreateMock();
+            Mock<UserManager<ApplicationUser>> mockUserManager = MockUserManager.CreateMock();
             mockUserManager
                 .Setup(_ => _.FindByNameAsync(UserName))
                 .Returns(Task.FromResult(mockUser));
@@ -1856,13 +1854,13 @@ namespace UnitTests.Controllers
                 .Setup(_ => _.GetUserId(mockCurrentUser.Object))
                 .Returns("SomeOtherUserId");
 
-            var mockHttpContext = new Mock<HttpContext>(MockBehavior.Strict);
+            Mock<HttpContext> mockHttpContext = new(MockBehavior.Strict);
             mockHttpContext.SetupGet(_ => _.User).Returns(mockCurrentUser.Object).Verifiable();
 
-            var mockEmailSender = new Mock<IEmailSender>(MockBehavior.Strict);
-            var mockClanManager = new Mock<IClanManager>(MockBehavior.Strict);
+            Mock<IEmailSender> mockEmailSender = new(MockBehavior.Strict);
+            Mock<IClanManager> mockClanManager = new(MockBehavior.Strict);
 
-            var controller = new UserController(
+            UserController controller = new(
                 gameData,
                 telemetryClient,
                 mockDatabaseCommandFactory.Object,
@@ -1872,7 +1870,7 @@ namespace UnitTests.Controllers
                 mockClanManager.Object);
             controller.ControllerContext = new ControllerContext { HttpContext = mockHttpContext.Object };
 
-            var result = await controller.GetSettings(UserName);
+            ActionResult<UserSettings> result = await controller.GetSettingsAsync(UserName);
             Assert.NotNull(result);
             Assert.Equal(userSettings, result.Value);
 
@@ -1894,18 +1892,18 @@ namespace UnitTests.Controllers
             const string UserName = "SomeUserName";
             const string UserId = "SomeUserId";
 
-            var gameData = MockGameData.RealData;
-            var telemetryClient = new TelemetryClient(new TelemetryConfiguration());
-            var mockDatabaseCommandFactory = new Mock<IDatabaseCommandFactory>(MockBehavior.Strict);
-            var userSettings = new UserSettings();
-            var mockUserSettingsProvider = new Mock<IUserSettingsProvider>(MockBehavior.Strict);
+            ClickerHeroesTrackerWebsite.Models.Game.GameData gameData = MockGameData.RealData;
+            TelemetryClient telemetryClient = new(new TelemetryConfiguration());
+            Mock<IDatabaseCommandFactory> mockDatabaseCommandFactory = new(MockBehavior.Strict);
+            UserSettings userSettings = new();
+            Mock<IUserSettingsProvider> mockUserSettingsProvider = new(MockBehavior.Strict);
             mockUserSettingsProvider
                 .Setup(_ => _.PatchAsync(UserId, userSettings))
                 .Returns(Task.CompletedTask);
 
-            var mockUser = new ApplicationUser();
-            var mockCurrentUser = new Mock<ClaimsPrincipal>(MockBehavior.Strict);
-            var mockUserManager = MockUserManager.CreateMock();
+            ApplicationUser mockUser = new();
+            Mock<ClaimsPrincipal> mockCurrentUser = new(MockBehavior.Strict);
+            Mock<UserManager<ApplicationUser>> mockUserManager = MockUserManager.CreateMock();
             mockUserManager
                 .Setup(_ => _.FindByNameAsync(UserName))
                 .Returns(Task.FromResult(mockUser));
@@ -1916,13 +1914,13 @@ namespace UnitTests.Controllers
                 .Setup(_ => _.GetUserId(mockCurrentUser.Object))
                 .Returns(UserId);
 
-            var mockHttpContext = new Mock<HttpContext>(MockBehavior.Strict);
+            Mock<HttpContext> mockHttpContext = new(MockBehavior.Strict);
             mockHttpContext.SetupGet(_ => _.User).Returns(mockCurrentUser.Object).Verifiable();
 
-            var mockEmailSender = new Mock<IEmailSender>(MockBehavior.Strict);
-            var mockClanManager = new Mock<IClanManager>(MockBehavior.Strict);
+            Mock<IEmailSender> mockEmailSender = new(MockBehavior.Strict);
+            Mock<IClanManager> mockClanManager = new(MockBehavior.Strict);
 
-            var controller = new UserController(
+            UserController controller = new(
                 gameData,
                 telemetryClient,
                 mockDatabaseCommandFactory.Object,
@@ -1932,7 +1930,7 @@ namespace UnitTests.Controllers
                 mockClanManager.Object);
             controller.ControllerContext = new ControllerContext { HttpContext = mockHttpContext.Object };
 
-            var result = await controller.PatchSettings(UserName, userSettings);
+            ActionResult result = await controller.PatchSettingsAsync(UserName, userSettings);
 
             Assert.NotNull(result);
             Assert.IsType<OkResult>(result);
@@ -1954,20 +1952,20 @@ namespace UnitTests.Controllers
         {
             const string UserName = "SomeUserName";
 
-            var gameData = MockGameData.RealData;
-            var telemetryClient = new TelemetryClient(new TelemetryConfiguration());
-            var mockDatabaseCommandFactory = new Mock<IDatabaseCommandFactory>(MockBehavior.Strict);
-            var userSettings = new UserSettings();
-            var mockUserSettingsProvider = new Mock<IUserSettingsProvider>(MockBehavior.Strict);
-            var mockUserManager = MockUserManager.CreateMock();
+            ClickerHeroesTrackerWebsite.Models.Game.GameData gameData = MockGameData.RealData;
+            TelemetryClient telemetryClient = new(new TelemetryConfiguration());
+            Mock<IDatabaseCommandFactory> mockDatabaseCommandFactory = new(MockBehavior.Strict);
+            UserSettings userSettings = new();
+            Mock<IUserSettingsProvider> mockUserSettingsProvider = new(MockBehavior.Strict);
+            Mock<UserManager<ApplicationUser>> mockUserManager = MockUserManager.CreateMock();
             mockUserManager
                 .Setup(_ => _.FindByNameAsync(UserName))
                 .Returns(Task.FromResult<ApplicationUser>(null));
 
-            var mockEmailSender = new Mock<IEmailSender>(MockBehavior.Strict);
-            var mockClanManager = new Mock<IClanManager>(MockBehavior.Strict);
+            Mock<IEmailSender> mockEmailSender = new(MockBehavior.Strict);
+            Mock<IClanManager> mockClanManager = new(MockBehavior.Strict);
 
-            var controller = new UserController(
+            UserController controller = new(
                 gameData,
                 telemetryClient,
                 mockDatabaseCommandFactory.Object,
@@ -1976,7 +1974,7 @@ namespace UnitTests.Controllers
                 mockEmailSender.Object,
                 mockClanManager.Object);
 
-            var result = await controller.PatchSettings(UserName, userSettings);
+            ActionResult result = await controller.PatchSettingsAsync(UserName, userSettings);
 
             Assert.NotNull(result);
             Assert.IsType<NotFoundResult>(result);
@@ -1996,14 +1994,14 @@ namespace UnitTests.Controllers
         {
             const string UserName = "SomeUserName";
 
-            var gameData = MockGameData.RealData;
-            var telemetryClient = new TelemetryClient(new TelemetryConfiguration());
-            var mockDatabaseCommandFactory = new Mock<IDatabaseCommandFactory>(MockBehavior.Strict);
-            var userSettings = new UserSettings();
-            var mockUserSettingsProvider = new Mock<IUserSettingsProvider>(MockBehavior.Strict);
+            ClickerHeroesTrackerWebsite.Models.Game.GameData gameData = MockGameData.RealData;
+            TelemetryClient telemetryClient = new(new TelemetryConfiguration());
+            Mock<IDatabaseCommandFactory> mockDatabaseCommandFactory = new(MockBehavior.Strict);
+            UserSettings userSettings = new();
+            Mock<IUserSettingsProvider> mockUserSettingsProvider = new(MockBehavior.Strict);
 
-            var mockUser = new ApplicationUser();
-            var mockUserManager = MockUserManager.CreateMock();
+            ApplicationUser mockUser = new();
+            Mock<UserManager<ApplicationUser>> mockUserManager = MockUserManager.CreateMock();
             mockUserManager
                 .Setup(_ => _.FindByNameAsync(UserName))
                 .Returns(Task.FromResult(mockUser));
@@ -2011,10 +2009,10 @@ namespace UnitTests.Controllers
                 .Setup(_ => _.GetUserIdAsync(mockUser))
                 .Returns(Task.FromResult<string>(null));
 
-            var mockEmailSender = new Mock<IEmailSender>(MockBehavior.Strict);
-            var mockClanManager = new Mock<IClanManager>(MockBehavior.Strict);
+            Mock<IEmailSender> mockEmailSender = new(MockBehavior.Strict);
+            Mock<IClanManager> mockClanManager = new(MockBehavior.Strict);
 
-            var controller = new UserController(
+            UserController controller = new(
                 gameData,
                 telemetryClient,
                 mockDatabaseCommandFactory.Object,
@@ -2023,7 +2021,7 @@ namespace UnitTests.Controllers
                 mockEmailSender.Object,
                 mockClanManager.Object);
 
-            var result = await controller.PatchSettings(UserName, userSettings);
+            ActionResult result = await controller.PatchSettingsAsync(UserName, userSettings);
 
             Assert.NotNull(result);
             Assert.IsType<NotFoundResult>(result);
@@ -2044,18 +2042,18 @@ namespace UnitTests.Controllers
             const string UserName = "SomeUserName";
             const string UserId = "SomeUserId";
 
-            var gameData = MockGameData.RealData;
-            var telemetryClient = new TelemetryClient(new TelemetryConfiguration());
-            var mockDatabaseCommandFactory = new Mock<IDatabaseCommandFactory>(MockBehavior.Strict);
-            var userSettings = new UserSettings();
-            var mockUserSettingsProvider = new Mock<IUserSettingsProvider>(MockBehavior.Strict);
+            ClickerHeroesTrackerWebsite.Models.Game.GameData gameData = MockGameData.RealData;
+            TelemetryClient telemetryClient = new(new TelemetryConfiguration());
+            Mock<IDatabaseCommandFactory> mockDatabaseCommandFactory = new(MockBehavior.Strict);
+            UserSettings userSettings = new();
+            Mock<IUserSettingsProvider> mockUserSettingsProvider = new(MockBehavior.Strict);
 
-            var mockUser = new ApplicationUser();
-            var mockCurrentUser = new Mock<ClaimsPrincipal>(MockBehavior.Strict);
+            ApplicationUser mockUser = new();
+            Mock<ClaimsPrincipal> mockCurrentUser = new(MockBehavior.Strict);
             mockCurrentUser
                 .Setup(_ => _.IsInRole("Admin"))
                 .Returns(false);
-            var mockUserManager = MockUserManager.CreateMock();
+            Mock<UserManager<ApplicationUser>> mockUserManager = MockUserManager.CreateMock();
             mockUserManager
                 .Setup(_ => _.FindByNameAsync(UserName))
                 .Returns(Task.FromResult(mockUser));
@@ -2066,13 +2064,13 @@ namespace UnitTests.Controllers
                 .Setup(_ => _.GetUserId(mockCurrentUser.Object))
                 .Returns("SomeOtherUserId");
 
-            var mockHttpContext = new Mock<HttpContext>(MockBehavior.Strict);
+            Mock<HttpContext> mockHttpContext = new(MockBehavior.Strict);
             mockHttpContext.SetupGet(_ => _.User).Returns(mockCurrentUser.Object).Verifiable();
 
-            var mockEmailSender = new Mock<IEmailSender>(MockBehavior.Strict);
-            var mockClanManager = new Mock<IClanManager>(MockBehavior.Strict);
+            Mock<IEmailSender> mockEmailSender = new(MockBehavior.Strict);
+            Mock<IClanManager> mockClanManager = new(MockBehavior.Strict);
 
-            var controller = new UserController(
+            UserController controller = new(
                 gameData,
                 telemetryClient,
                 mockDatabaseCommandFactory.Object,
@@ -2082,7 +2080,7 @@ namespace UnitTests.Controllers
                 mockClanManager.Object);
             controller.ControllerContext = new ControllerContext { HttpContext = mockHttpContext.Object };
 
-            var result = await controller.PatchSettings(UserName, userSettings);
+            ActionResult result = await controller.PatchSettingsAsync(UserName, userSettings);
 
             Assert.NotNull(result);
             Assert.IsType<ForbidResult>(result);
@@ -2105,13 +2103,13 @@ namespace UnitTests.Controllers
             const string UserName = "SomeUserName";
             const string UserId = "SomeUserId";
 
-            var gameData = MockGameData.RealData;
-            var telemetryClient = new TelemetryClient(new TelemetryConfiguration());
-            var mockDatabaseCommandFactory = new Mock<IDatabaseCommandFactory>(MockBehavior.Strict);
-            var mockUserSettingsProvider = new Mock<IUserSettingsProvider>(MockBehavior.Strict);
-            var mockUser = new ApplicationUser();
-            var mockCurrentUser = new Mock<ClaimsPrincipal>(MockBehavior.Strict);
-            var mockUserManager = MockUserManager.CreateMock();
+            ClickerHeroesTrackerWebsite.Models.Game.GameData gameData = MockGameData.RealData;
+            TelemetryClient telemetryClient = new(new TelemetryConfiguration());
+            Mock<IDatabaseCommandFactory> mockDatabaseCommandFactory = new(MockBehavior.Strict);
+            Mock<IUserSettingsProvider> mockUserSettingsProvider = new(MockBehavior.Strict);
+            ApplicationUser mockUser = new();
+            Mock<ClaimsPrincipal> mockCurrentUser = new(MockBehavior.Strict);
+            Mock<UserManager<ApplicationUser>> mockUserManager = MockUserManager.CreateMock();
             mockUserManager
                 .Setup(_ => _.FindByNameAsync(UserName))
                 .Returns(Task.FromResult(mockUser));
@@ -2128,7 +2126,7 @@ namespace UnitTests.Controllers
                 .Setup(_ => _.HasPasswordAsync(mockUser))
                 .Returns(Task.FromResult(true));
 
-            var logins = new List<ExternalLogin>
+            List<ExternalLogin> logins = new()
             {
                 new ExternalLogin { ProviderName = "SomeProvider0", ExternalUserId = "SomeExternalUserId0" },
                 new ExternalLogin { ProviderName = "SomeProvider1", ExternalUserId = "SomeExternalUserId1" },
@@ -2138,13 +2136,13 @@ namespace UnitTests.Controllers
                 .Setup(_ => _.GetLoginsAsync(mockUser))
                 .Returns(Task.FromResult<IList<UserLoginInfo>>(logins.Select(login => new UserLoginInfo(login.ProviderName, login.ExternalUserId, login.ProviderName)).ToList()));
 
-            var mockHttpContext = new Mock<HttpContext>(MockBehavior.Strict);
+            Mock<HttpContext> mockHttpContext = new(MockBehavior.Strict);
             mockHttpContext.SetupGet(_ => _.User).Returns(mockCurrentUser.Object).Verifiable();
 
-            var mockEmailSender = new Mock<IEmailSender>(MockBehavior.Strict);
-            var mockClanManager = new Mock<IClanManager>(MockBehavior.Strict);
+            Mock<IEmailSender> mockEmailSender = new(MockBehavior.Strict);
+            Mock<IClanManager> mockClanManager = new(MockBehavior.Strict);
 
-            var controller = new UserController(
+            UserController controller = new(
                 gameData,
                 telemetryClient,
                 mockDatabaseCommandFactory.Object,
@@ -2154,14 +2152,14 @@ namespace UnitTests.Controllers
                 mockClanManager.Object);
             controller.ControllerContext = new ControllerContext { HttpContext = mockHttpContext.Object };
 
-            var result = await controller.GetLogins(UserName);
+            ActionResult<UserLogins> result = await controller.GetLoginsAsync(UserName);
             Assert.NotNull(result);
 
-            var model = result.Value;
+            UserLogins model = result.Value;
             Assert.True(model.HasPassword);
 
             Assert.Equal(logins.Count, model.ExternalLogins.Count);
-            for (var i = 0; i < model.ExternalLogins.Count; i++)
+            for (int i = 0; i < model.ExternalLogins.Count; i++)
             {
                 Assert.Equal(logins[i].ProviderName, model.ExternalLogins[i].ProviderName);
                 Assert.Equal(logins[i].ExternalUserId, model.ExternalLogins[i].ExternalUserId);
@@ -2184,19 +2182,19 @@ namespace UnitTests.Controllers
         {
             const string UserName = "SomeUserName";
 
-            var gameData = MockGameData.RealData;
-            var telemetryClient = new TelemetryClient(new TelemetryConfiguration());
-            var mockDatabaseCommandFactory = new Mock<IDatabaseCommandFactory>(MockBehavior.Strict);
-            var mockUserSettingsProvider = new Mock<IUserSettingsProvider>(MockBehavior.Strict);
-            var mockUserManager = MockUserManager.CreateMock();
+            ClickerHeroesTrackerWebsite.Models.Game.GameData gameData = MockGameData.RealData;
+            TelemetryClient telemetryClient = new(new TelemetryConfiguration());
+            Mock<IDatabaseCommandFactory> mockDatabaseCommandFactory = new(MockBehavior.Strict);
+            Mock<IUserSettingsProvider> mockUserSettingsProvider = new(MockBehavior.Strict);
+            Mock<UserManager<ApplicationUser>> mockUserManager = MockUserManager.CreateMock();
             mockUserManager
                 .Setup(_ => _.FindByNameAsync(UserName))
                 .Returns(Task.FromResult<ApplicationUser>(null));
 
-            var mockEmailSender = new Mock<IEmailSender>(MockBehavior.Strict);
-            var mockClanManager = new Mock<IClanManager>(MockBehavior.Strict);
+            Mock<IEmailSender> mockEmailSender = new(MockBehavior.Strict);
+            Mock<IClanManager> mockClanManager = new(MockBehavior.Strict);
 
-            var controller = new UserController(
+            UserController controller = new(
                 gameData,
                 telemetryClient,
                 mockDatabaseCommandFactory.Object,
@@ -2205,7 +2203,7 @@ namespace UnitTests.Controllers
                 mockEmailSender.Object,
                 mockClanManager.Object);
 
-            var result = await controller.GetLogins(UserName);
+            ActionResult<UserLogins> result = await controller.GetLoginsAsync(UserName);
 
             Assert.NotNull(result);
             Assert.IsType<NotFoundResult>(result.Result);
@@ -2225,13 +2223,13 @@ namespace UnitTests.Controllers
         {
             const string UserName = "SomeUserName";
 
-            var gameData = MockGameData.RealData;
-            var telemetryClient = new TelemetryClient(new TelemetryConfiguration());
-            var mockDatabaseCommandFactory = new Mock<IDatabaseCommandFactory>(MockBehavior.Strict);
-            var mockUserSettingsProvider = new Mock<IUserSettingsProvider>(MockBehavior.Strict);
+            ClickerHeroesTrackerWebsite.Models.Game.GameData gameData = MockGameData.RealData;
+            TelemetryClient telemetryClient = new(new TelemetryConfiguration());
+            Mock<IDatabaseCommandFactory> mockDatabaseCommandFactory = new(MockBehavior.Strict);
+            Mock<IUserSettingsProvider> mockUserSettingsProvider = new(MockBehavior.Strict);
 
-            var mockUser = new ApplicationUser();
-            var mockUserManager = MockUserManager.CreateMock();
+            ApplicationUser mockUser = new();
+            Mock<UserManager<ApplicationUser>> mockUserManager = MockUserManager.CreateMock();
             mockUserManager
                 .Setup(_ => _.FindByNameAsync(UserName))
                 .Returns(Task.FromResult(mockUser));
@@ -2239,10 +2237,10 @@ namespace UnitTests.Controllers
                 .Setup(_ => _.GetUserIdAsync(mockUser))
                 .Returns(Task.FromResult<string>(null));
 
-            var mockEmailSender = new Mock<IEmailSender>(MockBehavior.Strict);
-            var mockClanManager = new Mock<IClanManager>(MockBehavior.Strict);
+            Mock<IEmailSender> mockEmailSender = new(MockBehavior.Strict);
+            Mock<IClanManager> mockClanManager = new(MockBehavior.Strict);
 
-            var controller = new UserController(
+            UserController controller = new(
                 gameData,
                 telemetryClient,
                 mockDatabaseCommandFactory.Object,
@@ -2251,7 +2249,7 @@ namespace UnitTests.Controllers
                 mockEmailSender.Object,
                 mockClanManager.Object);
 
-            var result = await controller.GetLogins(UserName);
+            ActionResult<UserLogins> result = await controller.GetLoginsAsync(UserName);
 
             Assert.NotNull(result);
             Assert.IsType<NotFoundResult>(result.Result);
@@ -2272,17 +2270,17 @@ namespace UnitTests.Controllers
             const string UserName = "SomeUserName";
             const string UserId = "SomeUserId";
 
-            var gameData = MockGameData.RealData;
-            var telemetryClient = new TelemetryClient(new TelemetryConfiguration());
-            var mockDatabaseCommandFactory = new Mock<IDatabaseCommandFactory>(MockBehavior.Strict);
-            var mockUserSettingsProvider = new Mock<IUserSettingsProvider>(MockBehavior.Strict);
+            ClickerHeroesTrackerWebsite.Models.Game.GameData gameData = MockGameData.RealData;
+            TelemetryClient telemetryClient = new(new TelemetryConfiguration());
+            Mock<IDatabaseCommandFactory> mockDatabaseCommandFactory = new(MockBehavior.Strict);
+            Mock<IUserSettingsProvider> mockUserSettingsProvider = new(MockBehavior.Strict);
 
-            var mockUser = new ApplicationUser();
-            var mockCurrentUser = new Mock<ClaimsPrincipal>(MockBehavior.Strict);
+            ApplicationUser mockUser = new();
+            Mock<ClaimsPrincipal> mockCurrentUser = new(MockBehavior.Strict);
             mockCurrentUser
                 .Setup(_ => _.IsInRole("Admin"))
                 .Returns(false);
-            var mockUserManager = MockUserManager.CreateMock();
+            Mock<UserManager<ApplicationUser>> mockUserManager = MockUserManager.CreateMock();
             mockUserManager
                 .Setup(_ => _.FindByNameAsync(UserName))
                 .Returns(Task.FromResult(mockUser));
@@ -2293,13 +2291,13 @@ namespace UnitTests.Controllers
                 .Setup(_ => _.GetUserId(mockCurrentUser.Object))
                 .Returns("SomeOtherUserId");
 
-            var mockHttpContext = new Mock<HttpContext>(MockBehavior.Strict);
+            Mock<HttpContext> mockHttpContext = new(MockBehavior.Strict);
             mockHttpContext.SetupGet(_ => _.User).Returns(mockCurrentUser.Object).Verifiable();
 
-            var mockEmailSender = new Mock<IEmailSender>(MockBehavior.Strict);
-            var mockClanManager = new Mock<IClanManager>(MockBehavior.Strict);
+            Mock<IEmailSender> mockEmailSender = new(MockBehavior.Strict);
+            Mock<IClanManager> mockClanManager = new(MockBehavior.Strict);
 
-            var controller = new UserController(
+            UserController controller = new(
                 gameData,
                 telemetryClient,
                 mockDatabaseCommandFactory.Object,
@@ -2309,7 +2307,7 @@ namespace UnitTests.Controllers
                 mockClanManager.Object);
             controller.ControllerContext = new ControllerContext { HttpContext = mockHttpContext.Object };
 
-            var result = await controller.GetLogins(UserName);
+            ActionResult<UserLogins> result = await controller.GetLoginsAsync(UserName);
 
             Assert.NotNull(result);
             Assert.IsType<ForbidResult>(result.Result);
@@ -2332,16 +2330,16 @@ namespace UnitTests.Controllers
             const string UserName = "SomeUserName";
             const string UserId = "SomeUserId";
 
-            var gameData = MockGameData.RealData;
-            var telemetryClient = new TelemetryClient(new TelemetryConfiguration());
-            var mockDatabaseCommandFactory = new Mock<IDatabaseCommandFactory>(MockBehavior.Strict);
-            var mockUserSettingsProvider = new Mock<IUserSettingsProvider>(MockBehavior.Strict);
-            var mockUser = new ApplicationUser();
-            var mockCurrentUser = new Mock<ClaimsPrincipal>(MockBehavior.Strict);
+            ClickerHeroesTrackerWebsite.Models.Game.GameData gameData = MockGameData.RealData;
+            TelemetryClient telemetryClient = new(new TelemetryConfiguration());
+            Mock<IDatabaseCommandFactory> mockDatabaseCommandFactory = new(MockBehavior.Strict);
+            Mock<IUserSettingsProvider> mockUserSettingsProvider = new(MockBehavior.Strict);
+            ApplicationUser mockUser = new();
+            Mock<ClaimsPrincipal> mockCurrentUser = new(MockBehavior.Strict);
             mockCurrentUser
                 .Setup(_ => _.IsInRole("Admin"))
                 .Returns(true);
-            var mockUserManager = MockUserManager.CreateMock();
+            Mock<UserManager<ApplicationUser>> mockUserManager = MockUserManager.CreateMock();
             mockUserManager
                 .Setup(_ => _.FindByNameAsync(UserName))
                 .Returns(Task.FromResult(mockUser));
@@ -2355,7 +2353,7 @@ namespace UnitTests.Controllers
                 .Setup(_ => _.HasPasswordAsync(mockUser))
                 .Returns(Task.FromResult(true));
 
-            var logins = new List<ExternalLogin>
+            List<ExternalLogin> logins = new()
             {
                 new ExternalLogin { ProviderName = "SomeProvider0", ExternalUserId = "SomeExternalUserId0" },
                 new ExternalLogin { ProviderName = "SomeProvider1", ExternalUserId = "SomeExternalUserId1" },
@@ -2365,13 +2363,13 @@ namespace UnitTests.Controllers
                 .Setup(_ => _.GetLoginsAsync(mockUser))
                 .Returns(Task.FromResult<IList<UserLoginInfo>>(logins.Select(login => new UserLoginInfo(login.ProviderName, login.ExternalUserId, login.ProviderName)).ToList()));
 
-            var mockHttpContext = new Mock<HttpContext>(MockBehavior.Strict);
+            Mock<HttpContext> mockHttpContext = new(MockBehavior.Strict);
             mockHttpContext.SetupGet(_ => _.User).Returns(mockCurrentUser.Object).Verifiable();
 
-            var mockEmailSender = new Mock<IEmailSender>(MockBehavior.Strict);
-            var mockClanManager = new Mock<IClanManager>(MockBehavior.Strict);
+            Mock<IEmailSender> mockEmailSender = new(MockBehavior.Strict);
+            Mock<IClanManager> mockClanManager = new(MockBehavior.Strict);
 
-            var controller = new UserController(
+            UserController controller = new(
                 gameData,
                 telemetryClient,
                 mockDatabaseCommandFactory.Object,
@@ -2381,14 +2379,14 @@ namespace UnitTests.Controllers
                 mockClanManager.Object);
             controller.ControllerContext = new ControllerContext { HttpContext = mockHttpContext.Object };
 
-            var result = await controller.GetLogins(UserName);
+            ActionResult<UserLogins> result = await controller.GetLoginsAsync(UserName);
             Assert.NotNull(result);
 
-            var model = result.Value;
+            UserLogins model = result.Value;
             Assert.True(model.HasPassword);
 
             Assert.Equal(logins.Count, model.ExternalLogins.Count);
-            for (var i = 0; i < model.ExternalLogins.Count; i++)
+            for (int i = 0; i < model.ExternalLogins.Count; i++)
             {
                 Assert.Equal(logins[i].ProviderName, model.ExternalLogins[i].ProviderName);
                 Assert.Equal(logins[i].ExternalUserId, model.ExternalLogins[i].ExternalUserId);
@@ -2414,19 +2412,19 @@ namespace UnitTests.Controllers
             const string Provider = "SomeProvider";
             const string ExternalUserId = "SomeExternalUserId";
 
-            var model = new ExternalLogin
+            ExternalLogin model = new()
             {
                 ProviderName = Provider,
                 ExternalUserId = ExternalUserId,
             };
 
-            var gameData = MockGameData.RealData;
-            var telemetryClient = new TelemetryClient(new TelemetryConfiguration());
-            var mockDatabaseCommandFactory = new Mock<IDatabaseCommandFactory>(MockBehavior.Strict);
-            var mockUserSettingsProvider = new Mock<IUserSettingsProvider>(MockBehavior.Strict);
-            var mockUser = new ApplicationUser();
-            var mockCurrentUser = new Mock<ClaimsPrincipal>(MockBehavior.Strict);
-            var mockUserManager = MockUserManager.CreateMock();
+            ClickerHeroesTrackerWebsite.Models.Game.GameData gameData = MockGameData.RealData;
+            TelemetryClient telemetryClient = new(new TelemetryConfiguration());
+            Mock<IDatabaseCommandFactory> mockDatabaseCommandFactory = new(MockBehavior.Strict);
+            Mock<IUserSettingsProvider> mockUserSettingsProvider = new(MockBehavior.Strict);
+            ApplicationUser mockUser = new();
+            Mock<ClaimsPrincipal> mockCurrentUser = new(MockBehavior.Strict);
+            Mock<UserManager<ApplicationUser>> mockUserManager = MockUserManager.CreateMock();
             mockUserManager
                 .Setup(_ => _.FindByNameAsync(UserName))
                 .Returns(Task.FromResult(mockUser));
@@ -2440,13 +2438,13 @@ namespace UnitTests.Controllers
                 .Setup(_ => _.RemoveLoginAsync(mockUser, Provider, ExternalUserId))
                 .Returns(Task.FromResult(IdentityResult.Success));
 
-            var mockHttpContext = new Mock<HttpContext>(MockBehavior.Strict);
+            Mock<HttpContext> mockHttpContext = new(MockBehavior.Strict);
             mockHttpContext.SetupGet(_ => _.User).Returns(mockCurrentUser.Object).Verifiable();
 
-            var mockEmailSender = new Mock<IEmailSender>(MockBehavior.Strict);
-            var mockClanManager = new Mock<IClanManager>(MockBehavior.Strict);
+            Mock<IEmailSender> mockEmailSender = new(MockBehavior.Strict);
+            Mock<IClanManager> mockClanManager = new(MockBehavior.Strict);
 
-            var controller = new UserController(
+            UserController controller = new(
                 gameData,
                 telemetryClient,
                 mockDatabaseCommandFactory.Object,
@@ -2456,7 +2454,7 @@ namespace UnitTests.Controllers
                 mockClanManager.Object);
             controller.ControllerContext = new ControllerContext { HttpContext = mockHttpContext.Object };
 
-            var result = await controller.RemoveLogin(UserName, model);
+            ActionResult result = await controller.RemoveLoginAsync(UserName, model);
 
             Assert.NotNull(result);
             Assert.IsType<OkResult>(result);
@@ -2480,25 +2478,25 @@ namespace UnitTests.Controllers
             const string Provider = "SomeProvider";
             const string ExternalUserId = "SomeExternalUserId";
 
-            var model = new ExternalLogin
+            ExternalLogin model = new()
             {
                 ProviderName = Provider,
                 ExternalUserId = ExternalUserId,
             };
 
-            var gameData = MockGameData.RealData;
-            var telemetryClient = new TelemetryClient(new TelemetryConfiguration());
-            var mockDatabaseCommandFactory = new Mock<IDatabaseCommandFactory>(MockBehavior.Strict);
-            var mockUserSettingsProvider = new Mock<IUserSettingsProvider>(MockBehavior.Strict);
-            var mockUserManager = MockUserManager.CreateMock();
+            ClickerHeroesTrackerWebsite.Models.Game.GameData gameData = MockGameData.RealData;
+            TelemetryClient telemetryClient = new(new TelemetryConfiguration());
+            Mock<IDatabaseCommandFactory> mockDatabaseCommandFactory = new(MockBehavior.Strict);
+            Mock<IUserSettingsProvider> mockUserSettingsProvider = new(MockBehavior.Strict);
+            Mock<UserManager<ApplicationUser>> mockUserManager = MockUserManager.CreateMock();
             mockUserManager
                 .Setup(_ => _.FindByNameAsync(UserName))
                 .Returns(Task.FromResult<ApplicationUser>(null));
 
-            var mockEmailSender = new Mock<IEmailSender>(MockBehavior.Strict);
-            var mockClanManager = new Mock<IClanManager>(MockBehavior.Strict);
+            Mock<IEmailSender> mockEmailSender = new(MockBehavior.Strict);
+            Mock<IClanManager> mockClanManager = new(MockBehavior.Strict);
 
-            var controller = new UserController(
+            UserController controller = new(
                 gameData,
                 telemetryClient,
                 mockDatabaseCommandFactory.Object,
@@ -2507,7 +2505,7 @@ namespace UnitTests.Controllers
                 mockEmailSender.Object,
                 mockClanManager.Object);
 
-            var result = await controller.RemoveLogin(UserName, model);
+            ActionResult result = await controller.RemoveLoginAsync(UserName, model);
 
             Assert.NotNull(result);
             Assert.IsType<NotFoundResult>(result);
@@ -2529,19 +2527,19 @@ namespace UnitTests.Controllers
             const string Provider = "SomeProvider";
             const string ExternalUserId = "SomeExternalUserId";
 
-            var model = new ExternalLogin
+            ExternalLogin model = new()
             {
                 ProviderName = Provider,
                 ExternalUserId = ExternalUserId,
             };
 
-            var gameData = MockGameData.RealData;
-            var telemetryClient = new TelemetryClient(new TelemetryConfiguration());
-            var mockDatabaseCommandFactory = new Mock<IDatabaseCommandFactory>(MockBehavior.Strict);
-            var mockUserSettingsProvider = new Mock<IUserSettingsProvider>(MockBehavior.Strict);
+            ClickerHeroesTrackerWebsite.Models.Game.GameData gameData = MockGameData.RealData;
+            TelemetryClient telemetryClient = new(new TelemetryConfiguration());
+            Mock<IDatabaseCommandFactory> mockDatabaseCommandFactory = new(MockBehavior.Strict);
+            Mock<IUserSettingsProvider> mockUserSettingsProvider = new(MockBehavior.Strict);
 
-            var mockUser = new ApplicationUser();
-            var mockUserManager = MockUserManager.CreateMock();
+            ApplicationUser mockUser = new();
+            Mock<UserManager<ApplicationUser>> mockUserManager = MockUserManager.CreateMock();
             mockUserManager
                 .Setup(_ => _.FindByNameAsync(UserName))
                 .Returns(Task.FromResult(mockUser));
@@ -2549,10 +2547,10 @@ namespace UnitTests.Controllers
                 .Setup(_ => _.GetUserIdAsync(mockUser))
                 .Returns(Task.FromResult<string>(null));
 
-            var mockEmailSender = new Mock<IEmailSender>(MockBehavior.Strict);
-            var mockClanManager = new Mock<IClanManager>(MockBehavior.Strict);
+            Mock<IEmailSender> mockEmailSender = new(MockBehavior.Strict);
+            Mock<IClanManager> mockClanManager = new(MockBehavior.Strict);
 
-            var controller = new UserController(
+            UserController controller = new(
                 gameData,
                 telemetryClient,
                 mockDatabaseCommandFactory.Object,
@@ -2561,7 +2559,7 @@ namespace UnitTests.Controllers
                 mockEmailSender.Object,
                 mockClanManager.Object);
 
-            var result = await controller.RemoveLogin(UserName, model);
+            ActionResult result = await controller.RemoveLoginAsync(UserName, model);
 
             Assert.NotNull(result);
             Assert.IsType<NotFoundResult>(result);
@@ -2584,23 +2582,23 @@ namespace UnitTests.Controllers
             const string Provider = "SomeProvider";
             const string ExternalUserId = "SomeExternalUserId";
 
-            var model = new ExternalLogin
+            ExternalLogin model = new()
             {
                 ProviderName = Provider,
                 ExternalUserId = ExternalUserId,
             };
 
-            var gameData = MockGameData.RealData;
-            var telemetryClient = new TelemetryClient(new TelemetryConfiguration());
-            var mockDatabaseCommandFactory = new Mock<IDatabaseCommandFactory>(MockBehavior.Strict);
-            var mockUserSettingsProvider = new Mock<IUserSettingsProvider>(MockBehavior.Strict);
+            ClickerHeroesTrackerWebsite.Models.Game.GameData gameData = MockGameData.RealData;
+            TelemetryClient telemetryClient = new(new TelemetryConfiguration());
+            Mock<IDatabaseCommandFactory> mockDatabaseCommandFactory = new(MockBehavior.Strict);
+            Mock<IUserSettingsProvider> mockUserSettingsProvider = new(MockBehavior.Strict);
 
-            var mockUser = new ApplicationUser();
-            var mockCurrentUser = new Mock<ClaimsPrincipal>(MockBehavior.Strict);
+            ApplicationUser mockUser = new();
+            Mock<ClaimsPrincipal> mockCurrentUser = new(MockBehavior.Strict);
             mockCurrentUser
                 .Setup(_ => _.IsInRole("Admin"))
                 .Returns(false);
-            var mockUserManager = MockUserManager.CreateMock();
+            Mock<UserManager<ApplicationUser>> mockUserManager = MockUserManager.CreateMock();
             mockUserManager
                 .Setup(_ => _.FindByNameAsync(UserName))
                 .Returns(Task.FromResult(mockUser));
@@ -2611,13 +2609,13 @@ namespace UnitTests.Controllers
                 .Setup(_ => _.GetUserId(mockCurrentUser.Object))
                 .Returns("SomeOtherUserId");
 
-            var mockHttpContext = new Mock<HttpContext>(MockBehavior.Strict);
+            Mock<HttpContext> mockHttpContext = new(MockBehavior.Strict);
             mockHttpContext.SetupGet(_ => _.User).Returns(mockCurrentUser.Object).Verifiable();
 
-            var mockEmailSender = new Mock<IEmailSender>(MockBehavior.Strict);
-            var mockClanManager = new Mock<IClanManager>(MockBehavior.Strict);
+            Mock<IEmailSender> mockEmailSender = new(MockBehavior.Strict);
+            Mock<IClanManager> mockClanManager = new(MockBehavior.Strict);
 
-            var controller = new UserController(
+            UserController controller = new(
                 gameData,
                 telemetryClient,
                 mockDatabaseCommandFactory.Object,
@@ -2627,7 +2625,7 @@ namespace UnitTests.Controllers
                 mockClanManager.Object);
             controller.ControllerContext = new ControllerContext { HttpContext = mockHttpContext.Object };
 
-            var result = await controller.RemoveLogin(UserName, model);
+            ActionResult result = await controller.RemoveLoginAsync(UserName, model);
 
             Assert.NotNull(result);
             Assert.IsType<ForbidResult>(result);
@@ -2652,23 +2650,23 @@ namespace UnitTests.Controllers
             const string Provider = "SomeProvider";
             const string ExternalUserId = "SomeExternalUserId";
 
-            var model = new ExternalLogin
+            ExternalLogin model = new()
             {
                 ProviderName = Provider,
                 ExternalUserId = ExternalUserId,
             };
 
-            var gameData = MockGameData.RealData;
-            var telemetryClient = new TelemetryClient(new TelemetryConfiguration());
-            var mockDatabaseCommandFactory = new Mock<IDatabaseCommandFactory>(MockBehavior.Strict);
-            var mockUserSettingsProvider = new Mock<IUserSettingsProvider>(MockBehavior.Strict);
+            ClickerHeroesTrackerWebsite.Models.Game.GameData gameData = MockGameData.RealData;
+            TelemetryClient telemetryClient = new(new TelemetryConfiguration());
+            Mock<IDatabaseCommandFactory> mockDatabaseCommandFactory = new(MockBehavior.Strict);
+            Mock<IUserSettingsProvider> mockUserSettingsProvider = new(MockBehavior.Strict);
 
-            var mockUser = new ApplicationUser();
-            var mockCurrentUser = new Mock<ClaimsPrincipal>(MockBehavior.Strict);
+            ApplicationUser mockUser = new();
+            Mock<ClaimsPrincipal> mockCurrentUser = new(MockBehavior.Strict);
             mockCurrentUser
                 .Setup(_ => _.IsInRole("Admin"))
                 .Returns(true);
-            var mockUserManager = MockUserManager.CreateMock();
+            Mock<UserManager<ApplicationUser>> mockUserManager = MockUserManager.CreateMock();
             mockUserManager
                 .Setup(_ => _.FindByNameAsync(UserName))
                 .Returns(Task.FromResult(mockUser));
@@ -2682,13 +2680,13 @@ namespace UnitTests.Controllers
                 .Setup(_ => _.RemoveLoginAsync(mockUser, Provider, ExternalUserId))
                 .Returns(Task.FromResult(IdentityResult.Success));
 
-            var mockHttpContext = new Mock<HttpContext>(MockBehavior.Strict);
+            Mock<HttpContext> mockHttpContext = new(MockBehavior.Strict);
             mockHttpContext.SetupGet(_ => _.User).Returns(mockCurrentUser.Object).Verifiable();
 
-            var mockEmailSender = new Mock<IEmailSender>(MockBehavior.Strict);
-            var mockClanManager = new Mock<IClanManager>(MockBehavior.Strict);
+            Mock<IEmailSender> mockEmailSender = new(MockBehavior.Strict);
+            Mock<IClanManager> mockClanManager = new(MockBehavior.Strict);
 
-            var controller = new UserController(
+            UserController controller = new(
                 gameData,
                 telemetryClient,
                 mockDatabaseCommandFactory.Object,
@@ -2698,7 +2696,7 @@ namespace UnitTests.Controllers
                 mockClanManager.Object);
             controller.ControllerContext = new ControllerContext { HttpContext = mockHttpContext.Object };
 
-            var result = await controller.RemoveLogin(UserName, model);
+            ActionResult result = await controller.RemoveLoginAsync(UserName, model);
 
             Assert.NotNull(result);
             Assert.IsType<OkResult>(result);
@@ -2723,19 +2721,19 @@ namespace UnitTests.Controllers
             const string Provider = "SomeProvider";
             const string ExternalUserId = "SomeExternalUserId";
 
-            var model = new ExternalLogin
+            ExternalLogin model = new()
             {
                 ProviderName = Provider,
                 ExternalUserId = ExternalUserId,
             };
 
-            var gameData = MockGameData.RealData;
-            var telemetryClient = new TelemetryClient(new TelemetryConfiguration());
-            var mockDatabaseCommandFactory = new Mock<IDatabaseCommandFactory>(MockBehavior.Strict);
-            var mockUserSettingsProvider = new Mock<IUserSettingsProvider>(MockBehavior.Strict);
-            var mockUser = new ApplicationUser();
-            var mockCurrentUser = new Mock<ClaimsPrincipal>(MockBehavior.Strict);
-            var mockUserManager = MockUserManager.CreateMock();
+            ClickerHeroesTrackerWebsite.Models.Game.GameData gameData = MockGameData.RealData;
+            TelemetryClient telemetryClient = new(new TelemetryConfiguration());
+            Mock<IDatabaseCommandFactory> mockDatabaseCommandFactory = new(MockBehavior.Strict);
+            Mock<IUserSettingsProvider> mockUserSettingsProvider = new(MockBehavior.Strict);
+            ApplicationUser mockUser = new();
+            Mock<ClaimsPrincipal> mockCurrentUser = new(MockBehavior.Strict);
+            Mock<UserManager<ApplicationUser>> mockUserManager = MockUserManager.CreateMock();
             mockUserManager
                 .Setup(_ => _.FindByNameAsync(UserName))
                 .Returns(Task.FromResult(mockUser));
@@ -2749,13 +2747,13 @@ namespace UnitTests.Controllers
                 .Setup(_ => _.RemoveLoginAsync(mockUser, Provider, ExternalUserId))
                 .Returns(Task.FromResult(IdentityResult.Failed(new IdentityError { Description = "SomeDescription" })));
 
-            var mockHttpContext = new Mock<HttpContext>(MockBehavior.Strict);
+            Mock<HttpContext> mockHttpContext = new(MockBehavior.Strict);
             mockHttpContext.SetupGet(_ => _.User).Returns(mockCurrentUser.Object).Verifiable();
 
-            var mockEmailSender = new Mock<IEmailSender>(MockBehavior.Strict);
-            var mockClanManager = new Mock<IClanManager>(MockBehavior.Strict);
+            Mock<IEmailSender> mockEmailSender = new(MockBehavior.Strict);
+            Mock<IClanManager> mockClanManager = new(MockBehavior.Strict);
 
-            var controller = new UserController(
+            UserController controller = new(
                 gameData,
                 telemetryClient,
                 mockDatabaseCommandFactory.Object,
@@ -2765,7 +2763,7 @@ namespace UnitTests.Controllers
                 mockClanManager.Object);
             controller.ControllerContext = new ControllerContext { HttpContext = mockHttpContext.Object };
 
-            var result = await controller.RemoveLogin(UserName, model);
+            ActionResult result = await controller.RemoveLoginAsync(UserName, model);
 
             Assert.NotNull(result);
             Assert.IsType<BadRequestObjectResult>(result);
@@ -2789,21 +2787,21 @@ namespace UnitTests.Controllers
             const string UserName = "SomeUserName";
             const string UserId = "SomeUserId";
 
-            var gameData = MockGameData.RealData;
-            var telemetryClient = new TelemetryClient(new TelemetryConfiguration());
-            var mockDatabaseCommandFactory = new Mock<IDatabaseCommandFactory>(MockBehavior.Strict);
-            var userSettings = new UserSettings();
-            var mockUserSettingsProvider = new Mock<IUserSettingsProvider>(MockBehavior.Strict);
+            ClickerHeroesTrackerWebsite.Models.Game.GameData gameData = MockGameData.RealData;
+            TelemetryClient telemetryClient = new(new TelemetryConfiguration());
+            Mock<IDatabaseCommandFactory> mockDatabaseCommandFactory = new(MockBehavior.Strict);
+            UserSettings userSettings = new();
+            Mock<IUserSettingsProvider> mockUserSettingsProvider = new(MockBehavior.Strict);
             mockUserSettingsProvider
                 .Setup(_ => _.PatchAsync(UserId, userSettings))
                 .Returns(Task.CompletedTask);
 
-            var mockUser = new ApplicationUser();
-            var mockCurrentUser = new Mock<ClaimsPrincipal>(MockBehavior.Strict);
+            ApplicationUser mockUser = new();
+            Mock<ClaimsPrincipal> mockCurrentUser = new(MockBehavior.Strict);
             mockCurrentUser
                 .Setup(_ => _.IsInRole("Admin"))
                 .Returns(true);
-            var mockUserManager = MockUserManager.CreateMock();
+            Mock<UserManager<ApplicationUser>> mockUserManager = MockUserManager.CreateMock();
             mockUserManager
                 .Setup(_ => _.FindByNameAsync(UserName))
                 .Returns(Task.FromResult(mockUser));
@@ -2814,13 +2812,13 @@ namespace UnitTests.Controllers
                 .Setup(_ => _.GetUserId(mockCurrentUser.Object))
                 .Returns("SomeOtherUserId");
 
-            var mockHttpContext = new Mock<HttpContext>(MockBehavior.Strict);
+            Mock<HttpContext> mockHttpContext = new(MockBehavior.Strict);
             mockHttpContext.SetupGet(_ => _.User).Returns(mockCurrentUser.Object).Verifiable();
 
-            var mockEmailSender = new Mock<IEmailSender>(MockBehavior.Strict);
-            var mockClanManager = new Mock<IClanManager>(MockBehavior.Strict);
+            Mock<IEmailSender> mockEmailSender = new(MockBehavior.Strict);
+            Mock<IClanManager> mockClanManager = new(MockBehavior.Strict);
 
-            var controller = new UserController(
+            UserController controller = new(
                 gameData,
                 telemetryClient,
                 mockDatabaseCommandFactory.Object,
@@ -2830,7 +2828,7 @@ namespace UnitTests.Controllers
                 mockClanManager.Object);
             controller.ControllerContext = new ControllerContext { HttpContext = mockHttpContext.Object };
 
-            var result = await controller.PatchSettings(UserName, userSettings);
+            ActionResult result = await controller.PatchSettingsAsync(UserName, userSettings);
 
             Assert.NotNull(result);
             Assert.IsType<OkResult>(result);
@@ -2854,18 +2852,18 @@ namespace UnitTests.Controllers
             const string UserId = "SomeUserId";
             const string NewPassword = "SomeNewPassword";
 
-            var model = new SetPasswordRequest
+            SetPasswordRequest model = new()
             {
                 NewPassword = NewPassword,
             };
 
-            var gameData = MockGameData.RealData;
-            var telemetryClient = new TelemetryClient(new TelemetryConfiguration());
-            var mockDatabaseCommandFactory = new Mock<IDatabaseCommandFactory>(MockBehavior.Strict);
-            var mockUserSettingsProvider = new Mock<IUserSettingsProvider>(MockBehavior.Strict);
-            var mockUser = new ApplicationUser();
-            var mockCurrentUser = new Mock<ClaimsPrincipal>(MockBehavior.Strict);
-            var mockUserManager = MockUserManager.CreateMock();
+            ClickerHeroesTrackerWebsite.Models.Game.GameData gameData = MockGameData.RealData;
+            TelemetryClient telemetryClient = new(new TelemetryConfiguration());
+            Mock<IDatabaseCommandFactory> mockDatabaseCommandFactory = new(MockBehavior.Strict);
+            Mock<IUserSettingsProvider> mockUserSettingsProvider = new(MockBehavior.Strict);
+            ApplicationUser mockUser = new();
+            Mock<ClaimsPrincipal> mockCurrentUser = new(MockBehavior.Strict);
+            Mock<UserManager<ApplicationUser>> mockUserManager = MockUserManager.CreateMock();
             mockUserManager
                 .Setup(_ => _.FindByNameAsync(UserName))
                 .Returns(Task.FromResult(mockUser));
@@ -2879,13 +2877,13 @@ namespace UnitTests.Controllers
                 .Setup(_ => _.AddPasswordAsync(mockUser, NewPassword))
                 .Returns(Task.FromResult(IdentityResult.Success));
 
-            var mockHttpContext = new Mock<HttpContext>(MockBehavior.Strict);
+            Mock<HttpContext> mockHttpContext = new(MockBehavior.Strict);
             mockHttpContext.SetupGet(_ => _.User).Returns(mockCurrentUser.Object).Verifiable();
 
-            var mockEmailSender = new Mock<IEmailSender>(MockBehavior.Strict);
-            var mockClanManager = new Mock<IClanManager>(MockBehavior.Strict);
+            Mock<IEmailSender> mockEmailSender = new(MockBehavior.Strict);
+            Mock<IClanManager> mockClanManager = new(MockBehavior.Strict);
 
-            var controller = new UserController(
+            UserController controller = new(
                 gameData,
                 telemetryClient,
                 mockDatabaseCommandFactory.Object,
@@ -2895,7 +2893,7 @@ namespace UnitTests.Controllers
                 mockClanManager.Object);
             controller.ControllerContext = new ControllerContext { HttpContext = mockHttpContext.Object };
 
-            var result = await controller.SetPassword(UserName, model);
+            ActionResult result = await controller.SetPasswordAsync(UserName, model);
 
             Assert.NotNull(result);
             Assert.IsType<OkResult>(result);
@@ -2918,24 +2916,24 @@ namespace UnitTests.Controllers
             const string UserName = "SomeUserName";
             const string NewPassword = "SomeNewPassword";
 
-            var model = new SetPasswordRequest
+            SetPasswordRequest model = new()
             {
                 NewPassword = NewPassword,
             };
 
-            var gameData = MockGameData.RealData;
-            var telemetryClient = new TelemetryClient(new TelemetryConfiguration());
-            var mockDatabaseCommandFactory = new Mock<IDatabaseCommandFactory>(MockBehavior.Strict);
-            var mockUserSettingsProvider = new Mock<IUserSettingsProvider>(MockBehavior.Strict);
-            var mockUserManager = MockUserManager.CreateMock();
+            ClickerHeroesTrackerWebsite.Models.Game.GameData gameData = MockGameData.RealData;
+            TelemetryClient telemetryClient = new(new TelemetryConfiguration());
+            Mock<IDatabaseCommandFactory> mockDatabaseCommandFactory = new(MockBehavior.Strict);
+            Mock<IUserSettingsProvider> mockUserSettingsProvider = new(MockBehavior.Strict);
+            Mock<UserManager<ApplicationUser>> mockUserManager = MockUserManager.CreateMock();
             mockUserManager
                 .Setup(_ => _.FindByNameAsync(UserName))
                 .Returns(Task.FromResult<ApplicationUser>(null));
 
-            var mockEmailSender = new Mock<IEmailSender>(MockBehavior.Strict);
-            var mockClanManager = new Mock<IClanManager>(MockBehavior.Strict);
+            Mock<IEmailSender> mockEmailSender = new(MockBehavior.Strict);
+            Mock<IClanManager> mockClanManager = new(MockBehavior.Strict);
 
-            var controller = new UserController(
+            UserController controller = new(
                 gameData,
                 telemetryClient,
                 mockDatabaseCommandFactory.Object,
@@ -2944,7 +2942,7 @@ namespace UnitTests.Controllers
                 mockEmailSender.Object,
                 mockClanManager.Object);
 
-            var result = await controller.SetPassword(UserName, model);
+            ActionResult result = await controller.SetPasswordAsync(UserName, model);
 
             Assert.NotNull(result);
             Assert.IsType<NotFoundResult>(result);
@@ -2965,18 +2963,18 @@ namespace UnitTests.Controllers
             const string UserName = "SomeUserName";
             const string NewPassword = "SomeNewPassword";
 
-            var model = new SetPasswordRequest
+            SetPasswordRequest model = new()
             {
                 NewPassword = NewPassword,
             };
 
-            var gameData = MockGameData.RealData;
-            var telemetryClient = new TelemetryClient(new TelemetryConfiguration());
-            var mockDatabaseCommandFactory = new Mock<IDatabaseCommandFactory>(MockBehavior.Strict);
-            var mockUserSettingsProvider = new Mock<IUserSettingsProvider>(MockBehavior.Strict);
+            ClickerHeroesTrackerWebsite.Models.Game.GameData gameData = MockGameData.RealData;
+            TelemetryClient telemetryClient = new(new TelemetryConfiguration());
+            Mock<IDatabaseCommandFactory> mockDatabaseCommandFactory = new(MockBehavior.Strict);
+            Mock<IUserSettingsProvider> mockUserSettingsProvider = new(MockBehavior.Strict);
 
-            var mockUser = new ApplicationUser();
-            var mockUserManager = MockUserManager.CreateMock();
+            ApplicationUser mockUser = new();
+            Mock<UserManager<ApplicationUser>> mockUserManager = MockUserManager.CreateMock();
             mockUserManager
                 .Setup(_ => _.FindByNameAsync(UserName))
                 .Returns(Task.FromResult(mockUser));
@@ -2984,10 +2982,10 @@ namespace UnitTests.Controllers
                 .Setup(_ => _.GetUserIdAsync(mockUser))
                 .Returns(Task.FromResult<string>(null));
 
-            var mockEmailSender = new Mock<IEmailSender>(MockBehavior.Strict);
-            var mockClanManager = new Mock<IClanManager>(MockBehavior.Strict);
+            Mock<IEmailSender> mockEmailSender = new(MockBehavior.Strict);
+            Mock<IClanManager> mockClanManager = new(MockBehavior.Strict);
 
-            var controller = new UserController(
+            UserController controller = new(
                 gameData,
                 telemetryClient,
                 mockDatabaseCommandFactory.Object,
@@ -2996,7 +2994,7 @@ namespace UnitTests.Controllers
                 mockEmailSender.Object,
                 mockClanManager.Object);
 
-            var result = await controller.SetPassword(UserName, model);
+            ActionResult result = await controller.SetPasswordAsync(UserName, model);
 
             Assert.NotNull(result);
             Assert.IsType<NotFoundResult>(result);
@@ -3018,22 +3016,22 @@ namespace UnitTests.Controllers
             const string UserId = "SomeUserId";
             const string NewPassword = "SomeNewPassword";
 
-            var model = new SetPasswordRequest
+            SetPasswordRequest model = new()
             {
                 NewPassword = NewPassword,
             };
 
-            var gameData = MockGameData.RealData;
-            var telemetryClient = new TelemetryClient(new TelemetryConfiguration());
-            var mockDatabaseCommandFactory = new Mock<IDatabaseCommandFactory>(MockBehavior.Strict);
-            var mockUserSettingsProvider = new Mock<IUserSettingsProvider>(MockBehavior.Strict);
+            ClickerHeroesTrackerWebsite.Models.Game.GameData gameData = MockGameData.RealData;
+            TelemetryClient telemetryClient = new(new TelemetryConfiguration());
+            Mock<IDatabaseCommandFactory> mockDatabaseCommandFactory = new(MockBehavior.Strict);
+            Mock<IUserSettingsProvider> mockUserSettingsProvider = new(MockBehavior.Strict);
 
-            var mockUser = new ApplicationUser();
-            var mockCurrentUser = new Mock<ClaimsPrincipal>(MockBehavior.Strict);
+            ApplicationUser mockUser = new();
+            Mock<ClaimsPrincipal> mockCurrentUser = new(MockBehavior.Strict);
             mockCurrentUser
                 .Setup(_ => _.IsInRole("Admin"))
                 .Returns(false);
-            var mockUserManager = MockUserManager.CreateMock();
+            Mock<UserManager<ApplicationUser>> mockUserManager = MockUserManager.CreateMock();
             mockUserManager
                 .Setup(_ => _.FindByNameAsync(UserName))
                 .Returns(Task.FromResult(mockUser));
@@ -3044,13 +3042,13 @@ namespace UnitTests.Controllers
                 .Setup(_ => _.GetUserId(mockCurrentUser.Object))
                 .Returns("SomeOtherUserId");
 
-            var mockHttpContext = new Mock<HttpContext>(MockBehavior.Strict);
+            Mock<HttpContext> mockHttpContext = new(MockBehavior.Strict);
             mockHttpContext.SetupGet(_ => _.User).Returns(mockCurrentUser.Object).Verifiable();
 
-            var mockEmailSender = new Mock<IEmailSender>(MockBehavior.Strict);
-            var mockClanManager = new Mock<IClanManager>(MockBehavior.Strict);
+            Mock<IEmailSender> mockEmailSender = new(MockBehavior.Strict);
+            Mock<IClanManager> mockClanManager = new(MockBehavior.Strict);
 
-            var controller = new UserController(
+            UserController controller = new(
                 gameData,
                 telemetryClient,
                 mockDatabaseCommandFactory.Object,
@@ -3060,7 +3058,7 @@ namespace UnitTests.Controllers
                 mockClanManager.Object);
             controller.ControllerContext = new ControllerContext { HttpContext = mockHttpContext.Object };
 
-            var result = await controller.SetPassword(UserName, model);
+            ActionResult result = await controller.SetPasswordAsync(UserName, model);
 
             Assert.NotNull(result);
             Assert.IsType<ForbidResult>(result);
@@ -3084,22 +3082,22 @@ namespace UnitTests.Controllers
             const string UserId = "SomeUserId";
             const string NewPassword = "SomeNewPassword";
 
-            var model = new SetPasswordRequest
+            SetPasswordRequest model = new()
             {
                 NewPassword = NewPassword,
             };
 
-            var gameData = MockGameData.RealData;
-            var telemetryClient = new TelemetryClient(new TelemetryConfiguration());
-            var mockDatabaseCommandFactory = new Mock<IDatabaseCommandFactory>(MockBehavior.Strict);
-            var mockUserSettingsProvider = new Mock<IUserSettingsProvider>(MockBehavior.Strict);
+            ClickerHeroesTrackerWebsite.Models.Game.GameData gameData = MockGameData.RealData;
+            TelemetryClient telemetryClient = new(new TelemetryConfiguration());
+            Mock<IDatabaseCommandFactory> mockDatabaseCommandFactory = new(MockBehavior.Strict);
+            Mock<IUserSettingsProvider> mockUserSettingsProvider = new(MockBehavior.Strict);
 
-            var mockUser = new ApplicationUser();
-            var mockCurrentUser = new Mock<ClaimsPrincipal>(MockBehavior.Strict);
+            ApplicationUser mockUser = new();
+            Mock<ClaimsPrincipal> mockCurrentUser = new(MockBehavior.Strict);
             mockCurrentUser
                 .Setup(_ => _.IsInRole("Admin"))
                 .Returns(true);
-            var mockUserManager = MockUserManager.CreateMock();
+            Mock<UserManager<ApplicationUser>> mockUserManager = MockUserManager.CreateMock();
             mockUserManager
                 .Setup(_ => _.FindByNameAsync(UserName))
                 .Returns(Task.FromResult(mockUser));
@@ -3113,13 +3111,13 @@ namespace UnitTests.Controllers
                 .Setup(_ => _.AddPasswordAsync(mockUser, NewPassword))
                 .Returns(Task.FromResult(IdentityResult.Success));
 
-            var mockHttpContext = new Mock<HttpContext>(MockBehavior.Strict);
+            Mock<HttpContext> mockHttpContext = new(MockBehavior.Strict);
             mockHttpContext.SetupGet(_ => _.User).Returns(mockCurrentUser.Object).Verifiable();
 
-            var mockEmailSender = new Mock<IEmailSender>(MockBehavior.Strict);
-            var mockClanManager = new Mock<IClanManager>(MockBehavior.Strict);
+            Mock<IEmailSender> mockEmailSender = new(MockBehavior.Strict);
+            Mock<IClanManager> mockClanManager = new(MockBehavior.Strict);
 
-            var controller = new UserController(
+            UserController controller = new(
                 gameData,
                 telemetryClient,
                 mockDatabaseCommandFactory.Object,
@@ -3129,7 +3127,7 @@ namespace UnitTests.Controllers
                 mockClanManager.Object);
             controller.ControllerContext = new ControllerContext { HttpContext = mockHttpContext.Object };
 
-            var result = await controller.SetPassword(UserName, model);
+            ActionResult result = await controller.SetPasswordAsync(UserName, model);
 
             Assert.NotNull(result);
             Assert.IsType<OkResult>(result);
@@ -3153,18 +3151,18 @@ namespace UnitTests.Controllers
             const string UserId = "SomeUserId";
             const string NewPassword = "SomeNewPassword";
 
-            var model = new SetPasswordRequest
+            SetPasswordRequest model = new()
             {
                 NewPassword = NewPassword,
             };
 
-            var gameData = MockGameData.RealData;
-            var telemetryClient = new TelemetryClient(new TelemetryConfiguration());
-            var mockDatabaseCommandFactory = new Mock<IDatabaseCommandFactory>(MockBehavior.Strict);
-            var mockUserSettingsProvider = new Mock<IUserSettingsProvider>(MockBehavior.Strict);
-            var mockUser = new ApplicationUser();
-            var mockCurrentUser = new Mock<ClaimsPrincipal>(MockBehavior.Strict);
-            var mockUserManager = MockUserManager.CreateMock();
+            ClickerHeroesTrackerWebsite.Models.Game.GameData gameData = MockGameData.RealData;
+            TelemetryClient telemetryClient = new(new TelemetryConfiguration());
+            Mock<IDatabaseCommandFactory> mockDatabaseCommandFactory = new(MockBehavior.Strict);
+            Mock<IUserSettingsProvider> mockUserSettingsProvider = new(MockBehavior.Strict);
+            ApplicationUser mockUser = new();
+            Mock<ClaimsPrincipal> mockCurrentUser = new(MockBehavior.Strict);
+            Mock<UserManager<ApplicationUser>> mockUserManager = MockUserManager.CreateMock();
             mockUserManager
                 .Setup(_ => _.FindByNameAsync(UserName))
                 .Returns(Task.FromResult(mockUser));
@@ -3178,13 +3176,13 @@ namespace UnitTests.Controllers
                 .Setup(_ => _.AddPasswordAsync(mockUser, NewPassword))
                 .Returns(Task.FromResult(IdentityResult.Failed(new IdentityError { Description = "SomeDescription" })));
 
-            var mockHttpContext = new Mock<HttpContext>(MockBehavior.Strict);
+            Mock<HttpContext> mockHttpContext = new(MockBehavior.Strict);
             mockHttpContext.SetupGet(_ => _.User).Returns(mockCurrentUser.Object).Verifiable();
 
-            var mockEmailSender = new Mock<IEmailSender>(MockBehavior.Strict);
-            var mockClanManager = new Mock<IClanManager>(MockBehavior.Strict);
+            Mock<IEmailSender> mockEmailSender = new(MockBehavior.Strict);
+            Mock<IClanManager> mockClanManager = new(MockBehavior.Strict);
 
-            var controller = new UserController(
+            UserController controller = new(
                 gameData,
                 telemetryClient,
                 mockDatabaseCommandFactory.Object,
@@ -3194,7 +3192,7 @@ namespace UnitTests.Controllers
                 mockClanManager.Object);
             controller.ControllerContext = new ControllerContext { HttpContext = mockHttpContext.Object };
 
-            var result = await controller.SetPassword(UserName, model);
+            ActionResult result = await controller.SetPasswordAsync(UserName, model);
 
             Assert.NotNull(result);
             Assert.IsType<BadRequestObjectResult>(result);
@@ -3220,19 +3218,19 @@ namespace UnitTests.Controllers
             const string CurrentPassword = "SomeCurrentPassword";
             const string NewPassword = "SomeNewPassword";
 
-            var model = new ChangePasswordRequest
+            ChangePasswordRequest model = new()
             {
                 CurrentPassword = CurrentPassword,
                 NewPassword = NewPassword,
             };
 
-            var gameData = MockGameData.RealData;
-            var telemetryClient = new TelemetryClient(new TelemetryConfiguration());
-            var mockDatabaseCommandFactory = new Mock<IDatabaseCommandFactory>(MockBehavior.Strict);
-            var mockUserSettingsProvider = new Mock<IUserSettingsProvider>(MockBehavior.Strict);
-            var mockUser = new ApplicationUser();
-            var mockCurrentUser = new Mock<ClaimsPrincipal>(MockBehavior.Strict);
-            var mockUserManager = MockUserManager.CreateMock();
+            ClickerHeroesTrackerWebsite.Models.Game.GameData gameData = MockGameData.RealData;
+            TelemetryClient telemetryClient = new(new TelemetryConfiguration());
+            Mock<IDatabaseCommandFactory> mockDatabaseCommandFactory = new(MockBehavior.Strict);
+            Mock<IUserSettingsProvider> mockUserSettingsProvider = new(MockBehavior.Strict);
+            ApplicationUser mockUser = new();
+            Mock<ClaimsPrincipal> mockCurrentUser = new(MockBehavior.Strict);
+            Mock<UserManager<ApplicationUser>> mockUserManager = MockUserManager.CreateMock();
             mockUserManager
                 .Setup(_ => _.FindByNameAsync(UserName))
                 .Returns(Task.FromResult(mockUser));
@@ -3246,13 +3244,13 @@ namespace UnitTests.Controllers
                 .Setup(_ => _.ChangePasswordAsync(mockUser, CurrentPassword, NewPassword))
                 .Returns(Task.FromResult(IdentityResult.Success));
 
-            var mockHttpContext = new Mock<HttpContext>(MockBehavior.Strict);
+            Mock<HttpContext> mockHttpContext = new(MockBehavior.Strict);
             mockHttpContext.SetupGet(_ => _.User).Returns(mockCurrentUser.Object).Verifiable();
 
-            var mockEmailSender = new Mock<IEmailSender>(MockBehavior.Strict);
-            var mockClanManager = new Mock<IClanManager>(MockBehavior.Strict);
+            Mock<IEmailSender> mockEmailSender = new(MockBehavior.Strict);
+            Mock<IClanManager> mockClanManager = new(MockBehavior.Strict);
 
-            var controller = new UserController(
+            UserController controller = new(
                 gameData,
                 telemetryClient,
                 mockDatabaseCommandFactory.Object,
@@ -3262,7 +3260,7 @@ namespace UnitTests.Controllers
                 mockClanManager.Object);
             controller.ControllerContext = new ControllerContext { HttpContext = mockHttpContext.Object };
 
-            var result = await controller.ChangePassword(UserName, model);
+            ActionResult result = await controller.ChangePasswordAsync(UserName, model);
 
             Assert.NotNull(result);
             Assert.IsType<OkResult>(result);
@@ -3286,25 +3284,25 @@ namespace UnitTests.Controllers
             const string CurrentPassword = "SomeCurrentPassword";
             const string NewPassword = "SomeNewPassword";
 
-            var model = new ChangePasswordRequest
+            ChangePasswordRequest model = new()
             {
                 CurrentPassword = CurrentPassword,
                 NewPassword = NewPassword,
             };
 
-            var gameData = MockGameData.RealData;
-            var telemetryClient = new TelemetryClient(new TelemetryConfiguration());
-            var mockDatabaseCommandFactory = new Mock<IDatabaseCommandFactory>(MockBehavior.Strict);
-            var mockUserSettingsProvider = new Mock<IUserSettingsProvider>(MockBehavior.Strict);
-            var mockUserManager = MockUserManager.CreateMock();
+            ClickerHeroesTrackerWebsite.Models.Game.GameData gameData = MockGameData.RealData;
+            TelemetryClient telemetryClient = new(new TelemetryConfiguration());
+            Mock<IDatabaseCommandFactory> mockDatabaseCommandFactory = new(MockBehavior.Strict);
+            Mock<IUserSettingsProvider> mockUserSettingsProvider = new(MockBehavior.Strict);
+            Mock<UserManager<ApplicationUser>> mockUserManager = MockUserManager.CreateMock();
             mockUserManager
                 .Setup(_ => _.FindByNameAsync(UserName))
                 .Returns(Task.FromResult<ApplicationUser>(null));
 
-            var mockEmailSender = new Mock<IEmailSender>(MockBehavior.Strict);
-            var mockClanManager = new Mock<IClanManager>(MockBehavior.Strict);
+            Mock<IEmailSender> mockEmailSender = new(MockBehavior.Strict);
+            Mock<IClanManager> mockClanManager = new(MockBehavior.Strict);
 
-            var controller = new UserController(
+            UserController controller = new(
                 gameData,
                 telemetryClient,
                 mockDatabaseCommandFactory.Object,
@@ -3313,7 +3311,7 @@ namespace UnitTests.Controllers
                 mockEmailSender.Object,
                 mockClanManager.Object);
 
-            var result = await controller.ChangePassword(UserName, model);
+            ActionResult result = await controller.ChangePasswordAsync(UserName, model);
 
             Assert.NotNull(result);
             Assert.IsType<NotFoundResult>(result);
@@ -3335,19 +3333,19 @@ namespace UnitTests.Controllers
             const string CurrentPassword = "SomeCurrentPassword";
             const string NewPassword = "SomeNewPassword";
 
-            var model = new ChangePasswordRequest
+            ChangePasswordRequest model = new()
             {
                 CurrentPassword = CurrentPassword,
                 NewPassword = NewPassword,
             };
 
-            var gameData = MockGameData.RealData;
-            var telemetryClient = new TelemetryClient(new TelemetryConfiguration());
-            var mockDatabaseCommandFactory = new Mock<IDatabaseCommandFactory>(MockBehavior.Strict);
-            var mockUserSettingsProvider = new Mock<IUserSettingsProvider>(MockBehavior.Strict);
+            ClickerHeroesTrackerWebsite.Models.Game.GameData gameData = MockGameData.RealData;
+            TelemetryClient telemetryClient = new(new TelemetryConfiguration());
+            Mock<IDatabaseCommandFactory> mockDatabaseCommandFactory = new(MockBehavior.Strict);
+            Mock<IUserSettingsProvider> mockUserSettingsProvider = new(MockBehavior.Strict);
 
-            var mockUser = new ApplicationUser();
-            var mockUserManager = MockUserManager.CreateMock();
+            ApplicationUser mockUser = new();
+            Mock<UserManager<ApplicationUser>> mockUserManager = MockUserManager.CreateMock();
             mockUserManager
                 .Setup(_ => _.FindByNameAsync(UserName))
                 .Returns(Task.FromResult(mockUser));
@@ -3355,10 +3353,10 @@ namespace UnitTests.Controllers
                 .Setup(_ => _.GetUserIdAsync(mockUser))
                 .Returns(Task.FromResult<string>(null));
 
-            var mockEmailSender = new Mock<IEmailSender>(MockBehavior.Strict);
-            var mockClanManager = new Mock<IClanManager>(MockBehavior.Strict);
+            Mock<IEmailSender> mockEmailSender = new(MockBehavior.Strict);
+            Mock<IClanManager> mockClanManager = new(MockBehavior.Strict);
 
-            var controller = new UserController(
+            UserController controller = new(
                 gameData,
                 telemetryClient,
                 mockDatabaseCommandFactory.Object,
@@ -3367,7 +3365,7 @@ namespace UnitTests.Controllers
                 mockEmailSender.Object,
                 mockClanManager.Object);
 
-            var result = await controller.ChangePassword(UserName, model);
+            ActionResult result = await controller.ChangePasswordAsync(UserName, model);
 
             Assert.NotNull(result);
             Assert.IsType<NotFoundResult>(result);
@@ -3390,23 +3388,23 @@ namespace UnitTests.Controllers
             const string CurrentPassword = "SomeCurrentPassword";
             const string NewPassword = "SomeNewPassword";
 
-            var model = new ChangePasswordRequest
+            ChangePasswordRequest model = new()
             {
                 CurrentPassword = CurrentPassword,
                 NewPassword = NewPassword,
             };
 
-            var gameData = MockGameData.RealData;
-            var telemetryClient = new TelemetryClient(new TelemetryConfiguration());
-            var mockDatabaseCommandFactory = new Mock<IDatabaseCommandFactory>(MockBehavior.Strict);
-            var mockUserSettingsProvider = new Mock<IUserSettingsProvider>(MockBehavior.Strict);
+            ClickerHeroesTrackerWebsite.Models.Game.GameData gameData = MockGameData.RealData;
+            TelemetryClient telemetryClient = new(new TelemetryConfiguration());
+            Mock<IDatabaseCommandFactory> mockDatabaseCommandFactory = new(MockBehavior.Strict);
+            Mock<IUserSettingsProvider> mockUserSettingsProvider = new(MockBehavior.Strict);
 
-            var mockUser = new ApplicationUser();
-            var mockCurrentUser = new Mock<ClaimsPrincipal>(MockBehavior.Strict);
+            ApplicationUser mockUser = new();
+            Mock<ClaimsPrincipal> mockCurrentUser = new(MockBehavior.Strict);
             mockCurrentUser
                 .Setup(_ => _.IsInRole("Admin"))
                 .Returns(false);
-            var mockUserManager = MockUserManager.CreateMock();
+            Mock<UserManager<ApplicationUser>> mockUserManager = MockUserManager.CreateMock();
             mockUserManager
                 .Setup(_ => _.FindByNameAsync(UserName))
                 .Returns(Task.FromResult(mockUser));
@@ -3417,13 +3415,13 @@ namespace UnitTests.Controllers
                 .Setup(_ => _.GetUserId(mockCurrentUser.Object))
                 .Returns("SomeOtherUserId");
 
-            var mockHttpContext = new Mock<HttpContext>(MockBehavior.Strict);
+            Mock<HttpContext> mockHttpContext = new(MockBehavior.Strict);
             mockHttpContext.SetupGet(_ => _.User).Returns(mockCurrentUser.Object).Verifiable();
 
-            var mockEmailSender = new Mock<IEmailSender>(MockBehavior.Strict);
-            var mockClanManager = new Mock<IClanManager>(MockBehavior.Strict);
+            Mock<IEmailSender> mockEmailSender = new(MockBehavior.Strict);
+            Mock<IClanManager> mockClanManager = new(MockBehavior.Strict);
 
-            var controller = new UserController(
+            UserController controller = new(
                 gameData,
                 telemetryClient,
                 mockDatabaseCommandFactory.Object,
@@ -3433,7 +3431,7 @@ namespace UnitTests.Controllers
                 mockClanManager.Object);
             controller.ControllerContext = new ControllerContext { HttpContext = mockHttpContext.Object };
 
-            var result = await controller.ChangePassword(UserName, model);
+            ActionResult result = await controller.ChangePasswordAsync(UserName, model);
 
             Assert.NotNull(result);
             Assert.IsType<ForbidResult>(result);
@@ -3458,23 +3456,23 @@ namespace UnitTests.Controllers
             const string CurrentPassword = "SomeCurrentPassword";
             const string NewPassword = "SomeNewPassword";
 
-            var model = new ChangePasswordRequest
+            ChangePasswordRequest model = new()
             {
                 CurrentPassword = CurrentPassword,
                 NewPassword = NewPassword,
             };
 
-            var gameData = MockGameData.RealData;
-            var telemetryClient = new TelemetryClient(new TelemetryConfiguration());
-            var mockDatabaseCommandFactory = new Mock<IDatabaseCommandFactory>(MockBehavior.Strict);
-            var mockUserSettingsProvider = new Mock<IUserSettingsProvider>(MockBehavior.Strict);
+            ClickerHeroesTrackerWebsite.Models.Game.GameData gameData = MockGameData.RealData;
+            TelemetryClient telemetryClient = new(new TelemetryConfiguration());
+            Mock<IDatabaseCommandFactory> mockDatabaseCommandFactory = new(MockBehavior.Strict);
+            Mock<IUserSettingsProvider> mockUserSettingsProvider = new(MockBehavior.Strict);
 
-            var mockUser = new ApplicationUser();
-            var mockCurrentUser = new Mock<ClaimsPrincipal>(MockBehavior.Strict);
+            ApplicationUser mockUser = new();
+            Mock<ClaimsPrincipal> mockCurrentUser = new(MockBehavior.Strict);
             mockCurrentUser
                 .Setup(_ => _.IsInRole("Admin"))
                 .Returns(true);
-            var mockUserManager = MockUserManager.CreateMock();
+            Mock<UserManager<ApplicationUser>> mockUserManager = MockUserManager.CreateMock();
             mockUserManager
                 .Setup(_ => _.FindByNameAsync(UserName))
                 .Returns(Task.FromResult(mockUser));
@@ -3488,13 +3486,13 @@ namespace UnitTests.Controllers
                 .Setup(_ => _.ChangePasswordAsync(mockUser, CurrentPassword, NewPassword))
                 .Returns(Task.FromResult(IdentityResult.Success));
 
-            var mockHttpContext = new Mock<HttpContext>(MockBehavior.Strict);
+            Mock<HttpContext> mockHttpContext = new(MockBehavior.Strict);
             mockHttpContext.SetupGet(_ => _.User).Returns(mockCurrentUser.Object).Verifiable();
 
-            var mockEmailSender = new Mock<IEmailSender>(MockBehavior.Strict);
-            var mockClanManager = new Mock<IClanManager>(MockBehavior.Strict);
+            Mock<IEmailSender> mockEmailSender = new(MockBehavior.Strict);
+            Mock<IClanManager> mockClanManager = new(MockBehavior.Strict);
 
-            var controller = new UserController(
+            UserController controller = new(
                 gameData,
                 telemetryClient,
                 mockDatabaseCommandFactory.Object,
@@ -3504,7 +3502,7 @@ namespace UnitTests.Controllers
                 mockClanManager.Object);
             controller.ControllerContext = new ControllerContext { HttpContext = mockHttpContext.Object };
 
-            var result = await controller.ChangePassword(UserName, model);
+            ActionResult result = await controller.ChangePasswordAsync(UserName, model);
 
             Assert.NotNull(result);
             Assert.IsType<OkResult>(result);
@@ -3529,19 +3527,19 @@ namespace UnitTests.Controllers
             const string CurrentPassword = "SomeCurrentPassword";
             const string NewPassword = "SomeNewPassword";
 
-            var model = new ChangePasswordRequest
+            ChangePasswordRequest model = new()
             {
                 CurrentPassword = CurrentPassword,
                 NewPassword = NewPassword,
             };
 
-            var gameData = MockGameData.RealData;
-            var telemetryClient = new TelemetryClient(new TelemetryConfiguration());
-            var mockDatabaseCommandFactory = new Mock<IDatabaseCommandFactory>(MockBehavior.Strict);
-            var mockUserSettingsProvider = new Mock<IUserSettingsProvider>(MockBehavior.Strict);
-            var mockUser = new ApplicationUser();
-            var mockCurrentUser = new Mock<ClaimsPrincipal>(MockBehavior.Strict);
-            var mockUserManager = MockUserManager.CreateMock();
+            ClickerHeroesTrackerWebsite.Models.Game.GameData gameData = MockGameData.RealData;
+            TelemetryClient telemetryClient = new(new TelemetryConfiguration());
+            Mock<IDatabaseCommandFactory> mockDatabaseCommandFactory = new(MockBehavior.Strict);
+            Mock<IUserSettingsProvider> mockUserSettingsProvider = new(MockBehavior.Strict);
+            ApplicationUser mockUser = new();
+            Mock<ClaimsPrincipal> mockCurrentUser = new(MockBehavior.Strict);
+            Mock<UserManager<ApplicationUser>> mockUserManager = MockUserManager.CreateMock();
             mockUserManager
                 .Setup(_ => _.FindByNameAsync(UserName))
                 .Returns(Task.FromResult(mockUser));
@@ -3555,13 +3553,13 @@ namespace UnitTests.Controllers
                 .Setup(_ => _.ChangePasswordAsync(mockUser, CurrentPassword, NewPassword))
                 .Returns(Task.FromResult(IdentityResult.Failed(new IdentityError { Description = "SomeDescription" })));
 
-            var mockHttpContext = new Mock<HttpContext>(MockBehavior.Strict);
+            Mock<HttpContext> mockHttpContext = new(MockBehavior.Strict);
             mockHttpContext.SetupGet(_ => _.User).Returns(mockCurrentUser.Object).Verifiable();
 
-            var mockEmailSender = new Mock<IEmailSender>(MockBehavior.Strict);
-            var mockClanManager = new Mock<IClanManager>(MockBehavior.Strict);
+            Mock<IEmailSender> mockEmailSender = new(MockBehavior.Strict);
+            Mock<IClanManager> mockClanManager = new(MockBehavior.Strict);
 
-            var controller = new UserController(
+            UserController controller = new(
                 gameData,
                 telemetryClient,
                 mockDatabaseCommandFactory.Object,
@@ -3571,7 +3569,7 @@ namespace UnitTests.Controllers
                 mockClanManager.Object);
             controller.ControllerContext = new ControllerContext { HttpContext = mockHttpContext.Object };
 
-            var result = await controller.ChangePassword(UserName, model);
+            ActionResult result = await controller.ChangePasswordAsync(UserName, model);
 
             Assert.NotNull(result);
             Assert.IsType<BadRequestObjectResult>(result);
@@ -3594,18 +3592,18 @@ namespace UnitTests.Controllers
         {
             const string Code = "SomeCode";
 
-            var model = new ResetPasswordRequest
+            ResetPasswordRequest model = new()
             {
                 Email = "SomeEmail",
             };
 
-            var gameData = MockGameData.RealData;
-            var telemetryClient = new TelemetryClient(new TelemetryConfiguration());
-            var mockDatabaseCommandFactory = new Mock<IDatabaseCommandFactory>(MockBehavior.Strict);
-            var mockUserSettingsProvider = new Mock<IUserSettingsProvider>(MockBehavior.Strict);
+            ClickerHeroesTrackerWebsite.Models.Game.GameData gameData = MockGameData.RealData;
+            TelemetryClient telemetryClient = new(new TelemetryConfiguration());
+            Mock<IDatabaseCommandFactory> mockDatabaseCommandFactory = new(MockBehavior.Strict);
+            Mock<IUserSettingsProvider> mockUserSettingsProvider = new(MockBehavior.Strict);
 
-            var mockUser = new ApplicationUser();
-            var mockUserManager = MockUserManager.CreateMock();
+            ApplicationUser mockUser = new();
+            Mock<UserManager<ApplicationUser>> mockUserManager = MockUserManager.CreateMock();
             mockUserManager
                 .Setup(_ => _.FindByEmailAsync(model.Email))
                 .Returns(Task.FromResult(mockUser));
@@ -3613,14 +3611,14 @@ namespace UnitTests.Controllers
                 .Setup(_ => _.GeneratePasswordResetTokenAsync(mockUser))
                 .Returns(Task.FromResult(Code));
 
-            var mockEmailSender = new Mock<IEmailSender>(MockBehavior.Strict);
+            Mock<IEmailSender> mockEmailSender = new(MockBehavior.Strict);
             mockEmailSender
                 .Setup(_ => _.SendEmailAsync(model.Email, It.IsAny<string>(), It.Is<string>(str => str.Contains(Code, StringComparison.Ordinal))))
                 .Returns(Task.CompletedTask);
 
-            var mockClanManager = new Mock<IClanManager>(MockBehavior.Strict);
+            Mock<IClanManager> mockClanManager = new(MockBehavior.Strict);
 
-            var controller = new UserController(
+            UserController controller = new(
                 gameData,
                 telemetryClient,
                 mockDatabaseCommandFactory.Object,
@@ -3628,7 +3626,7 @@ namespace UnitTests.Controllers
                 mockUserManager.Object,
                 mockEmailSender.Object,
                 mockClanManager.Object);
-            var result = await controller.ResetPassword(model);
+            ActionResult result = await controller.ResetPasswordAsync(model);
 
             Assert.NotNull(result);
             Assert.IsType<OkResult>(result);
@@ -3646,24 +3644,24 @@ namespace UnitTests.Controllers
         [Fact]
         public static async Task ResetPassword_UserLookupFails()
         {
-            var model = new ResetPasswordRequest
+            ResetPasswordRequest model = new()
             {
                 Email = "SomeEmail",
             };
 
-            var gameData = MockGameData.RealData;
-            var telemetryClient = new TelemetryClient(new TelemetryConfiguration());
-            var mockDatabaseCommandFactory = new Mock<IDatabaseCommandFactory>(MockBehavior.Strict);
-            var mockUserSettingsProvider = new Mock<IUserSettingsProvider>(MockBehavior.Strict);
-            var mockEmailSender = new Mock<IEmailSender>(MockBehavior.Strict);
-            var mockClanManager = new Mock<IClanManager>(MockBehavior.Strict);
+            ClickerHeroesTrackerWebsite.Models.Game.GameData gameData = MockGameData.RealData;
+            TelemetryClient telemetryClient = new(new TelemetryConfiguration());
+            Mock<IDatabaseCommandFactory> mockDatabaseCommandFactory = new(MockBehavior.Strict);
+            Mock<IUserSettingsProvider> mockUserSettingsProvider = new(MockBehavior.Strict);
+            Mock<IEmailSender> mockEmailSender = new(MockBehavior.Strict);
+            Mock<IClanManager> mockClanManager = new(MockBehavior.Strict);
 
-            var mockUserManager = MockUserManager.CreateMock();
+            Mock<UserManager<ApplicationUser>> mockUserManager = MockUserManager.CreateMock();
             mockUserManager
                 .Setup(_ => _.FindByEmailAsync(model.Email))
                 .Returns(Task.FromResult((ApplicationUser)null));
 
-            var controller = new UserController(
+            UserController controller = new(
                 gameData,
                 telemetryClient,
                 mockDatabaseCommandFactory.Object,
@@ -3671,7 +3669,7 @@ namespace UnitTests.Controllers
                 mockUserManager.Object,
                 mockEmailSender.Object,
                 mockClanManager.Object);
-            var result = await controller.ResetPassword(model);
+            ActionResult result = await controller.ResetPasswordAsync(model);
 
             Assert.NotNull(result);
             Assert.IsType<OkResult>(result);
@@ -3687,22 +3685,22 @@ namespace UnitTests.Controllers
         [Fact]
         public static async Task ResetPasswordConfirmation_Success()
         {
-            var model = new ResetPasswordConfirmationRequest
+            ResetPasswordConfirmationRequest model = new()
             {
                 Email = "SomeEmail",
                 Password = "SomePassword",
                 Code = "SomeCode",
             };
 
-            var gameData = MockGameData.RealData;
-            var telemetryClient = new TelemetryClient(new TelemetryConfiguration());
-            var mockDatabaseCommandFactory = new Mock<IDatabaseCommandFactory>(MockBehavior.Strict);
-            var mockUserSettingsProvider = new Mock<IUserSettingsProvider>(MockBehavior.Strict);
-            var mockEmailSender = new Mock<IEmailSender>(MockBehavior.Strict);
-            var mockClanManager = new Mock<IClanManager>(MockBehavior.Strict);
+            ClickerHeroesTrackerWebsite.Models.Game.GameData gameData = MockGameData.RealData;
+            TelemetryClient telemetryClient = new(new TelemetryConfiguration());
+            Mock<IDatabaseCommandFactory> mockDatabaseCommandFactory = new(MockBehavior.Strict);
+            Mock<IUserSettingsProvider> mockUserSettingsProvider = new(MockBehavior.Strict);
+            Mock<IEmailSender> mockEmailSender = new(MockBehavior.Strict);
+            Mock<IClanManager> mockClanManager = new(MockBehavior.Strict);
 
-            var mockUser = new ApplicationUser();
-            var mockUserManager = MockUserManager.CreateMock();
+            ApplicationUser mockUser = new();
+            Mock<UserManager<ApplicationUser>> mockUserManager = MockUserManager.CreateMock();
             mockUserManager
                 .Setup(_ => _.FindByEmailAsync(model.Email))
                 .Returns(Task.FromResult(mockUser));
@@ -3710,7 +3708,7 @@ namespace UnitTests.Controllers
                 .Setup(_ => _.ResetPasswordAsync(mockUser, model.Code, model.Password))
                 .Returns(Task.FromResult(IdentityResult.Success));
 
-            var controller = new UserController(
+            UserController controller = new(
                 gameData,
                 telemetryClient,
                 mockDatabaseCommandFactory.Object,
@@ -3718,7 +3716,7 @@ namespace UnitTests.Controllers
                 mockUserManager.Object,
                 mockEmailSender.Object,
                 mockClanManager.Object);
-            var result = await controller.ResetPasswordConfirmation(model);
+            ActionResult result = await controller.ResetPasswordConfirmationAsync(model);
 
             Assert.NotNull(result);
             Assert.IsType<OkResult>(result);
@@ -3736,26 +3734,26 @@ namespace UnitTests.Controllers
         [Fact]
         public static async Task ResetPasswordConfirmation_UserLookupFails()
         {
-            var model = new ResetPasswordConfirmationRequest
+            ResetPasswordConfirmationRequest model = new()
             {
                 Email = "SomeEmail",
                 Password = "SomePassword",
                 Code = "SomeCode",
             };
 
-            var gameData = MockGameData.RealData;
-            var telemetryClient = new TelemetryClient(new TelemetryConfiguration());
-            var mockDatabaseCommandFactory = new Mock<IDatabaseCommandFactory>(MockBehavior.Strict);
-            var mockUserSettingsProvider = new Mock<IUserSettingsProvider>(MockBehavior.Strict);
-            var mockEmailSender = new Mock<IEmailSender>(MockBehavior.Strict);
-            var mockClanManager = new Mock<IClanManager>(MockBehavior.Strict);
+            ClickerHeroesTrackerWebsite.Models.Game.GameData gameData = MockGameData.RealData;
+            TelemetryClient telemetryClient = new(new TelemetryConfiguration());
+            Mock<IDatabaseCommandFactory> mockDatabaseCommandFactory = new(MockBehavior.Strict);
+            Mock<IUserSettingsProvider> mockUserSettingsProvider = new(MockBehavior.Strict);
+            Mock<IEmailSender> mockEmailSender = new(MockBehavior.Strict);
+            Mock<IClanManager> mockClanManager = new(MockBehavior.Strict);
 
-            var mockUserManager = MockUserManager.CreateMock();
+            Mock<UserManager<ApplicationUser>> mockUserManager = MockUserManager.CreateMock();
             mockUserManager
                 .Setup(_ => _.FindByEmailAsync(model.Email))
                 .Returns(Task.FromResult((ApplicationUser)null));
 
-            var controller = new UserController(
+            UserController controller = new(
                 gameData,
                 telemetryClient,
                 mockDatabaseCommandFactory.Object,
@@ -3763,7 +3761,7 @@ namespace UnitTests.Controllers
                 mockUserManager.Object,
                 mockEmailSender.Object,
                 mockClanManager.Object);
-            var result = await controller.ResetPasswordConfirmation(model);
+            ActionResult result = await controller.ResetPasswordConfirmationAsync(model);
 
             Assert.NotNull(result);
             Assert.IsType<OkResult>(result);
@@ -3779,22 +3777,22 @@ namespace UnitTests.Controllers
         [Fact]
         public static async Task ResetPasswordConfirmation_ResetPasswordFails()
         {
-            var model = new ResetPasswordConfirmationRequest
+            ResetPasswordConfirmationRequest model = new()
             {
                 Email = "SomeEmail",
                 Password = "SomePassword",
                 Code = "SomeCode",
             };
 
-            var gameData = MockGameData.RealData;
-            var telemetryClient = new TelemetryClient(new TelemetryConfiguration());
-            var mockDatabaseCommandFactory = new Mock<IDatabaseCommandFactory>(MockBehavior.Strict);
-            var mockUserSettingsProvider = new Mock<IUserSettingsProvider>(MockBehavior.Strict);
-            var mockEmailSender = new Mock<IEmailSender>(MockBehavior.Strict);
-            var mockClanManager = new Mock<IClanManager>(MockBehavior.Strict);
+            ClickerHeroesTrackerWebsite.Models.Game.GameData gameData = MockGameData.RealData;
+            TelemetryClient telemetryClient = new(new TelemetryConfiguration());
+            Mock<IDatabaseCommandFactory> mockDatabaseCommandFactory = new(MockBehavior.Strict);
+            Mock<IUserSettingsProvider> mockUserSettingsProvider = new(MockBehavior.Strict);
+            Mock<IEmailSender> mockEmailSender = new(MockBehavior.Strict);
+            Mock<IClanManager> mockClanManager = new(MockBehavior.Strict);
 
-            var mockUser = new ApplicationUser();
-            var mockUserManager = MockUserManager.CreateMock();
+            ApplicationUser mockUser = new();
+            Mock<UserManager<ApplicationUser>> mockUserManager = MockUserManager.CreateMock();
             mockUserManager
                 .Setup(_ => _.FindByEmailAsync(model.Email))
                 .Returns(Task.FromResult(mockUser));
@@ -3802,7 +3800,7 @@ namespace UnitTests.Controllers
                 .Setup(_ => _.ResetPasswordAsync(mockUser, model.Code, model.Password))
                 .Returns(Task.FromResult(IdentityResult.Failed(new IdentityError { Description = "SomeDescription" })));
 
-            var controller = new UserController(
+            UserController controller = new(
                 gameData,
                 telemetryClient,
                 mockDatabaseCommandFactory.Object,
@@ -3810,7 +3808,7 @@ namespace UnitTests.Controllers
                 mockUserManager.Object,
                 mockEmailSender.Object,
                 mockClanManager.Object);
-            var result = await controller.ResetPasswordConfirmation(model);
+            ActionResult result = await controller.ResetPasswordConfirmationAsync(model);
 
             Assert.NotNull(result);
             Assert.IsType<BadRequestObjectResult>(result);

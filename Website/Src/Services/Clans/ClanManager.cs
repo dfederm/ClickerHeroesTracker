@@ -1,37 +1,35 @@
-﻿// <copyright file="ClanManager.cs" company="Clicker Heroes Tracker">
-// Copyright (c) Clicker Heroes Tracker. All rights reserved.
-// </copyright>
+﻿// Copyright (C) Clicker Heroes Tracker. All Rights Reserved.
+
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Net.Http;
+using System.Text;
+using System.Threading.Tasks;
+using ClickerHeroesTrackerWebsite.Models.Api;
+using ClickerHeroesTrackerWebsite.Models.Api.Clans;
+using ClickerHeroesTrackerWebsite.Services.Database;
+using ClickerHeroesTrackerWebsite.Utility;
+using Newtonsoft.Json;
 
 namespace Website.Services.Clans
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Net.Http;
-    using System.Text;
-    using System.Threading.Tasks;
-    using ClickerHeroesTrackerWebsite.Models.Api;
-    using ClickerHeroesTrackerWebsite.Models.Api.Clans;
-    using ClickerHeroesTrackerWebsite.Services.Database;
-    using ClickerHeroesTrackerWebsite.Utility;
-    using Newtonsoft.Json;
-
     public class ClanManager : IClanManager
     {
         private const string BaseUrl = "http://clickerheroes-savedgames3-747864888.us-east-1.elb.amazonaws.com";
 
         private static readonly char[] MessageDelimeter = { ';' };
 
-        private readonly IDatabaseCommandFactory databaseCommandFactory;
+        private readonly IDatabaseCommandFactory _databaseCommandFactory;
 
-        private readonly HttpClient httpClient;
+        private readonly HttpClient _httpClient;
 
         public ClanManager(
             IDatabaseCommandFactory databaseCommandFactory,
             HttpClient httpClient)
         {
-            this.databaseCommandFactory = databaseCommandFactory;
-            this.httpClient = httpClient;
+            _databaseCommandFactory = databaseCommandFactory;
+            _httpClient = httpClient;
         }
 
         public async Task<string> GetClanNameAsync(string userId)
@@ -49,11 +47,11 @@ namespace Website.Services.Clans
                     FROM GameUsers
                     WHERE UserId = @UserId
                 );";
-            var parameters = new Dictionary<string, object>
+            Dictionary<string, object> parameters = new()
             {
                 { "@UserId", userId },
             };
-            using (var command = this.databaseCommandFactory.Create(CommandText, parameters))
+            using (IDatabaseCommand command = _databaseCommandFactory.Create(CommandText, parameters))
             {
                 return (await command.ExecuteScalarAsync())?.ToString();
             }
@@ -61,11 +59,11 @@ namespace Website.Services.Clans
 
         public async Task<ClanData> GetClanDataAsync(string clanName)
         {
-            var clanDataTask = this.GetBasicClanDataAsync(clanName);
-            var guildMembersTask = this.GetGuildMembersAsync(clanName);
+            Task<ClanData> clanDataTask = GetBasicClanDataAsync(clanName);
+            Task<IList<GuildMember>> guildMembersTask = GetGuildMembersAsync(clanName);
             await Task.WhenAll(clanDataTask, guildMembersTask);
 
-            var clanData = clanDataTask.Result;
+            ClanData clanData = clanDataTask.Result;
             if (clanData != null)
             {
                 clanData.GuildMembers = guildMembersTask.Result;
@@ -82,33 +80,33 @@ namespace Website.Services.Clans
             }
 
             // Start this immediately since it does not rely on getting the clan information
-            var updateGameUsers = this.UpdateGameUsersTableAsync(userId, gameUserId, passwordHash);
+            Task updateGameUsers = UpdateGameUsersTableAsync(userId, gameUserId, passwordHash);
             try
             {
-                var parameters = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+                Dictionary<string, string> parameters = new(StringComparer.OrdinalIgnoreCase)
                 {
                     { "uid", gameUserId },
                     { "passwordHash", passwordHash },
                 };
-                var content = new FormUrlEncodedContent(parameters);
-                var response = await this.httpClient.PostAsync(BaseUrl + "/clans/getGuildInfo.php", content);
+                FormUrlEncodedContent content = new(parameters);
+                HttpResponseMessage response = await _httpClient.PostAsync(BaseUrl + "/clans/getGuildInfo.php", content);
 
-                var responseString = await response.Content.ReadAsStringAsync();
+                string responseString = await response.Content.ReadAsStringAsync();
                 if (responseString.Contains("\"success\": false", StringComparison.OrdinalIgnoreCase))
                 {
                     return;
                 }
 
-                var clanResponse = JsonConvert.DeserializeObject<GuildResponse>(responseString);
-                var clan = clanResponse.Result;
+                GuildResponse clanResponse = JsonConvert.DeserializeObject<GuildResponse>(responseString);
+                GuildResponseResult clan = clanResponse.Result;
                 if (clan?.Guild == null)
                 {
                     return;
                 }
 
                 // Wait for the clans table first since it may create a foreign key required by the clan members table.
-                await this.UpdateClansTableAsync(clan);
-                await this.UpdateClanMembersTableAsync(clan);
+                await UpdateClansTableAsync(clan);
+                await UpdateClanMembersTableAsync(clan);
             }
             finally
             {
@@ -120,17 +118,17 @@ namespace Website.Services.Clans
         public async Task<IList<Message>> GetMessages(string userId, int count)
         {
             // Fetch in parallel
-            var parametersTask = this.GetBaseParameters(userId);
-            var clanNameTask = this.GetClanNameAsync(userId);
+            Task<Dictionary<string, string>> parametersTask = GetBaseParametersAsync(userId);
+            Task<string> clanNameTask = GetClanNameAsync(userId);
             await Task.WhenAll(parametersTask, clanNameTask);
 
-            var parameters = parametersTask.Result;
+            Dictionary<string, string> parameters = parametersTask.Result;
             if (parameters == null)
             {
                 return null;
             }
 
-            var clanName = clanNameTask.Result;
+            string clanName = clanNameTask.Result;
             if (clanName == null)
             {
                 return null;
@@ -139,32 +137,32 @@ namespace Website.Services.Clans
             parameters.Add("guildName", clanName);
 
             // Fetch in parallel
-            var messagesTask = Task.Run(async () =>
+            Task<IDictionary<string, string>> messagesTask = Task.Run(async () =>
             {
-                var content = new FormUrlEncodedContent(parameters);
-                var response = await this.httpClient.PostAsync(BaseUrl + "/clans/getGuildMessages.php", content);
-                var str = await response.Content.ReadAsStringAsync();
+                FormUrlEncodedContent content = new(parameters);
+                HttpResponseMessage response = await _httpClient.PostAsync(BaseUrl + "/clans/getGuildMessages.php", content);
+                string str = await response.Content.ReadAsStringAsync();
                 return JsonConvert.DeserializeObject<MessageResponse>(str)?.Result?.Messages;
             });
-            var guildMembersTask = this.GetGuildMembersAsync(clanName);
+            Task<IList<GuildMember>> guildMembersTask = GetGuildMembersAsync(clanName);
             await Task.WhenAll(messagesTask, guildMembersTask);
 
-            var guildMembers = guildMembersTask.Result.ToDictionary(member => member.Uid, member => member.Nickname);
-            var messages = messagesTask.Result;
+            Dictionary<string, string> guildMembers = guildMembersTask.Result.ToDictionary(member => member.Uid, member => member.Nickname);
+            IDictionary<string, string> messages = messagesTask.Result;
             if (messages == null)
             {
                 return null;
             }
 
-            var messageList = new List<Message>(messages.Count);
-            foreach (var kvp in messages)
+            List<Message> messageList = new(messages.Count);
+            foreach (KeyValuePair<string, string> kvp in messages)
             {
-                var messageSplit = kvp.Value.Split(MessageDelimeter, 2);
+                string[] messageSplit = kvp.Value.Split(MessageDelimeter, 2);
                 messageList.Add(new Message
                 {
                     Content = messageSplit[1],
                     Date = Convert.ToDouble(kvp.Key).UnixTimeStampToDateTime(),
-                    Username = guildMembers.TryGetValue(messageSplit[0], out var userName) ? userName : null,
+                    Username = guildMembers.TryGetValue(messageSplit[0], out string userName) ? userName : null,
                 });
             }
 
@@ -181,17 +179,17 @@ namespace Website.Services.Clans
         public async Task<string> SendMessage(string userId, string message)
         {
             // Fetch in parallel
-            var parametersTask = this.GetBaseParameters(userId);
-            var clanNameTask = this.GetClanNameAsync(userId);
+            Task<Dictionary<string, string>> parametersTask = GetBaseParametersAsync(userId);
+            Task<string> clanNameTask = GetClanNameAsync(userId);
             await Task.WhenAll(parametersTask, clanNameTask);
 
-            var parameters = parametersTask.Result;
+            Dictionary<string, string> parameters = parametersTask.Result;
             if (parameters == null)
             {
                 return null;
             }
 
-            var clanName = clanNameTask.Result;
+            string clanName = clanNameTask.Result;
             if (clanName == null)
             {
                 return null;
@@ -200,17 +198,17 @@ namespace Website.Services.Clans
             parameters.Add("guildName", clanName);
             parameters.Add("message", message);
 
-            var content = new FormUrlEncodedContent(parameters);
-            var response = await this.httpClient.PostAsync(BaseUrl + "/clans/sendGuildMessage.php", content);
+            FormUrlEncodedContent content = new(parameters);
+            HttpResponseMessage response = await _httpClient.PostAsync(BaseUrl + "/clans/sendGuildMessage.php", content);
             return await response.Content.ReadAsStringAsync();
         }
 
         public async Task<IList<LeaderboardClan>> FetchLeaderboardAsync(string userId, int page, int count)
         {
-            var clanName = await this.GetClanNameAsync(userId);
+            string clanName = await GetClanNameAsync(userId);
 
-            var clans = new List<LeaderboardClan>();
-            var offset = (page - 1) * count;
+            List<LeaderboardClan> clans = new();
+            int offset = (page - 1) * count;
 
             const string GetLeaderboardDataCommandText = @"
                 SELECT Name, CurrentRaidLevel, (SELECT COUNT(*) FROM ClanMembers WHERE ClanMembers.ClanName = Name) AS MemberCount
@@ -219,18 +217,18 @@ namespace Website.Services.Clans
                 ORDER BY CurrentRaidLevel DESC
                     OFFSET @Offset ROWS
                     FETCH NEXT @Count ROWS ONLY;";
-            var parameters = new Dictionary<string, object>
+            Dictionary<string, object> parameters = new()
             {
                 { "@Offset", offset },
                 { "@Count", count },
             };
-            using (var command = this.databaseCommandFactory.Create(GetLeaderboardDataCommandText, parameters))
-            using (var reader = await command.ExecuteReaderAsync())
+            using (IDatabaseCommand command = _databaseCommandFactory.Create(GetLeaderboardDataCommandText, parameters))
+            using (System.Data.IDataReader reader = await command.ExecuteReaderAsync())
             {
-                var i = 1;
+                int i = 1;
                 while (reader.Read())
                 {
-                    var isUserClan = string.Equals(clanName, reader["Name"].ToString(), StringComparison.OrdinalIgnoreCase);
+                    bool isUserClan = string.Equals(clanName, reader["Name"].ToString(), StringComparison.OrdinalIgnoreCase);
 
                     clans.Add(new LeaderboardClan
                     {
@@ -254,15 +252,15 @@ namespace Website.Services.Clans
                 FROM Clans
                 WHERE IsBlocked = 0";
 
-            using (var command = this.databaseCommandFactory.Create(GetLeaderboardCountCommandText))
-            using (var reader = await command.ExecuteReaderAsync())
+            using (IDatabaseCommand command = _databaseCommandFactory.Create(GetLeaderboardCountCommandText))
+            using (System.Data.IDataReader reader = await command.ExecuteReaderAsync())
             {
                 if (!reader.Read())
                 {
                     return null;
                 }
 
-                var pagination = new PaginationMetadata
+                PaginationMetadata pagination = new()
                 {
                     Count = Convert.ToInt32(reader["TotalClans"]),
                 };
@@ -293,16 +291,16 @@ namespace Website.Services.Clans
                 SELECT RowNumber, CurrentRaidLevel, @ClanName AS ClanName, IsBlocked
                 FROM NumberedRows
                 WHERE Name = @ClanName;";
-            var parameters = new Dictionary<string, object>
+            Dictionary<string, object> parameters = new()
             {
                 { "@ClanName", clanName },
             };
-            using (var command = this.databaseCommandFactory.Create(CommandText, parameters))
-            using (var reader = await command.ExecuteReaderAsync())
+            using (IDatabaseCommand command = _databaseCommandFactory.Create(CommandText, parameters))
+            using (System.Data.IDataReader reader = await command.ExecuteReaderAsync())
             {
                 if (reader.Read())
                 {
-                    var isBlocked = Convert.ToBoolean(reader["IsBlocked"]);
+                    bool isBlocked = Convert.ToBoolean(reader["IsBlocked"]);
 
                     return new ClanData
                     {
@@ -327,14 +325,14 @@ namespace Website.Services.Clans
                 LEFT JOIN AspNetUsers
                 ON GameUsers.UserId = AspNetUsers.Id
                 WHERE ClanName = @ClanName;";
-            var parameters = new Dictionary<string, object>
+            Dictionary<string, object> parameters = new()
             {
                 { "@ClanName", clanName },
             };
-            using (var command = this.databaseCommandFactory.Create(CommandText, parameters))
-            using (var reader = await command.ExecuteReaderAsync())
+            using (IDatabaseCommand command = _databaseCommandFactory.Create(CommandText, parameters))
+            using (System.Data.IDataReader reader = await command.ExecuteReaderAsync())
             {
-                var guildMembers = new List<GuildMember>();
+                List<GuildMember> guildMembers = new();
                 while (reader.Read())
                 {
                     guildMembers.Add(new GuildMember
@@ -366,13 +364,13 @@ namespace Website.Services.Clans
                 WHEN NOT MATCHED THEN
                     INSERT (Name, CurrentRaidLevel, ClanMasterId)
                     VALUES (Input.Name, Input.CurrentRaidLevel, Input.ClanMasterId);";
-            var parameters = new Dictionary<string, object>
-                {
+            Dictionary<string, object> parameters = new()
+            {
                     { "@Name", clan.Guild.Name },
                     { "@CurrentRaidLevel", clan.Guild.CurrentRaidLevel },
                     { "@ClanMasterId", clan.Guild.GuildMasterUid },
-                };
-            using (var command = this.databaseCommandFactory.Create(CommandText, parameters))
+            };
+            using (IDatabaseCommand command = _databaseCommandFactory.Create(CommandText, parameters))
             {
                 await command.ExecuteNonQueryAsync();
             }
@@ -380,8 +378,8 @@ namespace Website.Services.Clans
 
         private async Task UpdateClanMembersTableAsync(GuildResponseResult clan)
         {
-            var clanMembers = clan.GuildMembers.Values
-                .Where(member => clan.Guild.MemberUids.TryGetValue(member.Uid, out var memberType) && memberType == MemberType.Member)
+            List<GuildMember> clanMembers = clan.GuildMembers.Values
+                .Where(member => clan.Guild.MemberUids.TryGetValue(member.Uid, out MemberType memberType) && memberType == MemberType.Member)
                 .OrderByDescending(member => member.HighestZone)
                 .ToList();
 
@@ -403,20 +401,20 @@ namespace Website.Services.Clans
                 WHEN NOT MATCHED BY SOURCE AND ClanMembers.ClanName = @ClanName THEN
                     DELETE;
             */
-            var commandText = new StringBuilder();
-            var parameters = new Dictionary<string, object>
-                {
+            StringBuilder commandText = new();
+            Dictionary<string, object> parameters = new()
+            {
                     { "@ClanName", clan.Guild.Name },
-                };
+            };
 
             commandText.Append(@"
                 MERGE INTO ClanMembers WITH (HOLDLOCK)
                 USING
                     ( VALUES ");
-            var isFirst = true;
-            for (var i = 0; i < clanMembers.Count; i++)
+            bool isFirst = true;
+            for (int i = 0; i < clanMembers.Count; i++)
             {
-                var clanMember = clanMembers[i];
+                GuildMember clanMember = clanMembers[i];
 
                 if (!isFirst)
                 {
@@ -446,7 +444,7 @@ namespace Website.Services.Clans
                     VALUES (Input.Id, Input.Nickname, Input.HighestZone, Input.ClanName)
                 WHEN NOT MATCHED BY SOURCE AND ClanMembers.ClanName = @ClanName THEN
                     DELETE;");
-            using (var command = this.databaseCommandFactory.Create(commandText.ToString(), parameters))
+            using (IDatabaseCommand command = _databaseCommandFactory.Create(commandText.ToString(), parameters))
             {
                 await command.ExecuteNonQueryAsync();
             }
@@ -473,19 +471,19 @@ namespace Website.Services.Clans
                 WHEN NOT MATCHED THEN
                     INSERT (Id, PasswordHash, UserId)
                     VALUES (Input.Id, Input.PasswordHash, Input.UserId);";
-            var parameters = new Dictionary<string, object>
-                {
+            Dictionary<string, object> parameters = new()
+            {
                     { "@Id", gameUserId },
                     { "@PasswordHash", passwordHash },
                     { "@UserId", userId },
-                };
-            using (var command = this.databaseCommandFactory.Create(CommandText, parameters))
+            };
+            using (IDatabaseCommand command = _databaseCommandFactory.Create(CommandText, parameters))
             {
                 await command.ExecuteNonQueryAsync();
             }
         }
 
-        private async Task<Dictionary<string, string>> GetBaseParameters(string userId)
+        private async Task<Dictionary<string, string>> GetBaseParametersAsync(string userId)
         {
             if (userId == null)
             {
@@ -496,12 +494,12 @@ namespace Website.Services.Clans
                 SELECT Id, PasswordHash
                 FROM GameUsers
                 WHERE UserId = @UserId";
-            var parameters = new Dictionary<string, object>
+            Dictionary<string, object> parameters = new()
             {
                 { "@UserId", userId },
             };
-            using (var command = this.databaseCommandFactory.Create(CommandText, parameters))
-            using (var reader = await command.ExecuteReaderAsync())
+            using (IDatabaseCommand command = _databaseCommandFactory.Create(CommandText, parameters))
+            using (System.Data.IDataReader reader = await command.ExecuteReaderAsync())
             {
                 if (reader.Read())
                 {

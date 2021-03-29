@@ -1,18 +1,16 @@
-﻿// <copyright file="GoogleAssertionGrantHandlerTests.cs" company="Clicker Heroes Tracker">
-// Copyright (c) Clicker Heroes Tracker. All rights reserved.
-// </copyright>
+﻿// Copyright (C) Clicker Heroes Tracker. All Rights Reserved.
+
+using System.Net;
+using System.Threading.Tasks;
+using Microsoft.Extensions.Options;
+using Newtonsoft.Json;
+using Testing.HttpClient;
+using Website.Models.Authentication;
+using Website.Services.Authentication;
+using Xunit;
 
 namespace UnitTests.Services.Authentication
 {
-    using System.Net;
-    using System.Threading.Tasks;
-    using Microsoft.Extensions.Options;
-    using Newtonsoft.Json;
-    using Testing.HttpClient;
-    using Website.Models.Authentication;
-    using Website.Services.Authentication;
-    using Xunit;
-
     public static class GoogleAssertionGrantHandlerTests
     {
         private const string ClientId = "SomeClientId";
@@ -24,19 +22,19 @@ namespace UnitTests.Services.Authentication
         [Fact]
         public static async Task ValidateAsync_Success()
         {
-            var authenticationSettings = new AuthenticationSettings
+            AuthenticationSettings authenticationSettings = new()
             {
                 Google = new GoogleAuthenticationSettings
                 {
                     ClientId = ClientId,
                 },
             };
-            var options = Options.Create(authenticationSettings);
+            IOptions<AuthenticationSettings> options = Options.Create(authenticationSettings);
 
-            using (var http = new HttpClientTestingFactory())
+            using (HttpClientTestingFactory http = new())
             {
-                var handler = new GoogleAssertionGrantHandler(options, http.HttpClient);
-                var resultTask = handler.ValidateAsync(Assertion);
+                GoogleAssertionGrantHandler handler = new(options, http.HttpClient);
+                Task<AssertionGrantResult> resultTask = handler.ValidateAsync(Assertion);
 
                 http.Expect(ValidationEndpoint).Respond(JsonConvert.SerializeObject(new JsonWebToken
                 {
@@ -45,7 +43,7 @@ namespace UnitTests.Services.Authentication
                     Email = ExternalUserEmail,
                 }));
 
-                var result = await resultTask;
+                AssertionGrantResult result = await resultTask;
                 Assert.NotNull(result);
                 Assert.True(result.IsSuccessful);
                 Assert.Equal(ExternalUserId, result.ExternalUserId);
@@ -58,17 +56,17 @@ namespace UnitTests.Services.Authentication
         [Fact]
         public static async Task ValidateAsync_HttpError()
         {
-            var authenticationSettings = new AuthenticationSettings();
-            var options = Options.Create(authenticationSettings);
+            AuthenticationSettings authenticationSettings = new();
+            IOptions<AuthenticationSettings> options = Options.Create(authenticationSettings);
 
-            using (var http = new HttpClientTestingFactory())
+            using (HttpClientTestingFactory http = new())
             {
-                var handler = new GoogleAssertionGrantHandler(options, http.HttpClient);
-                var resultTask = handler.ValidateAsync(Assertion);
+                GoogleAssertionGrantHandler handler = new(options, http.HttpClient);
+                Task<AssertionGrantResult> resultTask = handler.ValidateAsync(Assertion);
 
                 http.Expect(ValidationEndpoint).Respond(HttpStatusCode.BadRequest);
 
-                var result = await resultTask;
+                AssertionGrantResult result = await resultTask;
                 Assert.NotNull(result);
                 Assert.False(result.IsSuccessful);
 
@@ -79,19 +77,19 @@ namespace UnitTests.Services.Authentication
         [Fact]
         public static async Task ValidateAsync_WrongAudience()
         {
-            var authenticationSettings = new AuthenticationSettings
+            AuthenticationSettings authenticationSettings = new()
             {
                 Google = new GoogleAuthenticationSettings
                 {
                     ClientId = ClientId,
                 },
             };
-            var options = Options.Create(authenticationSettings);
+            IOptions<AuthenticationSettings> options = Options.Create(authenticationSettings);
 
-            using (var http = new HttpClientTestingFactory())
+            using (HttpClientTestingFactory http = new())
             {
-                var handler = new GoogleAssertionGrantHandler(options, http.HttpClient);
-                var resultTask = handler.ValidateAsync(Assertion);
+                GoogleAssertionGrantHandler handler = new(options, http.HttpClient);
+                Task<AssertionGrantResult> resultTask = handler.ValidateAsync(Assertion);
 
                 http.Expect(ValidationEndpoint).Respond(JsonConvert.SerializeObject(new JsonWebToken
                 {
@@ -99,7 +97,7 @@ namespace UnitTests.Services.Authentication
                     Sub = ExternalUserId,
                 }));
 
-                var result = await resultTask;
+                AssertionGrantResult result = await resultTask;
                 Assert.NotNull(result);
                 Assert.False(result.IsSuccessful);
 

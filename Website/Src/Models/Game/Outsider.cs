@@ -1,11 +1,9 @@
-﻿// <copyright file="Outsider.cs" company="Clicker Heroes Tracker">
-// Copyright (c) Clicker Heroes Tracker. All rights reserved.
-// </copyright>
+﻿// Copyright (C) Clicker Heroes Tracker. All Rights Reserved.
+
+using Newtonsoft.Json;
 
 namespace ClickerHeroesTrackerWebsite.Models.Game
 {
-    using Newtonsoft.Json;
-
     /// <summary>
     /// Represents the data for an outsider in the game.
     /// </summary>
@@ -13,7 +11,7 @@ namespace ClickerHeroesTrackerWebsite.Models.Game
     public class Outsider
     {
         /// <summary>
-        /// Gets or sets the outsider id
+        /// Gets or sets the outsider id.
         /// </summary>
         [JsonProperty(PropertyName = "id", Required = Required.Always)]
         public int Id { get; set; }

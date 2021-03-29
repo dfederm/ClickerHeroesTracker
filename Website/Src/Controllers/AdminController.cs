@@ -1,46 +1,44 @@
-﻿// <copyright file="AdminController.cs" company="Clicker Heroes Tracker">
-// Copyright (c) Clicker Heroes Tracker. All rights reserved.
-// </copyright>
+﻿// Copyright (C) Clicker Heroes Tracker. All Rights Reserved.
+
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using ClickerHeroesTrackerWebsite.Services.Database;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using OpenIddict.Validation.AspNetCore;
+using Website.Models.Api.Admin;
 
 namespace Website.Controllers
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Threading.Tasks;
-    using ClickerHeroesTrackerWebsite.Services.Database;
-    using Microsoft.AspNetCore.Authorization;
-    using Microsoft.AspNetCore.Mvc;
-    using OpenIddict.Validation.AspNetCore;
-    using Website.Models.Api.Admin;
-
     [Route("api/admin")]
     [Authorize(Roles = "Admin", AuthenticationSchemes = OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme)]
     [ApiController]
     public class AdminController : Controller
     {
-        private readonly IDatabaseCommandFactory databaseCommandFactory;
+        private readonly IDatabaseCommandFactory _databaseCommandFactory;
 
         public AdminController(IDatabaseCommandFactory databaseCommandFactory)
         {
-            this.databaseCommandFactory = databaseCommandFactory;
+            _databaseCommandFactory = databaseCommandFactory;
         }
 
         [Route("staleuploads")]
         [HttpGet]
-        public async Task<ActionResult<List<int>>> StaleUploads()
+        public async Task<ActionResult<List<int>>> StaleUploadsAsync()
         {
             const string CommandText = @"
                 SELECT Id
                 FROM Uploads
                 WHERE UserId IS NULL
                 AND UploadTime < DATEADD(day, -30, GETDATE())";
-            var uploadIds = new List<int>();
-            using (var command = this.databaseCommandFactory.Create(CommandText))
-            using (var reader = await command.ExecuteReaderAsync())
+            List<int> uploadIds = new();
+            using (IDatabaseCommand command = _databaseCommandFactory.Create(CommandText))
+            using (System.Data.IDataReader reader = await command.ExecuteReaderAsync())
             {
                 while (reader.Read())
                 {
-                    var uploadId = Convert.ToInt32(reader["Id"]);
+                    int uploadId = Convert.ToInt32(reader["Id"]);
                     uploadIds.Add(uploadId);
                 }
             }
@@ -50,7 +48,7 @@ namespace Website.Controllers
 
         [Route("countinvalidauthtokens")]
         [HttpGet]
-        public async Task<ActionResult<int>> CountInvalidAuthTokens()
+        public async Task<ActionResult<int>> CountInvalidAuthTokensAsync()
         {
             const string CommandText = @"
                 SELECT COUNT(*) AS Count
@@ -58,7 +56,7 @@ namespace Website.Controllers
                 WHERE ExpirationDate < CAST(GETUTCDATE() AS datetimeoffset)
                 OR Status <> 'valid'
                 OR Status IS NULL";
-            using (var command = this.databaseCommandFactory.Create(CommandText))
+            using (IDatabaseCommand command = _databaseCommandFactory.Create(CommandText))
             {
                 return Convert.ToInt32(await command.ExecuteScalarAsync());
             }
@@ -66,7 +64,7 @@ namespace Website.Controllers
 
         [Route("pruneinvalidauthtokens")]
         [HttpPost]
-        public async Task PruneInvalidAuthTokens(PruneInvalidAuthTokensRequest model)
+        public async Task PruneInvalidAuthTokensAsync(PruneInvalidAuthTokensRequest model)
         {
             const string CommandTextFormat = @"
                 DELETE TOP (@BatchSize)
@@ -74,12 +72,12 @@ namespace Website.Controllers
                 WHERE ExpirationDate < CAST(GETUTCDATE() AS datetimeoffset)
                 OR Status <> 'valid'
                 OR Status IS NULL";
-            var parameters = new Dictionary<string, object>
+            Dictionary<string, object> parameters = new()
             {
                 { "BatchSize", model.BatchSize },
             };
 
-            using (var command = this.databaseCommandFactory.Create(CommandTextFormat, parameters))
+            using (IDatabaseCommand command = _databaseCommandFactory.Create(CommandTextFormat, parameters))
             {
                 await command.ExecuteNonQueryAsync();
             }
@@ -87,21 +85,21 @@ namespace Website.Controllers
 
         [Route("blockedclans")]
         [HttpGet]
-        public async Task<ActionResult<List<string>>> BlockedClans()
+        public async Task<ActionResult<List<string>>> BlockedClansAsync()
         {
-            var blockedClans = new List<string>();
+            List<string> blockedClans = new();
 
             const string CommandText = @"
                 SELECT Name
                 FROM Clans
                 WHERE IsBlocked = 1
                 ORDER BY Name ASC;";
-            using (var command = this.databaseCommandFactory.Create(CommandText))
-            using (var reader = await command.ExecuteReaderAsync())
+            using (IDatabaseCommand command = _databaseCommandFactory.Create(CommandText))
+            using (System.Data.IDataReader reader = await command.ExecuteReaderAsync())
             {
                 while (reader.Read())
                 {
-                    var clanName = reader["Name"].ToString();
+                    string clanName = reader["Name"].ToString();
                     blockedClans.Add(clanName);
                 }
             }
@@ -111,18 +109,18 @@ namespace Website.Controllers
 
         [Route("blockclan")]
         [HttpPost]
-        public async Task BlockClan(BlockClanRequest model)
+        public async Task BlockClanAsync(BlockClanRequest model)
         {
             const string CommandText = @"
                 UPDATE Clans
                 SET IsBlocked = @IsBlocked
                 WHERE Name = @Name;";
-            var parameters = new Dictionary<string, object>
+            Dictionary<string, object> parameters = new()
             {
                 { "@Name", model.ClanName },
                 { "@IsBlocked", model.IsBlocked },
             };
-            using (var command = this.databaseCommandFactory.Create(CommandText, parameters))
+            using (IDatabaseCommand command = _databaseCommandFactory.Create(CommandText, parameters))
             {
                 await command.ExecuteNonQueryAsync();
             }

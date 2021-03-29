@@ -1,12 +1,10 @@
-﻿// <copyright file="UserSettings.cs" company="Clicker Heroes Tracker">
-// Copyright (c) Clicker Heroes Tracker. All rights reserved.
-// </copyright>
+﻿// Copyright (C) Clicker Heroes Tracker. All Rights Reserved.
+
+using ClickerHeroesTrackerWebsite.Models;
+using Website.Services.Settings;
 
 namespace Website.Models.Api.Users
 {
-    using ClickerHeroesTrackerWebsite.Models;
-    using Website.Services.Settings;
-
     public sealed class UserSettings
     {
         /// <summary>
@@ -15,27 +13,27 @@ namespace Website.Models.Api.Users
         public PlayStyle? PlayStyle { get; set; }
 
         /// <summary>
-        /// Gets or sets a value indicating whether the user wants to see numbers in scientific notation
+        /// Gets or sets a value indicating whether the user wants to see numbers in scientific notation.
         /// </summary>
         public bool? UseScientificNotation { get; set; }
 
         /// <summary>
-        /// Gets or sets the threshold at which to use scientific notation
+        /// Gets or sets the threshold at which to use scientific notation.
         /// </summary>
         public int? ScientificNotationThreshold { get; set; }
 
         /// <summary>
-        /// Gets or sets a value indicating whether the user wants to see graphs with logarithmic scale
+        /// Gets or sets a value indicating whether the user wants to see graphs with logarithmic scale.
         /// </summary>
         public bool? UseLogarithmicGraphScale { get; set; }
 
         /// <summary>
-        /// Gets or sets the range a graph must cover to use logarithmic scale
+        /// Gets or sets the range a graph must cover to use logarithmic scale.
         /// </summary>
         public int? LogarithmicGraphScaleThreshold { get; set; }
 
         /// <summary>
-        /// Gets or sets the hybrid idle:active ratio
+        /// Gets or sets the hybrid idle:active ratio.
         /// </summary>
         public double? HybridRatio { get; set; }
 
@@ -45,12 +43,12 @@ namespace Website.Models.Api.Users
         public SiteThemeType? Theme { get; set; }
 
         /// <summary>
-        /// Gets or sets a value indicating whether the user wants suggestions for skill ancients
+        /// Gets or sets a value indicating whether the user wants suggestions for skill ancients.
         /// </summary>
         public bool? ShouldLevelSkillAncients { get; set; }
 
         /// <summary>
-        /// Gets or sets the id of the ancient skill ancients should be based on
+        /// Gets or sets the id of the ancient skill ancients should be based on.
         /// </summary>
         public int? SkillAncientBaseAncient { get; set; }
 

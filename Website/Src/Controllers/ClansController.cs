@@ -1,45 +1,43 @@
-﻿// <copyright file="ClansController.cs" company="Clicker Heroes Tracker">
-// Copyright (c) Clicker Heroes Tracker. All rights reserved.
-// </copyright>
+﻿// Copyright (C) Clicker Heroes Tracker. All Rights Reserved.
+
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using ClickerHeroesTrackerWebsite.Models;
+using ClickerHeroesTrackerWebsite.Models.Api.Clans;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
+using Website.Services.Clans;
 
 namespace ClickerHeroesTrackerWebsite.Controllers
 {
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Threading.Tasks;
-    using ClickerHeroesTrackerWebsite.Models;
-    using ClickerHeroesTrackerWebsite.Models.Api.Clans;
-    using Microsoft.AspNetCore.Authorization;
-    using Microsoft.AspNetCore.Identity;
-    using Microsoft.AspNetCore.Mvc;
-    using Website.Services.Clans;
-
     [Route("api/clans")]
     [Authorize]
     [ApiController]
     public class ClansController : Controller
     {
-        private readonly UserManager<ApplicationUser> userManager;
+        private readonly UserManager<ApplicationUser> _userManager;
 
-        private readonly IClanManager clanManager;
+        private readonly IClanManager _clanManager;
 
         public ClansController(
             UserManager<ApplicationUser> userManager,
             IClanManager clanManager)
         {
-            this.userManager = userManager;
-            this.clanManager = clanManager;
+            _userManager = userManager;
+            _clanManager = clanManager;
         }
 
         [Route("{clanName}")]
         [HttpGet]
         [AllowAnonymous]
-        public async Task<ActionResult<ClanData>> Get(string clanName)
+        public async Task<ActionResult<ClanData>> GetAsync(string clanName)
         {
-            var clanData = await this.clanManager.GetClanDataAsync(clanName);
+            ClanData clanData = await _clanManager.GetClanDataAsync(clanName);
             if (clanData == null)
             {
-                return this.NotFound();
+                return NotFound();
             }
 
             return clanData;
@@ -48,27 +46,27 @@ namespace ClickerHeroesTrackerWebsite.Controllers
         [Route("")]
         [HttpGet]
         [AllowAnonymous]
-        public async Task<ActionResult<LeaderboardSummaryListResponse>> List(
+        public async Task<ActionResult<LeaderboardSummaryListResponse>> ListAsync(
             int page = ParameterConstants.List.Page.Default,
             int count = ParameterConstants.List.Count.Default)
         {
             // Validate parameters
             if (page < ParameterConstants.List.Page.Min)
             {
-                return this.BadRequest("Invalid parameter: page");
+                return BadRequest("Invalid parameter: page");
             }
 
             if (count < ParameterConstants.List.Count.Min
                 || count > ParameterConstants.List.Count.Max)
             {
-                return this.BadRequest("Invalid parameter: count");
+                return BadRequest("Invalid parameter: count");
             }
 
-            var userId = this.userManager.GetUserId(this.User);
+            string userId = _userManager.GetUserId(User);
 
             // Fetch in parallel
-            var leaderboardTask = this.clanManager.FetchLeaderboardAsync(userId, page, count);
-            var paginationTask = this.clanManager.FetchPaginationAsync(this.Request.Path, page, count);
+            Task<IList<LeaderboardClan>> leaderboardTask = _clanManager.FetchLeaderboardAsync(userId, page, count);
+            Task<Models.Api.PaginationMetadata> paginationTask = _clanManager.FetchPaginationAsync(Request.Path, page, count);
             await Task.WhenAll(leaderboardTask, paginationTask);
 
             return new LeaderboardSummaryListResponse
@@ -80,21 +78,21 @@ namespace ClickerHeroesTrackerWebsite.Controllers
 
         [Route("messages")]
         [HttpGet]
-        public async Task<ActionResult<List<Message>>> GetMessages(int count = ParameterConstants.GetMessages.Count.Default)
+        public async Task<ActionResult<List<Message>>> GetMessagesAsync(int count = ParameterConstants.GetMessages.Count.Default)
         {
             // Validate parameters
             if (count < ParameterConstants.GetMessages.Count.Min
                 || count > ParameterConstants.GetMessages.Count.Max)
             {
-                return this.BadRequest("Invalid parameter: count");
+                return BadRequest("Invalid parameter: count");
             }
 
-            var userId = this.userManager.GetUserId(this.User);
+            string userId = _userManager.GetUserId(User);
 
-            var messages = await this.clanManager.GetMessages(userId, count);
+            IList<Message> messages = await _clanManager.GetMessages(userId, count);
             if (messages == null)
             {
-                return this.NoContent();
+                return NoContent();
             }
 
             return messages.ToList();
@@ -102,13 +100,13 @@ namespace ClickerHeroesTrackerWebsite.Controllers
 
         [Route("messages")]
         [HttpPost]
-        public async Task<ActionResult<string>> SendMessage([FromForm] string message)
+        public async Task<ActionResult<string>> SendMessageAsync([FromForm] string message)
         {
-            var userId = this.userManager.GetUserId(this.User);
-            var responseString = await this.clanManager.SendMessage(userId, message);
+            string userId = _userManager.GetUserId(User);
+            string responseString = await _clanManager.SendMessage(userId, message);
             if (responseString == null)
             {
-                return this.NotFound();
+                return NotFound();
             }
 
             return responseString;
