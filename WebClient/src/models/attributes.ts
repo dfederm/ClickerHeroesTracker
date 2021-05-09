@@ -35,8 +35,8 @@ export class Attributes {
         let attack = new Decimal(0);
         let clickDamage = new Decimal(0);
 
-        for (let heroId in this.heroCollection.heroes) {
-            let hero = this.heroCollection.heroes[heroId];
+        for (const heroId in this.heroCollection.heroes) {
+            const hero = this.heroCollection.heroes[heroId];
 
             attack = attack.plus(hero.currentAttack);
             clickDamage = clickDamage.plus(hero.currentClickDamage);

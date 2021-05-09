@@ -6,10 +6,10 @@ import { NgbModal, NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
 })
 export class OpenDialogDirective {
     @Input()
-    public openDialog: string;
+    public openDialog: string | undefined;
 
     @Input()
-    public dismissCurrentDialog: boolean;
+    public dismissCurrentDialog: boolean | undefined;
 
     constructor(
         element: ElementRef,

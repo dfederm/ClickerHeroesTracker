@@ -17,12 +17,12 @@ export class FeedbackService {
         return this.authenticationService.getAuthHeaders()
             .then(headers => {
                 headers = headers.set("Content-Type", "application/x-www-form-urlencoded");
-                let params = new HttpParams()
+                const params = new HttpParams()
                     .set("comments", comments)
                     .set("email", email);
 
                 // Angular doesn't encode '+' correctly. See: https://github.com/angular/angular/issues/11058
-                let body = params.toString().replace(/\+/gi, "%2B");
+                const body = params.toString().replace(/\+/gi, "%2B");
 
                 return this.http
                     .post("/api/feedback", body, { headers, responseType: "text" })

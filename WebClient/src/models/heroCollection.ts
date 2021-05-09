@@ -10,14 +10,14 @@ export class HeroCollection {
     }
 
     public hasHeroWithLevel(param1: number, param2: number): boolean {
-        let hero = this.getById(param1);
+        const hero = this.getById(param1);
         return hero && hero.level >= param2;
     }
 
     public getTotalEpicLevels(): number {
         let epicLevels = 0;
-        for (let heroId in this.heroes) {
-            let hero = this.heroes[heroId];
+        for (const heroId in this.heroes) {
+            const hero = this.heroes[heroId];
             epicLevels += hero.epicLevel;
         }
 
@@ -25,7 +25,7 @@ export class HeroCollection {
     }
 
     public addEpicLevel(heroId: number, numLevels: number = 1): void {
-        let hero = this.getById(heroId);
+        const hero = this.getById(heroId);
         hero.epicLevel = hero.epicLevel + numLevels;
     }
 

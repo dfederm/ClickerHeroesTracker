@@ -111,7 +111,7 @@ export class UserService {
         let headers = new HttpHeaders();
         headers = headers.set("Content-Type", "application/json");
 
-        let body: ICreateUserRequest = {
+        const body: ICreateUserRequest = {
             userName,
             email,
             password,
@@ -123,7 +123,7 @@ export class UserService {
             .then(() => void 0)
             .catch((err: HttpErrorResponse) => {
                 this.httpErrorHandlerService.logError("UserService.create.error", err);
-                let errors = this.httpErrorHandlerService.getValidationErrors(err);
+                const errors = this.httpErrorHandlerService.getValidationErrors(err);
                 return Promise.reject(errors);
             });
     }
@@ -195,7 +195,7 @@ export class UserService {
     public addFollow(userName: string, followUserName: string): Promise<void> {
         return this.authenticationService.getAuthHeaders()
             .then(headers => {
-                let body: IAddFollowRequest = { followUserName };
+                const body: IAddFollowRequest = { followUserName };
                 return this.http
                     .post(`/api/users/${userName}/follows`, body, { headers, responseType: "text" })
                     .toPromise();
@@ -252,7 +252,7 @@ export class UserService {
         return this.authenticationService.getAuthHeaders()
             .then(headers => {
                 headers = headers.set("Content-Type", "application/json");
-                let body: ISetPasswordRequest = { newPassword };
+                const body: ISetPasswordRequest = { newPassword };
                 return this.http
                     .post(`/api/users/${userName}/setpassword`, body, { headers, responseType: "text" })
                     .toPromise();
@@ -260,7 +260,7 @@ export class UserService {
             .then(() => void 0)
             .catch((err: HttpErrorResponse) => {
                 this.httpErrorHandlerService.logError("UserService.setPassword.error", err);
-                let errors = this.httpErrorHandlerService.getValidationErrors(err);
+                const errors = this.httpErrorHandlerService.getValidationErrors(err);
                 return Promise.reject(errors);
             });
     }
@@ -269,7 +269,7 @@ export class UserService {
         return this.authenticationService.getAuthHeaders()
             .then(headers => {
                 headers = headers.set("Content-Type", "application/json");
-                let body: IChangePasswordRequest = { currentPassword, newPassword };
+                const body: IChangePasswordRequest = { currentPassword, newPassword };
                 return this.http
                     .post(`/api/users/${userName}/changepassword`, body, { headers, responseType: "text" })
                     .toPromise();
@@ -277,7 +277,7 @@ export class UserService {
             .then(() => void 0)
             .catch((err: HttpErrorResponse) => {
                 this.httpErrorHandlerService.logError("UserService.changePassword.error", err);
-                let errors = this.httpErrorHandlerService.getValidationErrors(err);
+                const errors = this.httpErrorHandlerService.getValidationErrors(err);
                 return Promise.reject(errors);
             });
     }
@@ -285,14 +285,14 @@ export class UserService {
     public resetPassword(email: string): Promise<void> {
         let headers = new HttpHeaders();
         headers = headers.set("Content-Type", "application/json");
-        let body: IResetPasswordRequest = { email };
+        const body: IResetPasswordRequest = { email };
         return this.http
             .post("/api/users/resetpassword", body, { headers, responseType: "text" })
             .toPromise()
             .then(() => void 0)
             .catch((err: HttpErrorResponse) => {
                 this.httpErrorHandlerService.logError("UserService.resetPassword.error", err);
-                let errors = this.httpErrorHandlerService.getValidationErrors(err);
+                const errors = this.httpErrorHandlerService.getValidationErrors(err);
                 return Promise.reject(errors);
             });
     }
@@ -300,7 +300,7 @@ export class UserService {
     public resetPasswordConfirmation(email: string, password: string, code: string): Promise<void> {
         let headers = new HttpHeaders();
         headers = headers.set("Content-Type", "application/json");
-        let body: IResetPasswordConfirmationRequest = {
+        const body: IResetPasswordConfirmationRequest = {
             email,
             password,
             code,
@@ -311,7 +311,7 @@ export class UserService {
             .then(() => void 0)
             .catch((err: HttpErrorResponse) => {
                 this.httpErrorHandlerService.logError("UserService.resetPasswordConfirmation.error", err);
-                let errors = this.httpErrorHandlerService.getValidationErrors(err);
+                const errors = this.httpErrorHandlerService.getValidationErrors(err);
                 return Promise.reject(errors);
             });
     }

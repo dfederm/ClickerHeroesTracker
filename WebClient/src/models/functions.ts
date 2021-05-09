@@ -31,10 +31,10 @@ export function isPercent(levelAmountFormula: string): boolean {
 }
 
 export function percent(levelAmountFormula: string, level: Decimal): Decimal {
-    let percentSuffix = levelAmountFormula.substring(percent.length);
+    const percentSuffix = levelAmountFormula.substring(percent.length);
 
     // Eg. percent5 => 0.95 (95%)
-    let percentValue = 1 - (Number(percentSuffix) / 100);
+    const percentValue = 1 - (Number(percentSuffix) / 100);
 
     // Basically percent5 is "take 5% off each time" or "95% of the last value"
     return new Decimal(1).minus(new Decimal(percentValue).pow(level)).times(100);

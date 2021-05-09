@@ -54,7 +54,7 @@ export class UserData {
     ) { }
 
     public upgradeClickPercent(params: string): void {
-        let percentIncrease = Number(params);
+        const percentIncrease = Number(params);
         this.clickMultiplier = this.clickMultiplier * (1 + percentIncrease / 100);
     }
 
@@ -131,19 +131,17 @@ export class UserData {
         }
         */
 
-        let dpsMultiplier = this.ancients.idleDpsPercent.times(0.01).plus(1)
+        const dpsMultiplier = this.ancients.idleDpsPercent.times(0.01).plus(1)
             .times(this.ancients.idleUnassignedAutoclickerBonusPercent.times(this.getUnassignedAutoClickerMultiplier(this.totalAutoclickers)).times(0.01).plus(1));
 
-        let damagePerFrame = this.attributes.currentAttack
+        const damagePerFrame = this.attributes.currentAttack
             .times(dpsMultiplier)
             .dividedBy(30); // 30 fps
 
         // Optimization to take larger steps when possible
-        let increments = [100000, 10000, 1000, 100, 10, 1];
+        const increments = [100000, 10000, 1000, 100, 10, 1];
         zone -= zone % 5; // Need round down to the nearest boss to avoid larger steps jumping over bosses
-        for (let i = 0; i < increments.length; i++) {
-            let increment = increments[i];
-
+        for (const increment of increments) {
             while (monster.maxLife.lessThanOrEqualTo(damagePerFrame)) {
                 zone += increment;
                 monster = new Monster(this, this.ancients, zone);
@@ -168,8 +166,8 @@ export class UserData {
     }
 
     public getTreasureChestChance(param1: number): number {
-        let loc2 = this.ancients.treasureChestSpawnPercent.times(0.01).plus(1).toNumber();
-        let loc3 = 0.0099999999 * (1 - Math.exp(-0.006 * Math.floor(param1 / UserData.TREASURE_CHANCE_DECREASE_ZONE_INTERVAL)));
+        const loc2 = this.ancients.treasureChestSpawnPercent.times(0.01).plus(1).toNumber();
+        const loc3 = 0.0099999999 * (1 - Math.exp(-0.006 * Math.floor(param1 / UserData.TREASURE_CHANCE_DECREASE_ZONE_INTERVAL)));
         return Math.max((UserData.CHANCE_OF_TREASURE_MONSTER - loc3) * loc2, UserData.MINIMUM_TREASURE_CHANCE_MULTIPLIER);
     }
 
@@ -187,7 +185,7 @@ export class UserData {
     }
 
     public getRandomGoldenHeroes(uncollectedEpicHeroes: number, excludedHeroId: number = 0): number[] {
-        let heroGilds: number[] = [];
+        const heroGilds: number[] = [];
 
         /*
         // TODO: Do this right, although it at best saves a few hero souls
@@ -196,7 +194,7 @@ export class UserData {
             loc5 = 5;
         }
         */
-        let highestHeroSeen = 5;
+        const highestHeroSeen = 5;
 
         let loc6 = 1;
         while (loc6 <= highestHeroSeen) {
@@ -207,7 +205,7 @@ export class UserData {
         let loc7 = uncollectedEpicHeroes;
         if (uncollectedEpicHeroes > 1000) {
             let loc8 = 0;
-            let loc9 = Math.floor(loc7 / (highestHeroSeen - 1));
+            const loc9 = Math.floor(loc7 / (highestHeroSeen - 1));
             loc6 = 2;
             while (loc6 <= highestHeroSeen) {
                 loc7 = loc7 - loc9;
@@ -233,7 +231,7 @@ export class UserData {
     }
 
     public openAllZoneGildedHeroes(): void {
-        let uncollectedEpicHeroes = this.numberOfUncollectedEpicHeroes;
+        const uncollectedEpicHeroes = this.numberOfUncollectedEpicHeroes;
         this.collectEpicHeroGift(uncollectedEpicHeroes, false);
 
         /*
@@ -263,7 +261,7 @@ export class UserData {
     }
 
     public collectEpicHeroGift(uncollectedEpicHeroes: number = 1, shouldRecalculate: boolean = true): {}[] {
-        let gildLevels = this.getRandomGoldenHeroes(uncollectedEpicHeroes);
+        const gildLevels = this.getRandomGoldenHeroes(uncollectedEpicHeroes);
         this.heroCollection.addGildLevels(gildLevels);
 
         if (this.epicHeroReceivedUpTo < 100) {
@@ -280,13 +278,13 @@ export class UserData {
     }
 
     public moveAllGildsToHero(heroId: number): void {
-        let hero = this.heroCollection.getById(heroId);
-        let epicLevels = this.heroCollection.getTotalEpicLevels();
-        let epicLevelsToMove = epicLevels - hero.epicLevel;
-        let heroSoulCost = new Decimal(80 * epicLevelsToMove);
+        const hero = this.heroCollection.getById(heroId);
+        const epicLevels = this.heroCollection.getTotalEpicLevels();
+        const epicLevelsToMove = epicLevels - hero.epicLevel;
+        const heroSoulCost = new Decimal(80 * epicLevelsToMove);
         if (this.heroSouls.greaterThanOrEqualTo(heroSoulCost)) {
             // Remove gils from all other heroes
-            for (let id in this.heroCollection.heroes) {
+            for (const id in this.heroCollection.heroes) {
                 this.heroCollection.heroes[id].epicLevel = 0;
             }
 
@@ -312,11 +310,11 @@ export class UserData {
     }
 
     private getUncappedZoneMonsterRequirement(zone: number): number {
-        let monsterLevelRequirement = this.ancients.monsterLevelRequirement.toNumber();
+        const monsterLevelRequirement = this.ancients.monsterLevelRequirement.toNumber();
         let monstersRemovedThisZone = Math.floor(monsterLevelRequirement);
 
         // Uses random... might want a deterministic way to do this.
-        let chanceToRemove = monsterLevelRequirement - monstersRemovedThisZone;
+        const chanceToRemove = monsterLevelRequirement - monstersRemovedThisZone;
         if (Math.random() < chanceToRemove) {
             monstersRemovedThisZone++;
         }
@@ -325,26 +323,26 @@ export class UserData {
     }
 
     private upgradeHeroPercent(params: string): void {
-        let pieces = params.split(",");
-        let heroId = Number(pieces[0]);
-        let percentIncrease = new Decimal(pieces[1].trim());
-        let hero = this.heroCollection.getById(heroId);
+        const pieces = params.split(",");
+        const heroId = Number(pieces[0]);
+        const percentIncrease = new Decimal(pieces[1].trim());
+        const hero = this.heroCollection.getById(heroId);
         hero.upgradeDamageMultiplier = hero.upgradeDamageMultiplier.times(percentIncrease.times(0.01).plus(1));
         hero.recalculateDamageMultiplier();
     }
 
     private upgradeEveryonePercent(params: string): void {
-        let percentIncrease = Number(params);
+        const percentIncrease = Number(params);
         this.allDpsMultiplier = this.allDpsMultiplier * (1 + percentIncrease / 100);
     }
 
     private upgradeGoldFoundPercent(params: string): void {
-        let percentIncrease = Number(params);
+        const percentIncrease = Number(params);
         this.goldMultiplier = this.goldMultiplier * (1 + percentIncrease / 100);
     }
 
     private getUncappedBossHpMultiplier(level: number): number {
-        let zoneMultiplier = 1 + Math.floor(level / UserData.BOSS_HEALTH_INCREASE_ZONE_INTERVAL) * UserData.BOSS_HEALTH_INCREASE_PER_ZONE_INTERVAL;
+        const zoneMultiplier = 1 + Math.floor(level / UserData.BOSS_HEALTH_INCREASE_ZONE_INTERVAL) * UserData.BOSS_HEALTH_INCREASE_PER_ZONE_INTERVAL;
         return zoneMultiplier * UserData.BOSS_HP_MULTIPLIER - this.ancients.bossLifePercent.toNumber();
     }
 }

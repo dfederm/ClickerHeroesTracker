@@ -9,7 +9,7 @@ import { Subscription } from "rxjs";
 export class AdComponent implements OnInit, OnDestroy {
     public rerender = false;
 
-    private subscription: Subscription;
+    private subscription: Subscription | null = null;
 
     constructor(
         private readonly router: Router,

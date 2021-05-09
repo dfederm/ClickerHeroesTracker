@@ -18,37 +18,37 @@ export class AdminComponent implements OnInit {
 
     public static pruneInvalidAuthTokenBatchSize = 1000;
 
-    public staleUploadError: string;
+    public staleUploadError: string | null = null;
 
-    public isStaleUploadsLoading: boolean;
+    public isStaleUploadsLoading = false;
 
-    public staleUploadIds: number[];
+    public staleUploadIds: number[] = [];
 
-    public deletesInProgress: boolean;
+    public deletesInProgress = false;
 
-    public deletedStaleUploads: number;
+    public deletedStaleUploads = 0;
 
-    public totalStaleUploads: number;
+    public totalStaleUploads = 0;
 
-    public invalidAuthTokensError: string;
+    public invalidAuthTokensError: string | null = null;
 
-    public isInvalidAuthTokensLoading: boolean;
+    public isInvalidAuthTokensLoading = false;
 
-    public prunedInvalidAuthTokens: number;
+    public prunedInvalidAuthTokens = 0;
 
-    public totalInvalidAuthTokens: number;
+    public totalInvalidAuthTokens = 0;
 
-    public pruningInProgress: boolean;
+    public pruningInProgress = false;
 
-    public blockedClansError: string;
+    public blockedClansError: string | null = null;
 
-    public isLoadingBlockedClans: boolean;
+    public isLoadingBlockedClans = false;
 
-    public blockedClans: string[];
+    public blockedClans: string[] = [];
 
-    public unblockClanName: string;
+    public unblockClanName: string | undefined;
 
-    public isUnblockClansLoading: boolean;
+    public isUnblockClansLoading = false;
 
     constructor(
         private readonly authenticationService: AuthenticationService,
@@ -65,14 +65,20 @@ export class AdminComponent implements OnInit {
     }
 
     public unblockClan(): void {
+        const unblockClanName = this.unblockClanName;
+        if (!unblockClanName) {
+            this.blockedClansError = "Invalid clan to unblock";
+            return;
+        }
+
         this.blockedClansError = null;
         this.isUnblockClansLoading = true;
 
         this.authenticationService.getAuthHeaders()
             .then(headers => {
                 headers = headers.set("Content-Type", "application/json");
-                let body: IBlockClanRequest = {
-                    clanName: this.unblockClanName,
+                const body: IBlockClanRequest = {
+                    clanName: unblockClanName,
                     isBlocked: false,
                 };
                 return this.http
@@ -85,7 +91,7 @@ export class AdminComponent implements OnInit {
             })
             .catch((err: HttpErrorResponse) => {
                 this.httpErrorHandlerService.logError("AdminComponent.unblockClan.error", err);
-                let errors = this.httpErrorHandlerService.getValidationErrors(err);
+                const errors = this.httpErrorHandlerService.getValidationErrors(err);
                 this.blockedClansError = errors.join(";");
             });
     }
@@ -109,7 +115,7 @@ export class AdminComponent implements OnInit {
             })
             .catch((err: HttpErrorResponse) => {
                 this.httpErrorHandlerService.logError("AdminComponent.fetchStaleUploads.error", err);
-                let errors = this.httpErrorHandlerService.getValidationErrors(err);
+                const errors = this.httpErrorHandlerService.getValidationErrors(err);
                 this.staleUploadError = errors.join(";");
             });
     }
@@ -152,7 +158,7 @@ export class AdminComponent implements OnInit {
 
         this.authenticationService.getAuthHeaders()
             .then(headers => {
-                let body: IPruneInvalidAuthTokensRequest = { batchSize: AdminComponent.pruneInvalidAuthTokenBatchSize };
+                const body: IPruneInvalidAuthTokensRequest = { batchSize: AdminComponent.pruneInvalidAuthTokenBatchSize };
                 return this.http.post("/api/admin/pruneinvalidauthtokens", body, { headers })
                     .toPromise();
             })
@@ -201,12 +207,12 @@ export class AdminComponent implements OnInit {
             return;
         }
 
-        if (!this.staleUploadIds || this.staleUploadIds.length === 0) {
+        const uploadId = this.staleUploadIds.shift();
+        if (!uploadId) {
             this.deletesInProgress = false;
             return;
         }
 
-        let uploadId = this.staleUploadIds.shift();
         this.uploadService.delete(uploadId)
             .catch(() => void 0) // Swallow errors
             .then(() => {

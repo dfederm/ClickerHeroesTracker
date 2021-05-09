@@ -102,16 +102,16 @@ export class Hero {
             return new Decimal(0);
         }
 
-        let baseAttack = new Decimal(this.definition.baseCost).dividedBy(10).times(Math.pow(1 - 0.0188 * Math.min(this.definition.id, 14), this.definition.id)).ceil();
-        let baseAttackMultiplier = Hero.baseAttackMultipliers[this.definition.id] || new Decimal(1);
+        const baseAttack = new Decimal(this.definition.baseCost).dividedBy(10).times(Math.pow(1 - 0.0188 * Math.min(this.definition.id, 14), this.definition.id)).ceil();
+        const baseAttackMultiplier = Hero.baseAttackMultipliers[this.definition.id] || new Decimal(1);
         return baseAttack.times(baseAttackMultiplier);
     }
 
     private getMultiplierForHeroLevel(): Decimal {
         let loc7 = NaN;
         let loc3: Decimal = new Decimal(1);
-        let loc4 = 7;
-        let loc5: number = Math.min(Math.floor(this.level / 1000), 8);
+        const loc4 = 7;
+        const loc5: number = Math.min(Math.floor(this.level / 1000), 8);
         let loc6: number = Math.floor(this.level / 25) - loc5 - loc4;
         if (this.definition.id >= 27 && this.definition.id <= 45) {
             if (this.level >= 525) {
@@ -168,15 +168,15 @@ export class Hero {
     }
 
     private heroCostFormula1(fromLevel: number, toLevel: number): Decimal {
-        let loc5: Decimal = null;
-        let loc7: Decimal = null;
+        let loc5: Decimal | null = null;
+        let loc7: Decimal | null = null;
         let loc9 = 0;
         let loc10: Decimal;
         let loc11: number;
         let loc12: Decimal;
         let loc13: Decimal;
-        let loc4 = 1.07;
-        let loc6: number = 1 - this.ancients.heroLevelCostPercent.times(0.01).toNumber();
+        const loc4 = 1.07;
+        const loc6: number = 1 - this.ancients.heroLevelCostPercent.times(0.01).toNumber();
         if (this.definition.id === 1) {
             if (fromLevel <= 15) {
                 loc5 = new Decimal(0);
@@ -219,8 +219,8 @@ export class Hero {
     }
 
     private heroCostFormula46(fromLevel: number, toLevel: number): Decimal {
-        let loc4 = 1.07;
-        let loc6 = 1 - this.ancients.heroLevelCostPercent.times(0.01).toNumber();
+        const loc4 = 1.07;
+        const loc6 = 1 - this.ancients.heroLevelCostPercent.times(0.01).toNumber();
         let loc7 = new Decimal(this.definition.baseCost);
         let loc8 = new Decimal(loc4).pow(toLevel);
         loc8 = loc8.minus(new Decimal(loc4).pow(fromLevel));

@@ -11,6 +11,7 @@ import { ApplicationInsightsModule, AppInsightsService } from "@markpieszak/ng-a
 import { ChartsModule } from "ng2-charts";
 import { CompareValidatorModule } from "angular-compare-validator";
 import { JwBootstrapSwitchNg2Module } from "jw-bootstrap-switch-ng2";
+// TODO: use https://github.com/t-ho/ngx-ui-loader or something
 import { NgxLoadingModule } from "ngx-loading";
 
 import { AppComponent } from "./components/app/app";
@@ -48,7 +49,7 @@ import { ExponentialPipe } from "./pipes/exponentialPipe";
 
 // Custom url matching for legacy calculation urls. Angular doesn't have great built-in rules for this.
 // This is an exported function because Angular AOT is terrible and can't handle it otherwise.
-export function legacyCalculatorMatcher(segments: UrlSegment[]): UrlMatchResult {
+export function legacyCalculatorMatcher(segments: UrlSegment[]): UrlMatchResult | null {
   if (segments.length !== 2) {
     return null;
   }
@@ -100,70 +101,57 @@ const routes: Routes =
   ];
 
 @NgModule({
-  imports:
-    [
-      BrowserModule,
-      FormsModule,
-      RouterModule.forRoot(routes),
-      HttpClientModule,
-      NgbModule,
-      ClipboardModule,
-      AdsenseModule.forRoot(),
-      // Make sure this matches the API settings as well. Is there a better way to do this?
-      ApplicationInsightsModule.forRoot({ instrumentationKey: "99fba640-790d-484f-83c4-3c97450d8698" }),
-      ChartsModule,
-      CompareValidatorModule,
-      JwBootstrapSwitchNg2Module,
-      NgxLoadingModule.forRoot({}),
-    ],
-  declarations:
-    [
-      AppComponent,
-      HomeComponent,
-      NewsComponent,
-      ChangelogComponent,
-      AdComponent,
-      NavbarComponent,
-      LogInDialogComponent,
-      UploadDialogComponent,
-      OpenDialogDirective,
-      UserComponent,
-      UploadsTableComponent,
-      UserUploadsComponent,
-      UploadComponent,
-      ExponentialPipe,
-      ClansComponent,
-      UserProgressComponent,
-      UserCompareComponent,
-      BannerComponent,
-      RegisterDialogComponent,
-      ExternalLoginsComponent,
-      FeedbackDialogComponent,
-      ResetPasswordDialogComponent,
-      SettingsDialogComponent,
-      ChangePasswordDialogComponent,
-      AdminComponent,
-      NotFoundComponent,
-      AncientSuggestionsComponent,
-      OutsiderSuggestionsComponent,
-      AscensionZoneComponent,
-      ClanComponent,
-      TimeAgoPipe,
-    ],
-  entryComponents:
-    [
-      LogInDialogComponent,
-      UploadDialogComponent,
-      RegisterDialogComponent,
-      FeedbackDialogComponent,
-      ResetPasswordDialogComponent,
-      SettingsDialogComponent,
-      ChangePasswordDialogComponent,
-    ],
-  providers:
-    [
-      AppInsightsService,
-    ],
+  imports: [
+    BrowserModule,
+    FormsModule,
+    RouterModule.forRoot(routes),
+    HttpClientModule,
+    NgbModule,
+    ClipboardModule,
+    AdsenseModule.forRoot(),
+    // Make sure this matches the API settings as well. Is there a better way to do this?
+    ApplicationInsightsModule.forRoot({ instrumentationKey: "99fba640-790d-484f-83c4-3c97450d8698" }),
+    ChartsModule,
+    CompareValidatorModule,
+    JwBootstrapSwitchNg2Module,
+    NgxLoadingModule.forRoot({}),
+  ],
+  declarations: [
+    AppComponent,
+    HomeComponent,
+    NewsComponent,
+    ChangelogComponent,
+    AdComponent,
+    NavbarComponent,
+    LogInDialogComponent,
+    UploadDialogComponent,
+    OpenDialogDirective,
+    UserComponent,
+    UploadsTableComponent,
+    UserUploadsComponent,
+    UploadComponent,
+    ExponentialPipe,
+    ClansComponent,
+    UserProgressComponent,
+    UserCompareComponent,
+    BannerComponent,
+    RegisterDialogComponent,
+    ExternalLoginsComponent,
+    FeedbackDialogComponent,
+    ResetPasswordDialogComponent,
+    SettingsDialogComponent,
+    ChangePasswordDialogComponent,
+    AdminComponent,
+    NotFoundComponent,
+    AncientSuggestionsComponent,
+    OutsiderSuggestionsComponent,
+    AscensionZoneComponent,
+    ClanComponent,
+    TimeAgoPipe,
+  ],
+  providers: [
+    AppInsightsService,
+  ],
   bootstrap: [AppComponent],
 })
 export class AppModule { }

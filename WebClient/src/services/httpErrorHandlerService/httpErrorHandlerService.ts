@@ -15,8 +15,8 @@ export class HttpErrorHandlerService {
     ) { }
 
     public logError(eventName: string, err: HttpErrorResponse): void {
-        let status = (err.status || 0).toString();
-        let message = err.error instanceof ErrorEvent
+        const status = (err.status || 0).toString();
+        const message = err.error instanceof ErrorEvent
             // A client-side or network error occurred.
             ? err.error.message
             // The backend returned an unsuccessful response code.
@@ -30,9 +30,9 @@ export class HttpErrorHandlerService {
             return [err.error.message];
         }
 
-        let errors: string[] = [];
-        let validationErrorResponse: IValidationErrorResponse = JSON.parse(err.error);
-        for (let field in validationErrorResponse) {
+        const errors: string[] = [];
+        const validationErrorResponse: IValidationErrorResponse = JSON.parse(err.error);
+        for (const field in validationErrorResponse) {
             errors.push(...validationErrorResponse[field]);
         }
 

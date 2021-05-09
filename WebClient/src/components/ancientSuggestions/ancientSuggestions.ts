@@ -131,7 +131,7 @@ export class AncientSuggestionsComponent implements OnInit {
                 continue;
             }
 
-            let ancient: IAncientViewModel = {
+            const ancient: IAncientViewModel = {
                 id,
                 name: AncientSuggestionsComponent.getShortName(ancientDefinition),
                 ancientLevel: new Decimal(0),
@@ -148,7 +148,7 @@ export class AncientSuggestionsComponent implements OnInit {
     }
 
     public static getShortName(entity: { name: string }): string {
-        let commaIndex = entity.name.indexOf(",");
+        const commaIndex = entity.name.indexOf(",");
         return commaIndex >= 0
             ? entity.name.substring(0, commaIndex)
             : entity.name;
@@ -170,10 +170,9 @@ export class AncientSuggestionsComponent implements OnInit {
             return num.toExponential().replace("+", "");
         }
 
-        for (let i = 0; i < this.ancients.length; i++) {
-            let ancientViewModel = this.ancients[i];
+        for (const ancientViewModel of this.ancients) {
             if (ancientViewModel.suggestedLevel) {
-                let ancient = this.autoLeveledSavedGame.data.ancients.ancients[ancientViewModel.id.toString()];
+                const ancient = this.autoLeveledSavedGame.data.ancients.ancients[ancientViewModel.id.toString()];
                 ancient.level = formatForSavedGameData(ancientViewModel.suggestedLevel);
                 ancient.spentHeroSouls = formatForSavedGameData(new Decimal(ancient.spentHeroSouls).plus(ancientViewModel.costToLevel));
             }
@@ -211,22 +210,21 @@ export class AncientSuggestionsComponent implements OnInit {
             return;
         }
 
-        let itemLevels: { [ancientId: string]: Decimal } = {};
+        const itemLevels: { [ancientId: string]: Decimal } = {};
         if (this.savedGame.data.items && this.savedGame.data.items.items && this.savedGame.data.items.slots) {
-            for (let slotId in this.savedGame.data.items.slots) {
-                let itemId = this.savedGame.data.items.slots[slotId];
-                let item = this.savedGame.data.items.items[itemId];
+            for (const slotId in this.savedGame.data.items.slots) {
+                const itemId = this.savedGame.data.items.slots[slotId];
+                const item = this.savedGame.data.items.items[itemId];
                 if (item) {
-                    let bonuses = [
+                    const bonuses = [
                         { type: item.bonusType1, level: item.bonus1Level },
                         { type: item.bonusType2, level: item.bonus2Level },
                         { type: item.bonusType3, level: item.bonus3Level },
                         { type: item.bonusType4, level: item.bonus4Level },
                     ];
 
-                    for (let i = 0; i < bonuses.length; i++) {
-                        let bonus = bonuses[i];
-                        let bonusType = gameData.itemBonusTypes[bonus.type];
+                    for (const bonus of bonuses) {
+                        const bonusType = gameData.itemBonusTypes[bonus.type];
                         if (bonusType) {
                             itemLevels[bonusType.ancientId] = (itemLevels[bonusType.ancientId] || new Decimal(0)).plus(bonus.level);
                         }
@@ -236,9 +234,8 @@ export class AncientSuggestionsComponent implements OnInit {
         }
 
         if (this.savedGame.data.ancients && this.savedGame.data.ancients.ancients) {
-            for (let i = 0; i < this.ancients.length; i++) {
-                let ancient = this.ancients[i];
-                let ancientData = this.savedGame.data.ancients.ancients[ancient.id];
+            for (const ancient of this.ancients) {
+                const ancientData = this.savedGame.data.ancients.ancients[ancient.id];
                 if (ancientData) {
                     ancient.ancientLevel = new Decimal(ancientData.level || 0);
                     ancient.purchaseTime = ancientData.purchaseTime;
@@ -281,8 +278,7 @@ export class AncientSuggestionsComponent implements OnInit {
         }
 
         // Clear out existing suggestions
-        for (let i = 0; i < this.ancients.length; i++) {
-            let ancient = this.ancients[i];
+        for (const ancient of this.ancients) {
             ancient.isBase = false;
             ancient.suggestedLevel = undefined;
             ancient.diffValue = undefined;
@@ -290,7 +286,7 @@ export class AncientSuggestionsComponent implements OnInit {
             ancient.costToLevel = undefined;
         }
 
-        let startTime = Date.now();
+        const startTime = Date.now();
 
         const isHybridRatioActiveFocused = this.settings.hybridRatio < 1;
         const baseAncient = this.playStyle === "active" || (this.playStyle === "hybrid" && isHybridRatioActiveFocused)
@@ -305,7 +301,7 @@ export class AncientSuggestionsComponent implements OnInit {
                 this.availableSouls = this.availableSouls.plus(this.pendingSouls);
             }
 
-            let baseLevel = this.getAncientLevel(baseAncient);
+            const baseLevel = this.getAncientLevel(baseAncient);
             let left = baseLevel.times(-1);
             let right: Decimal;
             let mid: Decimal;
@@ -328,13 +324,13 @@ export class AncientSuggestionsComponent implements OnInit {
               polynomial in hs, is still very slow (as hs is basically exponential
               in play-time). As such, we'll make do with an approximation.
             */
-            let initialDiff = right.minus(left);
+            const initialDiff = right.minus(left);
             while (right.minus(left).greaterThan(1) && right.minus(left).dividedBy(initialDiff).greaterThan(1e-5)) {
                 if (spentHS === undefined) {
                     mid = right.plus(left).dividedBy(2).floor();
                 } else {
-                    let fitIndicator = spentHS.dividedBy(this.availableSouls).ln();
-                    let interval = right.minus(left);
+                    const fitIndicator = spentHS.dividedBy(this.availableSouls).ln();
+                    const interval = right.minus(left);
 
                     // If the (log of) the number of the percentage of spent hero souls is very large or very small, place the new search point off-center.
                     if (fitIndicator.lessThan(-0.1)) {
@@ -359,7 +355,7 @@ export class AncientSuggestionsComponent implements OnInit {
             suggestedLevels = this.calculateAncientSuggestions(baseLevel.plus(left));
 
             // Ensure we don't suggest removing levels
-            for (let ancient in suggestedLevels) {
+            for (const ancient in suggestedLevels) {
                 suggestedLevels[ancient] = Decimal.max(suggestedLevels[ancient], this.getAncientLevel(ancient));
             }
         } else {
@@ -368,12 +364,12 @@ export class AncientSuggestionsComponent implements OnInit {
         }
 
         this.spentSouls = new Decimal(0);
-        let ancientCosts = this.getAncientCosts(suggestedLevels);
+        const ancientCosts = this.getAncientCosts(suggestedLevels);
 
-        for (let ancientName in suggestedLevels) {
-            let suggestedLevel = suggestedLevels[ancientName];
-            let ancient = this.ancientsByName[ancientName];
-            let cost = ancientCosts[ancientName];
+        for (const ancientName in suggestedLevels) {
+            const suggestedLevel = suggestedLevels[ancientName];
+            const ancient = this.ancientsByName[ancientName];
+            const cost = ancientCosts[ancientName];
             this.spentSouls = this.spentSouls.minus(cost);
             if (ancient) {
                 ancient.suggestedLevel = suggestedLevel;
@@ -480,10 +476,10 @@ export class AncientSuggestionsComponent implements OnInit {
 
         // Skill ancients
         if (this.playStyle !== "idle" && this.settings.shouldLevelSkillAncients) {
-            let skillAncientBaseAncient = gameData.ancients[this.settings.skillAncientBaseAncient];
-            let skillAncientBaseAncientShortName = AncientSuggestionsComponent.getShortName(skillAncientBaseAncient);
-            let skillAncientBaseAncientLevel = suggestedLevels[skillAncientBaseAncientShortName];
-            let suggestedSkillAncientLevel = skillAncientBaseAncientLevel.plus(this.settings.skillAncientLevelDiff);
+            const skillAncientBaseAncient = gameData.ancients[this.settings.skillAncientBaseAncient];
+            const skillAncientBaseAncientShortName = AncientSuggestionsComponent.getShortName(skillAncientBaseAncient);
+            const skillAncientBaseAncientLevel = suggestedLevels[skillAncientBaseAncientShortName];
+            const suggestedSkillAncientLevel = skillAncientBaseAncientLevel.plus(this.settings.skillAncientLevelDiff);
 
             suggestedLevels.Berserker = suggestedSkillAncientLevel;
             suggestedLevels.Chawedo = suggestedSkillAncientLevel;
@@ -496,15 +492,15 @@ export class AncientSuggestionsComponent implements OnInit {
         }
 
         // Handle ancients with caps
-        for (let ancientName in AncientSuggestionsComponent.ancientLevelCaps) {
+        for (const ancientName in AncientSuggestionsComponent.ancientLevelCaps) {
             if (suggestedLevels[ancientName]) {
-                let maxLevel = AncientSuggestionsComponent.ancientLevelCaps[ancientName];
+                const maxLevel = AncientSuggestionsComponent.ancientLevelCaps[ancientName];
                 suggestedLevels[ancientName] = Decimal.min(maxLevel, suggestedLevels[ancientName]);
             }
         }
 
         // Normalize the values
-        for (let ancient in suggestedLevels) {
+        for (const ancient in suggestedLevels) {
             suggestedLevels[ancient] = Decimal.max(suggestedLevels[ancient].ceil(), new Decimal(0));
 
             // The game only lets you buy 4 exponents less than what you currently have, so clip any suggestions less than that.
@@ -520,10 +516,10 @@ export class AncientSuggestionsComponent implements OnInit {
     private formatForClipboard(num: Decimal): string {
         // The game can't handle pasting in decimal points, so we'll just use an altered sci-not form that excludes the decimal (eg. 1.234e5 => 1234e2)
         if (num.greaterThanOrEqualTo(1e6)) {
-            let str = num.toExponential();
-            let groups = AncientSuggestionsComponent.exponentialRegex.exec(str);
+            const str = num.toExponential();
+            const groups = AncientSuggestionsComponent.exponentialRegex.exec(str);
             let n = parseFloat(groups[1]);
-            let exponent = parseInt(groups[3]);
+            let exponent = parseInt(groups[3], 10);
 
             n *= 1e5;
             n = Math.floor(n);
@@ -538,15 +534,15 @@ export class AncientSuggestionsComponent implements OnInit {
     }
 
     private getAncientLevel(ancientName: string): Decimal {
-        let ancient = this.ancientsByName[ancientName];
+        const ancient = this.ancientsByName[ancientName];
         return ancient
             ? ancient.ancientLevel
             : new Decimal(0);
     }
 
     private getAncientCosts(suggestedLevels: { [key: string]: Decimal }): { [key: string]: Decimal } {
-        let costs: { [key: string]: Decimal } = {};
-        for (let ancient in suggestedLevels) {
+        const costs: { [key: string]: Decimal } = {};
+        for (const ancient in suggestedLevels) {
             const suggestedLevel = suggestedLevels[ancient];
             const currentLevel = this.getAncientLevel(ancient);
 
@@ -569,10 +565,10 @@ export class AncientSuggestionsComponent implements OnInit {
     }
 
     private getTotalAncientCost(suggestedLevels: { [key: string]: Decimal }): Decimal {
-        let costs = this.getAncientCosts(suggestedLevels);
+        const costs = this.getAncientCosts(suggestedLevels);
 
         let totalCost = new Decimal(0);
-        for (let ancient in costs) {
+        for (const ancient in costs) {
             totalCost = totalCost.plus(costs[ancient]);
         }
 
@@ -605,7 +601,7 @@ export class AncientSuggestionsComponent implements OnInit {
 
                         }
 
-                        let num = n.toNumber();
+                        const num = n.toNumber();
                         let cost = new Decimal(0);
                         for (let i = 1; i <= num; i++) {
                             cost = cost.plus(Decimal.pow(i, 1.5));
@@ -621,7 +617,7 @@ export class AncientSuggestionsComponent implements OnInit {
                     ancientCost = () => new Decimal(0);
             }
 
-            let ancientShortName = AncientSuggestionsComponent.getShortName(ancient);
+            const ancientShortName = AncientSuggestionsComponent.getShortName(ancient);
             ancientCosts[ancientShortName] = ancientCost;
         }
 
@@ -647,13 +643,13 @@ export class AncientSuggestionsComponent implements OnInit {
                 }
 
                 // Sort by date
-                let timeDiff = a.purchaseTime - b.purchaseTime;
+                const timeDiff = a.purchaseTime - b.purchaseTime;
                 if (timeDiff !== 0) {
                     return timeDiff;
                 }
 
                 // Finally, sort by id
-                return parseInt(a.id) - parseInt(b.id);
+                return parseInt(a.id, 10) - parseInt(b.id, 10);
             });
         } else {
             // Sort by name

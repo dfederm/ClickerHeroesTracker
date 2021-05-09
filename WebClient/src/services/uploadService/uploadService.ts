@@ -14,7 +14,7 @@ export interface IUpload {
 
     playStyle: string;
 
-    user: IUser;
+    user: IUser | null;
 
     content: string;
 
@@ -27,7 +27,7 @@ export interface IUpload {
 export class UploadService {
     private readonly cache = new Cache<number, IUpload>(10);
 
-    private user: IUser;
+    private user: IUser | null = null;
 
     private cacheOnCreate = true;
 
@@ -41,7 +41,7 @@ export class UploadService {
         this.authenticationService
             .userInfo()
             .subscribe(userInfo => {
-                if (userInfo.username !== (this.user && this.user.name)) {
+                if ((userInfo.isLoggedIn && userInfo.username) !== this.user?.name) {
                     // Reset the cache on user change
                     this.cache.reset();
 
@@ -65,7 +65,7 @@ export class UploadService {
     }
 
     public get(id: number): Promise<IUpload> {
-        let cachedUpload = this.cache.get(id);
+        const cachedUpload = this.cache.get(id);
         if (cachedUpload) {
             this.appInsights.trackEvent("UploadService.get.cacheHit");
             return Promise.resolve(cachedUpload);
@@ -91,13 +91,13 @@ export class UploadService {
         return this.authenticationService.getAuthHeaders()
             .then(headers => {
                 headers = headers.set("Content-Type", "application/x-www-form-urlencoded");
-                let params = new HttpParams()
+                const params = new HttpParams()
                     .set("encodedSaveData", encodedSaveData)
                     .set("addToProgress", addToProgress.toString())
                     .set("playStyle", playStyle);
 
                 // Angular doesn't encode '+' correctly. See: https://github.com/angular/angular/issues/11058
-                let body = params.toString().replace(/\+/gi, "%2B");
+                const body = params.toString().replace(/\+/gi, "%2B");
 
                 return this.http
                     .post<number>("/api/uploads", body, { headers })
@@ -105,7 +105,7 @@ export class UploadService {
             })
             .then(uploadId => {
                 if (this.cacheOnCreate) {
-                    let upload: IUpload = {
+                    const upload: IUpload = {
                         id: uploadId,
                         isScrubbed: false, // Provided by the user, so definitely not scrubbed, even if the user isn't logged in
                         content: encodedSaveData,

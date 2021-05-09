@@ -42,8 +42,8 @@ export class Upgrade {
     }
 
     public get cost(): Decimal {
-        let hero = this.heroes[this.definition.heroId];
-        let multiplier = Upgrade.attributeMultipliers[this.definition.attribute];
+        const hero = this.heroes[this.definition.heroId];
+        const multiplier = Upgrade.attributeMultipliers[this.definition.attribute];
         return new Decimal(hero.baseCost).times(multiplier);
     }
 }

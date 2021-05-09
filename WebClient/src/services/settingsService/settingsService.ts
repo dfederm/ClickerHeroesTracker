@@ -53,9 +53,9 @@ export class SettingsService {
 
     private readonly settingsSubject: BehaviorSubject<IUserSettings>;
 
-    private userName: string;
+    private userName: string | null = null;
 
-    private refreshSubscription: Subscription;
+    private refreshSubscription: Subscription | null = null;
 
     private numPendingPatches = 0;
 
@@ -64,8 +64,8 @@ export class SettingsService {
         private readonly http: HttpClient,
         private readonly httpErrorHandlerService: HttpErrorHandlerService,
     ) {
-        let settingsString = localStorage.getItem(SettingsService.settingsKey);
-        let currentSettings = settingsString == null ? null : JSON.parse(settingsString);
+        const settingsString = localStorage.getItem(SettingsService.settingsKey);
+        const currentSettings = settingsString == null ? null : JSON.parse(settingsString);
         this.settingsSubject = new BehaviorSubject(this.normalizeSettings(currentSettings));
 
         this.authenticationService
@@ -104,7 +104,7 @@ export class SettingsService {
             this.refreshSubscription = null;
         }
 
-        let patch = { [setting]: value };
+        const patch = { [setting]: value };
         if (this.userName) {
             this.numPendingPatches++;
 
@@ -123,7 +123,7 @@ export class SettingsService {
                 });
         }
 
-        let newSettings = Object.assign({}, this.settingsSubject.getValue(), patch);
+        const newSettings = Object.assign({}, this.settingsSubject.getValue(), patch);
         this.handleNewSettings(newSettings);
         return Promise.resolve();
     }
@@ -193,7 +193,7 @@ export class SettingsService {
     }
 
     // In case the settings are missing some values, fill in the defaults
-    private normalizeSettings(settings: IUserSettings): IUserSettings {
+    private normalizeSettings(settings: IUserSettings | null): IUserSettings {
         return Object.assign({}, SettingsService.defaultSettings, settings);
     }
 

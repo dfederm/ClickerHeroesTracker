@@ -35,9 +35,8 @@ export class Ancient {
 
         switch (this.definition.levelAmountFormula) {
             case "libAndSiy": {
-                let xylMultiplier = this.outsiders.idleBonus.times(0.01).plus(1);
-                for (let i = 0; i < Ancient.libAndSiyaVariables.length; i++) {
-                    let variables = Ancient.libAndSiyaVariables[i];
+                const xylMultiplier = this.outsiders.idleBonus.times(0.01).plus(1);
+                for (const variables of Ancient.libAndSiyaVariables) {
                     if (variables.threshold === null || this.level.lessThan(variables.threshold)) {
                         return this.level.minus(variables.minus).times(variables.times).plus(variables.plus).times(xylMultiplier);
                     }
@@ -72,9 +71,9 @@ export class Ancient {
     }
 
     private diminishingReturns(): Decimal {
-        let params = this.definition.levelAmountParams.split(",");
-        let param1 = Number(params[0]);
-        let param2 = Number(params[1]);
+        const params = this.definition.levelAmountParams.split(",");
+        const param1 = Number(params[0]);
+        const param2 = Number(params[1]);
         return new Decimal(param1 * (1 - Math.exp(param2 * this.level.toNumber())));
     }
 }

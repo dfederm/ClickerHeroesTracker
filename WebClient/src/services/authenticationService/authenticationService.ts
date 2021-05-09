@@ -1,7 +1,7 @@
 import { Injectable } from "@angular/core";
 import { HttpClient, HttpHeaders, HttpParams, HttpErrorResponse } from "@angular/common/http";
 import { Observable, BehaviorSubject, Subscription, interval } from "rxjs";
-import * as JwtDecode from "jwt-decode";
+import jwt_decode from "jwt-decode";
 import { map, distinctUntilChanged } from "rxjs/operators";
 import { HttpErrorHandlerService } from "../httpErrorHandlerService/httpErrorHandlerService";
 
@@ -14,13 +14,19 @@ export interface IAuthTokenModel {
     expiration_date?: number;
 }
 
-export interface IUserInfo {
-    isLoggedIn: boolean;
-    id?: string;
-    username?: string;
-    email?: string;
-    isAdmin?: boolean;
+export interface ILoggedInUserInfo {
+    isLoggedIn: true;
+    id: string;
+    username: string;
+    email: string;
+    isAdmin: boolean;
 }
+
+export interface ILoggedOutUserInfo {
+    isLoggedIn: false;
+}
+
+type IUserInfo = ILoggedInUserInfo | ILoggedOutUserInfo;
 
 @Injectable({
     providedIn: "root",
@@ -28,21 +34,21 @@ export interface IUserInfo {
 export class AuthenticationService {
     private static readonly tokensKey: string = "auth-tokens";
 
-    private currentTokens: IAuthTokenModel;
+    private currentTokens: IAuthTokenModel | null;
 
     private readonly userInfoSubject: BehaviorSubject<IUserInfo>;
 
-    private refreshSubscription: Subscription;
+    private refreshSubscription: Subscription | null = null;
 
     // This promise is used effectively like a lock.
     // It should always be assigned just before making a token request and resolve after the request returns.
-    private fetchTokensPromise: Promise<void>;
+    private fetchTokensPromise: Promise<void> | null = null;
 
     constructor(
         private readonly httpErrorHandlerService: HttpErrorHandlerService,
         private readonly http: HttpClient,
     ) {
-        let tokensString = localStorage.getItem(AuthenticationService.tokensKey);
+        const tokensString = localStorage.getItem(AuthenticationService.tokensKey);
         this.currentTokens = tokensString == null ? null : JSON.parse(tokensString);
         this.userInfoSubject = new BehaviorSubject(this.getUserInfo());
 
@@ -55,7 +61,7 @@ export class AuthenticationService {
     }
 
     public logInWithPassword(username: string, password: string): Promise<void> {
-        let params = new HttpParams()
+        const params = new HttpParams()
             .set("grant_type", "password")
             .set("username", username)
             .set("password", password);
@@ -124,7 +130,7 @@ export class AuthenticationService {
         params = params.set("scope", "openid offline_access profile email roles");
 
         // Angular doesn't encode '+' correctly. See: https://github.com/angular/angular/issues/11058
-        let body = params.toString().replace(/\+/gi, "%2B");
+        const body = params.toString().replace(/\+/gi, "%2B");
 
         this.fetchTokensPromise = this.http.post<IAuthTokenModel>("/api/auth/token", body, { headers })
             .toPromise()
@@ -152,13 +158,21 @@ export class AuthenticationService {
     }
 
     private refreshTokens(): Promise<void> {
-        let params = new HttpParams()
+        if (!this.currentTokens) {
+            throw new Error();
+        }
+
+        const params = new HttpParams()
             .set("grant_type", "refresh_token")
             .set("refresh_token", this.currentTokens.refresh_token);
         return this.fetchTokens(params);
     }
 
     private scheduleRefresh(): void {
+        if (!this.currentTokens) {
+            throw new Error();
+        }
+
         // Refresh every half the total expiration time. This assumes the expire duration doesn't change over time.
         this.refreshSubscription = interval(this.currentTokens.expires_in / 2 * 1000).pipe(
             map(() => this.refreshTokens()),
@@ -168,9 +182,10 @@ export class AuthenticationService {
     private getUserInfo(): IUserInfo {
         if (this.currentTokens
             && this.currentTokens.id_token
+            && this.currentTokens.expiration_date
             && this.currentTokens.expiration_date > Date.now()
         ) {
-            let claims: { [claim: string]: string } = JwtDecode(this.currentTokens.id_token);
+            const claims: { [claim: string]: string } = jwt_decode(this.currentTokens.id_token);
             return {
                 isLoggedIn: true,
                 id: claims.sub,

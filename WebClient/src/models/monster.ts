@@ -36,20 +36,20 @@ export class Monster {
     }
 
     private static createCachedMonsterLife(): { [level: number]: Decimal } {
-        let cachedMonsterLife: { [level: number]: Decimal } = {};
+        const cachedMonsterLife: { [level: number]: Decimal } = {};
         cachedMonsterLife[Monster.levelWhereScaleChanges] = new Decimal(Monster.earlyBase).pow(Monster.levelWhereScaleChanges - 1).times(10);
         cachedMonsterLife[500] = new Decimal(Monster.lateBase).pow(500 - Monster.levelWhereScaleChanges).times(cachedMonsterLife[Monster.levelWhereScaleChanges]);
         return cachedMonsterLife;
     }
 
     private monsterLifeFormula1(): Decimal {
-        let loc3: Decimal = null;
+        let loc3: Decimal | null = null;
         let loc4: number;
         let loc6: number;
         let loc7: number;
         let loc8: number;
         let loc9: number;
-        let loc10: Decimal = null;
+        let loc10: Decimal | null = null;
 
         if (!this.userData.transcendent && this.userData.highestFinishedZonePersist > 500) {
             return this.oldMonsterLifeFormula1();
@@ -86,7 +86,7 @@ export class Monster {
     }
 
     private monsterGoldFormula1(): Decimal {
-        let loc4: Decimal = new Decimal(1);
+        const loc4: Decimal = new Decimal(1);
         let loc5 = 1;
         if (this.level > 75) {
             loc5 = Math.min(3, Math.pow(1.025, this.level - 75));
@@ -112,9 +112,9 @@ export class Monster {
     private oldMonsterLifeFormula1(): Decimal {
         let loc5: number;
         let loc6: number;
-        let loc3 = 1.6;
-        let loc4 = 1.15;
-        let loc7 = 140;
+        const loc3 = 1.6;
+        const loc4 = 1.15;
+        const loc7 = 140;
 
         if (this.level < loc7) {
             loc5 = this.level;
@@ -150,9 +150,9 @@ export class Monster {
             return Monster.cachedMonsterLife[param1];
         }
 
-        let loc3 = Math.floor(param1 / 500);
-        let loc4 = Monster.lateBase + (loc3 - 1) * Monster.increasePerFiveHundredLevels;
-        let loc2 = new Decimal(loc4).pow(500).times(this.monsterLifeByFiveHundreds(param1 - 500));
+        const loc3 = Math.floor(param1 / 500);
+        const loc4 = Monster.lateBase + (loc3 - 1) * Monster.increasePerFiveHundredLevels;
+        const loc2 = new Decimal(loc4).pow(500).times(this.monsterLifeByFiveHundreds(param1 - 500));
         Monster.cachedMonsterLife[param1] = loc2;
         return loc2;
     }

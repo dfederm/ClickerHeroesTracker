@@ -13,7 +13,7 @@ import { SavedGame } from "../../models/savedGame";
 })
 export class UploadComponent implements OnInit {
     public userInfo: IUserInfo;
-    public errorMessage: string;
+    public errorMessage: string | null = null;
     public isLoading: boolean;
 
     public userName: string;

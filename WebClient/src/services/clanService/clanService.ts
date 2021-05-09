@@ -68,7 +68,7 @@ export class ClanService {
         private readonly httpErrorHandlerService: HttpErrorHandlerService,
     ) { }
 
-    public getClan(clanName: string): Promise<IClanData> {
+    public getClan(clanName: string): Promise<IClanData | null> {
         return this.authenticationService.getAuthHeaders()
             .then(headers => {
                 return this.http
@@ -119,11 +119,11 @@ export class ClanService {
         return this.authenticationService.getAuthHeaders()
             .then(headers => {
                 headers = headers.set("Content-Type", "application/x-www-form-urlencoded");
-                let params = new HttpParams()
+                const params = new HttpParams()
                     .set("message", message);
 
                 // Angular doesn't encode '+' correctly. See: https://github.com/angular/angular/issues/11058
-                let body = params.toString().replace(/\+/gi, "%2B");
+                const body = params.toString().replace(/\+/gi, "%2B");
 
                 return this.http
                     .post<ISendMessageResponse>("/api/clans/messages", body, { headers })

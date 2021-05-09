@@ -10,13 +10,13 @@ require("toformat")(Decimal);
 // tslint:enable:no-var-requires
 
 // Hack until toFormat has proper typings
-export interface IFormattableDecimal {
-    toFormat?(decimalPlaces: number, rounding: Decimal.Rounding): string;
+export interface IFormattableDecimal extends Decimal {
+    toFormat(decimalPlaces: number, rounding: Decimal.Rounding): string;
 }
 
 @Pipe({ name: "exponential" })
 export class ExponentialPipe implements PipeTransform {
-    private settings: IUserSettings;
+    private settings: IUserSettings = SettingsService.defaultSettings;
 
     constructor(
         settingsService: SettingsService,

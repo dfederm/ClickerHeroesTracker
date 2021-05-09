@@ -20,13 +20,13 @@ export class VersionService {
 
     public static retryDelay = 1000;
 
-    private readonly version: BehaviorSubject<IVersion>;
+    private readonly version: BehaviorSubject<IVersion | null>;
 
     constructor(
         private readonly http: HttpClient,
         private readonly httpErrorHandlerService: HttpErrorHandlerService,
     ) {
-        this.version = new BehaviorSubject(null);
+        this.version = new BehaviorSubject<IVersion | null>(null);
 
         /*
             Note that these is a (fairly rare) race condition here. If the inital fetch of
@@ -38,8 +38,14 @@ export class VersionService {
     }
 
     public getVersion(): Observable<IVersion> {
+        // We need lots of type annotations to remove nullability, so we need a separte function.
+        // See: https://stackoverflow.com/a/60135405
+        function isNonNull<T>(value: T): value is NonNullable<T> {
+            return value != null;
+        }
+
         return this.version.pipe(
-            filter(version => version != null),
+            filter(isNonNull),
             distinctUntilChanged((x, y) => JSON.stringify(x) === JSON.stringify(y)),
         );
     }

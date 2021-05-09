@@ -1,5 +1,6 @@
 import { Component, OnInit } from "@angular/core";
 import { AppInsightsService } from "@markpieszak/ng-application-insights";
+// TODO use this instead: https://www.npmjs.com/package/@azure/msal-browser
 import { UserAgentApplication } from "msal";
 
 import { SettingsService, IUserSettings } from "../../services/settingsService/settingsService";
@@ -18,11 +19,11 @@ export class AppComponent implements OnInit {
     dark: "https://maxcdn.bootstrapcdn.com/bootswatch/4.1.3/slate/bootstrap.min.css",
   };
 
-  public isLoading: boolean;
+  public isLoading: boolean = false;
 
-  private hasSettings: boolean;
+  private hasSettings: boolean = false;
 
-  private hasUserInfo: boolean;
+  private hasUserInfo: boolean = false;
 
   constructor(
     private readonly settingsService: SettingsService,
@@ -59,7 +60,15 @@ export class AppComponent implements OnInit {
     let cssUrl = AppComponent.themeCssUrls[settings.theme] || AppComponent.themeCssUrls[AppComponent.defaultTheme];
 
     // This needs to be in the <head> so it's not part of this component's template.
-    document.getElementById("bootstrapStylesheet").setAttribute("href", cssUrl);
+    var bootstrapStylesheetElement = document.getElementById("bootstrapStylesheet");
+    if (bootstrapStylesheetElement)
+    {
+      bootstrapStylesheetElement.setAttribute("href", cssUrl);
+    }
+    else
+    {
+      throw new Error("Element 'bootstrapStylesheet' did not exist");
+    }
 
     this.hasSettings = true;
     this.checkIfDoneLoading();
