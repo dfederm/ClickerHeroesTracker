@@ -36,7 +36,7 @@
     "ng2-adsense": "^6.0.2",
     "ng2-charts": "^2.3.0",
     "ngx-clipboard": "^12.3.0",
-    "ngx-loading": "^8.0.0",
+    "ngx-spinner": "^8.1.0",
     "pako": "^1.0.10",
     "reflect-metadata": "^0.1.13",
     "rxjs": "^6.5.4",

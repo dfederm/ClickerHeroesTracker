@@ -6,7 +6,9 @@
                class="alert alert-danger">
                 There was a problem getting leaderboard data
             </p>
-            <ngx-loading [show]="isLoading && !isError"></ngx-loading>
+            <ngx-spinner name="clans"
+                         [fullScreen]="false"
+                         type="ball-pulse"></ngx-spinner>
             <table *ngIf="!isError"
                    class="table table-sm table-striped">
                 <thead>

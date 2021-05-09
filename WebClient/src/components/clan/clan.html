@@ -2,7 +2,9 @@
     <h2>{{ clanName }}</h2>
     <div class="row">
         <div class="col-md-6">
-            <ngx-loading [show]="isClanInformationLoading && !isClanInformationError"></ngx-loading>
+            <ngx-spinner name="clanInformation"
+                         [fullScreen]="false"
+                         type="ball-pulse"></ngx-spinner>
             <p *ngIf="isClanInformationError"
                class="alert alert-danger">
                 There was a problem getting the clan's data
@@ -35,7 +37,9 @@
                class="alert alert-danger">
                 Oops! Something went wrong.
             </p>
-            <ngx-loading [show]="isActionsLoading && !isActionsError"></ngx-loading>
+            <ngx-spinner name="clanActions"
+                         [fullScreen]="false"
+                         type="ball-pulse"></ngx-spinner>
             <button class="btn btn-secondary"
                     (click)="toggleBlock()">
                 {{ isBlocked ? "Unblock" : "Block" }}
@@ -71,7 +75,9 @@
         <div *ngIf="isUserClan"
              class="col-lg-6">
             <h3>Message Board</h3>
-            <ngx-loading [show]="isMessagesLoading && !messagesError"></ngx-loading>
+            <ngx-spinner name="clanMessages"
+                         [fullScreen]="false"
+                         type="ball-pulse"></ngx-spinner>
             <p *ngIf="messagesError"
                class="alert alert-danger">
                 {{ messagesError }}

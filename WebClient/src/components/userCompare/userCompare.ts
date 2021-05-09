@@ -6,6 +6,7 @@ import { SettingsService, IUserSettings } from "../../services/settingsService/s
 import { Decimal } from "decimal.js";
 import { ChartDataSets, ChartOptions, ChartTooltipItem } from "chart.js";
 import { ExponentialPipe } from "../../pipes/exponentialPipe";
+import { NgxSpinnerService } from "ngx-spinner";
 
 interface IChartViewModel {
     isProminent: boolean;
@@ -42,7 +43,6 @@ export class UserCompareComponent implements OnInit {
     ];
 
     public isError: boolean;
-    public isLoading: boolean;
     public userName: string;
     public compareUserName: string;
     public _selectedRange: string;
@@ -55,6 +55,7 @@ export class UserCompareComponent implements OnInit {
         private readonly route: ActivatedRoute,
         private readonly userService: UserService,
         private readonly settingsService: SettingsService,
+        private readonly spinnerService: NgxSpinnerService,
     ) { }
 
     public get selectedRange(): string {
@@ -130,17 +131,19 @@ export class UserCompareComponent implements OnInit {
                 endOrCount = Number(this.selectedRange);
         }
 
-        this.isLoading = true;
+        this.spinnerService.show("userCompare");
         Promise.all([
             this.userService.getProgress(this.userName, startOrPage, endOrCount),
             this.userService.getProgress(this.compareUserName, startOrPage, endOrCount),
         ])
             .then(data => this.handleData(data[0], data[1]))
-            .catch(() => this.isError = true);
+            .catch(() => this.isError = true)
+            .finally(() => {
+                this.spinnerService.hide("userCompare");
+            });
     }
 
     private handleData(progress1: IProgressData, progress2: IProgressData): void {
-        this.isLoading = false;
         if (!progress1 || !progress2) {
             this.charts = [];
             return;

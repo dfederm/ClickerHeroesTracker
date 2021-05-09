@@ -2,6 +2,7 @@ import { Component, OnInit } from "@angular/core";
 import { ClanService, ILeaderboardClan, ILeaderboardSummaryListResponse } from "../../services/clanService/clanService";
 import { AuthenticationService, IUserInfo } from "../../services/authenticationService/authenticationService";
 import { UserService } from "../../services/userService/userService";
+import { NgxSpinnerService } from "ngx-spinner";
 
 @Component({
     selector: "clans",
@@ -9,8 +10,6 @@ import { UserService } from "../../services/userService/userService";
 })
 export class ClansComponent implements OnInit {
     public isError = false;
-
-    public isLoading: boolean;
 
     public clans: ILeaderboardClan[];
 
@@ -28,6 +27,7 @@ export class ClansComponent implements OnInit {
         private readonly clanService: ClanService,
         private readonly authenticationService: AuthenticationService,
         private readonly userService: UserService,
+        private readonly spinnerService: NgxSpinnerService,
     ) { }
 
     public get page(): number {
@@ -82,16 +82,18 @@ export class ClansComponent implements OnInit {
     }
 
     private getLeaderboard(): Promise<void> {
-        this.isLoading = true;
         this.isError = false;
+        this.spinnerService.show("clans");
         return this.clanService.getLeaderboard(this.page, this.count)
             .then(response => {
-                this.isLoading = false;
                 this.leaderboardResponse = response;
                 this.updateLeaderboard();
             })
             .catch(() => {
                 this.isError = true;
+            })
+            .finally(() => {
+                this.spinnerService.hide("clans");
             });
     }
 

@@ -3,6 +3,7 @@ import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
 
 import { AuthenticationService } from "../../services/authenticationService/authenticationService";
 import { UserService, IUserLogins } from "../../services/userService/userService";
+import { NgxSpinnerService } from "ngx-spinner";
 
 @Component({
     selector: "changePasswordDialog",
@@ -10,8 +11,6 @@ import { UserService, IUserLogins } from "../../services/userService/userService
 })
 export class ChangePasswordDialogComponent implements OnInit {
     public errors: string[];
-
-    public isLoading: boolean;
 
     public logins: IUserLogins;
 
@@ -27,10 +26,11 @@ export class ChangePasswordDialogComponent implements OnInit {
         private readonly authenticationService: AuthenticationService,
         private readonly userService: UserService,
         public activeModal: NgbActiveModal,
+        private readonly spinnerService: NgxSpinnerService,
     ) { }
 
     public ngOnInit(): void {
-        this.isLoading = true;
+        this.spinnerService.show("changePassword");
         this.authenticationService
             .userInfo()
             .subscribe(userInfo => {
@@ -39,28 +39,32 @@ export class ChangePasswordDialogComponent implements OnInit {
                 this.userService
                     .getLogins(this.userName)
                     .then(logins => {
-                        this.isLoading = false;
                         this.logins = logins;
                     })
                     .catch(() => {
                         this.errors = ["There was an unexpected error. Please try again in a bit."];
+                    })
+                    .finally(() => {
+                        this.spinnerService.hide("changePassword");
                     });
             });
     }
 
     public submit(): void {
         this.errors = null;
-        this.isLoading = true;
+        this.spinnerService.show("changePassword");
         let passwordPromise = this.logins.hasPassword
             ? this.userService.changePassword(this.userName, this.currentPassword, this.newPassword)
             : this.userService.setPassword(this.userName, this.newPassword);
         passwordPromise
             .then(() => {
-                this.isLoading = false;
                 this.activeModal.close();
             })
             .catch((errors: string[]) => {
                 this.errors = errors;
+            })
+            .finally(() => {
+                this.spinnerService.hide("changePassword");
             });
     }
 }

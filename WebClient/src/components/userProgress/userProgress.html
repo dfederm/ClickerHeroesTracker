@@ -19,7 +19,9 @@
        class="alert alert-warning">
         This user has no uploaded data for that time period
     </p>
-    <ngx-loading [show]="isLoading && !isError"></ngx-loading>
+    <ngx-spinner name="userProgress"
+                 [fullScreen]="false"
+                 type="ball-pulse"></ngx-spinner>
 
     <div class="row">
         <div *ngFor="let chart of charts"

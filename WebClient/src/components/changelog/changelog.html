@@ -2,7 +2,9 @@
    class="alert alert-danger">
   There was a problem getting the site news
 </p>
-<ngx-loading [show]="isLoading && !isError"></ngx-loading>
+<ngx-spinner name="changelog"
+             [fullScreen]="false"
+             type="ball-pulse"></ngx-spinner>
 
 <button *ngIf="canEdit"
         class="btn btn-primary"

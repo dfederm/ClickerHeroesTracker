@@ -73,7 +73,9 @@
                      class="alert alert-danger">
                     {{ modalErrorMessage }}
                 </div>
-                <ngx-loading [show]="isModalLoading && !modalErrorMessage"></ngx-loading>
+                <ngx-spinner name="modal"
+                             [fullScreen]="false"
+                             type="ball-pulse"></ngx-spinner>
                 <p class="alert alert-warning">
                     This feature is experimental and is considered cheating. Please report any problems via the
                     <a [openDialog]="FeedbackDialogComponent">feedback form</a> or on

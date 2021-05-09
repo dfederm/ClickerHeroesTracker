@@ -6,6 +6,7 @@ import { Decimal } from "decimal.js";
 import { NgbModal } from "@ng-bootstrap/ng-bootstrap";
 import { switchMap } from "rxjs/operators";
 import { SavedGame } from "../../models/savedGame";
+import { NgxSpinnerService } from "ngx-spinner";
 
 @Component({
     selector: "upload",
@@ -14,7 +15,6 @@ import { SavedGame } from "../../models/savedGame";
 export class UploadComponent implements OnInit {
     public userInfo: IUserInfo;
     public errorMessage: string;
-    public isLoading: boolean;
 
     public userName: string;
     public clanName: string;
@@ -45,6 +45,7 @@ export class UploadComponent implements OnInit {
         private readonly router: Router,
         private readonly uploadService: UploadService,
         private readonly modalService: NgbModal,
+        private readonly spinnerService: NgxSpinnerService,
     ) {
     }
 
@@ -55,7 +56,7 @@ export class UploadComponent implements OnInit {
 
         this.route.params.pipe(
             switchMap(params => {
-                this.isLoading = true;
+                this.spinnerService.show("upload");
                 return this.uploadService.get(+params.id);
             }),
         ).subscribe(upload => this.handleUpload(upload), () => this.handleError("There was a problem getting that upload"));
@@ -75,20 +76,22 @@ export class UploadComponent implements OnInit {
     }
 
     public deleteUpload(closeModal: () => void): void {
-        this.isLoading = true;
+        this.spinnerService.show("upload");
         this.uploadService.delete(this.uploadId)
             .then(() => {
-                this.isLoading = false;
                 this.router.navigate([`/users/${this.userName}`]);
             })
             .catch(() => this.handleError("There was a problem deleting that upload"))
-            .then(closeModal);
+            .then(closeModal)
+            .finally(() => {
+                this.spinnerService.hide("upload");
+            });
     }
 
     private handleUpload(upload: IUpload): void {
         this.upload = upload;
         this.refresh();
-        this.isLoading = false;
+        this.spinnerService.hide("upload");
     }
 
     // tslint:disable-next-line:cyclomatic-complexity
@@ -139,7 +142,7 @@ export class UploadComponent implements OnInit {
     }
 
     private handleError(errorMessage: string): void {
-        this.isLoading = false;
+        this.spinnerService.hide("upload");
         this.errorMessage = errorMessage;
     }
 }

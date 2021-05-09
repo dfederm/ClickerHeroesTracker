@@ -8,7 +8,9 @@
                  class="alert alert-danger">
                 {{ staleUploadError }}
             </div>
-            <ngx-loading [show]="isStaleUploadsLoading && !staleUploadError"></ngx-loading>
+            <ngx-spinner name="staleUploads"
+                         [fullScreen]="false"
+                         type="ball-pulse"></ngx-spinner>
             <div *ngIf="staleUploadIds">
                 <p>{{ totalStaleUploads - deletedStaleUploads }} stale uploads</p>
                 <p>
@@ -36,7 +38,9 @@
                  class="alert alert-danger">
                 {{ invalidAuthTokensError }}
             </div>
-            <ngx-loading [show]="isInvalidAuthTokensLoading && !invalidAuthTokensError"></ngx-loading>
+            <ngx-spinner name="invalidAuthTokens"
+                         [fullScreen]="false"
+                         type="ball-pulse"></ngx-spinner>
             <div *ngIf="totalInvalidAuthTokens !== undefined">
                 <p>{{ totalInvalidAuthTokens - prunedInvalidAuthTokens }} Invalid Auth Tokens</p>
                 <p>
@@ -64,7 +68,9 @@
                  class="alert alert-danger">
                 {{ blockedClansError }}
             </div>
-            <ngx-loading [show]="(isLoadingBlockedClans || isUnblockClansLoading) && !blockedClansError"></ngx-loading>
+            <ngx-spinner name="blockedClans"
+                         [fullScreen]="false"
+                         type="ball-pulse"></ngx-spinner>
             <form (ngSubmit)="unblockClan()"
                   #unblockClanForm="ngForm">
                 <div class="form-group">

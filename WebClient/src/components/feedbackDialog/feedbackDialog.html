@@ -11,7 +11,9 @@
          class="alert alert-danger">
         {{ errorMessage }}
     </div>
-    <ngx-loading [show]="isLoading && !errorMessage"></ngx-loading>
+    <ngx-spinner name="feedbackDialog"
+                 [fullScreen]="false"
+                 type="ball-pulse"></ngx-spinner>
     <form (ngSubmit)="submit()"
           #feedbackForm="ngForm">
         <div class="form-group"

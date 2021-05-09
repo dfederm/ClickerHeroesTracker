@@ -3,6 +3,7 @@ import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
 
 import { AuthenticationService, IUserInfo } from "../../services/authenticationService/authenticationService";
 import { FeedbackService } from "../../services/feedbackService/feedbackService";
+import { NgxSpinnerService } from "ngx-spinner";
 
 @Component({
     selector: "feedback",
@@ -10,8 +11,6 @@ import { FeedbackService } from "../../services/feedbackService/feedbackService"
 })
 export class FeedbackDialogComponent implements OnInit {
     public errorMessage: string;
-
-    public isLoading: boolean;
 
     public userInfo: IUserInfo;
 
@@ -23,6 +22,7 @@ export class FeedbackDialogComponent implements OnInit {
         private readonly authenticationService: AuthenticationService,
         private readonly feedbackService: FeedbackService,
         public activeModal: NgbActiveModal,
+        private readonly spinnerService: NgxSpinnerService,
     ) { }
 
     public ngOnInit(): void {
@@ -32,18 +32,20 @@ export class FeedbackDialogComponent implements OnInit {
     }
 
     public submit(): void {
-        this.isLoading = true;
         let email = this.userInfo.isLoggedIn
             ? this.userInfo.email
             : this.email;
 
+        this.spinnerService.show("feedbackDialog");
         this.feedbackService.send(this.comments, email)
             .then(() => {
-                this.isLoading = false;
                 this.activeModal.close();
             })
             .catch(() => {
                 this.errorMessage = "Something went wrong. Please try again";
+            })
+            .finally(() => {
+                this.spinnerService.hide("feedbackDialog");
             });
     }
 }

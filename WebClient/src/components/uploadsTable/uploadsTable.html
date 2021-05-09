@@ -2,7 +2,9 @@
    class="alert alert-danger">
   There was a problem getting your uploads
 </p>
-<ngx-loading [show]="isLoading && !isError"></ngx-loading>
+<ngx-spinner name="uploadsTable"
+             [fullScreen]="false"
+             type="ball-pulse"></ngx-spinner>
 
 <table class="table table-sm table-striped">
   <thead>

@@ -11,7 +11,9 @@
                class="alert alert-danger">
                 Oops! Something went wrong.
             </p>
-            <ngx-loading [show]="isActionsLoading && !isActionsError"></ngx-loading>
+            <ngx-spinner name="userActions"
+                         [fullScreen]="false"
+                         type="ball-pulse"></ngx-spinner>
             <button *ngIf="!isCurrentUserFollowing"
                     class="btn btn-secondary"
                     (click)="follow()">
@@ -44,7 +46,9 @@
                class="alert alert-warning">
                 No uploads in the last week!
             </p>
-            <ngx-loading [show]="isProgressLoading && !isProgressError"></ngx-loading>
+            <ngx-spinner name="userProgress"
+                         [fullScreen]="false"
+                         type="ball-pulse"></ngx-spinner>
             <!-- Height is intedned to be 400px, but for some reason the chart is 1.7x what we specify, so use 235 -->
             <canvas baseChart
                     *ngIf="progress"
@@ -68,7 +72,9 @@
             <p *ngIf="(!follows || !follows.length) && !isFollowsError">
                 {{ currentUserName && currentUserName !== userName ? userName + ' is' : 'You are' }} currently not following any users.
             </p>
-            <ngx-loading [show]="isFollowsLoading && !isFollowsError"></ngx-loading>
+            <ngx-spinner name="userFollows"
+                         [fullScreen]="false"
+                         type="ball-pulse"></ngx-spinner>
             <table *ngIf="follows && follows.length"
                    class="table table-sm table-striped">
                 <tbody>

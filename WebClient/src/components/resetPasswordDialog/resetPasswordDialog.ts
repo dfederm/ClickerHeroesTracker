@@ -3,6 +3,7 @@ import { NgbActiveModal, NgbModal } from "@ng-bootstrap/ng-bootstrap";
 
 import { LogInDialogComponent } from "../logInDialog/logInDialog";
 import { UserService } from "../../services/userService/userService";
+import { NgxSpinnerService } from "ngx-spinner";
 
 @Component({
     selector: "resetPasswordDialog",
@@ -10,8 +11,6 @@ import { UserService } from "../../services/userService/userService";
 })
 export class ResetPasswordDialogComponent {
     public errors: string[];
-
-    public isLoading: boolean;
 
     public email = "";
 
@@ -27,32 +26,37 @@ export class ResetPasswordDialogComponent {
         private readonly userService: UserService,
         private readonly modalService: NgbModal,
         public activeModal: NgbActiveModal,
+        private readonly spinnerService: NgxSpinnerService,
     ) { }
 
     public sendCode(): void {
         this.errors = null;
-        this.isLoading = true;
+        this.spinnerService.show("resetPasswordDialog");
         this.userService.resetPassword(this.email)
             .then(() => {
-                this.isLoading = false;
                 this.codeSent = true;
             })
             .catch((errors: string[]) => {
                 this.errors = errors;
+            })
+            .finally(() => {
+                this.spinnerService.hide("resetPasswordDialog");
             });
     }
 
     public resetPassword(): void {
         this.errors = null;
-        this.isLoading = true;
+        this.spinnerService.show("resetPasswordDialog");
         this.userService.resetPasswordConfirmation(this.email, this.password, this.code)
             .then(() => {
-                this.isLoading = false;
                 this.activeModal.close();
                 this.modalService.open(LogInDialogComponent);
             })
             .catch((errors: string[]) => {
                 this.errors = errors;
+            })
+            .finally(() => {
+                this.spinnerService.hide("resetPasswordDialog");
             });
     }
 }
