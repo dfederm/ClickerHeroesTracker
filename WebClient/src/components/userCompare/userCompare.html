@@ -21,7 +21,9 @@
        class="alert alert-warning">
         These users have no uploaded data for that time period
     </p>
-    <ngx-loading [show]="isLoading && !isError"></ngx-loading>
+    <ngx-spinner name="userCompare"
+                 [fullScreen]="false"
+                 type="ball-pulse"></ngx-spinner>
 
     <div class="row">
         <div *ngFor="let chart of charts"

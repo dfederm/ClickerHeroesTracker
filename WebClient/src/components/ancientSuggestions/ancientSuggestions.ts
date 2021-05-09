@@ -9,6 +9,7 @@ import { FeedbackDialogComponent } from "../feedbackDialog/feedbackDialog";
 import { UploadService } from "../../services/uploadService/uploadService";
 import { Router } from "@angular/router";
 import { HttpErrorResponse } from "@angular/common/http";
+import { NgxSpinnerService } from "ngx-spinner";
 
 interface IAncientViewModel {
     id: string;
@@ -56,7 +57,6 @@ export class AncientSuggestionsComponent implements OnInit {
 
     public autoLeveledSavedGame: SavedGame;
     public modalErrorMessage: string;
-    public isModalLoading: boolean;
 
     public get playStyle(): string {
         return this._playStyle;
@@ -122,6 +122,7 @@ export class AncientSuggestionsComponent implements OnInit {
         private readonly modalService: NgbModal,
         private readonly router: Router,
         private readonly uploadService: UploadService,
+        private readonly spinnerService: NgxSpinnerService,
     ) {
         for (const id in gameData.ancients) {
             const ancientDefinition = gameData.ancients[id];
@@ -188,7 +189,7 @@ export class AncientSuggestionsComponent implements OnInit {
 
     public saveAutolevel(): void {
         this.modalErrorMessage = null;
-        this.isModalLoading = true;
+        this.spinnerService.show("modal");
         this.uploadService.create(this.autoLeveledSavedGame.content, true, this.playStyle)
             .then(uploadId => {
                 this.appInsights.trackEvent("SaveAutolevel");
@@ -196,12 +197,14 @@ export class AncientSuggestionsComponent implements OnInit {
             })
             .then(() => {
                 this.autolevelModal.close();
-                this.isModalLoading = false;
             })
             .catch((error: HttpErrorResponse) => {
                 this.modalErrorMessage = error.status >= 400 && error.status < 500
                     ? "The uploaded save was not valid"
                     : "An unknown error occurred";
+            })
+            .finally(() => {
+                this.spinnerService.hide("modal");
             });
     }
 

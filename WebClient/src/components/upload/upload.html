@@ -4,7 +4,9 @@
        class="alert alert-danger">
         {{ errorMessage }}
     </p>
-    <ngx-loading [show]="isLoading && !errorMessage"></ngx-loading>
+    <ngx-spinner name="upload"
+                 [fullScreen]="false"
+                 type="ball-pulse"></ngx-spinner>
     <div class="row">
         <div class="col-md-6">
             <ul class="list-inline">

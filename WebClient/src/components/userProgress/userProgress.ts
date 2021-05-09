@@ -7,6 +7,7 @@ import { ChartDataSets, ChartOptions, ChartTooltipItem } from "chart.js";
 import { SettingsService, IUserSettings } from "../../services/settingsService/settingsService";
 import { ExponentialPipe } from "../../pipes/exponentialPipe";
 import { PercentPipe } from "@angular/common";
+import { NgxSpinnerService } from "ngx-spinner";
 
 interface IChartViewModel {
     isProminent: boolean;
@@ -43,7 +44,6 @@ export class UserProgressComponent implements OnInit {
     ];
 
     public isError: boolean;
-    public isLoading: boolean;
     public userName: string;
     public _selectedRange: string;
     public ranges: string[];
@@ -56,6 +56,7 @@ export class UserProgressComponent implements OnInit {
         private readonly route: ActivatedRoute,
         private readonly userService: UserService,
         private readonly settingsService: SettingsService,
+        private readonly spinnerService: NgxSpinnerService,
         @Inject(LOCALE_ID) locale: string,
     ) {
         this.percentPipe = new PercentPipe(locale);
@@ -133,14 +134,16 @@ export class UserProgressComponent implements OnInit {
                 endOrCount = Number(this.selectedRange);
         }
 
-        this.isLoading = true;
+        this.spinnerService.show("userProgress");
         this.userService.getProgress(this.userName, startOrPage, endOrCount)
             .then(progress => this.handleData(progress))
-            .catch(() => this.isError = true);
+            .catch(() => this.isError = true)
+            .finally(() => {
+                this.spinnerService.hide("userProgress");
+            });
     }
 
     private handleData(progress: IProgressData): void {
-        this.isLoading = false;
         if (!progress) {
             this.charts = [];
             return;

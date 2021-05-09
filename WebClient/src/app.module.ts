@@ -1,5 +1,6 @@
 import { NgModule } from "@angular/core";
 import { BrowserModule } from "@angular/platform-browser";
+import { BrowserAnimationsModule } from "@angular/platform-browser/animations";
 import { FormsModule } from "@angular/forms";
 import { RouterModule, Routes, UrlSegment, UrlMatchResult } from "@angular/router";
 import { HttpClientModule } from "@angular/common/http";
@@ -11,7 +12,7 @@ import { ApplicationInsightsModule, AppInsightsService } from "@markpieszak/ng-a
 import { ChartsModule } from "ng2-charts";
 import { CompareValidatorModule } from "angular-compare-validator";
 import { JwBootstrapSwitchNg2Module } from "jw-bootstrap-switch-ng2";
-import { NgxLoadingModule } from "ngx-loading";
+import { NgxSpinnerModule } from "ngx-spinner";
 
 import { AppComponent } from "./components/app/app";
 import { HomeComponent } from "./components/home/home";
@@ -103,6 +104,7 @@ const routes: Routes =
   imports:
     [
       BrowserModule,
+      BrowserAnimationsModule,
       FormsModule,
       RouterModule.forRoot(routes),
       HttpClientModule,
@@ -114,7 +116,7 @@ const routes: Routes =
       ChartsModule,
       CompareValidatorModule,
       JwBootstrapSwitchNg2Module,
-      NgxLoadingModule.forRoot({}),
+      NgxSpinnerModule,
     ],
   declarations:
     [

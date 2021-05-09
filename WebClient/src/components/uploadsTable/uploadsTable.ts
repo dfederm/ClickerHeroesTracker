@@ -1,6 +1,7 @@
 import { Component, OnInit, Input } from "@angular/core";
 import { UserService, IUploadSummaryListResponse } from "../../services/userService/userService";
 import { Decimal } from "decimal.js";
+import { NgxSpinnerService } from "ngx-spinner";
 
 interface IUploadViewModel {
     id: number;
@@ -18,7 +19,6 @@ interface IUploadViewModel {
 export class UploadsTableComponent implements OnInit {
     public uploads: IUploadViewModel[];
     public isError: boolean;
-    public isLoading: boolean;
     public totalUploads: number;
 
     @Input()
@@ -54,7 +54,10 @@ export class UploadsTableComponent implements OnInit {
         }
     }
 
-    constructor(private readonly userService: UserService) { }
+    constructor(
+        private readonly userService: UserService,
+        private readonly spinnerService: NgxSpinnerService,
+    ) { }
 
     public ngOnInit(): void {
         this.populateUploads();
@@ -63,11 +66,14 @@ export class UploadsTableComponent implements OnInit {
 
     private populateUploads(): void {
         this.isError = false;
-        this.isLoading = true;
+        this.spinnerService.show("uploadsTable");
         this.userService
             .getUploads(this.userName, this.page, this.count)
             .then(response => this.handleData(response))
-            .catch(() => this.isError = true);
+            .catch(() => this.isError = true)
+            .finally(() => {
+                this.spinnerService.hide("uploadsTable");
+            });
     }
 
     private handleData(response: IUploadSummaryListResponse): void {
@@ -76,7 +82,6 @@ export class UploadsTableComponent implements OnInit {
             return;
         }
 
-        this.isLoading = false;
         this.uploads = [];
 
         let uploads = response.uploads;

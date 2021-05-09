@@ -11,7 +11,9 @@
          class="alert alert-danger">
         {{ errorMessage }}
     </div>
-    <ngx-loading [show]="isLoading && !errorMessage"></ngx-loading>
+    <ngx-spinner name="uploadDialog"
+                 [fullScreen]="false"
+                 type="ball-pulse"></ngx-spinner>
     <form (ngSubmit)="upload()">
         <div class="form-group">
             <label for="encodedSaveData">Save Data</label>

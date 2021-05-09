@@ -1,6 +1,7 @@
 import { Component, OnInit } from "@angular/core";
 import { AppInsightsService } from "@markpieszak/ng-application-insights";
 import { UserAgentApplication } from "msal";
+import { NgxSpinnerService } from "ngx-spinner";
 
 import { SettingsService, IUserSettings } from "../../services/settingsService/settingsService";
 import { AuthenticationService, IUserInfo } from "../../services/authenticationService/authenticationService";
@@ -28,9 +29,11 @@ export class AppComponent implements OnInit {
     private readonly settingsService: SettingsService,
     private readonly authenticationService: AuthenticationService,
     private readonly appInsights: AppInsightsService,
+    private readonly spinnerService: NgxSpinnerService,
   ) { }
 
   public ngOnInit(): void {
+    this.spinnerService.show();
     this.isLoading = true;
 
     // Get the auth headers simply because it forces a wait on fetching the initial auth tokens.
@@ -78,6 +81,7 @@ export class AppComponent implements OnInit {
 
   private checkIfDoneLoading(): void {
     if (this.hasSettings && this.hasUserInfo) {
+      this.spinnerService.hide();
       this.isLoading = false;
     }
   }

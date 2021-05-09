@@ -6,6 +6,7 @@ import { ActivatedRoute } from "@angular/router";
 import { HttpClient, HttpErrorResponse } from "@angular/common/http";
 import { HttpErrorHandlerService } from "../../services/httpErrorHandlerService/httpErrorHandlerService";
 import { IBlockClanRequest } from "../../models";
+import { NgxSpinnerService } from "ngx-spinner";
 
 @Component({
     selector: "clan",
@@ -18,8 +19,6 @@ export class ClanComponent implements OnInit {
     public isClanInformationLoading: boolean;
 
     public messagesError = "";
-
-    public isMessagesLoading: boolean;
 
     public clanName: string;
 
@@ -41,8 +40,6 @@ export class ClanComponent implements OnInit {
 
     public isActionsError: boolean;
 
-    public isActionsLoading: boolean;
-
     private userClanName: string;
 
     constructor(
@@ -52,6 +49,7 @@ export class ClanComponent implements OnInit {
         private readonly route: ActivatedRoute,
         private readonly http: HttpClient,
         private readonly httpErrorHandlerService: HttpErrorHandlerService,
+        private readonly spinnerService: NgxSpinnerService,
     ) { }
 
     public ngOnInit(): void {
@@ -66,7 +64,7 @@ export class ClanComponent implements OnInit {
 
     public sendMessage(): void {
         this.messagesError = "";
-        this.isMessagesLoading = true;
+        this.spinnerService.show("clanMessages");
         this.clanService.sendMessage(this.newMessage)
             .then(() => {
                 this.newMessage = "";
@@ -78,7 +76,7 @@ export class ClanComponent implements OnInit {
     }
 
     public toggleBlock(): void {
-        this.isActionsLoading = true;
+        this.spinnerService.show("clanActions");
         this.authenticationService.getAuthHeaders()
             .then(headers => {
                 headers = headers.set("Content-Type", "application/json");
@@ -91,12 +89,14 @@ export class ClanComponent implements OnInit {
                     .toPromise();
             })
             .then(() => {
-                this.isActionsLoading = false;
                 this.refreshClanData();
             })
             .catch((err: HttpErrorResponse) => {
                 this.isActionsError = true;
                 this.httpErrorHandlerService.logError("ClanComponent.toggleBlock.error", err);
+            })
+            .finally(() => {
+                this.spinnerService.hide("clanActions");
             });
     }
 
@@ -128,10 +128,9 @@ export class ClanComponent implements OnInit {
     private refreshClanData(): Promise<void> {
         this.isClanInformationError = false;
         this.isClanInformationLoading = true;
-
+        this.spinnerService.show("clanInformation");
         return this.clanService.getClan(this.clanName)
             .then(response => {
-                this.isClanInformationLoading = false;
                 if (!response) {
                     return;
                 }
@@ -148,8 +147,10 @@ export class ClanComponent implements OnInit {
                 if (!err || err.status !== 404) {
                     this.isClanInformationError = true;
                 }
-
+            })
+            .finally(() => {
                 this.isClanInformationLoading = false;
+                this.spinnerService.hide("clanInformation");
             });
     }
 
@@ -165,14 +166,16 @@ export class ClanComponent implements OnInit {
         }
 
         this.messagesError = "";
-        this.isMessagesLoading = true;
+        this.spinnerService.show("clanMessages");
         this.clanService.getMessages()
             .then(messages => {
-                this.isMessagesLoading = false;
                 this.messages = messages;
             })
             .catch(() => {
                 this.messagesError = "There was a problem getting your clan's messages. Please try again.";
+            })
+            .finally(() => {
+                this.spinnerService.hide("clanMessages");
             });
     }
 }

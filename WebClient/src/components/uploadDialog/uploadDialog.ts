@@ -8,6 +8,7 @@ import { RegisterDialogComponent } from "../registerDialog/registerDialog";
 import { AuthenticationService, IUserInfo } from "../../services/authenticationService/authenticationService";
 import { UploadService } from "../../services/uploadService/uploadService";
 import { SettingsService, PlayStyle } from "../../services/settingsService/settingsService";
+import { NgxSpinnerService } from "ngx-spinner";
 
 @Component({
     selector: "upload",
@@ -15,8 +16,6 @@ import { SettingsService, PlayStyle } from "../../services/settingsService/setti
 })
 export class UploadDialogComponent implements OnInit {
     public errorMessage: string;
-
-    public isLoading: boolean;
 
     public userInfo: IUserInfo;
 
@@ -38,6 +37,7 @@ export class UploadDialogComponent implements OnInit {
         public activeModal: NgbActiveModal,
         private readonly router: Router,
         private readonly settingsService: SettingsService,
+        private readonly spinnerService: NgxSpinnerService,
     ) { }
 
     public ngOnInit(): void {
@@ -56,19 +56,21 @@ export class UploadDialogComponent implements OnInit {
             return;
         }
 
-        this.isLoading = true;
+        this.spinnerService.show("uploadDialog");
         this.uploadService.create(this.encodedSaveData, this.addToProgress, this.playStyle)
             .then(uploadId => {
                 return this.router.navigate(["/uploads", uploadId]);
             })
             .then(() => {
                 this.activeModal.close();
-                this.isLoading = false;
             })
             .catch((error: HttpErrorResponse) => {
                 this.errorMessage = error.status >= 400 && error.status < 500
                     ? "The uploaded save was not valid"
                     : "An unknown error occurred";
+            })
+            .finally(() => {
+                this.spinnerService.hide("uploadDialog");
             });
     }
 

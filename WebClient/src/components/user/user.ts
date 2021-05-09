@@ -7,6 +7,7 @@ import { AuthenticationService, IUserInfo } from "../../services/authenticationS
 import { Decimal } from "decimal.js";
 import { ChartDataSets, ChartOptions, ChartTooltipItem } from "chart.js";
 import { ActivatedRoute } from "@angular/router";
+import { NgxSpinnerService } from "ngx-spinner";
 
 interface IProgressViewModel {
   datasets: ChartDataSets[];
@@ -34,11 +35,9 @@ export class UserComponent implements OnInit {
   public progress: IProgressViewModel;
 
   public isFollowsError: boolean;
-  public isFollowsLoading: boolean;
   public follows: string[];
 
   public isActionsError: boolean;
-  public isActionsLoading: boolean;
   public currentUserName: string;
   public isCurrentUserFollowing: boolean;
   private currentUserFollows: string[];
@@ -50,6 +49,7 @@ export class UserComponent implements OnInit {
     private readonly settingsService: SettingsService,
     private readonly route: ActivatedRoute,
     private readonly authenticationService: AuthenticationService,
+    private readonly spinnerService: NgxSpinnerService,
   ) { }
 
   public ngOnInit(): void {
@@ -67,26 +67,30 @@ export class UserComponent implements OnInit {
   }
 
   public follow(): void {
-    this.isActionsLoading = true;
+    this.spinnerService.show("userActions");
     this.userService.addFollow(this.currentUserName, this.userName)
       .then(() => {
-        this.isActionsLoading = false;
         this.isCurrentUserFollowing = true;
       })
       .catch(() => {
         this.isActionsError = true;
+      })
+      .finally(() => {
+        this.spinnerService.hide("userActions");
       });
   }
 
   public unfollow(): void {
-    this.isActionsLoading = true;
+    this.spinnerService.show("userActions");
     this.userService.removeFollow(this.currentUserName, this.userName)
       .then(() => {
-        this.isActionsLoading = false;
         this.isCurrentUserFollowing = false;
       })
       .catch(() => {
         this.isActionsError = true;
+      })
+      .finally(() => {
+        this.spinnerService.hide("userActions");
       });
   }
 
@@ -111,14 +115,16 @@ export class UserComponent implements OnInit {
     this.isActionsError = false;
     if (currentUserInfo.isLoggedIn) {
       this.currentUserName = currentUserInfo.username;
-      this.isActionsLoading = true;
+      this.spinnerService.show("userActions");
       this.userService.getFollows(this.currentUserName)
         .then(data => {
-          this.isActionsLoading = false;
           this.currentUserFollows = data.follows;
           this.refreshActions();
         })
-        .catch(() => this.isActionsError = true);
+        .catch(() => this.isActionsError = true)
+        .finally(() => {
+          this.spinnerService.hide("userActions");
+        });
     } else {
       this.currentUserName = null;
       this.currentUserFollows = null;
@@ -151,15 +157,23 @@ export class UserComponent implements OnInit {
       }
     }
 
+    this.spinnerService.show("userProgress");
     this.isProgressLoading = true;
     this.userService.getProgress(this.userName, startOrPage, endOrCount)
       .then(progress => this.handleProgressData(progress))
-      .catch(() => this.isProgressError = true);
+      .catch(() => this.isProgressError = true)
+      .finally(() => {
+        this.isProgressLoading = false;
+        this.spinnerService.hide("userProgress");
+      });
 
-    this.isFollowsLoading = true;
+    this.spinnerService.show("userFollows");
     this.userService.getFollows(this.userName)
       .then(follows => this.handleFollowsData(follows))
-      .catch(() => this.isFollowsError = true);
+      .catch(() => this.isFollowsError = true)
+      .finally(() => {
+        this.spinnerService.hide("userFollows");
+      });
 
     // Ignore errors; it just means we don't see the clan name
     this.userService.getUser(this.userName)
@@ -179,7 +193,6 @@ export class UserComponent implements OnInit {
   }
 
   private handleProgressData(progress: IProgressData): void {
-    this.isProgressLoading = false;
     if (progress && Object.keys(progress.soulsSpentData).length === 0) {
       // No data
       return;
@@ -290,7 +303,6 @@ export class UserComponent implements OnInit {
   }
 
   private handleFollowsData(data: IFollowsData): void {
-    this.isFollowsLoading = false;
     if (!data || !data.follows || !data.follows.length) {
       // No data
       return;

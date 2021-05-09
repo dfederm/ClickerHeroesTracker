@@ -11,7 +11,9 @@
          class="alert alert-danger">
         {{ error }}
     </div>
-    <ngx-loading [show]="isLoading && !error"></ngx-loading>
+    <ngx-spinner name="logInDialog"
+                 [fullScreen]="false"
+                 type="ball-pulse"></ngx-spinner>
     <form (ngSubmit)="logIn()">
         <div class="form-group">
             <label for="username">Username or Email</label>

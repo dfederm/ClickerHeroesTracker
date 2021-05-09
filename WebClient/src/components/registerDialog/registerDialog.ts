@@ -4,6 +4,7 @@ import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
 import { LogInDialogComponent } from "../logInDialog/logInDialog";
 import { AuthenticationService } from "../../services/authenticationService/authenticationService";
 import { UserService } from "../../services/userService/userService";
+import { NgxSpinnerService } from "ngx-spinner";
 
 @Component({
     selector: "registerDialog",
@@ -11,8 +12,6 @@ import { UserService } from "../../services/userService/userService";
 })
 export class RegisterDialogComponent {
     public errors: string[];
-
-    public isLoading: boolean;
 
     public username = "";
 
@@ -28,24 +27,28 @@ export class RegisterDialogComponent {
         private readonly authenticationService: AuthenticationService,
         private readonly userService: UserService,
         public activeModal: NgbActiveModal,
+        private readonly spinnerService: NgxSpinnerService,
     ) { }
 
     public register(): void {
         this.errors = null;
-        this.isLoading = true;
+        this.spinnerService.show("registerDialog");
         this.userService.create(this.username, this.email, this.password)
             .then(() => {
                 return this.authenticationService.logInWithPassword(this.username, this.password)
                     .then(() => {
-                        this.isLoading = false;
                         this.activeModal.close();
                     })
                     .catch(() => {
                         this.errors = ["Something went wrong. Your account was created but but we had trouble logging you in. Please try logging in with your new account."];
+                        return Promise.resolve();
                     });
             })
             .catch((errors: string[]) => {
                 this.errors = errors;
+            })
+            .finally(() => {
+                this.spinnerService.hide("registerDialog");
             });
     }
 }

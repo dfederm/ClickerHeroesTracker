@@ -4,6 +4,7 @@ import { UserAgentApplication } from "msal";
 
 import { AuthenticationService } from "../../services/authenticationService/authenticationService";
 import { UserService, IUserLogins, IExternalLogin } from "../../services/userService/userService";
+import { NgxSpinnerService } from "ngx-spinner";
 
 export interface ILoginButton {
     name: string;
@@ -31,8 +32,6 @@ export class ExternalLoginsComponent implements OnInit {
     public logins: IUserLogins;
 
     public error: string;
-
-    public isLoading: boolean;
 
     public needUsername: boolean;
 
@@ -65,11 +64,12 @@ export class ExternalLoginsComponent implements OnInit {
         private readonly authenticationService: AuthenticationService,
         public activeModal: NgbActiveModal,
         private readonly userService: UserService,
+        private readonly spinnerService: NgxSpinnerService,
     ) { }
 
     public ngOnInit(): void {
         if (this.isManageMode) {
-            this.isLoading = true;
+            this.spinnerService.show("externalLogins");
             this.authenticationService
                 .userInfo()
                 .subscribe(userInfo => {
@@ -176,7 +176,7 @@ export class ExternalLoginsComponent implements OnInit {
     }
 
     public removeLogin(login: IExternalLogin): void {
-        this.isLoading = true;
+        this.spinnerService.show("externalLogins");
         this.userService
             .removeLogin(this.username, login)
             .then(() => this.fetchLoginData())
@@ -190,10 +190,9 @@ export class ExternalLoginsComponent implements OnInit {
         this.grantType = grantType;
         this.assertion = assertion;
 
-        this.isLoading = true;
+        this.spinnerService.show("externalLogins");
         return this.authenticationService.logInWithAssertion(grantType, assertion, this.isManageMode ? undefined : this.username)
             .then(() => {
-                this.isLoading = false;
                 if (this.isManageMode) {
                     return this.fetchLoginData();
                 }
@@ -202,8 +201,6 @@ export class ExternalLoginsComponent implements OnInit {
                 return Promise.resolve();
             })
             .catch(error => {
-                this.isLoading = false;
-
                 let errorResponse: IErrorResponse;
                 try {
                     errorResponse = error.json();
@@ -217,15 +214,17 @@ export class ExternalLoginsComponent implements OnInit {
                 }
 
                 return Promise.reject(error);
+            })
+            .finally(() => {
+                this.spinnerService.hide("externalLogins");
             });
     }
 
     private fetchLoginData(): Promise<void> {
-        this.isLoading = true;
+        this.spinnerService.show("externalLogins");
         return this.userService
             .getLogins(this.username)
             .then(logins => {
-                this.isLoading = false;
                 this.logins = logins;
 
                 let loginProviderNames: { [name: string]: boolean } = {};
@@ -239,6 +238,9 @@ export class ExternalLoginsComponent implements OnInit {
                         this.addLogins.push(this.allLogins[i]);
                     }
                 }
+            })
+            .finally(() => {
+                this.spinnerService.hide("externalLogins");
             });
     }
 }

@@ -3,6 +3,7 @@ import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
 
 import { SettingsService, PlayStyle, Theme, IUserSettings, GraphSpacingType } from "../../services/settingsService/settingsService";
 import { ChangePasswordDialogComponent } from "../changePasswordDialog/changePasswordDialog";
+import { NgxSpinnerService } from "ngx-spinner";
 
 @Component({
     selector: "settingsDialog",
@@ -10,8 +11,6 @@ import { ChangePasswordDialogComponent } from "../changePasswordDialog/changePas
 })
 export class SettingsDialogComponent implements OnInit {
     public error: string;
-
-    public isLoading: boolean;
 
     public settings: IUserSettings;
 
@@ -38,14 +37,15 @@ export class SettingsDialogComponent implements OnInit {
     constructor(
         private readonly settingsService: SettingsService,
         public activeModal: NgbActiveModal,
+        private readonly spinnerService: NgxSpinnerService,
     ) { }
 
     public ngOnInit(): void {
-        this.isLoading = true;
+        this.spinnerService.show("settingsDialog");
         this.settingsService
             .settings()
             .subscribe(settings => {
-                this.isLoading = false;
+                this.spinnerService.hide("settingsDialog");
 
                 // Make a copy so the 2-way bindings don't mutate the actual settings object.
                 this.settings = JSON.parse(JSON.stringify(settings));

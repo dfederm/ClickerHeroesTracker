@@ -1,4 +1,5 @@
 import { Component, OnInit, Input } from "@angular/core";
+import { NgxSpinnerService } from "ngx-spinner";
 
 import { NewsService, ISiteNewsEntryListResponse } from "../../services/newsService/newsService";
 import { AuthenticationService } from "../../services/authenticationService/authenticationService";
@@ -18,7 +19,6 @@ interface IChangelogSectionViewModel {
 export class ChangelogComponent implements OnInit {
     public sections: IChangelogSectionViewModel[];
     public isError: boolean;
-    public isLoading: boolean;
 
     public canEdit: boolean;
 
@@ -31,6 +31,7 @@ export class ChangelogComponent implements OnInit {
     constructor(
         private readonly newsService: NewsService,
         private readonly authenticationService: AuthenticationService,
+        private readonly spinnerService: NgxSpinnerService,
     ) { }
 
     public ngOnInit(): void {
@@ -67,28 +68,31 @@ export class ChangelogComponent implements OnInit {
             }
         }
 
-        this.isLoading = true;
+        this.spinnerService.show("changelog");
         this.newsService
             .addNews({ date, messages })
             .then(() => this.refreshNews())
-            .catch(() => this.isError = true);
+            .catch(() => this.isError = true)
+            .finally(() => this.spinnerService.hide("changelog"));
     }
 
     public delete(viewModel: IChangelogSectionViewModel): void {
         let date = viewModel.date.toISOString().substring(0, 10);
-        this.isLoading = true;
+        this.spinnerService.show("changelog");
         this.newsService
             .deleteNews(date)
             .then(() => this.refreshNews())
-            .catch(() => this.isError = true);
+            .catch(() => this.isError = true)
+            .finally(() => this.spinnerService.hide("changelog"));
     }
 
     private refreshNews(): void {
-        this.isLoading = true;
+        this.spinnerService.show("changelog");
         this.newsService
             .getNews()
             .then(response => this.handleData(response))
-            .catch(() => this.isError = true);
+            .catch(() => this.isError = true)
+            .finally(() => this.spinnerService.hide("changelog"));
     }
 
     private handleData(response: ISiteNewsEntryListResponse): void {
@@ -97,7 +101,6 @@ export class ChangelogComponent implements OnInit {
             return;
         }
 
-        this.isLoading = false;
         let entries = response.entries;
 
         let numEntries = 0;
