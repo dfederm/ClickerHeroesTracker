@@ -1,6 +1,5 @@
 import { Component, OnInit } from "@angular/core";
 import { AppInsightsService } from "@markpieszak/ng-application-insights";
-import { UserAgentApplication } from "msal";
 import { NgxSpinnerService } from "ngx-spinner";
 
 import { SettingsService, IUserSettings } from "../../services/settingsService/settingsService";
@@ -49,13 +48,6 @@ export class AppComponent implements OnInit {
           .settings()
           .subscribe(settings => this.handleSettings(settings));
       });
-
-    // This is weird but Microsoft login redirects back to the site and expects it to create the object before it closes the popup.
-    // See https://github.com/AzureAD/microsoft-authentication-library-for-js/issues/174
-    if (location.hash.includes("id_token")) {
-      // tslint:disable-next-line:no-unused-expression - Constructing this object has side-effects
-      new UserAgentApplication({ auth: { clientId: "4ecf3d26-e844-4855-9158-b8f6c0121b50" } });
-    }
   }
 
   private handleSettings(settings: IUserSettings): void {

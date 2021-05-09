@@ -8,7 +8,7 @@ import { ExternalLoginsComponent, IErrorResponse } from "./externalLogins";
 import { AuthenticationService, IUserInfo } from "../../services/authenticationService/authenticationService";
 import { UserService, IUserLogins } from "../../services/userService/userService";
 import { BehaviorSubject } from "rxjs";
-import { AuthResponse } from "msal";
+import { AuthenticationResult } from "@azure/msal-browser";
 
 // tslint:disable-next-line:no-namespace
 declare global {
@@ -459,12 +459,10 @@ describe("ExternalLoginsComponent", () => {
             spyOn(activeModal, "close");
 
             const token = "someToken";
-            let authResponse = {
-                idToken: {
-                    rawIdToken: token,
-                },
-            } as AuthResponse;
-            spyOn(component.microsoftApp, "loginPopup").and.returnValue(Promise.resolve(authResponse));
+            let authResult = {
+                idToken: token,
+            } as AuthenticationResult;
+            spyOn(component.microsoftApp, "loginPopup").and.returnValue(Promise.resolve(authResult));
 
             let buttons = fixture.debugElement.queryAll(By.css("button"));
             expect(buttons.length).toEqual(3);
@@ -529,12 +527,10 @@ describe("ExternalLoginsComponent", () => {
             spyOn(activeModal, "close");
 
             const token = "someToken";
-            let authResponse = {
-                idToken: {
-                    rawIdToken: token,
-                },
-            } as AuthResponse;
-            spyOn(component.microsoftApp, "loginPopup").and.returnValue(Promise.resolve(authResponse));
+            let authResult = {
+                idToken: token,
+            } as AuthenticationResult;
+            spyOn(component.microsoftApp, "loginPopup").and.returnValue(Promise.resolve(authResult));
 
             let buttons = fixture.debugElement.queryAll(By.css("button"));
             expect(buttons.length).toEqual(3);
@@ -605,12 +601,10 @@ describe("ExternalLoginsComponent", () => {
 
             // Using Microsoft login since it's easy to mock, but they should all apply equally
             const token = "someToken";
-            let authResponse = {
-                idToken: {
-                    rawIdToken: token,
-                },
-            } as AuthResponse;
-            spyOn(component.microsoftApp, "loginPopup").and.returnValue(Promise.resolve(authResponse));
+            let authResult = {
+                idToken: token,
+            } as AuthenticationResult;
+            spyOn(component.microsoftApp, "loginPopup").and.returnValue(Promise.resolve(authResult));
 
             let buttons = fixture.debugElement.queryAll(By.css("button"));
             expect(buttons.length).toEqual(3);

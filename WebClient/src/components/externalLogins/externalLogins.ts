@@ -1,6 +1,6 @@
 import { Component, OnInit, Input } from "@angular/core";
 import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
-import { UserAgentApplication } from "msal";
+import { PublicClientApplication } from "@azure/msal-browser";
 
 import { AuthenticationService } from "../../services/authenticationService/authenticationService";
 import { UserService, IUserLogins, IExternalLogin } from "../../services/userService/userService";
@@ -24,7 +24,7 @@ export class ExternalLoginsComponent implements OnInit {
     // Facebook doesn't give us a way to check if it's initialized, so we track it ourselves.
     public static facebookInitialized = false;
 
-    public microsoftApp: UserAgentApplication;
+    public microsoftApp: PublicClientApplication;
 
     @Input()
     public isManageMode: boolean;
@@ -101,7 +101,7 @@ export class ExternalLoginsComponent implements OnInit {
             ExternalLoginsComponent.facebookInitialized = true;
         }
 
-        this.microsoftApp = new UserAgentApplication({ auth: { clientId: "4ecf3d26-e844-4855-9158-b8f6c0121b50" } });
+        this.microsoftApp = new PublicClientApplication({ auth: { clientId: "4ecf3d26-e844-4855-9158-b8f6c0121b50" } });
     }
 
     public googleLogIn(): void {
@@ -149,7 +149,7 @@ export class ExternalLoginsComponent implements OnInit {
         // There is no signal when the user closes the popup. The promise just never resoles.
         // See: https://github.com/AzureAD/microsoft-authentication-library-for-js/issues/129
         this.microsoftApp.loginPopup({ scopes: ["openid", "email"] })
-            .then(loginResponse => this.logIn("urn:ietf:params:oauth:grant-type:microsoft_identity_token", loginResponse.idToken.rawIdToken))
+            .then(loginResponse => this.logIn("urn:ietf:params:oauth:grant-type:microsoft_identity_token", loginResponse.idToken))
             .catch((error: string) => {
                 if (error && error.startsWith("user_cancelled:")) {
                     return;
