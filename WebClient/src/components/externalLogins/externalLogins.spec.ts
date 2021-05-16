@@ -9,6 +9,7 @@ import { AuthenticationService, IUserInfo } from "../../services/authenticationS
 import { UserService, IUserLogins } from "../../services/userService/userService";
 import { BehaviorSubject } from "rxjs";
 import { AuthenticationResult } from "@azure/msal-browser";
+import { NgxSpinnerService } from "ngx-spinner";
 
 // tslint:disable-next-line:no-namespace
 declare global {
@@ -47,6 +48,10 @@ describe("ExternalLoginsComponent", () => {
             getLogins: (): void => void 0,
             removeLogin: (): void => void 0,
         };
+        let spinnerService = {
+            show: (): void => void 0,
+            hide: (): void => void 0,
+        };
 
         gapiSpy = jasmine.createSpyObj<typeof gapi>(["load"]);
         fbSpy = jasmine.createSpyObj<typeof FB>(["init"]);
@@ -69,6 +74,7 @@ describe("ExternalLoginsComponent", () => {
                         { provide: AuthenticationService, useValue: authenticationService },
                         { provide: NgbActiveModal, useValue: activeModal },
                         { provide: UserService, useValue: userService },
+                        { provide: NgxSpinnerService, useValue: spinnerService },
                     ],
                 schemas: [NO_ERRORS_SCHEMA],
             })
@@ -300,6 +306,9 @@ describe("ExternalLoginsComponent", () => {
     });
 
     describe("Logging in with Facebook", () => {
+        // Hack to mock FB.login is overloaded. See: https://javascript.plainenglish.io/mocking-ts-method-overloads-with-jest-e9c3d3f1ce0c
+        type facebookLogin = (callback: (response: facebook.StatusResponse) => void, options?: facebook.LoginOptions) => void;
+
         beforeEach(() => {
             fixture.detectChanges();
         });
@@ -314,8 +323,8 @@ describe("ExternalLoginsComponent", () => {
             let loginResponse = {
                 status: "connected",
                 authResponse: { accessToken: "someAccessToken" },
-            } as FB.LoginStatusResponse;
-            FB.login = jasmine.createSpy("login", (handler: (response: FB.LoginStatusResponse) => void) => handler(loginResponse)).and.callThrough();
+            } as facebook.StatusResponse;
+            (FB.login as facebookLogin) = jasmine.createSpy("login", (handler: (response: facebook.StatusResponse) => void) => handler(loginResponse)).and.callThrough();
 
             let buttons = fixture.debugElement.queryAll(By.css("button"));
             expect(buttons.length).toEqual(3);
@@ -350,8 +359,8 @@ describe("ExternalLoginsComponent", () => {
             let loginResponse = {
                 status: "somethingInvalid",
                 authResponse: {},
-            } as unknown as FB.LoginStatusResponse;
-            FB.login = jasmine.createSpy("login", (handler: (response: FB.LoginStatusResponse) => void) => handler(loginResponse)).and.callThrough();
+            } as unknown as facebook.StatusResponse;
+            (FB.login as facebookLogin) = jasmine.createSpy("login", (handler: (response: facebook.StatusResponse) => void) => handler(loginResponse)).and.callThrough();
 
             let buttons = fixture.debugElement.queryAll(By.css("button"));
             expect(buttons.length).toEqual(3);
@@ -386,8 +395,8 @@ describe("ExternalLoginsComponent", () => {
             let loginResponse = {
                 status: "connected",
                 authResponse: { accessToken: "someAccessToken" },
-            } as FB.LoginStatusResponse;
-            FB.login = jasmine.createSpy("login", (handler: (response: FB.LoginStatusResponse) => void) => handler(loginResponse)).and.callThrough();
+            } as facebook.StatusResponse;
+            (FB.login as facebookLogin) = jasmine.createSpy("login", (handler: (response: facebook.StatusResponse) => void) => handler(loginResponse)).and.callThrough();
 
             let buttons = fixture.debugElement.queryAll(By.css("button"));
             expect(buttons.length).toEqual(3);
@@ -419,8 +428,8 @@ describe("ExternalLoginsComponent", () => {
             let activeModal = TestBed.get(NgbActiveModal) as NgbActiveModal;
             spyOn(activeModal, "close");
 
-            let loginResponse = {} as FB.LoginStatusResponse;
-            FB.login = jasmine.createSpy("login", (handler: (response: FB.LoginStatusResponse) => void) => handler(loginResponse)).and.callThrough();
+            let loginResponse = {} as facebook.StatusResponse;
+            (FB.login as facebookLogin) = jasmine.createSpy("login", (handler: (response: facebook.StatusResponse) => void) => handler(loginResponse)).and.callThrough();
 
             let buttons = fixture.debugElement.queryAll(By.css("button"));
             expect(buttons.length).toEqual(3);

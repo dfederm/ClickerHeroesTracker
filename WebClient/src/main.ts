@@ -1,23 +1,12 @@
-// tslint:disable:no-require-imports
-// tslint:disable:no-var-requires
+import { enableProdMode } from '@angular/core';
+import { platformBrowserDynamic } from '@angular/platform-browser-dynamic';
 
-// Polyfills
-import "core-js/es/reflect";
+import { AppModule } from './app.module';
+import { environment } from './environments/environment';
 
-// Angular needs zone.js
-import "zone.js/dist/zone";
-
-if (process.env.NODE_ENV === "production") {
-    require("@angular/core").enableProdMode();
-    let platformBrowser = require("@angular/platform-browser").platformBrowser;
-    let appModuleFactory = require("./app.module.ngfactory").AppModuleNgFactory;
-    platformBrowser().bootstrapModuleFactory(appModuleFactory);
-} else {
-    // Better dubuggability
-    Error.stackTraceLimit = Infinity;
-    require("zone.js/dist/long-stack-trace-zone");
-
-    let platformBrowserDynamic = require("@angular/platform-browser-dynamic").platformBrowserDynamic;
-    let appModule = require("./app.module").AppModule;
-    platformBrowserDynamic().bootstrapModule(appModule);
+if (environment.production) {
+  enableProdMode();
 }
+
+platformBrowserDynamic().bootstrapModule(AppModule)
+  .catch(err => console.error(err));

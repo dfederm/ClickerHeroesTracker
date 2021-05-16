@@ -1,4 +1,4 @@
-import { NgModule } from "@angular/core";
+import { CUSTOM_ELEMENTS_SCHEMA, NgModule } from "@angular/core";
 import { BrowserModule } from "@angular/platform-browser";
 import { BrowserAnimationsModule } from "@angular/platform-browser/animations";
 import { FormsModule } from "@angular/forms";
@@ -6,11 +6,10 @@ import { RouterModule, Routes, UrlSegment, UrlMatchResult } from "@angular/route
 import { HttpClientModule } from "@angular/common/http";
 import { NgbModule } from "@ng-bootstrap/ng-bootstrap";
 import { ClipboardModule } from "ngx-clipboard";
-import { TimeAgoPipe } from "time-ago-pipe";
 import { AdsenseModule } from "ng2-adsense";
 import { ApplicationInsightsModule, AppInsightsService } from "@markpieszak/ng-application-insights";
 import { ChartsModule } from "ng2-charts";
-import { CompareValidatorModule } from "angular-compare-validator";
+import { ValidateEqualModule } from "ng-validate-equal";
 import { JwBootstrapSwitchNg2Module } from "jw-bootstrap-switch-ng2";
 import { NgxSpinnerModule } from "ngx-spinner";
 
@@ -46,10 +45,15 @@ import { ClanComponent } from "./components/clan/clan";
 import { OpenDialogDirective } from "./directives/openDialog/openDialog";
 
 import { ExponentialPipe } from "./pipes/exponentialPipe";
+import { TimeAgoPipe } from "./pipes/timeAgoPipe";
+
+import { environment } from "./environments/environment";
+import { HTTP_INTERCEPTORS } from "@angular/common/http";
+import { DeveloperHttpInterceptor } from "./services/developerHttpInterceptor/developerHttpInterceptor";
 
 // Custom url matching for legacy calculation urls. Angular doesn't have great built-in rules for this.
 // This is an exported function because Angular AOT is terrible and can't handle it otherwise.
-export function legacyCalculatorMatcher(segments: UrlSegment[]): UrlMatchResult {
+export function legacyCalculatorMatcher(segments: UrlSegment[]): UrlMatchResult | null {
   if (segments.length !== 2) {
     return null;
   }
@@ -101,71 +105,62 @@ const routes: Routes =
   ];
 
 @NgModule({
-  imports:
-    [
-      BrowserModule,
-      BrowserAnimationsModule,
-      FormsModule,
-      RouterModule.forRoot(routes),
-      HttpClientModule,
-      NgbModule,
-      ClipboardModule,
-      AdsenseModule.forRoot(),
-      // Make sure this matches the API settings as well. Is there a better way to do this?
-      ApplicationInsightsModule.forRoot({ instrumentationKey: "99fba640-790d-484f-83c4-3c97450d8698" }),
-      ChartsModule,
-      CompareValidatorModule,
-      JwBootstrapSwitchNg2Module,
-      NgxSpinnerModule,
-    ],
-  declarations:
-    [
-      AppComponent,
-      HomeComponent,
-      NewsComponent,
-      ChangelogComponent,
-      AdComponent,
-      NavbarComponent,
-      LogInDialogComponent,
-      UploadDialogComponent,
-      OpenDialogDirective,
-      UserComponent,
-      UploadsTableComponent,
-      UserUploadsComponent,
-      UploadComponent,
-      ExponentialPipe,
-      ClansComponent,
-      UserProgressComponent,
-      UserCompareComponent,
-      BannerComponent,
-      RegisterDialogComponent,
-      ExternalLoginsComponent,
-      FeedbackDialogComponent,
-      ResetPasswordDialogComponent,
-      SettingsDialogComponent,
-      ChangePasswordDialogComponent,
-      AdminComponent,
-      NotFoundComponent,
-      AncientSuggestionsComponent,
-      OutsiderSuggestionsComponent,
-      AscensionZoneComponent,
-      ClanComponent,
-      TimeAgoPipe,
-    ],
-  entryComponents:
-    [
-      LogInDialogComponent,
-      UploadDialogComponent,
-      RegisterDialogComponent,
-      FeedbackDialogComponent,
-      ResetPasswordDialogComponent,
-      SettingsDialogComponent,
-      ChangePasswordDialogComponent,
-    ],
-  providers:
-    [
-      AppInsightsService,
-    ],
+  imports: [
+    BrowserModule,
+    BrowserAnimationsModule,
+    FormsModule,
+    RouterModule.forRoot(routes),
+    HttpClientModule,
+    NgbModule,
+    ClipboardModule,
+    AdsenseModule.forRoot(),
+    // Make sure this matches the API settings as well. Is there a better way to do this?
+    ApplicationInsightsModule.forRoot({ instrumentationKey: "99fba640-790d-484f-83c4-3c97450d8698" }),
+    ChartsModule,
+    ValidateEqualModule,
+    JwBootstrapSwitchNg2Module,
+    NgxSpinnerModule,
+  ],
+  declarations: [
+    AppComponent,
+    HomeComponent,
+    NewsComponent,
+    ChangelogComponent,
+    AdComponent,
+    NavbarComponent,
+    LogInDialogComponent,
+    UploadDialogComponent,
+    OpenDialogDirective,
+    UserComponent,
+    UploadsTableComponent,
+    UserUploadsComponent,
+    UploadComponent,
+    ExponentialPipe,
+    ClansComponent,
+    UserProgressComponent,
+    UserCompareComponent,
+    BannerComponent,
+    RegisterDialogComponent,
+    ExternalLoginsComponent,
+    FeedbackDialogComponent,
+    ResetPasswordDialogComponent,
+    SettingsDialogComponent,
+    ChangePasswordDialogComponent,
+    AdminComponent,
+    NotFoundComponent,
+    AncientSuggestionsComponent,
+    OutsiderSuggestionsComponent,
+    AscensionZoneComponent,
+    ClanComponent,
+    TimeAgoPipe,
+  ],
+  providers: [
+    AppInsightsService,
+    ...(environment.production ? [] : [
+      { provide: HTTP_INTERCEPTORS, useClass: DeveloperHttpInterceptor, multi: true },
+    ]),
+  ],
   bootstrap: [AppComponent],
+  schemas: [CUSTOM_ELEMENTS_SCHEMA],
 })
 export class AppModule { }

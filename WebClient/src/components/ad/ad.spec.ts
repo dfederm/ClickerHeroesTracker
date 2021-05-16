@@ -12,8 +12,7 @@ describe("AdComponent", () => {
     let timesRendered: number;
 
     @Component({
-        // tslint:disable-next-line:component-selector - We're mocking out a 3rd party component
-        selector: "ng2-adsense",
+        selector: "ng-adsense",
         template: "{{ renderNumber }}",
     })
     class MockAdComponent {
@@ -85,7 +84,7 @@ describe("AdComponent", () => {
     function verifyAd(expectedTimesRendered: number): void {
         fixture.detectChanges();
 
-        let ad = fixture.debugElement.query(By.css("ng2-adsense"));
+        let ad = fixture.debugElement.query(By.css("ng-adsense"));
         expect(ad).not.toBeNull();
 
         let mockAdComponent = ad.componentInstance as MockAdComponent;

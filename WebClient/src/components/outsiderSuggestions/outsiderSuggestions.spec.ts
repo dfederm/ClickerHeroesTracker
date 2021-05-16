@@ -13,12 +13,12 @@ import { PercentPipe } from "@angular/common";
 import { Decimal } from "decimal.js";
 
 // To generate these tests is to open https://driej.github.io/Clicker-Heroes-Outsiders/, open the console, and run test()
-// tslint:disable-next-line:no-require-imports no-var-requires
-export const testData: ITestData[] = require("./outsiderSuggestions.testdata.json");
+import * as testDataRaw from "./outsiderSuggestions.testdata.json";
+export const testData: ITestData[] = testDataRaw;
 
 interface ITestData {
     ancientSouls: number;
-    expectedLevels: [number, number, number, number, number, number, number, number, number];
+    expectedLevels: number[];
     expectedRemaining: number;
     newHze: number;
     newLogHeroSouls: number;

@@ -1,12 +1,11 @@
 import { ComponentFixture, TestBed, async } from "@angular/core/testing";
 import { By } from "@angular/platform-browser";
 import { DatePipe } from "@angular/common";
-import { NO_ERRORS_SCHEMA, ChangeDetectorRef } from "@angular/core";
+import { NO_ERRORS_SCHEMA, ChangeDetectorRef, Pipe, PipeTransform } from "@angular/core";
 import { Decimal } from "decimal.js";
 
 import { UploadsTableComponent } from "./uploadsTable";
 import { UserService, IUploadSummaryListResponse, IUploadSummary } from "../../services/userService/userService";
-import { ExponentialPipe } from "../../pipes/exponentialPipe";
 import { SettingsService } from "../../services/settingsService/settingsService";
 import { BehaviorSubject } from "rxjs";
 
@@ -27,6 +26,13 @@ describe("UploadsTableComponent", () => {
             zone: 100 * i,
             souls: `1e${100 * i}`,
         });
+    }
+
+    const exponentialPipeTransform = (value: string | Decimal | number) => "exponentialPipe(" + value + ")";
+
+    @Pipe({ name: 'exponential' })
+    class MockExponentialPipe implements PipeTransform {
+        public transform = exponentialPipeTransform;
     }
 
     beforeEach(async(() => {
@@ -51,14 +57,14 @@ describe("UploadsTableComponent", () => {
             {
                 declarations: [
                     UploadsTableComponent,
-                    ExponentialPipe,
+                    MockExponentialPipe,
                 ],
                 providers: [
                     { provide: UserService, useValue: userService },
                     { provide: SettingsService, useValue: settingsService },
                     { provide: ChangeDetectorRef, useValue: changeDetectorRef },
                     DatePipe,
-                    ExponentialPipe,
+                    MockExponentialPipe,
                 ],
                 schemas: [NO_ERRORS_SCHEMA],
             })
@@ -137,7 +143,6 @@ describe("UploadsTableComponent", () => {
 
     function verifyTable(page: number): Promise<void> {
         let datePipe = TestBed.get(DatePipe) as DatePipe;
-        let exponentialPipe = TestBed.get(ExponentialPipe) as ExponentialPipe;
 
         fixture.detectChanges();
         return fixture.whenStable().then(() => {
@@ -153,13 +158,13 @@ describe("UploadsTableComponent", () => {
                 expect(cells.length).toEqual(5);
 
                 let ascensionCell = cells[0];
-                expect(ascensionCell.nativeElement.textContent.trim()).toEqual(exponentialPipe.transform(expectedUpload.ascensionNumber));
+                expect(ascensionCell.nativeElement.textContent.trim()).toEqual(exponentialPipeTransform(expectedUpload.ascensionNumber));
 
                 let zoneCell = cells[1];
-                expect(zoneCell.nativeElement.textContent.trim()).toEqual(exponentialPipe.transform(expectedUpload.zone));
+                expect(zoneCell.nativeElement.textContent.trim()).toEqual(exponentialPipeTransform(expectedUpload.zone));
 
                 let soulsCell = cells[2];
-                expect(soulsCell.nativeElement.textContent.trim()).toEqual(exponentialPipe.transform(new Decimal(expectedUpload.souls)));
+                expect(soulsCell.nativeElement.textContent.trim()).toEqual(exponentialPipeTransform(new Decimal(expectedUpload.souls)));
 
                 let dateCell = cells[3];
                 expect(dateCell.properties.title).toEqual("Uploaded " + datePipe.transform(expectedUpload.timeSubmitted, "short"));

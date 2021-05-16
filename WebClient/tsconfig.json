@@ -1,33 +1,35 @@
 {
+  "compileOnSave": false,
   "compilerOptions": {
-    "target": "es5",
-    "module": "commonjs",
-    "moduleResolution": "node",
-    "lib": [
-      "es2015",
-      "dom"
-    ],
-    "noEmitOnError": true,
-    "noImplicitAny": true,
+    "baseUrl": "./",
+    "outDir": "./dist/out-tsc",
+    "forceConsistentCasingInFileNames": true,
+    //"strict": true, // TODO: Enable strict mode
+    "noImplicitAny": true, // Remove after enabling strict
     "noImplicitReturns": true,
-    "emitDecoratorMetadata": true,
-    "experimentalDecorators": true,
+    "noFallthroughCasesInSwitch": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "sourceMap": true,
-    "typeRoots": [
-      "./node_modules/@types/"
+    "declaration": false,
+    "downlevelIteration": true,
+    "experimentalDecorators": true,
+    "moduleResolution": "node",
+    "importHelpers": true,
+    "resolveJsonModule": true,
+    "allowSyntheticDefaultImports": true,
+    "target": "es2015",
+    "module": "es2020",
+    "lib": [
+      "es2018",
+      "dom"
     ]
   },
   "angularCompilerOptions": {
-    "strictInjectionParameters": true,
+    "enableI18nLegacyMessageIdFormat": false,
     "fullTemplateTypeCheck": true,
-    "preserveWhitespaces": false,
-    // Angular tends to be behind in TS versions.
-    "disableTypeScriptVersionCheck": true,
-  },
-  "exclude": [
-    "node_modules/*",
-    "dist/*"
-  ]
+    "strictInjectionParameters": true,
+    "strictInputAccessModifiers": true,
+    "strictTemplates": true
+  }
 }

@@ -39,7 +39,7 @@ jobs:
     - name: Setup Node.js
       uses: actions/setup-node@v1
       with:
-        node-version: '14.x'
+        node-version: '16.x'
     - name: Install npm packages
       run: npm ci
       working-directory: ./WebClient
@@ -47,7 +47,7 @@ jobs:
       run: npm run build
       working-directory: ./WebClient
     - name: Test
-      run: npm run test
+      run: npm run coverage
       working-directory: ./WebClient
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v1

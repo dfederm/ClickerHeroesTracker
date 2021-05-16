@@ -1,7 +1,7 @@
 import { ComponentFixture, TestBed, async } from "@angular/core/testing";
 import { ActivatedRoute, Router, Params } from "@angular/router";
 import { FormsModule } from "@angular/forms";
-import { NO_ERRORS_SCHEMA, DebugElement, ChangeDetectorRef } from "@angular/core";
+import { NO_ERRORS_SCHEMA, DebugElement, ChangeDetectorRef, Pipe, PipeTransform } from "@angular/core";
 import { By } from "@angular/platform-browser";
 import { BehaviorSubject } from "rxjs";
 import { DatePipe, PercentPipe } from "@angular/common";
@@ -9,7 +9,6 @@ import { NgbModal, NgbModalRef } from "@ng-bootstrap/ng-bootstrap";
 import { Decimal } from "decimal.js";
 
 import { UploadComponent } from "./upload";
-import { ExponentialPipe } from "../../pipes/exponentialPipe";
 import { AuthenticationService, IUserInfo } from "../../services/authenticationService/authenticationService";
 import { UploadService, IUpload } from "../../services/uploadService/uploadService";
 import { SettingsService } from "../../services/settingsService/settingsService";
@@ -30,6 +29,13 @@ describe("UploadComponent", () => {
     const settings = SettingsService.defaultSettings;
 
     let settingsSubject = new BehaviorSubject(settings);
+
+    const exponentialPipeTransform = (value: string | Decimal) => "exponentialPipe(" + value + ")";
+
+    @Pipe({ name: 'exponential' })
+    class MockExponentialPipe implements PipeTransform {
+        public transform = exponentialPipeTransform;
+    }
 
     beforeEach(async(() => {
         userInfoSubject = new BehaviorSubject({ isLoggedIn: false });
@@ -70,13 +76,14 @@ describe("UploadComponent", () => {
         let settingsService = { settings: () => settingsSubject };
         let changeDetectorRef = { markForCheck: (): void => void 0 };
         let modalService = { open: (): void => void 0 };
+
         TestBed.configureTestingModule(
             {
                 imports: [FormsModule],
                 declarations:
                     [
                         UploadComponent,
-                        ExponentialPipe,
+                        MockExponentialPipe,
                     ],
                 providers:
                     [
@@ -89,7 +96,7 @@ describe("UploadComponent", () => {
                         { provide: NgbModal, useValue: modalService },
                         DatePipe,
                         PercentPipe,
-                        ExponentialPipe,
+                        MockExponentialPipe,
                     ],
                 schemas: [NO_ERRORS_SCHEMA],
             })
@@ -421,7 +428,6 @@ describe("UploadComponent", () => {
 
     describe("Miscellaneous Stats", () => {
         it("should display data", async(() => {
-            let exponentialPipe = TestBed.get(ExponentialPipe) as ExponentialPipe;
             let percentPipe = TestBed.get(PercentPipe) as PercentPipe;
 
             let upload = getUpload();
@@ -464,7 +470,7 @@ describe("UploadComponent", () => {
                         let expectedFormattedValue: string;
                         switch (expected.type) {
                             case "exponential": {
-                                expectedFormattedValue = exponentialPipe.transform(new Decimal(expectedValue));
+                                expectedFormattedValue = exponentialPipeTransform(new Decimal(expectedValue));
                                 break;
                             }
                             case "percent": {
