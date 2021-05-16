@@ -1,5 +1,5 @@
-// tslint:disable-next-line:no-require-imports no-var-requires
-export const gameData: IGameData = require("../../../Website/Src/wwwroot/data/GameData.json");
+import gameDataJson from "../../../GameData.json";
+export const gameData: IGameData = gameDataJson;
 
 export interface IGameData {
     itemBonusTypes: { [id: string]: IItemBonusType };
@@ -38,10 +38,10 @@ export interface IUpgradeData {
 
 export interface IAncientData {
     name: string;
-    nonTranscendent: boolean;
+    nonTranscendent?: boolean;
     levelCostFormula: string;
     levelAmountFormula: string;
-    levelAmountParams: string;
+    levelAmountParams?: string;
 }
 
 export interface IOutsiderData {

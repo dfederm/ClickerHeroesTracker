@@ -2,8 +2,7 @@ import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { AncientSuggestionsComponent } from "./ancientSuggestions";
 import { By } from "@angular/platform-browser";
 import { FormsModule } from "@angular/forms";
-import { ExponentialPipe } from "../../pipes/exponentialPipe";
-import { NO_ERRORS_SCHEMA, DebugElement, ChangeDetectorRef } from "@angular/core";
+import { NO_ERRORS_SCHEMA, DebugElement, Pipe, PipeTransform } from "@angular/core";
 import { AppInsightsService } from "@markpieszak/ng-application-insights";
 import { BehaviorSubject } from "rxjs";
 import { SettingsService } from "../../services/settingsService/settingsService";
@@ -116,13 +115,19 @@ describe("AncientSuggestionsComponent", () => {
         }
     }
 
+    const exponentialPipeTransform = (value: string | Decimal) => "exponentialPipe(" + value + ")";
+
+    @Pipe({ name: 'exponential' })
+    class MockExponentialPipe implements PipeTransform {
+        public transform = exponentialPipeTransform;
+    }
+
     beforeEach(done => {
         let appInsights = {
             trackMetric: (): void => void 0,
             trackEvent: (): void => void 0,
         };
         let settingsService = { settings: () => settingsSubject };
-        let changeDetectorRef = { markForCheck: (): void => void 0 };
 
         let modalService = { open: (): void => void 0 };
         let router = { navigate: (): void => void 0 };
@@ -133,13 +138,11 @@ describe("AncientSuggestionsComponent", () => {
                 imports: [FormsModule],
                 declarations: [
                     AncientSuggestionsComponent,
-                    ExponentialPipe,
+                    MockExponentialPipe,
                 ],
                 providers: [
                     { provide: AppInsightsService, useValue: appInsights },
                     { provide: SettingsService, useValue: settingsService },
-                    { provide: ChangeDetectorRef, useValue: changeDetectorRef },
-                    ExponentialPipe,
                     { provide: NgbModal, useValue: modalService },
                     { provide: Router, useValue: router },
                     { provide: UploadService, useValue: uploadService },
@@ -482,8 +485,6 @@ describe("AncientSuggestionsComponent", () => {
         function verify(expectedValues: { name: string, suggested?: string, isPrimary?: boolean }[], expectedSpentSoulsStr?: string): void {
             fixture.detectChanges();
 
-            let exponentialPipe = TestBed.get(ExponentialPipe) as ExponentialPipe;
-
             let table = fixture.debugElement.query(By.css("table"));
             expect(table).not.toBeNull();
 
@@ -500,7 +501,7 @@ describe("AncientSuggestionsComponent", () => {
                 let ancientId = ancientIdByName[expected.name];
 
                 let expectedCurrentLevel = new Decimal(savedGameData.ancients.ancients[ancientId].level);
-                let expectedCurrentLevelText = exponentialPipe.transform(expectedCurrentLevel);
+                let expectedCurrentLevelText = exponentialPipeTransform(expectedCurrentLevel);
                 if (ancientsWithItems[ancientId]) {
                     expectedCurrentLevelText += " (*)";
                 }
@@ -511,7 +512,7 @@ describe("AncientSuggestionsComponent", () => {
                     ? "N/A (*)"
                     : expected.suggested === undefined
                         ? "-"
-                        : exponentialPipe.transform(expectedSuggestedLevel);
+                        : exponentialPipeTransform(expectedSuggestedLevel);
                 expect(getNormalizedTextContent(cells[2])).toEqual(expectedSuggestedLevelText, `Unexpected suggested level for ${expected.name}`);
 
                 let expectedDifference = expectedSuggestedLevel.minus(expectedCurrentLevel);
@@ -521,7 +522,7 @@ describe("AncientSuggestionsComponent", () => {
 
                 let expectedDifferenceText = expected.isPrimary || expected.suggested === undefined
                     ? "-"
-                    : exponentialPipe.transform(expectedDifference);
+                    : exponentialPipeTransform(expectedDifference);
                 expect(getNormalizedTextContent(cells[3])).toEqual(expectedDifferenceText, `Unexpected difference in levels for ${expected.name}`);
             }
 
@@ -541,18 +542,18 @@ describe("AncientSuggestionsComponent", () => {
                     expectedAvailableSouls = expectedAvailableSouls.plus(savedGame.data.primalSouls);
                 }
 
-                let expectedAvailableSoulsText = exponentialPipe.transform(expectedAvailableSouls);
+                let expectedAvailableSoulsText = exponentialPipeTransform(expectedAvailableSouls);
                 expect(getNormalizedTextContent(heroSoulsCells[1])).toEqual(expectedAvailableSoulsText);
                 expect(expectedAvailableSouls).toEqual(component.availableSouls);
 
                 let expectedSpentSouls = new Decimal(expectedSpentSoulsStr);
-                let expectedSpentSoulsText = exponentialPipe.transform(expectedSpentSouls);
+                let expectedSpentSoulsText = exponentialPipeTransform(expectedSpentSouls);
                 expect(getNormalizedTextContent(heroSoulsCells[2])).toEqual(expectedSpentSoulsText);
                 expect(expectedSpentSouls).toEqual(component.spentSouls);
                 expect(expectedSpentSouls.isPositive()).toEqual(false);
 
                 let expectedRemainingSouls = expectedAvailableSouls.plus(expectedSpentSouls);
-                let expectedRemainingSoulsText = exponentialPipe.transform(expectedRemainingSouls);
+                let expectedRemainingSoulsText = exponentialPipeTransform(expectedRemainingSouls);
                 expect(getNormalizedTextContent(heroSoulsCells[3])).toEqual(expectedRemainingSoulsText);
                 expect(expectedRemainingSouls).toEqual(component.remainingSouls);
                 expect(expectedRemainingSouls.isNegative()).toEqual(false);

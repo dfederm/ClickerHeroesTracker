@@ -174,7 +174,9 @@ namespace ClickerHeroesTrackerWebsite
                     .Build();
             });
 
-            BuildInfoProvider buildInfoProvider = new(_environment);
+            IBuildInfoProvider buildInfoProvider = _environment.IsDevelopment()
+                ? new DeveloperBuildInfoProvider()
+                : new FileBuildInfoProvider(Path.Combine(_environment.ContentRootPath, "BuildInfo.json"));
 
             services.AddApplicationInsightsTelemetry(new ApplicationInsightsServiceOptions
             {
@@ -182,7 +184,21 @@ namespace ClickerHeroesTrackerWebsite
                 DeveloperMode = _environment.IsDevelopment(),
             });
 
-            services.AddCors();
+            services.AddCors(options =>
+            {
+                // Allow WebClient dev-server to call the API locally.
+                if (_environment.IsDevelopment())
+                {
+                    options.AddDefaultPolicy(builder =>
+                    {
+                        builder
+                            .WithOrigins("http://localhost:4200")
+                            .AllowAnyMethod()
+                            .AllowAnyHeader()
+                            .AllowCredentials();
+                    });
+                }
+            });
 
             services.AddControllers()
                 .AddJsonOptions(options =>
@@ -214,10 +230,10 @@ namespace ClickerHeroesTrackerWebsite
                 services.AddSingleton<ISiteNewsProvider, InMemorySiteNewsProvider>();
             }
 
-            services.AddSingleton(_ => GameData.Parse(Path.Combine(_environment.WebRootPath, "data", "GameData.json")));
+            services.AddSingleton(_ => GameData.Parse(Path.Combine(_environment.ContentRootPath, "GameData.json")));
             services.AddSingleton(_ => new HttpClient());
             services.AddSingleton<IAssertionGrantHandlerProvider, AssertionGrantHandlerProvider>();
-            services.AddSingleton<IBuildInfoProvider>(buildInfoProvider);
+            services.AddSingleton(buildInfoProvider);
             services.AddSingleton<IEmailSender, EmailSender>();
             services.AddSingleton<IOptions<PasswordHasherOptions>, PasswordHasherOptionsAccessor>();
 

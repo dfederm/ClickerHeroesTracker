@@ -4,11 +4,12 @@ import { FormsModule } from "@angular/forms";
 import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
 import { DebugElement, NO_ERRORS_SCHEMA } from "@angular/core";
 import { BehaviorSubject } from "rxjs";
-import { CompareValidatorModule } from "angular-compare-validator";
+import { ValidateEqualModule } from "ng-validate-equal";
 
 import { ChangePasswordDialogComponent } from "./changePasswordDialog";
 import { AuthenticationService, IUserInfo } from "../../services/authenticationService/authenticationService";
 import { UserService, IUserLogins } from "../../services/userService/userService";
+import { NgxSpinnerService } from "ngx-spinner";
 
 describe("ChangePasswordDialogComponent", () => {
     let fixture: ComponentFixture<ChangePasswordDialogComponent>;
@@ -39,12 +40,16 @@ describe("ChangePasswordDialogComponent", () => {
             changePassword: (): void => void 0,
         };
         let activeModal = { close: (): void => void 0 };
+        let spinnerService = {
+            show: (): void => void 0,
+            hide: (): void => void 0,
+        };
 
         TestBed.configureTestingModule(
             {
                 imports: [
                     FormsModule,
-                    CompareValidatorModule,
+                    ValidateEqualModule,
                 ],
                 declarations: [ChangePasswordDialogComponent],
                 providers:
@@ -52,6 +57,7 @@ describe("ChangePasswordDialogComponent", () => {
                         { provide: AuthenticationService, useValue: authenticationService },
                         { provide: UserService, useValue: userService },
                         { provide: NgbActiveModal, useValue: activeModal },
+                        { provide: NgxSpinnerService, useValue: spinnerService },
                     ],
                 schemas: [NO_ERRORS_SCHEMA],
             })

@@ -13,13 +13,6 @@ jobs:
     steps:
     - name: Checkout repository
       uses: actions/checkout@main
-    - name: Update build info
-      shell: pwsh
-      run: |
-        ./build/UpdateBuildInfo.ps1 `
-          -SourceDirectory "$Env:GITHUB_WORKSPACE" `
-          -SourceVersion "$Env:GITHUB_SHA" `
-          -BuildUrl "$Env:GITHUB_SERVER_URL/$Env:GITHUB_REPOSITORY/actions/runs/$Env:GITHUB_RUN_ID"
     - name: Setup .NET
       uses: actions/setup-dotnet@v1.7.2
       with:
@@ -65,7 +58,7 @@ jobs:
       run: npm run build
       working-directory: ./WebClient
     - name: Test
-      run: npm run test
+      run: npm run coverage
       working-directory: ./WebClient
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v1
@@ -101,6 +94,14 @@ jobs:
       with:
         name: webclient-artifacts
         path: ./deploy/wwwroot
+    - name: Create build info
+      shell: pwsh
+      run: |
+        ./build/CreateBuildInfo.ps1 `
+          -SourceVersion "$Env:GITHUB_SHA" `
+          -BuildUrl "$Env:GITHUB_SERVER_URL/$Env:GITHUB_REPOSITORY/actions/runs/$Env:GITHUB_RUN_ID" `
+          -WebClientDirectory ./deploy/wwwroot `
+          -OutputDirectory ./deploy
     - name: Deploy to Azure WebApps (staging slot)
       uses: azure/webapps-deploy@v2
       with:

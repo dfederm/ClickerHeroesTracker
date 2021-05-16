@@ -1,7 +1,7 @@
 {
+  "extends": "tslint:recommended",
   "rulesDirectory": [
-    "node_modules/codelyzer",
-    "node_modules/tslint-microsoft-contrib"
+    "codelyzer"
   ],
   "rules": {
     // Core rules
@@ -280,56 +280,6 @@
     "use-component-view-encapsulation": true,
     "use-injectable-provided-in": true,
     "use-lifecycle-interface": true,
-    "use-pipe-transform-interface": true,
-    // tslint-microsoft-contrib rules: https://github.com/Microsoft/tslint-microsoft-contrib
-    "function-name": [
-      true,
-      {
-        "method-regex": "^[a-z][\\w\\d]+$",
-        "private-method-regex": "^[a-z][\\w\\d]+$",
-        "protected-method-regex": "^[a-z][\\w\\d]+$",
-        "static-method-regex": "^[a-z][\\w\\d]+$",
-        "function-regex": "^[a-z][\\w\\d]+$"
-      }
-    ],
-    "informative-docs": true,
-    "no-banned-terms": true,
-    "no-constant-condition": true,
-    "no-control-regex": true,
-    "no-cookies": true,
-    "no-delete-expression": true,
-    "no-disable-auto-sanitization": true,
-    "no-document-domain": true,
-    "no-document-write": true,
-    "no-empty-line-after-opening-brace": true,
-    "no-exec-script": true,
-    "no-function-expression": true,
-    "no-http-string": true,
-    "no-inner-html": true,
-    "no-invalid-regexp": true,
-    "no-invalid-template-strings": true,
-    "no-multiline-string": true,
-    "no-octal-literal": true,
-    "no-regex-spaces": true,
-    "no-single-line-block-comment": true,
-    "no-string-based-set-immediate": true,
-    "no-string-based-set-interval": true,
-    "no-string-based-set-timeout": true,
-    "no-this-assignment": true,
-    "no-typeof-undefined": true,
-    "no-unnecessary-field-initialization": true,
-    "no-unnecessary-local-variable": true,
-    "no-unnecessary-override": true,
-    "no-unnecessary-semicolons": true,
-    "no-unsupported-browser-code": true,
-    "no-useless-files": true,
-    "no-with-statement": true,
-    "non-literal-fs-path": true,
-    "non-literal-require": true,
-    "possible-timing-attack": true,
-    "prefer-array-literal": true,
-    "promise-must-complete": true,
-    "use-named-parameter": true,
-    "use-simple-attributes": true
+    "use-pipe-transform-interface": true
   }
 }

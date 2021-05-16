@@ -27,12 +27,3 @@ logs/
 
 # WebClient outputs
 dist/
-
-# WebClient outputs copied to WebSite
-**/wwwroot/index.html
-**/wwwroot/manifest.json
-**/wwwroot/*.js
-**/wwwroot/*.js.map
-
-# cache-loader cache
-.cache-loader

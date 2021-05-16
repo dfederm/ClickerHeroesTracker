@@ -1,5 +1,5 @@
-import * as pako from "pako";
-import * as CryptoJS from "crypto-js";
+import { inflate, deflate } from "pako";
+import * as MD5 from "crypto-js/md5";
 
 export interface IItemData {
     bonusType1: number;
@@ -194,7 +194,7 @@ export class SavedGame {
         }
 
         // Validation
-        let expectedHash = CryptoJS.MD5(unsprinkled + SavedGame.sprinkleSalt).toString();
+        let expectedHash = MD5(unsprinkled + SavedGame.sprinkleSalt).toString();
         // tslint:disable-next-line:possible-timing-attack This isn't a security issue
         if (hash !== expectedHash) {
             return null;
@@ -215,7 +215,7 @@ export class SavedGame {
             sprinkled += "0";
         }
 
-        let hash = CryptoJS.MD5(base64Data + SavedGame.sprinkleSalt).toString();
+        let hash = MD5(base64Data + SavedGame.sprinkleSalt).toString();
         return sprinkled + SavedGame.sprinkleAntiCheatCode + hash;
     }
 
@@ -245,14 +245,18 @@ export class SavedGame {
 
     private static decodeZlib(content: string): ISavedGameData {
         let result = content.slice(SavedGame.hashLength);
-        let data = pako.inflate(atob(result), { to: "string" });
-        return JSON.parse(data);
+        let decodedData = atob(result);
+        let charData = decodedData.split("").map(x => x.charCodeAt(0));
+        let binData = new Uint8Array(charData);
+        let json = inflate(binData, { to: "string" });
+        return JSON.parse(json);
 
     }
 
     private static encodeZlib(data: ISavedGameData): string {
         let json = JSON.stringify(data);
-        let encodedData = pako.deflate(json, { to: "string" });
-        return SavedGame.zlibHash + btoa(encodedData);
+        let binData = deflate(json);
+        let encodedData = btoa(String.fromCharCode.apply(null, binData));
+        return SavedGame.zlibHash + encodedData;
     }
 }

@@ -1,7 +1,7 @@
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { FormsModule } from "@angular/forms";
 import { NgbActiveModal, NgbModal } from "@ng-bootstrap/ng-bootstrap";
-import { CompareValidatorModule } from "angular-compare-validator";
+import { ValidateEqualModule } from "ng-validate-equal";
 
 import { ResetPasswordDialogComponent } from "./resetPasswordDialog";
 import { UserService } from "../../services/userService/userService";
@@ -24,7 +24,7 @@ describe("ResetPasswordDialogComponent", () => {
             {
                 imports: [
                     FormsModule,
-                    CompareValidatorModule,
+                    ValidateEqualModule,
                 ],
                 declarations: [
                     ResetPasswordDialogComponent,

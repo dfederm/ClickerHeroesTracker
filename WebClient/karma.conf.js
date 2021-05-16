@@ -1,89 +1,77 @@
 module.exports = function (config) {
   config.set({
     basePath: '',
-
-    frameworks: ['jasmine'],
-
-    files: [
-      { pattern: './karma-test-shim.js', watched: false }
+    frameworks: ['jasmine', '@angular-devkit/build-angular'],
+    plugins: [
+      require('karma-jasmine'),
+      require('karma-chrome-launcher'),
+      require('karma-jasmine-html-reporter'),
+      require('karma-coverage'),
+      require('@angular-devkit/build-angular/plugins/karma')
     ],
-
-    preprocessors: {
-      './karma-test-shim.js': ['webpack', 'sourcemap']
+    client: {
+      jasmine: {
+        // you can add configuration options for Jasmine here
+        // the possible options are listed at https://jasmine.github.io/api/edge/Configuration.html
+        // for example, you can disable the random execution with `random: false`
+        // or set a specific seed with `seed: 4321`
+      },
+      clearContext: false // leave Jasmine Spec Runner output visible in browser
     },
-
-    webpack: require('./webpack.config')(),
-
-    webpackMiddleware: {
-      stats: 'errors-only'
+    jasmineHtmlReporter: {
+      suppressAll: true // removes the duplicated traces
     },
-
-    webpackServer: {
-      noInfo: true
-    },
-
-    // test results reporter to use
-    reporters: ['progress', 'coverage-istanbul', 'kjhtml', 'junit'],
-
-    coverageIstanbulReporter: {
-      reports: ['html', 'cobertura', 'text-summary'],
-      dir: './logs/coverage',
-      fixWebpackSourcePaths: true,
-      'report-config': {
-        html: {
+    coverageReporter: {
+      dir: require('path').join(__dirname, './logs/coverage'),
+      subdir: '.',
+      includeAllSources: true,
+      reporters: [
+        {
+          type: 'html',
           subdir: 'html'
         },
-        cobertura: {
-          file: 'cobertura.xml'
-        }
-      },
-      thresholds: {
-        emitWarning: false,
+        {
+          type: 'text-summary'
+        },
+        {
+          type: 'cobertura',
+          file: 'cobertura.xml',
+        },
+      ],
+      check: {
         // thresholds for all files
         global: {
-          // TODO: Increase to 90
           statements: 85,
+          branches: 75,
+          functions: 85,
+          lines: 85
         },
-        // thresholds per file. Really should raise this, but the game models hold it back.
+        // thresholds per file
         each: {
-          statements: 45,
+          statements: 75,
+          branches: 50,
+          functions: 75,
+          lines: 75,
+          excludes: [
+            // Models are ported from game code so some code might not be used
+            'src/models/*.ts'
+          ]
         }
-      },
+      }
     },
-
-    junitReporter: {
-      outputDir: '',
-      outputFile: './logs/test-results.xml',
-      useBrowserName: false,
-    },
-
-    // web server port
+    reporters: ['progress', 'kjhtml'],
     port: 9876,
-
-    // enable / disable colors in the output (reporters and logs)
     colors: true,
-
-    // level of logging
-    // possible values: config.LOG_DISABLE || config.LOG_ERROR || config.LOG_WARN || config.LOG_INFO || config.LOG_DEBUG
     logLevel: config.LOG_INFO,
-
-    // enable / disable watching file and executing tests whenever any file changes
-    autoWatch: false,
-
-    // start these browsers
-    // available browser launchers: https://npmjs.org/browse/keyword/karma-launcher
-    browsers: ['ChromeHeadless'],
-
-    // Continuous Integration mode
-    // if true, Karma captures browsers, runs the tests and exits
-    singleRun: true,
-
-    // Concurrency level
-    // how many browser should be started simultaneous
-    concurrency: Infinity,
-
-    // How long will Karma wait for a message from a browser before disconnecting from it (in ms).
-    // Sometimes dealing with very large numbers can cause a small hang.
-    browserNoActivityTimeout: 60000,
+    autoWatch: true,
+    browsers: ['Chrome'],
+    customLaunchers: {
+      ChromeHeadlessCI: {
+        base: 'ChromeHeadless',
+        flags: ['--no-sandbox']
+      }
+    },
+    singleRun: false,
+    restartOnFileChange: true
   });
 };

@@ -1,7 +1,7 @@
 import { Injectable } from "@angular/core";
 import { HttpClient, HttpHeaders, HttpParams, HttpErrorResponse } from "@angular/common/http";
 import { Observable, BehaviorSubject, Subscription, interval } from "rxjs";
-import * as JwtDecode from "jwt-decode";
+import jwt_decode from "jwt-decode";
 import { map, distinctUntilChanged } from "rxjs/operators";
 import { HttpErrorHandlerService } from "../httpErrorHandlerService/httpErrorHandlerService";
 
@@ -170,7 +170,7 @@ export class AuthenticationService {
             && this.currentTokens.id_token
             && this.currentTokens.expiration_date > Date.now()
         ) {
-            let claims: { [claim: string]: string } = JwtDecode(this.currentTokens.id_token);
+            let claims: { [claim: string]: string } = jwt_decode(this.currentTokens.id_token);
             return {
                 isLoggedIn: true,
                 id: claims.sub,

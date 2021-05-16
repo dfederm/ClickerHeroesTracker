@@ -2,17 +2,9 @@ import { Pipe, PipeTransform, ChangeDetectorRef } from "@angular/core";
 import { Decimal } from "decimal.js";
 import { SettingsService, IUserSettings } from "../services/settingsService/settingsService";
 
-// Some shenanigans to wire up toformat, which doesn't have typings.
-// tslint:disable:no-require-imports
-// tslint:disable:no-var-requires
-require("toformat")(Decimal);
-// tslint:enable:no-require-imports
-// tslint:enable:no-var-requires
-
-// Hack until toFormat has proper typings
-export interface IFormattableDecimal {
-    toFormat?(decimalPlaces: number, rounding: Decimal.Rounding): string;
-}
+// Wire up toformat, which adds the toformat function to Decimal
+import toFormat from "toformat";
+toFormat(Decimal);
 
 @Pipe({ name: "exponential" })
 export class ExponentialPipe implements PipeTransform {
@@ -52,7 +44,7 @@ export class ExponentialPipe implements PipeTransform {
             const useScientificNotation = settings && settings.useScientificNotation && value.abs().greaterThan(settings.scientificNotationThreshold);
             return useScientificNotation
                 ? value.toExponential(3)
-                : (value as IFormattableDecimal).toFormat(0, 0);
+                : value.toFormat(0, 0);
         }
 
         throw new Error("Unexpected value passed to ExponentialPipe");

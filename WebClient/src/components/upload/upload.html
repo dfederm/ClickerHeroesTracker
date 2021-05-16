@@ -48,37 +48,42 @@
                     </button>
                 </div>
                 <div class="modal-body">
-                    <div class="form-group">
-                        <ngb-tabset>
-                            <ngb-tab title="Shareable">
-                                <ng-template ngbTabContent>
-                                    <p>This has been scrubbed of personal data and is safely shareable.</p>
-                                    <textarea class="form-control"
-                                              rows="2"
-                                              #scrubbedContent
-                                              readonly>{{ savedGame.scrubbedContent }}</textarea>
-                                    <button type="button"
-                                            class="btn btn-primary float-right"
-                                            [ngxClipboard]="scrubbedContent"
-                                            (cbOnSuccess)="c()">Copy to Clipboard</button>
-                                </ng-template>
-                            </ngb-tab>
-                            <ngb-tab title="Raw Data"
-                                     *ngIf="!savedGame.isScrubbed">
-                                <ng-template ngbTabContent>
-                                    <p class="alert alert-warning">This is the exact content you previously uploaded. It generally should not be shared
-                                        to other players as it may contain personal data.</p>
-                                    <textarea class="form-control"
-                                              rows="2"
-                                              #rawContent
-                                              readonly>{{ savedGame.content }}</textarea>
-                                    <button type="button"
-                                            class="btn btn-primary float-right"
-                                            [ngxClipboard]="rawContent"
-                                            (cbOnSuccess)="c()">Copy to Clipboard</button>
-                                </ng-template>
-                            </ngb-tab>
-                        </ngb-tabset>
+                    <ul ngbNav
+                        #viewSaveDataNav="ngbNav"
+                        class="nav-tabs">
+                        <li ngbNavItem>
+                            <a ngbNavLink>Shareable</a>
+                            <ng-template ngbNavContent>
+                                <p>This has been scrubbed of personal data and is safely shareable.</p>
+                                <textarea class="form-control"
+                                          rows="2"
+                                          #scrubbedContent
+                                          readonly>{{ savedGame.scrubbedContent }}</textarea>
+                                <button type="button"
+                                        class="btn btn-primary float-right"
+                                        [ngxClipboard]="scrubbedContent"
+                                        (cbOnSuccess)="c()">Copy to Clipboard</button>
+                            </ng-template>
+                        </li>
+                        <li ngbNavItem
+                            *ngIf="!savedGame.isScrubbed">
+                            <a ngbNavLink>Raw Data</a>
+                            <ng-template ngbNavContent>
+                                <p class="alert alert-warning">This is the exact content you previously uploaded. It generally should not be shared
+                                    to other players as it may contain personal data.</p>
+                                <textarea class="form-control"
+                                          rows="2"
+                                          #rawContent
+                                          readonly>{{ savedGame.content }}</textarea>
+                                <button type="button"
+                                        class="btn btn-primary float-right"
+                                        [ngxClipboard]="rawContent"
+                                        (cbOnSuccess)="c()">Copy to Clipboard</button>
+                            </ng-template>
+                        </li>
+                    </ul>
+                    <div class="form-group"
+                         [ngbNavOutlet]="viewSaveDataNav">
                     </div>
                 </div>
                 <div class="modal-footer">

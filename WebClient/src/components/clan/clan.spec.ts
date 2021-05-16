@@ -1,9 +1,8 @@
-import { NO_ERRORS_SCHEMA, ChangeDetectorRef, DebugElement } from "@angular/core";
+import { NO_ERRORS_SCHEMA, DebugElement, Pipe, PipeTransform } from "@angular/core";
 import { By } from "@angular/platform-browser";
 import { FormsModule } from "@angular/forms";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { HttpClientTestingModule } from "@angular/common/http/testing";
-import { TimeAgoPipe } from "time-ago-pipe";
 import { ClanComponent } from "./clan";
 import { ClanService, IClanData, IMessage } from "../../services/clanService/clanService";
 import { AuthenticationService, IUserInfo } from "../../services/authenticationService/authenticationService";
@@ -48,6 +47,13 @@ describe("ClanComponent", () => {
         clanName: clan.clanName,
     };
 
+    const timeAgoPipeTransform = (value: string) => "timeAgo(" + value + ")";
+
+    @Pipe({ name: 'timeAgo' })
+    class MockTimeAgoPipe implements PipeTransform {
+        public transform = timeAgoPipeTransform;
+    }
+
     beforeEach(done => {
         let clanService = {
             getClan(): Promise<IClanData> {
@@ -86,7 +92,7 @@ describe("ClanComponent", () => {
                 declarations:
                     [
                         ClanComponent,
-                        TimeAgoPipe,
+                        MockTimeAgoPipe,
                     ],
                 providers:
                     [
@@ -95,8 +101,6 @@ describe("ClanComponent", () => {
                         { provide: UserService, useValue: userService },
                         { provide: ActivatedRoute, useValue: route },
                         { provide: HttpErrorHandlerService, useValue: httpErrorHandlerService },
-                        TimeAgoPipe,
-                        ChangeDetectorRef, // Needed for TimeAgoPipe
                     ],
                 schemas: [NO_ERRORS_SCHEMA],
             })
@@ -207,8 +211,6 @@ describe("ClanComponent", () => {
     });
 
     it("should display messages if it's the user's clan", done => {
-        let timeAgoPipe = TestBed.get(TimeAgoPipe) as TimeAgoPipe;
-
         fixture.detectChanges();
         fixture.whenStable()
             .then(() => {
@@ -228,7 +230,7 @@ describe("ClanComponent", () => {
                     expect(messageElementsPieces.length).toEqual(2);
 
                     let metadataElement = messageElementsPieces[0].children;
-                    expect(metadataElement[0].nativeElement.textContent.trim()).toEqual("(" + timeAgoPipe.transform(expectedMessage.date) + ")");
+                    expect(metadataElement[0].nativeElement.textContent.trim()).toEqual("(" + timeAgoPipeTransform(expectedMessage.date) + ")");
                     if (expectedMessage.username) {
                         expect(metadataElement[1].nativeElement.classList.contains("text-muted")).toBe(false);
                         expect(metadataElement[1].nativeElement.textContent.trim()).toEqual(expectedMessage.username);

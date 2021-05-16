@@ -3,14 +3,15 @@
   <PropertyGroup>
     <TargetFramework>net5.0</TargetFramework>
     <UserSecretsId>aspnet-ClickerHeroesTrackerWebsite-20161025101322</UserSecretsId>
+    <ServerGarbageCollection>true</ServerGarbageCollection>
   </PropertyGroup>
 
   <ItemGroup>
-    <None Include="app.config" />
-    <None Include="wwwroot\**\*">
+    <None Include="Services\Database\Schemas\**\*">
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
     </None>
-    <None Include="Services\Database\Schemas\**\*">
+    <None Include="..\..\GameData.json">
+      <Link>GameData.json</Link>
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
     </None>
   </ItemGroup>
@@ -29,26 +30,5 @@
     <PackageReference Include="OpenIddict.EntityFrameworkCore" Version="3.0.0-beta3.20403.69" />
     <PackageReference Include="Sendgrid" Version="9.21.0" />
   </ItemGroup>
-
-  <!-- For developer builds, copy the WebClient outputs to the web root -->
-  <ItemGroup>
-    <_WebClientOutputs Include="..\..\WebClient\dist\*" />
-  </ItemGroup>
-  <Target Name="CopyWebClientOutputs"
-          AfterTargets="GetCopyToOutputDirectoryItems"
-          Condition="'$(Configuration)' == 'Debug'"
-          Inputs="@(_WebClientOutputs)"
-          Outputs="@(_WebClientOutputs->'wwwroot\%(Filename)%(Extension)')">
-    <Copy SourceFiles="@(_WebClientOutputs)"
-          DestinationFiles="@(_WebClientOutputs->'wwwroot\%(Filename)%(Extension)')"
-          SkipUnchangedFiles="$(SkipCopyUnchangedFiles)"
-          OverwriteReadOnlyFiles="$(OverwriteReadOnlyFiles)"
-          Retries="$(CopyRetryCount)"
-          RetryDelayMilliseconds="$(CopyRetryDelayMilliseconds)"
-          UseHardlinksIfPossible="$(CreateHardLinksForAdditionalFilesIfPossible)"
-          UseSymboliclinksIfPossible="$(CreateSymbolicLinksForAdditionalFilesIfPossible)">
-      <Output TaskParameter="DestinationFiles" ItemName="FileWrites" />
-    </Copy>
-  </Target>
 
 </Project>

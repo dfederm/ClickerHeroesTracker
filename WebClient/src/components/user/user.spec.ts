@@ -11,6 +11,7 @@ import { SettingsService } from "../../services/settingsService/settingsService"
 import { ActivatedRoute } from "@angular/router";
 import { AuthenticationService, IUserInfo } from "../../services/authenticationService/authenticationService";
 import { IUser } from "../../models";
+import { NgxSpinnerService } from "ngx-spinner";
 
 describe("UserComponent", () => {
     let fixture: ComponentFixture<UserComponent>;
@@ -89,6 +90,11 @@ describe("UserComponent", () => {
             userInfo: () => userInfo,
         };
 
+        let spinnerService = {
+            show: (): void => void 0,
+            hide: (): void => void 0,
+        };
+
         TestBed.configureTestingModule(
             {
                 declarations: [UserComponent],
@@ -97,6 +103,7 @@ describe("UserComponent", () => {
                     { provide: UserService, useValue: userService },
                     { provide: SettingsService, useValue: settingsService },
                     { provide: AuthenticationService, useValue: authenticationService },
+                    { provide: NgxSpinnerService, useValue: spinnerService },
                 ],
                 schemas: [NO_ERRORS_SCHEMA],
             })

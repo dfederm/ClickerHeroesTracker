@@ -6,7 +6,8 @@ import { NgbModal, NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
 })
 export class OpenDialogDirective {
     @Input()
-    public openDialog: string;
+    // tslint:disable-next-line: no-any
+    public openDialog: any;
 
     @Input()
     public dismissCurrentDialog: boolean;
