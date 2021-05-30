@@ -261,7 +261,7 @@ describe("ClanComponent", () => {
     });
 
     it("should send messages", done => {
-        let clanService = TestBed.get(ClanService) as ClanService;
+        let clanService = TestBed.inject(ClanService);
 
         const message = "Test Message";
 
@@ -305,7 +305,7 @@ describe("ClanComponent", () => {
     });
 
     it("should show an error message when sending a message fails", done => {
-        let clanService = TestBed.get(ClanService) as ClanService;
+        let clanService = TestBed.inject(ClanService);
 
         const message = "Test Message";
 

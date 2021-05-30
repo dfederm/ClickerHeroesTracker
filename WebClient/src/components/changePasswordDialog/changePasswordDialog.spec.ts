@@ -358,10 +358,10 @@ describe("ChangePasswordDialogComponent", () => {
 
     describe("Form submission", () => {
         it("should close the dialog when changing the password properly", done => {
-            let userService = TestBed.get(UserService) as UserService;
+            let userService = TestBed.inject(UserService);
             spyOn(userService, "changePassword").and.returnValue(Promise.resolve());
 
-            let activeModal = TestBed.get(NgbActiveModal) as NgbActiveModal;
+            let activeModal = TestBed.inject(NgbActiveModal);
             spyOn(activeModal, "close");
 
             setUserLogins(loginsWithPassword)
@@ -389,10 +389,10 @@ describe("ChangePasswordDialogComponent", () => {
         });
 
         it("should close the dialog when adding a new password properly", done => {
-            let userService = TestBed.get(UserService) as UserService;
+            let userService = TestBed.inject(UserService);
             spyOn(userService, "setPassword").and.returnValue(Promise.resolve());
 
-            let activeModal = TestBed.get(NgbActiveModal) as NgbActiveModal;
+            let activeModal = TestBed.inject(NgbActiveModal);
             spyOn(activeModal, "close");
 
             setUserLogins(loginsWithoutPassword)
@@ -419,10 +419,10 @@ describe("ChangePasswordDialogComponent", () => {
         });
 
         it("should show an error when password change fails", done => {
-            let userService = TestBed.get(UserService) as UserService;
+            let userService = TestBed.inject(UserService);
             spyOn(userService, "changePassword").and.returnValue(Promise.reject(["error0", "error1", "error2"]));
 
-            let activeModal = TestBed.get(NgbActiveModal) as NgbActiveModal;
+            let activeModal = TestBed.inject(NgbActiveModal);
             spyOn(activeModal, "close");
 
             setUserLogins(loginsWithPassword)
@@ -453,10 +453,10 @@ describe("ChangePasswordDialogComponent", () => {
         });
 
         it("should show an error when adding a password fails", done => {
-            let userService = TestBed.get(UserService) as UserService;
+            let userService = TestBed.inject(UserService);
             spyOn(userService, "setPassword").and.returnValue(Promise.reject(["error0", "error1", "error2"]));
 
-            let activeModal = TestBed.get(NgbActiveModal) as NgbActiveModal;
+            let activeModal = TestBed.inject(NgbActiveModal);
             spyOn(activeModal, "close");
 
             setUserLogins(loginsWithoutPassword)
@@ -497,7 +497,7 @@ describe("ChangePasswordDialogComponent", () => {
     });
 
     function setUserLogins(logins: IUserLogins): Promise<void> {
-        let userService = TestBed.get(UserService) as UserService;
+        let userService = TestBed.inject(UserService);
         spyOn(userService, "getLogins").and.returnValue(Promise.resolve(logins));
 
         // First allow the getLogins promise to finish

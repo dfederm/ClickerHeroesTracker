@@ -601,7 +601,7 @@ describe("AncientSuggestionsComponent", () => {
 
         describe("Modal", () => {
             it("should show the modal when clicked", () => {
-                let modalService = TestBed.get(NgbModal) as NgbModal;
+                let modalService = TestBed.inject(NgbModal);
                 spyOn(modalService, "open").and.returnValue({ result: Promise.resolve() } as NgbModalRef);
 
                 component.savedGame = savedGame;
@@ -620,13 +620,13 @@ describe("AncientSuggestionsComponent", () => {
 
             it("should add to progress", async () => {
                 let modal = jasmine.createSpyObj("modal", ["close"]);
-                let modalService = TestBed.get(NgbModal) as NgbModal;
+                let modalService = TestBed.inject(NgbModal);
                 spyOn(modalService, "open").and.returnValue(modal);
 
-                let uploadService = TestBed.get(UploadService) as UploadService;
+                let uploadService = TestBed.inject(UploadService);
                 spyOn(uploadService, "create").and.returnValue(Promise.resolve<number>(123));
 
-                let router = TestBed.get(Router) as Router;
+                let router = TestBed.inject(Router);
                 spyOn(router, "navigate").and.returnValue(Promise.resolve(true));
 
                 component.savedGame = savedGame;
@@ -658,13 +658,13 @@ describe("AncientSuggestionsComponent", () => {
 
             it("should show an error when the upload fails", async () => {
                 let modal = jasmine.createSpyObj("modal", ["close"]);
-                let modalService = TestBed.get(NgbModal) as NgbModal;
+                let modalService = TestBed.inject(NgbModal);
                 spyOn(modalService, "open").and.returnValue(modal);
 
-                let uploadService = TestBed.get(UploadService) as UploadService;
+                let uploadService = TestBed.inject(UploadService);
                 spyOn(uploadService, "create").and.returnValue(Promise.reject({}));
 
-                let router = TestBed.get(Router) as Router;
+                let router = TestBed.inject(Router);
                 spyOn(router, "navigate");
 
                 component.savedGame = savedGame;

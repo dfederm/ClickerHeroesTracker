@@ -108,7 +108,7 @@ describe("SettingsDialogComponent", () => {
         });
 
         it("should hide when playStyle is not hybrid", () => {
-            let settingsService = TestBed.get(SettingsService) as SettingsService;
+            let settingsService = TestBed.inject(SettingsService);
             spyOn(settingsService, "setSetting").and.returnValue(Promise.resolve());
 
             let playStyleInput = getInput<HTMLSelectElement>(0, "select");
@@ -153,7 +153,7 @@ describe("SettingsDialogComponent", () => {
         });
 
         it("should hide when playStyle is idle", () => {
-            let settingsService = TestBed.get(SettingsService) as SettingsService;
+            let settingsService = TestBed.inject(SettingsService);
             spyOn(settingsService, "setSetting").and.returnValue(Promise.resolve());
 
             let playStyleInput = getInput<HTMLSelectElement>(0, "select");
@@ -198,7 +198,7 @@ describe("SettingsDialogComponent", () => {
         });
 
         it("should hide when playStyle is idle", () => {
-            let settingsService = TestBed.get(SettingsService) as SettingsService;
+            let settingsService = TestBed.inject(SettingsService);
             spyOn(settingsService, "setSetting").and.returnValue(Promise.resolve());
 
             let playStyleInput = getInput<HTMLSelectElement>(0, "select");
@@ -208,7 +208,7 @@ describe("SettingsDialogComponent", () => {
         });
 
         it("should hide when shouldLevelSkillAncients is off", () => {
-            let settingsService = TestBed.get(SettingsService) as SettingsService;
+            let settingsService = TestBed.inject(SettingsService);
             spyOn(settingsService, "setSetting").and.returnValue(Promise.resolve());
 
             let shouldLevelSkillAncientsInput = getInput<HTMLInputElement>(2, "input");
@@ -252,7 +252,7 @@ describe("SettingsDialogComponent", () => {
         });
 
         it("should hide when playStyle is idle", () => {
-            let settingsService = TestBed.get(SettingsService) as SettingsService;
+            let settingsService = TestBed.inject(SettingsService);
             spyOn(settingsService, "setSetting").and.returnValue(Promise.resolve());
 
             let playStyleInput = getInput<HTMLSelectElement>(0, "select");
@@ -262,7 +262,7 @@ describe("SettingsDialogComponent", () => {
         });
 
         it("should hide when shouldLevelSkillAncients is off", () => {
-            let settingsService = TestBed.get(SettingsService) as SettingsService;
+            let settingsService = TestBed.inject(SettingsService);
             spyOn(settingsService, "setSetting").and.returnValue(Promise.resolve());
 
             let shouldLevelSkillAncientsInput = getInput<HTMLInputElement>(2, "input");
@@ -342,7 +342,7 @@ describe("SettingsDialogComponent", () => {
         });
 
         it("should hide when useScientificNotation is off", () => {
-            let settingsService = TestBed.get(SettingsService) as SettingsService;
+            let settingsService = TestBed.inject(SettingsService);
             spyOn(settingsService, "setSetting").and.returnValue(Promise.resolve());
 
             let useScientificNotationInput = getInput<HTMLInputElement>(5, "input");
@@ -422,7 +422,7 @@ describe("SettingsDialogComponent", () => {
         });
 
         it("should hide when useLogarithmicGraphScale is off", () => {
-            let settingsService = TestBed.get(SettingsService) as SettingsService;
+            let settingsService = TestBed.inject(SettingsService);
             spyOn(settingsService, "setSetting").and.returnValue(Promise.resolve());
 
             let useLogarithmicGraphScaleInput = getInput<HTMLInputElement>(7, "input");
@@ -570,7 +570,7 @@ describe("SettingsDialogComponent", () => {
         setting: keyof IUserSettings,
         setValue: () => {},
     ): void {
-        let settingsService = TestBed.get(SettingsService) as SettingsService;
+        let settingsService = TestBed.inject(SettingsService);
         spyOn(settingsService, "setSetting").and.returnValue(Promise.resolve());
 
         let newValue = setValue();
@@ -585,7 +585,7 @@ describe("SettingsDialogComponent", () => {
         setValue: () => void,
     ): Promise<void> {
         let resolvePromise: () => void;
-        let settingsService = TestBed.get(SettingsService) as SettingsService;
+        let settingsService = TestBed.inject(SettingsService);
         // tslint:disable-next-line:promise-must-complete - The promise does resolve, we just assign it to resolvePromise.
         spyOn(settingsService, "setSetting").and.returnValue(new Promise(resolve => {
             resolvePromise = resolve;
@@ -621,7 +621,7 @@ describe("SettingsDialogComponent", () => {
         setValue: () => void,
     ): Promise<void> {
         let rejectPromise: () => void;
-        let settingsService = TestBed.get(SettingsService) as SettingsService;
+        let settingsService = TestBed.inject(SettingsService);
         // tslint:disable-next-line:promise-must-complete - The promise does resolve, we just assign it to resolvePromise.
         spyOn(settingsService, "setSetting").and.returnValue(new Promise((_, reject) => {
             rejectPromise = reject;

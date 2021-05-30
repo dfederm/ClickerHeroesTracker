@@ -31,8 +31,8 @@ describe("NewsService", () => {
                     ],
             });
 
-        newsService = TestBed.get(NewsService) as NewsService;
-        httpMock = TestBed.get(HttpTestingController) as HttpTestingController;
+        newsService = TestBed.inject(NewsService);
+        httpMock = TestBed.inject(HttpTestingController);
     });
 
     afterAll(() => {

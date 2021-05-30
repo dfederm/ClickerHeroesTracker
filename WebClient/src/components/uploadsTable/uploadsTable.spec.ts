@@ -142,7 +142,7 @@ describe("UploadsTableComponent", () => {
     }));
 
     function verifyTable(page: number): Promise<void> {
-        let datePipe = TestBed.get(DatePipe) as DatePipe;
+        let datePipe = TestBed.inject(DatePipe);
 
         fixture.detectChanges();
         return fixture.whenStable().then(() => {

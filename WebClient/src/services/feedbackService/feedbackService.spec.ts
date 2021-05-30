@@ -34,8 +34,8 @@ describe("FeedbackService", () => {
                     ],
             });
 
-        feedbackService = TestBed.get(FeedbackService) as FeedbackService;
-        httpMock = TestBed.get(HttpTestingController) as HttpTestingController;
+        feedbackService = TestBed.inject(FeedbackService);
+        httpMock = TestBed.inject(HttpTestingController);
     });
 
     afterEach(() => {

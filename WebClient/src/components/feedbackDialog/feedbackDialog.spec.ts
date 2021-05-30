@@ -306,10 +306,10 @@ describe("FeedbackDialogComponent", () => {
 
     describe("form submission", () => {
         it("should send correct feedback data when user is not logged in", done => {
-            let feedbackService = TestBed.get(FeedbackService) as FeedbackService;
+            let feedbackService = TestBed.inject(FeedbackService);
             spyOn(feedbackService, "send").and.returnValue(Promise.resolve());
 
-            let activeModal = TestBed.get(NgbActiveModal) as NgbActiveModal;
+            let activeModal = TestBed.inject(NgbActiveModal);
             spyOn(activeModal, "close");
 
             userInfo.next(notLoggedInUser);
@@ -347,10 +347,10 @@ describe("FeedbackDialogComponent", () => {
         });
 
         it("should send correct feedback data when user is logged in", done => {
-            let feedbackService = TestBed.get(FeedbackService) as FeedbackService;
+            let feedbackService = TestBed.inject(FeedbackService);
             spyOn(feedbackService, "send").and.returnValue(Promise.resolve());
 
-            let activeModal = TestBed.get(NgbActiveModal) as NgbActiveModal;
+            let activeModal = TestBed.inject(NgbActiveModal);
             spyOn(activeModal, "close");
 
             userInfo.next(loggedInUser);
@@ -387,10 +387,10 @@ describe("FeedbackDialogComponent", () => {
         });
 
         it("should show an error when feedbackService fails", done => {
-            let feedbackService = TestBed.get(FeedbackService) as FeedbackService;
+            let feedbackService = TestBed.inject(FeedbackService);
             spyOn(feedbackService, "send").and.returnValue(Promise.reject(null));
 
-            let activeModal = TestBed.get(NgbActiveModal) as NgbActiveModal;
+            let activeModal = TestBed.inject(NgbActiveModal);
             spyOn(activeModal, "close");
 
             userInfo.next(loggedInUser);

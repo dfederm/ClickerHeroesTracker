@@ -54,8 +54,8 @@ describe("UploadService", () => {
                     ],
             });
 
-        uploadService = TestBed.get(UploadService) as UploadService;
-        httpMock = TestBed.get(HttpTestingController) as HttpTestingController;
+        uploadService = TestBed.inject(UploadService);
+        httpMock = TestBed.inject(HttpTestingController);
     });
 
     afterEach(() => {
@@ -218,7 +218,7 @@ describe("UploadService", () => {
                 name: "someName",
                 clanName: "someClanName",
             };
-            let userService = TestBed.get(UserService) as UserService;
+            let userService = TestBed.inject(UserService);
             spyOn(userService, "getUser").and.returnValue(Promise.resolve(user));
 
             // Originally logged in
@@ -300,7 +300,7 @@ describe("UploadService", () => {
                 name: "someName",
                 clanName: "someClanName",
             };
-            let userService = TestBed.get(UserService) as UserService;
+            let userService = TestBed.inject(UserService);
             spyOn(userService, "getUser").and.returnValue(Promise.resolve(user));
 
             userInfo.next(loggedInUser);
@@ -337,7 +337,7 @@ describe("UploadService", () => {
         }));
 
         it("should not cache uploads when we're mising current user data", fakeAsync(() => {
-            let userService = TestBed.get(UserService) as UserService;
+            let userService = TestBed.inject(UserService);
             spyOn(userService, "getUser").and.returnValue(Promise.reject(null));
 
             userInfo.next(loggedInUser);

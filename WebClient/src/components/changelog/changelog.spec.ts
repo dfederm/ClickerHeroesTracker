@@ -69,7 +69,7 @@ describe("ChangelogComponent", () => {
         let newsService = TestBed.get(NewsService);
         spyOn(newsService, "getNews").and.returnValue(Promise.resolve(siteNewsEntryListResponse));
 
-        let datePipe = TestBed.get(DatePipe) as DatePipe;
+        let datePipe = TestBed.inject(DatePipe);
 
         component.showDates = true;
         fixture.detectChanges();

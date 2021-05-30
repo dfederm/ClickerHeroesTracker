@@ -37,7 +37,7 @@ describe("AuthenticationService", () => {
         let now = Date.now();
         spyOn(Date, "now").and.callFake(() => now);
 
-        httpMock = TestBed.get(HttpTestingController) as HttpTestingController;
+        httpMock = TestBed.inject(HttpTestingController);
     });
 
     afterEach(() => {
@@ -48,7 +48,7 @@ describe("AuthenticationService", () => {
         it("should not be logged in initially when local storage is empty", fakeAsync(() => {
             (localStorage.getItem as jasmine.Spy).and.returnValue(null);
 
-            let authenticationService = TestBed.get(AuthenticationService) as AuthenticationService;
+            let authenticationService = TestBed.inject(AuthenticationService);
 
             authenticationService.userInfo()
                 .subscribe(userInfo => expect(userInfo).toEqual(notLoggedInUser));
@@ -63,7 +63,7 @@ describe("AuthenticationService", () => {
             (localStorage.getItem as jasmine.Spy).and.returnValue(JSON.stringify(tokens));
             let expectedUserInfo = createResponseUserInfo();
 
-            let authenticationService = TestBed.get(AuthenticationService) as AuthenticationService;
+            let authenticationService = TestBed.inject(AuthenticationService);
             tick();
 
             let request = httpMock.expectOne(tokenRequest);
@@ -97,7 +97,7 @@ describe("AuthenticationService", () => {
             (localStorage.getItem as jasmine.Spy).and.returnValue(JSON.stringify(tokens));
             let expectedUserInfo = createResponseUserInfo();
 
-            let authenticationService = TestBed.get(AuthenticationService) as AuthenticationService;
+            let authenticationService = TestBed.inject(AuthenticationService);
             tick();
 
             let request = httpMock.expectOne(tokenRequest);
@@ -127,35 +127,27 @@ describe("AuthenticationService", () => {
     });
 
     describe("getAuthHeaders", () => {
-        it("should return empty headers when not logged in", done => {
+        it("should return empty headers when not logged in", async () => {
             (localStorage.getItem as jasmine.Spy).and.returnValue(null);
 
-            let authenticationService = TestBed.get(AuthenticationService) as AuthenticationService;
-            return authenticationService.getAuthHeaders()
-                .then(headers => {
-                    expect(headers.keys().length).toEqual(0);
-                })
-                .then(done)
-                .catch(done.fail);
+            let authenticationService = TestBed.inject(AuthenticationService);
+            const headers = await authenticationService.getAuthHeaders();
+            expect(headers.keys().length).toEqual(0);
         });
 
-        it("should get auth headers when logged in", done => {
+        it("should get auth headers when logged in", async () => {
             let tokens = createCachedAuthModel();
             (localStorage.getItem as jasmine.Spy).and.returnValue(JSON.stringify(tokens));
 
-            let authenticationService = TestBed.get(AuthenticationService) as AuthenticationService;
+            let authenticationService = TestBed.inject(AuthenticationService);
 
             // It tries to refresh initially, and the headers will be blocked until the refresh responds.
             let request = httpMock.expectOne(tokenRequest);
             request.flush(tokens);
 
-            return authenticationService.getAuthHeaders()
-                .then(headers => {
-                    expect(headers.keys().length).toEqual(1);
-                    expect(headers.get("Authorization")).toEqual("someTokenType someAccessToken");
-                })
-                .then(done)
-                .catch(done.fail);
+            const headers = await authenticationService.getAuthHeaders();
+            expect(headers.keys().length).toEqual(1);
+            expect(headers.get("Authorization")).toEqual("someTokenType someAccessToken");
         });
     });
 
@@ -165,7 +157,7 @@ describe("AuthenticationService", () => {
             let error: Error;
             let userInfoLog: IUserInfo[] = [];
 
-            let authenticationService = TestBed.get(AuthenticationService) as AuthenticationService;
+            let authenticationService = TestBed.inject(AuthenticationService);
             authenticationService.userInfo()
                 .subscribe(userInfo => {
                     userInfoLog.push(userInfo);
@@ -191,7 +183,7 @@ describe("AuthenticationService", () => {
             let error: Error;
             let userInfoLog: IUserInfo[] = [];
 
-            let authenticationService = TestBed.get(AuthenticationService) as AuthenticationService;
+            let authenticationService = TestBed.inject(AuthenticationService);
             authenticationService.userInfo()
                 .subscribe(_ => userInfoLog.push(_));
             authenticationService.logInWithPassword("someUsername", "somePassword")
@@ -243,7 +235,7 @@ describe("AuthenticationService", () => {
             let error: Error;
             let userInfoLog: IUserInfo[] = [];
 
-            let authenticationService = TestBed.get(AuthenticationService) as AuthenticationService;
+            let authenticationService = TestBed.inject(AuthenticationService);
             authenticationService.userInfo()
                 .subscribe(userInfo => {
                     userInfoLog.push(userInfo);
@@ -272,7 +264,7 @@ describe("AuthenticationService", () => {
             let error: Error;
             let userInfoLog: IUserInfo[] = [];
 
-            let authenticationService = TestBed.get(AuthenticationService) as AuthenticationService;
+            let authenticationService = TestBed.inject(AuthenticationService);
             authenticationService.userInfo()
                 .subscribe(_ => userInfoLog.push(_));
             authenticationService.logInWithAssertion("someGrantType", "someAssertion", null)
@@ -321,7 +313,7 @@ describe("AuthenticationService", () => {
         }));
 
         it("should add the username when provided", fakeAsync(() => {
-            let authenticationService = TestBed.get(AuthenticationService) as AuthenticationService;
+            let authenticationService = TestBed.inject(AuthenticationService);
             authenticationService.logInWithAssertion("someGrantType", "someAssertion", "someUsername");
 
             let request = httpMock.expectOne(tokenRequest);
@@ -337,7 +329,7 @@ describe("AuthenticationService", () => {
             (localStorage.getItem as jasmine.Spy).and.returnValue(JSON.stringify(tokens));
             let userInfo = createCachedUserInfo();
 
-            let authenticationService = TestBed.get(AuthenticationService) as AuthenticationService;
+            let authenticationService = TestBed.inject(AuthenticationService);
             authenticationService.userInfo()
                 .subscribe(_ => userInfoLog.push(_));
 
@@ -357,7 +349,7 @@ describe("AuthenticationService", () => {
             (localStorage.getItem as jasmine.Spy).and.returnValue(JSON.stringify(tokens));
             let userInfo = createCachedUserInfo();
 
-            let authenticationService = TestBed.get(AuthenticationService) as AuthenticationService;
+            let authenticationService = TestBed.inject(AuthenticationService);
             authenticationService.userInfo()
                 .subscribe(_ => userInfoLog.push(_));
 

@@ -137,10 +137,10 @@ describe("ExternalLoginsComponent", () => {
         });
 
         it("should close the dialog when successful", done => {
-            let authenticationService = TestBed.get(AuthenticationService) as AuthenticationService;
+            let authenticationService = TestBed.inject(AuthenticationService);
             spyOn(authenticationService, "logInWithAssertion").and.returnValue(Promise.resolve());
 
-            let activeModal = TestBed.get(NgbActiveModal) as NgbActiveModal;
+            let activeModal = TestBed.inject(NgbActiveModal);
             spyOn(activeModal, "close");
 
             let authResponse = { id_token: "someIdToken" } as gapi.auth2.AuthResponse;
@@ -182,10 +182,10 @@ describe("ExternalLoginsComponent", () => {
         });
 
         it("should show an error when Google fails", done => {
-            let authenticationService = TestBed.get(AuthenticationService) as AuthenticationService;
+            let authenticationService = TestBed.inject(AuthenticationService);
             spyOn(authenticationService, "logInWithAssertion");
 
-            let activeModal = TestBed.get(NgbActiveModal) as NgbActiveModal;
+            let activeModal = TestBed.inject(NgbActiveModal);
             spyOn(activeModal, "close");
 
             let googleAuth = jasmine.createSpyObj<gapi.auth2.GoogleAuth>(["signIn"]);
@@ -221,10 +221,10 @@ describe("ExternalLoginsComponent", () => {
         });
 
         it("should show an error when authenticationService fails", done => {
-            let authenticationService = TestBed.get(AuthenticationService) as AuthenticationService;
+            let authenticationService = TestBed.inject(AuthenticationService);
             spyOn(authenticationService, "logInWithAssertion").and.returnValue(Promise.reject(""));
 
-            let activeModal = TestBed.get(NgbActiveModal) as NgbActiveModal;
+            let activeModal = TestBed.inject(NgbActiveModal);
             spyOn(activeModal, "close");
 
             let authResponse = { id_token: "someIdToken" } as gapi.auth2.AuthResponse;
@@ -266,10 +266,10 @@ describe("ExternalLoginsComponent", () => {
         });
 
         it("should not show an error when cancelled", done => {
-            let authenticationService = TestBed.get(AuthenticationService) as AuthenticationService;
+            let authenticationService = TestBed.inject(AuthenticationService);
             spyOn(authenticationService, "logInWithAssertion");
 
-            let activeModal = TestBed.get(NgbActiveModal) as NgbActiveModal;
+            let activeModal = TestBed.inject(NgbActiveModal);
             spyOn(activeModal, "close");
 
             let googleAuth = jasmine.createSpyObj<gapi.auth2.GoogleAuth>(["signIn"]);
@@ -314,10 +314,10 @@ describe("ExternalLoginsComponent", () => {
         });
 
         it("should close the dialog when successful", done => {
-            let authenticationService = TestBed.get(AuthenticationService) as AuthenticationService;
+            let authenticationService = TestBed.inject(AuthenticationService);
             spyOn(authenticationService, "logInWithAssertion").and.returnValue(Promise.resolve());
 
-            let activeModal = TestBed.get(NgbActiveModal) as NgbActiveModal;
+            let activeModal = TestBed.inject(NgbActiveModal);
             spyOn(activeModal, "close");
 
             let loginResponse = {
@@ -350,10 +350,10 @@ describe("ExternalLoginsComponent", () => {
         });
 
         it("should show an error when Facebook fails", done => {
-            let authenticationService = TestBed.get(AuthenticationService) as AuthenticationService;
+            let authenticationService = TestBed.inject(AuthenticationService);
             spyOn(authenticationService, "logInWithAssertion");
 
-            let activeModal = TestBed.get(NgbActiveModal) as NgbActiveModal;
+            let activeModal = TestBed.inject(NgbActiveModal);
             spyOn(activeModal, "close");
 
             let loginResponse = {
@@ -386,10 +386,10 @@ describe("ExternalLoginsComponent", () => {
         });
 
         it("should show an error when authenticationService fails", done => {
-            let authenticationService = TestBed.get(AuthenticationService) as AuthenticationService;
+            let authenticationService = TestBed.inject(AuthenticationService);
             spyOn(authenticationService, "logInWithAssertion").and.returnValue(Promise.reject(""));
 
-            let activeModal = TestBed.get(NgbActiveModal) as NgbActiveModal;
+            let activeModal = TestBed.inject(NgbActiveModal);
             spyOn(activeModal, "close");
 
             let loginResponse = {
@@ -422,10 +422,10 @@ describe("ExternalLoginsComponent", () => {
         });
 
         it("should not show an error when cancelled", done => {
-            let authenticationService = TestBed.get(AuthenticationService) as AuthenticationService;
+            let authenticationService = TestBed.inject(AuthenticationService);
             spyOn(authenticationService, "logInWithAssertion");
 
-            let activeModal = TestBed.get(NgbActiveModal) as NgbActiveModal;
+            let activeModal = TestBed.inject(NgbActiveModal);
             spyOn(activeModal, "close");
 
             let loginResponse = {} as facebook.StatusResponse;
@@ -461,10 +461,10 @@ describe("ExternalLoginsComponent", () => {
         });
 
         it("should close the dialog when successful", done => {
-            let authenticationService = TestBed.get(AuthenticationService) as AuthenticationService;
+            let authenticationService = TestBed.inject(AuthenticationService);
             spyOn(authenticationService, "logInWithAssertion").and.returnValue(Promise.resolve());
 
-            let activeModal = TestBed.get(NgbActiveModal) as NgbActiveModal;
+            let activeModal = TestBed.inject(NgbActiveModal);
             spyOn(activeModal, "close");
 
             const token = "someToken";
@@ -497,10 +497,10 @@ describe("ExternalLoginsComponent", () => {
         });
 
         it("should show an error when Microsoft fails", done => {
-            let authenticationService = TestBed.get(AuthenticationService) as AuthenticationService;
+            let authenticationService = TestBed.inject(AuthenticationService);
             spyOn(authenticationService, "logInWithAssertion");
 
-            let activeModal = TestBed.get(NgbActiveModal) as NgbActiveModal;
+            let activeModal = TestBed.inject(NgbActiveModal);
             spyOn(activeModal, "close");
 
             spyOn(component.microsoftApp, "loginPopup").and.returnValue(Promise.reject(""));
@@ -529,10 +529,10 @@ describe("ExternalLoginsComponent", () => {
         });
 
         it("should show an error when authenticationService fails", done => {
-            let authenticationService = TestBed.get(AuthenticationService) as AuthenticationService;
+            let authenticationService = TestBed.inject(AuthenticationService);
             spyOn(authenticationService, "logInWithAssertion").and.returnValue(Promise.reject(""));
 
-            let activeModal = TestBed.get(NgbActiveModal) as NgbActiveModal;
+            let activeModal = TestBed.inject(NgbActiveModal);
             spyOn(activeModal, "close");
 
             const token = "someToken";
@@ -565,10 +565,10 @@ describe("ExternalLoginsComponent", () => {
         });
 
         it("should not show an error when cancelled", done => {
-            let authenticationService = TestBed.get(AuthenticationService) as AuthenticationService;
+            let authenticationService = TestBed.inject(AuthenticationService);
             spyOn(authenticationService, "logInWithAssertion");
 
-            let activeModal = TestBed.get(NgbActiveModal) as NgbActiveModal;
+            let activeModal = TestBed.inject(NgbActiveModal);
             spyOn(activeModal, "close");
 
             spyOn(component.microsoftApp, "loginPopup").and.returnValue(Promise.reject("user_cancelled:User closed the popup window window and cancelled the flow"));
@@ -603,7 +603,7 @@ describe("ExternalLoginsComponent", () => {
         beforeEach(done => {
             fixture.detectChanges();
 
-            authenticationService = TestBed.get(AuthenticationService) as AuthenticationService;
+            authenticationService = TestBed.inject(AuthenticationService);
 
             let errorResponse: IErrorResponse = { error: "account_selection_required" };
             spyOn(authenticationService, "logInWithAssertion").and.returnValue(Promise.reject({ json: () => errorResponse }));
@@ -689,7 +689,7 @@ describe("ExternalLoginsComponent", () => {
             it("should close the dialog when registering properly", done => {
                 (authenticationService.logInWithAssertion as jasmine.Spy).and.returnValue(Promise.resolve());
 
-                let activeModal = TestBed.get(NgbActiveModal) as NgbActiveModal;
+                let activeModal = TestBed.inject(NgbActiveModal);
                 spyOn(activeModal, "close");
 
                 let form = fixture.debugElement.query(By.css("form"));
@@ -710,7 +710,7 @@ describe("ExternalLoginsComponent", () => {
             it("should show an error when an http error occurs", done => {
                 (authenticationService.logInWithAssertion as jasmine.Spy).and.returnValue(Promise.reject(""));
 
-                let activeModal = TestBed.get(NgbActiveModal) as NgbActiveModal;
+                let activeModal = TestBed.inject(NgbActiveModal);
                 spyOn(activeModal, "close");
 
                 let form = fixture.debugElement.query(By.css("form"));
@@ -733,7 +733,7 @@ describe("ExternalLoginsComponent", () => {
                 let errorResponse = { error_description: "someErrorDescription" };
                 (authenticationService.logInWithAssertion as jasmine.Spy).and.returnValue(Promise.reject({ json: () => errorResponse }));
 
-                let activeModal = TestBed.get(NgbActiveModal) as NgbActiveModal;
+                let activeModal = TestBed.inject(NgbActiveModal);
                 spyOn(activeModal, "close");
 
                 let form = fixture.debugElement.query(By.css("form"));
@@ -818,7 +818,7 @@ describe("ExternalLoginsComponent", () => {
                     },
                 ],
             };
-            let userService = TestBed.get(UserService) as UserService;
+            let userService = TestBed.inject(UserService);
             spyOn(userService, "getLogins").and.returnValue(Promise.resolve(logins));
 
             fixture.detectChanges();
@@ -844,7 +844,7 @@ describe("ExternalLoginsComponent", () => {
         });
 
         it("should show an error when fetching logins fails", done => {
-            let userService = TestBed.get(UserService) as UserService;
+            let userService = TestBed.inject(UserService);
             spyOn(userService, "getLogins").and.returnValue(Promise.reject(""));
 
             fixture.detectChanges();
@@ -884,7 +884,7 @@ describe("ExternalLoginsComponent", () => {
                     },
                 ],
             };
-            let userService = TestBed.get(UserService) as UserService;
+            let userService = TestBed.inject(UserService);
             spyOn(userService, "getLogins").and.returnValue(Promise.resolve(logins));
             spyOn(userService, "removeLogin").and.returnValue(Promise.resolve());
 
@@ -941,7 +941,7 @@ describe("ExternalLoginsComponent", () => {
                     },
                 ],
             };
-            let userService = TestBed.get(UserService) as UserService;
+            let userService = TestBed.inject(UserService);
             spyOn(userService, "getLogins").and.returnValue(Promise.resolve(logins));
             spyOn(userService, "removeLogin").and.returnValue(Promise.reject(""));
 
@@ -1000,10 +1000,10 @@ describe("ExternalLoginsComponent", () => {
                     },
                 ],
             };
-            let userService = TestBed.get(UserService) as UserService;
+            let userService = TestBed.inject(UserService);
             spyOn(userService, "getLogins").and.returnValue(Promise.resolve(logins));
 
-            let authenticationService = TestBed.get(AuthenticationService) as AuthenticationService;
+            let authenticationService = TestBed.inject(AuthenticationService);
             spyOn(authenticationService, "logInWithAssertion").and.returnValue(Promise.resolve());
 
             fixture.detectChanges();
@@ -1057,7 +1057,7 @@ describe("ExternalLoginsComponent", () => {
                     },
                 ],
             };
-            let userService = TestBed.get(UserService) as UserService;
+            let userService = TestBed.inject(UserService);
             spyOn(userService, "getLogins").and.returnValue(Promise.resolve(logins));
 
             fixture.detectChanges();

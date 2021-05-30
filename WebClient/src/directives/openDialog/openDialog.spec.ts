@@ -73,10 +73,10 @@ describe("OpenDialogDirective", () => {
     });
 
     it("should open a dialog", () => {
-        let modalService = TestBed.get(NgbModal) as NgbModal;
+        let modalService = TestBed.inject(NgbModal);
         spyOn(modalService, "open");
 
-        let activeModal = TestBed.get(NgbActiveModal) as NgbActiveModal;
+        let activeModal = TestBed.inject(NgbActiveModal);
         spyOn(activeModal, "dismiss");
 
         link.triggerEventHandler("click", $event);
@@ -86,10 +86,10 @@ describe("OpenDialogDirective", () => {
     });
 
     it("should close the active dialog when dismissCurrentDialog is true", () => {
-        let modalService = TestBed.get(NgbModal) as NgbModal;
+        let modalService = TestBed.inject(NgbModal);
         spyOn(modalService, "open");
 
-        let activeModal = TestBed.get(NgbActiveModal) as NgbActiveModal;
+        let activeModal = TestBed.inject(NgbActiveModal);
         spyOn(activeModal, "dismiss");
 
         fixture.componentInstance.dismissCurrentDialog = true;
@@ -101,10 +101,10 @@ describe("OpenDialogDirective", () => {
     });
 
     it("should not close the active dialog when dismissCurrentDialog is false", () => {
-        let modalService = TestBed.get(NgbModal) as NgbModal;
+        let modalService = TestBed.inject(NgbModal);
         spyOn(modalService, "open");
 
-        let activeModal = TestBed.get(NgbActiveModal) as NgbActiveModal;
+        let activeModal = TestBed.inject(NgbActiveModal);
         spyOn(activeModal, "dismiss");
 
         fixture.componentInstance.dismissCurrentDialog = false;

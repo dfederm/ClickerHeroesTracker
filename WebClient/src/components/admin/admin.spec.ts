@@ -48,7 +48,7 @@ describe("AdminComponent", () => {
             })
             .compileComponents()
             .then(() => {
-                httpMock = TestBed.get(HttpTestingController) as HttpTestingController;
+                httpMock = TestBed.inject(HttpTestingController);
                 fixture = TestBed.createComponent(AdminComponent);
             })
             .then(done)
@@ -63,7 +63,7 @@ describe("AdminComponent", () => {
         let authenticationService: AuthenticationService;
 
         beforeEach(done => {
-            authenticationService = TestBed.get(AuthenticationService) as AuthenticationService;
+            authenticationService = TestBed.inject(AuthenticationService);
             spyOn(authenticationService, "getAuthHeaders").and.returnValue(Promise.resolve(new HttpHeaders()));
 
             fixture.detectChanges();
@@ -110,7 +110,7 @@ describe("AdminComponent", () => {
             expect(containers.length).toEqual(3);
             container = containers[0];
 
-            authenticationService = TestBed.get(AuthenticationService) as AuthenticationService;
+            authenticationService = TestBed.inject(AuthenticationService);
             spyOn(authenticationService, "getAuthHeaders").and.returnValue(Promise.resolve(new HttpHeaders()));
 
             fixture.detectChanges();
@@ -178,7 +178,7 @@ describe("AdminComponent", () => {
         });
 
         it("should show errors when stale uploads fetch fails", done => {
-            let httpErrorHandlerService = TestBed.get(HttpErrorHandlerService) as HttpErrorHandlerService;
+            let httpErrorHandlerService = TestBed.inject(HttpErrorHandlerService);
             spyOn(httpErrorHandlerService, "getValidationErrors").and.returnValue(["error0", "error1", "error2"]);
             spyOn(httpErrorHandlerService, "logError");
 
@@ -209,7 +209,7 @@ describe("AdminComponent", () => {
         });
 
         it("should delete stale uploads", done => {
-            let uploadService = TestBed.get(UploadService) as UploadService;
+            let uploadService = TestBed.inject(UploadService);
             spyOn(uploadService, "delete").and.returnValue(Promise.resolve());
 
             let fetchButton = container.query(By.css("button"));
@@ -267,7 +267,7 @@ describe("AdminComponent", () => {
         it("should cancel deletion", done => {
             let unresolvedPromises: (() => void)[] = [];
             let numDeletedStaleUploads = staleuploads.length / 2;
-            let uploadService = TestBed.get(UploadService) as UploadService;
+            let uploadService = TestBed.inject(UploadService);
             spyOn(uploadService, "delete").and.callFake((uploadId: number) => {
                 // Pause half way through
                 return uploadId < numDeletedStaleUploads
@@ -372,7 +372,7 @@ describe("AdminComponent", () => {
             expect(containers.length).toEqual(3);
             container = containers[1];
 
-            authenticationService = TestBed.get(AuthenticationService) as AuthenticationService;
+            authenticationService = TestBed.inject(AuthenticationService);
             spyOn(authenticationService, "getAuthHeaders").and.returnValue(Promise.resolve(new HttpHeaders()));
 
             fixture.detectChanges();
@@ -438,7 +438,7 @@ describe("AdminComponent", () => {
         });
 
         it("should show errors when invalid auth tokens fetch fails", done => {
-            let httpErrorHandlerService = TestBed.get(HttpErrorHandlerService) as HttpErrorHandlerService;
+            let httpErrorHandlerService = TestBed.inject(HttpErrorHandlerService);
             spyOn(httpErrorHandlerService, "logError");
 
             let fetchButton = container.query(By.css("button"));

@@ -31,8 +31,8 @@ describe("ClanService", () => {
                     ],
             });
 
-        clanService = TestBed.get(ClanService) as ClanService;
-        httpMock = TestBed.get(HttpTestingController) as HttpTestingController;
+        clanService = TestBed.inject(ClanService);
+        httpMock = TestBed.inject(HttpTestingController);
     });
 
     afterEach(() => {
