@@ -438,13 +438,13 @@ describe("RegisterDialogComponent", () => {
 
     describe("Form submission", () => {
         it("should close the dialog when registering properly", done => {
-            let userService = TestBed.get(UserService) as UserService;
+            let userService = TestBed.inject(UserService);
             spyOn(userService, "create").and.returnValue(Promise.resolve());
 
-            let authenticationService = TestBed.get(AuthenticationService) as AuthenticationService;
+            let authenticationService = TestBed.inject(AuthenticationService);
             spyOn(authenticationService, "logInWithPassword").and.returnValue(Promise.resolve());
 
-            let activeModal = TestBed.get(NgbActiveModal) as NgbActiveModal;
+            let activeModal = TestBed.inject(NgbActiveModal);
             spyOn(activeModal, "close");
 
             // Wait for stability since ngModel is async
@@ -475,13 +475,13 @@ describe("RegisterDialogComponent", () => {
         });
 
         it("should show an error when user creation fails", done => {
-            let userService = TestBed.get(UserService) as UserService;
+            let userService = TestBed.inject(UserService);
             spyOn(userService, "create").and.returnValue(Promise.reject(["error0", "error1", "error2"]));
 
-            let authenticationService = TestBed.get(AuthenticationService) as AuthenticationService;
+            let authenticationService = TestBed.inject(AuthenticationService);
             spyOn(authenticationService, "logInWithPassword");
 
-            let activeModal = TestBed.get(NgbActiveModal) as NgbActiveModal;
+            let activeModal = TestBed.inject(NgbActiveModal);
             spyOn(activeModal, "close");
 
             // Wait for stability since ngModel is async
@@ -515,13 +515,13 @@ describe("RegisterDialogComponent", () => {
         });
 
         it("should show an error when login after creation fails", done => {
-            let userService = TestBed.get(UserService) as UserService;
+            let userService = TestBed.inject(UserService);
             spyOn(userService, "create").and.returnValue(Promise.resolve());
 
-            let authenticationService = TestBed.get(AuthenticationService) as AuthenticationService;
+            let authenticationService = TestBed.inject(AuthenticationService);
             spyOn(authenticationService, "logInWithPassword").and.returnValue(Promise.reject(""));
 
-            let activeModal = TestBed.get(NgbActiveModal) as NgbActiveModal;
+            let activeModal = TestBed.inject(NgbActiveModal);
             spyOn(activeModal, "close");
 
             // Wait for stability since ngModel is async

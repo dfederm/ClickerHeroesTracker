@@ -47,10 +47,10 @@ describe("LogInDialogComponent", () => {
     });
 
     it("should close the dialog when using proper credentials", done => {
-        let authenticationService = TestBed.get(AuthenticationService) as AuthenticationService;
+        let authenticationService = TestBed.inject(AuthenticationService);
         spyOn(authenticationService, "logInWithPassword").and.returnValue(Promise.resolve());
 
-        let activeModal = TestBed.get(NgbActiveModal) as NgbActiveModal;
+        let activeModal = TestBed.inject(NgbActiveModal);
         spyOn(activeModal, "close");
 
         // Wait for stability since ngModel is async
@@ -93,10 +93,10 @@ describe("LogInDialogComponent", () => {
     });
 
     it("should show an error when using incorrect credentials", done => {
-        let authenticationService = TestBed.get(AuthenticationService) as AuthenticationService;
+        let authenticationService = TestBed.inject(AuthenticationService);
         spyOn(authenticationService, "logInWithPassword").and.returnValue(Promise.reject(""));
 
-        let activeModal = TestBed.get(NgbActiveModal) as NgbActiveModal;
+        let activeModal = TestBed.inject(NgbActiveModal);
         spyOn(activeModal, "close");
 
         // Wait for stability since ngModel is async

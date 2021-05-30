@@ -48,7 +48,7 @@ describe("SettingsService", () => {
                     ],
             });
 
-        httpMock = TestBed.get(HttpTestingController) as HttpTestingController;
+        httpMock = TestBed.inject(HttpTestingController);
 
         spyOn(localStorage, "getItem");
         spyOn(localStorage, "setItem");
@@ -284,7 +284,7 @@ describe("SettingsService", () => {
 
         function createService(): IUserSettings[] {
             let settingsLog: IUserSettings[] = [];
-            let settingsService = TestBed.get(SettingsService) as SettingsService;
+            let settingsService = TestBed.inject(SettingsService);
 
             settingsService.settings().subscribe(settings => {
                 settingsLog.push(settings);
@@ -440,7 +440,7 @@ describe("SettingsService", () => {
             userInfo.next(notLoggedInUser);
 
             let settingsLog: IUserSettings[];
-            settingsService = TestBed.get(SettingsService) as SettingsService;
+            settingsService = TestBed.inject(SettingsService);
 
             settingsService.settings().subscribe(settings => {
                 if (settingsLog) {
@@ -464,7 +464,7 @@ describe("SettingsService", () => {
             userInfo.next(loggedInUser);
 
             let settingsLog: IUserSettings[];
-            settingsService = TestBed.get(SettingsService) as SettingsService;
+            settingsService = TestBed.inject(SettingsService);
 
             settingsService.settings().subscribe(settings => {
                 if (settingsLog) {

@@ -55,7 +55,7 @@ describe("NavbarComponent", () => {
     }));
 
     it("should display the anonymous nav bar when the user is not logged in", async(() => {
-        let authenticationService = TestBed.get(AuthenticationService) as AuthenticationService;
+        let authenticationService = TestBed.inject(AuthenticationService);
         spyOn(authenticationService, "userInfo").and.returnValue(new BehaviorSubject(notLoggedInUser));
 
         fixture.detectChanges();
@@ -101,7 +101,7 @@ describe("NavbarComponent", () => {
     }));
 
     it("should display the authenticated nav bar when the user is logged in", async(() => {
-        let authenticationService = TestBed.get(AuthenticationService) as AuthenticationService;
+        let authenticationService = TestBed.inject(AuthenticationService);
         spyOn(authenticationService, "userInfo").and.returnValue(new BehaviorSubject(loggedInUser));
 
         fixture.detectChanges();
@@ -154,7 +154,7 @@ describe("NavbarComponent", () => {
 
     it("should update userInfo when the authenticationService updates", async(() => {
         let userInfo = new BehaviorSubject(notLoggedInUser);
-        let authenticationService = TestBed.get(AuthenticationService) as AuthenticationService;
+        let authenticationService = TestBed.inject(AuthenticationService);
         spyOn(authenticationService, "userInfo").and.returnValue(userInfo);
 
         fixture.detectChanges();
@@ -180,7 +180,7 @@ describe("NavbarComponent", () => {
     }));
 
     it("should be able to collape and expand the navbar", () => {
-        let authenticationService = TestBed.get(AuthenticationService) as AuthenticationService;
+        let authenticationService = TestBed.inject(AuthenticationService);
         spyOn(authenticationService, "userInfo").and.returnValue(new BehaviorSubject(notLoggedInUser));
 
         let toggler = fixture.debugElement.query(By.css(".navbar-toggler"));
@@ -203,7 +203,7 @@ describe("NavbarComponent", () => {
     });
 
     it("should collape the navbar on navigation", () => {
-        let authenticationService = TestBed.get(AuthenticationService) as AuthenticationService;
+        let authenticationService = TestBed.inject(AuthenticationService);
         spyOn(authenticationService, "userInfo").and.returnValue(new BehaviorSubject(notLoggedInUser));
 
         let toggler = fixture.debugElement.query(By.css(".navbar-toggler"));
@@ -224,7 +224,7 @@ describe("NavbarComponent", () => {
     });
 
     it("should not collape the navbar on unrelated navigation event", () => {
-        let authenticationService = TestBed.get(AuthenticationService) as AuthenticationService;
+        let authenticationService = TestBed.inject(AuthenticationService);
         spyOn(authenticationService, "userInfo").and.returnValue(new BehaviorSubject(notLoggedInUser));
 
         let toggler = fixture.debugElement.query(By.css(".navbar-toggler"));
@@ -245,7 +245,7 @@ describe("NavbarComponent", () => {
     });
 
     it("should log out after clicking the log out button", () => {
-        let authenticationService = TestBed.get(AuthenticationService) as AuthenticationService;
+        let authenticationService = TestBed.inject(AuthenticationService);
         spyOn(authenticationService, "userInfo").and.returnValue(new BehaviorSubject(loggedInUser));
 
         fixture.detectChanges();

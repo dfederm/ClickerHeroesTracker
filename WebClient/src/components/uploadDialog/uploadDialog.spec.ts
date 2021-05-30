@@ -114,13 +114,13 @@ describe("UploadDialogComponent", () => {
         it("should upload correct save data when user is not logged in", async(() => {
             setUserInfo(notLoggedInUser)
                 .then(() => {
-                    let uploadService = TestBed.get(UploadService) as UploadService;
+                    let uploadService = TestBed.inject(UploadService);
                     spyOn(uploadService, "create").and.returnValue(Promise.resolve<number>(123));
 
-                    let router = TestBed.get(Router) as Router;
+                    let router = TestBed.inject(Router);
                     spyOn(router, "navigate");
 
-                    let activeModal = TestBed.get(NgbActiveModal) as NgbActiveModal;
+                    let activeModal = TestBed.inject(NgbActiveModal);
                     spyOn(activeModal, "close");
 
                     setInputValue(encodedSaveData, "someEncodedSaveData");
@@ -143,13 +143,13 @@ describe("UploadDialogComponent", () => {
         it("should upload correct save data when user is logged in", async(() => {
             setUserInfo(loggedInUser)
                 .then(() => {
-                    let uploadService = TestBed.get(UploadService) as UploadService;
+                    let uploadService = TestBed.inject(UploadService);
                     spyOn(uploadService, "create").and.returnValue(Promise.resolve<number>(123));
 
-                    let router = TestBed.get(Router) as Router;
+                    let router = TestBed.inject(Router);
                     spyOn(router, "navigate");
 
-                    let activeModal = TestBed.get(NgbActiveModal) as NgbActiveModal;
+                    let activeModal = TestBed.inject(NgbActiveModal);
                     spyOn(activeModal, "close");
 
                     setInputValue(encodedSaveData, "someEncodedSaveData");
@@ -172,13 +172,13 @@ describe("UploadDialogComponent", () => {
         it("should show an error when uploadService fails", async(() => {
             setUserInfo(loggedInUser)
                 .then(() => {
-                    let uploadService = TestBed.get(UploadService) as UploadService;
+                    let uploadService = TestBed.inject(UploadService);
                     spyOn(uploadService, "create").and.returnValue(Promise.reject(new HttpErrorResponse({ status: 500, statusText: "someStatusText" })));
 
-                    let router = TestBed.get(Router) as Router;
+                    let router = TestBed.inject(Router);
                     spyOn(router, "navigate");
 
-                    let activeModal = TestBed.get(NgbActiveModal) as NgbActiveModal;
+                    let activeModal = TestBed.inject(NgbActiveModal);
                     spyOn(activeModal, "close");
 
                     setInputValue(encodedSaveData, "someEncodedSaveData");

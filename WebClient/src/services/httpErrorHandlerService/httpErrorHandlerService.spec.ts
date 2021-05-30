@@ -20,12 +20,12 @@ describe("HttpErrorHandlerService", () => {
                     ],
             });
 
-        service = TestBed.get(HttpErrorHandlerService) as HttpErrorHandlerService;
+        service = TestBed.inject(HttpErrorHandlerService);
     });
 
     describe("logError", () => {
         it("should log a client error", () => {
-            let appInsightsService = TestBed.get(AppInsightsService) as AppInsightsService;
+            let appInsightsService = TestBed.inject(AppInsightsService);
 
             let error = new ErrorEvent("someType", { message: "someMessage" });
             let err = new HttpErrorResponse({ error });
@@ -35,7 +35,7 @@ describe("HttpErrorHandlerService", () => {
         });
 
         it("should log a server error", () => {
-            let appInsightsService = TestBed.get(AppInsightsService) as AppInsightsService;
+            let appInsightsService = TestBed.inject(AppInsightsService);
 
             let error = JSON.stringify({ someField: "someValue" });
             let err = new HttpErrorResponse({ status: 123, error });

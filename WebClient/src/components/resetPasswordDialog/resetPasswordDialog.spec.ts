@@ -149,7 +149,7 @@ describe("ResetPasswordDialogComponent", () => {
 
         describe("Form submission", () => {
             it("should send the code when the form is filled out properly", done => {
-                let userService = TestBed.get(UserService) as UserService;
+                let userService = TestBed.inject(UserService);
                 spyOn(userService, "resetPassword").and.returnValue(Promise.resolve());
 
                 // Wait for stability since ngModel is async
@@ -176,7 +176,7 @@ describe("ResetPasswordDialogComponent", () => {
             });
 
             it("should show an error when sending the code fails", done => {
-                let userService = TestBed.get(UserService) as UserService;
+                let userService = TestBed.inject(UserService);
                 spyOn(userService, "resetPassword").and.returnValue(Promise.reject(["error0", "error1", "error2"]));
 
                 // Wait for stability since ngModel is async
@@ -482,13 +482,13 @@ describe("ResetPasswordDialogComponent", () => {
 
         describe("Form submission", () => {
             it("should reset the password when the form is filled out properly", done => {
-                let userService = TestBed.get(UserService) as UserService;
+                let userService = TestBed.inject(UserService);
                 spyOn(userService, "resetPasswordConfirmation").and.returnValue(Promise.resolve());
 
-                let activeModal = TestBed.get(NgbActiveModal) as NgbActiveModal;
+                let activeModal = TestBed.inject(NgbActiveModal);
                 spyOn(activeModal, "close");
 
-                let modalService = TestBed.get(NgbModal) as NgbModal;
+                let modalService = TestBed.inject(NgbModal);
                 spyOn(modalService, "open");
 
                 // Wait for stability since ngModel is async
@@ -518,13 +518,13 @@ describe("ResetPasswordDialogComponent", () => {
             });
 
             it("should show an error when reset password fails", done => {
-                let userService = TestBed.get(UserService) as UserService;
+                let userService = TestBed.inject(UserService);
                 spyOn(userService, "resetPasswordConfirmation").and.returnValue(Promise.reject(["error0", "error1", "error2"]));
 
-                let activeModal = TestBed.get(NgbActiveModal) as NgbActiveModal;
+                let activeModal = TestBed.inject(NgbActiveModal);
                 spyOn(activeModal, "close");
 
-                let modalService = TestBed.get(NgbModal) as NgbModal;
+                let modalService = TestBed.inject(NgbModal);
                 spyOn(modalService, "open");
 
                 // Wait for stability since ngModel is async

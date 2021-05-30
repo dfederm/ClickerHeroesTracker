@@ -24,8 +24,8 @@ describe("VersionService", () => {
                 ],
             });
 
-        httpMock = TestBed.get(HttpTestingController) as HttpTestingController;
-        versionService = TestBed.get(VersionService) as VersionService;
+        httpMock = TestBed.inject(HttpTestingController);
+        versionService = TestBed.inject(VersionService);
     });
 
     afterEach(() => {

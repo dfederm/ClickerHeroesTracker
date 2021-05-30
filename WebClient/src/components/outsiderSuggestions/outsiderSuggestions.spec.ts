@@ -102,8 +102,8 @@ describe("OutsiderSuggestionsComponent", () => {
             component.refresh();
             fixture.detectChanges();
 
-            let exponentialPipe = TestBed.get(ExponentialPipe) as ExponentialPipe;
-            let percentPipe = TestBed.get(PercentPipe) as PercentPipe;
+            let exponentialPipe = TestBed.inject(ExponentialPipe);
+            let percentPipe = TestBed.inject(PercentPipe);
 
             let tables = fixture.debugElement.queryAll(By.css("table"));
             expect(tables.length).toEqual(2);

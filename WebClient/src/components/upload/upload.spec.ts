@@ -159,7 +159,7 @@ describe("UploadComponent", () => {
         }));
 
         it("should display anonymous data", async(() => {
-            let datePipe = TestBed.get(DatePipe) as DatePipe;
+            let datePipe = TestBed.inject(DatePipe);
 
             let upload = getUpload();
             delete upload.user;
@@ -194,7 +194,7 @@ describe("UploadComponent", () => {
         }));
 
         it("should display public data", async(() => {
-            let datePipe = TestBed.get(DatePipe) as DatePipe;
+            let datePipe = TestBed.inject(DatePipe);
 
             let upload = getUpload();
             let savedGame = new SavedGame(upload.content, true);
@@ -252,7 +252,7 @@ describe("UploadComponent", () => {
         }));
 
         it("should show the modal when clicked", async(() => {
-            let modalService = TestBed.get(NgbModal) as NgbModal;
+            let modalService = TestBed.inject(NgbModal);
             spyOn(modalService, "open").and.returnValue({ result: Promise.resolve() } as NgbModalRef);
 
             let upload = getUpload();
@@ -308,7 +308,7 @@ describe("UploadComponent", () => {
         }));
 
         it("should show the modal when clicked", async(() => {
-            let modalService = TestBed.get(NgbModal) as NgbModal;
+            let modalService = TestBed.inject(NgbModal);
             spyOn(modalService, "open").and.returnValue({ result: Promise.resolve() } as NgbModalRef);
 
             let upload = getUpload();
@@ -341,7 +341,7 @@ describe("UploadComponent", () => {
         }));
 
         it("should delete the upload when confirmed", async(() => {
-            let router = TestBed.get(Router) as Router;
+            let router = TestBed.inject(Router);
             spyOn(router, "navigate").and.returnValue(Promise.resolve(true));
 
             let upload = getUpload();
@@ -370,7 +370,7 @@ describe("UploadComponent", () => {
         }));
 
         it("should show an error when the upload service fails to delete the upload", async(() => {
-            let router = TestBed.get(Router) as Router;
+            let router = TestBed.inject(Router);
             spyOn(router, "navigate");
 
             let upload = getUpload();
@@ -428,7 +428,7 @@ describe("UploadComponent", () => {
 
     describe("Miscellaneous Stats", () => {
         it("should display data", async(() => {
-            let percentPipe = TestBed.get(PercentPipe) as PercentPipe;
+            let percentPipe = TestBed.inject(PercentPipe);
 
             let upload = getUpload();
             uploadServiceGetResolve(upload)
