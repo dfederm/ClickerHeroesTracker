@@ -122,7 +122,7 @@ describe("AncientSuggestionsComponent", () => {
         public transform = exponentialPipeTransform;
     }
 
-    beforeEach(done => {
+    beforeEach(async () => {
         let appInsights = {
             trackMetric: (): void => void 0,
             trackEvent: (): void => void 0,
@@ -133,7 +133,7 @@ describe("AncientSuggestionsComponent", () => {
         let router = { navigate: (): void => void 0 };
         let uploadService = { create: (): void => void 0 };
 
-        TestBed.configureTestingModule(
+        await TestBed.configureTestingModule(
             {
                 imports: [FormsModule],
                 declarations: [
@@ -149,24 +149,19 @@ describe("AncientSuggestionsComponent", () => {
                 ],
                 schemas: [NO_ERRORS_SCHEMA],
             })
-            .compileComponents()
-            .then(() => {
-                fixture = TestBed.createComponent(AncientSuggestionsComponent);
-                component = fixture.componentInstance;
-            })
-            .then(done)
-            .catch(done.fail);
+            .compileComponents();
+
+        fixture = TestBed.createComponent(AncientSuggestionsComponent);
+        component = fixture.componentInstance;
     });
 
     describe("Suggestion Types", () => {
-        beforeEach(done => {
+        beforeEach(async () => {
             component.savedGame = savedGame;
             fixture.detectChanges();
 
             // NgModel is async
-            fixture.whenStable()
-                .then(done)
-                .catch(done.fail);
+            await fixture.whenStable();
         });
 
         it("should default to available souls not including souls from ascension", () => {

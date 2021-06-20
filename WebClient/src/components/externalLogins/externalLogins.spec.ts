@@ -35,7 +35,7 @@ describe("ExternalLoginsComponent", () => {
     let gapiSpy: jasmine.SpyObj<typeof gapi>;
     let fbSpy: jasmine.SpyObj<typeof FB>;
 
-    beforeEach(done => {
+    beforeEach(async () => {
         userInfo = new BehaviorSubject(loggedInUser);
 
         let authenticationService = {
@@ -65,26 +65,22 @@ describe("ExternalLoginsComponent", () => {
         window.gapi = gapiSpy;
         window.FB = fbSpy;
 
-        TestBed.configureTestingModule(
+        await TestBed.configureTestingModule(
             {
                 imports: [FormsModule],
                 declarations: [ExternalLoginsComponent],
-                providers:
-                    [
-                        { provide: AuthenticationService, useValue: authenticationService },
-                        { provide: NgbActiveModal, useValue: activeModal },
-                        { provide: UserService, useValue: userService },
-                        { provide: NgxSpinnerService, useValue: spinnerService },
-                    ],
+                providers: [
+                    { provide: AuthenticationService, useValue: authenticationService },
+                    { provide: NgbActiveModal, useValue: activeModal },
+                    { provide: UserService, useValue: userService },
+                    { provide: NgxSpinnerService, useValue: spinnerService },
+                ],
                 schemas: [NO_ERRORS_SCHEMA],
             })
-            .compileComponents()
-            .then(() => {
-                fixture = TestBed.createComponent(ExternalLoginsComponent);
-                component = fixture.componentInstance;
-            })
-            .then(done)
-            .catch(done.fail);
+            .compileComponents();
+
+        fixture = TestBed.createComponent(ExternalLoginsComponent);
+        component = fixture.componentInstance;
     });
 
     afterEach(() => {
@@ -136,7 +132,7 @@ describe("ExternalLoginsComponent", () => {
             fixture.detectChanges();
         });
 
-        it("should close the dialog when successful", done => {
+        it("should close the dialog when successful", async () => {
             let authenticationService = TestBed.inject(AuthenticationService);
             spyOn(authenticationService, "logInWithAssertion").and.returnValue(Promise.resolve());
 
@@ -163,25 +159,21 @@ describe("ExternalLoginsComponent", () => {
             expect(button).not.toBeNull();
             button.nativeElement.click();
 
-            fixture.whenStable()
-                .then(() => {
-                    fixture.detectChanges();
+            await fixture.whenStable();
+            fixture.detectChanges();
 
-                    expect(auth2.getAuthInstance).toHaveBeenCalled();
-                    expect(googleAuth.signIn).toHaveBeenCalled();
-                    expect(googleUser.getAuthResponse).toHaveBeenCalled();
-                    expect(authenticationService.logInWithAssertion).toHaveBeenCalledWith("urn:ietf:params:oauth:grant-type:google_identity_token", authResponse.id_token, undefined);
-                    expect(activeModal.close).toHaveBeenCalled();
+            expect(auth2.getAuthInstance).toHaveBeenCalled();
+            expect(googleAuth.signIn).toHaveBeenCalled();
+            expect(googleUser.getAuthResponse).toHaveBeenCalled();
+            expect(authenticationService.logInWithAssertion).toHaveBeenCalledWith("urn:ietf:params:oauth:grant-type:google_identity_token", authResponse.id_token, undefined);
+            expect(activeModal.close).toHaveBeenCalled();
 
-                    // No error
-                    let error = fixture.debugElement.query(By.css(".alert-danger"));
-                    expect(error).toBeNull();
-                })
-                .then(done)
-                .catch(done.fail);
+            // No error
+            let error = fixture.debugElement.query(By.css(".alert-danger"));
+            expect(error).toBeNull();
         });
 
-        it("should show an error when Google fails", done => {
+        it("should show an error when Google fails", async () => {
             let authenticationService = TestBed.inject(AuthenticationService);
             spyOn(authenticationService, "logInWithAssertion");
 
@@ -203,24 +195,20 @@ describe("ExternalLoginsComponent", () => {
             expect(button).not.toBeNull();
             button.nativeElement.click();
 
-            fixture.whenStable()
-                .then(() => {
-                    fixture.detectChanges();
+            await fixture.whenStable();
+            fixture.detectChanges();
 
-                    expect(auth2.getAuthInstance).toHaveBeenCalled();
-                    expect(googleAuth.signIn).toHaveBeenCalled();
-                    expect(authenticationService.logInWithAssertion).not.toHaveBeenCalled();
-                    expect(activeModal.close).not.toHaveBeenCalled();
+            expect(auth2.getAuthInstance).toHaveBeenCalled();
+            expect(googleAuth.signIn).toHaveBeenCalled();
+            expect(authenticationService.logInWithAssertion).not.toHaveBeenCalled();
+            expect(activeModal.close).not.toHaveBeenCalled();
 
-                    // Error
-                    let error = fixture.debugElement.query(By.css(".alert-danger"));
-                    expect(error).not.toBeNull();
-                })
-                .then(done)
-                .catch(done.fail);
+            // Error
+            let error = fixture.debugElement.query(By.css(".alert-danger"));
+            expect(error).not.toBeNull();
         });
 
-        it("should show an error when authenticationService fails", done => {
+        it("should show an error when authenticationService fails", async () => {
             let authenticationService = TestBed.inject(AuthenticationService);
             spyOn(authenticationService, "logInWithAssertion").and.returnValue(Promise.reject(""));
 
@@ -247,25 +235,21 @@ describe("ExternalLoginsComponent", () => {
             expect(button).not.toBeNull();
             button.nativeElement.click();
 
-            fixture.whenStable()
-                .then(() => {
-                    fixture.detectChanges();
+            await fixture.whenStable();
+            fixture.detectChanges();
 
-                    expect(auth2.getAuthInstance).toHaveBeenCalled();
-                    expect(googleAuth.signIn).toHaveBeenCalled();
-                    expect(googleUser.getAuthResponse).toHaveBeenCalled();
-                    expect(authenticationService.logInWithAssertion).toHaveBeenCalledWith("urn:ietf:params:oauth:grant-type:google_identity_token", authResponse.id_token, undefined);
-                    expect(activeModal.close).not.toHaveBeenCalled();
+            expect(auth2.getAuthInstance).toHaveBeenCalled();
+            expect(googleAuth.signIn).toHaveBeenCalled();
+            expect(googleUser.getAuthResponse).toHaveBeenCalled();
+            expect(authenticationService.logInWithAssertion).toHaveBeenCalledWith("urn:ietf:params:oauth:grant-type:google_identity_token", authResponse.id_token, undefined);
+            expect(activeModal.close).not.toHaveBeenCalled();
 
-                    // Error
-                    let error = fixture.debugElement.query(By.css(".alert-danger"));
-                    expect(error).not.toBeNull();
-                })
-                .then(done)
-                .catch(done.fail);
+            // Error
+            let error = fixture.debugElement.query(By.css(".alert-danger"));
+            expect(error).not.toBeNull();
         });
 
-        it("should not show an error when cancelled", done => {
+        it("should not show an error when cancelled", async () => {
             let authenticationService = TestBed.inject(AuthenticationService);
             spyOn(authenticationService, "logInWithAssertion");
 
@@ -287,21 +271,17 @@ describe("ExternalLoginsComponent", () => {
             expect(button).not.toBeNull();
             button.nativeElement.click();
 
-            fixture.whenStable()
-                .then(() => {
-                    fixture.detectChanges();
+            await fixture.whenStable();
+            fixture.detectChanges();
 
-                    expect(auth2.getAuthInstance).toHaveBeenCalled();
-                    expect(googleAuth.signIn).toHaveBeenCalled();
-                    expect(authenticationService.logInWithAssertion).not.toHaveBeenCalled();
-                    expect(activeModal.close).not.toHaveBeenCalled();
+            expect(auth2.getAuthInstance).toHaveBeenCalled();
+            expect(googleAuth.signIn).toHaveBeenCalled();
+            expect(authenticationService.logInWithAssertion).not.toHaveBeenCalled();
+            expect(activeModal.close).not.toHaveBeenCalled();
 
-                    // No error
-                    let error = fixture.debugElement.query(By.css(".alert-danger"));
-                    expect(error).toBeNull();
-                })
-                .then(done)
-                .catch(done.fail);
+            // No error
+            let error = fixture.debugElement.query(By.css(".alert-danger"));
+            expect(error).toBeNull();
         });
     });
 
@@ -313,7 +293,7 @@ describe("ExternalLoginsComponent", () => {
             fixture.detectChanges();
         });
 
-        it("should close the dialog when successful", done => {
+        it("should close the dialog when successful", async () => {
             let authenticationService = TestBed.inject(AuthenticationService);
             spyOn(authenticationService, "logInWithAssertion").and.returnValue(Promise.resolve());
 
@@ -333,23 +313,19 @@ describe("ExternalLoginsComponent", () => {
             expect(button).not.toBeNull();
             button.nativeElement.click();
 
-            fixture.whenStable()
-                .then(() => {
-                    fixture.detectChanges();
+            await fixture.whenStable();
+            fixture.detectChanges();
 
-                    expect(FB.login).toHaveBeenCalled();
-                    expect(authenticationService.logInWithAssertion).toHaveBeenCalledWith("urn:ietf:params:oauth:grant-type:facebook_access_token", loginResponse.authResponse.accessToken, undefined);
-                    expect(activeModal.close).toHaveBeenCalled();
+            expect(FB.login).toHaveBeenCalled();
+            expect(authenticationService.logInWithAssertion).toHaveBeenCalledWith("urn:ietf:params:oauth:grant-type:facebook_access_token", loginResponse.authResponse.accessToken, undefined);
+            expect(activeModal.close).toHaveBeenCalled();
 
-                    // No error
-                    let error = fixture.debugElement.query(By.css(".alert-danger"));
-                    expect(error).toBeNull();
-                })
-                .then(done)
-                .catch(done.fail);
+            // No error
+            let error = fixture.debugElement.query(By.css(".alert-danger"));
+            expect(error).toBeNull();
         });
 
-        it("should show an error when Facebook fails", done => {
+        it("should show an error when Facebook fails", async () => {
             let authenticationService = TestBed.inject(AuthenticationService);
             spyOn(authenticationService, "logInWithAssertion");
 
@@ -369,23 +345,19 @@ describe("ExternalLoginsComponent", () => {
             expect(button).not.toBeNull();
             button.nativeElement.click();
 
-            fixture.whenStable()
-                .then(() => {
-                    fixture.detectChanges();
+            await fixture.whenStable();
+            fixture.detectChanges();
 
-                    expect(FB.login).toHaveBeenCalled();
-                    expect(authenticationService.logInWithAssertion).not.toHaveBeenCalled();
-                    expect(activeModal.close).not.toHaveBeenCalled();
+            expect(FB.login).toHaveBeenCalled();
+            expect(authenticationService.logInWithAssertion).not.toHaveBeenCalled();
+            expect(activeModal.close).not.toHaveBeenCalled();
 
-                    // Error
-                    let error = fixture.debugElement.query(By.css(".alert-danger"));
-                    expect(error).not.toBeNull();
-                })
-                .then(done)
-                .catch(done.fail);
+            // Error
+            let error = fixture.debugElement.query(By.css(".alert-danger"));
+            expect(error).not.toBeNull();
         });
 
-        it("should show an error when authenticationService fails", done => {
+        it("should show an error when authenticationService fails", async () => {
             let authenticationService = TestBed.inject(AuthenticationService);
             spyOn(authenticationService, "logInWithAssertion").and.returnValue(Promise.reject(""));
 
@@ -405,23 +377,19 @@ describe("ExternalLoginsComponent", () => {
             expect(button).not.toBeNull();
             button.nativeElement.click();
 
-            fixture.whenStable()
-                .then(() => {
-                    fixture.detectChanges();
+            await fixture.whenStable();
+            fixture.detectChanges();
 
-                    expect(FB.login).toHaveBeenCalled();
-                    expect(authenticationService.logInWithAssertion).toHaveBeenCalledWith("urn:ietf:params:oauth:grant-type:facebook_access_token", loginResponse.authResponse.accessToken, undefined);
-                    expect(activeModal.close).not.toHaveBeenCalled();
+            expect(FB.login).toHaveBeenCalled();
+            expect(authenticationService.logInWithAssertion).toHaveBeenCalledWith("urn:ietf:params:oauth:grant-type:facebook_access_token", loginResponse.authResponse.accessToken, undefined);
+            expect(activeModal.close).not.toHaveBeenCalled();
 
-                    // Error
-                    let error = fixture.debugElement.query(By.css(".alert-danger"));
-                    expect(error).not.toBeNull();
-                })
-                .then(done)
-                .catch(done.fail);
+            // Error
+            let error = fixture.debugElement.query(By.css(".alert-danger"));
+            expect(error).not.toBeNull();
         });
 
-        it("should not show an error when cancelled", done => {
+        it("should not show an error when cancelled", async () => {
             let authenticationService = TestBed.inject(AuthenticationService);
             spyOn(authenticationService, "logInWithAssertion");
 
@@ -438,20 +406,16 @@ describe("ExternalLoginsComponent", () => {
             expect(button).not.toBeNull();
             button.nativeElement.click();
 
-            fixture.whenStable()
-                .then(() => {
-                    fixture.detectChanges();
+            await fixture.whenStable();
+            fixture.detectChanges();
 
-                    expect(FB.login).toHaveBeenCalled();
-                    expect(authenticationService.logInWithAssertion).not.toHaveBeenCalled();
-                    expect(activeModal.close).not.toHaveBeenCalled();
+            expect(FB.login).toHaveBeenCalled();
+            expect(authenticationService.logInWithAssertion).not.toHaveBeenCalled();
+            expect(activeModal.close).not.toHaveBeenCalled();
 
-                    // No error
-                    let error = fixture.debugElement.query(By.css(".alert-danger"));
-                    expect(error).toBeNull();
-                })
-                .then(done)
-                .catch(done.fail);
+            // No error
+            let error = fixture.debugElement.query(By.css(".alert-danger"));
+            expect(error).toBeNull();
         });
     });
 
@@ -460,7 +424,7 @@ describe("ExternalLoginsComponent", () => {
             fixture.detectChanges();
         });
 
-        it("should close the dialog when successful", done => {
+        it("should close the dialog when successful", async () => {
             let authenticationService = TestBed.inject(AuthenticationService);
             spyOn(authenticationService, "logInWithAssertion").and.returnValue(Promise.resolve());
 
@@ -480,23 +444,19 @@ describe("ExternalLoginsComponent", () => {
             expect(button).not.toBeNull();
             button.nativeElement.click();
 
-            fixture.whenStable()
-                .then(() => {
-                    fixture.detectChanges();
+            await fixture.whenStable();
+            fixture.detectChanges();
 
-                    expect(component.microsoftApp.loginPopup).toHaveBeenCalledWith({ scopes: ["openid", "email"] });
-                    expect(authenticationService.logInWithAssertion).toHaveBeenCalledWith("urn:ietf:params:oauth:grant-type:microsoft_identity_token", token, undefined);
-                    expect(activeModal.close).toHaveBeenCalled();
+            expect(component.microsoftApp.loginPopup).toHaveBeenCalledWith({ scopes: ["openid", "email"] });
+            expect(authenticationService.logInWithAssertion).toHaveBeenCalledWith("urn:ietf:params:oauth:grant-type:microsoft_identity_token", token, undefined);
+            expect(activeModal.close).toHaveBeenCalled();
 
-                    // No error
-                    let error = fixture.debugElement.query(By.css(".alert-danger"));
-                    expect(error).toBeNull();
-                })
-                .then(done)
-                .catch(done.fail);
+            // No error
+            let error = fixture.debugElement.query(By.css(".alert-danger"));
+            expect(error).toBeNull();
         });
 
-        it("should show an error when Microsoft fails", done => {
+        it("should show an error when Microsoft fails", async () => {
             let authenticationService = TestBed.inject(AuthenticationService);
             spyOn(authenticationService, "logInWithAssertion");
 
@@ -512,23 +472,19 @@ describe("ExternalLoginsComponent", () => {
             expect(button).not.toBeNull();
             button.nativeElement.click();
 
-            fixture.whenStable()
-                .then(() => {
-                    fixture.detectChanges();
+            await fixture.whenStable();
+            fixture.detectChanges();
 
-                    expect(component.microsoftApp.loginPopup).toHaveBeenCalledWith({ scopes: ["openid", "email"] });
-                    expect(authenticationService.logInWithAssertion).not.toHaveBeenCalled();
-                    expect(activeModal.close).not.toHaveBeenCalled();
+            expect(component.microsoftApp.loginPopup).toHaveBeenCalledWith({ scopes: ["openid", "email"] });
+            expect(authenticationService.logInWithAssertion).not.toHaveBeenCalled();
+            expect(activeModal.close).not.toHaveBeenCalled();
 
-                    // Error
-                    let error = fixture.debugElement.query(By.css(".alert-danger"));
-                    expect(error).not.toBeNull();
-                })
-                .then(done)
-                .catch(done.fail);
+            // Error
+            let error = fixture.debugElement.query(By.css(".alert-danger"));
+            expect(error).not.toBeNull();
         });
 
-        it("should show an error when authenticationService fails", done => {
+        it("should show an error when authenticationService fails", async () => {
             let authenticationService = TestBed.inject(AuthenticationService);
             spyOn(authenticationService, "logInWithAssertion").and.returnValue(Promise.reject(""));
 
@@ -548,23 +504,19 @@ describe("ExternalLoginsComponent", () => {
             expect(button).not.toBeNull();
             button.nativeElement.click();
 
-            fixture.whenStable()
-                .then(() => {
-                    fixture.detectChanges();
+            await fixture.whenStable();
+            fixture.detectChanges();
 
-                    expect(component.microsoftApp.loginPopup).toHaveBeenCalledWith({ scopes: ["openid", "email"] });
-                    expect(authenticationService.logInWithAssertion).toHaveBeenCalledWith("urn:ietf:params:oauth:grant-type:microsoft_identity_token", token, undefined);
-                    expect(activeModal.close).not.toHaveBeenCalled();
+            expect(component.microsoftApp.loginPopup).toHaveBeenCalledWith({ scopes: ["openid", "email"] });
+            expect(authenticationService.logInWithAssertion).toHaveBeenCalledWith("urn:ietf:params:oauth:grant-type:microsoft_identity_token", token, undefined);
+            expect(activeModal.close).not.toHaveBeenCalled();
 
-                    // Error
-                    let error = fixture.debugElement.query(By.css(".alert-danger"));
-                    expect(error).not.toBeNull();
-                })
-                .then(done)
-                .catch(done.fail);
+            // Error
+            let error = fixture.debugElement.query(By.css(".alert-danger"));
+            expect(error).not.toBeNull();
         });
 
-        it("should not show an error when cancelled", done => {
+        it("should not show an error when cancelled", async () => {
             let authenticationService = TestBed.inject(AuthenticationService);
             spyOn(authenticationService, "logInWithAssertion");
 
@@ -580,27 +532,23 @@ describe("ExternalLoginsComponent", () => {
             expect(button).not.toBeNull();
             button.nativeElement.click();
 
-            fixture.whenStable()
-                .then(() => {
-                    fixture.detectChanges();
+            await fixture.whenStable();
+            fixture.detectChanges();
 
-                    expect(component.microsoftApp.loginPopup).toHaveBeenCalledWith({ scopes: ["openid", "email"] });
-                    expect(authenticationService.logInWithAssertion).not.toHaveBeenCalled();
-                    expect(activeModal.close).not.toHaveBeenCalled();
+            expect(component.microsoftApp.loginPopup).toHaveBeenCalledWith({ scopes: ["openid", "email"] });
+            expect(authenticationService.logInWithAssertion).not.toHaveBeenCalled();
+            expect(activeModal.close).not.toHaveBeenCalled();
 
-                    // No error
-                    let error = fixture.debugElement.query(By.css(".alert-danger"));
-                    expect(error).toBeNull();
-                })
-                .then(done)
-                .catch(done.fail);
+            // No error
+            let error = fixture.debugElement.query(By.css(".alert-danger"));
+            expect(error).toBeNull();
         });
     });
 
     describe("Choosing a user name", () => {
         let authenticationService: AuthenticationService;
 
-        beforeEach(done => {
+        beforeEach(async () => {
             fixture.detectChanges();
 
             authenticationService = TestBed.inject(AuthenticationService);
@@ -622,19 +570,15 @@ describe("ExternalLoginsComponent", () => {
             expect(button).not.toBeNull();
             button.nativeElement.click();
 
-            fixture.whenStable()
-                .then(() => {
-                    fixture.detectChanges();
+            await fixture.whenStable();
+            fixture.detectChanges();
 
-                    // Reset fro the actual tests
-                    (authenticationService.logInWithAssertion as jasmine.Spy).calls.reset();
+            // Reset for the actual tests
+            (authenticationService.logInWithAssertion as jasmine.Spy).calls.reset();
 
-                    // No error
-                    let error = fixture.debugElement.query(By.css(".alert-danger"));
-                    expect(error).toBeNull();
-                })
-                .then(done)
-                .catch(done.fail);
+            // No error
+            let error = fixture.debugElement.query(By.css(".alert-danger"));
+            expect(error).toBeNull();
         });
 
         describe("Validation", () => {
@@ -686,7 +630,7 @@ describe("ExternalLoginsComponent", () => {
         });
 
         describe("Form submission", () => {
-            it("should close the dialog when registering properly", done => {
+            it("should close the dialog when registering properly", async () => {
                 (authenticationService.logInWithAssertion as jasmine.Spy).and.returnValue(Promise.resolve());
 
                 let activeModal = TestBed.inject(NgbActiveModal);
@@ -695,19 +639,15 @@ describe("ExternalLoginsComponent", () => {
                 let form = fixture.debugElement.query(By.css("form"));
                 expect(form).not.toBeNull();
 
-                submit(form)
-                    .then(() => {
-                        expect(authenticationService.logInWithAssertion).toHaveBeenCalledWith("urn:ietf:params:oauth:grant-type:microsoft_identity_token", "someToken", "someUsername");
-                        expect(activeModal.close).toHaveBeenCalled();
+                await submit(form);
+                expect(authenticationService.logInWithAssertion).toHaveBeenCalledWith("urn:ietf:params:oauth:grant-type:microsoft_identity_token", "someToken", "someUsername");
+                expect(activeModal.close).toHaveBeenCalled();
 
-                        let errors = getAllErrors();
-                        expect(errors.length).toEqual(0);
-                    })
-                    .then(done)
-                    .catch(done.fail);
+                let errors = getAllErrors();
+                expect(errors.length).toEqual(0);
             });
 
-            it("should show an error when an http error occurs", done => {
+            it("should show an error when an http error occurs", async () => {
                 (authenticationService.logInWithAssertion as jasmine.Spy).and.returnValue(Promise.reject(""));
 
                 let activeModal = TestBed.inject(NgbActiveModal);
@@ -716,20 +656,16 @@ describe("ExternalLoginsComponent", () => {
                 let form = fixture.debugElement.query(By.css("form"));
                 expect(form).not.toBeNull();
 
-                submit(form)
-                    .then(() => {
-                        expect(authenticationService.logInWithAssertion).toHaveBeenCalledWith("urn:ietf:params:oauth:grant-type:microsoft_identity_token", "someToken", "someUsername");
-                        expect(activeModal.close).not.toHaveBeenCalled();
+                await submit(form);
+                expect(authenticationService.logInWithAssertion).toHaveBeenCalledWith("urn:ietf:params:oauth:grant-type:microsoft_identity_token", "someToken", "someUsername");
+                expect(activeModal.close).not.toHaveBeenCalled();
 
-                        let errors = getAllErrors();
-                        expect(errors.length).toEqual(1);
-                        expect(errors[0]).toEqual("There was a problem creating your account");
-                    })
-                    .then(done)
-                    .catch(done.fail);
+                let errors = getAllErrors();
+                expect(errors.length).toEqual(1);
+                expect(errors[0]).toEqual("There was a problem creating your account");
             });
 
-            it("should show an error when there is a validation error", done => {
+            it("should show an error when there is a validation error", async () => {
                 let errorResponse = { error_description: "someErrorDescription" };
                 (authenticationService.logInWithAssertion as jasmine.Spy).and.returnValue(Promise.reject({ json: () => errorResponse }));
 
@@ -739,20 +675,16 @@ describe("ExternalLoginsComponent", () => {
                 let form = fixture.debugElement.query(By.css("form"));
                 expect(form).not.toBeNull();
 
-                submit(form)
-                    .then(() => {
-                        expect(authenticationService.logInWithAssertion).toHaveBeenCalledWith("urn:ietf:params:oauth:grant-type:microsoft_identity_token", "someToken", "someUsername");
-                        expect(activeModal.close).not.toHaveBeenCalled();
+                await submit(form);
+                expect(authenticationService.logInWithAssertion).toHaveBeenCalledWith("urn:ietf:params:oauth:grant-type:microsoft_identity_token", "someToken", "someUsername");
+                expect(activeModal.close).not.toHaveBeenCalled();
 
-                        let errors = getAllErrors();
-                        expect(errors.length).toEqual(1);
-                        expect(errors[0]).toEqual("someErrorDescription");
-                    })
-                    .then(done)
-                    .catch(done.fail);
+                let errors = getAllErrors();
+                expect(errors.length).toEqual(1);
+                expect(errors[0]).toEqual("someErrorDescription");
             });
 
-            function submit(form: DebugElement): Promise<void> {
+            async function submit(form: DebugElement): Promise<void> {
                 setUsername(form, "someUsername");
 
                 fixture.detectChanges();
@@ -760,8 +692,8 @@ describe("ExternalLoginsComponent", () => {
                 expect(button).not.toBeNull();
                 button.nativeElement.click();
 
-                return fixture.whenStable()
-                    .then(() => fixture.detectChanges());
+                await fixture.whenStable();
+                return fixture.detectChanges();
             }
         });
 
@@ -800,7 +732,7 @@ describe("ExternalLoginsComponent", () => {
             component.isManageMode = true;
         });
 
-        it("should display list of registered logins", done => {
+        it("should display list of registered logins", async () => {
             let logins: IUserLogins = {
                 hasPassword: true,
                 externalLogins: [
@@ -825,25 +757,21 @@ describe("ExternalLoginsComponent", () => {
 
             expect(userService.getLogins).toHaveBeenCalledWith(loggedInUser.username);
 
-            fixture.whenStable()
-                .then(() => {
-                    fixture.detectChanges();
+            await fixture.whenStable();
+            fixture.detectChanges();
 
-                    let loginsTable = fixture.debugElement.query(By.css("table"));
-                    expect(loginsTable).not.toBeNull();
+            let loginsTable = fixture.debugElement.query(By.css("table"));
+            expect(loginsTable).not.toBeNull();
 
-                    let loginsRows = loginsTable.queryAll(By.css("tr"));
-                    expect(loginsRows.length).toEqual(logins.externalLogins.length);
+            let loginsRows = loginsTable.queryAll(By.css("tr"));
+            expect(loginsRows.length).toEqual(logins.externalLogins.length);
 
-                    // No error
-                    let error = fixture.debugElement.query(By.css(".alert-danger"));
-                    expect(error).toBeNull();
-                })
-                .then(done)
-                .catch(done.fail);
+            // No error
+            let error = fixture.debugElement.query(By.css(".alert-danger"));
+            expect(error).toBeNull();
         });
 
-        it("should show an error when fetching logins fails", done => {
+        it("should show an error when fetching logins fails", async () => {
             let userService = TestBed.inject(UserService);
             spyOn(userService, "getLogins").and.returnValue(Promise.reject(""));
 
@@ -851,22 +779,18 @@ describe("ExternalLoginsComponent", () => {
 
             expect(userService.getLogins).toHaveBeenCalledWith(loggedInUser.username);
 
-            fixture.whenStable()
-                .then(() => {
-                    fixture.detectChanges();
+            await fixture.whenStable();
+            fixture.detectChanges();
 
-                    let loginsTable = fixture.debugElement.query(By.css("table"));
-                    expect(loginsTable).toBeNull();
+            let loginsTable = fixture.debugElement.query(By.css("table"));
+            expect(loginsTable).toBeNull();
 
-                    // Error
-                    let error = fixture.debugElement.query(By.css(".alert-danger"));
-                    expect(error).not.toBeNull();
-                })
-                .then(done)
-                .catch(done.fail);
+            // Error
+            let error = fixture.debugElement.query(By.css(".alert-danger"));
+            expect(error).not.toBeNull();
         });
 
-        it("should remove login", done => {
+        it("should remove login", async () => {
             let logins: IUserLogins = {
                 hasPassword: true,
                 externalLogins: [
@@ -893,37 +817,31 @@ describe("ExternalLoginsComponent", () => {
             expect(userService.getLogins).toHaveBeenCalledWith(loggedInUser.username);
             (userService.getLogins as jasmine.Spy).calls.reset();
 
-            fixture.whenStable()
-                .then(() => {
-                    fixture.detectChanges();
+            await fixture.whenStable();
+            fixture.detectChanges();
 
-                    let loginsTable = fixture.debugElement.query(By.css("table"));
-                    expect(loginsTable).not.toBeNull();
+            let loginsTable = fixture.debugElement.query(By.css("table"));
+            expect(loginsTable).not.toBeNull();
 
-                    let loginsRows = loginsTable.queryAll(By.css("tr"));
-                    expect(loginsRows.length).toEqual(logins.externalLogins.length);
+            let loginsRows = loginsTable.queryAll(By.css("tr"));
+            expect(loginsRows.length).toEqual(logins.externalLogins.length);
 
-                    let removeButton = loginsRows[1].query(By.css("button"));
-                    expect(removeButton).not.toBeNull();
-                    removeButton.nativeElement.click();
+            let removeButton = loginsRows[1].query(By.css("button"));
+            expect(removeButton).not.toBeNull();
+            removeButton.nativeElement.click();
 
-                    expect(userService.removeLogin).toHaveBeenCalledWith(loggedInUser.username, logins.externalLogins[1]);
+            expect(userService.removeLogin).toHaveBeenCalledWith(loggedInUser.username, logins.externalLogins[1]);
+            await fixture.whenStable();
 
-                    return fixture.whenStable();
-                })
-                .then(() => {
-                    // Refreshes the data
-                    expect(userService.getLogins).toHaveBeenCalledWith(loggedInUser.username);
+            // Refreshes the data
+            expect(userService.getLogins).toHaveBeenCalledWith(loggedInUser.username);
 
-                    // No error
-                    let error = fixture.debugElement.query(By.css(".alert-danger"));
-                    expect(error).toBeNull();
-                })
-                .then(done)
-                .catch(done.fail);
+            // No error
+            let error = fixture.debugElement.query(By.css(".alert-danger"));
+            expect(error).toBeNull();
         });
 
-        it("should show an error when remove login fails", done => {
+        it("should show an error when remove login fails", async () => {
             let logins: IUserLogins = {
                 hasPassword: true,
                 externalLogins: [
@@ -950,38 +868,32 @@ describe("ExternalLoginsComponent", () => {
             expect(userService.getLogins).toHaveBeenCalledWith(loggedInUser.username);
             (userService.getLogins as jasmine.Spy).calls.reset();
 
-            fixture.whenStable()
-                .then(() => {
-                    fixture.detectChanges();
+            await fixture.whenStable();
+            fixture.detectChanges();
 
-                    let loginsTable = fixture.debugElement.query(By.css("table"));
-                    expect(loginsTable).not.toBeNull();
+            let loginsTable = fixture.debugElement.query(By.css("table"));
+            expect(loginsTable).not.toBeNull();
 
-                    let loginsRows = loginsTable.queryAll(By.css("tr"));
-                    expect(loginsRows.length).toEqual(logins.externalLogins.length);
+            let loginsRows = loginsTable.queryAll(By.css("tr"));
+            expect(loginsRows.length).toEqual(logins.externalLogins.length);
 
-                    let removeButton = loginsRows[1].query(By.css("button"));
-                    expect(removeButton).not.toBeNull();
-                    removeButton.nativeElement.click();
+            let removeButton = loginsRows[1].query(By.css("button"));
+            expect(removeButton).not.toBeNull();
+            removeButton.nativeElement.click();
 
-                    expect(userService.removeLogin).toHaveBeenCalledWith(loggedInUser.username, logins.externalLogins[1]);
+            expect(userService.removeLogin).toHaveBeenCalledWith(loggedInUser.username, logins.externalLogins[1]);
 
-                    return fixture.whenStable();
-                })
-                .then(() => {
-                    fixture.detectChanges();
+            await fixture.whenStable();
+            fixture.detectChanges();
 
-                    expect(userService.getLogins).not.toHaveBeenCalled();
+            expect(userService.getLogins).not.toHaveBeenCalled();
 
-                    // Error
-                    let error = fixture.debugElement.query(By.css(".alert-danger"));
-                    expect(error).not.toBeNull();
-                })
-                .then(done)
-                .catch(done.fail);
+            // Error
+            let error = fixture.debugElement.query(By.css(".alert-danger"));
+            expect(error).not.toBeNull();
         });
 
-        it("should hide add buttons for registered logins", done => {
+        it("should hide add buttons for registered logins", async () => {
             let authResponse = { id_token: "someIdToken" };
             let logins: IUserLogins = {
                 hasPassword: true,
@@ -1011,42 +923,36 @@ describe("ExternalLoginsComponent", () => {
             expect(userService.getLogins).toHaveBeenCalledWith(loggedInUser.username);
             (userService.getLogins as jasmine.Spy).calls.reset();
 
-            fixture.whenStable()
-                .then(() => {
-                    fixture.detectChanges();
+            await fixture.whenStable();
+            fixture.detectChanges();
 
-                    let buttons = fixture.debugElement.queryAll(By.css("button"));
-                    expect(buttons.length).not.toEqual(0);
+            let buttons = fixture.debugElement.queryAll(By.css("button"));
+            expect(buttons.length).not.toEqual(0);
 
-                    let button: DebugElement = null;
-                    for (let i = 0; i < buttons.length; i++) {
-                        if (buttons[i].nativeElement.textContent.trim() === "Google") {
-                            button = buttons[i];
-                        }
-                    }
+            let button: DebugElement = null;
+            for (let i = 0; i < buttons.length; i++) {
+                if (buttons[i].nativeElement.textContent.trim() === "Google") {
+                    button = buttons[i];
+                }
+            }
 
-                    gapi.auth2.getAuthInstance = () => ({ signIn: () => Promise.resolve({ getAuthResponse: () => authResponse }) }) as {} as gapi.auth2.GoogleAuth;
+            gapi.auth2.getAuthInstance = () => ({ signIn: () => Promise.resolve({ getAuthResponse: () => authResponse }) }) as {} as gapi.auth2.GoogleAuth;
+            expect(button).toBeDefined();
+            button.nativeElement.click();
 
-                    expect(button).toBeDefined();
-                    button.nativeElement.click();
+            await fixture.whenStable();
 
-                    return fixture.whenStable();
-                })
-                .then(() => {
-                    expect(authenticationService.logInWithAssertion).toHaveBeenCalledWith("urn:ietf:params:oauth:grant-type:google_identity_token", authResponse.id_token, undefined);
+            expect(authenticationService.logInWithAssertion).toHaveBeenCalledWith("urn:ietf:params:oauth:grant-type:google_identity_token", authResponse.id_token, undefined);
 
-                    // Refreshes the data
-                    expect(userService.getLogins).toHaveBeenCalledWith(loggedInUser.username);
+            // Refreshes the data
+            expect(userService.getLogins).toHaveBeenCalledWith(loggedInUser.username);
 
-                    // No error
-                    let error = fixture.debugElement.query(By.css(".alert-danger"));
-                    expect(error).toBeNull();
-                })
-                .then(done)
-                .catch(done.fail);
+            // No error
+            let error = fixture.debugElement.query(By.css(".alert-danger"));
+            expect(error).toBeNull();
         });
 
-        it("should refresh the login data when adding a new login", done => {
+        it("should refresh the login data when adding a new login", async () => {
             const providerName = "Google";
             let logins: IUserLogins = {
                 hasPassword: true,
@@ -1064,27 +970,20 @@ describe("ExternalLoginsComponent", () => {
 
             expect(userService.getLogins).toHaveBeenCalledWith(loggedInUser.username);
 
-            fixture.whenStable()
-                .then(() => {
-                    fixture.detectChanges();
+            await fixture.whenStable();
+            fixture.detectChanges();
 
-                    let buttons = fixture.debugElement.queryAll(By.css("button"));
-                    expect(buttons.length).not.toEqual(0);
+            let buttons = fixture.debugElement.queryAll(By.css("button"));
+            expect(buttons.length).not.toEqual(0);
+            for (let i = 0; i < buttons.length; i++) {
+                if (buttons[i].nativeElement.textContent.trim() === providerName) {
+                    throw new Error(`Found add button for provider: ${providerName}`);
+                }
+            }
 
-                    for (let i = 0; i < buttons.length; i++) {
-                        if (buttons[i].nativeElement.textContent.trim() === providerName) {
-                            return Promise.reject(`Found add button for provider: ${providerName}`);
-                        }
-                    }
-
-                    // No error
-                    let error = fixture.debugElement.query(By.css(".alert-danger"));
-                    expect(error).toBeNull();
-
-                    return Promise.resolve();
-                })
-                .then(done)
-                .catch(done.fail);
+            // No error
+            let error = fixture.debugElement.query(By.css(".alert-danger"));
+            expect(error).toBeNull();
         });
     });
 });

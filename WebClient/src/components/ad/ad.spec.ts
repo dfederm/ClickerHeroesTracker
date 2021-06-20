@@ -30,7 +30,7 @@ describe("AdComponent", () => {
         }
     }
 
-    beforeEach(done => {
+    beforeEach(async () => {
         timesRendered = 0;
         navigationEvents = new Subject();
         let router = {
@@ -40,23 +40,18 @@ describe("AdComponent", () => {
             },
         };
 
-        TestBed.configureTestingModule(
+        await TestBed.configureTestingModule(
             {
                 declarations: [
                     AdComponent,
                     MockAdComponent,
                 ],
-                providers:
-                    [
-                        { provide: Router, useValue: router },
-                    ],
+                providers: [
+                    { provide: Router, useValue: router },
+                ],
             })
-            .compileComponents()
-            .then(() => {
-                fixture = TestBed.createComponent(AdComponent);
-            })
-            .then(done)
-            .catch(done.fail);
+            .compileComponents();
+        fixture = TestBed.createComponent(AdComponent);
     });
 
     it("should display an ad", () => {

@@ -25,7 +25,7 @@ describe("FeedbackDialogComponent", () => {
         isLoggedIn: false,
     };
 
-    beforeEach(done => {
+    beforeEach(async () => {
         userInfo = new BehaviorSubject(notLoggedInUser);
         let authenticationService = { userInfo: () => userInfo };
         let feedbackService = {
@@ -33,27 +33,23 @@ describe("FeedbackDialogComponent", () => {
         };
         let activeModal = { close: (): void => void 0 };
 
-        TestBed.configureTestingModule(
+        await TestBed.configureTestingModule(
             {
                 imports: [FormsModule],
                 declarations: [FeedbackDialogComponent],
-                providers:
-                    [
-                        { provide: AuthenticationService, useValue: authenticationService },
-                        { provide: FeedbackService, useValue: feedbackService },
-                        { provide: NgbActiveModal, useValue: activeModal },
-                    ],
+                providers: [
+                    { provide: AuthenticationService, useValue: authenticationService },
+                    { provide: FeedbackService, useValue: feedbackService },
+                    { provide: NgbActiveModal, useValue: activeModal },
+                ],
                 schemas: [NO_ERRORS_SCHEMA],
             })
-            .compileComponents()
-            .then(() => {
-                fixture = TestBed.createComponent(FeedbackDialogComponent);
-                component = fixture.componentInstance;
+            .compileComponents();
 
-                fixture.detectChanges();
-            })
-            .then(done)
-            .catch(done.fail);
+        fixture = TestBed.createComponent(FeedbackDialogComponent);
+        component = fixture.componentInstance;
+
+        fixture.detectChanges();
     });
 
     it("should display the modal header", () => {
@@ -94,218 +90,193 @@ describe("FeedbackDialogComponent", () => {
     });
 
     describe("form validation", () => {
-        it("should disable the submit button initially", done => {
+        it("should disable the submit button initially", async () => {
             // Wait for stability since ngModel is async
-            fixture.whenStable()
-                .then(() => {
-                    let body = fixture.debugElement.query(By.css(".modal-body"));
-                    expect(body).not.toBeNull();
+            await fixture.whenStable();
 
-                    let form = body.query(By.css("form"));
-                    expect(form).not.toBeNull();
+            let body = fixture.debugElement.query(By.css(".modal-body"));
+            expect(body).not.toBeNull();
 
-                    fixture.detectChanges();
-                    let button = form.query(By.css("button"));
-                    expect(button).not.toBeNull();
-                    expect(button.properties.disabled).toEqual(true);
+            let form = body.query(By.css("form"));
+            expect(form).not.toBeNull();
 
-                    let errors = getAllErrors();
-                    expect(errors.length).toEqual(0);
-                })
-                .then(done)
-                .catch(done.fail);
+            fixture.detectChanges();
+            let button = form.query(By.css("button"));
+            expect(button).not.toBeNull();
+            expect(button.properties.disabled).toEqual(true);
+
+            let errors = getAllErrors();
+            expect(errors.length).toEqual(0);
         });
 
-        it("should enable the register button when the user is not logged in and all inputs are valid", done => {
+        it("should enable the register button when the user is not logged in and all inputs are valid", async () => {
             userInfo.next(notLoggedInUser);
             fixture.detectChanges();
 
             // Wait for stability since ngModel is async
-            fixture.whenStable()
-                .then(() => {
-                    let body = fixture.debugElement.query(By.css(".modal-body"));
-                    expect(body).not.toBeNull();
+            await fixture.whenStable();
+            let body = fixture.debugElement.query(By.css(".modal-body"));
+            expect(body).not.toBeNull();
 
-                    let form = body.query(By.css("form"));
-                    expect(form).not.toBeNull();
+            let form = body.query(By.css("form"));
+            expect(form).not.toBeNull();
 
-                    setInputValue(form, "comments", "someComments");
-                    setInputValue(form, "email", "someEmail@someDomain.com");
+            setInputValue(form, "comments", "someComments");
+            setInputValue(form, "email", "someEmail@someDomain.com");
 
-                    fixture.detectChanges();
-                    let button = form.query(By.css("button"));
-                    expect(button).not.toBeNull();
-                    expect(button.properties.disabled).toEqual(false);
+            fixture.detectChanges();
+            let button = form.query(By.css("button"));
+            expect(button).not.toBeNull();
+            expect(button.properties.disabled).toEqual(false);
 
-                    let errors = getAllErrors();
-                    expect(errors.length).toEqual(0);
-                })
-                .then(done)
-                .catch(done.fail);
+            let errors = getAllErrors();
+            expect(errors.length).toEqual(0);
         });
 
-        it("should enable the register button when the user is logged in and all inputs are valid", done => {
+        it("should enable the register button when the user is logged in and all inputs are valid", async () => {
             userInfo.next(loggedInUser);
             fixture.detectChanges();
 
             // Wait for stability since ngModel is async
-            fixture.whenStable()
-                .then(() => {
-                    let body = fixture.debugElement.query(By.css(".modal-body"));
-                    expect(body).not.toBeNull();
+            await fixture.whenStable();
 
-                    let form = body.query(By.css("form"));
-                    expect(form).not.toBeNull();
+            let body = fixture.debugElement.query(By.css(".modal-body"));
+            expect(body).not.toBeNull();
 
-                    setInputValue(form, "comments", "someComments");
+            let form = body.query(By.css("form"));
+            expect(form).not.toBeNull();
 
-                    fixture.detectChanges();
-                    let button = form.query(By.css("button"));
-                    expect(button).not.toBeNull();
-                    expect(button.properties.disabled).toEqual(false);
+            setInputValue(form, "comments", "someComments");
 
-                    let errors = getAllErrors();
-                    expect(errors.length).toEqual(0);
-                })
-                .then(done)
-                .catch(done.fail);
+            fixture.detectChanges();
+            let button = form.query(By.css("button"));
+            expect(button).not.toBeNull();
+            expect(button.properties.disabled).toEqual(false);
+
+            let errors = getAllErrors();
+            expect(errors.length).toEqual(0);
         });
 
         describe("comments", () => {
-            it("should disable the submit button with missing comments", done => {
+            it("should disable the submit button with missing comments", async () => {
                 // Wait for stability since ngModel is async
-                fixture.whenStable()
-                    .then(() => {
-                        let body = fixture.debugElement.query(By.css(".modal-body"));
-                        expect(body).not.toBeNull();
+                await fixture.whenStable();
 
-                        let form = body.query(By.css("form"));
-                        expect(form).not.toBeNull();
+                let body = fixture.debugElement.query(By.css(".modal-body"));
+                expect(body).not.toBeNull();
 
-                        setInputValue(form, "email", "someEmail@someDomain.com");
+                let form = body.query(By.css("form"));
+                expect(form).not.toBeNull();
 
-                        fixture.detectChanges();
-                        let button = form.query(By.css("button"));
-                        expect(button).not.toBeNull();
-                        expect(button.properties.disabled).toEqual(true);
+                setInputValue(form, "email", "someEmail@someDomain.com");
 
-                        let errors = getAllErrors();
-                        expect(errors.length).toEqual(0);
-                    })
-                    .then(done)
-                    .catch(done.fail);
+                fixture.detectChanges();
+                let button = form.query(By.css("button"));
+                expect(button).not.toBeNull();
+                expect(button.properties.disabled).toEqual(true);
+
+                let errors = getAllErrors();
+                expect(errors.length).toEqual(0);
             });
 
-            it("should disable the submit button with empty comments", done => {
+            it("should disable the submit button with empty comments", async () => {
                 // Wait for stability since ngModel is async
-                fixture.whenStable()
-                    .then(() => {
-                        let body = fixture.debugElement.query(By.css(".modal-body"));
-                        expect(body).not.toBeNull();
+                await fixture.whenStable();
 
-                        let form = body.query(By.css("form"));
-                        expect(form).not.toBeNull();
+                let body = fixture.debugElement.query(By.css(".modal-body"));
+                expect(body).not.toBeNull();
 
-                        setInputValue(form, "comments", "someComments");
-                        setInputValue(form, "comments", "");
-                        setInputValue(form, "email", "someEmail@someDomain.com");
+                let form = body.query(By.css("form"));
+                expect(form).not.toBeNull();
 
-                        fixture.detectChanges();
-                        let button = form.query(By.css("button"));
-                        expect(button).not.toBeNull();
-                        expect(button.properties.disabled).toEqual(true);
+                setInputValue(form, "comments", "someComments");
+                setInputValue(form, "comments", "");
+                setInputValue(form, "email", "someEmail@someDomain.com");
 
-                        let errors = getAllErrors();
-                        expect(errors.length).toEqual(1);
-                        expect(errors[0]).toEqual("Comments are required");
-                    })
-                    .then(done)
-                    .catch(done.fail);
+                fixture.detectChanges();
+                let button = form.query(By.css("button"));
+                expect(button).not.toBeNull();
+                expect(button.properties.disabled).toEqual(true);
+
+                let errors = getAllErrors();
+                expect(errors.length).toEqual(1);
+                expect(errors[0]).toEqual("Comments are required");
             });
         });
 
         describe("email", () => {
-            it("should disable the submit button with a missing email", done => {
+            it("should disable the submit button with a missing email", async () => {
                 // Wait for stability since ngModel is async
-                fixture.whenStable()
-                    .then(() => {
-                        let body = fixture.debugElement.query(By.css(".modal-body"));
-                        expect(body).not.toBeNull();
+                await fixture.whenStable();
 
-                        let form = body.query(By.css("form"));
-                        expect(form).not.toBeNull();
+                let body = fixture.debugElement.query(By.css(".modal-body"));
+                expect(body).not.toBeNull();
 
-                        setInputValue(form, "comments", "someComments");
+                let form = body.query(By.css("form"));
+                expect(form).not.toBeNull();
 
-                        fixture.detectChanges();
-                        let button = form.query(By.css("button"));
-                        expect(button).not.toBeNull();
-                        expect(button.properties.disabled).toEqual(true);
+                setInputValue(form, "comments", "someComments");
 
-                        let errors = getAllErrors();
-                        expect(errors.length).toEqual(0);
-                    })
-                    .then(done)
-                    .catch(done.fail);
+                fixture.detectChanges();
+                let button = form.query(By.css("button"));
+                expect(button).not.toBeNull();
+                expect(button.properties.disabled).toEqual(true);
+
+                let errors = getAllErrors();
+                expect(errors.length).toEqual(0);
             });
 
-            it("should disable the submit button with an empty email", done => {
+            it("should disable the submit button with an empty email", async () => {
                 // Wait for stability since ngModel is async
-                fixture.whenStable()
-                    .then(() => {
-                        let body = fixture.debugElement.query(By.css(".modal-body"));
-                        expect(body).not.toBeNull();
+                await fixture.whenStable();
 
-                        let form = body.query(By.css("form"));
-                        expect(form).not.toBeNull();
+                let body = fixture.debugElement.query(By.css(".modal-body"));
+                expect(body).not.toBeNull();
 
-                        setInputValue(form, "comments", "someComments");
-                        setInputValue(form, "email", "someEmail@someDomain.com");
-                        setInputValue(form, "email", "");
+                let form = body.query(By.css("form"));
+                expect(form).not.toBeNull();
 
-                        fixture.detectChanges();
-                        let button = form.query(By.css("button"));
-                        expect(button).not.toBeNull();
-                        expect(button.properties.disabled).toEqual(true);
+                setInputValue(form, "comments", "someComments");
+                setInputValue(form, "email", "someEmail@someDomain.com");
+                setInputValue(form, "email", "");
 
-                        let errors = getAllErrors();
-                        expect(errors.length).toEqual(1);
-                        expect(errors[0]).toEqual("Must be a valid email address");
-                    })
-                    .then(done)
-                    .catch(done.fail);
+                fixture.detectChanges();
+                let button = form.query(By.css("button"));
+                expect(button).not.toBeNull();
+                expect(button.properties.disabled).toEqual(true);
+
+                let errors = getAllErrors();
+                expect(errors.length).toEqual(1);
+                expect(errors[0]).toEqual("Must be a valid email address");
             });
 
-            it("should disable the submit button with an invalid email", done => {
+            it("should disable the submit button with an invalid email", async () => {
                 // Wait for stability since ngModel is async
-                fixture.whenStable()
-                    .then(() => {
-                        let body = fixture.debugElement.query(By.css(".modal-body"));
-                        expect(body).not.toBeNull();
+                await fixture.whenStable();
 
-                        let form = body.query(By.css("form"));
-                        expect(form).not.toBeNull();
+                let body = fixture.debugElement.query(By.css(".modal-body"));
+                expect(body).not.toBeNull();
 
-                        setInputValue(form, "comments", "someComments");
-                        setInputValue(form, "email", "notAnEmail");
+                let form = body.query(By.css("form"));
+                expect(form).not.toBeNull();
 
-                        fixture.detectChanges();
-                        let button = form.query(By.css("button"));
-                        expect(button).not.toBeNull();
-                        expect(button.properties.disabled).toEqual(true);
+                setInputValue(form, "comments", "someComments");
+                setInputValue(form, "email", "notAnEmail");
 
-                        let errors = getAllErrors();
-                        expect(errors.length).toEqual(1);
-                        expect(errors[0]).toEqual("Must be a valid email address");
-                    })
-                    .then(done)
-                    .catch(done.fail);
+                fixture.detectChanges();
+                let button = form.query(By.css("button"));
+                expect(button).not.toBeNull();
+                expect(button.properties.disabled).toEqual(true);
+
+                let errors = getAllErrors();
+                expect(errors.length).toEqual(1);
+                expect(errors[0]).toEqual("Must be a valid email address");
             });
         });
     });
 
     describe("form submission", () => {
-        it("should send correct feedback data when user is not logged in", done => {
+        it("should send correct feedback data when user is not logged in", async () => {
             let feedbackService = TestBed.inject(FeedbackService);
             spyOn(feedbackService, "send").and.returnValue(Promise.resolve());
 
@@ -316,37 +287,33 @@ describe("FeedbackDialogComponent", () => {
             fixture.detectChanges();
 
             // Wait for stability since ngModel is async
-            fixture.whenStable()
-                .then(() => {
-                    let body = fixture.debugElement.query(By.css(".modal-body"));
-                    expect(body).not.toBeNull();
+            await fixture.whenStable();
 
-                    let form = body.query(By.css("form"));
-                    expect(form).not.toBeNull();
+            let body = fixture.debugElement.query(By.css(".modal-body"));
+            expect(body).not.toBeNull();
 
-                    setInputValue(form, "comments", "someComments");
-                    setInputValue(form, "email", "someEmail@someDomain.com");
+            let form = body.query(By.css("form"));
+            expect(form).not.toBeNull();
 
-                    fixture.detectChanges();
-                    let button = form.query(By.css("button"));
-                    expect(button).not.toBeNull();
-                    button.nativeElement.click();
+            setInputValue(form, "comments", "someComments");
+            setInputValue(form, "email", "someEmail@someDomain.com");
 
-                    // Wait for stability from the feedbackService promise
-                    fixture.detectChanges();
-                    return fixture.whenStable();
-                })
-                .then(() => {
-                    expect(feedbackService.send).toHaveBeenCalledWith("someComments", "someEmail@someDomain.com");
+            fixture.detectChanges();
+            let button = form.query(By.css("button"));
+            expect(button).not.toBeNull();
 
-                    expect(component.errorMessage).toBeFalsy();
-                    expect(activeModal.close).toHaveBeenCalled();
-                })
-                .then(done)
-                .catch(done.fail);
+            button.nativeElement.click();
+
+            // Wait for stability from the feedbackService promise
+            fixture.detectChanges();
+            await fixture.whenStable();
+
+            expect(feedbackService.send).toHaveBeenCalledWith("someComments", "someEmail@someDomain.com");
+            expect(component.errorMessage).toBeFalsy();
+            expect(activeModal.close).toHaveBeenCalled();
         });
 
-        it("should send correct feedback data when user is logged in", done => {
+        it("should send correct feedback data when user is logged in", async () => {
             let feedbackService = TestBed.inject(FeedbackService);
             spyOn(feedbackService, "send").and.returnValue(Promise.resolve());
 
@@ -357,36 +324,32 @@ describe("FeedbackDialogComponent", () => {
             fixture.detectChanges();
 
             // Wait for stability since ngModel is async
-            fixture.whenStable()
-                .then(() => {
-                    let body = fixture.debugElement.query(By.css(".modal-body"));
-                    expect(body).not.toBeNull();
+            await fixture.whenStable();
 
-                    let form = body.query(By.css("form"));
-                    expect(form).not.toBeNull();
+            let body = fixture.debugElement.query(By.css(".modal-body"));
+            expect(body).not.toBeNull();
 
-                    setInputValue(form, "comments", "someComments");
+            let form = body.query(By.css("form"));
+            expect(form).not.toBeNull();
 
-                    fixture.detectChanges();
-                    let button = form.query(By.css("button"));
-                    expect(button).not.toBeNull();
-                    button.nativeElement.click();
+            setInputValue(form, "comments", "someComments");
 
-                    // Wait for stability from the feedbackService promise
-                    fixture.detectChanges();
-                    return fixture.whenStable();
-                })
-                .then(() => {
-                    expect(feedbackService.send).toHaveBeenCalledWith("someComments", loggedInUser.email);
+            fixture.detectChanges();
+            let button = form.query(By.css("button"));
+            expect(button).not.toBeNull();
 
-                    expect(component.errorMessage).toBeFalsy();
-                    expect(activeModal.close).toHaveBeenCalled();
-                })
-                .then(done)
-                .catch(done.fail);
+            button.nativeElement.click();
+
+            // Wait for stability from the feedbackService promise
+            fixture.detectChanges();
+            await fixture.whenStable();
+
+            expect(feedbackService.send).toHaveBeenCalledWith("someComments", loggedInUser.email);
+            expect(component.errorMessage).toBeFalsy();
+            expect(activeModal.close).toHaveBeenCalled();
         });
 
-        it("should show an error when feedbackService fails", done => {
+        it("should show an error when feedbackService fails", async () => {
             let feedbackService = TestBed.inject(FeedbackService);
             spyOn(feedbackService, "send").and.returnValue(Promise.reject(null));
 
@@ -397,31 +360,28 @@ describe("FeedbackDialogComponent", () => {
             fixture.detectChanges();
 
             // Wait for stability since ngModel is async
-            fixture.whenStable()
-                .then(() => {
-                    let body = fixture.debugElement.query(By.css(".modal-body"));
-                    expect(body).not.toBeNull();
+            await fixture.whenStable();
 
-                    let form = body.query(By.css("form"));
-                    expect(form).not.toBeNull();
+            let body = fixture.debugElement.query(By.css(".modal-body"));
+            expect(body).not.toBeNull();
 
-                    setInputValue(form, "comments", "someComments");
+            let form = body.query(By.css("form"));
+            expect(form).not.toBeNull();
 
-                    fixture.detectChanges();
-                    let button = form.query(By.css("button"));
-                    expect(button).not.toBeNull();
-                    button.nativeElement.click();
+            setInputValue(form, "comments", "someComments");
 
-                    // Wait for stability from the feedbackService promise
-                    fixture.detectChanges();
-                    return fixture.whenStable();
-                })
-                .then(() => {
-                    expect(component.errorMessage).toBeTruthy();
-                    expect(activeModal.close).not.toHaveBeenCalled();
-                })
-                .then(done)
-                .catch(done.fail);
+            fixture.detectChanges();
+            let button = form.query(By.css("button"));
+            expect(button).not.toBeNull();
+
+            button.nativeElement.click();
+
+            // Wait for stability from the feedbackService promise
+            fixture.detectChanges();
+            await fixture.whenStable();
+
+            expect(component.errorMessage).toBeTruthy();
+            expect(activeModal.close).not.toHaveBeenCalled();
         });
     });
 

@@ -71,7 +71,7 @@ describe("UserComponent", () => {
         clanName: "someClanName",
     };
 
-    beforeEach(done => {
+    beforeEach(async () => {
         let route = { params: routeParams };
         let userService = {
             getProgress: () => Promise.resolve(progress),
@@ -95,7 +95,7 @@ describe("UserComponent", () => {
             hide: (): void => void 0,
         };
 
-        TestBed.configureTestingModule(
+        await TestBed.configureTestingModule(
             {
                 declarations: [UserComponent],
                 providers: [
@@ -107,33 +107,26 @@ describe("UserComponent", () => {
                 ],
                 schemas: [NO_ERRORS_SCHEMA],
             })
-            .compileComponents()
-            .then(() => {
-                fixture = TestBed.createComponent(UserComponent);
-            })
-            .then(done)
-            .catch(done.fail);
+            .compileComponents();
+
+        fixture = TestBed.createComponent(UserComponent);
     });
 
     describe("Actions", () => {
-        it("should not display when the current user is not logged in", done => {
+        it("should not display when the current user is not logged in", async () => {
             userInfo.next(notLoggedInUser);
 
             fixture.detectChanges();
-            fixture.whenStable()
-                .then(() => {
-                    fixture.detectChanges();
+            await fixture.whenStable();
+            fixture.detectChanges();
 
-                    let containers = fixture.debugElement.queryAll(By.css(".col-md-6"));
+            let containers = fixture.debugElement.queryAll(By.css(".col-md-6"));
 
-                    // Actions container is missing
-                    expect(containers.length).toEqual(3);
-                })
-                .then(done)
-                .catch(done.fail);
+            // Actions container is missing
+            expect(containers.length).toEqual(3);
         });
 
-        it("should not display when the current user is the user being viewed", done => {
+        it("should not display when the current user is the user being viewed", async () => {
             userInfo.next({
                 isLoggedIn: true,
                 id: "someId",
@@ -142,246 +135,194 @@ describe("UserComponent", () => {
             });
 
             fixture.detectChanges();
-            fixture.whenStable()
-                .then(() => {
-                    fixture.detectChanges();
+            await fixture.whenStable();
+            fixture.detectChanges();
 
-                    let containers = fixture.debugElement.queryAll(By.css(".col-md-6"));
+            let containers = fixture.debugElement.queryAll(By.css(".col-md-6"));
 
-                    // Actions container is missing
-                    expect(containers.length).toEqual(3);
-                })
-                .then(done)
-                .catch(done.fail);
+            // Actions container is missing
+            expect(containers.length).toEqual(3);
         });
 
-        it("should be able to follow the user", done => {
-            let userService = TestBed.get(UserService);
+        it("should be able to follow the user", async () => {
+            let userService = TestBed.inject(UserService);
             spyOn(userService, "getFollows").and.returnValue(Promise.resolve({ follows: ["someOtherUser"] }));
             spyOn(userService, "addFollow").and.returnValue(Promise.resolve());
 
             userInfo.next(loggedInUser);
 
             fixture.detectChanges();
-            fixture.whenStable()
-                .then(() => {
-                    fixture.detectChanges();
+            await fixture.whenStable();
+            fixture.detectChanges();
 
-                    let containers = fixture.debugElement.queryAll(By.css(".col-md-6"));
-                    expect(containers.length).toEqual(4);
+            let containers = fixture.debugElement.queryAll(By.css(".col-md-6"));
+            expect(containers.length).toEqual(4);
 
-                    let actionsContainer = containers[0];
+            let actionsContainer = containers[0];
 
-                    let buttons = actionsContainer.queryAll(By.css("button"));
-                    expect(buttons.length).toEqual(1);
+            let buttons = actionsContainer.queryAll(By.css("button"));
+            expect(buttons.length).toEqual(1);
 
-                    let followButton = buttons[0];
-                    expect(followButton).not.toBeNull();
-                    expect(followButton.nativeElement.textContent.trim()).toEqual("Follow");
-                    followButton.nativeElement.click();
+            let followButton = buttons[0];
+            expect(followButton).not.toBeNull();
+            expect(followButton.nativeElement.textContent.trim()).toEqual("Follow");
+            followButton.nativeElement.click();
 
-                    expect(userService.addFollow).toHaveBeenCalledWith(loggedInUser.username, userName);
+            expect(userService.addFollow).toHaveBeenCalledWith(loggedInUser.username, userName);
 
-                    return fixture.whenStable();
-                })
-                .then(() => {
-                    fixture.detectChanges();
+            await fixture.whenStable();
+            fixture.detectChanges();
 
-                    let containers = fixture.debugElement.queryAll(By.css(".col-md-6"));
-                    expect(containers.length).toEqual(4);
+            buttons = actionsContainer.queryAll(By.css("button"));
+            expect(buttons.length).toEqual(1);
 
-                    let actionsContainer = containers[0];
-
-                    let buttons = actionsContainer.queryAll(By.css("button"));
-                    expect(buttons.length).toEqual(1);
-
-                    let followButton = buttons[0];
-                    expect(followButton).not.toBeNull();
-                    expect(followButton.nativeElement.textContent.trim()).toEqual("Unfollow");
-                })
-                .then(done)
-                .catch(done.fail);
+            let unfollowButton = buttons[0];
+            expect(unfollowButton).not.toBeNull();
+            expect(unfollowButton.nativeElement.textContent.trim()).toEqual("Unfollow");
         });
 
-        it("should show an error when following the user fails", done => {
-            let userService = TestBed.get(UserService);
+        it("should show an error when following the user fails", async () => {
+            let userService = TestBed.inject(UserService);
             spyOn(userService, "getFollows").and.returnValue(Promise.resolve({ follows: ["someOtherUser"] }));
             spyOn(userService, "addFollow").and.returnValue(Promise.reject("someReason"));
 
             userInfo.next(loggedInUser);
 
             fixture.detectChanges();
-            fixture.whenStable()
-                .then(() => {
-                    fixture.detectChanges();
+            await fixture.whenStable();
+            fixture.detectChanges();
 
-                    let containers = fixture.debugElement.queryAll(By.css(".col-md-6"));
-                    expect(containers.length).toEqual(4);
+            let containers = fixture.debugElement.queryAll(By.css(".col-md-6"));
+            expect(containers.length).toEqual(4);
 
-                    let actionsContainer = containers[0];
+            let actionsContainer = containers[0];
 
-                    let buttons = actionsContainer.queryAll(By.css("button"));
-                    expect(buttons.length).toEqual(1);
+            let buttons = actionsContainer.queryAll(By.css("button"));
+            expect(buttons.length).toEqual(1);
 
-                    let followButton = buttons[0];
-                    expect(followButton).not.toBeNull();
-                    expect(followButton.nativeElement.textContent.trim()).toEqual("Follow");
-                    followButton.nativeElement.click();
+            let followButton = buttons[0];
+            expect(followButton).not.toBeNull();
+            expect(followButton.nativeElement.textContent.trim()).toEqual("Follow");
+            followButton.nativeElement.click();
 
-                    expect(userService.addFollow).toHaveBeenCalledWith(loggedInUser.username, userName);
+            expect(userService.addFollow).toHaveBeenCalledWith(loggedInUser.username, userName);
 
-                    return fixture.whenStable();
-                })
-                .then(() => {
-                    fixture.detectChanges();
+            await fixture.whenStable();
+            fixture.detectChanges();
 
-                    let containers = fixture.debugElement.queryAll(By.css(".col-md-6"));
-                    expect(containers.length).toEqual(4);
+            buttons = actionsContainer.queryAll(By.css("button"));
+            expect(buttons.length).toEqual(1);
 
-                    let actionsContainer = containers[0];
+            followButton = buttons[0];
+            expect(followButton).not.toBeNull();
+            expect(followButton.nativeElement.textContent.trim()).toEqual("Follow");
 
-                    let buttons = actionsContainer.queryAll(By.css("button"));
-                    expect(buttons.length).toEqual(1);
-
-                    let followButton = buttons[0];
-                    expect(followButton).not.toBeNull();
-                    expect(followButton.nativeElement.textContent.trim()).toEqual("Follow");
-
-                    let error = actionsContainer.query(By.css(".alert-danger"));
-                    expect(error).not.toBeNull();
-                })
-                .then(done)
-                .catch(done.fail);
+            let error = actionsContainer.query(By.css(".alert-danger"));
+            expect(error).not.toBeNull();
         });
 
-        it("should be able to unfollow the user", done => {
-            let userService = TestBed.get(UserService);
+        it("should be able to unfollow the user", async () => {
+            let userService = TestBed.inject(UserService);
             spyOn(userService, "getFollows").and.returnValue(Promise.resolve({ follows: [userName] }));
             spyOn(userService, "removeFollow").and.returnValue(Promise.resolve());
 
             userInfo.next(loggedInUser);
 
             fixture.detectChanges();
-            fixture.whenStable()
-                .then(() => {
-                    fixture.detectChanges();
+            await fixture.whenStable();
+            fixture.detectChanges();
 
-                    let containers = fixture.debugElement.queryAll(By.css(".col-md-6"));
-                    expect(containers.length).toEqual(4);
+            let containers = fixture.debugElement.queryAll(By.css(".col-md-6"));
+            expect(containers.length).toEqual(4);
 
-                    let actionsContainer = containers[0];
+            let actionsContainer = containers[0];
 
-                    let buttons = actionsContainer.queryAll(By.css("button"));
-                    expect(buttons.length).toEqual(1);
+            let buttons = actionsContainer.queryAll(By.css("button"));
+            expect(buttons.length).toEqual(1);
 
-                    let followButton = buttons[0];
-                    expect(followButton).not.toBeNull();
-                    expect(followButton.nativeElement.textContent.trim()).toEqual("Unfollow");
-                    followButton.nativeElement.click();
+            let unfollowButton = buttons[0];
+            expect(unfollowButton).not.toBeNull();
+            expect(unfollowButton.nativeElement.textContent.trim()).toEqual("Unfollow");
+            unfollowButton.nativeElement.click();
 
-                    expect(userService.removeFollow).toHaveBeenCalledWith(loggedInUser.username, userName);
+            expect(userService.removeFollow).toHaveBeenCalledWith(loggedInUser.username, userName);
 
-                    return fixture.whenStable();
-                })
-                .then(() => {
-                    fixture.detectChanges();
+            await fixture.whenStable();
+            fixture.detectChanges();
 
-                    let containers = fixture.debugElement.queryAll(By.css(".col-md-6"));
-                    expect(containers.length).toEqual(4);
+            buttons = actionsContainer.queryAll(By.css("button"));
+            expect(buttons.length).toEqual(1);
 
-                    let actionsContainer = containers[0];
-
-                    let buttons = actionsContainer.queryAll(By.css("button"));
-                    expect(buttons.length).toEqual(1);
-
-                    let followButton = buttons[0];
-                    expect(followButton).not.toBeNull();
-                    expect(followButton.nativeElement.textContent.trim()).toEqual("Follow");
-                })
-                .then(done)
-                .catch(done.fail);
+            let followButton = buttons[0];
+            expect(followButton).not.toBeNull();
+            expect(followButton.nativeElement.textContent.trim()).toEqual("Follow");
         });
 
-        it("should show an error when unfollowing the user fails", done => {
-            let userService = TestBed.get(UserService);
+        it("should show an error when unfollowing the user fails", async () => {
+            let userService = TestBed.inject(UserService);
             spyOn(userService, "getFollows").and.returnValue(Promise.resolve({ follows: [userName] }));
             spyOn(userService, "removeFollow").and.returnValue(Promise.reject("someReason"));
 
             userInfo.next(loggedInUser);
 
             fixture.detectChanges();
-            fixture.whenStable()
-                .then(() => {
-                    fixture.detectChanges();
+            await fixture.whenStable();
+            fixture.detectChanges();
 
-                    let containers = fixture.debugElement.queryAll(By.css(".col-md-6"));
-                    expect(containers.length).toEqual(4);
+            let containers = fixture.debugElement.queryAll(By.css(".col-md-6"));
+            expect(containers.length).toEqual(4);
 
-                    let actionsContainer = containers[0];
+            let actionsContainer = containers[0];
 
-                    let buttons = actionsContainer.queryAll(By.css("button"));
-                    expect(buttons.length).toEqual(1);
+            let buttons = actionsContainer.queryAll(By.css("button"));
+            expect(buttons.length).toEqual(1);
 
-                    let followButton = buttons[0];
-                    expect(followButton).not.toBeNull();
-                    expect(followButton.nativeElement.textContent.trim()).toEqual("Unfollow");
-                    followButton.nativeElement.click();
+            let followButton = buttons[0];
+            expect(followButton).not.toBeNull();
+            expect(followButton.nativeElement.textContent.trim()).toEqual("Unfollow");
+            followButton.nativeElement.click();
 
-                    expect(userService.removeFollow).toHaveBeenCalledWith(loggedInUser.username, userName);
+            expect(userService.removeFollow).toHaveBeenCalledWith(loggedInUser.username, userName);
 
-                    return fixture.whenStable();
-                })
-                .then(() => {
-                    fixture.detectChanges();
+            await fixture.whenStable();
+            fixture.detectChanges();
 
-                    let containers = fixture.debugElement.queryAll(By.css(".col-md-6"));
-                    expect(containers.length).toEqual(4);
+            buttons = actionsContainer.queryAll(By.css("button"));
+            expect(buttons.length).toEqual(1);
 
-                    let actionsContainer = containers[0];
+            let unfollowButton = buttons[0];
+            expect(unfollowButton).not.toBeNull();
+            expect(unfollowButton.nativeElement.textContent.trim()).toEqual("Unfollow");
 
-                    let buttons = actionsContainer.queryAll(By.css("button"));
-                    expect(buttons.length).toEqual(1);
-
-                    let followButton = buttons[0];
-                    expect(followButton).not.toBeNull();
-                    expect(followButton.nativeElement.textContent.trim()).toEqual("Unfollow");
-
-                    let error = actionsContainer.query(By.css(".alert-danger"));
-                    expect(error).not.toBeNull();
-                })
-                .then(done)
-                .catch(done.fail);
+            let error = actionsContainer.query(By.css(".alert-danger"));
+            expect(error).not.toBeNull();
         });
 
-        it("should show an error when the current users' follows fail", done => {
-            let userService = TestBed.get(UserService);
+        it("should show an error when the current users' follows fail", async () => {
+            let userService = TestBed.inject(UserService);
             spyOn(userService, "getFollows").and.returnValue(Promise.reject("someReason"));
 
             userInfo.next(loggedInUser);
 
             fixture.detectChanges();
-            fixture.whenStable()
-                .then(() => {
-                    fixture.detectChanges();
+            await fixture.whenStable();
+            fixture.detectChanges();
 
-                    let containers = fixture.debugElement.queryAll(By.css(".col-md-6"));
-                    expect(containers.length).toEqual(4);
+            let containers = fixture.debugElement.queryAll(By.css(".col-md-6"));
+            expect(containers.length).toEqual(4);
 
-                    let actionsContainer = containers[0];
+            let actionsContainer = containers[0];
 
-                    let buttons = actionsContainer.queryAll(By.css("button"));
-                    expect(buttons.length).toEqual(1);
+            let buttons = actionsContainer.queryAll(By.css("button"));
+            expect(buttons.length).toEqual(1);
 
-                    // Show follow button by defailt
-                    let followButton = buttons[0];
-                    expect(followButton).not.toBeNull();
-                    expect(followButton.nativeElement.textContent.trim()).toEqual("Follow");
+            // Show follow button by default
+            let followButton = buttons[0];
+            expect(followButton).not.toBeNull();
+            expect(followButton.nativeElement.textContent.trim()).toEqual("Follow");
 
-                    let error = actionsContainer.query(By.css(".alert-danger"));
-                    expect(error).not.toBeNull();
-                })
-                .then(done)
-                .catch(done.fail);
+            let error = actionsContainer.query(By.css(".alert-danger"));
+            expect(error).not.toBeNull();
         });
     });
 
@@ -403,54 +344,50 @@ describe("UserComponent", () => {
     });
 
     describe("Progress Summary", () => {
-        it("should display a chart with linear scale", done => {
+        it("should display a chart with linear scale", async () => {
             fixture.detectChanges();
-            fixture.whenStable()
-                .then(() => {
-                    fixture.detectChanges();
+            await fixture.whenStable();
+            fixture.detectChanges();
 
-                    let containers = fixture.debugElement.queryAll(By.css(".col-md-6"));
-                    expect(containers.length).toEqual(4);
+            let containers = fixture.debugElement.queryAll(By.css(".col-md-6"));
+            expect(containers.length).toEqual(4);
 
-                    let progressContainer = containers[2];
+            let progressContainer = containers[2];
 
-                    let error = progressContainer.query(By.css(".alert-danger"));
-                    expect(error).toBeNull();
+            let error = progressContainer.query(By.css(".alert-danger"));
+            expect(error).toBeNull();
 
-                    let warning = progressContainer.query(By.css(".alert-warning"));
-                    expect(warning).toBeNull();
+            let warning = progressContainer.query(By.css(".alert-warning"));
+            expect(warning).toBeNull();
 
-                    let chart = progressContainer.query(By.css("canvas"));
-                    expect(chart).not.toBeNull();
-                    expect(chart.attributes.baseChart).toBeDefined();
-                    expect(chart.attributes.height).toEqual("235");
-                    expect(chart.properties.chartType).toEqual("line");
+            let chart = progressContainer.query(By.css("canvas"));
+            expect(chart).not.toBeNull();
+            expect(chart.attributes.baseChart).toBeDefined();
+            expect(chart.attributes.height).toEqual("235");
+            expect(chart.properties.chartType).toEqual("line");
 
-                    let datasets: ChartDataSets[] = chart.properties.datasets;
-                    expect(datasets).toBeTruthy();
-                    expect(datasets.length).toEqual(1);
+            let datasets: ChartDataSets[] = chart.properties.datasets;
+            expect(datasets).toBeTruthy();
+            expect(datasets.length).toEqual(1);
 
-                    let data = datasets[0].data as ChartPoint[];
-                    let dataKeys = Object.keys(progress.soulsSpentData);
-                    expect(data.length).toEqual(dataKeys.length);
-                    for (let i = 0; i < data.length; i++) {
-                        expect(data[i].x).toEqual(new Date(dataKeys[i]).getTime());
-                        expect(data[i].y).toEqual(Number(progress.soulsSpentData[dataKeys[i]]));
-                    }
+            let data = datasets[0].data as ChartPoint[];
+            let dataKeys = Object.keys(progress.soulsSpentData);
+            expect(data.length).toEqual(dataKeys.length);
+            for (let i = 0; i < data.length; i++) {
+                expect(data[i].x).toEqual(new Date(dataKeys[i]).getTime());
+                expect(data[i].y).toEqual(Number(progress.soulsSpentData[dataKeys[i]]));
+            }
 
-                    let colors = chart.properties.colors;
-                    expect(colors).toBeTruthy();
+            let colors = chart.properties.colors;
+            expect(colors).toBeTruthy();
 
-                    let options: ChartOptions = chart.properties.options;
-                    expect(options).toBeTruthy();
-                    expect(options.title.text).toEqual("Souls Spent");
-                    expect(options.scales.yAxes[0].type).toEqual("linear");
-                })
-                .then(done)
-                .catch(done.fail);
+            let options: ChartOptions = chart.properties.options;
+            expect(options).toBeTruthy();
+            expect(options.title.text).toEqual("Souls Spent");
+            expect(options.scales.yAxes[0].type).toEqual("linear");
         });
 
-        it("should display a chart with logarithmic scale", done => {
+        it("should display a chart with logarithmic scale", async () => {
             // Using values greater than normal numbers can handle
             let soulsSpentData: { [date: string]: string } = {
                 "2017-01-01T00:00:00Z": "1e1000",
@@ -459,209 +396,185 @@ describe("UserComponent", () => {
                 "2017-01-04T00:00:00Z": "1e1003",
                 "2017-01-05T00:00:00Z": "1e1004",
             };
-            let userService = TestBed.get(UserService);
-            spyOn(userService, "getProgress").and.returnValue(Promise.resolve({ soulsSpentData }));
+            let userService = TestBed.inject(UserService);
+            spyOn(userService, "getProgress").and.returnValue(Promise.resolve({ soulsSpentData } as any));
 
             fixture.detectChanges();
-            fixture.whenStable()
-                .then(() => {
-                    fixture.detectChanges();
+            await fixture.whenStable();
+            fixture.detectChanges();
 
-                    let containers = fixture.debugElement.queryAll(By.css(".col-md-6"));
-                    expect(containers.length).toEqual(4);
+            let containers = fixture.debugElement.queryAll(By.css(".col-md-6"));
+            expect(containers.length).toEqual(4);
 
-                    let progressContainer = containers[2];
+            let progressContainer = containers[2];
 
-                    let error = progressContainer.query(By.css(".alert-danger"));
-                    expect(error).toBeNull();
+            let error = progressContainer.query(By.css(".alert-danger"));
+            expect(error).toBeNull();
 
-                    let warning = progressContainer.query(By.css(".alert-warning"));
-                    expect(warning).toBeNull();
+            let warning = progressContainer.query(By.css(".alert-warning"));
+            expect(warning).toBeNull();
 
-                    let chart = progressContainer.query(By.css("canvas"));
-                    expect(chart).not.toBeNull();
-                    expect(chart.attributes.baseChart).toBeDefined();
-                    expect(chart.attributes.height).toEqual("235");
-                    expect(chart.properties.chartType).toEqual("line");
+            let chart = progressContainer.query(By.css("canvas"));
+            expect(chart).not.toBeNull();
+            expect(chart.attributes.baseChart).toBeDefined();
+            expect(chart.attributes.height).toEqual("235");
+            expect(chart.properties.chartType).toEqual("line");
 
-                    let datasets: ChartDataSets[] = chart.properties.datasets;
-                    expect(datasets).toBeTruthy();
-                    expect(datasets.length).toEqual(1);
+            let datasets: ChartDataSets[] = chart.properties.datasets;
+            expect(datasets).toBeTruthy();
+            expect(datasets.length).toEqual(1);
 
-                    let data = datasets[0].data as ChartPoint[];
-                    let dataKeys = Object.keys(soulsSpentData);
-                    expect(data.length).toEqual(dataKeys.length);
-                    for (let i = 0; i < data.length; i++) {
-                        expect(data[i].x).toEqual(new Date(dataKeys[i]).getTime());
+            let data = datasets[0].data as ChartPoint[];
+            let dataKeys = Object.keys(soulsSpentData);
+            expect(data.length).toEqual(dataKeys.length);
+            for (let i = 0; i < data.length; i++) {
+                expect(data[i].x).toEqual(new Date(dataKeys[i]).getTime());
 
-                        // The value we plot is actually the log of the value to fake log scale
-                        expect(data[i].y).toEqual(new Decimal(soulsSpentData[dataKeys[i]]).log().toNumber());
-                    }
+                // The value we plot is actually the log of the value to fake log scale
+                expect(data[i].y).toEqual(new Decimal(soulsSpentData[dataKeys[i]]).log().toNumber());
+            }
 
-                    let colors = chart.properties.colors;
-                    expect(colors).toBeTruthy();
+            let colors = chart.properties.colors;
+            expect(colors).toBeTruthy();
 
-                    let options: ChartOptions = chart.properties.options;
-                    expect(options).toBeTruthy();
-                    expect(options.title.text).toEqual("Souls Spent");
+            let options: ChartOptions = chart.properties.options;
+            expect(options).toBeTruthy();
+            expect(options.title.text).toEqual("Souls Spent");
 
-                    // Linear since we're manually managing log scale
-                    expect(options.scales.yAxes[0].type).toEqual("linear");
-                })
-                .then(done)
-                .catch(done.fail);
+            // Linear since we're manually managing log scale
+            expect(options.scales.yAxes[0].type).toEqual("linear");
         });
 
-        it("should show an error when userService.getProgress fails", done => {
-            let userService = TestBed.get(UserService);
+        it("should show an error when userService.getProgress fails", async () => {
+            let userService = TestBed.inject(UserService);
             spyOn(userService, "getProgress").and.returnValue(Promise.reject("someReason"));
 
             fixture.detectChanges();
-            fixture.whenStable()
-                .then(() => {
-                    fixture.detectChanges();
+            await fixture.whenStable();
+            fixture.detectChanges();
 
-                    let containers = fixture.debugElement.queryAll(By.css(".col-md-6"));
-                    expect(containers.length).toEqual(4);
+            let containers = fixture.debugElement.queryAll(By.css(".col-md-6"));
+            expect(containers.length).toEqual(4);
 
-                    let progressContainer = containers[2];
+            let progressContainer = containers[2];
 
-                    let chart = progressContainer.query(By.css("canvas"));
-                    expect(chart).toBeNull();
+            let chart = progressContainer.query(By.css("canvas"));
+            expect(chart).toBeNull();
 
-                    let error = progressContainer.query(By.css(".alert-danger"));
-                    expect(error).not.toBeNull();
+            let error = progressContainer.query(By.css(".alert-danger"));
+            expect(error).not.toBeNull();
 
-                    let warning = progressContainer.query(By.css(".alert-warning"));
-                    expect(warning).toBeNull();
-                })
-                .then(done)
-                .catch(done.fail);
+            let warning = progressContainer.query(By.css(".alert-warning"));
+            expect(warning).toBeNull();
         });
 
-        it("should show a warning when there is no data", done => {
-            let userService = TestBed.get(UserService);
-            spyOn(userService, "getProgress").and.returnValue(Promise.resolve({ soulsSpentData: {} }));
+        it("should show a warning when there is no data", async () => {
+            let userService = TestBed.inject(UserService);
+            spyOn(userService, "getProgress").and.returnValue(Promise.resolve({ soulsSpentData: {} } as any));
 
             fixture.detectChanges();
-            fixture.whenStable()
-                .then(() => {
-                    fixture.detectChanges();
+            await fixture.whenStable();
+            fixture.detectChanges();
 
-                    let containers = fixture.debugElement.queryAll(By.css(".col-md-6"));
-                    expect(containers.length).toEqual(4);
+            let containers = fixture.debugElement.queryAll(By.css(".col-md-6"));
+            expect(containers.length).toEqual(4);
 
-                    let progressContainer = containers[2];
+            let progressContainer = containers[2];
 
-                    let chart = progressContainer.query(By.css("canvas"));
-                    expect(chart).toBeNull();
+            let chart = progressContainer.query(By.css("canvas"));
+            expect(chart).toBeNull();
 
-                    let error = progressContainer.query(By.css(".alert-danger"));
-                    expect(error).toBeNull();
+            let error = progressContainer.query(By.css(".alert-danger"));
+            expect(error).toBeNull();
 
-                    let warning = progressContainer.query(By.css(".alert-warning"));
-                    expect(warning).not.toBeNull();
-                })
-                .then(done)
-                .catch(done.fail);
+            let warning = progressContainer.query(By.css(".alert-warning"));
+            expect(warning).not.toBeNull();
         });
     });
 
     describe("Follows", () => {
-        it("should display the table", done => {
+        it("should display the table", async () => {
             fixture.detectChanges();
-            fixture.whenStable()
-                .then(() => {
-                    fixture.detectChanges();
+            await fixture.whenStable();
+            fixture.detectChanges();
 
-                    let containers = fixture.debugElement.queryAll(By.css(".col-md-6"));
-                    expect(containers.length).toEqual(4);
+            let containers = fixture.debugElement.queryAll(By.css(".col-md-6"));
+            expect(containers.length).toEqual(4);
 
-                    let followsContainer = containers[3];
+            let followsContainer = containers[3];
 
-                    let error = followsContainer.query(By.css(".alert-danger"));
-                    expect(error).toBeNull();
+            let error = followsContainer.query(By.css(".alert-danger"));
+            expect(error).toBeNull();
 
-                    let noData = followsContainer.query(By.css("p:not(.alert-danger)"));
-                    expect(noData).toBeNull();
+            let noData = followsContainer.query(By.css("p:not(.alert-danger)"));
+            expect(noData).toBeNull();
 
-                    let table = followsContainer.query(By.css("table"));
-                    expect(table).not.toBeNull();
+            let table = followsContainer.query(By.css("table"));
+            expect(table).not.toBeNull();
 
-                    let rows = table.query(By.css("tbody")).children;
-                    expect(rows.length).toEqual(followsData.follows.length);
+            let rows = table.query(By.css("tbody")).children;
+            expect(rows.length).toEqual(followsData.follows.length);
 
-                    for (let i = 0; i < rows.length; i++) {
-                        let expectedFollow = followsData.follows[i];
+            for (let i = 0; i < rows.length; i++) {
+                let expectedFollow = followsData.follows[i];
 
-                        let cells = rows[i].children;
-                        expect(cells.length).toEqual(2);
+                let cells = rows[i].children;
+                expect(cells.length).toEqual(2);
 
-                        let followCell = cells[0];
-                        expect(followCell.nativeElement.textContent.trim()).toEqual(expectedFollow);
+                let followCell = cells[0];
+                expect(followCell.nativeElement.textContent.trim()).toEqual(expectedFollow);
 
-                        let compareCell = cells[1];
-                        let link = compareCell.query(By.css("a"));
-                        expect(link.properties.routerLink).toEqual(`/users/${userName}/compare/${expectedFollow}`);
-                        expect(link.nativeElement.textContent.trim()).toEqual("Compare");
-                    }
-                })
-                .then(done)
-                .catch(done.fail);
+                let compareCell = cells[1];
+                let link = compareCell.query(By.css("a"));
+                expect(link.properties.routerLink).toEqual(`/users/${userName}/compare/${expectedFollow}`);
+                expect(link.nativeElement.textContent.trim()).toEqual("Compare");
+            }
         });
 
-        it("should show an error when userService.getFollows fails", done => {
-            let userService = TestBed.get(UserService);
+        it("should show an error when userService.getFollows fails", async () => {
+            let userService = TestBed.inject(UserService);
             spyOn(userService, "getFollows").and.returnValue(Promise.reject("someReason"));
 
             fixture.detectChanges();
-            fixture.whenStable()
-                .then(() => {
-                    fixture.detectChanges();
+            await fixture.whenStable();
+            fixture.detectChanges();
 
-                    let containers = fixture.debugElement.queryAll(By.css(".col-md-6"));
-                    expect(containers.length).toEqual(4);
+            let containers = fixture.debugElement.queryAll(By.css(".col-md-6"));
+            expect(containers.length).toEqual(4);
 
-                    let followsContainer = containers[3];
+            let followsContainer = containers[3];
 
-                    let table = followsContainer.query(By.css("table"));
-                    expect(table).toBeNull();
+            let table = followsContainer.query(By.css("table"));
+            expect(table).toBeNull();
 
-                    let noData = followsContainer.query(By.css("p:not(.alert-danger)"));
-                    expect(noData).toBeNull();
+            let noData = followsContainer.query(By.css("p:not(.alert-danger)"));
+            expect(noData).toBeNull();
 
-                    let error = followsContainer.query(By.css(".alert-danger"));
-                    expect(error).not.toBeNull();
-                })
-                .then(done)
-                .catch(done.fail);
+            let error = followsContainer.query(By.css(".alert-danger"));
+            expect(error).not.toBeNull();
         });
 
-        it("should show a message when there is no data", done => {
-            let userService = TestBed.get(UserService);
-            spyOn(userService, "getFollows").and.returnValue(Promise.resolve({}));
+        it("should show a message when there is no data", async () => {
+            let userService = TestBed.inject(UserService);
+            spyOn(userService, "getFollows").and.returnValue(Promise.resolve({} as any));
 
             fixture.detectChanges();
-            fixture.whenStable()
-                .then(() => {
-                    fixture.detectChanges();
+            await fixture.whenStable();
+            fixture.detectChanges();
 
-                    let containers = fixture.debugElement.queryAll(By.css(".col-md-6"));
-                    expect(containers.length).toEqual(4);
+            let containers = fixture.debugElement.queryAll(By.css(".col-md-6"));
+            expect(containers.length).toEqual(4);
 
-                    let followsContainer = containers[3];
+            let followsContainer = containers[3];
 
-                    let table = followsContainer.query(By.css("table"));
-                    expect(table).toBeNull();
+            let table = followsContainer.query(By.css("table"));
+            expect(table).toBeNull();
 
-                    let error = followsContainer.query(By.css(".alert-danger"));
-                    expect(error).toBeNull();
+            let error = followsContainer.query(By.css(".alert-danger"));
+            expect(error).toBeNull();
 
-                    let noData = followsContainer.query(By.css("p:not(.alert-danger)"));
-                    expect(noData).not.toBeNull();
-                })
-                .then(done)
-                .catch(done.fail);
+            let noData = followsContainer.query(By.css("p:not(.alert-danger)"));
+            expect(noData).not.toBeNull();
         });
     });
 });

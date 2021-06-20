@@ -31,7 +31,7 @@ describe("ChangePasswordDialogComponent", () => {
         externalLogins: [],
     };
 
-    beforeEach(done => {
+    beforeEach(async () => {
         let userInfo = new BehaviorSubject(loggedInUser);
         let authenticationService = { userInfo: () => userInfo };
         let userService = {
@@ -45,475 +45,417 @@ describe("ChangePasswordDialogComponent", () => {
             hide: (): void => void 0,
         };
 
-        TestBed.configureTestingModule(
+        await TestBed.configureTestingModule(
             {
                 imports: [
                     FormsModule,
                     ValidateEqualModule,
                 ],
                 declarations: [ChangePasswordDialogComponent],
-                providers:
-                    [
-                        { provide: AuthenticationService, useValue: authenticationService },
-                        { provide: UserService, useValue: userService },
-                        { provide: NgbActiveModal, useValue: activeModal },
-                        { provide: NgxSpinnerService, useValue: spinnerService },
-                    ],
+                providers: [
+                    { provide: AuthenticationService, useValue: authenticationService },
+                    { provide: UserService, useValue: userService },
+                    { provide: NgbActiveModal, useValue: activeModal },
+                    { provide: NgxSpinnerService, useValue: spinnerService },
+                ],
                 schemas: [NO_ERRORS_SCHEMA],
             })
-            .compileComponents()
-            .then(() => {
-                fixture = TestBed.createComponent(ChangePasswordDialogComponent);
-            })
-            .then(done)
-            .catch(done.fail);
+            .compileComponents();
+
+        fixture = TestBed.createComponent(ChangePasswordDialogComponent);
     });
 
-    it("should show the current password field when the user has a password", done => {
-        setUserLogins(loginsWithPassword)
-            .then(() => {
-                let body = fixture.debugElement.query(By.css(".modal-body"));
-                expect(body).not.toBeNull();
+    it("should show the current password field when the user has a password", async () => {
+        await setUserLogins(loginsWithPassword);
 
-                let form = body.query(By.css("form"));
-                expect(form).not.toBeNull();
+        let body = fixture.debugElement.query(By.css(".modal-body"));
+        expect(body).not.toBeNull();
 
-                let element = form.query(By.css("#currentPassword"));
-                expect(element).not.toBeNull();
-            })
-            .then(done)
-            .catch(done.fail);
+        let form = body.query(By.css("form"));
+        expect(form).not.toBeNull();
+
+        let element = form.query(By.css("#currentPassword"));
+        expect(element).not.toBeNull();
     });
 
-    it("should hide the current password field when the user doesn't have a password", done => {
-        setUserLogins(loginsWithoutPassword)
-            .then(() => {
-                let body = fixture.debugElement.query(By.css(".modal-body"));
-                expect(body).not.toBeNull();
+    it("should hide the current password field when the user doesn't have a password", async () => {
+        await setUserLogins(loginsWithoutPassword);
 
-                let form = body.query(By.css("form"));
-                expect(form).not.toBeNull();
+        let body = fixture.debugElement.query(By.css(".modal-body"));
+        expect(body).not.toBeNull();
 
-                let element = form.query(By.css("#currentPassword"));
-                expect(element).toBeNull();
-            })
-            .then(done)
-            .catch(done.fail);
+        let form = body.query(By.css("form"));
+        expect(form).not.toBeNull();
+
+        let element = form.query(By.css("#currentPassword"));
+        expect(element).toBeNull();
     });
 
     describe("Validation", () => {
-        it("should disable the submit button initially", done => {
-            setUserLogins(loginsWithPassword)
-                .then(() => {
-                    let body = fixture.debugElement.query(By.css(".modal-body"));
-                    expect(body).not.toBeNull();
+        it("should disable the submit button initially", async () => {
+            await setUserLogins(loginsWithPassword);
 
-                    let form = body.query(By.css("form"));
-                    expect(form).not.toBeNull();
+            let body = fixture.debugElement.query(By.css(".modal-body"));
+            expect(body).not.toBeNull();
 
-                    let button = form.query(By.css("button"));
-                    expect(button).not.toBeNull();
-                    expect(button.properties.disabled).toEqual(true);
+            let form = body.query(By.css("form"));
+            expect(form).not.toBeNull();
 
-                    let errors = getAllErrors();
-                    expect(errors.length).toEqual(0);
-                })
-                .then(done)
-                .catch(done.fail);
+            let button = form.query(By.css("button"));
+            expect(button).not.toBeNull();
+            expect(button.properties.disabled).toEqual(true);
+
+            let errors = getAllErrors();
+            expect(errors.length).toEqual(0);
         });
 
-        it("should enable the submit button when all inputs are valid", done => {
-            setUserLogins(loginsWithPassword)
-                .then(() => {
-                    let body = fixture.debugElement.query(By.css(".modal-body"));
-                    expect(body).not.toBeNull();
+        it("should enable the submit button when all inputs are valid", async () => {
+            await setUserLogins(loginsWithPassword);
 
-                    let form = body.query(By.css("form"));
-                    expect(form).not.toBeNull();
+            let body = fixture.debugElement.query(By.css(".modal-body"));
+            expect(body).not.toBeNull();
 
-                    setInputValue(form, "currentPassword", "someCurrentPassword");
-                    setInputValue(form, "newPassword", "someNewPassword");
-                    setInputValue(form, "confirmNewPassword", "someNewPassword");
+            let form = body.query(By.css("form"));
+            expect(form).not.toBeNull();
 
-                    fixture.detectChanges();
-                    let button = form.query(By.css("button"));
-                    expect(button).not.toBeNull();
-                    expect(button.properties.disabled).toEqual(false);
+            setInputValue(form, "currentPassword", "someCurrentPassword");
+            setInputValue(form, "newPassword", "someNewPassword");
+            setInputValue(form, "confirmNewPassword", "someNewPassword");
 
-                    let errors = getAllErrors();
-                    expect(errors.length).toEqual(0);
-                })
-                .then(done)
-                .catch(done.fail);
+            fixture.detectChanges();
+            let button = form.query(By.css("button"));
+            expect(button).not.toBeNull();
+            expect(button.properties.disabled).toEqual(false);
+
+            let errors = getAllErrors();
+            expect(errors.length).toEqual(0);
         });
 
         describe("Current Password", () => {
-            it("should disable the submit button with a missing the current password", done => {
-                setUserLogins(loginsWithPassword)
-                    .then(() => {
-                        let body = fixture.debugElement.query(By.css(".modal-body"));
-                        expect(body).not.toBeNull();
+            it("should disable the submit button with a missing the current password", async () => {
+                await setUserLogins(loginsWithPassword);
 
-                        let form = body.query(By.css("form"));
-                        expect(form).not.toBeNull();
+                let body = fixture.debugElement.query(By.css(".modal-body"));
+                expect(body).not.toBeNull();
 
-                        setInputValue(form, "newPassword", "someNewPassword");
-                        setInputValue(form, "confirmNewPassword", "someNewPassword");
+                let form = body.query(By.css("form"));
+                expect(form).not.toBeNull();
 
-                        fixture.detectChanges();
-                        let button = form.query(By.css("button"));
-                        expect(button).not.toBeNull();
-                        expect(button.properties.disabled).toEqual(true);
+                setInputValue(form, "newPassword", "someNewPassword");
+                setInputValue(form, "confirmNewPassword", "someNewPassword");
 
-                        let errors = getAllErrors();
-                        expect(errors.length).toEqual(0);
-                    })
-                    .then(done)
-                    .catch(done.fail);
+                fixture.detectChanges();
+                let button = form.query(By.css("button"));
+                expect(button).not.toBeNull();
+                expect(button.properties.disabled).toEqual(true);
+
+                let errors = getAllErrors();
+                expect(errors.length).toEqual(0);
             });
 
-            it("should disable the submit button with an empty current password", done => {
-                setUserLogins(loginsWithPassword)
-                    .then(() => {
-                        let body = fixture.debugElement.query(By.css(".modal-body"));
-                        expect(body).not.toBeNull();
+            it("should disable the submit button with an empty current password", async () => {
+                await setUserLogins(loginsWithPassword);
 
-                        let form = body.query(By.css("form"));
-                        expect(form).not.toBeNull();
+                let body = fixture.debugElement.query(By.css(".modal-body"));
+                expect(body).not.toBeNull();
 
-                        setInputValue(form, "currentPassword", "someCurrentPassword");
-                        setInputValue(form, "currentPassword", "");
-                        setInputValue(form, "newPassword", "someNewPassword");
-                        setInputValue(form, "confirmNewPassword", "someNewPassword");
+                let form = body.query(By.css("form"));
+                expect(form).not.toBeNull();
 
-                        fixture.detectChanges();
-                        let button = form.query(By.css("button"));
-                        expect(button).not.toBeNull();
-                        expect(button.properties.disabled).toEqual(true);
+                setInputValue(form, "currentPassword", "someCurrentPassword");
+                setInputValue(form, "currentPassword", "");
+                setInputValue(form, "newPassword", "someNewPassword");
+                setInputValue(form, "confirmNewPassword", "someNewPassword");
 
-                        let errors = getAllErrors();
-                        expect(errors.length).toEqual(1);
-                        expect(errors[0]).toEqual("Current Password is required");
-                    })
-                    .then(done)
-                    .catch(done.fail);
+                fixture.detectChanges();
+                let button = form.query(By.css("button"));
+                expect(button).not.toBeNull();
+                expect(button.properties.disabled).toEqual(true);
+
+                let errors = getAllErrors();
+                expect(errors.length).toEqual(1);
+                expect(errors[0]).toEqual("Current Password is required");
             });
         });
 
         describe("New Password", () => {
-            it("should disable the submit button with a missing new password", done => {
-                setUserLogins(loginsWithPassword)
-                    .then(() => {
-                        let body = fixture.debugElement.query(By.css(".modal-body"));
-                        expect(body).not.toBeNull();
+            it("should disable the submit button with a missing new password", async () => {
+                await setUserLogins(loginsWithPassword);
 
-                        let form = body.query(By.css("form"));
-                        expect(form).not.toBeNull();
+                let body = fixture.debugElement.query(By.css(".modal-body"));
+                expect(body).not.toBeNull();
 
-                        setInputValue(form, "currentPassword", "someCurrentPassword");
+                let form = body.query(By.css("form"));
+                expect(form).not.toBeNull();
 
-                        fixture.detectChanges();
-                        let button = form.query(By.css("button"));
-                        expect(button).not.toBeNull();
-                        expect(button.properties.disabled).toEqual(true);
+                setInputValue(form, "currentPassword", "someCurrentPassword");
 
-                        let errors = getAllErrors();
-                        expect(errors.length).toEqual(0);
-                    })
-                    .then(done)
-                    .catch(done.fail);
+                fixture.detectChanges();
+                let button = form.query(By.css("button"));
+                expect(button).not.toBeNull();
+                expect(button.properties.disabled).toEqual(true);
+
+                let errors = getAllErrors();
+                expect(errors.length).toEqual(0);
             });
 
-            it("should disable the submit button with an empty new password", done => {
-                setUserLogins(loginsWithPassword)
-                    .then(() => {
-                        let body = fixture.debugElement.query(By.css(".modal-body"));
-                        expect(body).not.toBeNull();
+            it("should disable the submit button with an empty new password", async () => {
+                await setUserLogins(loginsWithPassword);
 
-                        let form = body.query(By.css("form"));
-                        expect(form).not.toBeNull();
+                let body = fixture.debugElement.query(By.css(".modal-body"));
+                expect(body).not.toBeNull();
 
-                        setInputValue(form, "currentPassword", "someCurrentPassword");
-                        setInputValue(form, "newPassword", "someNewPassword");
-                        setInputValue(form, "newPassword", "");
+                let form = body.query(By.css("form"));
+                expect(form).not.toBeNull();
 
-                        fixture.detectChanges();
-                        let button = form.query(By.css("button"));
-                        expect(button).not.toBeNull();
-                        expect(button.properties.disabled).toEqual(true);
+                setInputValue(form, "currentPassword", "someCurrentPassword");
+                setInputValue(form, "newPassword", "someNewPassword");
+                setInputValue(form, "newPassword", "");
 
-                        let errors = getAllErrors();
-                        expect(errors.length).toEqual(1);
-                        expect(errors[0]).toEqual("New Password is required");
-                    })
-                    .then(done)
-                    .catch(done.fail);
+                fixture.detectChanges();
+                let button = form.query(By.css("button"));
+                expect(button).not.toBeNull();
+                expect(button.properties.disabled).toEqual(true);
+
+                let errors = getAllErrors();
+                expect(errors.length).toEqual(1);
+                expect(errors[0]).toEqual("New Password is required");
             });
 
-            it("should disable the submit button with a short new password", done => {
-                setUserLogins(loginsWithPassword)
-                    .then(() => {
-                        let body = fixture.debugElement.query(By.css(".modal-body"));
-                        expect(body).not.toBeNull();
+            it("should disable the submit button with a short new password", async () => {
+                await setUserLogins(loginsWithPassword);
 
-                        let form = body.query(By.css("form"));
-                        expect(form).not.toBeNull();
+                let body = fixture.debugElement.query(By.css(".modal-body"));
+                expect(body).not.toBeNull();
 
-                        setInputValue(form, "currentPassword", "someCurrentPassword");
-                        setInputValue(form, "newPassword", "a");
+                let form = body.query(By.css("form"));
+                expect(form).not.toBeNull();
 
-                        fixture.detectChanges();
-                        let button = form.query(By.css("button"));
-                        expect(button).not.toBeNull();
-                        expect(button.properties.disabled).toEqual(true);
+                setInputValue(form, "currentPassword", "someCurrentPassword");
+                setInputValue(form, "newPassword", "a");
 
-                        let errors = getAllErrors();
-                        expect(errors.length).toEqual(1);
-                        expect(errors[0]).toEqual("New Password must be at least 4 characters long");
-                    })
-                    .then(done)
-                    .catch(done.fail);
+                fixture.detectChanges();
+                let button = form.query(By.css("button"));
+                expect(button).not.toBeNull();
+                expect(button.properties.disabled).toEqual(true);
+
+                let errors = getAllErrors();
+                expect(errors.length).toEqual(1);
+                expect(errors[0]).toEqual("New Password must be at least 4 characters long");
             });
         });
 
         describe("New Password Confirmation", () => {
-            it("should disable the submit button with a missing new password confirmation", done => {
-                setUserLogins(loginsWithPassword)
-                    .then(() => {
-                        let body = fixture.debugElement.query(By.css(".modal-body"));
-                        expect(body).not.toBeNull();
+            it("should disable the submit button with a missing new password confirmation", async () => {
+                await setUserLogins(loginsWithPassword);
 
-                        let form = body.query(By.css("form"));
-                        expect(form).not.toBeNull();
+                let body = fixture.debugElement.query(By.css(".modal-body"));
+                expect(body).not.toBeNull();
 
-                        setInputValue(form, "currentPassword", "someCurrentPassword");
-                        setInputValue(form, "newPassword", "someNewPassword");
+                let form = body.query(By.css("form"));
+                expect(form).not.toBeNull();
 
-                        fixture.detectChanges();
-                        let button = form.query(By.css("button"));
-                        expect(button).not.toBeNull();
-                        expect(button.properties.disabled).toEqual(true);
+                setInputValue(form, "currentPassword", "someCurrentPassword");
+                setInputValue(form, "newPassword", "someNewPassword");
 
-                        let errors = getAllErrors();
-                        expect(errors.length).toEqual(0);
-                    })
-                    .then(done)
-                    .catch(done.fail);
+                fixture.detectChanges();
+                let button = form.query(By.css("button"));
+                expect(button).not.toBeNull();
+                expect(button.properties.disabled).toEqual(true);
+
+                let errors = getAllErrors();
+                expect(errors.length).toEqual(0);
             });
 
-            it("should disable the submit button with a non-matching new password confirmation", done => {
-                setUserLogins(loginsWithPassword)
-                    .then(() => {
-                        let body = fixture.debugElement.query(By.css(".modal-body"));
-                        expect(body).not.toBeNull();
+            it("should disable the submit button with a non-matching new password confirmation", async () => {
+                await setUserLogins(loginsWithPassword);
 
-                        let form = body.query(By.css("form"));
-                        expect(form).not.toBeNull();
+                let body = fixture.debugElement.query(By.css(".modal-body"));
+                expect(body).not.toBeNull();
 
-                        setInputValue(form, "currentPassword", "someCurrentPassword");
-                        setInputValue(form, "newPassword", "someNewPassword");
-                        setInputValue(form, "confirmNewPassword", "someOtherNewPassword");
+                let form = body.query(By.css("form"));
+                expect(form).not.toBeNull();
 
-                        fixture.detectChanges();
-                        let button = form.query(By.css("button"));
-                        expect(button).not.toBeNull();
-                        expect(button.properties.disabled).toEqual(true);
+                setInputValue(form, "currentPassword", "someCurrentPassword");
+                setInputValue(form, "newPassword", "someNewPassword");
+                setInputValue(form, "confirmNewPassword", "someOtherNewPassword");
 
-                        let errors = getAllErrors();
-                        expect(errors.length).toEqual(1);
-                        expect(errors[0]).toEqual("New Passwords don't match");
-                    })
-                    .then(done)
-                    .catch(done.fail);
+                fixture.detectChanges();
+                let button = form.query(By.css("button"));
+                expect(button).not.toBeNull();
+                expect(button.properties.disabled).toEqual(true);
+
+                let errors = getAllErrors();
+                expect(errors.length).toEqual(1);
+                expect(errors[0]).toEqual("New Passwords don't match");
             });
 
-            it("should disable the submit button when the new password is changed to not match the new password confirmation", done => {
-                setUserLogins(loginsWithPassword)
-                    .then(() => {
-                        let body = fixture.debugElement.query(By.css(".modal-body"));
-                        expect(body).not.toBeNull();
+            it("should disable the submit button when the new password is changed to not match the new password confirmation", async () => {
+                await setUserLogins(loginsWithPassword);
 
-                        let form = body.query(By.css("form"));
-                        expect(form).not.toBeNull();
+                let body = fixture.debugElement.query(By.css(".modal-body"));
+                expect(body).not.toBeNull();
 
-                        setInputValue(form, "currentPassword", "someCurrentPassword");
-                        setInputValue(form, "newPassword", "someNewPassword");
-                        setInputValue(form, "confirmNewPassword", "someNewPassword");
-                        setInputValue(form, "newPassword", "someOtherNewPassword");
+                let form = body.query(By.css("form"));
+                expect(form).not.toBeNull();
 
-                        fixture.detectChanges();
-                        let button = form.query(By.css("button"));
-                        expect(button).not.toBeNull();
-                        expect(button.properties.disabled).toEqual(true);
+                setInputValue(form, "currentPassword", "someCurrentPassword");
+                setInputValue(form, "newPassword", "someNewPassword");
+                setInputValue(form, "confirmNewPassword", "someNewPassword");
+                setInputValue(form, "newPassword", "someOtherNewPassword");
 
-                        let errors = getAllErrors();
-                        expect(errors.length).toEqual(1);
-                        expect(errors[0]).toEqual("New Passwords don't match");
-                    })
-                    .then(done)
-                    .catch(done.fail);
+                fixture.detectChanges();
+                let button = form.query(By.css("button"));
+                expect(button).not.toBeNull();
+                expect(button.properties.disabled).toEqual(true);
+
+                let errors = getAllErrors();
+                expect(errors.length).toEqual(1);
+                expect(errors[0]).toEqual("New Passwords don't match");
             });
         });
     });
 
     describe("Form submission", () => {
-        it("should close the dialog when changing the password properly", done => {
+        it("should close the dialog when changing the password properly", async () => {
             let userService = TestBed.inject(UserService);
             spyOn(userService, "changePassword").and.returnValue(Promise.resolve());
 
             let activeModal = TestBed.inject(NgbActiveModal);
             spyOn(activeModal, "close");
 
-            setUserLogins(loginsWithPassword)
-                .then(() => {
-                    let body = fixture.debugElement.query(By.css(".modal-body"));
-                    expect(body).not.toBeNull();
+            await setUserLogins(loginsWithPassword);
 
-                    let form = body.query(By.css("form"));
-                    expect(form).not.toBeNull();
+            let body = fixture.debugElement.query(By.css(".modal-body"));
+            expect(body).not.toBeNull();
 
-                    setInputValue(form, "currentPassword", "someCurrentPassword");
-                    setInputValue(form, "newPassword", "someNewPassword");
-                    setInputValue(form, "confirmNewPassword", "someNewPassword");
-                    return submit(form);
-                })
-                .then(() => {
-                    expect(userService.changePassword).toHaveBeenCalledWith("someUsername", "someCurrentPassword", "someNewPassword");
-                    expect(activeModal.close).toHaveBeenCalled();
+            let form = body.query(By.css("form"));
+            expect(form).not.toBeNull();
 
-                    let errors = getAllErrors();
-                    expect(errors.length).toEqual(0);
-                })
-                .then(done)
-                .catch(done.fail);
+            setInputValue(form, "currentPassword", "someCurrentPassword");
+            setInputValue(form, "newPassword", "someNewPassword");
+            setInputValue(form, "confirmNewPassword", "someNewPassword");
+            await submit(form);
+
+            expect(userService.changePassword).toHaveBeenCalledWith("someUsername", "someCurrentPassword", "someNewPassword");
+            expect(activeModal.close).toHaveBeenCalled();
+
+            let errors = getAllErrors();
+            expect(errors.length).toEqual(0);
         });
 
-        it("should close the dialog when adding a new password properly", done => {
+        it("should close the dialog when adding a new password properly", async () => {
             let userService = TestBed.inject(UserService);
             spyOn(userService, "setPassword").and.returnValue(Promise.resolve());
 
             let activeModal = TestBed.inject(NgbActiveModal);
             spyOn(activeModal, "close");
 
-            setUserLogins(loginsWithoutPassword)
-                .then(() => {
-                    let body = fixture.debugElement.query(By.css(".modal-body"));
-                    expect(body).not.toBeNull();
+            await setUserLogins(loginsWithoutPassword);
 
-                    let form = body.query(By.css("form"));
-                    expect(form).not.toBeNull();
+            let body = fixture.debugElement.query(By.css(".modal-body"));
+            expect(body).not.toBeNull();
 
-                    setInputValue(form, "newPassword", "someNewPassword");
-                    setInputValue(form, "confirmNewPassword", "someNewPassword");
-                    return submit(form);
-                })
-                .then(() => {
-                    expect(userService.setPassword).toHaveBeenCalledWith("someUsername", "someNewPassword");
-                    expect(activeModal.close).toHaveBeenCalled();
+            let form = body.query(By.css("form"));
+            expect(form).not.toBeNull();
 
-                    let errors = getAllErrors();
-                    expect(errors.length).toEqual(0);
-                })
-                .then(done)
-                .catch(done.fail);
+            setInputValue(form, "newPassword", "someNewPassword");
+            setInputValue(form, "confirmNewPassword", "someNewPassword");
+            await submit(form);
+
+            expect(userService.setPassword).toHaveBeenCalledWith("someUsername", "someNewPassword");
+            expect(activeModal.close).toHaveBeenCalled();
+
+            let errors = getAllErrors();
+            expect(errors.length).toEqual(0);
         });
 
-        it("should show an error when password change fails", done => {
+        it("should show an error when password change fails", async () => {
             let userService = TestBed.inject(UserService);
             spyOn(userService, "changePassword").and.returnValue(Promise.reject(["error0", "error1", "error2"]));
 
             let activeModal = TestBed.inject(NgbActiveModal);
             spyOn(activeModal, "close");
 
-            setUserLogins(loginsWithPassword)
-                .then(() => {
-                    let body = fixture.debugElement.query(By.css(".modal-body"));
-                    expect(body).not.toBeNull();
+            await setUserLogins(loginsWithPassword);
 
-                    let form = body.query(By.css("form"));
-                    expect(form).not.toBeNull();
+            let body = fixture.debugElement.query(By.css(".modal-body"));
+            expect(body).not.toBeNull();
 
-                    setInputValue(form, "currentPassword", "someCurrentPassword");
-                    setInputValue(form, "newPassword", "someNewPassword");
-                    setInputValue(form, "confirmNewPassword", "someNewPassword");
-                    return submit(form);
-                })
-                .then(() => {
-                    expect(userService.changePassword).toHaveBeenCalledWith("someUsername", "someCurrentPassword", "someNewPassword");
-                    expect(activeModal.close).not.toHaveBeenCalled();
+            let form = body.query(By.css("form"));
+            expect(form).not.toBeNull();
 
-                    let errors = getAllErrors();
-                    expect(errors.length).toEqual(3);
-                    expect(errors[0]).toEqual("error0");
-                    expect(errors[1]).toEqual("error1");
-                    expect(errors[2]).toEqual("error2");
-                })
-                .then(done)
-                .catch(done.fail);
+            setInputValue(form, "currentPassword", "someCurrentPassword");
+            setInputValue(form, "newPassword", "someNewPassword");
+            setInputValue(form, "confirmNewPassword", "someNewPassword");
+            await submit(form);
+
+            expect(userService.changePassword).toHaveBeenCalledWith("someUsername", "someCurrentPassword", "someNewPassword");
+            expect(activeModal.close).not.toHaveBeenCalled();
+
+            let errors = getAllErrors();
+            expect(errors.length).toEqual(3);
+            expect(errors[0]).toEqual("error0");
+            expect(errors[1]).toEqual("error1");
+            expect(errors[2]).toEqual("error2");
         });
 
-        it("should show an error when adding a password fails", done => {
+        it("should show an error when adding a password fails", async () => {
             let userService = TestBed.inject(UserService);
             spyOn(userService, "setPassword").and.returnValue(Promise.reject(["error0", "error1", "error2"]));
 
             let activeModal = TestBed.inject(NgbActiveModal);
             spyOn(activeModal, "close");
 
-            setUserLogins(loginsWithoutPassword)
-                .then(() => {
-                    let body = fixture.debugElement.query(By.css(".modal-body"));
-                    expect(body).not.toBeNull();
+            await setUserLogins(loginsWithoutPassword);
 
-                    let form = body.query(By.css("form"));
-                    expect(form).not.toBeNull();
+            let body = fixture.debugElement.query(By.css(".modal-body"));
+            expect(body).not.toBeNull();
 
-                    setInputValue(form, "newPassword", "someNewPassword");
-                    setInputValue(form, "confirmNewPassword", "someNewPassword");
-                    return submit(form);
-                })
-                .then(() => {
-                    expect(userService.setPassword).toHaveBeenCalledWith("someUsername", "someNewPassword");
-                    expect(activeModal.close).not.toHaveBeenCalled();
+            let form = body.query(By.css("form"));
+            expect(form).not.toBeNull();
 
-                    let errors = getAllErrors();
-                    expect(errors.length).toEqual(3);
-                    expect(errors[0]).toEqual("error0");
-                    expect(errors[1]).toEqual("error1");
-                    expect(errors[2]).toEqual("error2");
-                })
-                .then(done)
-                .catch(done.fail);
+            setInputValue(form, "newPassword", "someNewPassword");
+            setInputValue(form, "confirmNewPassword", "someNewPassword");
+            await submit(form);
+
+            expect(userService.setPassword).toHaveBeenCalledWith("someUsername", "someNewPassword");
+            expect(activeModal.close).not.toHaveBeenCalled();
+
+            let errors = getAllErrors();
+            expect(errors.length).toEqual(3);
+            expect(errors[0]).toEqual("error0");
+            expect(errors[1]).toEqual("error1");
+            expect(errors[2]).toEqual("error2");
         });
 
-        function submit(form: DebugElement): Promise<void> {
+        async function submit(form: DebugElement): Promise<void> {
             fixture.detectChanges();
             let button = form.query(By.css("button"));
             expect(button).not.toBeNull();
             button.nativeElement.click();
 
-            return fixture.whenStable()
-                .then(() => fixture.detectChanges());
+            await fixture.whenStable();
+            return fixture.detectChanges();
         }
     });
 
-    function setUserLogins(logins: IUserLogins): Promise<void> {
+    async function setUserLogins(logins: IUserLogins): Promise<void> {
         let userService = TestBed.inject(UserService);
         spyOn(userService, "getLogins").and.returnValue(Promise.resolve(logins));
 
         // First allow the getLogins promise to finish
         fixture.detectChanges();
-        return fixture.whenStable()
-            .then(() => {
-                // Trigger the form to render
-                fixture.detectChanges();
+        await fixture.whenStable()
 
-                // Wait for stability again since ngModel is async
-                return fixture.whenStable();
-            })
-            .then(() => {
-                // Bind yet again since validation-related bindings depend on the ngModel values.
-                fixture.detectChanges();
-            });
+        // Trigger the form to render
+        fixture.detectChanges();
+
+        // Wait for stability again since ngModel is async
+        await fixture.whenStable();
+
+        // Bind yet again since validation-related bindings depend on the ngModel values.
+        fixture.detectChanges();
     }
 
     function setInputValue(form: DebugElement, id: string, value: string): void {

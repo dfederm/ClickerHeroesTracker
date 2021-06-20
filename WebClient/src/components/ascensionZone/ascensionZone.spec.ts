@@ -84,14 +84,14 @@ describe("AscensionZoneComponent", () => {
     let savedGame = new SavedGame(null, false);
     savedGame.data = savedGameData as ISavedGameData;
 
-    beforeEach(done => {
+    beforeEach(async () => {
         let appInsights = {
             trackMetric: (): void => void 0,
         };
         let settingsService = { settings: () => settingsSubject };
         let changeDetectorRef = { markForCheck: (): void => void 0 };
 
-        TestBed.configureTestingModule(
+        await TestBed.configureTestingModule(
             {
                 declarations: [
                     AscensionZoneComponent,
@@ -103,13 +103,10 @@ describe("AscensionZoneComponent", () => {
                     { provide: ChangeDetectorRef, useValue: changeDetectorRef },
                 ],
             })
-            .compileComponents()
-            .then(() => {
-                fixture = TestBed.createComponent(AscensionZoneComponent);
-                component = fixture.componentInstance;
-            })
-            .then(done)
-            .catch(done.fail);
+            .compileComponents();
+
+        fixture = TestBed.createComponent(AscensionZoneComponent);
+        component = fixture.componentInstance;
     });
 
     it("should show data after clicking the calculate button", () => {

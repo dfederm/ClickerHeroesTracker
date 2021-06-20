@@ -10,29 +10,25 @@ describe("BannerComponent", () => {
     let fixture: ComponentFixture<BannerComponent>;
     let version: BehaviorSubject<IVersion>;
 
-    beforeEach(done => {
+    beforeEach(async () => {
         version = new BehaviorSubject(createVersion(0));
         let versionService = {
             getVersion: () => version,
         };
 
-        TestBed.configureTestingModule(
+        await TestBed.configureTestingModule(
             {
                 declarations: [BannerComponent],
-                providers:
-                    [
-                        { provide: VersionService, useValue: versionService },
-                    ],
+                providers: [
+                    { provide: VersionService, useValue: versionService },
+                ],
                 schemas: [NO_ERRORS_SCHEMA],
             })
-            .compileComponents()
-            .then(() => {
-                fixture = TestBed.createComponent(BannerComponent);
+            .compileComponents();
 
-                fixture.detectChanges();
-            })
-            .then(done)
-            .catch(done.fail);
+        fixture = TestBed.createComponent(BannerComponent);
+
+        fixture.detectChanges();
     });
 
     it("should initially show nothing", () => {

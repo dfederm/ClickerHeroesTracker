@@ -54,7 +54,7 @@ describe("ClanComponent", () => {
         public transform = timeAgoPipeTransform;
     }
 
-    beforeEach(done => {
+    beforeEach(async () => {
         let clanService = {
             getClan(): Promise<IClanData> {
                 return Promise.resolve(clan);
@@ -83,268 +83,237 @@ describe("ClanComponent", () => {
             getValidationErrors: (): void => void 0,
         };
 
-        TestBed.configureTestingModule(
+        await TestBed.configureTestingModule(
             {
                 imports: [
                     FormsModule,
                     HttpClientTestingModule,
                 ],
-                declarations:
-                    [
-                        ClanComponent,
-                        MockTimeAgoPipe,
-                    ],
-                providers:
-                    [
-                        { provide: ClanService, useValue: clanService },
-                        { provide: AuthenticationService, useValue: authenticationService },
-                        { provide: UserService, useValue: userService },
-                        { provide: ActivatedRoute, useValue: route },
-                        { provide: HttpErrorHandlerService, useValue: httpErrorHandlerService },
-                    ],
+                declarations: [
+                    ClanComponent,
+                    MockTimeAgoPipe,
+                ],
+                providers: [
+                    { provide: ClanService, useValue: clanService },
+                    { provide: AuthenticationService, useValue: authenticationService },
+                    { provide: UserService, useValue: userService },
+                    { provide: ActivatedRoute, useValue: route },
+                    { provide: HttpErrorHandlerService, useValue: httpErrorHandlerService },
+                ],
                 schemas: [NO_ERRORS_SCHEMA],
             })
-            .compileComponents()
-            .then(() => {
-                fixture = TestBed.createComponent(ClanComponent);
-            })
-            .then(done)
-            .catch(done.fail);
+            .compileComponents();
+
+        fixture = TestBed.createComponent(ClanComponent);
     });
 
-    it("should display clan information", done => {
+    it("should display clan information", async () => {
         fixture.detectChanges();
-        fixture.whenStable()
-            .then(() => {
-                fixture.detectChanges();
-                expectNoErrors();
-
-                let clanTitle = fixture.debugElement.query(By.css("h2"));
-                expect(clanTitle.nativeElement.textContent.trim()).toEqual(clan.clanName);
-
-                let container = fixture.debugElement.query(By.css(".col-md-6"));
-                expect(container).not.toBeNull();
-
-                let clanInformation = container.queryAll(By.css("li span"));
-                expect(clanInformation.length).toEqual(2);
-                expect(clanInformation[0].nativeElement.textContent.trim()).toEqual(clan.rank.toString());
-                expect(clanInformation[1].nativeElement.textContent.trim()).toEqual(clan.currentRaidLevel.toString());
-            })
-            .then(done)
-            .catch(done.fail);
-    });
-
-    it("should display clan members", done => {
+        await fixture.whenStable();
         fixture.detectChanges();
-        fixture.whenStable()
-            .then(() => {
-                fixture.detectChanges();
-                expectNoErrors();
 
-                let containers = fixture.debugElement.queryAll(By.css(".col-lg-6"));
-                expect(containers.length).toEqual(2);
+        expectNoErrors();
 
-                let userRows = containers[0].query(By.css("table tbody")).children;
-                expect(userRows.length).toEqual(clan.guildMembers.length);
-                for (let i = 0; i < userRows.length; i++) {
-                    let userRow = userRows[i];
-                    let guildMember = clan.guildMembers[i];
+        let clanTitle = fixture.debugElement.query(By.css("h2"));
+        expect(clanTitle.nativeElement.textContent.trim()).toEqual(clan.clanName);
 
-                    let expectedName = guildMember.nickname;
-                    if (guildMember.userName) {
-                        expectedName += " ( " + guildMember.userName + " )";
-                    }
+        let container = fixture.debugElement.query(By.css(".col-md-6"));
+        expect(container).not.toBeNull();
 
-                    let cells = userRow.children;
-                    expect(cells.length).toEqual(2);
-                    expect(cells[0].nativeElement.textContent.trim().replace(/\s+/g, " ")).toEqual(expectedName);
-                    expect(cells[1].nativeElement.textContent.trim()).toEqual(guildMember.highestZone.toString());
-                }
-            })
-            .then(done)
-            .catch(done.fail);
+        let clanInformation = container.queryAll(By.css("li span"));
+        expect(clanInformation.length).toEqual(2);
+        expect(clanInformation[0].nativeElement.textContent.trim()).toEqual(clan.rank.toString());
+        expect(clanInformation[1].nativeElement.textContent.trim()).toEqual(clan.currentRaidLevel.toString());
     });
 
-    it("should display an error when fetching the clan fails", done => {
-        let clanService = TestBed.get(ClanService);
+    it("should display clan members", async () => {
+        fixture.detectChanges();
+        await fixture.whenStable();
+        fixture.detectChanges();
+
+        expectNoErrors();
+
+        let containers = fixture.debugElement.queryAll(By.css(".col-lg-6"));
+        expect(containers.length).toEqual(2);
+
+        let userRows = containers[0].query(By.css("table tbody")).children;
+        expect(userRows.length).toEqual(clan.guildMembers.length);
+
+        for (let i = 0; i < userRows.length; i++) {
+            let userRow = userRows[i];
+            let guildMember = clan.guildMembers[i];
+
+            let expectedName = guildMember.nickname;
+            if (guildMember.userName) {
+                expectedName += " ( " + guildMember.userName + " )";
+            }
+
+            let cells = userRow.children;
+            expect(cells.length).toEqual(2);
+            expect(cells[0].nativeElement.textContent.trim().replace(/\s+/g, " ")).toEqual(expectedName);
+            expect(cells[1].nativeElement.textContent.trim()).toEqual(guildMember.highestZone.toString());
+        }
+    });
+
+    it("should display an error when fetching the clan fails", async () => {
+        let clanService = TestBed.inject(ClanService);
         spyOn(clanService, "getClan").and.returnValue(Promise.reject("someReason"));
 
         fixture.detectChanges();
-        fixture.whenStable()
-            .then(() => {
-                fixture.detectChanges();
-                expectError("There was a problem getting the clan's data");
-            })
-            .then(done)
-            .catch(done.fail);
+        await fixture.whenStable();
+        fixture.detectChanges();
+
+        expectError("There was a problem getting the clan's data");
     });
 
-    it("should display an error when the clan does not exist", done => {
-        let clanService = TestBed.get(ClanService);
+    it("should display an error when the clan does not exist", async () => {
+        let clanService = TestBed.inject(ClanService);
         spyOn(clanService, "getClan").and.returnValue(Promise.reject({ status: 404 }));
 
         fixture.detectChanges();
-        fixture.whenStable()
-            .then(() => {
-                fixture.detectChanges();
-                expectError("This clan does not exist");
-            })
-            .then(done)
-            .catch(done.fail);
+        await fixture.whenStable();
+        fixture.detectChanges();
+
+        expectError("This clan does not exist");
     });
 
-    it("should not display messages if it's not the user's clan", done => {
-        let userService = TestBed.get(UserService);
-        spyOn(userService, "getUser").and.returnValue(Promise.resolve({ clanName: "someOtherClan" }));
+    it("should not display messages if it's not the user's clan", async () => {
+        let userService = TestBed.inject(UserService);
+        let user: IUser = {
+            name: "someUser",
+            clanName: "someOtherClan",
+        }
+        spyOn(userService, "getUser").and.returnValue(Promise.resolve(user));
 
         fixture.detectChanges();
-        fixture.whenStable()
-            .then(() => {
-                fixture.detectChanges();
-                expectNoErrors();
-
-                let containers = fixture.debugElement.queryAll(By.css(".col-lg-6"));
-                expect(containers.length).toEqual(1);
-            })
-            .then(done)
-            .catch(done.fail);
-    });
-
-    it("should display messages if it's the user's clan", done => {
+        await fixture.whenStable();
         fixture.detectChanges();
-        fixture.whenStable()
-            .then(() => {
-                fixture.detectChanges();
-                expectNoErrors();
 
-                let containers = fixture.debugElement.queryAll(By.css(".col-lg-6"));
-                expect(containers.length).toEqual(2);
+        expectNoErrors();
 
-                let messages = containers[1].queryAll(By.css(".clan-message"));
-                expect(messages.length).toEqual(clanMessages.length);
-                for (let i = 0; i < messages.length; i++) {
-                    let messageElement = messages[i];
-                    let expectedMessage = clanMessages[i];
-
-                    let messageElementsPieces = messageElement.children;
-                    expect(messageElementsPieces.length).toEqual(2);
-
-                    let metadataElement = messageElementsPieces[0].children;
-                    expect(metadataElement[0].nativeElement.textContent.trim()).toEqual("(" + timeAgoPipeTransform(expectedMessage.date) + ")");
-                    if (expectedMessage.username) {
-                        expect(metadataElement[1].nativeElement.classList.contains("text-muted")).toBe(false);
-                        expect(metadataElement[1].nativeElement.textContent.trim()).toEqual(expectedMessage.username);
-                    } else {
-                        expect(metadataElement[1].nativeElement.classList.contains("text-muted")).toBe(true);
-                        expect(metadataElement[1].nativeElement.textContent.trim()).toEqual("(Unknown)");
-                    }
-
-                    expect(messageElementsPieces[1].nativeElement.textContent.trim()).toEqual(expectedMessage.content);
-                }
-            })
-            .then(done)
-            .catch(done.fail);
+        let containers = fixture.debugElement.queryAll(By.css(".col-lg-6"));
+        expect(containers.length).toEqual(1);
     });
 
-    it("should display an error when fetcing messages fails", done => {
-        let clanService = TestBed.get(ClanService);
+    it("should display messages if it's the user's clan", async () => {
+        fixture.detectChanges();
+        await fixture.whenStable();
+        fixture.detectChanges();
+
+        expectNoErrors();
+
+        let containers = fixture.debugElement.queryAll(By.css(".col-lg-6"));
+        expect(containers.length).toEqual(2);
+
+        let messages = containers[1].queryAll(By.css(".clan-message"));
+        expect(messages.length).toEqual(clanMessages.length);
+        for (let i = 0; i < messages.length; i++) {
+            let messageElement = messages[i];
+            let expectedMessage = clanMessages[i];
+
+            let messageElementsPieces = messageElement.children;
+            expect(messageElementsPieces.length).toEqual(2);
+
+            let metadataElement = messageElementsPieces[0].children;
+            expect(metadataElement[0].nativeElement.textContent.trim()).toEqual("(" + timeAgoPipeTransform(expectedMessage.date) + ")");
+            if (expectedMessage.username) {
+                expect(metadataElement[1].nativeElement.classList.contains("text-muted")).toBe(false);
+                expect(metadataElement[1].nativeElement.textContent.trim()).toEqual(expectedMessage.username);
+            } else {
+                expect(metadataElement[1].nativeElement.classList.contains("text-muted")).toBe(true);
+                expect(metadataElement[1].nativeElement.textContent.trim()).toEqual("(Unknown)");
+            }
+
+            expect(messageElementsPieces[1].nativeElement.textContent.trim()).toEqual(expectedMessage.content);
+        }
+    });
+
+    it("should display an error when fetcing messages fails", async () => {
+        let clanService = TestBed.inject(ClanService);
         spyOn(clanService, "getMessages").and.returnValue(Promise.reject("someReason"));
 
         fixture.detectChanges();
-        fixture.whenStable()
-            .then(() => {
-                fixture.detectChanges();
-                expectError("There was a problem getting your clan's messages. Please try again.");
-            })
-            .then(done)
-            .catch(done.fail);
+        await fixture.whenStable();
+        fixture.detectChanges();
+
+        expectError("There was a problem getting your clan's messages. Please try again.");
     });
 
-    it("should send messages", done => {
+    it("should send messages", async () => {
         let clanService = TestBed.inject(ClanService);
 
         const message = "Test Message";
 
         // The first stabilization is for the initial population of clan data
         fixture.detectChanges();
-        fixture.whenStable()
-            .then(() => {
-                // We need a second stabilization round for binding ngModel since it's async and we added it to the DOM *after* the initial stabilization.
-                fixture.detectChanges();
-                return fixture.whenStable();
-            })
-            .then(() => {
-                expectNoErrors();
+        await fixture.whenStable();
 
-                let containers = fixture.debugElement.queryAll(By.css(".col-lg-6"));
-                expect(containers.length).toEqual(2);
+        // We need a second stabilization round for binding ngModel since it's async and we added it to the DOM *after* the initial stabilization.
+        fixture.detectChanges();
+        await fixture.whenStable();
 
-                let form = containers[1].query(By.css("form"));
-                expect(form).not.toBeNull();
+        expectNoErrors();
 
-                let input = form.query(By.css("input"));
-                expect(input).not.toBeNull();
-                setInputValue(input, message);
+        let containers = fixture.debugElement.queryAll(By.css(".col-lg-6"));
+        expect(containers.length).toEqual(2);
 
-                let button = form.query(By.css("button"));
-                expect(button).not.toBeNull();
+        let form = containers[1].query(By.css("form"));
+        expect(form).not.toBeNull();
 
-                spyOn(clanService, "sendMessage").and.callThrough();
-                button.nativeElement.click();
-                expect(clanService.sendMessage).toHaveBeenCalledWith(message);
+        let input = form.query(By.css("input"));
+        expect(input).not.toBeNull();
+        setInputValue(input, message);
 
-                // Ensure we refresh the UI
-                spyOn(clanService, "getMessages");
-                return fixture.whenStable();
-            })
-            .then(() => {
-                expect(clanService.getMessages).toHaveBeenCalled();
-            })
-            .then(done)
-            .catch(done.fail);
+        let button = form.query(By.css("button"));
+        expect(button).not.toBeNull();
+        spyOn(clanService, "sendMessage").and.callThrough();
+        button.nativeElement.click();
+        expect(clanService.sendMessage).toHaveBeenCalledWith(message);
+
+        // Ensure we refresh the UI
+        spyOn(clanService, "getMessages");
+
+        await fixture.whenStable();
+
+        expect(clanService.getMessages).toHaveBeenCalled();
     });
 
-    it("should show an error message when sending a message fails", done => {
+    it("should show an error message when sending a message fails", async () => {
         let clanService = TestBed.inject(ClanService);
 
         const message = "Test Message";
 
         // The first stabilization is for the initial population of clan data
         fixture.detectChanges();
-        fixture.whenStable()
-            .then(() => {
-                // We need a second stabilization round for binding ngModel since it's async and we added it to the DOM *after* the initial stabilization.
-                fixture.detectChanges();
-                return fixture.whenStable();
-            })
-            .then(() => {
-                expectNoErrors();
+        await fixture.whenStable();
+        // We need a second stabilization round for binding ngModel since it's async and we added it to the DOM *after* the initial stabilization.
 
-                let containers = fixture.debugElement.queryAll(By.css(".col-lg-6"));
-                expect(containers.length).toEqual(2);
+        fixture.detectChanges();
+        await fixture.whenStable();
 
-                let form = containers[1].query(By.css("form"));
-                expect(form).not.toBeNull();
+        expectNoErrors();
 
-                let input = form.query(By.css("input"));
-                expect(input).not.toBeNull();
-                setInputValue(input, message);
+        let containers = fixture.debugElement.queryAll(By.css(".col-lg-6"));
+        expect(containers.length).toEqual(2);
 
-                let button = form.query(By.css("button"));
-                expect(button).not.toBeNull();
+        let form = containers[1].query(By.css("form"));
+        expect(form).not.toBeNull();
 
-                spyOn(clanService, "sendMessage").and.returnValue(Promise.reject("someReason"));
-                button.nativeElement.click();
-                expect(clanService.sendMessage).toHaveBeenCalledWith(message);
+        let input = form.query(By.css("input"));
+        expect(input).not.toBeNull();
+        setInputValue(input, message);
 
-                return fixture.whenStable();
-            })
-            .then(() => {
-                fixture.detectChanges();
-                expectError("There was a problem sending your message. Please try again.");
-            })
-            .then(done)
-            .catch(done.fail);
+        let button = form.query(By.css("button"));
+        expect(button).not.toBeNull();
+
+        spyOn(clanService, "sendMessage").and.returnValue(Promise.reject("someReason"));
+        button.nativeElement.click();
+        expect(clanService.sendMessage).toHaveBeenCalledWith(message);
+
+        await fixture.whenStable();
+        fixture.detectChanges();
+
+        expectError("There was a problem sending your message. Please try again.");
     });
 
     function setInputValue(element: DebugElement, value: string): void {

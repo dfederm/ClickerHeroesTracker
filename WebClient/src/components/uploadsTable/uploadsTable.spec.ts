@@ -116,7 +116,7 @@ describe("UploadsTableComponent", () => {
     }));
 
     it("should display an error when the upload service errors", async(() => {
-        let userService = TestBed.get(UserService);
+        let userService = TestBed.inject(UserService);
         spyOn(userService, "getUploads").and.returnValue(Promise.reject("someReason"));
 
         fixture.detectChanges();
@@ -129,8 +129,8 @@ describe("UploadsTableComponent", () => {
     }));
 
     it("should display an error when the upload service returns an invalid response", async(() => {
-        let userService = TestBed.get(UserService);
-        spyOn(userService, "getUploads").and.returnValue(Promise.resolve({}));
+        let userService = TestBed.inject(UserService);
+        spyOn(userService, "getUploads").and.returnValue(Promise.resolve({} as any));
 
         fixture.detectChanges();
         fixture.whenStable().then(() => {

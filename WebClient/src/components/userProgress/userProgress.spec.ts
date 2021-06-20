@@ -137,7 +137,7 @@ describe("UserProgressComponent", () => {
         });
 
         it("should request the proper date range", () => {
-            let userService = TestBed.get(UserService);
+            let userService = TestBed.inject(UserService);
             spyOn(userService, "getProgress").and.callThrough();
 
             fixture.detectChanges();
@@ -169,118 +169,106 @@ describe("UserProgressComponent", () => {
     });
 
     describe("Charts", () => {
-        it("should display", done => {
+        it("should display", async () => {
             fixture.detectChanges();
-            fixture.whenStable()
-                .then(() => {
-                    fixture.detectChanges();
+            await fixture.whenStable();
+            fixture.detectChanges();
 
-                    let error = fixture.debugElement.query(By.css(".alert-danger"));
-                    expect(error).toBeNull();
+            let error = fixture.debugElement.query(By.css(".alert-danger"));
+            expect(error).toBeNull();
 
-                    let warning = fixture.debugElement.query(By.css(".alert-warning"));
-                    expect(warning).toBeNull();
+            let warning = fixture.debugElement.query(By.css(".alert-warning"));
+            expect(warning).toBeNull();
 
-                    let charts = fixture.debugElement.queryAll(By.css("canvas"));
-                    expect(charts.length).toEqual(16);
+            let charts = fixture.debugElement.queryAll(By.css("canvas"));
+            expect(charts.length).toEqual(16);
 
-                    for (let i = 0; i < charts.length; i++) {
-                        let chart = charts[i];
+            for (let i = 0; i < charts.length; i++) {
+                let chart = charts[i];
 
-                        expect(chart).not.toBeNull();
-                        expect(chart.attributes.baseChart).toBeDefined();
-                        expect(chart.attributes.height).toEqual("235");
-                        expect(chart.properties.chartType).toEqual("line");
+                expect(chart).not.toBeNull();
+                expect(chart.attributes.baseChart).toBeDefined();
+                expect(chart.attributes.height).toEqual("235");
+                expect(chart.properties.chartType).toEqual("line");
 
-                        let colors = chart.properties.colors;
-                        expect(colors).toBeTruthy();
+                let colors = chart.properties.colors;
+                expect(colors).toBeTruthy();
 
-                        let options: ChartOptions = chart.properties.options;
-                        expect(options).toBeTruthy();
-                        expect(options.title.text).toEqual(expectedChartOrder[i].title);
+                let options: ChartOptions = chart.properties.options;
+                expect(options).toBeTruthy();
+                expect(options.title.text).toEqual(expectedChartOrder[i].title);
 
-                        let datasets: ChartDataSets[] = chart.properties.datasets;
-                        expect(datasets).toBeTruthy();
-                        expect(datasets.length).toEqual(1);
+                let datasets: ChartDataSets[] = chart.properties.datasets;
+                expect(datasets).toBeTruthy();
+                expect(datasets.length).toEqual(1);
 
-                        let data = datasets[0].data as ChartPoint[];
-                        let expectedData = expectedChartOrder[i].data;
-                        let isLogarithmic = expectedChartOrder[i].isLogarithmic;
-                        let isPercent = expectedChartOrder[i].isPercent;
-                        let dataKeys = Object.keys(expectedData);
-                        expect(data.length).toEqual(dataKeys.length);
-                        for (let j = 0; j < data.length; j++) {
-                            let expectedDate = new Date(dataKeys[j]);
-                            expect(data[j].x).toEqual(expectedDate.getTime());
-                            expect((options.tooltips.callbacks.title as Function)([{ xLabel: dataKeys[j] }])).toEqual(expectedDate.toLocaleString());
+                let data = datasets[0].data as ChartPoint[];
+                let expectedData = expectedChartOrder[i].data;
+                let isLogarithmic = expectedChartOrder[i].isLogarithmic;
+                let isPercent = expectedChartOrder[i].isPercent;
+                let dataKeys = Object.keys(expectedData);
+                expect(data.length).toEqual(dataKeys.length);
+                for (let j = 0; j < data.length; j++) {
+                    let expectedDate = new Date(dataKeys[j]);
+                    expect(data[j].x).toEqual(expectedDate.getTime());
+                    expect((options.tooltips.callbacks.title as Function)([{ xLabel: dataKeys[j] }])).toEqual(expectedDate.toLocaleString());
 
-                            // When logarithmic, the value we plot is actually the log of the value to fake log scale
-                            let rawExpectedValue = expectedData[dataKeys[j]];
-                            let expectedValue = isLogarithmic
-                                ? new Decimal(rawExpectedValue).log().toNumber()
-                                : Number(rawExpectedValue);
-                            expect(data[j].y).toEqual(expectedValue);
+                    // When logarithmic, the value we plot is actually the log of the value to fake log scale
+                    let rawExpectedValue = expectedData[dataKeys[j]];
+                    let expectedValue = isLogarithmic
+                        ? new Decimal(rawExpectedValue).log().toNumber()
+                        : Number(rawExpectedValue);
+                    expect(data[j].y).toEqual(expectedValue);
 
-                            let expectedLabelNum = isLogarithmic
-                                ? Decimal.pow(10, expectedValue)
-                                : Number(expectedValue);
-                            let expectedLabel = isPercent
-                                ? percentPipe.transform(expectedValue / 100, "1.1-3")
-                                : ExponentialPipe.formatNumber(expectedLabelNum, settings);
-                            expect((options.tooltips.callbacks.label as Function)({ yLabel: expectedValue })).toEqual(expectedLabel);
-                            expect(options.scales.yAxes[0].ticks.callback(expectedValue, null, null)).toEqual(expectedLabel);
-                        }
+                    let expectedLabelNum = isLogarithmic
+                        ? Decimal.pow(10, expectedValue)
+                        : Number(expectedValue);
+                    let expectedLabel = isPercent
+                        ? percentPipe.transform(expectedValue / 100, "1.1-3")
+                        : ExponentialPipe.formatNumber(expectedLabelNum, settings);
+                    expect((options.tooltips.callbacks.label as Function)({ yLabel: expectedValue })).toEqual(expectedLabel);
+                    expect(options.scales.yAxes[0].ticks.callback(expectedValue, null, null)).toEqual(expectedLabel);
+                }
 
-                        // Linear even when logarithmic since we're manually managing log scale
-                        expect(options.scales.yAxes[0].type).toEqual("linear");
-                    }
-                })
-                .then(done)
-                .catch(done.fail);
+                // Linear even when logarithmic since we're manually managing log scale
+                expect(options.scales.yAxes[0].type).toEqual("linear");
+            }
         });
 
-        it("should show an error when userService.getProgress fails", done => {
-            let userService = TestBed.get(UserService);
+        it("should show an error when userService.getProgress fails", async () => {
+            let userService = TestBed.inject(UserService);
             spyOn(userService, "getProgress").and.returnValue(Promise.reject("someReason"));
 
             fixture.detectChanges();
-            fixture.whenStable()
-                .then(() => {
-                    fixture.detectChanges();
+            await fixture.whenStable();
+            fixture.detectChanges();
 
-                    let error = fixture.debugElement.query(By.css(".alert-danger"));
-                    expect(error).not.toBeNull();
+            let error = fixture.debugElement.query(By.css(".alert-danger"));
+            expect(error).not.toBeNull();
 
-                    let warning = fixture.debugElement.query(By.css(".alert-warning"));
-                    expect(warning).toBeNull();
+            let warning = fixture.debugElement.query(By.css(".alert-warning"));
+            expect(warning).toBeNull();
 
-                    let charts = fixture.debugElement.queryAll(By.css("canvas"));
-                    expect(charts.length).toEqual(0);
-                })
-                .then(done)
-                .catch(done.fail);
+            let charts = fixture.debugElement.queryAll(By.css("canvas"));
+            expect(charts.length).toEqual(0);
         });
 
-        it("should show a warning when there is no data", done => {
-            let userService = TestBed.get(UserService);
-            spyOn(userService, "getProgress").and.returnValue(Promise.resolve({}));
+        it("should show a warning when there is no data", async () => {
+            let userService = TestBed.inject(UserService);
+            spyOn(userService, "getProgress").and.returnValue(Promise.resolve({} as any));
 
             fixture.detectChanges();
-            fixture.whenStable()
-                .then(() => {
-                    fixture.detectChanges();
+            await fixture.whenStable();
+            fixture.detectChanges();
 
-                    let error = fixture.debugElement.query(By.css(".alert-danger"));
-                    expect(error).toBeNull();
+            let error = fixture.debugElement.query(By.css(".alert-danger"));
+            expect(error).toBeNull();
 
-                    let warning = fixture.debugElement.query(By.css(".alert-warning"));
-                    expect(warning).not.toBeNull();
+            let warning = fixture.debugElement.query(By.css(".alert-warning"));
+            expect(warning).not.toBeNull();
 
-                    let charts = fixture.debugElement.queryAll(By.css("canvas"));
-                    expect(charts.length).toEqual(0);
-                })
-                .then(done)
-                .catch(done.fail);
+            let charts = fixture.debugElement.queryAll(By.css("canvas"));
+            expect(charts.length).toEqual(0);
         });
     });
 

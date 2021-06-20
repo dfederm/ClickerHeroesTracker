@@ -28,7 +28,7 @@ describe("SettingsDialogComponent", () => {
         graphSpacingType: "time",
     };
 
-    beforeEach(done => {
+    beforeEach(async () => {
         let settingsSubject = new BehaviorSubject(settings);
         let settingsService = {
             settings: () => settingsSubject,
@@ -36,7 +36,7 @@ describe("SettingsDialogComponent", () => {
         };
         let activeModal = { close: (): void => void 0 };
 
-        TestBed.configureTestingModule(
+        await TestBed.configureTestingModule(
             {
                 imports: [
                     FormsModule,
@@ -51,15 +51,11 @@ describe("SettingsDialogComponent", () => {
                 ],
                 schemas: [NO_ERRORS_SCHEMA],
             })
-            .compileComponents()
-            .then(() => {
-                fixture = TestBed.createComponent(SettingsDialogComponent);
-                component = fixture.componentInstance;
+            .compileComponents();
 
-                fixture.detectChanges();
-            })
-            .then(done)
-            .catch(done.fail);
+        fixture = TestBed.createComponent(SettingsDialogComponent);
+        component = fixture.componentInstance;
+        fixture.detectChanges();
     });
 
     describe("Play Style", () => {
@@ -83,16 +79,12 @@ describe("SettingsDialogComponent", () => {
             );
         });
 
-        it("should disable the setting until the patch is complete", done => {
-            verifyDisabledUntilPromiseResolves(input, () => setSelectValue(input, input.selectedIndex + 1))
-                .then(done)
-                .catch(done.fail);
+        it("should disable the setting until the patch is complete", () => {
+            return verifyDisabledUntilPromiseResolves(input, () => setSelectValue(input, input.selectedIndex + 1));
         });
 
-        it("should show an error when the patch fails", done => {
-            verifyErrorShowWhenPromiseRejects(input, () => setSelectValue(input, input.selectedIndex + 1))
-                .then(done)
-                .catch(done.fail);
+        it("should show an error when the patch fails", () => {
+            return verifyErrorShowWhenPromiseRejects(input, () => setSelectValue(input, input.selectedIndex + 1));
         });
     });
 
@@ -128,16 +120,12 @@ describe("SettingsDialogComponent", () => {
             );
         });
 
-        it("should disable the setting until the patch is complete", done => {
-            verifyDisabledUntilPromiseResolves(input, () => setInputValue(input, (settings.hybridRatio + 1).toString()))
-                .then(done)
-                .catch(done.fail);
+        it("should disable the setting until the patch is complete", () => {
+            return verifyDisabledUntilPromiseResolves(input, () => setInputValue(input, (settings.hybridRatio + 1).toString()));
         });
 
-        it("should show an error when the patch fails", done => {
-            verifyErrorShowWhenPromiseRejects(input, () => setInputValue(input, (settings.hybridRatio + 1).toString()))
-                .then(done)
-                .catch(done.fail);
+        it("should show an error when the patch fails", () => {
+            return verifyErrorShowWhenPromiseRejects(input, () => setInputValue(input, (settings.hybridRatio + 1).toString()));
         });
     });
 
@@ -173,16 +161,12 @@ describe("SettingsDialogComponent", () => {
             );
         });
 
-        it("should disable the setting until the patch is complete", done => {
-            verifyDisabledUntilPromiseResolves(input, () => setCheckboxValue(input, !settings.shouldLevelSkillAncients))
-                .then(done)
-                .catch(done.fail);
+        it("should disable the setting until the patch is complete", () => {
+            return verifyDisabledUntilPromiseResolves(input, () => setCheckboxValue(input, !settings.shouldLevelSkillAncients));
         });
 
-        it("should show an error when the patch fails", done => {
-            verifyErrorShowWhenPromiseRejects(input, () => setCheckboxValue(input, !settings.shouldLevelSkillAncients))
-                .then(done)
-                .catch(done.fail);
+        it("should show an error when the patch fails", () => {
+            return verifyErrorShowWhenPromiseRejects(input, () => setCheckboxValue(input, !settings.shouldLevelSkillAncients));
         });
     });
 
@@ -227,16 +211,12 @@ describe("SettingsDialogComponent", () => {
             );
         });
 
-        it("should disable the setting until the patch is complete", done => {
-            verifyDisabledUntilPromiseResolves(input, () => setSelectValue(input, input.selectedIndex + 1))
-                .then(done)
-                .catch(done.fail);
+        it("should disable the setting until the patch is complete", () => {
+            return verifyDisabledUntilPromiseResolves(input, () => setSelectValue(input, input.selectedIndex + 1));
         });
 
-        it("should show an error when the patch fails", done => {
-            verifyErrorShowWhenPromiseRejects(input, () => setSelectValue(input, input.selectedIndex + 1))
-                .then(done)
-                .catch(done.fail);
+        it("should show an error when the patch fails", () => {
+            return verifyErrorShowWhenPromiseRejects(input, () => setSelectValue(input, input.selectedIndex + 1));
         });
     });
 
@@ -282,16 +262,12 @@ describe("SettingsDialogComponent", () => {
             );
         });
 
-        it("should disable the setting until the patch is complete", done => {
-            verifyDisabledUntilPromiseResolves(input, () => setInputValue(input, (settings.skillAncientLevelDiff + 1).toString()))
-                .then(done)
-                .catch(done.fail);
+        it("should disable the setting until the patch is complete", () => {
+            return verifyDisabledUntilPromiseResolves(input, () => setInputValue(input, (settings.skillAncientLevelDiff + 1).toString()));
         });
 
-        it("should show an error when the patch fails", done => {
-            verifyErrorShowWhenPromiseRejects(input, () => setInputValue(input, (settings.skillAncientLevelDiff + 1).toString()))
-                .then(done)
-                .catch(done.fail);
+        it("should show an error when the patch fails", () => {
+            return verifyErrorShowWhenPromiseRejects(input, () => setInputValue(input, (settings.skillAncientLevelDiff + 1).toString()));
         });
     });
 
@@ -317,16 +293,12 @@ describe("SettingsDialogComponent", () => {
             );
         });
 
-        it("should disable the setting until the patch is complete", done => {
-            verifyDisabledUntilPromiseResolves(input, () => setCheckboxValue(input, !settings.useScientificNotation))
-                .then(done)
-                .catch(done.fail);
+        it("should disable the setting until the patch is complete", () => {
+            return verifyDisabledUntilPromiseResolves(input, () => setCheckboxValue(input, !settings.useScientificNotation));
         });
 
-        it("should show an error when the patch fails", done => {
-            verifyErrorShowWhenPromiseRejects(input, () => setCheckboxValue(input, !settings.useScientificNotation))
-                .then(done)
-                .catch(done.fail);
+        it("should show an error when the patch fails", () => {
+            return verifyErrorShowWhenPromiseRejects(input, () => setCheckboxValue(input, !settings.useScientificNotation));
         });
     });
 
@@ -362,16 +334,12 @@ describe("SettingsDialogComponent", () => {
             );
         });
 
-        it("should disable the setting until the patch is complete", done => {
-            verifyDisabledUntilPromiseResolves(input, () => setInputValue(input, (settings.scientificNotationThreshold + 1).toString()))
-                .then(done)
-                .catch(done.fail);
+        it("should disable the setting until the patch is complete", () => {
+            return verifyDisabledUntilPromiseResolves(input, () => setInputValue(input, (settings.scientificNotationThreshold + 1).toString()));
         });
 
-        it("should show an error when the patch fails", done => {
-            verifyErrorShowWhenPromiseRejects(input, () => setInputValue(input, (settings.scientificNotationThreshold + 1).toString()))
-                .then(done)
-                .catch(done.fail);
+        it("should show an error when the patch fails", () => {
+            return verifyErrorShowWhenPromiseRejects(input, () => setInputValue(input, (settings.scientificNotationThreshold + 1).toString()));
         });
     });
 
@@ -397,16 +365,12 @@ describe("SettingsDialogComponent", () => {
             );
         });
 
-        it("should disable the setting until the patch is complete", done => {
-            verifyDisabledUntilPromiseResolves(input, () => setCheckboxValue(input, !settings.useLogarithmicGraphScale))
-                .then(done)
-                .catch(done.fail);
+        it("should disable the setting until the patch is complete", () => {
+            return verifyDisabledUntilPromiseResolves(input, () => setCheckboxValue(input, !settings.useLogarithmicGraphScale));
         });
 
-        it("should show an error when the patch fails", done => {
-            verifyErrorShowWhenPromiseRejects(input, () => setCheckboxValue(input, !settings.useLogarithmicGraphScale))
-                .then(done)
-                .catch(done.fail);
+        it("should show an error when the patch fails", () => {
+            return verifyErrorShowWhenPromiseRejects(input, () => setCheckboxValue(input, !settings.useLogarithmicGraphScale));
         });
     });
 
@@ -442,16 +406,12 @@ describe("SettingsDialogComponent", () => {
             );
         });
 
-        it("should disable the setting until the patch is complete", done => {
-            verifyDisabledUntilPromiseResolves(input, () => setInputValue(input, (settings.logarithmicGraphScaleThreshold + 1).toString()))
-                .then(done)
-                .catch(done.fail);
+        it("should disable the setting until the patch is complete", () => {
+            return verifyDisabledUntilPromiseResolves(input, () => setInputValue(input, (settings.logarithmicGraphScaleThreshold + 1).toString()));
         });
 
-        it("should show an error when the patch fails", done => {
-            verifyErrorShowWhenPromiseRejects(input, () => setInputValue(input, (settings.logarithmicGraphScaleThreshold + 1).toString()))
-                .then(done)
-                .catch(done.fail);
+        it("should show an error when the patch fails", () => {
+            return verifyErrorShowWhenPromiseRejects(input, () => setInputValue(input, (settings.logarithmicGraphScaleThreshold + 1).toString()));
         });
     });
 
@@ -476,16 +436,12 @@ describe("SettingsDialogComponent", () => {
             );
         });
 
-        it("should disable the setting until the patch is complete", done => {
-            verifyDisabledUntilPromiseResolves(input, () => setSelectValue(input, input.selectedIndex + 1))
-                .then(done)
-                .catch(done.fail);
+        it("should disable the setting until the patch is complete", () => {
+            return verifyDisabledUntilPromiseResolves(input, () => setSelectValue(input, input.selectedIndex + 1));
         });
 
-        it("should show an error when the patch fails", done => {
-            verifyErrorShowWhenPromiseRejects(input, () => setSelectValue(input, input.selectedIndex + 1))
-                .then(done)
-                .catch(done.fail);
+        it("should show an error when the patch fails", () => {
+            return verifyErrorShowWhenPromiseRejects(input, () => setSelectValue(input, input.selectedIndex + 1));
         });
     });
 
@@ -510,16 +466,12 @@ describe("SettingsDialogComponent", () => {
             );
         });
 
-        it("should disable the setting until the patch is complete", done => {
-            verifyDisabledUntilPromiseResolves(input, () => setSelectValue(input, input.selectedIndex + 1))
-                .then(done)
-                .catch(done.fail);
+        it("should disable the setting until the patch is complete", () => {
+            return verifyDisabledUntilPromiseResolves(input, () => setSelectValue(input, input.selectedIndex + 1));
         });
 
-        it("should show an error when the patch fails", done => {
-            verifyErrorShowWhenPromiseRejects(input, () => setSelectValue(input, input.selectedIndex + 1))
-                .then(done)
-                .catch(done.fail);
+        it("should show an error when the patch fails", () => {
+            return verifyErrorShowWhenPromiseRejects(input, () => setSelectValue(input, input.selectedIndex + 1));
         });
     });
 
@@ -580,7 +532,7 @@ describe("SettingsDialogComponent", () => {
         expect(error).toBeNull();
     }
 
-    function verifyDisabledUntilPromiseResolves(
+    async function verifyDisabledUntilPromiseResolves(
         input: HTMLSelectElement | HTMLInputElement,
         setValue: () => void,
     ): Promise<void> {
@@ -594,29 +546,26 @@ describe("SettingsDialogComponent", () => {
         setValue();
 
         // Not sure why this is needed to update the disable property
-        return fixture.whenStable()
-            .then(() => {
-                expect(input.disabled).toEqual(true);
+        await fixture.whenStable();
 
-                // Resolve the settingsService promise
-                resolvePromise();
-                fixture.detectChanges();
-                return fixture.whenStable();
-            })
-            .then(() => {
-                // Not sure why this is needed to update the disable property
-                fixture.detectChanges();
-                return fixture.whenStable();
-            })
-            .then(() => {
-                fixture.detectChanges();
-                let error = fixture.debugElement.query(By.css(".alert-danger"));
-                expect(error).toBeNull();
-                expect(input.disabled).toEqual(false);
-            });
+        expect(input.disabled).toEqual(true);
+
+        // Resolve the settingsService promise
+        resolvePromise();
+        fixture.detectChanges();
+        await fixture.whenStable();
+
+        // Not sure why this is needed to update the disable property
+        fixture.detectChanges();
+        await fixture.whenStable();
+        fixture.detectChanges();
+
+        let error = fixture.debugElement.query(By.css(".alert-danger"));
+        expect(error).toBeNull();
+        expect(input.disabled).toEqual(false);
     }
 
-    function verifyErrorShowWhenPromiseRejects(
+    async function verifyErrorShowWhenPromiseRejects(
         input: HTMLSelectElement | HTMLInputElement,
         setValue: () => void,
     ): Promise<void> {
@@ -630,26 +579,23 @@ describe("SettingsDialogComponent", () => {
         setValue();
 
         // Not sure why this is needed to update the disable property
-        return fixture.whenStable()
-            .then(() => {
-                expect(input.disabled).toEqual(true);
+        await fixture.whenStable();
 
-                // Resolve the settingsService promise
-                rejectPromise();
-                fixture.detectChanges();
-                return fixture.whenStable();
-            })
-            .then(() => {
-                // Not sure why this is needed to update the disable property
-                fixture.detectChanges();
-                return fixture.whenStable();
-            })
-            .then(() => {
-                fixture.detectChanges();
-                let error = fixture.debugElement.query(By.css(".alert-danger"));
-                expect(error).not.toBeNull();
-                expect(input.disabled).toEqual(false);
-            });
+        expect(input.disabled).toEqual(true);
+
+        // Resolve the settingsService promise
+        rejectPromise();
+        fixture.detectChanges();
+        await fixture.whenStable();
+
+        // Not sure why this is needed to update the disable property
+        fixture.detectChanges();
+        await fixture.whenStable();
+        fixture.detectChanges();
+
+        let error = fixture.debugElement.query(By.css(".alert-danger"));
+        expect(error).not.toBeNull();
+        expect(input.disabled).toEqual(false);
     }
 
     function setSelectValue(select: HTMLSelectElement, selectedIndex: number): void {
