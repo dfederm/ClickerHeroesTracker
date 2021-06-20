@@ -10,31 +10,27 @@ import { AuthenticationService } from "../../services/authenticationService/auth
 describe("LogInDialogComponent", () => {
     let fixture: ComponentFixture<LogInDialogComponent>;
 
-    beforeEach(done => {
+    beforeEach(async () => {
         let authenticationService = {
             logInWithPassword: (): void => void 0,
         };
         let activeModal = { close: (): void => void 0 };
 
-        TestBed.configureTestingModule(
+        await TestBed.configureTestingModule(
             {
                 imports: [FormsModule],
                 declarations: [LogInDialogComponent],
-                providers:
-                    [
-                        { provide: AuthenticationService, useValue: authenticationService },
-                        { provide: NgbActiveModal, useValue: activeModal },
-                    ],
+                providers: [
+                    { provide: AuthenticationService, useValue: authenticationService },
+                    { provide: NgbActiveModal, useValue: activeModal },
+                ],
                 schemas: [NO_ERRORS_SCHEMA],
             })
-            .compileComponents()
-            .then(() => {
-                fixture = TestBed.createComponent(LogInDialogComponent);
+            .compileComponents();
 
-                fixture.detectChanges();
-            })
-            .then(done)
-            .catch(done.fail);
+        fixture = TestBed.createComponent(LogInDialogComponent);
+        
+        fixture.detectChanges();
     });
 
     it("should display the modal header", () => {
@@ -46,7 +42,7 @@ describe("LogInDialogComponent", () => {
         expect(title.nativeElement.textContent).toEqual("Log in");
     });
 
-    it("should close the dialog when using proper credentials", done => {
+    it("should close the dialog when using proper credentials", async () => {
         let authenticationService = TestBed.inject(AuthenticationService);
         spyOn(authenticationService, "logInWithPassword").and.returnValue(Promise.resolve());
 
@@ -54,45 +50,40 @@ describe("LogInDialogComponent", () => {
         spyOn(activeModal, "close");
 
         // Wait for stability since ngModel is async
-        fixture.whenStable()
-            .then(() => {
-                let body = fixture.debugElement.query(By.css(".modal-body"));
-                expect(body).not.toBeNull();
+        await fixture.whenStable();
 
-                let form = body.query(By.css("form"));
-                expect(form).not.toBeNull();
+        let body = fixture.debugElement.query(By.css(".modal-body"));
+        expect(body).not.toBeNull();
 
-                let username = form.query(By.css("#username"));
-                expect(username).not.toBeNull();
-                setInputValue(username, "someUsername");
+        let form = body.query(By.css("form"));
+        expect(form).not.toBeNull();
 
-                let password = form.query(By.css("#password"));
-                expect(password).not.toBeNull();
-                setInputValue(password, "somePassword");
+        let username = form.query(By.css("#username"));
+        expect(username).not.toBeNull();
+        setInputValue(username, "someUsername");
 
-                let button = form.query(By.css("button"));
-                expect(button).not.toBeNull();
-                button.nativeElement.click();
+        let password = form.query(By.css("#password"));
+        expect(password).not.toBeNull();
+        setInputValue(password, "somePassword");
 
-                // Wait for stability from the authenticationService call
-                fixture.detectChanges();
-                return fixture.whenStable();
-            })
-            .then(() => {
-                fixture.detectChanges();
+        let button = form.query(By.css("button"));
+        expect(button).not.toBeNull();
+        button.nativeElement.click();
 
-                expect(authenticationService.logInWithPassword).toHaveBeenCalledWith("someUsername", "somePassword");
-                expect(activeModal.close).toHaveBeenCalled();
+        // Wait for stability from the authenticationService call
+        fixture.detectChanges();
+        await fixture.whenStable();
+        fixture.detectChanges();
 
-                // No error
-                let error = fixture.debugElement.query(By.css(".alert-danger"));
-                expect(error).toBeNull();
-            })
-            .then(done)
-            .catch(done.fail);
+        expect(authenticationService.logInWithPassword).toHaveBeenCalledWith("someUsername", "somePassword");
+        expect(activeModal.close).toHaveBeenCalled();
+
+        // No error
+        let error = fixture.debugElement.query(By.css(".alert-danger"));
+        expect(error).toBeNull();
     });
 
-    it("should show an error when using incorrect credentials", done => {
+    it("should show an error when using incorrect credentials", async () => {
         let authenticationService = TestBed.inject(AuthenticationService);
         spyOn(authenticationService, "logInWithPassword").and.returnValue(Promise.reject(""));
 
@@ -100,41 +91,36 @@ describe("LogInDialogComponent", () => {
         spyOn(activeModal, "close");
 
         // Wait for stability since ngModel is async
-        fixture.whenStable()
-            .then(() => {
-                let body = fixture.debugElement.query(By.css(".modal-body"));
-                expect(body).not.toBeNull();
+        await fixture.whenStable();
 
-                let form = body.query(By.css("form"));
-                expect(form).not.toBeNull();
+        let body = fixture.debugElement.query(By.css(".modal-body"));
+        expect(body).not.toBeNull();
 
-                let username = form.query(By.css("#username"));
-                expect(username).not.toBeNull();
-                setInputValue(username, "someUsername");
+        let form = body.query(By.css("form"));
+        expect(form).not.toBeNull();
 
-                let password = form.query(By.css("#password"));
-                expect(password).not.toBeNull();
-                setInputValue(password, "somePassword");
+        let username = form.query(By.css("#username"));
+        expect(username).not.toBeNull();
+        setInputValue(username, "someUsername");
 
-                let button = form.query(By.css("button"));
-                expect(button).not.toBeNull();
-                button.nativeElement.click();
+        let password = form.query(By.css("#password"));
+        expect(password).not.toBeNull();
+        setInputValue(password, "somePassword");
 
-                // Wait for stability from the authenticationService call
-                fixture.detectChanges();
-                return fixture.whenStable();
-            })
-            .then(() => {
-                fixture.detectChanges();
+        let button = form.query(By.css("button"));
+        expect(button).not.toBeNull();
+        button.nativeElement.click();
 
-                expect(authenticationService.logInWithPassword).toHaveBeenCalledWith("someUsername", "somePassword");
+        // Wait for stability from the authenticationService call
+        fixture.detectChanges();
+        await fixture.whenStable();
+        fixture.detectChanges();
 
-                let error = fixture.debugElement.query(By.css(".alert-danger"));
-                expect(error).not.toBeNull();
-                expect(activeModal.close).not.toHaveBeenCalled();
-            })
-            .then(done)
-            .catch(done.fail);
+        expect(authenticationService.logInWithPassword).toHaveBeenCalledWith("someUsername", "somePassword");
+
+        let error = fixture.debugElement.query(By.css(".alert-danger"));
+        expect(error).not.toBeNull();
+        expect(activeModal.close).not.toHaveBeenCalled();
     });
 
     function setInputValue(element: DebugElement, value: string): void {

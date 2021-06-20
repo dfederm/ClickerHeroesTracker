@@ -19,7 +19,7 @@ describe("AdminComponent", () => {
     const pruneInvalidAuthTokensRequest = { method: "post", url: "/api/admin/pruneinvalidauthtokens" };
     const blockedClansRequest = { method: "get", url: "/api/admin/blockedclans" };
 
-    beforeEach(done => {
+    beforeEach(async () => {
         let authenticationService = {
             getAuthHeaders: (): void => void 0,
         };
@@ -31,28 +31,24 @@ describe("AdminComponent", () => {
             delete: (): void => void 0,
         };
 
-        TestBed.configureTestingModule(
+        await TestBed.configureTestingModule(
             {
                 imports: [
                     FormsModule,
                     HttpClientTestingModule,
                 ],
-                providers:
-                    [
-                        { provide: AuthenticationService, useValue: authenticationService },
-                        { provide: HttpErrorHandlerService, useValue: httpErrorHandlerService },
-                        { provide: UploadService, useValue: uploadService },
-                    ],
+                providers: [
+                    { provide: AuthenticationService, useValue: authenticationService },
+                    { provide: HttpErrorHandlerService, useValue: httpErrorHandlerService },
+                    { provide: UploadService, useValue: uploadService },
+                ],
                 declarations: [AdminComponent],
                 schemas: [NO_ERRORS_SCHEMA],
             })
-            .compileComponents()
-            .then(() => {
-                httpMock = TestBed.inject(HttpTestingController);
-                fixture = TestBed.createComponent(AdminComponent);
-            })
-            .then(done)
-            .catch(done.fail);
+            .compileComponents();
+
+        httpMock = TestBed.inject(HttpTestingController);
+        fixture = TestBed.createComponent(AdminComponent);
     });
 
     afterEach(() => {
@@ -62,14 +58,12 @@ describe("AdminComponent", () => {
     describe("Initialization", () => {
         let authenticationService: AuthenticationService;
 
-        beforeEach(done => {
+        beforeEach(async () => {
             authenticationService = TestBed.inject(AuthenticationService);
             spyOn(authenticationService, "getAuthHeaders").and.returnValue(Promise.resolve(new HttpHeaders()));
 
             fixture.detectChanges();
-            fixture.whenStable()
-                .then(done)
-                .catch(done.fail);
+            await fixture.whenStable();
         });
 
         it("should make api calls", () => {
@@ -77,22 +71,18 @@ describe("AdminComponent", () => {
             expect(authenticationService.getAuthHeaders).toHaveBeenCalled();
         });
 
-        it("should show errors when queue data fetch fails", done => {
+        it("should show errors when queue data fetch fails", async () => {
             httpMock
                 .expectOne(blockedClansRequest)
                 .flush(null, { status: 500, statusText: "someStatus" });
 
             fixture.detectChanges();
-            fixture.whenStable()
-                .then(() => {
-                    fixture.detectChanges();
+            await fixture.whenStable();
+            fixture.detectChanges();
 
-                    let errors = getAllErrors();
-                    expect(errors.length).toEqual(1);
-                    expect(errors[0]).toEqual("Could not fetch blocked clans");
-                })
-                .then(done)
-                .catch(done.fail);
+            let errors = getAllErrors();
+            expect(errors.length).toEqual(1);
+            expect(errors[0]).toEqual("Could not fetch blocked clans");
         });
     });
 
@@ -105,7 +95,7 @@ describe("AdminComponent", () => {
             staleuploads.push(i);
         }
 
-        beforeEach(done => {
+        beforeEach(async () => {
             let containers = fixture.debugElement.queryAll(By.css(".col-md-4"));
             expect(containers.length).toEqual(3);
             container = containers[0];
@@ -114,17 +104,13 @@ describe("AdminComponent", () => {
             spyOn(authenticationService, "getAuthHeaders").and.returnValue(Promise.resolve(new HttpHeaders()));
 
             fixture.detectChanges();
-            fixture.whenStable()
-                .then(() => {
-                    fixture.detectChanges();
+            await fixture.whenStable();
+            fixture.detectChanges();
 
-                    expect(authenticationService.getAuthHeaders).toHaveBeenCalled();
-                    (authenticationService.getAuthHeaders as jasmine.Spy).calls.reset();
-
-                    httpMock.expectOne(blockedClansRequest);
-                })
-                .then(done)
-                .catch(done.fail);
+            expect(authenticationService.getAuthHeaders).toHaveBeenCalled();
+            (authenticationService.getAuthHeaders as jasmine.Spy).calls.reset();
+            
+            httpMock.expectOne(blockedClansRequest);
         });
 
         it("should initially just show the fetch button", () => {
@@ -139,45 +125,39 @@ describe("AdminComponent", () => {
             expect(errors.length).toEqual(0);
         });
 
-        it("should fetch stale uploads", done => {
+        it("should fetch stale uploads", async () => {
             let fetchButton = container.query(By.css("button"));
             fetchButton.nativeElement.click();
 
             fixture.detectChanges();
-            fixture.whenStable()
-                .then(() => {
-                    fixture.detectChanges();
+            await fixture.whenStable();
+            fixture.detectChanges();
 
-                    expect(authenticationService.getAuthHeaders).toHaveBeenCalled();
+            expect(authenticationService.getAuthHeaders).toHaveBeenCalled();
 
-                    let request = httpMock.expectOne(staleUploadsRequest);
+            let request = httpMock.expectOne(staleUploadsRequest);
 
-                    // Make a copy so our mock data doesn't get altered
-                    request.flush(JSON.parse(JSON.stringify(staleuploads)));
+            // Make a copy so our mock data doesn't get altered
+            request.flush(JSON.parse(JSON.stringify(staleuploads)));
 
-                    fixture.detectChanges();
-                    return fixture.whenStable();
-                })
-                .then(() => {
-                    fixture.detectChanges();
+            fixture.detectChanges();
+            await fixture.whenStable();
+            fixture.detectChanges();
 
-                    let progressBar = container.query(By.css("ngb-progressbar"));
-                    expect(progressBar).not.toBeNull();
-                    expect(progressBar.properties.value).toEqual(0);
+            let progressBar = container.query(By.css("ngb-progressbar"));
+            expect(progressBar).not.toBeNull();
+            expect(progressBar.properties.value).toEqual(0);
 
-                    let buttons = container.queryAll(By.css("button"));
-                    expect(buttons.length).toEqual(2);
-                    expect(buttons[0].nativeElement.textContent.trim()).toEqual("Fetch");
-                    expect(buttons[1].nativeElement.textContent.trim()).toEqual("Delete");
+            let buttons = container.queryAll(By.css("button"));
+            expect(buttons.length).toEqual(2);
+            expect(buttons[0].nativeElement.textContent.trim()).toEqual("Fetch");
+            expect(buttons[1].nativeElement.textContent.trim()).toEqual("Delete");
 
-                    let errors = getAllErrors();
-                    expect(errors.length).toEqual(0);
-                })
-                .then(done)
-                .catch(done.fail);
+            let errors = getAllErrors();
+            expect(errors.length).toEqual(0);
         });
 
-        it("should show errors when stale uploads fetch fails", done => {
+        it("should show errors when stale uploads fetch fails", async () => {
             let httpErrorHandlerService = TestBed.inject(HttpErrorHandlerService);
             spyOn(httpErrorHandlerService, "getValidationErrors").and.returnValue(["error0", "error1", "error2"]);
             spyOn(httpErrorHandlerService, "logError");
@@ -186,29 +166,24 @@ describe("AdminComponent", () => {
             fetchButton.nativeElement.click();
 
             fixture.detectChanges();
-            fixture.whenStable()
-                .then(() => {
-                    let request = httpMock.expectOne(staleUploadsRequest);
-                    request.flush(null, { status: 400, statusText: "someStatus" });
+            await fixture.whenStable();
 
-                    fixture.detectChanges();
-                    return fixture.whenStable();
-                })
-                .then(() => {
-                    fixture.detectChanges();
+            let request = httpMock.expectOne(staleUploadsRequest);
+            request.flush(null, { status: 400, statusText: "someStatus" });
 
-                    expect(httpErrorHandlerService.logError).toHaveBeenCalledWith("AdminComponent.fetchStaleUploads.error", jasmine.any(HttpErrorResponse));
-                    expect(httpErrorHandlerService.getValidationErrors).toHaveBeenCalledWith(jasmine.any(HttpErrorResponse));
+            fixture.detectChanges();
+            await fixture.whenStable();
+            fixture.detectChanges();
 
-                    let errors = getAllErrors();
-                    expect(errors.length).toEqual(1);
-                    expect(errors[0]).toEqual("error0;error1;error2");
-                })
-                .then(done)
-                .catch(done.fail);
+            expect(httpErrorHandlerService.logError).toHaveBeenCalledWith("AdminComponent.fetchStaleUploads.error", jasmine.any(HttpErrorResponse));
+            expect(httpErrorHandlerService.getValidationErrors).toHaveBeenCalledWith(jasmine.any(HttpErrorResponse));
+
+            let errors = getAllErrors();
+            expect(errors.length).toEqual(1);
+            expect(errors[0]).toEqual("error0;error1;error2");
         });
 
-        it("should delete stale uploads", done => {
+        it("should delete stale uploads", async () => {
             let uploadService = TestBed.inject(UploadService);
             spyOn(uploadService, "delete").and.returnValue(Promise.resolve());
 
@@ -216,55 +191,46 @@ describe("AdminComponent", () => {
             fetchButton.nativeElement.click();
 
             fixture.detectChanges();
-            fixture.whenStable()
-                .then(() => {
-                    let request = httpMock.expectOne(staleUploadsRequest);
+            await fixture.whenStable();
 
-                    // Make a copy so our mock data doesn't get altered
-                    request.flush(JSON.parse(JSON.stringify(staleuploads)));
+            let request = httpMock.expectOne(staleUploadsRequest);
 
-                    fixture.detectChanges();
-                    return fixture.whenStable();
-                })
-                .then(() => {
-                    fixture.detectChanges();
+            // Make a copy so our mock data doesn't get altered
+            request.flush(JSON.parse(JSON.stringify(staleuploads)));
 
-                    let progressBar = container.query(By.css("ngb-progressbar"));
-                    expect(progressBar).not.toBeNull();
-                    expect(progressBar.properties.value).toEqual(0);
+            fixture.detectChanges();
+            await fixture.whenStable();
+            fixture.detectChanges();
 
-                    let buttons = container.queryAll(By.css("button"));
-                    expect(buttons.length).toEqual(2);
+            let progressBar = container.query(By.css("ngb-progressbar"));
+            expect(progressBar).not.toBeNull();
+            expect(progressBar.properties.value).toEqual(0);
 
-                    let deleteButton = buttons[1];
-                    deleteButton.nativeElement.click();
+            let buttons = container.queryAll(By.css("button"));
+            expect(buttons.length).toEqual(2);
 
-                    return fixture.whenStable();
-                })
-                .then(() => {
-                    fixture.detectChanges();
+            let deleteButton = buttons[1];
+            deleteButton.nativeElement.click();
 
-                    expect(uploadService.delete).toHaveBeenCalledTimes(staleuploads.length);
-                    for (let i = 0; i < staleuploads.length; i++) {
-                        expect(uploadService.delete).toHaveBeenCalledWith(staleuploads[i]);
-                    }
+            await fixture.whenStable();
+            fixture.detectChanges();
 
-                    let progressBar = container.query(By.css("ngb-progressbar"));
-                    expect(progressBar).not.toBeNull();
-                    expect(progressBar.properties.value).toEqual(100);
+            expect(uploadService.delete).toHaveBeenCalledTimes(staleuploads.length);
+            for (let i = 0; i < staleuploads.length; i++) {
+                expect(uploadService.delete).toHaveBeenCalledWith(staleuploads[i]);
+            }
 
-                    let buttons = container.queryAll(By.css("button"));
-                    expect(buttons.length).toEqual(1);
-                    expect(buttons[0].nativeElement.textContent.trim()).toEqual("Fetch");
+            expect(progressBar.properties.value).toEqual(100);
 
-                    let errors = getAllErrors();
-                    expect(errors.length).toEqual(0);
-                })
-                .then(done)
-                .catch(done.fail);
+            buttons = container.queryAll(By.css("button"));
+            expect(buttons.length).toEqual(1);
+            expect(buttons[0].nativeElement.textContent.trim()).toEqual("Fetch");
+
+            let errors = getAllErrors();
+            expect(errors.length).toEqual(0);
         });
 
-        it("should cancel deletion", done => {
+        it("should cancel deletion", async () => {
             let unresolvedPromises: (() => void)[] = [];
             let numDeletedStaleUploads = staleuploads.length / 2;
             let uploadService = TestBed.inject(UploadService);
@@ -279,85 +245,70 @@ describe("AdminComponent", () => {
             fetchButton.nativeElement.click();
 
             fixture.detectChanges();
-            fixture.whenStable()
-                .then(() => {
-                    let request = httpMock.expectOne(staleUploadsRequest);
+            await fixture.whenStable();
 
-                    // Make a copy so our mock data doesn't get altered
-                    request.flush(JSON.parse(JSON.stringify(staleuploads)));
+            let request = httpMock.expectOne(staleUploadsRequest);
 
-                    fixture.detectChanges();
-                    return fixture.whenStable();
-                })
-                .then(() => {
-                    fixture.detectChanges();
+            // Make a copy so our mock data doesn't get altered
+            request.flush(JSON.parse(JSON.stringify(staleuploads)));
 
-                    let progressBar = container.query(By.css("ngb-progressbar"));
-                    expect(progressBar).not.toBeNull();
-                    expect(progressBar.properties.value).toEqual(0);
+            fixture.detectChanges();
+            await fixture.whenStable();
+            fixture.detectChanges();
 
-                    let buttons = container.queryAll(By.css("button"));
-                    expect(buttons.length).toEqual(2);
+            let progressBar = container.query(By.css("ngb-progressbar"));
+            expect(progressBar).not.toBeNull();
+            expect(progressBar.properties.value).toEqual(0);
 
-                    let deleteButton = buttons[1];
-                    deleteButton.nativeElement.click();
+            let buttons = container.queryAll(By.css("button"));
+            expect(buttons.length).toEqual(2);
 
-                    return fixture.whenStable();
-                })
-                .then(() => {
-                    fixture.detectChanges();
+            let deleteButton = buttons[1];
+            deleteButton.nativeElement.click();
 
-                    let expectedNumberOfDeleteCalls = numDeletedStaleUploads + AdminComponent.numParallelDeletes;
-                    expect(uploadService.delete).toHaveBeenCalledTimes(expectedNumberOfDeleteCalls);
-                    for (let i = 0; i < expectedNumberOfDeleteCalls; i++) {
-                        expect(uploadService.delete).toHaveBeenCalledWith(staleuploads[i]);
-                    }
+            await fixture.whenStable();
+            fixture.detectChanges();
 
-                    (uploadService.delete as jasmine.Spy).calls.reset();
+            let expectedNumberOfDeleteCalls = numDeletedStaleUploads + AdminComponent.numParallelDeletes;
+            expect(uploadService.delete).toHaveBeenCalledTimes(expectedNumberOfDeleteCalls);
+            for (let i = 0; i < expectedNumberOfDeleteCalls; i++) {
+                expect(uploadService.delete).toHaveBeenCalledWith(staleuploads[i]);
+            }
 
-                    let progressBar = container.query(By.css("ngb-progressbar"));
-                    expect(progressBar).not.toBeNull();
-                    expect(progressBar.properties.value).toEqual(100 * numDeletedStaleUploads / staleuploads.length);
+            (uploadService.delete as jasmine.Spy).calls.reset();
 
-                    let buttons = container.queryAll(By.css("button"));
-                    expect(buttons.length).toEqual(1);
+            expect(progressBar.properties.value).toEqual(100 * numDeletedStaleUploads / staleuploads.length);
 
-                    let cancelButton = buttons[0];
-                    expect(cancelButton.nativeElement.textContent.trim()).toEqual("Cancel");
-                    cancelButton.nativeElement.click();
+            buttons = container.queryAll(By.css("button"));
+            expect(buttons.length).toEqual(1);
 
-                    expect(unresolvedPromises.length).toEqual(AdminComponent.numParallelDeletes);
-                    for (let i = 0; i < unresolvedPromises.length; i++) {
-                        unresolvedPromises[i]();
-                    }
+            let cancelButton = buttons[0];
+            expect(cancelButton.nativeElement.textContent.trim()).toEqual("Cancel");
+            cancelButton.nativeElement.click();
+            
+            expect(unresolvedPromises.length).toEqual(AdminComponent.numParallelDeletes);
+            for (let i = 0; i < unresolvedPromises.length; i++) {
+                unresolvedPromises[i]();
+            }
 
-                    return fixture.whenStable();
-                })
-                .then(() => {
-                    // Need a 2nd round to update the property
-                    fixture.detectChanges();
-                    return fixture.whenStable();
-                })
-                .then(() => {
-                    fixture.detectChanges();
+            await fixture.whenStable();
+            // Need a 2nd round to update the property
+            fixture.detectChanges();
+            await fixture.whenStable();
+            fixture.detectChanges();
 
-                    expect(uploadService.delete).not.toHaveBeenCalled();
+            expect(uploadService.delete).not.toHaveBeenCalled();
 
-                    // We will only have let the pending requests finish before stopping
-                    let progressBar = container.query(By.css("ngb-progressbar"));
-                    expect(progressBar).not.toBeNull();
-                    expect(progressBar.properties.value).toEqual(100 * (numDeletedStaleUploads + AdminComponent.numParallelDeletes) / staleuploads.length);
+            // We will only have let the pending requests finish before stopping
+            expect(progressBar.properties.value).toEqual(100 * (numDeletedStaleUploads + AdminComponent.numParallelDeletes) / staleuploads.length);
 
-                    let buttons = container.queryAll(By.css("button"));
-                    expect(buttons.length).toEqual(2);
-                    expect(buttons[0].nativeElement.textContent.trim()).toEqual("Fetch");
-                    expect(buttons[1].nativeElement.textContent.trim()).toEqual("Delete");
+            buttons = container.queryAll(By.css("button"));
+            expect(buttons.length).toEqual(2);
+            expect(buttons[0].nativeElement.textContent.trim()).toEqual("Fetch");
+            expect(buttons[1].nativeElement.textContent.trim()).toEqual("Delete");
 
-                    let errors = getAllErrors();
-                    expect(errors.length).toEqual(0);
-                })
-                .then(done)
-                .catch(done.fail);
+            let errors = getAllErrors();
+            expect(errors.length).toEqual(0);
         });
     });
 
@@ -367,7 +318,7 @@ describe("AdminComponent", () => {
 
         const countInvalidAuthTokens = 1234;
 
-        beforeEach(done => {
+        beforeEach(async () => {
             let containers = fixture.debugElement.queryAll(By.css(".col-md-4"));
             expect(containers.length).toEqual(3);
             container = containers[1];
@@ -376,17 +327,12 @@ describe("AdminComponent", () => {
             spyOn(authenticationService, "getAuthHeaders").and.returnValue(Promise.resolve(new HttpHeaders()));
 
             fixture.detectChanges();
-            fixture.whenStable()
-                .then(() => {
-                    fixture.detectChanges();
+            await fixture.whenStable();
+            fixture.detectChanges();
 
-                    expect(authenticationService.getAuthHeaders).toHaveBeenCalled();
-                    (authenticationService.getAuthHeaders as jasmine.Spy).calls.reset();
-
-                    httpMock.expectOne(blockedClansRequest);
-                })
-                .then(done)
-                .catch(done.fail);
+            expect(authenticationService.getAuthHeaders).toHaveBeenCalled();
+            (authenticationService.getAuthHeaders as jasmine.Spy).calls.reset();
+            httpMock.expectOne(blockedClansRequest);
         });
 
         it("should initially just show the fetch button", () => {
@@ -401,43 +347,37 @@ describe("AdminComponent", () => {
             expect(errors.length).toEqual(0);
         });
 
-        it("should fetch invalid auth tokens", done => {
+        it("should fetch invalid auth tokens", async () => {
             let fetchButton = container.query(By.css("button"));
             fetchButton.nativeElement.click();
 
             fixture.detectChanges();
-            fixture.whenStable()
-                .then(() => {
-                    fixture.detectChanges();
+            await fixture.whenStable();
+            fixture.detectChanges();
 
-                    expect(authenticationService.getAuthHeaders).toHaveBeenCalled();
+            expect(authenticationService.getAuthHeaders).toHaveBeenCalled();
 
-                    let request = httpMock.expectOne(countInvalidAuthTokensRequest);
-                    request.flush(countInvalidAuthTokens);
+            let request = httpMock.expectOne(countInvalidAuthTokensRequest);
+            request.flush(countInvalidAuthTokens);
 
-                    fixture.detectChanges();
-                    return fixture.whenStable();
-                })
-                .then(() => {
-                    fixture.detectChanges();
+            fixture.detectChanges();
+            await fixture.whenStable();
+            fixture.detectChanges();
 
-                    let progressBar = container.query(By.css("ngb-progressbar"));
-                    expect(progressBar).not.toBeNull();
-                    expect(progressBar.properties.value).toEqual(0);
+            let progressBar = container.query(By.css("ngb-progressbar"));
+            expect(progressBar).not.toBeNull();
+            expect(progressBar.properties.value).toEqual(0);
 
-                    let buttons = container.queryAll(By.css("button"));
-                    expect(buttons.length).toEqual(2);
-                    expect(buttons[0].nativeElement.textContent.trim()).toEqual("Fetch");
-                    expect(buttons[1].nativeElement.textContent.trim()).toEqual("Prune");
+            let buttons = container.queryAll(By.css("button"));
+            expect(buttons.length).toEqual(2);
+            expect(buttons[0].nativeElement.textContent.trim()).toEqual("Fetch");
+            expect(buttons[1].nativeElement.textContent.trim()).toEqual("Prune");
 
-                    let errors = getAllErrors();
-                    expect(errors.length).toEqual(0);
-                })
-                .then(done)
-                .catch(done.fail);
+            let errors = getAllErrors();
+            expect(errors.length).toEqual(0);
         });
 
-        it("should show errors when invalid auth tokens fetch fails", done => {
+        it("should show errors when invalid auth tokens fetch fails", async () => {
             let httpErrorHandlerService = TestBed.inject(HttpErrorHandlerService);
             spyOn(httpErrorHandlerService, "logError");
 
@@ -445,82 +385,68 @@ describe("AdminComponent", () => {
             fetchButton.nativeElement.click();
 
             fixture.detectChanges();
-            fixture.whenStable()
-                .then(() => {
-                    let request = httpMock.expectOne(countInvalidAuthTokensRequest);
-                    request.flush(null, { status: 400, statusText: "someStatus" });
+            await fixture.whenStable();
 
-                    fixture.detectChanges();
-                    return fixture.whenStable();
-                })
-                .then(() => {
-                    fixture.detectChanges();
+            let request = httpMock.expectOne(countInvalidAuthTokensRequest);
+            request.flush(null, { status: 400, statusText: "someStatus" });
 
-                    expect(httpErrorHandlerService.logError).toHaveBeenCalledWith("AdminComponent.fetchInvalidAuthTokens.error", jasmine.any(HttpErrorResponse));
+            fixture.detectChanges();
+            await fixture.whenStable();
+            fixture.detectChanges();
 
-                    let errors = getAllErrors();
-                    expect(errors.length).toEqual(1);
-                    expect(errors[0]).toEqual("Something went wrong");
-                })
-                .then(done)
-                .catch(done.fail);
+            expect(httpErrorHandlerService.logError).toHaveBeenCalledWith("AdminComponent.fetchInvalidAuthTokens.error", jasmine.any(HttpErrorResponse));
+
+            let errors = getAllErrors();
+            expect(errors.length).toEqual(1);
+            expect(errors[0]).toEqual("Something went wrong");
         });
 
-        it("should prune invalid auth tokens", done => {
+        it("should prune invalid auth tokens", async () => {
             let fetchButton = container.query(By.css("button"));
             fetchButton.nativeElement.click();
 
             fixture.detectChanges();
-            fixture.whenStable()
-                .then(() => {
-                    let request = httpMock.expectOne(countInvalidAuthTokensRequest);
-                    request.flush(countInvalidAuthTokens);
+            await fixture.whenStable();
 
-                    fixture.detectChanges();
-                    return fixture.whenStable();
-                })
-                .then(() => {
-                    fixture.detectChanges();
+            let request = httpMock.expectOne(countInvalidAuthTokensRequest);
+            request.flush(countInvalidAuthTokens);
 
-                    let progressBar = container.query(By.css("ngb-progressbar"));
-                    expect(progressBar).not.toBeNull();
-                    expect(progressBar.properties.value).toEqual(0);
+            fixture.detectChanges();
+            await fixture.whenStable();
+            fixture.detectChanges();
 
-                    let buttons = container.queryAll(By.css("button"));
-                    expect(buttons.length).toEqual(2);
+            let progressBar = container.query(By.css("ngb-progressbar"));
+            expect(progressBar).not.toBeNull();
+            expect(progressBar.properties.value).toEqual(0);
 
-                    let pruneButton = buttons[1];
-                    pruneButton.nativeElement.click();
+            let buttons = container.queryAll(By.css("button"));
+            expect(buttons.length).toEqual(2);
 
-                    return fixture.whenStable();
-                })
-                .then(async () => {
-                    fixture.detectChanges();
+            let pruneButton = buttons[1];
+            pruneButton.nativeElement.click();
 
-                    for (let i = 0; i < countInvalidAuthTokens; i += AdminComponent.pruneInvalidAuthTokenBatchSize) {
-                        httpMock.expectOne(pruneInvalidAuthTokensRequest).flush(null);
+            await fixture.whenStable();
+            fixture.detectChanges();
 
-                        fixture.detectChanges();
-                        await fixture.whenStable();
-                        fixture.detectChanges();
-                    }
+            for (let i = 0; i < countInvalidAuthTokens; i += AdminComponent.pruneInvalidAuthTokenBatchSize) {
+                httpMock.expectOne(pruneInvalidAuthTokensRequest).flush(null);
 
-                    let progressBar = container.query(By.css("ngb-progressbar"));
-                    expect(progressBar).not.toBeNull();
-                    expect(progressBar.properties.value).toEqual(100);
+                fixture.detectChanges();
+                await fixture.whenStable();
+                fixture.detectChanges();
+            }
 
-                    let buttons = container.queryAll(By.css("button"));
-                    expect(buttons.length).toEqual(1);
-                    expect(buttons[0].nativeElement.textContent.trim()).toEqual("Fetch");
+            expect(progressBar.properties.value).toEqual(100);
 
-                    let errors = getAllErrors();
-                    expect(errors.length).toEqual(0);
-                })
-                .then(done)
-                .catch(done.fail);
+            buttons = container.queryAll(By.css("button"));
+            expect(buttons.length).toEqual(1);
+            expect(buttons[0].nativeElement.textContent.trim()).toEqual("Fetch");
+
+            let errors = getAllErrors();
+            expect(errors.length).toEqual(0);
         });
 
-        it("should cancel pruning", done => {
+        it("should cancel pruning", async () => {
             let numPrunedInvalidAuthTokens = countInvalidAuthTokens / 2;
             numPrunedInvalidAuthTokens -= numPrunedInvalidAuthTokens % AdminComponent.pruneInvalidAuthTokenBatchSize;
 
@@ -528,81 +454,66 @@ describe("AdminComponent", () => {
             fetchButton.nativeElement.click();
 
             fixture.detectChanges();
-            fixture.whenStable()
-                .then(() => {
-                    let request = httpMock.expectOne(countInvalidAuthTokensRequest);
-                    request.flush(countInvalidAuthTokens);
+            await fixture.whenStable();
 
-                    fixture.detectChanges();
-                    return fixture.whenStable();
-                })
-                .then(() => {
-                    fixture.detectChanges();
+            let request = httpMock.expectOne(countInvalidAuthTokensRequest);
+            request.flush(countInvalidAuthTokens);
 
-                    let progressBar = container.query(By.css("ngb-progressbar"));
-                    expect(progressBar).not.toBeNull();
-                    expect(progressBar.properties.value).toEqual(0);
+            fixture.detectChanges();
+            await fixture.whenStable();
+            fixture.detectChanges();
 
-                    let buttons = container.queryAll(By.css("button"));
-                    expect(buttons.length).toEqual(2);
+            let progressBar = container.query(By.css("ngb-progressbar"));
+            expect(progressBar).not.toBeNull();
+            expect(progressBar.properties.value).toEqual(0);
 
-                    let pruneButton = buttons[1];
-                    pruneButton.nativeElement.click();
+            let buttons = container.queryAll(By.css("button"));
+            expect(buttons.length).toEqual(2);
 
-                    return fixture.whenStable();
-                })
-                .then(async () => {
-                    fixture.detectChanges();
+            let pruneButton = buttons[1];
+            pruneButton.nativeElement.click();
 
-                    // Pause half way through
-                    for (let i = 0; i < numPrunedInvalidAuthTokens; i += AdminComponent.pruneInvalidAuthTokenBatchSize) {
-                        httpMock.expectOne(pruneInvalidAuthTokensRequest).flush(null);
+            await fixture.whenStable();
+            fixture.detectChanges();
 
-                        fixture.detectChanges();
-                        await fixture.whenStable();
-                        fixture.detectChanges();
-                    }
+            // Pause half way through
+            for (let i = 0; i < numPrunedInvalidAuthTokens; i += AdminComponent.pruneInvalidAuthTokenBatchSize) {
+                httpMock.expectOne(pruneInvalidAuthTokensRequest).flush(null);
 
-                    let progressBar = container.query(By.css("ngb-progressbar"));
-                    expect(progressBar).not.toBeNull();
-                    expect(progressBar.properties.value).toEqual(100 * numPrunedInvalidAuthTokens / countInvalidAuthTokens);
+                fixture.detectChanges();
+                await fixture.whenStable();
+                fixture.detectChanges();
+            }
 
-                    let buttons = container.queryAll(By.css("button"));
-                    expect(buttons.length).toEqual(1);
+            expect(progressBar.properties.value).toEqual(100 * numPrunedInvalidAuthTokens / countInvalidAuthTokens);
 
-                    let cancelButton = buttons[0];
-                    expect(cancelButton.nativeElement.textContent.trim()).toEqual("Cancel");
-                    cancelButton.nativeElement.click();
+            buttons = container.queryAll(By.css("button"));
+            expect(buttons.length).toEqual(1);
 
-                    // Flush the in-flight request
-                    httpMock.expectOne(pruneInvalidAuthTokensRequest).flush(null);
-                    numPrunedInvalidAuthTokens += AdminComponent.pruneInvalidAuthTokenBatchSize;
+            let cancelButton = buttons[0];
+            expect(cancelButton.nativeElement.textContent.trim()).toEqual("Cancel");
+            cancelButton.nativeElement.click();
 
-                    await fixture.whenStable();
-                })
-                .then(() => {
-                    // Need a 2nd round to update the property
-                    fixture.detectChanges();
-                    return fixture.whenStable();
-                })
-                .then(() => {
-                    fixture.detectChanges();
+            // Flush the in-flight request
+            httpMock.expectOne(pruneInvalidAuthTokensRequest).flush(null);
+            numPrunedInvalidAuthTokens += AdminComponent.pruneInvalidAuthTokenBatchSize;
 
-                    // We will only have let the pending requests finish before stopping
-                    let progressBar = container.query(By.css("ngb-progressbar"));
-                    expect(progressBar).not.toBeNull();
-                    expect(progressBar.properties.value).toEqual(100 * numPrunedInvalidAuthTokens / countInvalidAuthTokens);
+            await fixture.whenStable();
+            // Need a 2nd round to update the property
+            fixture.detectChanges();
+            await fixture.whenStable();
+            fixture.detectChanges();
 
-                    let buttons = container.queryAll(By.css("button"));
-                    expect(buttons.length).toEqual(2);
-                    expect(buttons[0].nativeElement.textContent.trim()).toEqual("Fetch");
-                    expect(buttons[1].nativeElement.textContent.trim()).toEqual("Prune");
+            // We will only have let the pending requests finish before stopping
+            expect(progressBar.properties.value).toEqual(100 * numPrunedInvalidAuthTokens / countInvalidAuthTokens);
 
-                    let errors = getAllErrors();
-                    expect(errors.length).toEqual(0);
-                })
-                .then(done)
-                .catch(done.fail);
+            buttons = container.queryAll(By.css("button"));
+            expect(buttons.length).toEqual(2);
+            expect(buttons[0].nativeElement.textContent.trim()).toEqual("Fetch");
+            expect(buttons[1].nativeElement.textContent.trim()).toEqual("Prune");
+
+            let errors = getAllErrors();
+            expect(errors.length).toEqual(0);
         });
     });
 

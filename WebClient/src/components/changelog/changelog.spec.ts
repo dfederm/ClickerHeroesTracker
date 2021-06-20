@@ -35,7 +35,7 @@ describe("ChangelogComponent", () => {
         isLoggedIn: false,
     };
 
-    beforeEach(done => {
+    beforeEach(async () => {
         let newsService = {
             getNews: (): void => void 0,
             addNews: (): void => void 0,
@@ -45,7 +45,7 @@ describe("ChangelogComponent", () => {
         userInfo = new BehaviorSubject(notLoggedInUser);
         let authenticationService = { userInfo: () => userInfo };
 
-        TestBed.configureTestingModule(
+        await TestBed.configureTestingModule(
             {
                 imports: [FormsModule],
                 declarations: [ChangelogComponent],
@@ -56,17 +56,14 @@ describe("ChangelogComponent", () => {
                 ],
                 schemas: [NO_ERRORS_SCHEMA],
             })
-            .compileComponents()
-            .then(() => {
-                fixture = TestBed.createComponent(ChangelogComponent);
-                component = fixture.componentInstance;
-            })
-            .then(done)
-            .catch(done.fail);
+            .compileComponents();
+
+        fixture = TestBed.createComponent(ChangelogComponent);
+        component = fixture.componentInstance;
     });
 
-    it("should display all news entries grouped by date", done => {
-        let newsService = TestBed.get(NewsService);
+    it("should display all news entries grouped by date", async () => {
+        let newsService = TestBed.inject(NewsService);
         spyOn(newsService, "getNews").and.returnValue(Promise.resolve(siteNewsEntryListResponse));
 
         let datePipe = TestBed.inject(DatePipe);
@@ -74,82 +71,72 @@ describe("ChangelogComponent", () => {
         component.showDates = true;
         fixture.detectChanges();
 
-        fixture.whenStable()
-            .then(() => {
-                fixture.detectChanges();
-                expect(newsService.getNews).toHaveBeenCalled();
+        await fixture.whenStable();
+        fixture.detectChanges();
 
-                let sections = fixture.debugElement.queryAll(By.css("div"));
-                expect(sections.length).toEqual(Object.keys(siteNewsEntryListResponse.entries).length);
+        expect(newsService.getNews).toHaveBeenCalled();
 
-                for (let i = 0; i < sections.length; i++) {
-                    // The sections are rendered in reverse order
-                    let expectedDate = sections.length - i;
+        let sections = fixture.debugElement.queryAll(By.css("div"));
+        expect(sections.length).toEqual(Object.keys(siteNewsEntryListResponse.entries).length);
 
-                    let dateElement = sections[i].query(By.css("h3"));
-                    expect(dateElement.nativeElement.textContent.trim()).toEqual(datePipe.transform(`1/${expectedDate}/2017`, "shortDate"));
+        for (let i = 0; i < sections.length; i++) {
+            // The sections are rendered in reverse order
+            let expectedDate = sections.length - i;
 
-                    let list = sections[i].query(By.css("ul"));
-                    let listItems = list.queryAll(By.css("li"));
-                    expect(listItems.length).toEqual(2);
-                    for (let j = 0; j < listItems.length; j++) {
-                        let listItem: HTMLElement = listItems[j].nativeElement;
-                        expect(listItem.textContent.trim()).toEqual(`${expectedDate}.${j}`);
-                    }
-                }
-            })
-            .then(done)
-            .catch(done.fail);
+            let dateElement = sections[i].query(By.css("h3"));
+            expect(dateElement.nativeElement.textContent.trim()).toEqual(datePipe.transform(`1/${expectedDate}/2017`, "shortDate"));
+
+            let list = sections[i].query(By.css("ul"));
+            let listItems = list.queryAll(By.css("li"));
+            expect(listItems.length).toEqual(2);
+            for (let j = 0; j < listItems.length; j++) {
+                let listItem: HTMLElement = listItems[j].nativeElement;
+                expect(listItem.textContent.trim()).toEqual(`${expectedDate}.${j}`);
+            }
+        }
     });
 
-    it("should display limited news entries in a single group", done => {
-        let newsService = TestBed.get(NewsService);
+    it("should display limited news entries in a single group", async () => {
+        let newsService = TestBed.inject(NewsService);
         spyOn(newsService, "getNews").and.returnValue(Promise.resolve(siteNewsEntryListResponse));
 
         component.showDates = false;
         component.maxEntries = 3;
+
+        fixture.detectChanges();
+        await fixture.whenStable()
         fixture.detectChanges();
 
-        fixture.whenStable()
-            .then(() => {
-                fixture.detectChanges();
-                expect(newsService.getNews).toHaveBeenCalled();
+        expect(newsService.getNews).toHaveBeenCalled();
 
-                let sections = fixture.debugElement.queryAll(By.css("div"));
-                expect(sections.length).toEqual(1);
+        let sections = fixture.debugElement.queryAll(By.css("div"));
+        expect(sections.length).toEqual(1);
 
-                let section = sections[0];
+        let section = sections[0];
 
-                let dateElement = section.query(By.css("h3"));
-                expect(dateElement).toBeNull();
+        let dateElement = section.query(By.css("h3"));
+        expect(dateElement).toBeNull();
 
-                let list = section.query(By.css("ul"));
-                let listItems = list.queryAll(By.css("li"));
-                expect(listItems.length).toEqual(3);
-                expect(listItems[0].nativeElement.textContent.trim()).toEqual("3.0");
-                expect(listItems[1].nativeElement.textContent.trim()).toEqual("3.1");
-                expect(listItems[2].nativeElement.textContent.trim()).toEqual("2.0");
-            })
-            .then(done)
-            .catch(done.fail);
+        let list = section.query(By.css("ul"));
+        let listItems = list.queryAll(By.css("li"));
+        expect(listItems.length).toEqual(3);
+        expect(listItems[0].nativeElement.textContent.trim()).toEqual("3.0");
+        expect(listItems[1].nativeElement.textContent.trim()).toEqual("3.1");
+        expect(listItems[2].nativeElement.textContent.trim()).toEqual("2.0");
     });
 
-    it("should display an error when the news service errors", done => {
-        let newsService = TestBed.get(NewsService);
+    it("should display an error when the news service errors", async () => {
+        let newsService = TestBed.inject(NewsService);
         spyOn(newsService, "getNews").and.returnValue(Promise.reject("someReason"));
 
         fixture.detectChanges();
 
-        fixture.whenStable()
-            .then(() => {
-                fixture.detectChanges();
-                expect(newsService.getNews).toHaveBeenCalled();
+        await fixture.whenStable()
+        fixture.detectChanges();
+        expect(newsService.getNews).toHaveBeenCalled();
 
-                let error = fixture.debugElement.query(By.css("p"));
-                expect(error.nativeElement.textContent.trim()).toEqual("There was a problem getting the site news");
-            })
-            .then(done)
-            .catch(done.fail);
+        let error = fixture.debugElement.query(By.css("p"));
+        expect(error.nativeElement.textContent.trim()).toEqual("There was a problem getting the site news");
     });
 
     describe("Admin users", () => {
@@ -158,141 +145,127 @@ describe("ChangelogComponent", () => {
         beforeEach(() => {
             userInfo.next(adminUser);
 
-            newsService = TestBed.get(NewsService);
+            newsService = TestBed.inject(NewsService);
             spyOn(newsService, "getNews").and.returnValue(Promise.resolve(siteNewsEntryListResponse));
         });
 
-        it("should not show edit and delete buttons when isFull=false", done => {
+        it("should not show edit and delete buttons when isFull=false", async () => {
             component.showDates = false;
 
             fixture.detectChanges();
-            fixture.whenStable()
-                .then(() => {
-                    fixture.detectChanges();
-                    expect(newsService.getNews).toHaveBeenCalled();
+            await fixture.whenStable()
+            fixture.detectChanges();
 
-                    let sections = fixture.debugElement.queryAll(By.css("div"));
-                    expect(sections.length).toEqual(1);
+            expect(newsService.getNews).toHaveBeenCalled();
 
-                    let section = sections[0];
+            let sections = fixture.debugElement.queryAll(By.css("div"));
+            expect(sections.length).toEqual(1);
 
-                    let dateElement = section.query(By.css("h3"));
-                    expect(dateElement).toBeNull();
+            let section = sections[0];
 
-                    let buttons = section.query(By.css("button"));
-                    expect(buttons).toBeNull();
-                })
-                .then(done)
-                .catch(done.fail);
+            let dateElement = section.query(By.css("h3"));
+            expect(dateElement).toBeNull();
+
+            let buttons = section.query(By.css("button"));
+            expect(buttons).toBeNull();
         });
 
-        it("should show edit and delete buttons when isFull=true", done => {
+        it("should show edit and delete buttons when isFull=true", async () => {
             component.showDates = true;
 
             fixture.detectChanges();
-            fixture.whenStable()
-                .then(() => {
-                    fixture.detectChanges();
-                    expect(newsService.getNews).toHaveBeenCalled();
+            await fixture.whenStable()
+            fixture.detectChanges();
 
-                    let sections = fixture.debugElement.queryAll(By.css("div"));
-                    expect(sections.length).toEqual(3);
+            expect(newsService.getNews).toHaveBeenCalled();
 
-                    for (let i = 0; i < sections.length; i++) {
-                        let dateElement = sections[i].query(By.css("h3"));
-                        expect(dateElement).not.toBeNull();
+            let sections = fixture.debugElement.queryAll(By.css("div"));
+            expect(sections.length).toEqual(3);
 
-                        let buttons = dateElement.queryAll(By.css("button"));
-                        expect(buttons.length).toEqual(2);
-                        expect(buttons[0].nativeElement.textContent.trim()).toEqual("Edit");
-                        expect(buttons[1].nativeElement.textContent.trim()).toEqual("Delete");
-                    }
-                })
-                .then(done)
-                .catch(done.fail);
+            for (let i = 0; i < sections.length; i++) {
+                let dateElement = sections[i].query(By.css("h3"));
+                expect(dateElement).not.toBeNull();
+
+                let buttons = dateElement.queryAll(By.css("button"));
+                expect(buttons.length).toEqual(2);
+                expect(buttons[0].nativeElement.textContent.trim()).toEqual("Edit");
+                expect(buttons[1].nativeElement.textContent.trim()).toEqual("Delete");
+            }
         });
 
-        it("should add a new section", done => {
+        it("should add a new section", async () => {
             spyOn(newsService, "addNews").and.returnValue(Promise.resolve());
 
             component.showDates = true;
 
-            let saveButton: DebugElement;
-            let dateStr: string;
+            fixture.detectChanges();
+            await fixture.whenStable()
+            fixture.detectChanges();
+
+            expect(newsService.getNews).toHaveBeenCalled();
+
+            let sections = fixture.debugElement.queryAll(By.css("div"));
+            expect(sections.length).toEqual(3);
+
+            let addButton = fixture.debugElement.query(By.css("button"));
+            expect(addButton).not.toBeNull();
+            addButton.nativeElement.click();
 
             fixture.detectChanges();
-            fixture.whenStable()
-                .then(() => {
-                    fixture.detectChanges();
-                    expect(newsService.getNews).toHaveBeenCalled();
 
-                    let sections = fixture.debugElement.queryAll(By.css("div"));
-                    expect(sections.length).toEqual(3);
+            // Wait since ngModel is async
+            await fixture.whenStable();
 
-                    let addButton = fixture.debugElement.query(By.css("button"));
-                    expect(addButton).not.toBeNull();
-                    addButton.nativeElement.click();
+            sections = fixture.debugElement.queryAll(By.css("div"));
+            expect(sections.length).toEqual(4);
 
-                    fixture.detectChanges();
+            let section = sections[0];
 
-                    // Wait since ngModel is async
-                    return fixture.whenStable();
-                })
-                .then(() => {
-                    let sections = fixture.debugElement.queryAll(By.css("div"));
-                    expect(sections.length).toEqual(4);
+            let dateElement = section.query(By.css("h3"));
+            expect(dateElement).not.toBeNull();
 
-                    let section = sections[0];
+            let dateInput = dateElement.query(By.css("input"));
+            expect(dateInput).not.toBeNull();
+            let dateStr = dateInput.nativeElement.value;
 
-                    let dateElement = section.query(By.css("h3"));
-                    expect(dateElement).not.toBeNull();
+            let buttons = section.queryAll(By.css("button"));
+            expect(buttons.length).toEqual(3);
+            expect(buttons[0].nativeElement.textContent.trim()).toEqual("Add");
+            expect(buttons[1].nativeElement.textContent.trim()).toEqual("Save");
+            expect(buttons[2].nativeElement.textContent.trim()).toEqual("Cancel");
 
-                    let dateInput = dateElement.query(By.css("input"));
-                    expect(dateInput).not.toBeNull();
-                    dateStr = dateInput.nativeElement.value;
+            let addMessageButton = buttons[0];
+            let saveButton = buttons[1];
 
-                    let buttons = section.queryAll(By.css("button"));
-                    expect(buttons.length).toEqual(3);
-                    expect(buttons[0].nativeElement.textContent.trim()).toEqual("Add");
-                    expect(buttons[1].nativeElement.textContent.trim()).toEqual("Save");
-                    expect(buttons[2].nativeElement.textContent.trim()).toEqual("Cancel");
+            addMessageButton.nativeElement.click();
+            fixture.detectChanges();
 
-                    let addMessageButton = buttons[0];
-                    saveButton = buttons[1];
+            let messages = section.queryAll(By.css("textarea"));
+            expect(messages.length).toEqual(2);
 
-                    addMessageButton.nativeElement.click();
-                    fixture.detectChanges();
+            setInputValue(messages[0], "someMessage0");
+            setInputValue(messages[1], "someMessage1");
 
-                    let messages = section.queryAll(By.css("textarea"));
-                    expect(messages.length).toEqual(2);
+            addMessageButton.nativeElement.click();
+            fixture.detectChanges();
 
-                    setInputValue(messages[0], "someMessage0");
-                    setInputValue(messages[1], "someMessage1");
+            messages = section.queryAll(By.css("textarea"));
+            expect(messages.length).toEqual(3);
 
-                    addMessageButton.nativeElement.click();
-                    fixture.detectChanges();
+            setInputValue(messages[2], "someMessage2");
 
-                    messages = section.queryAll(By.css("textarea"));
-                    expect(messages.length).toEqual(3);
+            saveButton.nativeElement.click();
+            await fixture.whenStable();
 
-                    setInputValue(messages[2], "someMessage2");
+            let expectedEntry: ISiteNewsEntry = {
+                date: new Date(dateStr).toISOString().substring(0, 10),
+                messages: ["someMessage0", "someMessage1", "someMessage2"],
+            };
 
-                    saveButton.nativeElement.click();
-                    return fixture.whenStable();
-                })
-                .then(() => {
-                    let expectedEntry: ISiteNewsEntry = {
-                        date: new Date(dateStr).toISOString().substring(0, 10),
-                        messages: ["someMessage0", "someMessage1", "someMessage2"],
-                    };
-
-                    expect(newsService.addNews).toHaveBeenCalledWith(expectedEntry);
-                })
-                .then(done)
-                .catch(done.fail);
+            expect(newsService.addNews).toHaveBeenCalledWith(expectedEntry);
         });
 
-        it("should edit an existing section", done => {
+        it("should edit an existing section", async () => {
             spyOn(newsService, "addNews").and.returnValue(Promise.resolve());
 
             component.showDates = true;
@@ -301,112 +274,97 @@ describe("ChangelogComponent", () => {
             let saveButton: DebugElement;
 
             fixture.detectChanges();
-            fixture.whenStable()
-                .then(() => {
-                    fixture.detectChanges();
-                    expect(newsService.getNews).toHaveBeenCalled();
+            await fixture.whenStable();
+            fixture.detectChanges();
 
-                    let sections = fixture.debugElement.queryAll(By.css("div"));
-                    expect(sections.length).toEqual(3);
+            expect(newsService.getNews).toHaveBeenCalled();
 
-                    section = sections[1];
+            let sections = fixture.debugElement.queryAll(By.css("div"));
+            expect(sections.length).toEqual(3);
+            section = sections[1];
 
-                    let dateElement = section.query(By.css("h3"));
-                    expect(dateElement).not.toBeNull();
+            let dateElement = section.query(By.css("h3"));
+            expect(dateElement).not.toBeNull();
 
-                    let buttons = dateElement.queryAll(By.css("button"));
-                    expect(buttons.length).toEqual(2);
-                    expect(buttons[0].nativeElement.textContent.trim()).toEqual("Edit");
-                    expect(buttons[1].nativeElement.textContent.trim()).toEqual("Delete");
+            let buttons = dateElement.queryAll(By.css("button"));
+            expect(buttons.length).toEqual(2);
+            expect(buttons[0].nativeElement.textContent.trim()).toEqual("Edit");
+            expect(buttons[1].nativeElement.textContent.trim()).toEqual("Delete");
 
-                    let editButton = buttons[0];
-                    editButton.nativeElement.click();
+            let editButton = buttons[0];
+            editButton.nativeElement.click();
 
-                    // Need to wait since ngModel is async
-                    fixture.detectChanges();
-                    return fixture.whenStable();
-                })
-                .then(() => {
-                    let dateElement = section.query(By.css("h3"));
-                    expect(dateElement).not.toBeNull();
+            // Need to wait since ngModel is async
+            fixture.detectChanges();
+            await fixture.whenStable();
 
-                    let dateInput = dateElement.query(By.css("input"));
-                    expect(dateInput).toBeNull();
+            dateElement = section.query(By.css("h3"));
+            expect(dateElement).not.toBeNull();
+            
+            let dateInput = dateElement.query(By.css("input"));
+            expect(dateInput).toBeNull();
+            
+            buttons = section.queryAll(By.css("button"));
+            expect(buttons.length).toEqual(3);
+            expect(buttons[0].nativeElement.textContent.trim()).toEqual("Add");
+            expect(buttons[1].nativeElement.textContent.trim()).toEqual("Save");
+            expect(buttons[2].nativeElement.textContent.trim()).toEqual("Cancel");
 
-                    let buttons = section.queryAll(By.css("button"));
-                    expect(buttons.length).toEqual(3);
-                    expect(buttons[0].nativeElement.textContent.trim()).toEqual("Add");
-                    expect(buttons[1].nativeElement.textContent.trim()).toEqual("Save");
-                    expect(buttons[2].nativeElement.textContent.trim()).toEqual("Cancel");
+            let messages = section.queryAll(By.css("textarea"));
+            expect(messages.length).toEqual(2);
 
-                    let messages = section.queryAll(By.css("textarea"));
-                    expect(messages.length).toEqual(2);
+            let addMessageButton = buttons[0];
+            saveButton = buttons[1];
+            addMessageButton.nativeElement.click();
+            fixture.detectChanges();
 
-                    let addMessageButton = buttons[0];
-                    saveButton = buttons[1];
+            messages = section.queryAll(By.css("textarea"));
+            expect(messages.length).toEqual(3);
+            setInputValue(messages[1], "someMessage1");
+            setInputValue(messages[2], "someMessage2");
+            saveButton.nativeElement.click();
+            await fixture.whenStable();
 
-                    addMessageButton.nativeElement.click();
-                    fixture.detectChanges();
-
-                    messages = section.queryAll(By.css("textarea"));
-                    expect(messages.length).toEqual(3);
-
-                    setInputValue(messages[1], "someMessage1");
-                    setInputValue(messages[2], "someMessage2");
-
-                    saveButton.nativeElement.click();
-                    return fixture.whenStable();
-                })
-                .then(() => {
-                    let expectedEntry: ISiteNewsEntry = {
-                        date: "2017-01-02",
-                        messages: ["2.0", "someMessage1", "someMessage2"],
-                    };
-
-                    expect(newsService.addNews).toHaveBeenCalledWith(expectedEntry);
-                })
-                .then(done)
-                .catch(done.fail);
+            let expectedEntry: ISiteNewsEntry = {
+                date: "2017-01-02",
+                messages: ["2.0", "someMessage1", "someMessage2"],
+            };
+            expect(newsService.addNews).toHaveBeenCalledWith(expectedEntry);
         });
 
-        it("should delete an existing section", done => {
+        it("should delete an existing section", async () => {
             spyOn(newsService, "deleteNews").and.returnValue(Promise.resolve());
 
             component.showDates = true;
 
             fixture.detectChanges();
-            fixture.whenStable()
-                .then(() => {
-                    fixture.detectChanges();
-                    expect(newsService.getNews).toHaveBeenCalled();
-                    (newsService.getNews as jasmine.Spy).calls.reset();
+            await fixture.whenStable();
+            fixture.detectChanges();
 
-                    let sections = fixture.debugElement.queryAll(By.css("div"));
-                    expect(sections.length).toEqual(3);
+            expect(newsService.getNews).toHaveBeenCalled();
+            (newsService.getNews as jasmine.Spy).calls.reset();
 
-                    let section = sections[1];
+            let sections = fixture.debugElement.queryAll(By.css("div"));
+            expect(sections.length).toEqual(3);
 
-                    let dateElement = section.query(By.css("h3"));
-                    expect(dateElement).not.toBeNull();
+            let section = sections[1];
+            let dateElement = section.query(By.css("h3"));
+            expect(dateElement).not.toBeNull();
 
-                    let buttons = dateElement.queryAll(By.css("button"));
-                    expect(buttons.length).toEqual(2);
-                    expect(buttons[0].nativeElement.textContent.trim()).toEqual("Edit");
-                    expect(buttons[1].nativeElement.textContent.trim()).toEqual("Delete");
+            let buttons = dateElement.queryAll(By.css("button"));
+            expect(buttons.length).toEqual(2);
+            expect(buttons[0].nativeElement.textContent.trim()).toEqual("Edit");
+            expect(buttons[1].nativeElement.textContent.trim()).toEqual("Delete");
 
-                    let deleteButton = buttons[1];
-                    deleteButton.nativeElement.click();
+            let deleteButton = buttons[1];
+            deleteButton.nativeElement.click();
 
-                    // Need to wait since ngModel is async
-                    fixture.detectChanges();
-                    return fixture.whenStable();
-                })
-                .then(() => {
-                    expect(newsService.deleteNews).toHaveBeenCalledWith("2017-01-02");
-                    expect(newsService.getNews).toHaveBeenCalled();
-                })
-                .then(done)
-                .catch(done.fail);
+            // Need to wait since ngModel is async
+            fixture.detectChanges();
+            await fixture.whenStable();
+
+            expect(newsService.deleteNews).toHaveBeenCalledWith("2017-01-02");
+            expect(newsService.getNews).toHaveBeenCalled();
         });
 
         function setInputValue(element: DebugElement, value: string): void {

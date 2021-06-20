@@ -436,7 +436,7 @@ describe("SettingsService", () => {
             discardPeriodicTasks();
         }));
 
-        it("should update settings when the user is not logged in", done => {
+        it("should update settings when the user is not logged in", async () => {
             userInfo.next(notLoggedInUser);
 
             let settingsLog: IUserSettings[];
@@ -451,13 +451,10 @@ describe("SettingsService", () => {
             // Start the log now so we skip the initial state.
             settingsLog = [];
 
-            settingsService.setSetting("playStyle", "somePlayStyle")
-                .then(() => {
-                    expect(settingsLog.length).toEqual(1);
-                    expect(settingsLog[0]).toEqual(Object.assign({}, SettingsService.defaultSettings, { playStyle: "somePlayStyle" }));
-                })
-                .then(done)
-                .catch(done.fail);
+            await settingsService.setSetting("playStyle", "somePlayStyle");
+
+            expect(settingsLog.length).toEqual(1);
+            expect(settingsLog[0]).toEqual(Object.assign({}, SettingsService.defaultSettings, { playStyle: "somePlayStyle" }));
         });
 
         function createService(): IUserSettings[] {

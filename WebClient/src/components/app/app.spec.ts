@@ -15,7 +15,7 @@ describe("AppComponent", () => {
     let userInfoSubject = new Subject<IUserInfo>();
     let appInsights: AppInsightsService;
 
-    beforeEach(done => {
+    beforeEach(async () => {
         let settingsService = { settings: () => settingsSubject };
         let authenticationService = {
             getAuthHeaders: () => Promise.resolve(new HttpHeaders()),
@@ -24,26 +24,22 @@ describe("AppComponent", () => {
 
         appInsights = jasmine.createSpyObj("appInsights", ["setAuthenticatedUserContext", "clearAuthenticatedUserContext"]);
 
-        TestBed.configureTestingModule(
+        await TestBed.configureTestingModule(
             {
                 declarations: [AppComponent],
-                providers:
-                    [
-                        { provide: SettingsService, useValue: settingsService },
-                        { provide: AuthenticationService, useValue: authenticationService },
-                        { provide: AppInsightsService, useValue: appInsights },
-                    ],
+                providers: [
+                    { provide: SettingsService, useValue: settingsService },
+                    { provide: AuthenticationService, useValue: authenticationService },
+                    { provide: AppInsightsService, useValue: appInsights },
+                ],
                 schemas: [NO_ERRORS_SCHEMA],
             })
-            .compileComponents()
-            .then(() => {
-                fixture = TestBed.createComponent(AppComponent);
+            .compileComponents();
 
-                fixture.detectChanges();
-                return fixture.whenStable();
-            })
-            .then(done)
-            .catch(done.fail);
+        fixture = TestBed.createComponent(AppComponent);
+
+        fixture.detectChanges();
+        await fixture.whenStable();
     });
 
     it("should update the stylesheet when the theme changes", () => {

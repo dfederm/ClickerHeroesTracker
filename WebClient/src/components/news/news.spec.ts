@@ -7,18 +7,15 @@ import { NewsComponent } from "./news";
 describe("NewsComponent", () => {
     let fixture: ComponentFixture<NewsComponent>;
 
-    beforeEach(done => {
-        TestBed.configureTestingModule(
+    beforeEach(async () => {
+        await TestBed.configureTestingModule(
             {
                 declarations: [NewsComponent],
                 schemas: [NO_ERRORS_SCHEMA],
             })
-            .compileComponents()
-            .then(() => {
-                fixture = TestBed.createComponent(NewsComponent);
-            })
-            .then(done)
-            .catch(done.fail);
+            .compileComponents();
+
+        fixture = TestBed.createComponent(NewsComponent);
     });
 
     it("should display a changelog with dates", () => {

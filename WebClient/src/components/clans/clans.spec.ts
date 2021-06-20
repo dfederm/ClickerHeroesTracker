@@ -54,7 +54,7 @@ describe("ClansComponent", () => {
         clanName: clanData.clanName,
     };
 
-    beforeEach(done => {
+    beforeEach(async () => {
         let clanService = {
             getClan(): Promise<IClanData> {
                 return Promise.resolve(clanData);
@@ -81,7 +81,7 @@ describe("ClansComponent", () => {
             getUser: (): Promise<IUser> => Promise.resolve(user),
         };
 
-        TestBed.configureTestingModule(
+        await TestBed.configureTestingModule(
             {
                 declarations: [ClansComponent],
                 providers: [
@@ -91,114 +91,98 @@ describe("ClansComponent", () => {
                 ],
                 schemas: [NO_ERRORS_SCHEMA],
             })
-            .compileComponents()
-            .then(() => {
-                fixture = TestBed.createComponent(ClansComponent);
-                component = fixture.componentInstance;
-            })
-            .then(done)
-            .catch(done.fail);
+            .compileComponents();
+
+        fixture = TestBed.createComponent(ClansComponent);
+        component = fixture.componentInstance;
     });
 
-    it("should display clan leaderboard when the user's clan is ranked lower", done => {
+    it("should display clan leaderboard when the user's clan is ranked lower", async () => {
         component.count = 3;
-        verifyLeaderboard(1)
-            .then(done)
-            .catch(done.fail);
+        await verifyLeaderboard(1);
     });
 
-    it("should update the leaderboard when the user's clan is within the current page", done => {
+    it("should update the leaderboard when the user's clan is within the current page", async () => {
         component.count = 3;
-        verifyLeaderboard(2)
-            .then(done)
-            .catch(done.fail);
+        await verifyLeaderboard(2);
     });
 
-    it("should display clan leaderboard when the user's clan is ranked higher", done => {
+    it("should display clan leaderboard when the user's clan is ranked higher", async () => {
         component.count = 3;
-        verifyLeaderboard(3)
-            .then(done)
-            .catch(done.fail);
+        await verifyLeaderboard(3);
     });
 
-    it("should update the leaderboard when the page changes", done => {
+    it("should update the leaderboard when the page changes", async () => {
         component.count = 3;
-        verifyLeaderboard(1)
-            .then(() => verifyLeaderboard(2))
-            .then(done)
-            .catch(done.fail);
+        await verifyLeaderboard(1);
+        await verifyLeaderboard(2);
     });
 
-    it("should display error when clanService.getLeaderboard errors", done => {
-        let clanService = TestBed.get(ClanService);
+    it("should display error when clanService.getLeaderboard errors", async () => {
+        let clanService = TestBed.inject(ClanService);
         spyOn(clanService, "getLeaderboard").and.returnValue(Promise.reject("someReason"));
 
         fixture.detectChanges();
-        fixture.whenStable()
-            .then(() => {
-                fixture.detectChanges();
+        await fixture.whenStable();
+        fixture.detectChanges();
 
-                let error = fixture.debugElement.query(By.css(".alert-danger"));
-                expect(error.nativeElement.textContent.trim()).toEqual("There was a problem getting leaderboard data");
+        let error = fixture.debugElement.query(By.css(".alert-danger"));
+        expect(error.nativeElement.textContent.trim()).toEqual("There was a problem getting leaderboard data");
 
-                let leaderboard = fixture.debugElement.query(By.css("table"));
-                expect(leaderboard).toBeNull();
-            })
-            .then(done)
-            .catch(done.fail);
+        let leaderboard = fixture.debugElement.query(By.css("table"));
+        expect(leaderboard).toBeNull();
     });
 
-    function verifyLeaderboard(page: number): Promise<void> {
+    async function verifyLeaderboard(page: number): Promise<void> {
         component.page = page;
 
         fixture.detectChanges();
-        return fixture.whenStable().then(() => {
-            fixture.detectChanges();
+        await fixture.whenStable()
+        fixture.detectChanges();
 
-            let error = fixture.debugElement.query(By.css(".alert-danger"));
-            expect(error).toBeNull();
+        let error = fixture.debugElement.query(By.css(".alert-danger"));
+        expect(error).toBeNull();
 
-            let leaderboard = fixture.debugElement.query(By.css("table"));
-            expect(leaderboard).not.toBeNull();
+        let leaderboard = fixture.debugElement.query(By.css("table"));
+        expect(leaderboard).not.toBeNull();
 
-            let clanRows = leaderboard.query(By.css("tbody")).children;
+        let clanRows = leaderboard.query(By.css("tbody")).children;
 
-            let expectedClanStart = (page - 1) * component.count;
-            let expectedClanEnd = page * component.count;
-            let expectedClans = clans.slice(expectedClanStart, expectedClanEnd);
+        let expectedClanStart = (page - 1) * component.count;
+        let expectedClanEnd = page * component.count;
+        let expectedClans = clans.slice(expectedClanStart, expectedClanEnd);
 
-            if (expectedClanStart > userClanIndex) {
-                expectedClans.unshift(userClan);
-            }
+        if (expectedClanStart > userClanIndex) {
+            expectedClans.unshift(userClan);
+        }
 
-            if (expectedClanEnd <= userClanIndex) {
-                expectedClans.push(userClan);
-            }
+        if (expectedClanEnd <= userClanIndex) {
+            expectedClans.push(userClan);
+        }
 
-            expect(clanRows.length).toEqual(expectedClans.length);
-            for (let i = 0; i < clanRows.length; i++) {
-                let clanRow = clanRows[i];
-                let clan = expectedClans[i];
+        expect(clanRows.length).toEqual(expectedClans.length);
+        for (let i = 0; i < clanRows.length; i++) {
+            let clanRow = clanRows[i];
+            let clan = expectedClans[i];
 
-                expect(clanRow.nativeElement.classList.contains("table-success")).toBe(clan === userClan);
+            expect(clanRow.nativeElement.classList.contains("table-success")).toBe(clan === userClan);
 
-                let cells = clanRow.children;
-                expect(cells.length).toEqual(4);
-                expect(cells[0].nativeElement.textContent.trim()).toEqual(clan.rank.toString());
-                expect(cells[1].nativeElement.textContent.trim()).toEqual(clan.name);
-                expect(cells[2].nativeElement.textContent.trim()).toEqual(clan.memberCount.toString());
-                expect(cells[3].nativeElement.textContent.trim()).toEqual(clan.currentRaidLevel.toString());
-            }
+            let cells = clanRow.children;
+            expect(cells.length).toEqual(4);
+            expect(cells[0].nativeElement.textContent.trim()).toEqual(clan.rank.toString());
+            expect(cells[1].nativeElement.textContent.trim()).toEqual(clan.name);
+            expect(cells[2].nativeElement.textContent.trim()).toEqual(clan.memberCount.toString());
+            expect(cells[3].nativeElement.textContent.trim()).toEqual(clan.currentRaidLevel.toString());
+        }
 
-            let pagination = fixture.debugElement.query(By.css("ngb-pagination"));
-            expect(pagination).not.toBeNull();
-            expect(pagination.properties.collectionSize).toEqual(clans.length);
-            expect(pagination.properties.page).toEqual(page);
-            expect(pagination.properties.pageSize).toEqual(component.count);
-            expect(pagination.properties.maxSize).toEqual(5);
-            expect(pagination.properties.rotate).toEqual(true);
-            expect(pagination.properties.ellipses).toEqual(false);
-            expect(pagination.properties.boundaryLinks).toEqual(true);
-        });
+        let pagination = fixture.debugElement.query(By.css("ngb-pagination"));
+        expect(pagination).not.toBeNull();
+        expect(pagination.properties.collectionSize).toEqual(clans.length);
+        expect(pagination.properties.page).toEqual(page);
+        expect(pagination.properties.pageSize).toEqual(component.count);
+        expect(pagination.properties.maxSize).toEqual(5);
+        expect(pagination.properties.rotate).toEqual(true);
+        expect(pagination.properties.ellipses).toEqual(false);
+        expect(pagination.properties.boundaryLinks).toEqual(true);
     }
 });

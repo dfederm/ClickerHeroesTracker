@@ -62,14 +62,14 @@ describe("OutsiderSuggestionsComponent", () => {
 
     const outsiderOrder = ["Xyliqil", "Chor'gorloth", "Phandoryss", "Ponyboy", "Borb", "Rhageist", "K'Ariqua", "Orphalas", "Sen-Akhan"];
 
-    beforeEach(done => {
+    beforeEach(async () => {
         let appInsights = {
             trackMetric: (): void => void 0,
         };
         let settingsService = { settings: () => settingsSubject };
         let changeDetectorRef = { markForCheck: (): void => void 0 };
 
-        TestBed.configureTestingModule(
+        await TestBed.configureTestingModule(
             {
                 imports: [FormsModule],
                 declarations: [
@@ -84,13 +84,10 @@ describe("OutsiderSuggestionsComponent", () => {
                     PercentPipe,
                 ],
             })
-            .compileComponents()
-            .then(() => {
-                fixture = TestBed.createComponent(OutsiderSuggestionsComponent);
-                component = fixture.componentInstance;
-            })
-            .then(done)
-            .catch(done.fail);
+            .compileComponents();
+
+        fixture = TestBed.createComponent(OutsiderSuggestionsComponent);
+        component = fixture.componentInstance;
     });
 
     for (let i = 0; i < testData.length; i++) {

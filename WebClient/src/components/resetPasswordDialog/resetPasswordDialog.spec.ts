@@ -12,7 +12,7 @@ describe("ResetPasswordDialogComponent", () => {
     let component: ResetPasswordDialogComponent;
     let fixture: ComponentFixture<ResetPasswordDialogComponent>;
 
-    beforeEach(done => {
+    beforeEach(async () => {
         let userService = {
             resetPassword: (): void => void 0,
             resetPasswordConfirmation: (): void => void 0,
@@ -20,7 +20,7 @@ describe("ResetPasswordDialogComponent", () => {
         let activeModal = { close: (): void => void 0 };
         let modalService = { open: (): void => void 0 };
 
-        TestBed.configureTestingModule(
+        await TestBed.configureTestingModule(
             {
                 imports: [
                     FormsModule,
@@ -36,173 +36,149 @@ describe("ResetPasswordDialogComponent", () => {
                 ],
                 schemas: [NO_ERRORS_SCHEMA],
             })
-            .compileComponents()
-            .then(() => {
-                fixture = TestBed.createComponent(ResetPasswordDialogComponent);
-                component = fixture.componentInstance;
+            .compileComponents();
 
-                fixture.detectChanges();
-            })
-            .then(done)
-            .catch(done.fail);
+        fixture = TestBed.createComponent(ResetPasswordDialogComponent);
+        component = fixture.componentInstance;
+        fixture.detectChanges();
     });
 
     describe("Send code form", () => {
         describe("Validation", () => {
-            it("should disable the send code button initially", done => {
+            it("should disable the send code button initially", async () => {
                 // Wait for stability since ngModel is async
-                fixture.whenStable()
-                    .then(() => {
-                        let body = fixture.debugElement.query(By.css(".modal-body"));
-                        expect(body).not.toBeNull();
+                await fixture.whenStable();
 
-                        let form = body.query(By.css("form"));
-                        expect(form).not.toBeNull();
+                let body = fixture.debugElement.query(By.css(".modal-body"));
+                expect(body).not.toBeNull();
 
-                        fixture.detectChanges();
-                        let button = form.query(By.css("button"));
-                        expect(button).not.toBeNull();
-                        expect(button.properties.disabled).toEqual(true);
+                let form = body.query(By.css("form"));
+                expect(form).not.toBeNull();
 
-                        let errors = getAllErrors();
-                        expect(errors.length).toEqual(0);
-                    })
-                    .then(done)
-                    .catch(done.fail);
+                fixture.detectChanges();
+                let button = form.query(By.css("button"));
+                expect(button).not.toBeNull();
+                expect(button.properties.disabled).toEqual(true);
+
+                let errors = getAllErrors();
+                expect(errors.length).toEqual(0);
             });
 
-            it("should enable the send code button when the email is valid", done => {
+            it("should enable the send code button when the email is valid", async () => {
                 // Wait for stability since ngModel is async
-                fixture.whenStable()
-                    .then(() => {
-                        let body = fixture.debugElement.query(By.css(".modal-body"));
-                        expect(body).not.toBeNull();
+                await fixture.whenStable();
 
-                        let form = body.query(By.css("form"));
-                        expect(form).not.toBeNull();
+                let body = fixture.debugElement.query(By.css(".modal-body"));
+                expect(body).not.toBeNull();
 
-                        setInputValue(form, "email", "someEmail@someDomain.com");
+                let form = body.query(By.css("form"));
+                expect(form).not.toBeNull();
 
-                        fixture.detectChanges();
-                        let button = form.query(By.css("button"));
-                        expect(button).not.toBeNull();
-                        expect(button.properties.disabled).toEqual(false);
+                setInputValue(form, "email", "someEmail@someDomain.com");
 
-                        let errors = getAllErrors();
-                        expect(errors.length).toEqual(0);
-                    })
-                    .then(done)
-                    .catch(done.fail);
+                fixture.detectChanges();
+                let button = form.query(By.css("button"));
+                expect(button).not.toBeNull();
+                expect(button.properties.disabled).toEqual(false);
+
+                let errors = getAllErrors();
+                expect(errors.length).toEqual(0);
             });
 
-            it("should disable the send code button with an empty email", done => {
+            it("should disable the send code button with an empty email", async () => {
                 // Wait for stability since ngModel is async
-                fixture.whenStable()
-                    .then(() => {
-                        let body = fixture.debugElement.query(By.css(".modal-body"));
-                        expect(body).not.toBeNull();
+                await fixture.whenStable();
 
-                        let form = body.query(By.css("form"));
-                        expect(form).not.toBeNull();
+                let body = fixture.debugElement.query(By.css(".modal-body"));
+                expect(body).not.toBeNull();
 
-                        setInputValue(form, "email", "someEmail@someDomain.com");
-                        setInputValue(form, "email", "");
+                let form = body.query(By.css("form"));
+                expect(form).not.toBeNull();
 
-                        fixture.detectChanges();
-                        let button = form.query(By.css("button"));
-                        expect(button).not.toBeNull();
-                        expect(button.properties.disabled).toEqual(true);
+                setInputValue(form, "email", "someEmail@someDomain.com");
+                setInputValue(form, "email", "");
 
-                        let errors = getAllErrors();
-                        expect(errors.length).toEqual(1);
-                        expect(errors[0]).toEqual("Email address is required");
-                    })
-                    .then(done)
-                    .catch(done.fail);
+                fixture.detectChanges();
+                let button = form.query(By.css("button"));
+                expect(button).not.toBeNull();
+                expect(button.properties.disabled).toEqual(true);
+
+                let errors = getAllErrors();
+                expect(errors.length).toEqual(1);
+                expect(errors[0]).toEqual("Email address is required");
             });
 
-            it("should disable the send code button with an invalid email", done => {
+            it("should disable the send code button with an invalid email", async () => {
                 // Wait for stability since ngModel is async
-                fixture.whenStable()
-                    .then(() => {
-                        let body = fixture.debugElement.query(By.css(".modal-body"));
-                        expect(body).not.toBeNull();
+                await fixture.whenStable();
 
-                        let form = body.query(By.css("form"));
-                        expect(form).not.toBeNull();
+                let body = fixture.debugElement.query(By.css(".modal-body"));
+                expect(body).not.toBeNull();
 
-                        setInputValue(form, "email", "notAnEmail");
+                let form = body.query(By.css("form"));
+                expect(form).not.toBeNull();
 
-                        fixture.detectChanges();
-                        let button = form.query(By.css("button"));
-                        expect(button).not.toBeNull();
-                        expect(button.properties.disabled).toEqual(true);
+                setInputValue(form, "email", "notAnEmail");
 
-                        let errors = getAllErrors();
-                        expect(errors.length).toEqual(1);
-                        expect(errors[0]).toEqual("Must be a valid email address");
-                    })
-                    .then(done)
-                    .catch(done.fail);
+                fixture.detectChanges();
+                let button = form.query(By.css("button"));
+                expect(button).not.toBeNull();
+                expect(button.properties.disabled).toEqual(true);
+
+                let errors = getAllErrors();
+                expect(errors.length).toEqual(1);
+                expect(errors[0]).toEqual("Must be a valid email address");
             });
         });
 
         describe("Form submission", () => {
-            it("should send the code when the form is filled out properly", done => {
+            it("should send the code when the form is filled out properly", async () => {
                 let userService = TestBed.inject(UserService);
                 spyOn(userService, "resetPassword").and.returnValue(Promise.resolve());
 
                 // Wait for stability since ngModel is async
-                fixture.whenStable()
-                    .then(() => {
-                        let body = fixture.debugElement.query(By.css(".modal-body"));
-                        expect(body).not.toBeNull();
+                await fixture.whenStable();
 
-                        let form = body.query(By.css("form"));
-                        expect(form).not.toBeNull();
+                let body = fixture.debugElement.query(By.css(".modal-body"));
+                expect(body).not.toBeNull();
 
-                        setInputValue(form, "email", "someEmail@someDomain.com");
-                        return submit(form);
-                    })
-                    .then(() => {
-                        expect(userService.resetPassword).toHaveBeenCalledWith("someEmail@someDomain.com");
-                        expect(component.codeSent).toEqual(true);
+                let form = body.query(By.css("form"));
+                expect(form).not.toBeNull();
 
-                        let errors = getAllErrors();
-                        expect(errors.length).toEqual(0);
-                    })
-                    .then(done)
-                    .catch(done.fail);
+                setInputValue(form, "email", "someEmail@someDomain.com");
+
+                await submit(form);
+                expect(userService.resetPassword).toHaveBeenCalledWith("someEmail@someDomain.com");
+                expect(component.codeSent).toEqual(true);
+
+                let errors = getAllErrors();
+                expect(errors.length).toEqual(0);
             });
 
-            it("should show an error when sending the code fails", done => {
+            it("should show an error when sending the code fails", async () => {
                 let userService = TestBed.inject(UserService);
                 spyOn(userService, "resetPassword").and.returnValue(Promise.reject(["error0", "error1", "error2"]));
 
                 // Wait for stability since ngModel is async
-                fixture.whenStable()
-                    .then(() => {
-                        let body = fixture.debugElement.query(By.css(".modal-body"));
-                        expect(body).not.toBeNull();
+                await fixture.whenStable();
 
-                        let form = body.query(By.css("form"));
-                        expect(form).not.toBeNull();
+                let body = fixture.debugElement.query(By.css(".modal-body"));
+                expect(body).not.toBeNull();
 
-                        setInputValue(form, "email", "someEmail@someDomain.com");
-                        return submit(form);
-                    })
-                    .then(() => {
-                        expect(userService.resetPassword).toHaveBeenCalledWith("someEmail@someDomain.com");
-                        expect(component.codeSent).toEqual(false);
+                let form = body.query(By.css("form"));
+                expect(form).not.toBeNull();
 
-                        let errors = getAllErrors();
-                        expect(errors.length).toEqual(3);
-                        expect(errors[0]).toEqual("error0");
-                        expect(errors[1]).toEqual("error1");
-                        expect(errors[2]).toEqual("error2");
-                    })
-                    .then(done)
-                    .catch(done.fail);
+                setInputValue(form, "email", "someEmail@someDomain.com");
+
+                await submit(form);
+                expect(userService.resetPassword).toHaveBeenCalledWith("someEmail@someDomain.com");
+                expect(component.codeSent).toEqual(false);
+
+                let errors = getAllErrors();
+                expect(errors.length).toEqual(3);
+                expect(errors[0]).toEqual("error0");
+                expect(errors[1]).toEqual("error1");
+                expect(errors[2]).toEqual("error2");
             });
         });
     });
@@ -215,273 +191,243 @@ describe("ResetPasswordDialogComponent", () => {
         });
 
         describe("Validation", () => {
-            it("should disable the reset password button initially", done => {
+            it("should disable the reset password button initially", async () => {
                 // Wait for stability since ngModel is async
-                fixture.whenStable()
-                    .then(() => {
-                        let body = fixture.debugElement.query(By.css(".modal-body"));
-                        expect(body).not.toBeNull();
+                await fixture.whenStable();
 
-                        let form = body.query(By.css("form"));
-                        expect(form).not.toBeNull();
+                let body = fixture.debugElement.query(By.css(".modal-body"));
+                expect(body).not.toBeNull();
 
-                        fixture.detectChanges();
-                        let button = form.query(By.css("button"));
-                        expect(button).not.toBeNull();
-                        expect(button.properties.disabled).toEqual(true);
+                let form = body.query(By.css("form"));
+                expect(form).not.toBeNull();
 
-                        let errors = getAllErrors();
-                        expect(errors.length).toEqual(0);
-                    })
-                    .then(done)
-                    .catch(done.fail);
+                fixture.detectChanges();
+                let button = form.query(By.css("button"));
+                expect(button).not.toBeNull();
+                expect(button.properties.disabled).toEqual(true);
+
+                let errors = getAllErrors();
+                expect(errors.length).toEqual(0);
             });
 
-            it("should enable the reset password button when all inputs are valid", done => {
+            it("should enable the reset password button when all inputs are valid", async () => {
                 // Wait for stability since ngModel is async
-                fixture.whenStable()
-                    .then(() => {
-                        let body = fixture.debugElement.query(By.css(".modal-body"));
-                        expect(body).not.toBeNull();
+                await fixture.whenStable();
 
-                        let form = body.query(By.css("form"));
-                        expect(form).not.toBeNull();
+                let body = fixture.debugElement.query(By.css(".modal-body"));
+                expect(body).not.toBeNull();
 
-                        setInputValue(form, "code", "someCode");
-                        setInputValue(form, "password", "somePassword");
-                        setInputValue(form, "confirmPassword", "somePassword");
+                let form = body.query(By.css("form"));
+                expect(form).not.toBeNull();
 
-                        fixture.detectChanges();
-                        let button = form.query(By.css("button"));
-                        expect(button).not.toBeNull();
-                        expect(button.properties.disabled).toEqual(false);
+                setInputValue(form, "code", "someCode");
+                setInputValue(form, "password", "somePassword");
+                setInputValue(form, "confirmPassword", "somePassword");
 
-                        let errors = getAllErrors();
-                        expect(errors.length).toEqual(0);
-                    })
-                    .then(done)
-                    .catch(done.fail);
+                fixture.detectChanges();
+                let button = form.query(By.css("button"));
+                expect(button).not.toBeNull();
+                expect(button.properties.disabled).toEqual(false);
+
+                let errors = getAllErrors();
+                expect(errors.length).toEqual(0);
             });
 
             describe("code", () => {
-                it("should disable the register button with a missing code", done => {
+                it("should disable the register button with a missing code", async () => {
                     // Wait for stability since ngModel is async
-                    fixture.whenStable()
-                        .then(() => {
-                            let body = fixture.debugElement.query(By.css(".modal-body"));
-                            expect(body).not.toBeNull();
+                    await fixture.whenStable();
 
-                            let form = body.query(By.css("form"));
-                            expect(form).not.toBeNull();
+                    let body = fixture.debugElement.query(By.css(".modal-body"));
+                    expect(body).not.toBeNull();
 
-                            setInputValue(form, "password", "somePassword");
-                            setInputValue(form, "confirmPassword", "somePassword");
+                    let form = body.query(By.css("form"));
+                    expect(form).not.toBeNull();
 
-                            fixture.detectChanges();
-                            let button = form.query(By.css("button"));
-                            expect(button).not.toBeNull();
-                            expect(button.properties.disabled).toEqual(true);
+                    setInputValue(form, "password", "somePassword");
+                    setInputValue(form, "confirmPassword", "somePassword");
 
-                            let errors = getAllErrors();
-                            expect(errors.length).toEqual(0);
-                        })
-                        .then(done)
-                        .catch(done.fail);
+                    fixture.detectChanges();
+                    let button = form.query(By.css("button"));
+                    expect(button).not.toBeNull();
+                    expect(button.properties.disabled).toEqual(true);
+
+                    let errors = getAllErrors();
+                    expect(errors.length).toEqual(0);
                 });
 
-                it("should disable the register button with an empty code", done => {
+                it("should disable the register button with an empty code", async () => {
                     // Wait for stability since ngModel is async
-                    fixture.whenStable()
-                        .then(() => {
-                            let body = fixture.debugElement.query(By.css(".modal-body"));
-                            expect(body).not.toBeNull();
+                    await fixture.whenStable();
 
-                            let form = body.query(By.css("form"));
-                            expect(form).not.toBeNull();
+                    let body = fixture.debugElement.query(By.css(".modal-body"));
+                    expect(body).not.toBeNull();
 
-                            setInputValue(form, "code", "someCode");
-                            setInputValue(form, "code", "");
-                            setInputValue(form, "password", "somePassword");
-                            setInputValue(form, "confirmPassword", "somePassword");
+                    let form = body.query(By.css("form"));
+                    expect(form).not.toBeNull();
 
-                            fixture.detectChanges();
-                            let button = form.query(By.css("button"));
-                            expect(button).not.toBeNull();
-                            expect(button.properties.disabled).toEqual(true);
+                    setInputValue(form, "code", "someCode");
+                    setInputValue(form, "code", "");
+                    setInputValue(form, "password", "somePassword");
+                    setInputValue(form, "confirmPassword", "somePassword");
 
-                            let errors = getAllErrors();
-                            expect(errors.length).toEqual(1);
-                            expect(errors[0]).toEqual("Reset code is required");
-                        })
-                        .then(done)
-                        .catch(done.fail);
+                    fixture.detectChanges();
+                    let button = form.query(By.css("button"));
+                    expect(button).not.toBeNull();
+                    expect(button.properties.disabled).toEqual(true);
+
+                    let errors = getAllErrors();
+                    expect(errors.length).toEqual(1);
+                    expect(errors[0]).toEqual("Reset code is required");
                 });
             });
 
             describe("password", () => {
-                it("should disable the register button with a missing password", done => {
+                it("should disable the register button with a missing password", async () => {
                     // Wait for stability since ngModel is async
-                    fixture.whenStable()
-                        .then(() => {
-                            let body = fixture.debugElement.query(By.css(".modal-body"));
-                            expect(body).not.toBeNull();
+                    await fixture.whenStable();
 
-                            let form = body.query(By.css("form"));
-                            expect(form).not.toBeNull();
+                    let body = fixture.debugElement.query(By.css(".modal-body"));
+                    expect(body).not.toBeNull();
 
-                            setInputValue(form, "code", "someCode");
+                    let form = body.query(By.css("form"));
+                    expect(form).not.toBeNull();
 
-                            fixture.detectChanges();
-                            let button = form.query(By.css("button"));
-                            expect(button).not.toBeNull();
-                            expect(button.properties.disabled).toEqual(true);
+                    setInputValue(form, "code", "someCode");
 
-                            let errors = getAllErrors();
-                            expect(errors.length).toEqual(0);
-                        })
-                        .then(done)
-                        .catch(done.fail);
+                    fixture.detectChanges();
+                    let button = form.query(By.css("button"));
+                    expect(button).not.toBeNull();
+                    expect(button.properties.disabled).toEqual(true);
+
+                    let errors = getAllErrors();
+                    expect(errors.length).toEqual(0);
                 });
 
-                it("should disable the register button with an empty password", done => {
+                it("should disable the register button with an empty password", async () => {
                     // Wait for stability since ngModel is async
-                    fixture.whenStable()
-                        .then(() => {
-                            let body = fixture.debugElement.query(By.css(".modal-body"));
-                            expect(body).not.toBeNull();
+                    await fixture.whenStable();
 
-                            let form = body.query(By.css("form"));
-                            expect(form).not.toBeNull();
+                    let body = fixture.debugElement.query(By.css(".modal-body"));
+                    expect(body).not.toBeNull();
 
-                            setInputValue(form, "code", "someCode");
-                            setInputValue(form, "password", "somePassword");
-                            setInputValue(form, "password", "");
+                    let form = body.query(By.css("form"));
+                    expect(form).not.toBeNull();
 
-                            fixture.detectChanges();
-                            let button = form.query(By.css("button"));
-                            expect(button).not.toBeNull();
-                            expect(button.properties.disabled).toEqual(true);
+                    setInputValue(form, "code", "someCode");
+                    setInputValue(form, "password", "somePassword");
+                    setInputValue(form, "password", "");
 
-                            let errors = getAllErrors();
-                            expect(errors.length).toEqual(1);
-                            expect(errors[0]).toEqual("Password is required");
-                        })
-                        .then(done)
-                        .catch(done.fail);
+                    fixture.detectChanges();
+                    let button = form.query(By.css("button"));
+                    expect(button).not.toBeNull();
+                    expect(button.properties.disabled).toEqual(true);
+
+                    let errors = getAllErrors();
+                    expect(errors.length).toEqual(1);
+                    expect(errors[0]).toEqual("Password is required");
                 });
 
-                it("should disable the register button with a short password", done => {
+                it("should disable the register button with a short password", async () => {
                     // Wait for stability since ngModel is async
-                    fixture.whenStable()
-                        .then(() => {
-                            let body = fixture.debugElement.query(By.css(".modal-body"));
-                            expect(body).not.toBeNull();
+                    await fixture.whenStable();
 
-                            let form = body.query(By.css("form"));
-                            expect(form).not.toBeNull();
+                    let body = fixture.debugElement.query(By.css(".modal-body"));
+                    expect(body).not.toBeNull();
 
-                            setInputValue(form, "code", "someCode");
-                            setInputValue(form, "password", "a");
+                    let form = body.query(By.css("form"));
+                    expect(form).not.toBeNull();
 
-                            fixture.detectChanges();
-                            let button = form.query(By.css("button"));
-                            expect(button).not.toBeNull();
-                            expect(button.properties.disabled).toEqual(true);
+                    setInputValue(form, "code", "someCode");
+                    setInputValue(form, "password", "a");
 
-                            let errors = getAllErrors();
-                            expect(errors.length).toEqual(1);
-                            expect(errors[0]).toEqual("Password must be at least 4 characters long");
-                        })
-                        .then(done)
-                        .catch(done.fail);
+                    fixture.detectChanges();
+                    let button = form.query(By.css("button"));
+                    expect(button).not.toBeNull();
+                    expect(button.properties.disabled).toEqual(true);
+
+                    let errors = getAllErrors();
+                    expect(errors.length).toEqual(1);
+                    expect(errors[0]).toEqual("Password must be at least 4 characters long");
                 });
             });
 
             describe("password confirmation", () => {
-                it("should disable the register button with a missing password confirmation", done => {
+                it("should disable the register button with a missing password confirmation", async () => {
                     // Wait for stability since ngModel is async
-                    fixture.whenStable()
-                        .then(() => {
-                            let body = fixture.debugElement.query(By.css(".modal-body"));
-                            expect(body).not.toBeNull();
+                    await fixture.whenStable();
 
-                            let form = body.query(By.css("form"));
-                            expect(form).not.toBeNull();
+                    let body = fixture.debugElement.query(By.css(".modal-body"));
+                    expect(body).not.toBeNull();
 
-                            setInputValue(form, "code", "someCode");
-                            setInputValue(form, "password", "somePassword");
+                    let form = body.query(By.css("form"));
+                    expect(form).not.toBeNull();
 
-                            fixture.detectChanges();
-                            let button = form.query(By.css("button"));
-                            expect(button).not.toBeNull();
-                            expect(button.properties.disabled).toEqual(true);
+                    setInputValue(form, "code", "someCode");
+                    setInputValue(form, "password", "somePassword");
 
-                            let errors = getAllErrors();
-                            expect(errors.length).toEqual(0);
-                        })
-                        .then(done)
-                        .catch(done.fail);
+                    fixture.detectChanges();
+                    let button = form.query(By.css("button"));
+                    expect(button).not.toBeNull();
+                    expect(button.properties.disabled).toEqual(true);
+
+                    let errors = getAllErrors();
+                    expect(errors.length).toEqual(0);
                 });
 
-                it("should disable the register button with a non-matching password confirmation", done => {
+                it("should disable the register button with a non-matching password confirmation", async () => {
                     // Wait for stability since ngModel is async
-                    fixture.whenStable()
-                        .then(() => {
-                            let body = fixture.debugElement.query(By.css(".modal-body"));
-                            expect(body).not.toBeNull();
+                    await fixture.whenStable();
 
-                            let form = body.query(By.css("form"));
-                            expect(form).not.toBeNull();
+                    let body = fixture.debugElement.query(By.css(".modal-body"));
+                    expect(body).not.toBeNull();
 
-                            setInputValue(form, "code", "someCode");
-                            setInputValue(form, "password", "somePassword");
-                            setInputValue(form, "confirmPassword", "someOtherPassword");
+                    let form = body.query(By.css("form"));
+                    expect(form).not.toBeNull();
 
-                            fixture.detectChanges();
-                            let button = form.query(By.css("button"));
-                            expect(button).not.toBeNull();
-                            expect(button.properties.disabled).toEqual(true);
+                    setInputValue(form, "code", "someCode");
+                    setInputValue(form, "password", "somePassword");
+                    setInputValue(form, "confirmPassword", "someOtherPassword");
 
-                            let errors = getAllErrors();
-                            expect(errors.length).toEqual(1);
-                            expect(errors[0]).toEqual("Passwords don't match");
-                        })
-                        .then(done)
-                        .catch(done.fail);
+                    fixture.detectChanges();
+                    let button = form.query(By.css("button"));
+                    expect(button).not.toBeNull();
+                    expect(button.properties.disabled).toEqual(true);
+
+                    let errors = getAllErrors();
+                    expect(errors.length).toEqual(1);
+                    expect(errors[0]).toEqual("Passwords don't match");
                 });
 
-                it("should disable the register button when the password is changed to not match the password confirmation", done => {
+                it("should disable the register button when the password is changed to not match the password confirmation", async () => {
                     // Wait for stability since ngModel is async
-                    fixture.whenStable()
-                        .then(() => {
-                            let body = fixture.debugElement.query(By.css(".modal-body"));
-                            expect(body).not.toBeNull();
+                    await fixture.whenStable();
 
-                            let form = body.query(By.css("form"));
-                            expect(form).not.toBeNull();
+                    let body = fixture.debugElement.query(By.css(".modal-body"));
+                    expect(body).not.toBeNull();
 
-                            setInputValue(form, "code", "someCode");
-                            setInputValue(form, "password", "somePassword");
-                            setInputValue(form, "confirmPassword", "somePassword");
-                            setInputValue(form, "password", "someOtherPassword");
+                    let form = body.query(By.css("form"));
+                    expect(form).not.toBeNull();
 
-                            fixture.detectChanges();
-                            let button = form.query(By.css("button"));
-                            expect(button).not.toBeNull();
-                            expect(button.properties.disabled).toEqual(true);
+                    setInputValue(form, "code", "someCode");
+                    setInputValue(form, "password", "somePassword");
+                    setInputValue(form, "confirmPassword", "somePassword");
+                    setInputValue(form, "password", "someOtherPassword");
 
-                            let errors = getAllErrors();
-                            expect(errors.length).toEqual(1);
-                            expect(errors[0]).toEqual("Passwords don't match");
-                        })
-                        .then(done)
-                        .catch(done.fail);
+                    fixture.detectChanges();
+                    let button = form.query(By.css("button"));
+                    expect(button).not.toBeNull();
+                    expect(button.properties.disabled).toEqual(true);
+
+                    let errors = getAllErrors();
+                    expect(errors.length).toEqual(1);
+                    expect(errors[0]).toEqual("Passwords don't match");
                 });
             });
         });
 
         describe("Form submission", () => {
-            it("should reset the password when the form is filled out properly", done => {
+            it("should reset the password when the form is filled out properly", async () => {
                 let userService = TestBed.inject(UserService);
                 spyOn(userService, "resetPasswordConfirmation").and.returnValue(Promise.resolve());
 
@@ -492,32 +438,28 @@ describe("ResetPasswordDialogComponent", () => {
                 spyOn(modalService, "open");
 
                 // Wait for stability since ngModel is async
-                fixture.whenStable()
-                    .then(() => {
-                        let body = fixture.debugElement.query(By.css(".modal-body"));
-                        expect(body).not.toBeNull();
+                await fixture.whenStable();
 
-                        let form = body.query(By.css("form"));
-                        expect(form).not.toBeNull();
+                let body = fixture.debugElement.query(By.css(".modal-body"));
+                expect(body).not.toBeNull();
 
-                        setInputValue(form, "code", "someCode");
-                        setInputValue(form, "password", "somePassword");
-                        setInputValue(form, "confirmPassword", "somePassword");
-                        return submit(form);
-                    })
-                    .then(() => {
-                        expect(userService.resetPasswordConfirmation).toHaveBeenCalledWith("someEmail@someDomain.com", "somePassword", "someCode");
-                        expect(activeModal.close).toHaveBeenCalled();
-                        expect(modalService.open).toHaveBeenCalled();
+                let form = body.query(By.css("form"));
+                expect(form).not.toBeNull();
 
-                        let errors = getAllErrors();
-                        expect(errors.length).toEqual(0);
-                    })
-                    .then(done)
-                    .catch(done.fail);
+                setInputValue(form, "code", "someCode");
+                setInputValue(form, "password", "somePassword");
+                setInputValue(form, "confirmPassword", "somePassword");
+
+                await submit(form);
+                expect(userService.resetPasswordConfirmation).toHaveBeenCalledWith("someEmail@someDomain.com", "somePassword", "someCode");
+                expect(activeModal.close).toHaveBeenCalled();
+                expect(modalService.open).toHaveBeenCalled();
+
+                let errors = getAllErrors();
+                expect(errors.length).toEqual(0);
             });
 
-            it("should show an error when reset password fails", done => {
+            it("should show an error when reset password fails", async () => {
                 let userService = TestBed.inject(UserService);
                 spyOn(userService, "resetPasswordConfirmation").and.returnValue(Promise.reject(["error0", "error1", "error2"]));
 
@@ -528,32 +470,28 @@ describe("ResetPasswordDialogComponent", () => {
                 spyOn(modalService, "open");
 
                 // Wait for stability since ngModel is async
-                fixture.whenStable()
-                    .then(() => {
-                        let body = fixture.debugElement.query(By.css(".modal-body"));
-                        expect(body).not.toBeNull();
+                await fixture.whenStable();
 
-                        let form = body.query(By.css("form"));
-                        expect(form).not.toBeNull();
+                let body = fixture.debugElement.query(By.css(".modal-body"));
+                expect(body).not.toBeNull();
 
-                        setInputValue(form, "code", "someCode");
-                        setInputValue(form, "password", "somePassword");
-                        setInputValue(form, "confirmPassword", "somePassword");
-                        return submit(form);
-                    })
-                    .then(() => {
-                        expect(userService.resetPasswordConfirmation).toHaveBeenCalledWith("someEmail@someDomain.com", "somePassword", "someCode");
-                        expect(activeModal.close).not.toHaveBeenCalled();
-                        expect(modalService.open).not.toHaveBeenCalled();
+                let form = body.query(By.css("form"));
+                expect(form).not.toBeNull();
 
-                        let errors = getAllErrors();
-                        expect(errors.length).toEqual(3);
-                        expect(errors[0]).toEqual("error0");
-                        expect(errors[1]).toEqual("error1");
-                        expect(errors[2]).toEqual("error2");
-                    })
-                    .then(done)
-                    .catch(done.fail);
+                setInputValue(form, "code", "someCode");
+                setInputValue(form, "password", "somePassword");
+                setInputValue(form, "confirmPassword", "somePassword");
+
+                await submit(form);
+                expect(userService.resetPasswordConfirmation).toHaveBeenCalledWith("someEmail@someDomain.com", "somePassword", "someCode");
+                expect(activeModal.close).not.toHaveBeenCalled();
+                expect(modalService.open).not.toHaveBeenCalled();
+
+                let errors = getAllErrors();
+                expect(errors.length).toEqual(3);
+                expect(errors[0]).toEqual("error0");
+                expect(errors[1]).toEqual("error1");
+                expect(errors[2]).toEqual("error2");
             });
         });
     });
@@ -570,14 +508,14 @@ describe("ResetPasswordDialogComponent", () => {
         element.nativeElement.dispatchEvent(evt);
     }
 
-    function submit(form: DebugElement): Promise<void> {
+    async function submit(form: DebugElement): Promise<void> {
         fixture.detectChanges();
         let button = form.query(By.css("button"));
         expect(button).not.toBeNull();
         button.nativeElement.click();
 
-        return fixture.whenStable()
-            .then(() => fixture.detectChanges());
+        await fixture.whenStable();
+        return fixture.detectChanges();
     }
 
     function getAllErrors(): string[] {
