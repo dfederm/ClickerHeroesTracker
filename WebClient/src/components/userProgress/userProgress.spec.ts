@@ -1,5 +1,5 @@
 import { NO_ERRORS_SCHEMA, LOCALE_ID } from "@angular/core";
-import { ComponentFixture, TestBed, async } from "@angular/core/testing";
+import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { By } from "@angular/platform-browser";
 import { ActivatedRoute, Params } from "@angular/router";
 import { BehaviorSubject } from "rxjs";
@@ -65,7 +65,7 @@ describe("UserProgressComponent", () => {
     const locale = "en-us";
     const percentPipe = new PercentPipe(locale);
 
-    beforeEach(async(() => {
+    beforeEach(async () => {
         let userService = {
             getProgress(): Promise<IProgressData> {
                 return Promise.resolve(progress);
@@ -76,7 +76,7 @@ describe("UserProgressComponent", () => {
 
         routeParams = new BehaviorSubject({ userName: "someUserName" });
         let route = { params: routeParams };
-        TestBed.configureTestingModule(
+        await TestBed.configureTestingModule(
             {
                 declarations: [UserProgressComponent],
                 providers: [
@@ -87,12 +87,11 @@ describe("UserProgressComponent", () => {
                 ],
                 schemas: [NO_ERRORS_SCHEMA],
             })
-            .compileComponents()
-            .then(() => {
-                fixture = TestBed.createComponent(UserProgressComponent);
-                component = fixture.componentInstance;
-            });
-    }));
+            .compileComponents();
+
+        fixture = TestBed.createComponent(UserProgressComponent);
+        component = fixture.componentInstance;
+    });
 
     describe("Range Selector", () => {
         it("should display", () => {

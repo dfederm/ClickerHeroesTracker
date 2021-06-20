@@ -1,5 +1,5 @@
 import { NO_ERRORS_SCHEMA } from "@angular/core";
-import { ComponentFixture, TestBed, async } from "@angular/core/testing";
+import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { By } from "@angular/platform-browser";
 import { ActivatedRoute, Params } from "@angular/router";
 import { BehaviorSubject } from "rxjs";
@@ -12,11 +12,11 @@ describe("UserUploadsComponent", () => {
 
     const userName = "someUserName";
 
-    beforeEach(async(() => {
+    beforeEach(async () => {
         routeParams = new BehaviorSubject({ userName });
         let route = { params: routeParams };
 
-        TestBed.configureTestingModule(
+        await TestBed.configureTestingModule(
             {
                 declarations: [UserUploadsComponent],
                 providers: [
@@ -24,11 +24,10 @@ describe("UserUploadsComponent", () => {
                 ],
                 schemas: [NO_ERRORS_SCHEMA],
             })
-            .compileComponents()
-            .then(() => {
-                fixture = TestBed.createComponent(UserUploadsComponent);
-            });
-    }));
+            .compileComponents();
+
+        fixture = TestBed.createComponent(UserUploadsComponent);
+    });
 
     it("should display a paginated upload table", () => {
         fixture.detectChanges();

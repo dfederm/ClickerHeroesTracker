@@ -1,5 +1,5 @@
 import { NO_ERRORS_SCHEMA } from "@angular/core";
-import { ComponentFixture, TestBed, async } from "@angular/core/testing";
+import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { By } from "@angular/platform-browser";
 
 import { HomeComponent } from "./home";
@@ -22,11 +22,11 @@ describe("HomeComponent", () => {
         isLoggedIn: false,
     };
 
-    beforeEach(async(() => {
+    beforeEach(async () => {
         userInfo = new BehaviorSubject(notLoggedInUser);
         let authenticationService = { userInfo: () => userInfo };
 
-        TestBed.configureTestingModule(
+        await TestBed.configureTestingModule(
             {
                 declarations: [HomeComponent],
                 schemas: [NO_ERRORS_SCHEMA],
@@ -34,12 +34,11 @@ describe("HomeComponent", () => {
                     { provide: AuthenticationService, useValue: authenticationService },
                 ],
             })
-            .compileComponents()
-            .then(() => {
-                fixture = TestBed.createComponent(HomeComponent);
-                component = fixture.componentInstance;
-            });
-    }));
+            .compileComponents();
+
+        fixture = TestBed.createComponent(HomeComponent);
+        component = fixture.componentInstance;
+    });
 
     it("should display the jumbotron", () => {
         fixture.detectChanges();
