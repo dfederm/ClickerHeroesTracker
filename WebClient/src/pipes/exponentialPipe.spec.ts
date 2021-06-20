@@ -1,5 +1,5 @@
 import { NO_ERRORS_SCHEMA, Component } from "@angular/core";
-import { ComponentFixture, TestBed, async } from "@angular/core/testing";
+import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { Decimal } from "decimal.js";
 import { BehaviorSubject } from "rxjs";
 
@@ -47,7 +47,7 @@ describe("ExponentialPipe", () => {
         public value: number | Decimal;
     }
 
-    beforeEach(async(() => {
+    beforeEach(() => {
         let settingsService = { settings: () => settingsSubject };
         fixture = TestBed.configureTestingModule(
             {
@@ -65,7 +65,7 @@ describe("ExponentialPipe", () => {
 
         // Initial binding
         fixture.detectChanges();
-    }));
+    });
 
     it("should display '0' when the value is undefined", () => {
         fixture.componentInstance.value = undefined;

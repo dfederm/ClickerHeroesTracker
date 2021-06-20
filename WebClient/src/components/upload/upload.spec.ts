@@ -1,4 +1,4 @@
-import { ComponentFixture, TestBed, async } from "@angular/core/testing";
+import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { ActivatedRoute, Router, Params } from "@angular/router";
 import { FormsModule } from "@angular/forms";
 import { NO_ERRORS_SCHEMA, DebugElement, ChangeDetectorRef, Pipe, PipeTransform } from "@angular/core";
@@ -37,36 +37,32 @@ describe("UploadComponent", () => {
         public transform = exponentialPipeTransform;
     }
 
-    beforeEach(async(() => {
+    beforeEach(async () => {
         userInfoSubject = new BehaviorSubject({ isLoggedIn: false });
         let authenticationService = { userInfo: () => userInfoSubject };
         let uploadService = {
             get: (): Promise<IUpload> => new Promise<IUpload>((resolve, reject) => {
-                uploadServiceGetResolve = (upload) => {
+                uploadServiceGetResolve = async (upload) => {
                     resolve(upload);
-                    return fixture.whenStable().then(() => {
-                        fixture.detectChanges();
-                    });
+                    await fixture.whenStable();
+                    fixture.detectChanges();
                 };
-                uploadServiceGetReject = () => {
+                uploadServiceGetReject = async () => {
                     reject();
-                    return fixture.whenStable().then(() => {
-                        fixture.detectChanges();
-                    });
+                    await fixture.whenStable();
+                    fixture.detectChanges();
                 };
             }),
             delete: (): Promise<void> => new Promise<void>((resolve, reject) => {
-                uploadServiceDeleteResolve = () => {
+                uploadServiceDeleteResolve = async () => {
                     resolve();
-                    return fixture.whenStable().then(() => {
-                        fixture.detectChanges();
-                    });
+                    await fixture.whenStable();
+                    fixture.detectChanges();
                 };
-                uploadServiceDeleteReject = () => {
+                uploadServiceDeleteReject = async () => {
                     reject();
-                    return fixture.whenStable().then(() => {
-                        fixture.detectChanges();
-                    });
+                    await fixture.whenStable();
+                    fixture.detectChanges();
                 };
             }),
         };
@@ -77,66 +73,59 @@ describe("UploadComponent", () => {
         let changeDetectorRef = { markForCheck: (): void => void 0 };
         let modalService = { open: (): void => void 0 };
 
-        TestBed.configureTestingModule(
+        await TestBed.configureTestingModule(
             {
                 imports: [FormsModule],
-                declarations:
-                    [
-                        UploadComponent,
-                        MockExponentialPipe,
-                    ],
-                providers:
-                    [
-                        { provide: AuthenticationService, useValue: authenticationService },
-                        { provide: ActivatedRoute, useValue: route },
-                        { provide: Router, useValue: router },
-                        { provide: UploadService, useValue: uploadService },
-                        { provide: SettingsService, useValue: settingsService },
-                        { provide: ChangeDetectorRef, useValue: changeDetectorRef },
-                        { provide: NgbModal, useValue: modalService },
-                        DatePipe,
-                        PercentPipe,
-                        MockExponentialPipe,
-                    ],
+                declarations: [
+                    UploadComponent,
+                    MockExponentialPipe,
+                ],
+                providers: [
+                    { provide: AuthenticationService, useValue: authenticationService },
+                    { provide: ActivatedRoute, useValue: route },
+                    { provide: Router, useValue: router },
+                    { provide: UploadService, useValue: uploadService },
+                    { provide: SettingsService, useValue: settingsService },
+                    { provide: ChangeDetectorRef, useValue: changeDetectorRef },
+                    { provide: NgbModal, useValue: modalService },
+                    DatePipe,
+                    PercentPipe,
+                    MockExponentialPipe,
+                ],
                 schemas: [NO_ERRORS_SCHEMA],
             })
-            .compileComponents()
-            .then(() => {
-                fixture = TestBed.createComponent(UploadComponent);
-                component = fixture.componentInstance;
+            .compileComponents();
 
-                // Initial bindings
-                fixture.detectChanges();
-            });
-    }));
+        fixture = TestBed.createComponent(UploadComponent);
+        component = fixture.componentInstance;
+
+        // Initial bindings
+        fixture.detectChanges();
+    });
 
     describe("Error message", () => {
-        it("should show an error when the upload service fails", async(() => {
-            uploadServiceGetReject()
-                .then(() => {
-                    fixture.detectChanges();
+        it("should show an error when the upload service fails", async () => {
+            await uploadServiceGetReject();
+            fixture.detectChanges();
 
-                    let errorMessage = fixture.debugElement.query(By.css(".alert-danger"));
-                    expect(errorMessage).not.toBeNull("Error message not found");
-                });
-        }));
+            let errorMessage = fixture.debugElement.query(By.css(".alert-danger"));
+            expect(errorMessage).not.toBeNull();
+        });
 
-        it("should not show an error when the upload service succeeds", async(() => {
+        it("should not show an error when the upload service succeeds", async () => {
             let upload = getUpload();
-            uploadServiceGetResolve(upload)
-                .then(() => {
-                    fixture.detectChanges();
+            await uploadServiceGetResolve(upload);
+            fixture.detectChanges();
 
-                    let errorMessage = fixture.debugElement.query(By.css(".alert-danger"));
-                    expect(errorMessage).toBeNull("Error message found");
-                });
-        }));
+            let errorMessage = fixture.debugElement.query(By.css(".alert-danger"));
+            expect(errorMessage).toBeNull();
+        });
     });
 
     describe("Upload summary data", () => {
-        it("should initially display placeholder data", async(() => {
+        it("should initially display placeholder data", () => {
             let errorMessage = fixture.debugElement.query(By.css(".alert-danger"));
-            expect(errorMessage).toBeNull("Error message found");
+            expect(errorMessage).toBeNull();
 
             let summaryData = fixture.debugElement.query(By.css(".col-md-6 ul"));
             expect(summaryData).not.toBeNull();
@@ -156,131 +145,123 @@ describe("UploadComponent", () => {
             let playStyleItem = items[2];
             let playStyleValueElement = playStyleItem.query(By.css("span"));
             expect(getNormalizedTextContent(playStyleValueElement)).toEqual("");
-        }));
+        });
 
-        it("should display anonymous data", async(() => {
+        it("should display anonymous data", async () => {
             let datePipe = TestBed.inject(DatePipe);
 
             let upload = getUpload();
             delete upload.user;
             let savedGame = new SavedGame(upload.content, true);
-            uploadServiceGetResolve(upload)
-                .then(() => {
-                    fixture.detectChanges();
+            await uploadServiceGetResolve(upload);
+            fixture.detectChanges();
 
-                    let errorMessage = fixture.debugElement.query(By.css(".alert-danger"));
-                    expect(errorMessage).toBeNull("Error message found");
+            let errorMessage = fixture.debugElement.query(By.css(".alert-danger"));
+            expect(errorMessage).toBeNull();
 
-                    let summaryData = fixture.debugElement.query(By.css(".col-md-6 ul"));
-                    expect(summaryData).not.toBeNull();
+            let summaryData = fixture.debugElement.query(By.css(".col-md-6 ul"));
+            expect(summaryData).not.toBeNull();
 
-                    let items = summaryData.queryAll(By.css("li"));
-                    expect(items.length).toEqual(3);
+            let items = summaryData.queryAll(By.css("li"));
+            expect(items.length).toEqual(3);
 
-                    let userNameItem = items[0];
-                    let userNameValueElement = userNameItem.query(By.css("span"));
-                    expect(userNameValueElement.nativeElement.classList.contains("text-muted")).toEqual(true);
-                    expect(getNormalizedTextContent(userNameValueElement)).toEqual("(Anonymous)");
+            let userNameItem = items[0];
+            let userNameValueElement = userNameItem.query(By.css("span"));
+            expect(userNameValueElement.nativeElement.classList.contains("text-muted")).toEqual(true);
+            expect(getNormalizedTextContent(userNameValueElement)).toEqual("(Anonymous)");
 
-                    let uploadTimeItem = items[1];
-                    let uploadTimeValueElement = uploadTimeItem.query(By.css("span"));
-                    expect(getNormalizedTextContent(uploadTimeValueElement)).toEqual(datePipe.transform(savedGame.data.unixTimestamp, "short"));
-                    expect(uploadTimeValueElement.properties.title).toEqual("Uploaded " + datePipe.transform(upload.timeSubmitted, "short"));
+            let uploadTimeItem = items[1];
+            let uploadTimeValueElement = uploadTimeItem.query(By.css("span"));
+            expect(getNormalizedTextContent(uploadTimeValueElement)).toEqual(datePipe.transform(savedGame.data.unixTimestamp, "short"));
+            expect(uploadTimeValueElement.properties.title).toEqual("Uploaded " + datePipe.transform(upload.timeSubmitted, "short"));
 
-                    let playStyleItem = items[2];
-                    let playStyleValueElement = playStyleItem.query(By.css("span"));
-                    expect(getNormalizedTextContent(playStyleValueElement)).toEqual("Hybrid");
-                });
-        }));
+            let playStyleItem = items[2];
+            let playStyleValueElement = playStyleItem.query(By.css("span"));
+            expect(getNormalizedTextContent(playStyleValueElement)).toEqual("Hybrid");
+        });
 
-        it("should display public data", async(() => {
+        it("should display public data", async () => {
             let datePipe = TestBed.inject(DatePipe);
 
             let upload = getUpload();
             let savedGame = new SavedGame(upload.content, true);
-            uploadServiceGetResolve(upload)
-                .then(() => {
-                    fixture.detectChanges();
+            await uploadServiceGetResolve(upload);
+            fixture.detectChanges();
 
-                    let errorMessage = fixture.debugElement.query(By.css(".alert-danger"));
-                    expect(errorMessage).toBeNull("Error message found");
+            let errorMessage = fixture.debugElement.query(By.css(".alert-danger"));
+            expect(errorMessage).toBeNull();
 
-                    let summaryData = fixture.debugElement.query(By.css(".col-md-6 ul"));
-                    expect(summaryData).not.toBeNull();
+            let summaryData = fixture.debugElement.query(By.css(".col-md-6 ul"));
+            expect(summaryData).not.toBeNull();
 
-                    let items = summaryData.queryAll(By.css("li"));
-                    expect(items.length).toEqual(3);
+            let items = summaryData.queryAll(By.css("li"));
+            expect(items.length).toEqual(3);
 
-                    let userNameItem = items[0];
-                    let userNameValueElement = userNameItem.query(By.css("a"));
-                    expect(userNameValueElement.properties.routerLink).toEqual(`/users/${upload.user.name}`);
-                    expect(userNameValueElement.nativeElement.classList.contains("text-muted")).toEqual(false);
-                    expect(getNormalizedTextContent(userNameValueElement)).toEqual(upload.user.name);
+            let userNameItem = items[0];
+            let userNameValueElement = userNameItem.query(By.css("a"));
+            expect(userNameValueElement.properties.routerLink).toEqual(`/users/${upload.user.name}`);
+            expect(userNameValueElement.nativeElement.classList.contains("text-muted")).toEqual(false);
+            expect(getNormalizedTextContent(userNameValueElement)).toEqual(upload.user.name);
 
-                    let uploadTimeItem = items[1];
-                    let uploadTimeValueElement = uploadTimeItem.query(By.css("span"));
-                    expect(getNormalizedTextContent(uploadTimeValueElement)).toEqual(datePipe.transform(savedGame.data.unixTimestamp, "short"));
-                    expect(uploadTimeValueElement.properties.title).toEqual("Uploaded " + datePipe.transform(upload.timeSubmitted, "short"));
+            let uploadTimeItem = items[1];
+            let uploadTimeValueElement = uploadTimeItem.query(By.css("span"));
+            expect(getNormalizedTextContent(uploadTimeValueElement)).toEqual(datePipe.transform(savedGame.data.unixTimestamp, "short"));
+            expect(uploadTimeValueElement.properties.title).toEqual("Uploaded " + datePipe.transform(upload.timeSubmitted, "short"));
 
-                    let playStyleItem = items[2];
-                    let playStyleValueElement = playStyleItem.query(By.css("span"));
-                    expect(getNormalizedTextContent(playStyleValueElement)).toEqual("Hybrid");
-                });
-        }));
+            let playStyleItem = items[2];
+            let playStyleValueElement = playStyleItem.query(By.css("span"));
+            expect(getNormalizedTextContent(playStyleValueElement)).toEqual("Hybrid");
+        });
     });
 
     describe("View Save Data button", () => {
-        it("should display", async(() => {
+        it("should display", async () => {
             let upload = getUpload();
-            uploadServiceGetResolve(upload)
-                .then(() => {
-                    fixture.detectChanges();
+            await uploadServiceGetResolve(upload);
+            fixture.detectChanges();
 
-                    let errorMessage = fixture.debugElement.query(By.css(".alert-danger"));
-                    expect(errorMessage).toBeNull("Error message found");
+            let errorMessage = fixture.debugElement.query(By.css(".alert-danger"));
+            expect(errorMessage).toBeNull();
 
-                    let buttons = fixture.debugElement.queryAll(By.css(".col-md-6.pull-right button"));
-                    let found = false;
-                    for (let i = 0; i < buttons.length; i++) {
-                        if (getNormalizedTextContent(buttons[i]) === "View Save Data") {
-                            found = true;
-                        }
-                    }
+            let buttons = fixture.debugElement.queryAll(By.css(".col-md-6.pull-right button"));
+            let found = false;
+            for (let i = 0; i < buttons.length; i++) {
+                if (getNormalizedTextContent(buttons[i]) === "View Save Data") {
+                    found = true;
+                }
+            }
 
-                    expect(found).toEqual(true, "Could not find the 'View Save Data' button");
-                });
-        }));
+            expect(found).toBeTrue();
+        });
 
-        it("should show the modal when clicked", async(() => {
+        it("should show the modal when clicked", async () => {
             let modalService = TestBed.inject(NgbModal);
             spyOn(modalService, "open").and.returnValue({ result: Promise.resolve() } as NgbModalRef);
 
             let upload = getUpload();
-            uploadServiceGetResolve(upload)
-                .then(() => {
-                    fixture.detectChanges();
+            await uploadServiceGetResolve(upload);
+            fixture.detectChanges();
 
-                    let errorMessage = fixture.debugElement.query(By.css(".alert-danger"));
-                    expect(errorMessage).toBeNull("Error message found");
+            let errorMessage = fixture.debugElement.query(By.css(".alert-danger"));
+            expect(errorMessage).toBeNull();
 
-                    let buttons = fixture.debugElement.queryAll(By.css(".col-md-6.pull-right button"));
-                    let viewSaveDataButton: DebugElement;
-                    for (let i = 0; i < buttons.length; i++) {
-                        if (getNormalizedTextContent(buttons[i]) === "View Save Data") {
-                            viewSaveDataButton = buttons[i];
-                        }
-                    }
+            let buttons = fixture.debugElement.queryAll(By.css(".col-md-6.pull-right button"));
+            let viewSaveDataButton: DebugElement;
+            for (let i = 0; i < buttons.length; i++) {
+                if (getNormalizedTextContent(buttons[i]) === "View Save Data") {
+                    viewSaveDataButton = buttons[i];
+                }
+            }
 
-                    expect(viewSaveDataButton).toBeDefined("Could not find the 'View Save Data' button");
+            expect(viewSaveDataButton).toBeDefined();
 
-                    viewSaveDataButton.nativeElement.click();
-                    expect(modalService.open).toHaveBeenCalled();
-                });
-        }));
+            viewSaveDataButton.nativeElement.click();
+            expect(modalService.open).toHaveBeenCalled();
+        });
     });
 
     describe("Delete button", () => {
-        it("should display when it's the user's upload", async(() => {
+        it("should display when it's the user's upload", async () => {
             let upload = getUpload();
             userInfoSubject.next({
                 isLoggedIn: true,
@@ -288,26 +269,25 @@ describe("UploadComponent", () => {
                 username: upload.user.name,
                 email: "someEmail",
             });
-            uploadServiceGetResolve(upload)
-                .then(() => {
-                    fixture.detectChanges();
 
-                    let errorMessage = fixture.debugElement.query(By.css(".alert-danger"));
-                    expect(errorMessage).toBeNull("Error message found");
+            await uploadServiceGetResolve(upload);
+            fixture.detectChanges();
 
-                    let buttons = fixture.debugElement.queryAll(By.css(".col-md-6.pull-right button"));
-                    let deleteButton: DebugElement;
-                    for (let i = 0; i < buttons.length; i++) {
-                        if (getNormalizedTextContent(buttons[i]) === "Delete") {
-                            deleteButton = buttons[i];
-                        }
-                    }
+            let errorMessage = fixture.debugElement.query(By.css(".alert-danger"));
+            expect(errorMessage).toBeNull();
 
-                    expect(deleteButton).toBeDefined("Could not find the 'Delete' button");
-                });
-        }));
+            let buttons = fixture.debugElement.queryAll(By.css(".col-md-6.pull-right button"));
+            let deleteButton: DebugElement;
+            for (let i = 0; i < buttons.length; i++) {
+                if (getNormalizedTextContent(buttons[i]) === "Delete") {
+                    deleteButton = buttons[i];
+                }
+            }
 
-        it("should show the modal when clicked", async(() => {
+            expect(deleteButton).toBeDefined();
+        });
+
+        it("should show the modal when clicked", async () => {
             let modalService = TestBed.inject(NgbModal);
             spyOn(modalService, "open").and.returnValue({ result: Promise.resolve() } as NgbModalRef);
 
@@ -318,87 +298,79 @@ describe("UploadComponent", () => {
                 username: upload.user.name,
                 email: "someEmail",
             });
-            uploadServiceGetResolve(upload)
-                .then(() => {
-                    fixture.detectChanges();
+            await uploadServiceGetResolve(upload);
+            fixture.detectChanges();
 
-                    let errorMessage = fixture.debugElement.query(By.css(".alert-danger"));
-                    expect(errorMessage).toBeNull("Error message found");
+            let errorMessage = fixture.debugElement.query(By.css(".alert-danger"));
+            expect(errorMessage).toBeNull();
 
-                    let buttons = fixture.debugElement.queryAll(By.css(".col-md-6.pull-right button"));
-                    let deleteButton: DebugElement;
-                    for (let i = 0; i < buttons.length; i++) {
-                        if (getNormalizedTextContent(buttons[i]) === "Delete") {
-                            deleteButton = buttons[i];
-                        }
-                    }
+            let buttons = fixture.debugElement.queryAll(By.css(".col-md-6.pull-right button"));
+            let deleteButton: DebugElement;
+            for (let i = 0; i < buttons.length; i++) {
+                if (getNormalizedTextContent(buttons[i]) === "Delete") {
+                    deleteButton = buttons[i];
+                }
+            }
 
-                    expect(deleteButton).toBeDefined("Could not find the 'Delete' button");
+            expect(deleteButton).toBeDefined();
 
-                    deleteButton.nativeElement.click();
-                    expect(modalService.open).toHaveBeenCalled();
-                });
-        }));
+            deleteButton.nativeElement.click();
+            expect(modalService.open).toHaveBeenCalled();
+        });
 
-        it("should delete the upload when confirmed", async(() => {
+        it("should delete the upload when confirmed", async () => {
             let router = TestBed.inject(Router);
             spyOn(router, "navigate").and.returnValue(Promise.resolve(true));
 
             let upload = getUpload();
-            uploadServiceGetResolve(upload)
-                .then(() => {
-                    fixture.detectChanges();
+            await uploadServiceGetResolve(upload);
 
-                    let errorMessage = fixture.debugElement.query(By.css(".alert-danger"));
-                    expect(errorMessage).toBeNull("Error message found");
+            fixture.detectChanges();
+            let errorMessage = fixture.debugElement.query(By.css(".alert-danger"));
+            expect(errorMessage).toBeNull();
 
-                    let closeModal = jasmine.createSpy("closeModal");
-                    component.deleteUpload(closeModal);
+            let closeModal = jasmine.createSpy("closeModal");
+            component.deleteUpload(closeModal);
+            await uploadServiceDeleteResolve();
 
-                    uploadServiceDeleteResolve()
-                        .then(() => fixture.whenStable()) // Not sure why the navigation promise needs yet another wait for stability
-                        .then(() => {
-                            fixture.detectChanges();
+            // Not sure why the navigation promise needs yet another wait for stability
+            await fixture.whenStable();
+            fixture.detectChanges();
 
-                            expect(router.navigate).toHaveBeenCalledWith([`/users/${upload.user.name}`]);
-                            expect(closeModal).toHaveBeenCalled();
+            expect(router.navigate).toHaveBeenCalledWith([`/users/${upload.user.name}`]);
+            expect(closeModal).toHaveBeenCalled();
 
-                            errorMessage = fixture.debugElement.query(By.css(".alert-danger"));
-                            expect(errorMessage).toBeNull("Error message found");
-                        });
-                });
-        }));
+            errorMessage = fixture.debugElement.query(By.css(".alert-danger"));
+            expect(errorMessage).toBeNull();
+        });
 
-        it("should show an error when the upload service fails to delete the upload", async(() => {
+        it("should show an error when the upload service fails to delete the upload", async () => {
             let router = TestBed.inject(Router);
             spyOn(router, "navigate");
 
             let upload = getUpload();
-            uploadServiceGetResolve(upload)
-                .then(() => {
-                    fixture.detectChanges();
+            await uploadServiceGetResolve(upload);
 
-                    let errorMessage = fixture.debugElement.query(By.css(".alert-danger"));
-                    expect(errorMessage).toBeNull("Error message found");
+            fixture.detectChanges();
+            let errorMessage = fixture.debugElement.query(By.css(".alert-danger"));
+            expect(errorMessage).toBeNull();
 
-                    let closeModal = jasmine.createSpy("closeModal");
-                    component.deleteUpload(closeModal);
+            let closeModal = jasmine.createSpy("closeModal");
+            component.deleteUpload(closeModal);
+            await uploadServiceDeleteReject();
 
-                    uploadServiceDeleteReject()
-                        .then(() => fixture.whenStable()) // Not sure why the navigation promise needs yet another wait for stability
-                        .then(() => {
-                            fixture.detectChanges();
+            // Not sure why the navigation promise needs yet another wait for stability
+            await fixture.whenStable();
+            fixture.detectChanges();
 
-                            expect(router.navigate).not.toHaveBeenCalled();
-                            expect(closeModal).toHaveBeenCalled();
+            expect(router.navigate).not.toHaveBeenCalled();
+            expect(closeModal).toHaveBeenCalled();
 
-                            errorMessage = fixture.debugElement.query(By.css(".alert-danger"));
-                            expect(errorMessage).not.toBeNull("Error message not found");
-                        });
-                });
-        }));
+            errorMessage = fixture.debugElement.query(By.css(".alert-danger"));
+            expect(errorMessage).not.toBeNull("Error message not found");
+        });
 
-        it("should not display when it's not the user's upload", async(() => {
+        it("should not display when it's not the user's upload", async () => {
             let upload = getUpload();
             userInfoSubject.next({
                 isLoggedIn: true,
@@ -406,86 +378,81 @@ describe("UploadComponent", () => {
                 username: "someOtherUsername",
                 email: "someOtherEmail",
             });
-            uploadServiceGetResolve(upload)
-                .then(() => {
-                    fixture.detectChanges();
+            await uploadServiceGetResolve(upload);
+            fixture.detectChanges();
 
-                    let errorMessage = fixture.debugElement.query(By.css(".alert-danger"));
-                    expect(errorMessage).toBeNull("Error message found");
+            let errorMessage = fixture.debugElement.query(By.css(".alert-danger"));
+            expect(errorMessage).toBeNull();
 
-                    let buttons = fixture.debugElement.queryAll(By.css(".col-md-6.pull-right button"));
-                    let deleteButton: DebugElement;
-                    for (let i = 0; i < buttons.length; i++) {
-                        if (getNormalizedTextContent(buttons[i]) === "Delete") {
-                            deleteButton = buttons[i];
-                        }
-                    }
+            let buttons = fixture.debugElement.queryAll(By.css(".col-md-6.pull-right button"));
+            let deleteButton: DebugElement;
+            for (let i = 0; i < buttons.length; i++) {
+                if (getNormalizedTextContent(buttons[i]) === "Delete") {
+                    deleteButton = buttons[i];
+                }
+            }
 
-                    expect(deleteButton).toBeUndefined("Unexpectedly found the 'Delete' button");
-                });
-        }));
+            expect(deleteButton).toBeUndefined();
+        });
     });
 
     describe("Miscellaneous Stats", () => {
-        it("should display data", async(() => {
+        it("should display data", async () => {
             let percentPipe = TestBed.inject(PercentPipe);
 
             let upload = getUpload();
-            uploadServiceGetResolve(upload)
-                .then(() => {
-                    fixture.detectChanges();
+            await uploadServiceGetResolve(upload);
+            fixture.detectChanges();
 
-                    let expectedValues: { name: string, stat: string, value: string, type: "exponential" | "percent" }[] =
-                        [
-                            { name: "Hero Souls Spent", stat: "heroSoulsSpent", value: "1.7754273760949743393e+501", type: "exponential" },
-                            { name: "Hero Souls Sacrificed", stat: "heroSoulsSacrificed", value: "4.451222095586916e+5129", type: "exponential" },
-                            { name: "Ancient Souls Earned", stat: "totalAncientSouls", value: "25648", type: "exponential" },
-                            { name: "Transcendent Power", stat: "transcendentPower", value: "0.24989526487039584", type: "percent" },
-                            { name: "Titan Damage", stat: "titanDamage", value: "4.4512220955869015e+5129", type: "exponential" },
-                            { name: "Highest Zone", stat: "highestZoneThisTranscension", value: "25621", type: "exponential" },
-                            { name: "Highest Zone (Lifetime)", stat: "highestZoneLifetime", value: "264669", type: "exponential" },
-                            { name: "Ascensions", stat: "ascensionsThisTranscension", value: "3", type: "exponential" },
-                            { name: "Ascensions (Lifetime)", stat: "ascensionsLifetime", value: "3370", type: "exponential" },
-                            { name: "Rubies", stat: "rubies", value: "107", type: "exponential" },
-                            { name: "Autoclickers", stat: "autoclickers", value: "10", type: "exponential" },
-                        ];
+            let expectedValues: { name: string; stat: string; value: string; type: "exponential" | "percent"; }[] = [
+                { name: "Hero Souls Spent", stat: "heroSoulsSpent", value: "1.7754273760949743393e+501", type: "exponential" },
+                { name: "Hero Souls Sacrificed", stat: "heroSoulsSacrificed", value: "4.451222095586916e+5129", type: "exponential" },
+                { name: "Ancient Souls Earned", stat: "totalAncientSouls", value: "25648", type: "exponential" },
+                { name: "Transcendent Power", stat: "transcendentPower", value: "0.24989526487039584", type: "percent" },
+                { name: "Titan Damage", stat: "titanDamage", value: "4.4512220955869015e+5129", type: "exponential" },
+                { name: "Highest Zone", stat: "highestZoneThisTranscension", value: "25621", type: "exponential" },
+                { name: "Highest Zone (Lifetime)", stat: "highestZoneLifetime", value: "264669", type: "exponential" },
+                { name: "Ascensions", stat: "ascensionsThisTranscension", value: "3", type: "exponential" },
+                { name: "Ascensions (Lifetime)", stat: "ascensionsLifetime", value: "3370", type: "exponential" },
+                { name: "Rubies", stat: "rubies", value: "107", type: "exponential" },
+                { name: "Autoclickers", stat: "autoclickers", value: "10", type: "exponential" },
+            ];
 
-                    let errorMessage = fixture.debugElement.query(By.css(".alert-danger"));
-                    expect(errorMessage).toBeNull("Error message found");
+            let errorMessage = fixture.debugElement.query(By.css(".alert-danger"));
+            expect(errorMessage).toBeNull();
 
-                    let table = fixture.debugElement.query(By.css("table"));
-                    expect(table).not.toBeNull();
+            let table = fixture.debugElement.query(By.css("table"));
+            expect(table).not.toBeNull();
 
-                    let rows = table.queryAll(By.css("tbody tr"));
-                    expect(rows.length).toEqual(expectedValues.length);
+            let rows = table.queryAll(By.css("tbody tr"));
+            expect(rows.length).toEqual(expectedValues.length);
 
-                    for (let i = 0; i < rows.length; i++) {
-                        let cells = rows[i].children;
-                        let expected = expectedValues[i];
+            for (let i = 0; i < rows.length; i++) {
+                let cells = rows[i].children;
+                let expected_1 = expectedValues[i];
 
-                        let expectedName = expected.name;
-                        expect(getNormalizedTextContent(cells[0])).toEqual(expectedName);
+                let expectedName = expected_1.name;
+                expect(getNormalizedTextContent(cells[0])).toEqual(expectedName);
 
-                        let expectedValue = expected.value;
-                        let expectedFormattedValue: string;
-                        switch (expected.type) {
-                            case "exponential": {
-                                expectedFormattedValue = exponentialPipeTransform(new Decimal(expectedValue));
-                                break;
-                            }
-                            case "percent": {
-                                expectedFormattedValue = percentPipe.transform(expectedValue, "1.1-3");
-                                break;
-                            }
-                            default: {
-                                fail();
-                            }
-                        }
-
-                        expect(getNormalizedTextContent(cells[1])).toEqual(expectedFormattedValue);
+                let expectedValue = expected_1.value;
+                let expectedFormattedValue: string;
+                switch (expected_1.type) {
+                    case "exponential": {
+                        expectedFormattedValue = exponentialPipeTransform(new Decimal(expectedValue));
+                        break;
                     }
-                });
-        }));
+                    case "percent": {
+                        expectedFormattedValue = percentPipe.transform(expectedValue, "1.1-3");
+                        break;
+                    }
+                    default: {
+                        fail();
+                    }
+                }
+
+                expect(getNormalizedTextContent(cells[1])).toEqual(expectedFormattedValue);
+            }
+        });
     });
 
     function getUpload(): IUpload {

@@ -1,5 +1,5 @@
 import { NO_ERRORS_SCHEMA } from "@angular/core";
-import { ComponentFixture, TestBed, async } from "@angular/core/testing";
+import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { By } from "@angular/platform-browser";
 import { ActivatedRoute, Params } from "@angular/router";
 import { BehaviorSubject } from "rxjs";
@@ -85,7 +85,7 @@ describe("UserCompareComponent", () => {
 
     let settingsSubject = new BehaviorSubject(settings);
 
-    beforeEach(async(() => {
+    beforeEach(async () => {
         let userService = {
             getProgress(userName: string): Promise<IProgressData> {
                 if (userName === "someUserName") {
@@ -104,7 +104,7 @@ describe("UserCompareComponent", () => {
 
         routeParams = new BehaviorSubject({ userName: "someUserName", compareUserName: "someOtherUserName" });
         let route = { params: routeParams };
-        TestBed.configureTestingModule(
+        await TestBed.configureTestingModule(
             {
                 declarations: [UserCompareComponent],
                 providers: [
@@ -114,12 +114,10 @@ describe("UserCompareComponent", () => {
                 ],
                 schemas: [NO_ERRORS_SCHEMA],
             })
-            .compileComponents()
-            .then(() => {
-                fixture = TestBed.createComponent(UserCompareComponent);
-                component = fixture.componentInstance;
-            });
-    }));
+            .compileComponents();
+        fixture = TestBed.createComponent(UserCompareComponent);
+        component = fixture.componentInstance;
+    });
 
     describe("Range Selector", () => {
         it("should display", () => {

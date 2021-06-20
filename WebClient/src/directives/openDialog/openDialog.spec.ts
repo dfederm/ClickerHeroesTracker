@@ -1,5 +1,5 @@
 import { NO_ERRORS_SCHEMA, Component, DebugElement } from "@angular/core";
-import { ComponentFixture, TestBed, async } from "@angular/core/testing";
+import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { By } from "@angular/platform-browser";
 import { NgbModal, NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
 
@@ -26,7 +26,7 @@ describe("OpenDialogDirective", () => {
         public dismissCurrentDialog: boolean;
     }
 
-    beforeEach(async(() => {
+    beforeEach(() => {
         let modalService = { open: (): void => void 0 };
         let activeModal = { dismiss: (): void => void 0 };
         fixture = TestBed.configureTestingModule(
@@ -54,7 +54,7 @@ describe("OpenDialogDirective", () => {
         let event = jasmine.createSpyObj("$event", ["preventDefault"]);
         event.target = jasmine.createSpyObj("eventTarget", ["blur"]);
         $event = event;
-    }));
+    });
 
     it("should add an href attribute", () => {
         expect((link.nativeElement as HTMLAnchorElement).href).toBeTruthy();

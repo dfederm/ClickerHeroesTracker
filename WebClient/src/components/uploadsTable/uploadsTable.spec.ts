@@ -1,4 +1,4 @@
-import { ComponentFixture, TestBed, async } from "@angular/core/testing";
+import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { By } from "@angular/platform-browser";
 import { DatePipe } from "@angular/common";
 import { NO_ERRORS_SCHEMA, ChangeDetectorRef, Pipe, PipeTransform } from "@angular/core";
@@ -35,7 +35,7 @@ describe("UploadsTableComponent", () => {
         public transform = exponentialPipeTransform;
     }
 
-    beforeEach(async(() => {
+    beforeEach(async () => {
         let userService = {
             getUploads(userName: string, page: number, count: number): Promise<IUploadSummaryListResponse> {
                 expect(userName).toEqual(component.userName);
@@ -53,7 +53,7 @@ describe("UploadsTableComponent", () => {
         let settingsService = { settings: () => settingsSubject };
         let changeDetectorRef = { markForCheck: (): void => void 0 };
 
-        TestBed.configureTestingModule(
+        await TestBed.configureTestingModule(
             {
                 declarations: [
                     UploadsTableComponent,
@@ -68,126 +68,116 @@ describe("UploadsTableComponent", () => {
                 ],
                 schemas: [NO_ERRORS_SCHEMA],
             })
-            .compileComponents()
-            .then(() => {
-                fixture = TestBed.createComponent(UploadsTableComponent);
-                component = fixture.componentInstance;
-            });
-    }));
+            .compileComponents();
 
-    it("should display a table without pagination when paginate=false", async(() => {
+        fixture = TestBed.createComponent(UploadsTableComponent);
+        component = fixture.componentInstance;
+    });
+
+    it("should display a table without pagination when paginate=false", async () => {
         component.userName = "someUserName";
         component.count = 3;
         component.paginate = false;
+        await verifyTable(1);
+    });
 
-        verifyTable(1);
-    }));
-
-    it("should display a table with pagination when paginate=true", async(() => {
+    it("should display a table with pagination when paginate=true", async () => {
         component.userName = "someUserName";
         component.count = 3;
         component.paginate = true;
+        await verifyTable(1);
+    });
 
-        verifyTable(1);
-    }));
-
-    it("should update the table when the page updates", async(() => {
+    it("should update the table when the page updates", async () => {
         component.userName = "someUserName";
         component.count = 3;
         component.paginate = true;
+        await verifyTable(1);
 
-        verifyTable(1)
-            .then(() => {
-                component.page = 2;
-                verifyTable(2);
-            });
-    }));
+        component.page = 2;
+        await verifyTable(2);
+    });
 
-    it("should update the table when the userName updates", async(() => {
+    it("should update the table when the userName updates", async () => {
         component.userName = "someUserName";
         component.count = 3;
         component.paginate = true;
+        await verifyTable(1);
 
-        verifyTable(1)
-            .then(() => {
-                component.userName = "someOtherUserName";
-                verifyTable(1);
-            });
-    }));
+        component.userName = "someOtherUserName";
+        return await verifyTable(1);
+    });
 
-    it("should display an error when the upload service errors", async(() => {
+    it("should display an error when the upload service errors", async () => {
         let userService = TestBed.inject(UserService);
         spyOn(userService, "getUploads").and.returnValue(Promise.reject("someReason"));
 
         fixture.detectChanges();
-        fixture.whenStable().then(() => {
-            fixture.detectChanges();
+        await fixture.whenStable();
+        fixture.detectChanges();
 
-            let error = fixture.debugElement.query(By.css("p"));
-            expect(error.nativeElement.textContent.trim()).toEqual("There was a problem getting your uploads");
-        });
-    }));
+        let error = fixture.debugElement.query(By.css("p"));
+        expect(error.nativeElement.textContent.trim()).toEqual("There was a problem getting your uploads");
+    });
 
-    it("should display an error when the upload service returns an invalid response", async(() => {
+    it("should display an error when the upload service returns an invalid response", async () => {
         let userService = TestBed.inject(UserService);
         spyOn(userService, "getUploads").and.returnValue(Promise.resolve({} as any));
 
         fixture.detectChanges();
-        fixture.whenStable().then(() => {
-            fixture.detectChanges();
+        await fixture.whenStable();
+        fixture.detectChanges();
 
-            let error = fixture.debugElement.query(By.css("p"));
-            expect(error.nativeElement.textContent.trim()).toEqual("There was a problem getting your uploads");
-        });
-    }));
+        let error = fixture.debugElement.query(By.css("p"));
+        expect(error.nativeElement.textContent.trim()).toEqual("There was a problem getting your uploads");
+    });
 
-    function verifyTable(page: number): Promise<void> {
+    async function verifyTable(page: number): Promise<void> {
         let datePipe = TestBed.inject(DatePipe);
 
         fixture.detectChanges();
-        return fixture.whenStable().then(() => {
-            fixture.detectChanges();
+        await fixture.whenStable();
+        fixture.detectChanges();
 
-            let rows = fixture.debugElement.query(By.css("tbody")).children;
-            expect(rows.length).toEqual(component.count);
+        let rows = fixture.debugElement.query(By.css("tbody")).children;
+        expect(rows.length).toEqual(component.count);
 
-            for (let i = 0; i < rows.length; i++) {
-                let expectedUpload = uploads[((page - 1) * component.count) + i];
+        for (let i = 0; i < rows.length; i++) {
+            let expectedUpload = uploads[((page - 1) * component.count) + i];
 
-                let cells = rows[i].children;
-                expect(cells.length).toEqual(5);
+            let cells = rows[i].children;
+            expect(cells.length).toEqual(5);
 
-                let ascensionCell = cells[0];
-                expect(ascensionCell.nativeElement.textContent.trim()).toEqual(exponentialPipeTransform(expectedUpload.ascensionNumber));
+            let ascensionCell = cells[0];
+            expect(ascensionCell.nativeElement.textContent.trim()).toEqual(exponentialPipeTransform(expectedUpload.ascensionNumber));
 
-                let zoneCell = cells[1];
-                expect(zoneCell.nativeElement.textContent.trim()).toEqual(exponentialPipeTransform(expectedUpload.zone));
+            let zoneCell = cells[1];
+            expect(zoneCell.nativeElement.textContent.trim()).toEqual(exponentialPipeTransform(expectedUpload.zone));
 
-                let soulsCell = cells[2];
-                expect(soulsCell.nativeElement.textContent.trim()).toEqual(exponentialPipeTransform(new Decimal(expectedUpload.souls)));
+            let soulsCell = cells[2];
+            expect(soulsCell.nativeElement.textContent.trim()).toEqual(exponentialPipeTransform(new Decimal(expectedUpload.souls)));
 
-                let dateCell = cells[3];
-                expect(dateCell.properties.title).toEqual("Uploaded " + datePipe.transform(expectedUpload.timeSubmitted, "short"));
-                expect(dateCell.nativeElement.textContent.trim()).toEqual(datePipe.transform(expectedUpload.saveTime, "short"));
+            let dateCell = cells[3];
+            expect(dateCell.properties.title).toEqual("Uploaded " + datePipe.transform(expectedUpload.timeSubmitted, "short"));
+            expect(dateCell.nativeElement.textContent.trim()).toEqual(datePipe.transform(expectedUpload.saveTime, "short"));
 
-                let viewCell = cells[4];
-                let link = viewCell.query(By.css("a"));
-                expect(link.properties.routerLink).toEqual(`/uploads/${expectedUpload.id}`);
-            }
+            let viewCell = cells[4];
+            let link = viewCell.query(By.css("a"));
+            expect(link.properties.routerLink).toEqual(`/uploads/${expectedUpload.id}`);
+        }
 
-            let pagination = fixture.debugElement.query(By.css("ngb-pagination"));
-            if (component.paginate) {
-                expect(pagination).not.toBeNull();
-                expect(pagination.properties.collectionSize).toEqual(uploads.length);
-                expect(pagination.properties.page).toEqual(page);
-                expect(pagination.properties.pageSize).toEqual(component.count);
-                expect(pagination.properties.maxSize).toEqual(5);
-                expect(pagination.properties.rotate).toEqual(true);
-                expect(pagination.properties.ellipses).toEqual(false);
-                expect(pagination.properties.boundaryLinks).toEqual(true);
-            } else {
-                expect(pagination).toBeNull();
-            }
-        });
+        let pagination = fixture.debugElement.query(By.css("ngb-pagination"));
+        if (component.paginate) {
+            expect(pagination).not.toBeNull();
+            expect(pagination.properties.collectionSize).toEqual(uploads.length);
+            expect(pagination.properties.page).toEqual(page);
+            expect(pagination.properties.pageSize).toEqual(component.count);
+            expect(pagination.properties.maxSize).toEqual(5);
+            expect(pagination.properties.rotate).toEqual(true);
+            expect(pagination.properties.ellipses).toEqual(false);
+            expect(pagination.properties.boundaryLinks).toEqual(true);
+        } else {
+            expect(pagination).toBeNull();
+        }
     }
 });

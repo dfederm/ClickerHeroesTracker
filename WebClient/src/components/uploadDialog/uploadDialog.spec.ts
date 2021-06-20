@@ -1,4 +1,4 @@
-import { ComponentFixture, TestBed, async } from "@angular/core/testing";
+import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
 import { By } from "@angular/platform-browser";
 import { FormsModule } from "@angular/forms";
@@ -31,7 +31,7 @@ describe("UploadDialogComponent", () => {
     const settings = SettingsService.defaultSettings;
     let settingsSubject = new BehaviorSubject(settings);
 
-    beforeEach(async(() => {
+    beforeEach(async () => {
         userInfo = new BehaviorSubject(notLoggedInUser);
         let authenticationService = { userInfo: () => userInfo };
         let uploadService = {
@@ -41,26 +41,24 @@ describe("UploadDialogComponent", () => {
         let activeModal = { close: (): void => void 0 };
         let router = { navigate: (): void => void 0 };
 
-        TestBed.configureTestingModule(
+        await TestBed.configureTestingModule(
             {
                 imports: [FormsModule],
                 declarations: [UploadDialogComponent],
-                providers:
-                    [
-                        { provide: AuthenticationService, useValue: authenticationService },
-                        { provide: UploadService, useValue: uploadService },
-                        { provide: SettingsService, useValue: settingsService },
-                        { provide: NgbActiveModal, useValue: activeModal },
-                        { provide: Router, useValue: router },
-                    ],
+                providers: [
+                    { provide: AuthenticationService, useValue: authenticationService },
+                    { provide: UploadService, useValue: uploadService },
+                    { provide: SettingsService, useValue: settingsService },
+                    { provide: NgbActiveModal, useValue: activeModal },
+                    { provide: Router, useValue: router },
+                ],
                 schemas: [NO_ERRORS_SCHEMA],
             })
-            .compileComponents()
-            .then(() => {
-                fixture = TestBed.createComponent(UploadDialogComponent);
-                component = fixture.componentInstance;
-            });
-    }));
+            .compileComponents();
+
+        fixture = TestBed.createComponent(UploadDialogComponent);
+        component = fixture.componentInstance;
+    });
 
     it("should display the modal header", () => {
         fixture.detectChanges();
@@ -80,141 +78,128 @@ describe("UploadDialogComponent", () => {
         let warningMessage: DebugElement;
         let button: DebugElement;
 
-        it("should display the form elements with 'add to progress' when the user is logged in", async(() => {
-            setUserInfo(loggedInUser)
-                .then(() => {
-                    expect(encodedSaveData).not.toBeNull();
-                    expect(playStyles.length).toEqual(3);
-                    expect(addToProgress).not.toBeNull();
-                    expect(warningMessage).toBeNull();
-                    expect(button).not.toBeNull();
-                });
-        }));
+        it("should display the form elements with 'add to progress' when the user is logged in", async () => {
+            await setUserInfo(loggedInUser);
+            expect(encodedSaveData).not.toBeNull();
+            expect(playStyles.length).toEqual(3);
+            expect(addToProgress).not.toBeNull();
+            expect(warningMessage).toBeNull();
+            expect(button).not.toBeNull();
+        });
 
-        it("should display the form elements without 'add to progress' when the user is not logged in", async(() => {
-            setUserInfo(notLoggedInUser)
-                .then(() => {
-                    expect(encodedSaveData).not.toBeNull();
-                    expect(playStyles.length).toEqual(3);
-                    expect(addToProgress).toBeNull();
-                    expect(warningMessage).not.toBeNull();
-                    expect(button).not.toBeNull();
-                });
-        }));
+        it("should display the form elements without 'add to progress' when the user is not logged in", async () => {
+            await setUserInfo(notLoggedInUser);
+            expect(encodedSaveData).not.toBeNull();
+            expect(playStyles.length).toEqual(3);
+            expect(addToProgress).toBeNull();
+            expect(warningMessage).not.toBeNull();
+            expect(button).not.toBeNull();
+        });
 
-        it("should show an error with empty save data", async(() => {
-            setUserInfo(notLoggedInUser)
-                .then(() => {
-                    button.nativeElement.click();
+        it("should show an error with empty save data", async () => {
+            await setUserInfo(notLoggedInUser);
+            button.nativeElement.click();
+            expect(component.errorMessage).toBeTruthy();
+        });
 
-                    expect(component.errorMessage).toBeTruthy();
-                });
-        }));
+        it("should upload correct save data when user is not logged in", async () => {
+            await setUserInfo(notLoggedInUser);
 
-        it("should upload correct save data when user is not logged in", async(() => {
-            setUserInfo(notLoggedInUser)
-                .then(() => {
-                    let uploadService = TestBed.inject(UploadService);
-                    spyOn(uploadService, "create").and.returnValue(Promise.resolve<number>(123));
+            let uploadService = TestBed.inject(UploadService);
+            spyOn(uploadService, "create").and.returnValue(Promise.resolve<number>(123));
 
-                    let router = TestBed.inject(Router);
-                    spyOn(router, "navigate");
+            let router = TestBed.inject(Router);
+            spyOn(router, "navigate");
 
-                    let activeModal = TestBed.inject(NgbActiveModal);
-                    spyOn(activeModal, "close");
+            let activeModal = TestBed.inject(NgbActiveModal);
+            spyOn(activeModal, "close");
 
-                    setInputValue(encodedSaveData, "someEncodedSaveData");
-                    playStyles[1].nativeElement.click();
+            setInputValue(encodedSaveData, "someEncodedSaveData");
+            playStyles[1].nativeElement.click();
 
-                    button.nativeElement.click();
+            button.nativeElement.click();
 
-                    // Wait for stability from the uploadService promise
-                    fixture.detectChanges();
-                    fixture.whenStable().then(() => {
-                        expect(uploadService.create).toHaveBeenCalledWith("someEncodedSaveData", true, "hybrid");
-
-                        expect(component.errorMessage).toBeFalsy();
-                        expect(router.navigate).toHaveBeenCalledWith(["/uploads", 123]);
-                        expect(activeModal.close).toHaveBeenCalled();
-                    });
-                });
-        }));
-
-        it("should upload correct save data when user is logged in", async(() => {
-            setUserInfo(loggedInUser)
-                .then(() => {
-                    let uploadService = TestBed.inject(UploadService);
-                    spyOn(uploadService, "create").and.returnValue(Promise.resolve<number>(123));
-
-                    let router = TestBed.inject(Router);
-                    spyOn(router, "navigate");
-
-                    let activeModal = TestBed.inject(NgbActiveModal);
-                    spyOn(activeModal, "close");
-
-                    setInputValue(encodedSaveData, "someEncodedSaveData");
-                    playStyles[1].nativeElement.click();
-
-                    button.nativeElement.click();
-
-                    // Wait for stability from the uploadService promise
-                    fixture.detectChanges();
-                    fixture.whenStable().then(() => {
-                        expect(uploadService.create).toHaveBeenCalledWith("someEncodedSaveData", true, "hybrid");
-
-                        expect(component.errorMessage).toBeFalsy();
-                        expect(router.navigate).toHaveBeenCalledWith(["/uploads", 123]);
-                        expect(activeModal.close).toHaveBeenCalled();
-                    });
-                });
-        }));
-
-        it("should show an error when uploadService fails", async(() => {
-            setUserInfo(loggedInUser)
-                .then(() => {
-                    let uploadService = TestBed.inject(UploadService);
-                    spyOn(uploadService, "create").and.returnValue(Promise.reject(new HttpErrorResponse({ status: 500, statusText: "someStatusText" })));
-
-                    let router = TestBed.inject(Router);
-                    spyOn(router, "navigate");
-
-                    let activeModal = TestBed.inject(NgbActiveModal);
-                    spyOn(activeModal, "close");
-
-                    setInputValue(encodedSaveData, "someEncodedSaveData");
-                    playStyles[1].nativeElement.click();
-
-                    button.nativeElement.click();
-
-                    // Wait for stability from the uploadService promise
-                    fixture.detectChanges();
-                    fixture.whenStable().then(() => {
-                        expect(component.errorMessage).toBeTruthy();
-                        expect(router.navigate).not.toHaveBeenCalled();
-                        expect(activeModal.close).not.toHaveBeenCalled();
-                    });
-                });
-        }));
-
-        function setUserInfo(value: IUserInfo): Promise<void> {
-            userInfo.next(value);
+            // Wait for stability from the uploadService promise
             fixture.detectChanges();
-            return fixture.whenStable()
-                .then(() => {
-                    fixture.detectChanges();
+            await fixture.whenStable();
 
-                    let body = fixture.debugElement.query(By.css(".modal-body"));
-                    expect(body).not.toBeNull();
+            expect(uploadService.create).toHaveBeenCalledWith("someEncodedSaveData", true, "hybrid");
+            expect(component.errorMessage).toBeFalsy();
+            expect(router.navigate).toHaveBeenCalledWith(["/uploads", 123]);
+            expect(activeModal.close).toHaveBeenCalled();
+        });
 
-                    let form = body.query(By.css("form"));
-                    expect(form).not.toBeNull();
+        it("should upload correct save data when user is logged in", async () => {
+            await setUserInfo(loggedInUser);
 
-                    encodedSaveData = form.query(By.css("#encodedSaveData"));
-                    playStyles = form.queryAll(By.css("[name='playStyle']"));
-                    addToProgress = form.query(By.css("#addToProgress"));
-                    warningMessage = form.query(By.css(".alert-warning"));
-                    button = form.query(By.css("button[type='submit']"));
-                });
+            let uploadService = TestBed.inject(UploadService);
+            spyOn(uploadService, "create").and.returnValue(Promise.resolve<number>(123));
+
+            let router = TestBed.inject(Router);
+            spyOn(router, "navigate");
+
+            let activeModal = TestBed.inject(NgbActiveModal);
+            spyOn(activeModal, "close");
+
+            setInputValue(encodedSaveData, "someEncodedSaveData");
+            playStyles[1].nativeElement.click();
+
+            button.nativeElement.click();
+
+            // Wait for stability from the uploadService promise
+            fixture.detectChanges();
+            await fixture.whenStable();
+
+            expect(uploadService.create).toHaveBeenCalledWith("someEncodedSaveData", true, "hybrid");
+            expect(component.errorMessage).toBeFalsy();
+            expect(router.navigate).toHaveBeenCalledWith(["/uploads", 123]);
+            expect(activeModal.close).toHaveBeenCalled();
+        });
+
+        it("should show an error when uploadService fails", async () => {
+            await setUserInfo(loggedInUser);
+
+            let uploadService = TestBed.inject(UploadService);
+            spyOn(uploadService, "create").and.returnValue(Promise.reject(new HttpErrorResponse({ status: 500, statusText: "someStatusText" })));
+
+            let router = TestBed.inject(Router);
+            spyOn(router, "navigate");
+
+            let activeModal = TestBed.inject(NgbActiveModal);
+            spyOn(activeModal, "close");
+
+            setInputValue(encodedSaveData, "someEncodedSaveData");
+            playStyles[1].nativeElement.click();
+
+            button.nativeElement.click();
+
+            // Wait for stability from the uploadService promise
+            fixture.detectChanges();
+            await fixture.whenStable();
+
+            expect(component.errorMessage).toBeTruthy();
+            expect(router.navigate).not.toHaveBeenCalled();
+            expect(activeModal.close).not.toHaveBeenCalled();
+        });
+
+        async function setUserInfo(value: IUserInfo): Promise<void> {
+            userInfo.next(value);
+
+            fixture.detectChanges();
+            await fixture.whenStable();
+            fixture.detectChanges();
+
+            let body = fixture.debugElement.query(By.css(".modal-body"));
+            expect(body).not.toBeNull();
+
+            let form = body.query(By.css("form"));
+            expect(form).not.toBeNull();
+
+            encodedSaveData = form.query(By.css("#encodedSaveData"));
+            playStyles = form.queryAll(By.css("[name='playStyle']"));
+            addToProgress = form.query(By.css("#addToProgress"));
+            warningMessage = form.query(By.css(".alert-warning"));
+            button = form.query(By.css("button[type='submit']"));
         }
     });
 });
