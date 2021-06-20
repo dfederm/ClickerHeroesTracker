@@ -31,23 +31,24 @@ export class AppComponent implements OnInit {
     private readonly spinnerService: NgxSpinnerService,
   ) { }
 
-  public ngOnInit(): void {
+  public async ngOnInit(): Promise<void> {
     this.spinnerService.show();
     this.isLoading = true;
 
-    // Get the auth headers simply because it forces a wait on fetching the initial auth tokens.
-    this.authenticationService
-      .getAuthHeaders()
-      .catch(() => void 0) // Swallow errors
-      .then(() => {
-        this.authenticationService
-          .userInfo()
-          .subscribe(userInfo => this.handleUserInfo(userInfo));
+    try {
+      // Get the auth headers simply because it forces a wait on fetching the initial auth tokens.
+      await this.authenticationService.getAuthHeaders();
+    } catch {
+      // Swallow errors
+    }
 
-        this.settingsService
-          .settings()
-          .subscribe(settings => this.handleSettings(settings));
-      });
+    this.authenticationService
+      .userInfo()
+      .subscribe(userInfo => this.handleUserInfo(userInfo));
+
+    this.settingsService
+      .settings()
+      .subscribe(settings => this.handleSettings(settings));
   }
 
   private handleSettings(settings: IUserSettings): void {

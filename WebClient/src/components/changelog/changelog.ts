@@ -35,6 +35,7 @@ export class ChangelogComponent implements OnInit {
     ) { }
 
     public ngOnInit(): void {
+        // Purposefully not awaited
         this.refreshNews();
 
         // Editing is only possible when showing dates
@@ -58,7 +59,7 @@ export class ChangelogComponent implements OnInit {
         viewModel.entries.push({ message: "" });
     }
 
-    public save(viewModel: IChangelogSectionViewModel): void {
+    public async save(viewModel: IChangelogSectionViewModel): Promise<void> {
         let date = (typeof viewModel.date === "string" ? new Date(viewModel.date) : viewModel.date).toISOString().substring(0, 10);
         let messages: string[] = [];
         for (let i = 0; i < viewModel.entries.length; i++) {
@@ -69,30 +70,40 @@ export class ChangelogComponent implements OnInit {
         }
 
         this.spinnerService.show("changelog");
-        this.newsService
-            .addNews({ date, messages })
-            .then(() => this.refreshNews())
-            .catch(() => this.isError = true)
-            .finally(() => this.spinnerService.hide("changelog"));
+        try {
+            await this.newsService.addNews({ date, messages });
+            await this.refreshNews();
+        } catch {
+            this.isError = true;            
+        } finally {
+            this.spinnerService.hide("changelog");
+        }
     }
 
-    public delete(viewModel: IChangelogSectionViewModel): void {
-        let date = viewModel.date.toISOString().substring(0, 10);
+    public async delete(viewModel: IChangelogSectionViewModel): Promise<void> {
+        const date = viewModel.date.toISOString().substring(0, 10);
+
         this.spinnerService.show("changelog");
-        this.newsService
-            .deleteNews(date)
-            .then(() => this.refreshNews())
-            .catch(() => this.isError = true)
-            .finally(() => this.spinnerService.hide("changelog"));
+        try {
+            await this.newsService.deleteNews(date);
+            await this.refreshNews();
+        } catch {
+            this.isError = true;            
+        } finally {
+            this.spinnerService.hide("changelog");
+        }
     }
 
-    private refreshNews(): void {
+    private async refreshNews(): Promise<void> {
         this.spinnerService.show("changelog");
-        this.newsService
-            .getNews()
-            .then(response => this.handleData(response))
-            .catch(() => this.isError = true)
-            .finally(() => this.spinnerService.hide("changelog"));
+        try {
+            const response = await this.newsService.getNews();
+            this.handleData(response);
+        } catch {
+            this.isError = true;            
+        } finally {
+            this.spinnerService.hide("changelog");
+        }
     }
 
     private handleData(response: ISiteNewsEntryListResponse): void {

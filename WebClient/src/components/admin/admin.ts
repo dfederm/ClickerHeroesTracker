@@ -1,5 +1,5 @@
 import { Component, OnInit } from "@angular/core";
-import { HttpClient, HttpErrorResponse } from "@angular/common/http";
+import { HttpClient } from "@angular/common/http";
 import { NgxSpinnerService } from "ngx-spinner";
 import { HttpErrorHandlerService } from "../../services/httpErrorHandlerService/httpErrorHandlerService";
 import { AuthenticationService } from "../../services/authenticationService/authenticationService";
@@ -51,71 +51,68 @@ export class AdminComponent implements OnInit {
         private readonly uploadService: UploadService,
     ) { }
 
-    public ngOnInit(): void {
-        this.refreshBlockedClans()
-            .catch(() => {
-                this.blockedClansError = "Could not fetch blocked clans";
-            });
+    public async ngOnInit(): Promise<void> {
+        try {
+            await this.refreshBlockedClans()
+        } catch (error) {
+            this.blockedClansError = "Could not fetch blocked clans";            
+        }
     }
 
-    public unblockClan(): void {
+    public async unblockClan(): Promise<void> {
         this.blockedClansError = null;
 
         this.spinnerService.show("blockedClans");
-        this.authenticationService.getAuthHeaders()
-            .then(headers => {
-                headers = headers.set("Content-Type", "application/json");
-                let body: IBlockClanRequest = {
-                    clanName: this.unblockClanName,
-                    isBlocked: false,
-                };
-                return this.http
-                    .post("/api/admin/blockclan", body, { headers })
-                    .toPromise();
-            })
-            .then(() => {
-                this.refreshBlockedClans();
-            })
-            .catch((err: HttpErrorResponse) => {
-                this.httpErrorHandlerService.logError("AdminComponent.unblockClan.error", err);
-                let errors = this.httpErrorHandlerService.getValidationErrors(err);
-                this.blockedClansError = errors.join(";");
-            })
-            .finally(() => {
-                this.spinnerService.hide("blockedClans");
-            });
+        try {
+            let headers = await this.authenticationService.getAuthHeaders();
+            headers = headers.set("Content-Type", "application/json");
+    
+            let body: IBlockClanRequest = {
+                clanName: this.unblockClanName,
+                isBlocked: false,
+            };
+    
+            await this.http
+                .post("/api/admin/blockclan", body, { headers })
+                .toPromise();
+     
+            await this.refreshBlockedClans();
+        } catch (err) {
+            this.httpErrorHandlerService.logError("AdminComponent.unblockClan.error", err);
+            let errors = this.httpErrorHandlerService.getValidationErrors(err);
+            this.blockedClansError = errors.join(";");        
+        } finally {
+            this.spinnerService.hide("blockedClans");
+        }
     }
 
-    public fetchStaleUploads(): void {
+    public async fetchStaleUploads(): Promise<void> {
         this.staleUploadError = null;
         this.staleUploadIds = [];
         this.deletedStaleUploads = 0;
         this.totalStaleUploads = 0;
 
         this.spinnerService.show("staleUploads");
-        this.authenticationService.getAuthHeaders()
-            .then(headers => {
-                return this.http.get<number[]>("/api/admin/staleuploads", { headers })
-                    .toPromise();
-            })
-            .then(response => {
-                this.staleUploadIds = response;
-                this.totalStaleUploads = this.staleUploadIds.length;
-            })
-            .catch((err: HttpErrorResponse) => {
-                this.httpErrorHandlerService.logError("AdminComponent.fetchStaleUploads.error", err);
-                let errors = this.httpErrorHandlerService.getValidationErrors(err);
-                this.staleUploadError = errors.join(";");
-            })
-            .finally(() => {
-                this.spinnerService.hide("staleUploads");
-            });
+        try {
+            let headers = await this.authenticationService.getAuthHeaders();
+            let response = await this.http.get<number[]>("/api/admin/staleuploads", { headers }).toPromise();
+    
+            this.staleUploadIds = response;
+            this.totalStaleUploads = this.staleUploadIds.length;
+        } catch (err) {
+            this.httpErrorHandlerService.logError("AdminComponent.fetchStaleUploads.error", err);
+            let errors = this.httpErrorHandlerService.getValidationErrors(err);
+            this.staleUploadError = errors.join(";");
+        } finally {
+            this.spinnerService.hide("staleUploads");
+        }
+
     }
 
-    public deleteStaleUploads(): void {
+    public async deleteStaleUploads(): Promise<void> {
         this.deletesInProgress = true;
         for (let i = 0; i < AdminComponent.numParallelDeletes; i++) {
-            this.deleteNextUpload();
+            await this.deleteNextUpload();
         }
     }
 
@@ -123,81 +120,70 @@ export class AdminComponent implements OnInit {
         this.deletesInProgress = false;
     }
 
-    public fetchInvalidAuthTokens(): void {
+    public async fetchInvalidAuthTokens(): Promise<void> {
         this.invalidAuthTokensError = null;
         this.prunedInvalidAuthTokens = 0;
         this.totalInvalidAuthTokens = 0;
 
         this.spinnerService.show("invalidAuthTokens");
-        this.authenticationService.getAuthHeaders()
-            .then(headers => {
-                return this.http.get<number>("/api/admin/countinvalidauthtokens", { headers })
-                    .toPromise();
-            })
-            .then(response => {
-                this.totalInvalidAuthTokens = response;
-            })
-            .catch((err: HttpErrorResponse) => {
-                this.httpErrorHandlerService.logError("AdminComponent.fetchInvalidAuthTokens.error", err);
-                this.invalidAuthTokensError = "Something went wrong";
-            })
-            .finally(() => {
-                this.spinnerService.hide("invalidAuthTokens");
-            });
+        try {
+            const headers = await this.authenticationService.getAuthHeaders();
+            const response = await this.http.get<number>("/api/admin/countinvalidauthtokens", { headers }).toPromise();
+            this.totalInvalidAuthTokens = response;
+        } catch (err) {
+            this.httpErrorHandlerService.logError("AdminComponent.fetchInvalidAuthTokens.error", err);
+            this.invalidAuthTokensError = "Something went wrong";        
+        } finally {
+            this.spinnerService.hide("invalidAuthTokens");
+        }
     }
 
-    public pruneInvalidAuthTokens(): void {
+    public async pruneInvalidAuthTokens(): Promise<void> {
         this.invalidAuthTokensError = null;
         this.pruningInProgress = true;
 
-        this.authenticationService.getAuthHeaders()
-            .then(headers => {
-                let body: IPruneInvalidAuthTokensRequest = { batchSize: AdminComponent.pruneInvalidAuthTokenBatchSize };
-                return this.http.post("/api/admin/pruneinvalidauthtokens", body, { headers })
-                    .toPromise();
-            })
-            .then(() => {
-                this.prunedInvalidAuthTokens += AdminComponent.pruneInvalidAuthTokenBatchSize;
-                if (this.prunedInvalidAuthTokens < this.totalInvalidAuthTokens) {
-                    if (this.pruningInProgress) {
-                        // Keep going
-                        this.pruneInvalidAuthTokens();
-                    }
-                } else {
-                    // Finished
-                    this.prunedInvalidAuthTokens = this.totalInvalidAuthTokens;
-                    this.pruningInProgress = false;
+        try {
+            let headers = await this.authenticationService.getAuthHeaders();
+            let body: IPruneInvalidAuthTokensRequest = { batchSize: AdminComponent.pruneInvalidAuthTokenBatchSize };
+            await this.http.post("/api/admin/pruneinvalidauthtokens", body, { headers }).toPromise();
+
+            this.prunedInvalidAuthTokens += AdminComponent.pruneInvalidAuthTokenBatchSize;
+            if (this.prunedInvalidAuthTokens < this.totalInvalidAuthTokens) {
+                if (this.pruningInProgress) {
+                    // Keep going
+                    await this.pruneInvalidAuthTokens();
                 }
-            })
-            .catch((err: HttpErrorResponse) => {
-                this.httpErrorHandlerService.logError("AdminComponent.pruneInvalidAuthTokens.error", err);
-                this.invalidAuthTokensError = "Something went wrong";
-            });
+            } else {
+                // Finished
+                this.prunedInvalidAuthTokens = this.totalInvalidAuthTokens;
+                this.pruningInProgress = false;
+            }
+        } catch (err) {
+            this.httpErrorHandlerService.logError("AdminComponent.pruneInvalidAuthTokens.error", err);
+            this.invalidAuthTokensError = "Something went wrong";
+        }
     }
 
     public cancelPruneInvalidAuthTokens(): void {
         this.pruningInProgress = false;
     }
 
-    private refreshBlockedClans(): Promise<void> {
+    private async refreshBlockedClans(): Promise<void> {
         this.spinnerService.show("blockedClans");
-        return this.authenticationService.getAuthHeaders()
-            .then(headers => {
-                return this.http.get<string[]>("/api/admin/blockedclans", { headers })
-                    .toPromise();
-            })
-            .then(response => {
-                this.blockedClans = response;
-                if (this.blockedClans.length > 0) {
-                    this.unblockClanName = this.blockedClans[0];
-                }
-            })
-            .finally(() => {
-                this.spinnerService.hide("blockedClans");
-            });
+        try {
+            let headers = await this.authenticationService.getAuthHeaders();
+            let response = await this.http.get<string[]>("/api/admin/blockedclans", { headers }).toPromise();
+    
+            this.blockedClans = response;
+            if (this.blockedClans.length > 0) {
+                this.unblockClanName = this.blockedClans[0];
+            }    
+        } finally {
+            this.spinnerService.hide("blockedClans");
+        }
     }
 
-    private deleteNextUpload(): void {
+    private async deleteNextUpload(): Promise<void> {
         // Cancellation
         if (!this.deletesInProgress) {
             return;
@@ -209,11 +195,14 @@ export class AdminComponent implements OnInit {
         }
 
         let uploadId = this.staleUploadIds.shift();
-        this.uploadService.delete(uploadId)
-            .catch(() => void 0) // Swallow errors
-            .then(() => {
-                this.deletedStaleUploads++;
-                this.deleteNextUpload();
-            });
+
+        try {
+            await this.uploadService.delete(uploadId);            
+        } catch {
+            // Swallow errors
+        }
+
+        this.deletedStaleUploads++;
+        await this.deleteNextUpload();
     }
 }

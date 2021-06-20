@@ -8,7 +8,6 @@ import { NgbModal, NgbModalRef } from "@ng-bootstrap/ng-bootstrap";
 import { FeedbackDialogComponent } from "../feedbackDialog/feedbackDialog";
 import { UploadService } from "../../services/uploadService/uploadService";
 import { Router } from "@angular/router";
-import { HttpErrorResponse } from "@angular/common/http";
 import { NgxSpinnerService } from "ngx-spinner";
 
 interface IAncientViewModel {
@@ -187,25 +186,21 @@ export class AncientSuggestionsComponent implements OnInit {
         this.appInsights.trackEvent("Autolevel");
     }
 
-    public saveAutolevel(): void {
+    public async saveAutolevel(): Promise<void> {
         this.modalErrorMessage = null;
         this.spinnerService.show("modal");
-        this.uploadService.create(this.autoLeveledSavedGame.content, true, this.playStyle)
-            .then(uploadId => {
-                this.appInsights.trackEvent("SaveAutolevel");
-                return this.router.navigate(["/uploads", uploadId]);
-            })
-            .then(() => {
-                this.autolevelModal.close();
-            })
-            .catch((error: HttpErrorResponse) => {
-                this.modalErrorMessage = error.status >= 400 && error.status < 500
-                    ? "The uploaded save was not valid"
-                    : "An unknown error occurred";
-            })
-            .finally(() => {
-                this.spinnerService.hide("modal");
-            });
+        try {
+            const uploadId = await this.uploadService.create(this.autoLeveledSavedGame.content, true, this.playStyle);
+            this.appInsights.trackEvent("SaveAutolevel");
+            await this.router.navigate(["/uploads", uploadId]);
+            this.autolevelModal.close();
+        } catch (error) {
+            this.modalErrorMessage = error.status >= 400 && error.status < 500
+            ? "The uploaded save was not valid"
+            : "An unknown error occurred";
+        } finally {
+            this.spinnerService.hide("modal");
+        }
     }
 
     // tslint:disable-next-line:cyclomatic-complexity
