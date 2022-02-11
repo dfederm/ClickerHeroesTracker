@@ -35,7 +35,7 @@ jobs:
         path: ./TestResults
       if: ${{ always() }} # Always run this step even on failure
     - name: Publish
-      run: dotnet publish Website/Src --configuration Release --runtime linux-x64 --self-contained true -p:PublishReadyToRun=true -p:PublishSingleFile=true -p:PublishTrimmed=true --no-restore --output artifacts
+      run: dotnet publish Website/Src --configuration Release --runtime linux-x64 --self-contained true -p:PublishReadyToRun=true -p:PublishSingleFile=true --no-restore --output artifacts
     - name: Upload published website
       uses: actions/upload-artifact@v2
       with:
