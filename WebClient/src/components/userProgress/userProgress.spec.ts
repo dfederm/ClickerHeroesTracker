@@ -7,7 +7,7 @@ import Decimal from "decimal.js";
 
 import { UserProgressComponent } from "./userProgress";
 import { UserService, IProgressData } from "../../services/userService/userService";
-import { ChartDataSets, ChartPoint, ChartOptions } from "chart.js";
+import { ChartDataset, ChartOptions, ScatterDataPoint } from "chart.js";
 import { SettingsService } from "../../services/settingsService/settingsService";
 import { ExponentialPipe } from "../../pipes/exponentialPipe";
 import { PercentPipe } from "@angular/common";
@@ -188,20 +188,17 @@ describe("UserProgressComponent", () => {
                 expect(chart).not.toBeNull();
                 expect(chart.attributes.baseChart).toBeDefined();
                 expect(chart.attributes.height).toEqual("235");
-                expect(chart.properties.chartType).toEqual("line");
+                expect(chart.properties.type).toEqual("line");
 
-                let colors = chart.properties.colors;
-                expect(colors).toBeTruthy();
-
-                let options: ChartOptions = chart.properties.options;
+                let options: ChartOptions<"line"> = chart.properties.options;
                 expect(options).toBeTruthy();
-                expect(options.title.text).toEqual(expectedChartOrder[i].title);
+                expect(options.plugins.title.text).toEqual(expectedChartOrder[i].title);
 
-                let datasets: ChartDataSets[] = chart.properties.datasets;
+                let datasets: ChartDataset[] = chart.properties.datasets;
                 expect(datasets).toBeTruthy();
                 expect(datasets.length).toEqual(1);
 
-                let data = datasets[0].data as ChartPoint[];
+                let data = datasets[0].data as ScatterDataPoint[];
                 let expectedData = expectedChartOrder[i].data;
                 let isLogarithmic = expectedChartOrder[i].isLogarithmic;
                 let isPercent = expectedChartOrder[i].isPercent;
@@ -210,7 +207,7 @@ describe("UserProgressComponent", () => {
                 for (let j = 0; j < data.length; j++) {
                     let expectedDate = new Date(dataKeys[j]);
                     expect(data[j].x).toEqual(expectedDate.getTime());
-                    expect((options.tooltips.callbacks.title as Function)([{ xLabel: dataKeys[j] }])).toEqual(expectedDate.toLocaleString());
+                    expect((options.plugins.tooltip.callbacks.title as Function)([{ parsed: { x: dataKeys[j] } }])).toEqual(expectedDate.toLocaleString());
 
                     // When logarithmic, the value we plot is actually the log of the value to fake log scale
                     let rawExpectedValue = expectedData[dataKeys[j]];
@@ -225,12 +222,12 @@ describe("UserProgressComponent", () => {
                     let expectedLabel = isPercent
                         ? percentPipe.transform(expectedValue / 100, "1.1-3")
                         : ExponentialPipe.formatNumber(expectedLabelNum, settings);
-                    expect((options.tooltips.callbacks.label as Function)({ yLabel: expectedValue })).toEqual(expectedLabel);
-                    expect(options.scales.yAxes[0].ticks.callback(expectedValue, null, null)).toEqual(expectedLabel);
+                    expect((options.plugins.tooltip.callbacks.label as Function)({ parsed: { y: expectedValue } })).toEqual(expectedLabel);
+                    expect((<any>options.scales.yAxis.ticks).callback(expectedValue, null, null)).toEqual(expectedLabel);
                 }
 
                 // Linear even when logarithmic since we're manually managing log scale
-                expect(options.scales.yAxes[0].type).toEqual("linear");
+                expect(options.scales.yAxis.type).toEqual("linear");
             }
         });
 

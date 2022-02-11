@@ -46,7 +46,7 @@ export class AscensionZoneComponent {
     ) {
     }
 
-    // tslint:disable-next-line:cyclomatic-complexity
+    // eslint-disable-next-line complexity
     public calculateAscensionZone(): void {
         let startTime = Date.now();
 

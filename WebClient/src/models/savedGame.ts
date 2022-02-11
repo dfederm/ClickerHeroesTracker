@@ -195,7 +195,7 @@ export class SavedGame {
 
         // Validation
         let expectedHash = MD5(unsprinkled + SavedGame.sprinkleSalt).toString();
-        // tslint:disable-next-line:possible-timing-attack This isn't a security issue
+        // eslint-disable-next-line
         if (hash !== expectedHash) {
             return null;
         }

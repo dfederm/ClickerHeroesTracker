@@ -35,7 +35,7 @@ describe("AdComponent", () => {
         navigationEvents = new Subject();
         let router = {
             events: {
-                // tslint:disable-next-line:deprecation - We're not actually using the deprecated overloads
+                // eslint-disable-next-line import/no-deprecated
                 subscribe: navigationEvents.subscribe.bind(navigationEvents),
             },
         };

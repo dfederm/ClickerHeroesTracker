@@ -8,7 +8,7 @@ import { NgbModule } from "@ng-bootstrap/ng-bootstrap";
 import { ClipboardModule } from "ngx-clipboard";
 import { AdsenseModule } from "ng2-adsense";
 import { ApplicationInsightsModule, AppInsightsService } from "@markpieszak/ng-application-insights";
-import { ChartsModule } from "ng2-charts";
+import { NgChartsModule } from "ng2-charts";
 import { ValidateEqualModule } from "ng-validate-equal";
 import { JwBootstrapSwitchNg2Module } from "jw-bootstrap-switch-ng2";
 import { NgxSpinnerModule } from "ngx-spinner";
@@ -116,7 +116,7 @@ const routes: Routes =
     AdsenseModule.forRoot(),
     // Make sure this matches the API settings as well. Is there a better way to do this?
     ApplicationInsightsModule.forRoot({ instrumentationKey: "99fba640-790d-484f-83c4-3c97450d8698" }),
-    ChartsModule,
+    NgChartsModule,
     ValidateEqualModule,
     JwBootstrapSwitchNg2Module,
     NgxSpinnerModule,

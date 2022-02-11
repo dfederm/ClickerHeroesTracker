@@ -16,7 +16,7 @@ describe("OpenDialogDirective", () => {
     })
     class MockDialogComponent { }
 
-    // tslint:disable-next-line:max-classes-per-file - Allow multiple mock classes in a file
+    // eslint-disable-next-line max-classes-per-file
     @Component({
         template: "<a [openDialog]=\"MockDialogComponent\" [dismissCurrentDialog]=\"dismissCurrentDialog\" ></a>",
         selector: "mock",

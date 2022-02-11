@@ -11,9 +11,9 @@ import { BehaviorSubject } from "rxjs";
 import { AuthenticationResult } from "@azure/msal-browser";
 import { NgxSpinnerService } from "ngx-spinner";
 
-// tslint:disable-next-line:no-namespace
+// eslint-disable-next-line @typescript-eslint/no-namespace
 declare global {
-    // tslint:disable-next-line:interface-name - We don't own this interface name, just extending it
+    // eslint-disable-next-line @typescript-eslint/naming-convention
     interface Window {
         gapi: {};
         FB: {};
@@ -84,7 +84,7 @@ describe("ExternalLoginsComponent", () => {
     });
 
     afterEach(() => {
-        // tslint:disable-next-line:no-any
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         ExternalLoginsComponent.facebookInitialized = false;
     });
 

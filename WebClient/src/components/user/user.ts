@@ -5,21 +5,14 @@ import { SettingsService, IUserSettings } from "../../services/settingsService/s
 import { AuthenticationService, IUserInfo } from "../../services/authenticationService/authenticationService";
 
 import { Decimal } from "decimal.js";
-import { ChartDataSets, ChartOptions, ChartTooltipItem } from "chart.js";
+import { ChartDataset, ChartOptions, TooltipItem } from "chart.js";
+import 'chartjs-adapter-date-fns';
 import { ActivatedRoute } from "@angular/router";
 import { NgxSpinnerService } from "ngx-spinner";
 
 interface IProgressViewModel {
-  datasets: ChartDataSets[];
-  options: ChartOptions;
-  colors: {
-    backgroundColor: string,
-    borderColor: string,
-    pointBackgroundColor: string,
-    pointBorderColor: string,
-    pointHoverBackgroundColor: string,
-    pointHoverBorderColor: string,
-  }[];
+  datasets: ChartDataset<"line">[];
+  options: ChartOptions<"line">;
 }
 
 @Component({
@@ -241,35 +234,38 @@ export class UserComponent implements OnInit {
     this.progress = {
       datasets: [{
         data: seriesData,
-      }],
-      colors: [{
-        backgroundColor: "rgba(151,187,205,0.4)",
+        fill: true,
         borderColor: "rgba(151,187,205,1)",
+        backgroundColor: "rgba(151,187,205,0.4)",
         pointBackgroundColor: "rgba(151,187,205,1)",
         pointBorderColor: "#fff",
         pointHoverBackgroundColor: "rgba(151,187,205,0.8)",
         pointHoverBorderColor: "#fff",
       }],
       options: {
-        title: {
-          display: true,
-          fontSize: 18,
-          text: "Souls Spent",
-        },
-        legend: {
-          display: false,
-        },
-        tooltips: {
-          callbacks: {
-            title: (tooltipItems: ChartTooltipItem[]) => {
-              return isTime
-                ? new Date(tooltipItems[0].xLabel).toLocaleString()
-                : tooltipItems[0].xLabel.toString();
+        plugins: {
+          title: {
+            display: true,
+            font: {
+              size: 18
             },
-            label: (tooltipItem: ChartTooltipItem) => {
-              return isLogarithmic
-                ? Decimal.pow(10, tooltipItem.yLabel).toExponential(3)
-                : Number(tooltipItem.yLabel).toExponential(3);
+            text: "Souls Spent",
+          },
+          legend: {
+            display: false,
+          },
+          tooltip: {
+            callbacks: {
+              title: (tooltipItems: TooltipItem<"line">[]) => {
+                return isTime
+                  ? new Date(tooltipItems[0].parsed.x).toLocaleString()
+                  : tooltipItems[0].parsed.x.toString();
+              },
+              label: (tooltipItem: TooltipItem<"line">) => {
+                return isLogarithmic
+                  ? Decimal.pow(10, tooltipItem.parsed.y).toExponential(3)
+                  : Number(tooltipItem.parsed.y).toExponential(3);
+              },
             },
           },
         },
@@ -280,23 +276,19 @@ export class UserComponent implements OnInit {
           },
         },
         scales: {
-          xAxes: [
-            {
-              type: isTime ? "time" : "linear",
-            },
-          ],
-          yAxes: [
-            {
-              type: "linear",
-              ticks: {
-                callback: (value: number): string => {
-                  return isLogarithmic
-                    ? Decimal.pow(10, value).toExponential(3)
-                    : value.toExponential(3);
-                },
+          xAxis: {
+            type: isTime ? "time" : "linear",
+          },
+          yAxis: {
+            type: "linear",
+            ticks: {
+              callback: (value: number): string => {
+                return isLogarithmic
+                  ? Decimal.pow(10, value).toExponential(3)
+                  : value.toExponential(3);
               },
             },
-          ],
+          },
         },
       },
     };

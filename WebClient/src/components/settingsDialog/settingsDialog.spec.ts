@@ -538,7 +538,7 @@ describe("SettingsDialogComponent", () => {
     ): Promise<void> {
         let resolvePromise: () => void;
         let settingsService = TestBed.inject(SettingsService);
-        // tslint:disable-next-line:promise-must-complete - The promise does resolve, we just assign it to resolvePromise.
+        // eslint-disable-next-line , , , , , , , , , , , 
         spyOn(settingsService, "setSetting").and.returnValue(new Promise(resolve => {
             resolvePromise = resolve;
         }));
@@ -571,7 +571,7 @@ describe("SettingsDialogComponent", () => {
     ): Promise<void> {
         let rejectPromise: () => void;
         let settingsService = TestBed.inject(SettingsService);
-        // tslint:disable-next-line:promise-must-complete - The promise does resolve, we just assign it to resolvePromise.
+        // eslint-disable-next-line
         spyOn(settingsService, "setSetting").and.returnValue(new Promise((_, reject) => {
             rejectPromise = reject;
         }));
