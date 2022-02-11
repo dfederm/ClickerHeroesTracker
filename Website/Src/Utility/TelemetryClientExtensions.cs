@@ -1,8 +1,9 @@
 ﻿// Copyright (C) Clicker Heroes Tracker. All Rights Reserved.
 
 using System.Collections.Generic;
+using Azure;
+using Azure.Data.Tables;
 using Microsoft.ApplicationInsights;
-using Microsoft.Azure.Cosmos.Table;
 
 namespace ClickerHeroesTrackerWebsite.Utility
 {
@@ -18,16 +19,13 @@ namespace ClickerHeroesTrackerWebsite.Utility
             telemetryClient.TrackEvent("InvalidTableEntry", properties);
         }
 
-        public static void TrackFailedTableResult(this TelemetryClient telemetryClient, TableResult result, ITableEntity operationEntity = null)
+        public static void TrackFailedTableResult(this TelemetryClient telemetryClient, Response response, ITableEntity operationEntity)
         {
-            ITableEntity resultEntity = result.Result as ITableEntity;
             Dictionary<string, string> properties = new()
             {
                 { "OperationEntity-PartitionKey", operationEntity?.PartitionKey ?? "<none>" },
                 { "OperationEntity-RowKey", operationEntity?.RowKey ?? "<none>" },
-                { "Result-HttpStatusCode", result.HttpStatusCode.ToString() },
-                { "ResultEntity-PartitionKey", resultEntity?.PartitionKey ?? "<none>" },
-                { "ResultEntity-RowKey", resultEntity?.RowKey ?? "<none>" },
+                { "Result-HttpStatusCode", response.Status.ToString() },
             };
             telemetryClient.TrackEvent("FailedTableResult", properties);
         }

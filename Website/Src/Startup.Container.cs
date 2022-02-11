@@ -5,6 +5,7 @@ using System.IO;
 using System.Net.Http;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using Azure.Data.Tables;
 using ClickerHeroesTrackerWebsite.Configuration;
 using ClickerHeroesTrackerWebsite.Models;
 using ClickerHeroesTrackerWebsite.Models.Game;
@@ -17,7 +18,6 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.Azure.Cosmos.Table;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -40,12 +40,17 @@ namespace ClickerHeroesTrackerWebsite
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            if (_environment.IsDevelopment())
+            {
+                services.AddDatabaseDeveloperPageExceptionFilter();
+            }
+
             // The DevelopmentStorageAccount will only work if you have the Storage emulator v4.3 installed: https://go.microsoft.com/fwlink/?linkid=717179&clcid=0x409
             string storageConnectionString = _configuration["Storage:ConnectionString"];
-            CloudStorageAccount storageAccount = null;
+            TableServiceClient tableServiceClient = null;
             if (!string.IsNullOrEmpty(storageConnectionString))
             {
-                storageAccount = CloudStorageAccount.Parse(storageConnectionString);
+                tableServiceClient = new TableServiceClient(storageConnectionString);
             }
 
             // Necessary to persist keys (like the ones used to generate auth cookies)
@@ -133,10 +138,6 @@ namespace ClickerHeroesTrackerWebsite
                     options.AddEphemeralEncryptionKey()
                            .AddEphemeralSigningKey();
 
-                    // When rolling tokens are enabled, immediately
-                    // redeem the refresh token to prevent future reuse.
-                    options.UseRollingRefreshTokens();
-
                     // Register the ASP.NET Core host and configure the ASP.NET Core-specific options.
                     options.UseAspNetCore()
                            .EnableTokenEndpointPassthrough();
@@ -207,7 +208,7 @@ namespace ClickerHeroesTrackerWebsite
                     options.JsonSerializerOptions.WriteIndented = true;
 
                     // Omit nulls
-                    options.JsonSerializerOptions.IgnoreNullValues = true;
+                    options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
 
                     // Use camel-casing for fields (lower case first character)
                     options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
@@ -220,9 +221,9 @@ namespace ClickerHeroesTrackerWebsite
             services.AddOptions();
 
             // Container controlled registrations
-            if (storageAccount != null)
+            if (tableServiceClient != null)
             {
-                services.AddSingleton(_ => storageAccount.CreateCloudTableClient());
+                services.AddSingleton(tableServiceClient);
                 services.AddSingleton<ISiteNewsProvider, AzureStorageSiteNewsProvider>();
             }
             else
