@@ -4,22 +4,15 @@ import { UserService, IProgressData } from "../../services/userService/userServi
 import { SettingsService, IUserSettings } from "../../services/settingsService/settingsService";
 
 import { Decimal } from "decimal.js";
-import { ChartDataSets, ChartOptions, ChartTooltipItem } from "chart.js";
+import { ChartDataset, ChartOptions, TooltipItem } from "chart.js";
+import 'chartjs-adapter-date-fns';
 import { ExponentialPipe } from "../../pipes/exponentialPipe";
 import { NgxSpinnerService } from "ngx-spinner";
 
 interface IChartViewModel {
     isProminent: boolean;
-    datasets: ChartDataSets[];
-    options: ChartOptions;
-    colors: {
-        backgroundColor: string,
-        borderColor: string,
-        pointBackgroundColor: string,
-        pointBorderColor: string,
-        pointHoverBackgroundColor: string,
-        pointHoverBorderColor: string,
-    }[];
+    datasets: ChartDataset<"line">[];
+    options: ChartOptions<"line">;
 }
 
 @Component({
@@ -176,7 +169,7 @@ export class UserCompareComponent implements OnInit {
         this.charts = charts;
     }
 
-    // tslint:disable-next-line:cyclomatic-complexity
+    // eslint-disable-next-line complexity
     private createChart(
         title: string,
         isProminent: boolean,
@@ -267,13 +260,7 @@ export class UserCompareComponent implements OnInit {
             datasets: [
                 {
                     data: seriesData1,
-                },
-                {
-                    data: seriesData2,
-                },
-            ],
-            colors: [
-                {
+                    fill: true,
                     backgroundColor: "rgba(151,187,205,0.4)",
                     borderColor: "rgba(151,187,205,1)",
                     pointBackgroundColor: "rgba(151,187,205,1)",
@@ -282,6 +269,8 @@ export class UserCompareComponent implements OnInit {
                     pointHoverBorderColor: "#fff",
                 },
                 {
+                    data: seriesData2,
+                    fill: true,
                     backgroundColor: "rgba(169,68,66,0.4)",
                     borderColor: "rgba(169,68,66,1)",
                     pointBackgroundColor: "rgba(169,68,66,1)",
@@ -291,27 +280,31 @@ export class UserCompareComponent implements OnInit {
                 },
             ],
             options: {
-                title: {
-                    display: true,
-                    fontSize: 18,
-                    text: title,
-                },
-                legend: {
-                    display: false,
-                },
-                tooltips: {
-                    callbacks: {
-                        title: (tooltipItems: ChartTooltipItem[]) => {
-                            return isTime
-                                ? new Date(tooltipItems[0].xLabel).toLocaleString()
-                                : null;
+                plugins: {
+                    title: {
+                        display: true,
+                        font: {
+                            size: 18,
                         },
-                        label: (tooltipItem: ChartTooltipItem) => {
-                            let tooltipUser = tooltipItem.datasetIndex === 0
-                                ? this.userName
-                                : this.compareUserName;
-                            let tooltipValue = this.formatNumber(tooltipItem.yLabel, isLogarithmic);
-                            return `${tooltipUser}: ${tooltipValue}`;
+                        text: title,
+                    },
+                    legend: {
+                        display: false,
+                    },
+                    tooltip: {
+                        callbacks: {
+                            title: (tooltipItems: TooltipItem<"line">[]) => {
+                                return isTime
+                                    ? new Date(tooltipItems[0].parsed.x).toLocaleString()
+                                    : null;
+                            },
+                            label: (tooltipItem: TooltipItem<"line">) => {
+                                let tooltipUser = tooltipItem.datasetIndex === 0
+                                    ? this.userName
+                                    : this.compareUserName;
+                                let tooltipValue = this.formatNumber(tooltipItem.parsed.y, isLogarithmic);
+                                return `${tooltipUser}: ${tooltipValue}`;
+                            },
                         },
                     },
                 },
@@ -322,22 +315,18 @@ export class UserCompareComponent implements OnInit {
                     },
                 },
                 scales: {
-                    xAxes: [
-                        {
-                            display: isTime,
-                            type: isTime ? "time" : "linear",
-                        },
-                    ],
-                    yAxes: [
-                        {
-                            type: "linear",
-                            ticks: {
-                                callback: (value: number): string => {
-                                    return this.formatNumber(value, isLogarithmic);
-                                },
+                    xAxis: {
+                        display: isTime,
+                        type: isTime ? "time" : "linear",
+                    },
+                    yAxis: {
+                        type: "linear",
+                        ticks: {
+                            callback: (value: number): string => {
+                                return this.formatNumber(value, isLogarithmic);
                             },
                         },
-                    ],
+                    },
                 },
             },
         };

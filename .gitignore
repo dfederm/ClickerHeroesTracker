@@ -22,6 +22,9 @@ PublishProfiles/
 # npm packages
 node_modules/
 
+# Angular cache
+.angular/
+
 # WebClient logs
 logs/
 

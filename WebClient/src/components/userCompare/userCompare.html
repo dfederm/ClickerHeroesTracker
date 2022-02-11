@@ -31,9 +31,8 @@
             <!-- Height is intedned to be 400px, but for some reason the chart is 1.7x what we specify, so use 235 -->
             <canvas baseChart
                     height="235"
-                    [chartType]="'line'"
+                    [type]="'line'"
                     [datasets]="chart.datasets"
-                    [colors]="chart.colors"
                     [options]="chart.options">
             </canvas>
         </div>

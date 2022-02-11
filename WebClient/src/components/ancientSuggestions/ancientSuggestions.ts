@@ -208,7 +208,7 @@ export class AncientSuggestionsComponent implements OnInit {
             });
     }
 
-    // tslint:disable-next-line:cyclomatic-complexity
+    // eslint-disable-next-line complexity
     private handleSavedGame(): void {
         if (!this.savedGame) {
             return;
@@ -276,7 +276,7 @@ export class AncientSuggestionsComponent implements OnInit {
         this.sortAncients();
     }
 
-    // tslint:disable-next-line:cyclomatic-complexity
+    // eslint-disable-next-line complexity
     private hydrateAncientSuggestions(): void {
         // Only render when we have both
         if (!this.settings || !this.savedGame) {
@@ -400,7 +400,7 @@ export class AncientSuggestionsComponent implements OnInit {
             });
     }
 
-    // tslint:disable-next-line:cyclomatic-complexity
+    // eslint-disable-next-line complexity
     private calculateAncientSuggestions(currentPrimaryAncientLevel?: Decimal): { [key: string]: Decimal } {
         const suggestedLevels: { [key: string]: Decimal } = {};
 

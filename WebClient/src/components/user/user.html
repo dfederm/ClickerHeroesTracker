@@ -53,9 +53,8 @@
             <canvas baseChart
                     *ngIf="progress"
                     height="235"
-                    [chartType]="'line'"
+                    [type]="'line'"
                     [datasets]="progress.datasets"
-                    [colors]="progress.colors"
                     [options]="progress.options">
             </canvas>
             <p>

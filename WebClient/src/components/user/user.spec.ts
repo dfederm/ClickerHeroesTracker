@@ -2,7 +2,7 @@ import { NO_ERRORS_SCHEMA } from "@angular/core";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { By } from "@angular/platform-browser";
 import Decimal from "decimal.js";
-import { ChartDataSets, ChartOptions, ChartPoint } from "chart.js";
+import { ChartDataset, ChartOptions, ScatterDataPoint } from "chart.js";
 import { BehaviorSubject } from "rxjs";
 
 import { UserComponent } from "./user";
@@ -364,13 +364,13 @@ describe("UserComponent", () => {
             expect(chart).not.toBeNull();
             expect(chart.attributes.baseChart).toBeDefined();
             expect(chart.attributes.height).toEqual("235");
-            expect(chart.properties.chartType).toEqual("line");
+            expect(chart.properties.type).toEqual("line");
 
-            let datasets: ChartDataSets[] = chart.properties.datasets;
+            let datasets: ChartDataset<"line">[] = chart.properties.datasets;
             expect(datasets).toBeTruthy();
             expect(datasets.length).toEqual(1);
 
-            let data = datasets[0].data as ChartPoint[];
+            let data = datasets[0].data as ScatterDataPoint[];
             let dataKeys = Object.keys(progress.soulsSpentData);
             expect(data.length).toEqual(dataKeys.length);
             for (let i = 0; i < data.length; i++) {
@@ -378,13 +378,10 @@ describe("UserComponent", () => {
                 expect(data[i].y).toEqual(Number(progress.soulsSpentData[dataKeys[i]]));
             }
 
-            let colors = chart.properties.colors;
-            expect(colors).toBeTruthy();
-
-            let options: ChartOptions = chart.properties.options;
+            let options: ChartOptions<"line"> = chart.properties.options;
             expect(options).toBeTruthy();
-            expect(options.title.text).toEqual("Souls Spent");
-            expect(options.scales.yAxes[0].type).toEqual("linear");
+            expect(options.plugins.title.text).toEqual("Souls Spent");
+            expect(options.scales.yAxis.type).toEqual("linear");
         });
 
         it("should display a chart with logarithmic scale", async () => {
@@ -418,13 +415,13 @@ describe("UserComponent", () => {
             expect(chart).not.toBeNull();
             expect(chart.attributes.baseChart).toBeDefined();
             expect(chart.attributes.height).toEqual("235");
-            expect(chart.properties.chartType).toEqual("line");
+            expect(chart.properties.type).toEqual("line");
 
-            let datasets: ChartDataSets[] = chart.properties.datasets;
+            let datasets: ChartDataset<"line">[] = chart.properties.datasets;
             expect(datasets).toBeTruthy();
             expect(datasets.length).toEqual(1);
 
-            let data = datasets[0].data as ChartPoint[];
+            let data = datasets[0].data as ScatterDataPoint[];
             let dataKeys = Object.keys(soulsSpentData);
             expect(data.length).toEqual(dataKeys.length);
             for (let i = 0; i < data.length; i++) {
@@ -434,15 +431,12 @@ describe("UserComponent", () => {
                 expect(data[i].y).toEqual(new Decimal(soulsSpentData[dataKeys[i]]).log().toNumber());
             }
 
-            let colors = chart.properties.colors;
-            expect(colors).toBeTruthy();
-
-            let options: ChartOptions = chart.properties.options;
+            let options: ChartOptions<"line"> = chart.properties.options;
             expect(options).toBeTruthy();
-            expect(options.title.text).toEqual("Souls Spent");
+            expect(options.plugins.title.text).toEqual("Souls Spent");
 
             // Linear since we're manually managing log scale
-            expect(options.scales.yAxes[0].type).toEqual("linear");
+            expect(options.scales.yAxis.type).toEqual("linear");
         });
 
         it("should show an error when userService.getProgress fails", async () => {

@@ -7,7 +7,7 @@ import Decimal from "decimal.js";
 
 import { UserCompareComponent } from "./userCompare";
 import { UserService, IProgressData } from "../../services/userService/userService";
-import { ChartDataSets, ChartPoint, ChartOptions } from "chart.js";
+import { ChartDataset, ChartOptions, ScatterDataPoint } from "chart.js";
 import { SettingsService } from "../../services/settingsService/settingsService";
 import { ExponentialPipe } from "../../pipes/exponentialPipe";
 
@@ -214,28 +214,25 @@ describe("UserCompareComponent", () => {
                 expect(chart).not.toBeNull();
                 expect(chart.attributes.baseChart).toBeDefined();
                 expect(chart.attributes.height).toEqual("235");
-                expect(chart.properties.chartType).toEqual("line");
+                expect(chart.properties.type).toEqual("line");
 
-                let colors = chart.properties.colors;
-                expect(colors).toBeTruthy();
-
-                let options: ChartOptions = chart.properties.options;
+                let options: ChartOptions<"line"> = chart.properties.options;
                 expect(options).toBeTruthy();
-                expect(options.title.text).toEqual(expectedChartOrder[i].title);
+                expect(options.plugins.title.text).toEqual(expectedChartOrder[i].title);
 
                 let isLogarithmic = expectedChartOrder[i].isLogarithmic;
-                let datasets: ChartDataSets[] = chart.properties.datasets;
+                let datasets: ChartDataset<"line">[] = chart.properties.datasets;
                 expect(datasets).toBeTruthy();
                 expect(datasets.length).toEqual(2);
 
-                let data1 = datasets[0].data as ChartPoint[];
+                let data1 = datasets[0].data as ScatterDataPoint[];
                 let expectedData1 = expectedChartOrder[i].data1;
                 let dataKeys1 = Object.keys(expectedData1);
                 expect(data1.length).toEqual(dataKeys1.length);
                 for (let j = 0; j < data1.length; j++) {
                     let expectedDate = new Date(dataKeys1[j]);
                     expect(data1[j].x).toEqual(expectedDate.getTime());
-                    expect((options.tooltips.callbacks.title as Function)([{ xLabel: dataKeys1[j] }])).toEqual(expectedDate.toLocaleString());
+                    expect((options.plugins.tooltip.callbacks.title as Function)([{ parsed: { x: dataKeys1[j] } }])).toEqual(expectedDate.toLocaleString());
 
                     // When logarithmic, the value we plot is actually the log of the value to fake log scale
                     let rawExpectedValue = expectedData1[dataKeys1[j]];
@@ -248,18 +245,18 @@ describe("UserCompareComponent", () => {
                         ? Decimal.pow(10, expectedValue)
                         : Number(expectedValue);
                     let expectedLabel = ExponentialPipe.formatNumber(expectedLabelNum, settings);
-                    expect((options.tooltips.callbacks.label as Function)({ yLabel: expectedValue, datasetIndex: 0 })).toEqual("someUserName: " + expectedLabel);
-                    expect(options.scales.yAxes[0].ticks.callback(expectedValue, null, null)).toEqual(expectedLabel);
+                    expect((options.plugins.tooltip.callbacks.label as Function)({ parsed: { y: expectedValue }, datasetIndex: 0 })).toEqual("someUserName: " + expectedLabel);
+                    expect((<any>options.scales.yAxis.ticks).callback(expectedValue, null, null)).toEqual(expectedLabel);
                 }
 
-                let data2 = datasets[1].data as ChartPoint[];
+                let data2 = datasets[1].data as ScatterDataPoint[];
                 let expectedData2 = expectedChartOrder[i].data2;
                 let dataKeys2 = Object.keys(expectedData2);
                 expect(data2.length).toEqual(dataKeys2.length);
                 for (let j = 0; j < data2.length; j++) {
                     let expectedDate = new Date(dataKeys2[j]);
                     expect(data2[j].x).toEqual(expectedDate.getTime());
-                    expect((options.tooltips.callbacks.title as Function)([{ xLabel: dataKeys2[j] }])).toEqual(expectedDate.toLocaleString());
+                    expect((options.plugins.tooltip.callbacks.title as Function)([{ parsed: { x: dataKeys2[j] } }])).toEqual(expectedDate.toLocaleString());
 
                     // When logarithmic, the value we plot is actually the log of the value to fake log scale
                     let rawExpectedValue = expectedData2[dataKeys2[j]];
@@ -272,12 +269,12 @@ describe("UserCompareComponent", () => {
                         ? Decimal.pow(10, expectedValue)
                         : Number(expectedValue);
                     let expectedLabel = ExponentialPipe.formatNumber(expectedLabelNum, settings);
-                    expect((options.tooltips.callbacks.label as Function)({ yLabel: expectedValue, datasetIndex: 1 })).toEqual("someOtherUserName: " + expectedLabel);
-                    expect(options.scales.yAxes[0].ticks.callback(expectedValue, null, null)).toEqual(expectedLabel);
+                    expect((options.plugins.tooltip.callbacks.label as Function)({ parsed: { y: expectedValue }, datasetIndex: 1 })).toEqual("someOtherUserName: " + expectedLabel);
+                    expect((<any>options.scales.yAxis.ticks).callback(expectedValue, null, null)).toEqual(expectedLabel);
                 }
 
                 // Linear even when logarithmic since we're manually managing log scale
-                expect(options.scales.yAxes[0].type).toEqual("linear");
+                expect(options.scales.yAxis.type).toEqual("linear");
             }
         });
 

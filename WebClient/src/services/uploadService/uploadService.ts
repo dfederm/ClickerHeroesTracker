@@ -3,7 +3,7 @@ import { HttpClient, HttpParams, HttpErrorResponse } from "@angular/common/http"
 import { HttpErrorHandlerService } from "../httpErrorHandlerService/httpErrorHandlerService";
 import { AuthenticationService } from "../../services/authenticationService/authenticationService";
 import { IUser } from "../../models";
-import * as Cache from "lru-cache";
+import Cache from "lru-cache";
 import { AppInsightsService } from "@markpieszak/ng-application-insights";
 import { UserService } from "../userService/userService";
 
@@ -25,7 +25,7 @@ export interface IUpload {
     providedIn: "root",
 })
 export class UploadService {
-    private readonly cache = new Cache<number, IUpload>(10);
+    private readonly cache = new Cache<number, IUpload>({ max: 10 });
 
     private user: IUser;
 
@@ -43,7 +43,8 @@ export class UploadService {
             .subscribe(userInfo => {
                 if (userInfo.username !== (this.user && this.user.name)) {
                     // Reset the cache on user change
-                    this.cache.reset();
+                    // Casting as 'any' as the types are not updated
+                    (<any>this.cache).clear();
 
                     this.user = null;
                     if (userInfo.isLoggedIn) {
@@ -125,7 +126,8 @@ export class UploadService {
     }
 
     public delete(id: number): Promise<void> {
-        this.cache.del(id);
+        // Casting as 'any' as the types are not updated
+        (<any>this.cache).delete(id);
         return this.authenticationService.getAuthHeaders()
             .then(headers => {
                 return this.http

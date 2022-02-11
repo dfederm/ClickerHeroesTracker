@@ -3,7 +3,8 @@ import { ActivatedRoute, Params } from "@angular/router";
 import { UserService, IProgressData } from "../../services/userService/userService";
 
 import { Decimal } from "decimal.js";
-import { ChartDataSets, ChartOptions, ChartTooltipItem } from "chart.js";
+import { ChartDataset, ChartOptions, TooltipItem } from "chart.js";
+import 'chartjs-adapter-date-fns';
 import { SettingsService, IUserSettings } from "../../services/settingsService/settingsService";
 import { ExponentialPipe } from "../../pipes/exponentialPipe";
 import { PercentPipe } from "@angular/common";
@@ -11,16 +12,8 @@ import { NgxSpinnerService } from "ngx-spinner";
 
 interface IChartViewModel {
     isProminent: boolean;
-    datasets: ChartDataSets[];
-    options: ChartOptions;
-    colors: {
-        backgroundColor: string,
-        borderColor: string,
-        pointBackgroundColor: string,
-        pointBorderColor: string,
-        pointHoverBackgroundColor: string,
-        pointHoverBorderColor: string,
-    }[];
+    datasets: ChartDataset<"line">[];
+    options: ChartOptions<"line">;
 }
 
 @Component({
@@ -235,8 +228,7 @@ export class UserProgressComponent implements OnInit {
             isProminent,
             datasets: [{
                 data: seriesData,
-            }],
-            colors: [{
+                fill: true,
                 backgroundColor: "rgba(151,187,205,0.4)",
                 borderColor: "rgba(151,187,205,1)",
                 pointBackgroundColor: "rgba(151,187,205,1)",
@@ -245,23 +237,27 @@ export class UserProgressComponent implements OnInit {
                 pointHoverBorderColor: "#fff",
             }],
             options: {
-                title: {
-                    display: true,
-                    fontSize: 18,
-                    text: title,
-                },
-                legend: {
-                    display: false,
-                },
-                tooltips: {
-                    callbacks: {
-                        title: (tooltipItems: ChartTooltipItem[]) => {
-                            return isTime
-                                ? new Date(tooltipItems[0].xLabel).toLocaleString()
-                                : tooltipItems[0].xLabel.toString();
+                plugins: {
+                    title: {
+                        display: true,
+                        font: {
+                            size: 18,
                         },
-                        label: (tooltipItem: ChartTooltipItem) => {
-                            return formatValue(tooltipItem.yLabel, isLogarithmic);
+                        text: title,
+                    },
+                    legend: {
+                        display: false,
+                    },
+                    tooltip: {
+                        callbacks: {
+                            title: (tooltipItems: TooltipItem<"line">[]) => {
+                                return isTime
+                                    ? new Date(tooltipItems[0].parsed.x).toLocaleString()
+                                    : tooltipItems[0].parsed.x.toString();
+                            },
+                            label: (tooltipItem: TooltipItem<"line">) => {
+                                return formatValue(tooltipItem.parsed.y, isLogarithmic);
+                            },
                         },
                     },
                 },
@@ -272,21 +268,18 @@ export class UserProgressComponent implements OnInit {
                     },
                 },
                 scales: {
-                    xAxes: [
-                        {
-                            type: isTime ? "time" : "linear",
-                        },
-                    ],
-                    yAxes: [
-                        {
-                            type: "linear",
-                            ticks: {
-                                callback: (value: number): string => {
-                                    return formatValue(value, isLogarithmic);
-                                },
+                    xAxis: {
+                        type: isTime ? "time" : "linear",
+                    },
+                    yAxis:
+                    {
+                        type: "linear",
+                        ticks: {
+                            callback: (value: number): string => {
+                                return formatValue(value, isLogarithmic);
                             },
                         },
-                    ],
+                    },
                 },
             },
         };

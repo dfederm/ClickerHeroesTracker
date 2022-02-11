@@ -65,7 +65,7 @@ export class OutsiderSuggestionsComponent {
         this.outsiders = this.outsiders.sort((a, b) => a.id - b.id);
     }
 
-    // tslint:disable-next-line:cyclomatic-complexity
+    // eslint-disable-next-line complexity
     public refresh(): void {
         if (!this.savedGame) {
             return;

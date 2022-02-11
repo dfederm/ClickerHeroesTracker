@@ -94,7 +94,7 @@ export class UploadComponent implements OnInit {
         this.spinnerService.hide("upload");
     }
 
-    // tslint:disable-next-line:cyclomatic-complexity
+    // eslint-disable-next-line complexity
     private refresh(): void {
         if (!this.upload) {
             return;
