@@ -29,7 +29,6 @@ namespace ClickerHeroesTrackerWebsite
             if (_environment.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
-                app.UseDatabaseErrorPage();
             }
             else
             {

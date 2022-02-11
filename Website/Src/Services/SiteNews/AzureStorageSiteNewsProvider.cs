@@ -4,15 +4,16 @@ using System;
 using System.Collections.Generic;
 using System.Net;
 using System.Threading.Tasks;
+using Azure;
+using Azure.Data.Tables;
 using ClickerHeroesTrackerWebsite.Utility;
 using Microsoft.ApplicationInsights;
-using Microsoft.Azure.Cosmos.Table;
 
 namespace Website.Services.SiteNews
 {
     public class AzureStorageSiteNewsProvider : ISiteNewsProvider
     {
-        private readonly CloudTableClient _tableClient;
+        private readonly TableServiceClient _tableClient;
 
         private readonly TelemetryClient _telemetryClient;
 
@@ -21,150 +22,123 @@ namespace Website.Services.SiteNews
         /// </summary>
         /// <param name="tableClient">The azure table client.</param>
         /// <param name="telemetryClient">The telemetry client to log errors.</param>
-        public AzureStorageSiteNewsProvider(CloudTableClient tableClient, TelemetryClient telemetryClient)
+        public AzureStorageSiteNewsProvider(TableServiceClient tableClient, TelemetryClient telemetryClient)
         {
             _tableClient = tableClient ?? throw new ArgumentNullException(nameof(tableClient));
             _telemetryClient = telemetryClient ?? throw new ArgumentNullException(nameof(telemetryClient));
         }
 
         /// <inheritdoc />
-        public Task EnsureCreatedAsync() => GetTableReference().CreateIfNotExistsAsync();
+        public Task EnsureCreatedAsync() => GetTableClient().CreateIfNotExistsAsync();
 
         /// <inheritdoc />
         public async Task AddSiteNewsEntriesAsync(DateTime newsDate, IList<string> messages)
         {
-            CloudTable table = GetTableReference();
+            TableClient tableClient = GetTableClient();
+            List<TableTransactionAction> batchOperation = new();
+
+            string partitionKey = newsDate.ToString("yyyy-MM-dd");
 
             // Delete all rows in the partition first
-            TableQuery<SiteNewsTableEntity> query = new TableQuery<SiteNewsTableEntity>().Where(TableQuery.GenerateFilterCondition("PartitionKey", QueryComparisons.Equal, newsDate.ToString("yyyy-MM-dd")));
-            TableBatchOperation batchOperation = new();
-            TableContinuationToken token = null;
-            do
+            AsyncPageable<TableEntity> results = tableClient.QueryAsync<TableEntity>(filter: $"PartitionKey eq {partitionKey}");
+            await foreach (TableEntity entity in results)
             {
-                TableQuerySegment<SiteNewsTableEntity> segment = await table.ExecuteQuerySegmentedAsync(query, token);
-                token = segment.ContinuationToken;
-                foreach (SiteNewsTableEntity entity in segment)
-                {
-                    batchOperation.Delete(entity);
-                }
+                batchOperation.Add(new TableTransactionAction(TableTransactionActionType.Delete, entity));
             }
-            while (token != null);
 
             if (batchOperation.Count > 0)
             {
-                await table.ExecuteBatchAsync(batchOperation);
-                batchOperation = new TableBatchOperation();
+                await tableClient.SubmitTransactionAsync(batchOperation);
+                batchOperation.Clear();
             }
 
             // Next insert all messages
             for (int i = 0; i < messages.Count; i++)
             {
-                batchOperation.Insert(new SiteNewsTableEntity(newsDate, i) { Message = messages[i] });
+                var entity = new TableEntity(partitionKey, rowKey: i.ToString()) { { "Message", messages[i] } };
+                batchOperation.Add(new TableTransactionAction(TableTransactionActionType.Add, entity));
             }
 
-            TableBatchResult results = await table.ExecuteBatchAsync(batchOperation);
-            HttpStatusCode returnStatusCode = HttpStatusCode.OK;
-            foreach (TableResult result in results)
+            Response<IReadOnlyList<Response>> responses = await tableClient.SubmitTransactionAsync(batchOperation);
+            int? returnStatusCode = null;
+            for (int i = 0; i < responses.Value.Count; i++)
             {
-                if (result.HttpStatusCode >= 400 && result.HttpStatusCode <= 499)
+                Response response = responses.Value[i];
+                if (response.IsError)
                 {
-                    _telemetryClient.TrackFailedTableResult(result);
-                    returnStatusCode = HttpStatusCode.BadRequest;
-                }
-
-                if (result.HttpStatusCode >= 500 && result.HttpStatusCode <= 599)
-                {
-                    _telemetryClient.TrackFailedTableResult(result);
-                    returnStatusCode = HttpStatusCode.InternalServerError;
+                    _telemetryClient.TrackFailedTableResult(response, batchOperation[i].Entity);
+                    returnStatusCode = response.Status;
                 }
             }
 
-            if (returnStatusCode != HttpStatusCode.OK)
+            if (returnStatusCode.HasValue)
             {
-                throw new InvalidOperationException("Failed to add news entries due to following http code: " + returnStatusCode);
+                throw new InvalidOperationException("Failed to add news entries due to following http code: " + returnStatusCode.Value);
             }
         }
 
         /// <inheritdoc />
         public async Task DeleteSiteNewsForDateAsync(DateTime newsDate)
         {
-            CloudTable table = GetTableReference();
+            TableClient tableClient = GetTableClient();
+            List<TableTransactionAction> batchOperation = new();
 
-            TableQuery<SiteNewsTableEntity> query = new TableQuery<SiteNewsTableEntity>().Where(TableQuery.GenerateFilterCondition("PartitionKey", QueryComparisons.Equal, newsDate.ToString("yyyy-MM-dd")));
-            TableBatchOperation batchOperation = new();
-            TableContinuationToken token = null;
-            do
+            string partitionKey = newsDate.ToString("yyyy-MM-dd");
+
+            AsyncPageable<TableEntity> results = tableClient.QueryAsync<TableEntity>(filter: $"PartitionKey eq {partitionKey}");
+            await foreach (TableEntity entity in results)
             {
-                TableQuerySegment<SiteNewsTableEntity> segment = await table.ExecuteQuerySegmentedAsync(query, token);
-                token = segment.ContinuationToken;
-                foreach (SiteNewsTableEntity entity in segment)
-                {
-                    batchOperation.Delete(entity);
-                }
+                batchOperation.Add(new TableTransactionAction(TableTransactionActionType.Delete, entity));
             }
-            while (token != null);
 
-            TableBatchResult results = await table.ExecuteBatchAsync(batchOperation);
-            HttpStatusCode returnStatusCode = HttpStatusCode.OK;
-            foreach (TableResult result in results)
+            Response<IReadOnlyList<Response>> responses = await tableClient.SubmitTransactionAsync(batchOperation);
+            int? returnStatusCode = null;
+            for (int i = 0; i < responses.Value.Count; i++)
             {
-                if (result.HttpStatusCode >= 400 && result.HttpStatusCode <= 499)
+                Response response = responses.Value[i];
+                if (response.IsError)
                 {
-                    _telemetryClient.TrackFailedTableResult(result);
-                    returnStatusCode = HttpStatusCode.BadRequest;
-                }
-
-                if (result.HttpStatusCode >= 500 && result.HttpStatusCode <= 599)
-                {
-                    _telemetryClient.TrackFailedTableResult(result);
-                    returnStatusCode = HttpStatusCode.InternalServerError;
+                    _telemetryClient.TrackFailedTableResult(response, batchOperation[i].Entity);
+                    returnStatusCode = response.Status;
                 }
             }
 
-            if (returnStatusCode != HttpStatusCode.OK)
+            if (returnStatusCode.HasValue)
             {
-                throw new InvalidOperationException("Failed to add news entries due to following http code: " + returnStatusCode);
+                throw new InvalidOperationException("Failed to add news entries due to following http code: " + returnStatusCode.Value);
             }
         }
 
         /// <inheritdoc />
         public async Task<IDictionary<DateTime, IList<string>>> RetrieveSiteNewsEntriesAsync()
         {
-            CloudTable table = GetTableReference();
-
-            TableQuery<SiteNewsTableEntity> query = new();
+            TableClient tableClient = GetTableClient();
 
             // Group entities by date and sort by order in each group
             int currentOrder = 0;
             SortedDictionary<DateTime, SortedList<int, string>> entitiesByDate = new();
-            TableContinuationToken token = null;
-            do
+            AsyncPageable<TableEntity> results = tableClient.QueryAsync<TableEntity>();
+            await foreach (TableEntity entity in results)
             {
-                TableQuerySegment<SiteNewsTableEntity> segment = await table.ExecuteQuerySegmentedAsync(query, token);
-                token = segment.ContinuationToken;
-                foreach (SiteNewsTableEntity entity in segment)
+                if (!DateTime.TryParse(entity.PartitionKey, out DateTime date))
                 {
-                    if (!DateTime.TryParse(entity.PartitionKey, out DateTime date))
-                    {
-                        _telemetryClient.TrackInvalidTableEntry(entity);
-                        continue;
-                    }
-
-                    if (!int.TryParse(entity.RowKey, out int order))
-                    {
-                        order = currentOrder++;
-                    }
-
-                    if (!entitiesByDate.TryGetValue(date, out SortedList<int, string> entities))
-                    {
-                        entities = new SortedList<int, string>();
-                        entitiesByDate.Add(date, entities);
-                    }
-
-                    entities.Add(order, entity.Message);
+                    _telemetryClient.TrackInvalidTableEntry(entity);
+                    continue;
                 }
+
+                if (!int.TryParse(entity.RowKey, out int order))
+                {
+                    order = currentOrder++;
+                }
+
+                if (!entitiesByDate.TryGetValue(date, out SortedList<int, string> entities))
+                {
+                    entities = new SortedList<int, string>();
+                    entitiesByDate.Add(date, entities);
+                }
+
+                entities.Add(order, entity.GetString("Message"));
             }
-            while (token != null);
 
             // Select only the messages
             SortedDictionary<DateTime, IList<string>> entries = new();
@@ -176,6 +150,6 @@ namespace Website.Services.SiteNews
             return entries;
         }
 
-        private CloudTable GetTableReference() => _tableClient.GetTableReference("SiteNews");
+        private TableClient GetTableClient() => _tableClient.GetTableClient("SiteNews");
     }
 }
