@@ -207,7 +207,7 @@ namespace ClickerHeroesTrackerWebsite
                     options.JsonSerializerOptions.WriteIndented = true;
 
                     // Omit nulls
-                    options.JsonSerializerOptions.IgnoreNullValues = true;
+                    options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
 
                     // Use camel-casing for fields (lower case first character)
                     options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
