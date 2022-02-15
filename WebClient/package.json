@@ -39,7 +39,7 @@
     "ngx-spinner": "^13.1.1",
     "ngx-window-token": "^6.0.0",
     "pako": "^2.0.4",
-    "rxjs": "~6.6.0",
+    "rxjs": "~7.5.4",
     "toformat": "^2.0.0",
     "tslib": "^2.3.0",
     "zone.js": "~0.11.4"
