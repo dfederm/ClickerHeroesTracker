@@ -62,7 +62,7 @@
     "@types/pako": "^1.0.3",
     "@typescript-eslint/eslint-plugin": "^5.11.0",
     "@typescript-eslint/parser": "^5.11.0",
-    "eslint": "^8.2.0",
+    "eslint": "^8.9.0",
     "eslint-plugin-import": "latest",
     "eslint-plugin-jsdoc": "latest",
     "eslint-plugin-prefer-arrow": "latest",
