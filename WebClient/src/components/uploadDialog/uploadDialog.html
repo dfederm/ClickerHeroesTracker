@@ -1,10 +1,8 @@
 <div class="modal-header">
     <h4 class="modal-title">Upload your save</h4>
     <button type="button"
-            class="close"
-            (click)="activeModal.dismiss()">
-        &times;
-    </button>
+            class="btn-close"
+            (click)="activeModal.dismiss()"></button>
 </div>
 <div class="modal-body">
     <div *ngIf="errorMessage"
@@ -15,7 +13,7 @@
                  [fullScreen]="false"
                  type="ball-pulse"></ngx-spinner>
     <form (ngSubmit)="upload()">
-        <div class="form-group">
+        <div class="mb-3">
             <label for="encodedSaveData">Save Data</label>
             <textarea class="form-control"
                       rows="2"
@@ -31,7 +29,7 @@
                    class="d-none"
                    (change)="uploadFile($event)" />
         </div>
-        <fieldset class="form-group">
+        <fieldset class="mb-3">
             <legend class="col-form-legend">Play Style</legend>
             <div *ngFor="let p of playStyles"
                  class="form-check form-check-inline">
@@ -45,7 +43,7 @@
             </div>
         </fieldset>
         <div *ngIf="userInfo.isLoggedIn"
-             class="form-group form-check">
+             class="mb-3 form-check">
             <label class="form-check-label">
                 <input class="form-check-input"
                        id="addToProgress"

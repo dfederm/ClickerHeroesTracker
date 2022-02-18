@@ -12,7 +12,7 @@
             <tbody>
                 <tr *ngFor="let externalLogin of logins.externalLogins">
                     <td>{{ externalLogin.providerName }}</td>
-                    <td class="text-right">
+                    <td class="text-end">
                         <!-- Don't allow users to remove the only way they have to log in -->
                         <button *ngIf="logins.hasPassword || logins.externalLogins.length > 1"
                                 class="btn btn-primary"
@@ -39,7 +39,7 @@
     </p>
     <form (ngSubmit)="chooseUserName()"
           #registerForm="ngForm">
-        <div class="form-group"
+        <div class="mb-3"
              [class.has-danger]="!(formUsername.valid || formUsername.pristine)">
             <label for="username">Username</label>
             <input type="text"

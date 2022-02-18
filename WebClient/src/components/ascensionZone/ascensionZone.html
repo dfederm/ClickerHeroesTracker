@@ -26,12 +26,12 @@
     </thead>
     <tbody>
         <tr *ngFor="let data of calculateAscensionZoneSteps">
-            <td class="text-right">{{ data.zone }}</td>
+            <td class="text-end">{{ data.zone }}</td>
             <td>{{ data.hero }}</td>
-            <td class="text-right">{{ data.heroLevel }}</td>
-            <td class="text-right">{{ data.heroGilds }}</td>
-            <td class="text-right">{{ data.damage | exponential }}</td>
-            <td class="text-right">{{ data.gold | exponential }}</td>
+            <td class="text-end">{{ data.heroLevel }}</td>
+            <td class="text-end">{{ data.heroGilds }}</td>
+            <td class="text-end">{{ data.damage | exponential }}</td>
+            <td class="text-end">{{ data.gold | exponential }}</td>
         </tr>
     </tbody>
 </table>

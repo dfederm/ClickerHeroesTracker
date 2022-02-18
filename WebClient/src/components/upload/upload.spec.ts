@@ -223,7 +223,7 @@ describe("UploadComponent", () => {
             let errorMessage = fixture.debugElement.query(By.css(".alert-danger"));
             expect(errorMessage).toBeNull();
 
-            let buttons = fixture.debugElement.queryAll(By.css(".col-md-6.pull-right button"));
+            let buttons = fixture.debugElement.queryAll(By.css(".col-md-6 button"));
             let found = false;
             for (let i = 0; i < buttons.length; i++) {
                 if (getNormalizedTextContent(buttons[i]) === "View Save Data") {
@@ -245,7 +245,7 @@ describe("UploadComponent", () => {
             let errorMessage = fixture.debugElement.query(By.css(".alert-danger"));
             expect(errorMessage).toBeNull();
 
-            let buttons = fixture.debugElement.queryAll(By.css(".col-md-6.pull-right button"));
+            let buttons = fixture.debugElement.queryAll(By.css(".col-md-6 button"));
             let viewSaveDataButton: DebugElement;
             for (let i = 0; i < buttons.length; i++) {
                 if (getNormalizedTextContent(buttons[i]) === "View Save Data") {
@@ -276,7 +276,7 @@ describe("UploadComponent", () => {
             let errorMessage = fixture.debugElement.query(By.css(".alert-danger"));
             expect(errorMessage).toBeNull();
 
-            let buttons = fixture.debugElement.queryAll(By.css(".col-md-6.pull-right button"));
+            let buttons = fixture.debugElement.queryAll(By.css(".col-md-6 button"));
             let deleteButton: DebugElement;
             for (let i = 0; i < buttons.length; i++) {
                 if (getNormalizedTextContent(buttons[i]) === "Delete") {
@@ -304,7 +304,7 @@ describe("UploadComponent", () => {
             let errorMessage = fixture.debugElement.query(By.css(".alert-danger"));
             expect(errorMessage).toBeNull();
 
-            let buttons = fixture.debugElement.queryAll(By.css(".col-md-6.pull-right button"));
+            let buttons = fixture.debugElement.queryAll(By.css(".col-md-6 button"));
             let deleteButton: DebugElement;
             for (let i = 0; i < buttons.length; i++) {
                 if (getNormalizedTextContent(buttons[i]) === "Delete") {
@@ -384,7 +384,7 @@ describe("UploadComponent", () => {
             let errorMessage = fixture.debugElement.query(By.css(".alert-danger"));
             expect(errorMessage).toBeNull();
 
-            let buttons = fixture.debugElement.queryAll(By.css(".col-md-6.pull-right button"));
+            let buttons = fixture.debugElement.queryAll(By.css(".col-md-6 button"));
             let deleteButton: DebugElement;
             for (let i = 0; i < buttons.length; i++) {
                 if (getNormalizedTextContent(buttons[i]) === "Delete") {

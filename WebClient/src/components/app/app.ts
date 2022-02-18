@@ -12,10 +12,10 @@ import { AuthenticationService, IUserInfo } from "../../services/authenticationS
 export class AppComponent implements OnInit {
   public static defaultTheme = "light";
 
-  // TODO: Consider getting all themes from https://bootswatch.com/api/4.json
+  // TODO: Consider getting all themes from https://bootswatch.com/api/5.json
   public static themeCssUrls: { [theme: string]: string } = {
-    light: "https://maxcdn.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css",
-    dark: "https://maxcdn.bootstrapcdn.com/bootswatch/4.1.3/slate/bootstrap.min.css",
+    light: "https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css",
+    dark: "https://cdn.jsdelivr.net/npm/bootswatch@5.1.3/dist/slate/bootstrap.min.css",
   };
 
   public isLoading: boolean;

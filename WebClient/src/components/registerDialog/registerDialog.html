@@ -1,10 +1,8 @@
 <div class="modal-header">
     <h4 class="modal-title">Register</h4>
     <button type="button"
-            class="close"
-            (click)="activeModal.dismiss()">
-        &times;
-    </button>
+            class="btn-close"
+            (click)="activeModal.dismiss()"></button>
 </div>
 <div class="modal-body">
     <div *ngIf="errors"
@@ -18,7 +16,7 @@
                  type="ball-pulse"></ngx-spinner>
     <form (ngSubmit)="register()"
           #registerForm="ngForm">
-        <div class="form-group"
+        <div class="mb-3"
              [class.has-danger]="!(formUsername.valid || formUsername.pristine)">
             <label for="username">Username</label>
             <input type="text"
@@ -40,7 +38,7 @@
                 </div>
             </div>
         </div>
-        <div class="form-group"
+        <div class="mb-3"
              [class.has-danger]="!(formEmail.valid || formEmail.pristine)">
             <label for="email">Email</label>
             <input type="email"
@@ -62,7 +60,7 @@
                 </div>
             </div>
         </div>
-        <div class="form-group"
+        <div class="mb-3"
              [class.has-danger]="!(formPassword.valid || formPassword.pristine)">
             <label for="password">Password</label>
             <input type="password"
@@ -84,7 +82,7 @@
                 </div>
             </div>
         </div>
-        <div class="form-group"
+        <div class="mb-3"
              [class.has-danger]="!(formConfirmPassword.valid || formConfirmPassword.pristine)">
             <label for="confirmPassword">Confirm Password</label>
             <input type="password"

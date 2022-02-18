@@ -1,10 +1,8 @@
 <div class="modal-header">
     <h4 class="modal-title">Feedback</h4>
     <button type="button"
-            class="close"
-            (click)="activeModal.dismiss()">
-        &times;
-    </button>
+            class="btn-close"
+            (click)="activeModal.dismiss()"></button>
 </div>
 <div class="modal-body">
     <div *ngIf="errorMessage"
@@ -16,7 +14,7 @@
                  type="ball-pulse"></ngx-spinner>
     <form (ngSubmit)="submit()"
           #feedbackForm="ngForm">
-        <div class="form-group"
+        <div class="mb-3"
              [class.has-danger]="!(formComments.valid || formComments.pristine)">
             <label for="comments">Please leave comments, questions, suggestions, or bug reports</label>
             <textarea class="form-control"
@@ -33,7 +31,7 @@
             </div>
         </div>
         <div *ngIf="!userInfo.isLoggedIn"
-             class="form-group"
+             class="mb-3"
              [class.has-danger]="!(formEmail.valid || formEmail.pristine)">
             <label for="email">Email</label>
             <input type="email"

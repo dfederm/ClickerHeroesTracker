@@ -16,15 +16,15 @@
     <tbody>
         <tr *ngFor="let outsider of outsiders">
             <td>{{ outsider.name }}:</td>
-            <td class="text-right">{{ outsider.currentLevel | exponential }}</td>
-            <td class="text-right">{{ outsider.suggestedLevel | exponential }}</td>
+            <td class="text-end">{{ outsider.currentLevel | exponential }}</td>
+            <td class="text-end">{{ outsider.suggestedLevel | exponential }}</td>
         </tr>
     </tbody>
     <tfoot>
         <tr>
             <td></td>
-            <td class="text-right">Remaining</td>
-            <td class="text-right">{{ remainingAncientSouls | exponential }}</td>
+            <td class="text-end">Remaining</td>
+            <td class="text-end">{{ remainingAncientSouls | exponential }}</td>
         </tr>
     </tfoot>
 </table>
@@ -38,19 +38,19 @@
     <tbody>
         <tr>
             <td>Highest Zone:</td>
-            <td class="text-right">{{ newHze | exponential }}</td>
+            <td class="text-end">{{ newHze | exponential }}</td>
         </tr>
         <tr>
             <td>Hero Souls:</td>
-            <td class="text-right">{{ newHeroSouls | exponential }}</td>
+            <td class="text-end">{{ newHeroSouls | exponential }}</td>
         </tr>
         <tr>
             <td>Ancient Souls:</td>
-            <td class="text-right">{{ newAncientSouls | exponential }} (+{{ ancientSoulsDiff | exponential }})</td>
+            <td class="text-end">{{ newAncientSouls | exponential }} (+{{ ancientSoulsDiff | exponential }})</td>
         </tr>
         <tr>
             <td>Transcendent Power:</td>
-            <td class="text-right">{{ newTranscendentPower | percent:'1.1-3' }}</td>
+            <td class="text-end">{{ newTranscendentPower | percent:'1.1-3' }}</td>
         </tr>
     </tbody>
 </table>
