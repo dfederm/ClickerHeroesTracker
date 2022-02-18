@@ -73,16 +73,14 @@
                          type="ball-pulse"></ngx-spinner>
             <form (ngSubmit)="unblockClan()"
                   #unblockClanForm="ngForm">
-                <div class="form-group">
-                    <label for="unblockClanName">Clan Name</label>
-                    <select class="form-control"
-                            id="unblockClanName"
-                            name="unblockClanName"
-                            [(ngModel)]="unblockClanName">
-                        <option *ngFor="let clanName of blockedClans"
-                                [ngValue]="clanName">{{ clanName }}</option>
-                    </select>
-                </div>
+                <label for="unblockClanName">Clan Name</label>
+                <select class="form-select"
+                        id="unblockClanName"
+                        name="unblockClanName"
+                        [(ngModel)]="unblockClanName">
+                    <option *ngFor="let clanName of blockedClans"
+                            [ngValue]="clanName">{{ clanName }}</option>
+                </select>
                 <button type="submit"
                         class="btn btn-primary">Unblock</button>
             </form>

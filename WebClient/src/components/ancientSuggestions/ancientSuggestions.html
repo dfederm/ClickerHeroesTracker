@@ -5,7 +5,7 @@
         Math by /u/sugima
     </a>
 </p>
-<fieldset class="form-group">
+<fieldset class="mb-3">
     <legend class="col-form-legend">Suggestion Type</legend>
     <div class="form-check form-check-inline">
         <label class="form-check-label">
@@ -37,7 +37,7 @@
     </div>
 </fieldset>
 <div *ngIf="suggestionType == 'AvailableSouls'"
-     class="form-group form-check">
+     class="form-check mb-3">
     <label class="form-check-label">
         <input class="form-check-input"
                name="useSoulsFromAscension"
@@ -46,7 +46,7 @@
         <span>Include souls from ascension (+{{ pendingSouls | exponential }})</span>
     </label>
 </div>
-<div>
+<div class="mb-3">
     <button class="btn btn-secondary"
             [disabled]="suggestionType != 'AvailableSouls' || useSoulsFromAscension"
             (click)="openAutolevelModal(autolevelModal)">
@@ -62,46 +62,42 @@
         <div class="modal-header">
             <h4 class="modal-title">Autolevel ancients</h4>
             <button type="button"
-                    class="close"
-                    (click)="d()">
-                &times;
-            </button>
+                    class="btn-close"
+                    (click)="d()"></button>
         </div>
         <div class="modal-body">
-            <div class="form-group">
-                <div *ngIf="modalErrorMessage"
-                     class="alert alert-danger">
-                    {{ modalErrorMessage }}
-                </div>
-                <ngx-spinner name="modal"
-                             [fullScreen]="false"
-                             type="ball-pulse"></ngx-spinner>
-                <p class="alert alert-warning">
-                    This feature is experimental and is considered cheating. Please report any problems via the
-                    <a [openDialog]="FeedbackDialogComponent">feedback form</a> or on
-                    <a href="https://github.com/dfederm/ClickerHeroesTracker/issues"
-                       target="_blank">Github</a>.
-                </p>
-                <p *ngIf="autoLeveledSavedGame.isScrubbed"
-                   class="alert alert-warning">
-                    You are either not logged in or this is not your save, so this has been scrubbed of personal data. If used, you will not be logged in and clan information will be gone.
-                </p>
-                <p>
-                    Import this into Clicker Heroes:
-                </p>
-                <textarea class="form-control"
-                          rows="2"
-                          #rawContent
-                          readonly>{{ autoLeveledSavedGame.content }}</textarea>
-                <button *ngIf="!autoLeveledSavedGame.isScrubbed"
-                        type="button"
-                        class="btn btn-primary"
-                        (click)="saveAutolevel()">Add to Progress</button>
-                <button type="button"
-                        class="btn btn-primary float-right"
-                        [ngxClipboard]="rawContent"
-                        (cbOnSuccess)="c()">Copy to Clipboard</button>
+            <div *ngIf="modalErrorMessage"
+                 class="alert alert-danger">
+                {{ modalErrorMessage }}
             </div>
+            <ngx-spinner name="modal"
+                         [fullScreen]="false"
+                         type="ball-pulse"></ngx-spinner>
+            <p class="alert alert-warning">
+                This feature is experimental and is considered cheating. Please report any problems via the
+                <a [openDialog]="FeedbackDialogComponent">feedback form</a> or on
+                <a href="https://github.com/dfederm/ClickerHeroesTracker/issues"
+                   target="_blank">Github</a>.
+            </p>
+            <p *ngIf="autoLeveledSavedGame.isScrubbed"
+               class="alert alert-warning">
+                You are either not logged in or this is not your save, so this has been scrubbed of personal data. If used, you will not be logged in and clan information will be gone.
+            </p>
+            <p>
+                Import this into Clicker Heroes:
+            </p>
+            <textarea class="form-control"
+                      rows="2"
+                      #rawContent
+                      readonly>{{ autoLeveledSavedGame.content }}</textarea>
+            <button *ngIf="!autoLeveledSavedGame.isScrubbed"
+                    type="button"
+                    class="btn btn-primary"
+                    (click)="saveAutolevel()">Add to Progress</button>
+            <button type="button"
+                    class="btn btn-primary float-right"
+                    [ngxClipboard]="rawContent"
+                    (cbOnSuccess)="c()">Copy to Clipboard</button>
         </div>
         <div class="modal-footer">
             <button type="button"
@@ -125,7 +121,7 @@
                 {{ ancient.name }}:
             </td>
 
-            <td class="text-right">
+            <td class="text-end">
                 {{ ancient.ancientLevel | exponential }}
                 <span *ngIf="!ancient.itemLevel.isZero()"
                       placement="right"
@@ -135,7 +131,7 @@
                 </span>
             </td>
 
-            <td class="text-right">
+            <td class="text-end">
                 {{ ancient.isBase ? "N/A" : ancient.suggestedLevel !== undefined ? (ancient.suggestedLevel | exponential) : "-" }}
                 <span *ngIf="ancient.isBase"
                       class="text-muted"
@@ -145,7 +141,7 @@
                     (*)
                 </span>
             </td>
-            <td class="text-right"
+            <td class="text-end"
                 [ngClass]="{'copiable font-weight-bold' : ancient.diffCopyValue}"
                 ngxClipboard
                 [cbContent]="ancient.diffCopyValue">
@@ -161,9 +157,9 @@
     <tfoot *ngIf="this.suggestionType === 'AvailableSouls'">
         <tr>
             <th>Hero Souls</th>
-            <td class="text-right">{{ availableSouls | exponential }}</td>
-            <td class="text-right">{{ spentSouls | exponential }}</td>
-            <td class="text-right">{{ remainingSouls | exponential }}</td>
+            <td class="text-end">{{ availableSouls | exponential }}</td>
+            <td class="text-end">{{ spentSouls | exponential }}</td>
+            <td class="text-end">{{ remainingSouls | exponential }}</td>
         </tr>
     </tfoot>
 </table>

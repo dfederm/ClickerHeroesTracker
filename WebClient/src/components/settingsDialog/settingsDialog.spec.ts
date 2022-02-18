@@ -479,7 +479,7 @@ describe("SettingsDialogComponent", () => {
         let body = fixture.debugElement.query(By.css(".modal-body"));
         expect(body).not.toBeNull();
 
-        let formGroups = body.queryAll(By.css(".form-group"));
+        let formGroups = body.queryAll(By.css(".mb-3"));
         expect(formGroups.length).toEqual(11);
 
         let formGroup = formGroups[i];
@@ -538,7 +538,7 @@ describe("SettingsDialogComponent", () => {
     ): Promise<void> {
         let resolvePromise: () => void;
         let settingsService = TestBed.inject(SettingsService);
-        // eslint-disable-next-line , , , , , , , , , , , 
+        // eslint-disable-next-line , , , , , , , , , , ,
         spyOn(settingsService, "setSetting").and.returnValue(new Promise(resolve => {
             resolvePromise = resolve;
         }));
