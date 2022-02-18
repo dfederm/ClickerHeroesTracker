@@ -43,7 +43,7 @@ describe("HomeComponent", () => {
     it("should display the jumbotron", () => {
         fixture.detectChanges();
 
-        let jumbotron = fixture.debugElement.query(By.css(".jumbotron"));
+        let jumbotron = fixture.debugElement.query(By.css(".row"));
         expect(jumbotron).not.toBeNull();
 
         let title = jumbotron.query(By.css("h1"));
