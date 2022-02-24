@@ -42,9 +42,7 @@ export class UploadService {
             .userInfo()
             .subscribe(userInfo => {
                 if (userInfo.username !== (this.user && this.user.name)) {
-                    // Reset the cache on user change
-                    // Casting as 'any' as the types are not updated
-                    (<any>this.cache).clear();
+                    this.cache.clear();
 
                     this.user = null;
                     if (userInfo.isLoggedIn) {
@@ -126,8 +124,7 @@ export class UploadService {
     }
 
     public delete(id: number): Promise<void> {
-        // Casting as 'any' as the types are not updated
-        (<any>this.cache).delete(id);
+        this.cache.delete(id);
         return this.authenticationService.getAuthHeaders()
             .then(headers => {
                 return this.http
