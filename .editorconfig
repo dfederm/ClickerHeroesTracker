@@ -228,6 +228,9 @@ dotnet_diagnostic.SA1200.severity = none
 # We prefer underscore prefixes for private fields
 dotnet_diagnostic.SA1309.severity = none
 
+# Files ending with a newline character is fine
+dotnet_diagnostic.SA1518.severity = none
+
 # We don't need documentation on everything
 dotnet_diagnostic.SA1600.severity = none
 dotnet_diagnostic.SA1601.severity = none
