@@ -4,9 +4,8 @@
   "scripts": {
     "ng": "ng",
     "start": "ng serve --open",
-    "build": "ng build",
+    "build": "ng build --configuration production",
     "watch": "ng build --watch --configuration development",
-    "test": "ng test",
     "coverage": "ng test --no-watch --code-coverage --no-progress --browsers=ChromeHeadlessCI",
     "lint": "ng lint"
   },
