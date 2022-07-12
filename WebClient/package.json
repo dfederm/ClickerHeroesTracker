@@ -21,7 +21,7 @@
     "@angular/platform-browser": "^14.0.5",
     "@angular/platform-browser-dynamic": "^14.0.5",
     "@angular/router": "^14.0.5",
-    "@azure/msal-browser": "^2.26.0",
+    "@azure/msal-browser": "^2.27.0",
     "@markpieszak/ng-application-insights": "^9.0.2",
     "@ng-bootstrap/ng-bootstrap": "^12.1.2",
     "bootstrap": "^5.1.3",
