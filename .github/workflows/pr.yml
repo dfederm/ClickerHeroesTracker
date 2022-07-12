@@ -41,7 +41,8 @@ jobs:
       with:
         node-version: '17.x'
     - name: Install npm packages
-      run: npm ci
+      # --force because some dependencies haven't updated to Angular 14 yet. Sigh
+      run: npm ci --force
       working-directory: ./WebClient
     - name: Build
       run: npm run build
