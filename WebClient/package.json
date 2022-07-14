@@ -19,7 +19,7 @@
     "@angular/forms": "^14.0.5",
     "@angular/localize": "^14.0.5",
     "@angular/platform-browser": "^14.0.5",
-    "@angular/platform-browser-dynamic": "^14.0.5",
+    "@angular/platform-browser-dynamic": "^14.0.6",
     "@angular/router": "^14.0.5",
     "@azure/msal-browser": "^2.27.0",
     "@markpieszak/ng-application-insights": "^9.0.2",
