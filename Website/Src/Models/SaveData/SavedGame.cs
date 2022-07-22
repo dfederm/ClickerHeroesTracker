@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Security.Cryptography;
 using System.Text;
-using Ionic.Zlib;
+using ICSharpCode.SharpZipLib.Zip.Compression.Streams;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
@@ -258,17 +258,20 @@ namespace ClickerHeroesTrackerWebsite.Models.SaveData
             string data = encodedSaveData.Substring(HashLength);
             byte[] bytes = Convert.FromBase64String(data);
             MemoryStream memStream = new(bytes);
-            ZlibStream zlibStream = new(memStream, CompressionMode.Decompress);
-            return new StreamReader(zlibStream);
+            InflaterInputStream inflaterStream = new(memStream);
+            return new StreamReader(inflaterStream);
         }
 
         private static string EncodeZlib(string json)
         {
-            using (MemoryStream jsonStream = new(Encoding.UTF8.GetBytes(json)))
-            using (ZlibStream zlibStream = new(jsonStream, CompressionMode.Compress))
             using (MemoryStream compressedStream = new(16 * 1024))
             {
-                zlibStream.CopyTo(compressedStream);
+                using (MemoryStream jsonStream = new(Encoding.UTF8.GetBytes(json)))
+                using (DeflaterOutputStream deflaterStream = new(compressedStream))
+                {
+                    jsonStream.CopyTo(deflaterStream);
+                }
+
                 return ZlibHash + Convert.ToBase64String(compressedStream.ToArray());
             }
         }
