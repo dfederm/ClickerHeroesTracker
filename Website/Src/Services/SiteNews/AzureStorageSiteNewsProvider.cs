@@ -40,7 +40,7 @@ namespace Website.Services.SiteNews
             string partitionKey = newsDate.ToString("yyyy-MM-dd");
 
             // Delete all rows in the partition first
-            AsyncPageable<TableEntity> results = tableClient.QueryAsync<TableEntity>(filter: $"PartitionKey eq {partitionKey}");
+            AsyncPageable<TableEntity> results = tableClient.QueryAsync<TableEntity>(filter: $"PartitionKey eq '{partitionKey}'");
             await foreach (TableEntity entity in results)
             {
                 batchOperation.Add(new TableTransactionAction(TableTransactionActionType.Delete, entity));
@@ -85,7 +85,7 @@ namespace Website.Services.SiteNews
 
             string partitionKey = newsDate.ToString("yyyy-MM-dd");
 
-            AsyncPageable<TableEntity> results = tableClient.QueryAsync<TableEntity>(filter: $"PartitionKey eq {partitionKey}");
+            AsyncPageable<TableEntity> results = tableClient.QueryAsync<TableEntity>(filter: $"PartitionKey eq '{partitionKey}'");
             await foreach (TableEntity entity in results)
             {
                 batchOperation.Add(new TableTransactionAction(TableTransactionActionType.Delete, entity));
