@@ -18,6 +18,7 @@ namespace UnitTests.Models
         [InlineData("InvalidAndroidNoBrace", false)]
         [InlineData("InvalidAndroidBadJson", false)]
         [InlineData("ValidZlib", true)]
+        [InlineData("ValidDeflate", true)]
         [InlineData("InvalidZlibBadData", false)]
         public static void SavedGame_Parse(string testDataName, bool expectedValid)
         {
@@ -39,6 +40,7 @@ namespace UnitTests.Models
         [InlineData("ValidSprinkle")]
         [InlineData("ValidAndroid")]
         [InlineData("ValidZlib")]
+        [InlineData("ValidDeflate")]
         public static void SavedGame_ScrubIdentity(string testDataName)
         {
             string encodedSaveData = File.ReadAllText(Path.Combine("TestData", testDataName + ".txt"));

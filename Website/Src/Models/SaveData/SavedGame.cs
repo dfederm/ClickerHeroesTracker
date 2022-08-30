@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Security.Cryptography;
 using System.Text;
+using ICSharpCode.SharpZipLib.Zip.Compression;
 using ICSharpCode.SharpZipLib.Zip.Compression.Streams;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -29,9 +30,12 @@ namespace ClickerHeroesTrackerWebsite.Models.SaveData
 
         private const string ZlibHash = "7a990d405d2c6fb93aa8fbb0ec1a3b23";
 
+        private const string DeflateHash = "7e8bb5a89f2842ac4af01b3b7e228592";
+
         private static readonly Dictionary<string, EncodingAlgorithm> EncodingAlgorithmHashes = new(StringComparer.OrdinalIgnoreCase)
         {
             { ZlibHash, EncodingAlgorithm.Zlib },
+            { DeflateHash, EncodingAlgorithm.Deflate },
         };
 
         private static readonly Dictionary<EncodingAlgorithm, Func<string, TextReader>> DecodeFuncs = new()
@@ -39,6 +43,7 @@ namespace ClickerHeroesTrackerWebsite.Models.SaveData
             { EncodingAlgorithm.Sprinkle, DecodeSprinkle },
             { EncodingAlgorithm.Android, DecodeAndroid },
             { EncodingAlgorithm.Zlib, DecodeZlib },
+            { EncodingAlgorithm.Deflate, DecodeDeflate },
         };
 
         private static readonly Dictionary<EncodingAlgorithm, Func<string, string>> EncodeFuncs = new()
@@ -46,6 +51,7 @@ namespace ClickerHeroesTrackerWebsite.Models.SaveData
             { EncodingAlgorithm.Sprinkle, EncodeSprinkle },
             { EncodingAlgorithm.Android, EncodeAndroid },
             { EncodingAlgorithm.Zlib, EncodeZlib },
+            { EncodingAlgorithm.Deflate, EncodeDeflate },
         };
 
         private readonly EncodingAlgorithm _encoding;
@@ -62,6 +68,7 @@ namespace ClickerHeroesTrackerWebsite.Models.SaveData
             Sprinkle,
             Android,
             Zlib,
+            Deflate,
         }
 
         public JObject Object { get; private set; }
@@ -109,13 +116,22 @@ namespace ClickerHeroesTrackerWebsite.Models.SaveData
 
             // Based on https://github.com/Legocro/Clan-stripper/blob/master/script.js
             savedGame.Object.Remove("type");
-            savedGame.Object.Property("email", StringComparison.OrdinalIgnoreCase).Value = string.Empty;
-            savedGame.Object.Property("passwordHash", StringComparison.OrdinalIgnoreCase).Value = string.Empty;
-            savedGame.Object.Property("prevLoginTimestamp", StringComparison.OrdinalIgnoreCase).Value = 0;
+            SetPropertyIfExists("email", string.Empty);
+            SetPropertyIfExists("passwordHash", string.Empty);
+            SetPropertyIfExists("prevLoginTimestamp", 0);
             savedGame.Object.Remove("account");
-            savedGame.Object.Property("accountId", StringComparison.OrdinalIgnoreCase).Value = 0;
-            savedGame.Object.Property("loginValidated", StringComparison.OrdinalIgnoreCase).Value = false;
-            savedGame.Object.Property("uniqueId", StringComparison.OrdinalIgnoreCase).Value = string.Empty;
+            SetPropertyIfExists("accountId", 0);
+            SetPropertyIfExists("loginValidated", false);
+            SetPropertyIfExists("uniqueId", string.Empty);
+
+            void SetPropertyIfExists(string propertyName, JToken value)
+            {
+                JProperty property = savedGame.Object.Property(propertyName, StringComparison.OrdinalIgnoreCase);
+                if (property != null)
+                {
+                    property.Value = value;
+                }
+            }
 
             if (!EncodeFuncs.TryGetValue(savedGame._encoding, out Func<string, string> encodeFunc))
             {
@@ -273,6 +289,29 @@ namespace ClickerHeroesTrackerWebsite.Models.SaveData
                 }
 
                 return ZlibHash + Convert.ToBase64String(compressedStream.ToArray());
+            }
+        }
+
+        private static TextReader DecodeDeflate(string encodedSaveData)
+        {
+            string data = encodedSaveData.Substring(HashLength);
+            byte[] bytes = Convert.FromBase64String(data);
+            MemoryStream memStream = new(bytes);
+            InflaterInputStream inflaterStream = new(memStream, new Inflater(noHeader: true));
+            return new StreamReader(inflaterStream);
+        }
+
+        private static string EncodeDeflate(string json)
+        {
+            using (MemoryStream compressedStream = new(16 * 1024))
+            {
+                using (MemoryStream jsonStream = new(Encoding.UTF8.GetBytes(json)))
+                using (DeflaterOutputStream deflaterStream = new(compressedStream, new Deflater(level: Deflater.DEFAULT_COMPRESSION, noZlibHeaderOrFooter: true)))
+                {
+                    jsonStream.CopyTo(deflaterStream);
+                }
+
+                return DeflateHash + Convert.ToBase64String(compressedStream.ToArray());
             }
         }
     }
