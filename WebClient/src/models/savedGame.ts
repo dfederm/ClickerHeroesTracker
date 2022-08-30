@@ -1,4 +1,4 @@
-import { inflate, deflate } from "pako";
+import { inflate, deflate, inflateRaw, deflateRaw } from "pako";
 import * as MD5 from "crypto-js/md5";
 
 export interface IItemData {
@@ -62,7 +62,7 @@ export interface ISavedGameData {
     outsiders: IOutsidersData;
 }
 
-type EncodingAlgorithm = "unknown" | "sprinkle" | "android" | "zlib";
+type EncodingAlgorithm = "unknown" | "sprinkle" | "android" | "zlib" | "deflate";
 
 // Ensure the logic here stays in sync with SavedGame.cs on the server
 export class SavedGame {
@@ -76,20 +76,25 @@ export class SavedGame {
 
     private static readonly zlibHash = "7a990d405d2c6fb93aa8fbb0ec1a3b23";
 
+    private static readonly deflateHash = "7e8bb5a89f2842ac4af01b3b7e228592";
+
     private static readonly encodingAlgorithmHashes: { [hash: string]: EncodingAlgorithm } = {
         [SavedGame.zlibHash]: "zlib",
+        [SavedGame.deflateHash]: "deflate",
     };
 
     private static readonly decodeFuncs: { [encodingAlgorithm: string]: (content: string) => ISavedGameData } = {
         sprinkle: SavedGame.decodeSprinkle,
         android: SavedGame.decodeAndroid,
         zlib: SavedGame.decodeZlib,
+        deflate: SavedGame.decodeDeflate,
     };
 
     private static readonly encodeFuncs: { [encodingAlgorithm: string]: (data: ISavedGameData) => string } = {
         sprinkle: SavedGame.encodeSprinkle,
         android: SavedGame.encodeAndroid,
         zlib: SavedGame.encodeZlib,
+        deflate: SavedGame.encodeDeflate,
     };
 
     public data: ISavedGameData;
@@ -239,7 +244,7 @@ export class SavedGame {
             .replace("\\", "\\\\")
             .replace("\"", "\\\"");
 
-        // No idea how accurate these chracters are. Just using what was found in one particular save.
+        // No idea how accurate these characters are. Just using what was found in one particular save.
         return "?D?TCSO" + SavedGame.androidPrefix + "\tjson??%" + json;
     }
 
@@ -250,7 +255,6 @@ export class SavedGame {
         let binData = new Uint8Array(charData);
         let json = inflate(binData, { to: "string" });
         return JSON.parse(json);
-
     }
 
     private static encodeZlib(data: ISavedGameData): string {
@@ -258,5 +262,21 @@ export class SavedGame {
         let binData = deflate(json);
         let encodedData = btoa(String.fromCharCode.apply(null, binData));
         return SavedGame.zlibHash + encodedData;
+    }
+
+    private static decodeDeflate(content: string): ISavedGameData {
+        let result = content.slice(SavedGame.hashLength);
+        let decodedData = atob(result);
+        let charData = decodedData.split("").map(x => x.charCodeAt(0));
+        let binData = new Uint8Array(charData);
+        let json = inflateRaw(binData, { to: "string" });
+        return JSON.parse(json);
+    }
+
+    private static encodeDeflate(data: ISavedGameData): string {
+        let json = JSON.stringify(data);
+        let binData = deflateRaw(json);
+        let encodedData = btoa(String.fromCharCode.apply(null, binData));
+        return SavedGame.deflateHash + encodedData;
     }
 }
