@@ -1,7 +1,7 @@
 import { NO_ERRORS_SCHEMA, LOCALE_ID } from "@angular/core";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { By } from "@angular/platform-browser";
-import { ActivatedRoute, Params } from "@angular/router";
+import { ActivatedRoute, NavigationExtras, Params, Router } from "@angular/router";
 import { BehaviorSubject } from "rxjs";
 import Decimal from "decimal.js";
 
@@ -16,6 +16,7 @@ describe("UserProgressComponent", () => {
     let component: UserProgressComponent;
     let fixture: ComponentFixture<UserProgressComponent>;
     let routeParams: BehaviorSubject<Params>;
+    let queryParams: BehaviorSubject<Params>;
 
     let progress: IProgressData = {
         soulsSpentData: createData(0),
@@ -75,12 +76,23 @@ describe("UserProgressComponent", () => {
         let settingsService = { settings: () => settingsSubject };
 
         routeParams = new BehaviorSubject({ userName: "someUserName" });
-        let route = { params: routeParams };
+        queryParams = new BehaviorSubject({});
+        let route = { params: routeParams, queryParams: queryParams };
+
+        let router = {
+            navigate: (_commands: any[], extras?: NavigationExtras) => {
+                if (extras.queryParams) {
+                    queryParams.next(extras.queryParams);
+                }
+            }
+        };
+
         await TestBed.configureTestingModule(
             {
                 declarations: [UserProgressComponent],
                 providers: [
                     { provide: ActivatedRoute, useValue: route },
+                    { provide: Router, useValue: router },
                     { provide: UserService, useValue: userService },
                     { provide: SettingsService, useValue: settingsService },
                     { provide: LOCALE_ID, useValue: locale },

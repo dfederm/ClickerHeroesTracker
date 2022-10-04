@@ -1,7 +1,7 @@
 import { NO_ERRORS_SCHEMA } from "@angular/core";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { By } from "@angular/platform-browser";
-import { ActivatedRoute, Params } from "@angular/router";
+import { ActivatedRoute, NavigationExtras, Params, Router } from "@angular/router";
 import { BehaviorSubject } from "rxjs";
 import Decimal from "decimal.js";
 
@@ -15,6 +15,7 @@ describe("UserCompareComponent", () => {
     let component: UserCompareComponent;
     let fixture: ComponentFixture<UserCompareComponent>;
     let routeParams: BehaviorSubject<Params>;
+    let queryParams: BehaviorSubject<Params>;
 
     let userProgress: IProgressData = {
         soulsSpentData: createData(100),
@@ -103,12 +104,23 @@ describe("UserCompareComponent", () => {
         let settingsService = { settings: () => settingsSubject };
 
         routeParams = new BehaviorSubject({ userName: "someUserName", compareUserName: "someOtherUserName" });
-        let route = { params: routeParams };
+        queryParams = new BehaviorSubject({});
+        let route = { params: routeParams, queryParams: queryParams };
+
+        let router = {
+            navigate: (_commands: any[], extras?: NavigationExtras) => {
+                if (extras.queryParams) {
+                    queryParams.next(extras.queryParams);
+                }
+            }
+        };
+
         await TestBed.configureTestingModule(
             {
                 declarations: [UserCompareComponent],
                 providers: [
                     { provide: ActivatedRoute, useValue: route },
+                    { provide: Router, useValue: router },
                     { provide: UserService, useValue: userService },
                     { provide: SettingsService, useValue: settingsService },
                 ],
