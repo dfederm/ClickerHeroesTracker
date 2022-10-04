@@ -178,6 +178,8 @@ describe("UserCompareComponent", () => {
                 "1m": new Date(new Date(now).setMonth(expectedEnd.getMonth() - 1)),
                 "3m": new Date(new Date(now).setMonth(expectedEnd.getMonth() - 3)),
                 "1y": new Date(new Date(now).setFullYear(expectedEnd.getFullYear() - 1)),
+                "3y": new Date(new Date(now).setFullYear(expectedEnd.getFullYear() - 3)),
+                "5y": new Date(new Date(now).setFullYear(expectedEnd.getFullYear() - 5)),
             };
 
             expect(component.ranges.length).toEqual(Object.keys(expectedStarts).length);

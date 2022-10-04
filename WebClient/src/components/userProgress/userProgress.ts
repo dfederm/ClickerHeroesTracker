@@ -28,6 +28,8 @@ export class UserProgressComponent implements OnInit {
         "1m",
         "3m",
         "1y",
+        "3y",
+        "5y",
     ];
     private static readonly ascensionRanges = [
         "10",
@@ -109,6 +111,9 @@ export class UserProgressComponent implements OnInit {
             case "3d":
                 startOrPage.setDate(startOrPage.getDate() - 3);
                 break;
+            case "1w":
+                startOrPage.setDate(startOrPage.getDate() - 7);
+                break;
             case "1m":
                 startOrPage.setMonth(startOrPage.getMonth() - 1);
                 break;
@@ -118,8 +123,11 @@ export class UserProgressComponent implements OnInit {
             case "1y":
                 startOrPage.setFullYear(startOrPage.getFullYear() - 1);
                 break;
-            case "1w":
-                startOrPage.setDate(startOrPage.getDate() - 7);
+            case "3y":
+                startOrPage.setFullYear(startOrPage.getFullYear() - 3);
+                break;
+            case "5y":
+                startOrPage.setFullYear(startOrPage.getFullYear() - 5);
                 break;
             default:
                 // Using Ascension range
