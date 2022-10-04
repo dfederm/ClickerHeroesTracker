@@ -1,5 +1,5 @@
 import { Component, OnInit } from "@angular/core";
-import { ActivatedRoute, Params } from "@angular/router";
+import { ActivatedRoute, Params, Router } from "@angular/router";
 import { UserService, IProgressData } from "../../services/userService/userService";
 import { SettingsService, IUserSettings } from "../../services/settingsService/settingsService";
 
@@ -45,32 +45,50 @@ export class UserCompareComponent implements OnInit {
     public charts: IChartViewModel[];
 
     private settings: IUserSettings;
+    private defaultRange: string;
 
     constructor(
         private readonly route: ActivatedRoute,
+        private readonly router: Router,
         private readonly userService: UserService,
         private readonly settingsService: SettingsService,
         private readonly spinnerService: NgxSpinnerService,
     ) { }
 
     public get selectedRange(): string {
-        return this._selectedRange;
+        return this._selectedRange ?? this.defaultRange;
     }
     public set selectedRange(value: string) {
         if (this._selectedRange !== value) {
             this._selectedRange = value;
-            this.fetchData();
+
+            this.router.navigate(
+                [],
+                {
+                    relativeTo: this.route,
+                    queryParams: { range: value },
+                    queryParamsHandling: "merge"
+                });
         }
     }
 
     public ngOnInit(): void {
-        this.route.params.subscribe(
-            (params: Params) => {
+        this.route.params.subscribe({
+            next: (params: Params) => {
                 this.userName = params.userName;
                 this.compareUserName = params.compareUserName;
                 this.fetchData();
             },
-            () => this.isError = true);
+            error: () => this.isError = true
+        });
+
+        this.route.queryParams.subscribe({
+            next: (params: Params) => {
+                this._selectedRange = params.range;
+                this.fetchData();
+            },
+            error: () => this.isError = true
+        });
 
         this.settingsService
             .settings()
@@ -79,15 +97,16 @@ export class UserCompareComponent implements OnInit {
                 switch (this.settings.graphSpacingType) {
                     case "ascension": {
                         this.ranges = UserCompareComponent.ascensionRanges;
-                        this._selectedRange = "10";
+                        this.defaultRange = "10";
                         break;
                     }
                     case "time":
                     default: {
                         this.ranges = UserCompareComponent.timeRanges;
-                        this._selectedRange = "1w";
+                        this.defaultRange = "1w";
                     }
                 }
+                this.validateRange();
                 this.fetchData();
             });
     }
@@ -349,5 +368,16 @@ export class UserCompareComponent implements OnInit {
 
     private toTitleCase(srt: string): string {
         return srt[0].toUpperCase() + srt.substring(1);
+    }
+
+    private validateRange(): void {
+        for (let i = 0; i < this.ranges.length; i++) {
+            if (this._selectedRange == this.ranges[i]) {
+                return;
+            }
+        }
+
+        // Reset the value
+        this.selectedRange = null;
     }
 }
