@@ -231,7 +231,11 @@ namespace ClickerHeroesTrackerWebsite
                 services.AddSingleton<ISiteNewsProvider, InMemorySiteNewsProvider>();
             }
 
-            services.AddSingleton(_ => GameData.Parse(Path.Combine(_environment.ContentRootPath, "GameData.json")));
+            string gameDataDirectoryPath = _environment.IsDevelopment()
+                ? Path.Combine(_environment.ContentRootPath, @"..\..")
+                : Path.Combine(_environment.ContentRootPath, "GameData");
+
+            services.AddSingleton(_ => GameData.Parse(Path.Combine(gameDataDirectoryPath, "GameData.json")));
             services.AddSingleton(_ => new HttpClient());
             services.AddSingleton<IAssertionGrantHandlerProvider, AssertionGrantHandlerProvider>();
             services.AddSingleton(buildInfoProvider);
