@@ -233,7 +233,7 @@ namespace ClickerHeroesTrackerWebsite
 
             string gameDataDirectoryPath = _environment.IsDevelopment()
                 ? Path.Combine(_environment.ContentRootPath, @"..\..")
-                : Path.Combine(_environment.ContentRootPath, "GameData");
+                : _environment.ContentRootPath;
 
             services.AddSingleton(_ => GameData.Parse(Path.Combine(gameDataDirectoryPath, "GameData.json")));
             services.AddSingleton(_ => new HttpClient());
