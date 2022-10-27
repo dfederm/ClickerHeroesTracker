@@ -3,6 +3,7 @@ import { ClanService, ILeaderboardClan, ILeaderboardSummaryListResponse } from "
 import { AuthenticationService, IUserInfo } from "../../services/authenticationService/authenticationService";
 import { UserService } from "../../services/userService/userService";
 import { NgxSpinnerService } from "ngx-spinner";
+import { debounceTime, map, Subject } from "rxjs";
 
 @Component({
     selector: "clans",
@@ -16,6 +17,10 @@ export class ClansComponent implements OnInit {
     public totalClans: number;
 
     public count = 20;
+
+    public filterSubject = new Subject<string>();
+
+    private filter = "";
 
     private userClan: ILeaderboardClan;
 
@@ -47,6 +52,18 @@ export class ClansComponent implements OnInit {
             .subscribe(userInfo => {
                 this.handleUser(userInfo);
             });
+
+        this.filterSubject.pipe(
+            debounceTime(250),
+            map(newFilter => {
+                this.filter = newFilter;
+                this.getLeaderboard();
+            })
+        ).subscribe();
+    }
+
+    public setFilter(filterValue: string): void {
+        this.filterSubject.next(filterValue);
     }
 
     private handleUser(userInfo: IUserInfo): void {
@@ -84,7 +101,7 @@ export class ClansComponent implements OnInit {
     private getLeaderboard(): Promise<void> {
         this.isError = false;
         this.spinnerService.show("clans");
-        return this.clanService.getLeaderboard(this.page, this.count)
+        return this.clanService.getLeaderboard(this.filter, this.page, this.count)
             .then(response => {
                 this.leaderboardResponse = response;
                 this.updateLeaderboard();
@@ -105,8 +122,10 @@ export class ClansComponent implements OnInit {
         // Clone the list since we may mutate it.
         this.clans = this.leaderboardResponse.leaderboardClans.slice();
 
-        // Only add the user clan if it's not in the results
-        if (this.userClan && !this.clans.find(clan => clan.isUserClan)) {
+        // Only add the user clan if it's not in the results and it matches the filter
+        if (this.userClan
+            && !this.clans.find(clan => clan.isUserClan)
+            && (!this.filter || this.userClan.name.toLowerCase().includes(this.filter.toLowerCase()))) {
             this.clans.push(this.userClan);
         }
 

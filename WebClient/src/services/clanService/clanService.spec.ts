@@ -109,10 +109,10 @@ describe("ClanService", () => {
     });
 
     describe("getLeaderboard", () => {
-        const apiRequest = { method: "get", url: "/api/clans?page=1&count=2" };
+        const apiRequest = { method: "get", url: "/api/clans?filter=foo&page=1&count=2" };
 
         it("should make an api call", fakeAsync(() => {
-            clanService.getLeaderboard(1, 2);
+            clanService.getLeaderboard("foo", 1, 2);
 
             // Tick the getAuthHeaders call
             tick();
@@ -123,7 +123,7 @@ describe("ClanService", () => {
 
         it("should return the leaderboard data", fakeAsync(() => {
             let response: ILeaderboardSummaryListResponse;
-            clanService.getLeaderboard(1, 2)
+            clanService.getLeaderboard("foo", 1, 2)
                 .then((r: ILeaderboardSummaryListResponse) => response = r);
 
             // Tick the getAuthHeaders call
@@ -141,7 +141,7 @@ describe("ClanService", () => {
         it("should handle http errors", fakeAsync(() => {
             let response: ILeaderboardSummaryListResponse;
             let error: HttpErrorResponse;
-            clanService.getLeaderboard(1, 2)
+            clanService.getLeaderboard("foo", 1, 2)
                 .then((r: ILeaderboardSummaryListResponse) => response = r)
                 .catch((e: HttpErrorResponse) => error = e);
 

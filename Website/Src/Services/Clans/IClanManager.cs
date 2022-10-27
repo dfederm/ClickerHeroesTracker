@@ -15,12 +15,12 @@ namespace Website.Services.Clans
 
         Task UpdateClanAsync(string userId, string gameUserId, string passwordHash);
 
-        Task<IList<Message>> GetMessages(string userId, int count);
+        Task<IReadOnlyList<Message>> GetMessages(string userId, int count);
 
         Task<string> SendMessage(string userId, string message);
 
-        Task<IList<LeaderboardClan>> FetchLeaderboardAsync(string userId, int page, int count);
+        Task<IReadOnlyList<LeaderboardClan>> FetchLeaderboardAsync(string filter, string userId, int page, int count);
 
-        Task<PaginationMetadata> FetchPaginationAsync(string pageBasePath, int page, int count);
+        Task<PaginationMetadata> FetchPaginationAsync(string pageBasePath, string filter, int page, int count);
     }
 }

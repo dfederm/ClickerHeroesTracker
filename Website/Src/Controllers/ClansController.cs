@@ -1,7 +1,6 @@
 ﻿// Copyright (C) Clicker Heroes Tracker. All Rights Reserved.
 
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using ClickerHeroesTrackerWebsite.Models;
 using ClickerHeroesTrackerWebsite.Models.Api;
@@ -48,6 +47,7 @@ namespace ClickerHeroesTrackerWebsite.Controllers
         [HttpGet]
         [AllowAnonymous]
         public async Task<ActionResult<LeaderboardSummaryListResponse>> ListAsync(
+            string filter = "",
             int page = ParameterConstants.List.Page.Default,
             int count = ParameterConstants.List.Count.Default)
         {
@@ -66,8 +66,8 @@ namespace ClickerHeroesTrackerWebsite.Controllers
             string userId = _userManager.GetUserId(User);
 
             // Fetch in parallel
-            Task<IList<LeaderboardClan>> leaderboardTask = _clanManager.FetchLeaderboardAsync(userId, page, count);
-            Task<PaginationMetadata> paginationTask = _clanManager.FetchPaginationAsync(Request.Path, page, count);
+            Task<IReadOnlyList<LeaderboardClan>> leaderboardTask = _clanManager.FetchLeaderboardAsync(filter, userId, page, count);
+            Task<PaginationMetadata> paginationTask = _clanManager.FetchPaginationAsync(Request.Path, filter, page, count);
             await Task.WhenAll(leaderboardTask, paginationTask);
 
             return new LeaderboardSummaryListResponse
@@ -79,7 +79,7 @@ namespace ClickerHeroesTrackerWebsite.Controllers
 
         [Route("messages")]
         [HttpGet]
-        public async Task<ActionResult<List<Message>>> GetMessagesAsync(int count = ParameterConstants.GetMessages.Count.Default)
+        public async Task<ActionResult<IReadOnlyList<Message>>> GetMessagesAsync(int count = ParameterConstants.GetMessages.Count.Default)
         {
             // Validate parameters
             if (count < ParameterConstants.GetMessages.Count.Min
@@ -90,13 +90,13 @@ namespace ClickerHeroesTrackerWebsite.Controllers
 
             string userId = _userManager.GetUserId(User);
 
-            IList<Message> messages = await _clanManager.GetMessages(userId, count);
+            IReadOnlyList<Message> messages = await _clanManager.GetMessages(userId, count);
             if (messages == null)
             {
                 return NoContent();
             }
 
-            return messages.ToList();
+            return new ActionResult<IReadOnlyList<Message>>(messages);
         }
 
         [Route("messages")]
