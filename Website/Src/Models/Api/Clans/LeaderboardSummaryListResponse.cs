@@ -8,6 +8,6 @@ namespace ClickerHeroesTrackerWebsite.Models.Api.Clans
     {
         public PaginationMetadata Pagination { get; set; }
 
-        public IList<LeaderboardClan> LeaderboardClans { get; set; }
+        public IReadOnlyList<LeaderboardClan> LeaderboardClans { get; set; }
     }
 }

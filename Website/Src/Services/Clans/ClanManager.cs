@@ -61,7 +61,7 @@ namespace Website.Services.Clans
         public async Task<ClanData> GetClanDataAsync(string clanName)
         {
             Task<ClanData> clanDataTask = GetBasicClanDataAsync(clanName);
-            Task<IList<GuildMember>> guildMembersTask = GetGuildMembersAsync(clanName);
+            Task<IReadOnlyList<GuildMember>> guildMembersTask = GetGuildMembersAsync(clanName);
             await Task.WhenAll(clanDataTask, guildMembersTask);
 
             ClanData clanData = clanDataTask.Result;
@@ -116,7 +116,7 @@ namespace Website.Services.Clans
             }
         }
 
-        public async Task<IList<Message>> GetMessages(string userId, int count)
+        public async Task<IReadOnlyList<Message>> GetMessages(string userId, int count)
         {
             // Fetch in parallel
             Task<Dictionary<string, string>> parametersTask = GetBaseParametersAsync(userId);
@@ -145,7 +145,7 @@ namespace Website.Services.Clans
                 string str = await response.Content.ReadAsStringAsync();
                 return JsonConvert.DeserializeObject<MessageResponse>(str)?.Result?.Messages;
             });
-            Task<IList<GuildMember>> guildMembersTask = GetGuildMembersAsync(clanName);
+            Task<IReadOnlyList<GuildMember>> guildMembersTask = GetGuildMembersAsync(clanName);
             await Task.WhenAll(messagesTask, guildMembersTask);
 
             Dictionary<string, string> guildMembers = guildMembersTask.Result.ToDictionary(member => member.Uid, member => member.Nickname);
@@ -204,7 +204,7 @@ namespace Website.Services.Clans
             return await response.Content.ReadAsStringAsync();
         }
 
-        public async Task<IList<LeaderboardClan>> FetchLeaderboardAsync(string userId, int page, int count)
+        public async Task<IReadOnlyList<LeaderboardClan>> FetchLeaderboardAsync(string filter, string userId, int page, int count)
         {
             string clanName = await GetClanNameAsync(userId);
 
@@ -212,21 +212,28 @@ namespace Website.Services.Clans
             int offset = (page - 1) * count;
 
             const string GetLeaderboardDataCommandText = @"
-                SELECT Name, CurrentRaidLevel, (SELECT COUNT(*) FROM ClanMembers WHERE ClanMembers.ClanName = Name) AS MemberCount
-                FROM Clans
-                WHERE IsBlocked = 0
+                WITH NumberedRows
+                AS
+                (
+                    SELECT ROW_NUMBER() OVER (ORDER BY CurrentRaidLevel DESC) AS RowNumber, CurrentRaidLevel, Name, IsBlocked
+                    FROM Clans
+                    WHERE IsBlocked = 0
+                )
+                SELECT RowNumber, Name, CurrentRaidLevel, (SELECT COUNT(*) FROM ClanMembers WHERE ClanMembers.ClanName = Name) AS MemberCount
+                FROM NumberedRows
+                WHERE @Filter = '' OR Name LIKE '%' + @Filter + '%'
                 ORDER BY CurrentRaidLevel DESC
                     OFFSET @Offset ROWS
                     FETCH NEXT @Count ROWS ONLY;";
             Dictionary<string, object> parameters = new()
             {
+                { "@Filter", filter ?? string.Empty },
                 { "@Offset", offset },
                 { "@Count", count },
             };
             using (IDatabaseCommand command = _databaseCommandFactory.Create(GetLeaderboardDataCommandText, parameters))
             using (IDataReader reader = await command.ExecuteReaderAsync())
             {
-                int i = 1;
                 while (reader.Read())
                 {
                     bool isUserClan = string.Equals(clanName, reader["Name"].ToString(), StringComparison.OrdinalIgnoreCase);
@@ -236,24 +243,28 @@ namespace Website.Services.Clans
                         Name = reader["Name"].ToString(),
                         CurrentRaidLevel = Convert.ToInt32(reader["CurrentRaidLevel"]),
                         MemberCount = Convert.ToInt32(reader["MemberCount"]),
-                        Rank = offset + i,
+                        Rank = Convert.ToInt32(reader["RowNumber"]),
                         IsUserClan = isUserClan,
                     });
-                    i++;
                 }
             }
 
             return clans;
         }
 
-        public async Task<PaginationMetadata> FetchPaginationAsync(string pageBasePath, int page, int count)
+        public async Task<PaginationMetadata> FetchPaginationAsync(string pageBasePath, string filter, int page, int count)
         {
             const string GetLeaderboardCountCommandText = @"
                 SELECT COUNT(*) AS TotalClans
                 FROM Clans
-                WHERE IsBlocked = 0";
+                WHERE IsBlocked = 0
+                AND @SearchString = '' OR Name LIKE '%' + @SearchString + '%'";
+            Dictionary<string, object> parameters = new()
+            {
+                { "@SearchString", filter ?? string.Empty },
+            };
 
-            using (IDatabaseCommand command = _databaseCommandFactory.Create(GetLeaderboardCountCommandText))
+            using (IDatabaseCommand command = _databaseCommandFactory.Create(GetLeaderboardCountCommandText, parameters))
             using (IDataReader reader = await command.ExecuteReaderAsync())
             {
                 if (!reader.Read())
@@ -316,7 +327,7 @@ namespace Website.Services.Clans
             }
         }
 
-        private async Task<IList<GuildMember>> GetGuildMembersAsync(string clanName)
+        private async Task<IReadOnlyList<GuildMember>> GetGuildMembersAsync(string clanName)
         {
             const string CommandText = @"
                 SELECT ClanMembers.Id as Uid, Nickname, HighestZone, UserName

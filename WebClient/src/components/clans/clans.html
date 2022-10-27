@@ -2,44 +2,54 @@
     <h2>Clan Leaderboard</h2>
     <div class="row">
         <div class="col-lg-6">
-            <p *ngIf="isError"
-               class="alert alert-danger">
-                There was a problem getting leaderboard data
-            </p>
-            <ngx-spinner name="clans"
-                         [fullScreen]="false"
-                         type="ball-pulse"></ngx-spinner>
-            <table *ngIf="!isError"
-                   class="table table-sm table-striped">
-                <thead>
-                    <tr>
-                        <th>Rank</th>
-                        <th>Name</th>
-                        <th>Members</th>
-                        <th>Current Raid Level</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr *ngFor="let clan of clans"
-                        [ngClass]="{'table-success' : clan.isUserClan}">
-                        <td>{{ clan.rank }}</td>
-                        <td>
-                            <a *ngIf="clan.name"
-                               routerLink="/clans/{{clan.name}}">{{ clan.name }}</a>
-                        </td>
-                        <td>{{ clan.memberCount | number }}</td>
-                        <td>{{ clan.currentRaidLevel | number }}</td>
-                    </tr>
-                </tbody>
-            </table>
-            <ngb-pagination [collectionSize]="totalClans"
-                            [(page)]="page"
-                            [pageSize]="count"
-                            [maxSize]="5"
-                            [rotate]="true"
-                            [ellipses]="false"
-                            [boundaryLinks]="true">
-            </ngb-pagination>
+            <input type="search"
+                   #filterInput
+                   class="form-control"
+                   placeholder="Filter"
+                   (keyup)="setFilter(filterInput.value)" />
+
+            <div class="position-relative">
+                <p *ngIf="isError"
+                   class="alert alert-danger">
+                    There was a problem getting leaderboard data
+                </p>
+
+                <ngx-spinner name="clans"
+                             [fullScreen]="false"
+                             type="ball-pulse"></ngx-spinner>
+
+                <table *ngIf="!isError"
+                       class="table table-sm table-striped">
+                    <thead>
+                        <tr>
+                            <th>Rank</th>
+                            <th>Name</th>
+                            <th>Members</th>
+                            <th>Current Raid Level</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr *ngFor="let clan of clans"
+                            [ngClass]="{'table-success' : clan.isUserClan}">
+                            <td>{{ clan.rank }}</td>
+                            <td>
+                                <a *ngIf="clan.name"
+                                   routerLink="/clans/{{clan.name}}">{{ clan.name }}</a>
+                            </td>
+                            <td>{{ clan.memberCount | number }}</td>
+                            <td>{{ clan.currentRaidLevel | number }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <ngb-pagination [collectionSize]="totalClans"
+                                [(page)]="page"
+                                [pageSize]="count"
+                                [maxSize]="5"
+                                [rotate]="true"
+                                [ellipses]="false"
+                                [boundaryLinks]="true">
+                </ngb-pagination>
+            </div>
         </div>
     </div>
 </div>

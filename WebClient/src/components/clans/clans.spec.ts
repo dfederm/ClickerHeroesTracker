@@ -59,15 +59,16 @@ describe("ClansComponent", () => {
             getClan(): Promise<IClanData> {
                 return Promise.resolve(clanData);
             },
-            getLeaderboard(page: number, count: number): Promise<ILeaderboardSummaryListResponse> {
+            getLeaderboard(filter: string, page: number, count: number): Promise<ILeaderboardSummaryListResponse> {
+                let filteredClans = clans.filter(clan => clan.name.toLowerCase().includes(filter.toLowerCase()));
                 let leaderboardSummaryListResponse: ILeaderboardSummaryListResponse = {
                     pagination:
                     {
-                        count: clans.length,
+                        count: filteredClans.length,
                         next: "someNext",
                         previous: "somePrevious",
                     },
-                    leaderboardClans: clans.slice((page - 1) * count, page * count),
+                    leaderboardClans: filteredClans.slice((page - 1) * count, page * count),
                 };
                 return Promise.resolve(leaderboardSummaryListResponse);
             },

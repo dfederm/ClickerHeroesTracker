@@ -10,7 +10,7 @@ namespace ClickerHeroesTrackerWebsite.Models.Api.Clans
 
         public int CurrentRaidLevel { get; set; }
 
-        public IList<GuildMember> GuildMembers { get; set; }
+        public IReadOnlyList<GuildMember> GuildMembers { get; set; }
 
         public int Rank { get; set; }
 
