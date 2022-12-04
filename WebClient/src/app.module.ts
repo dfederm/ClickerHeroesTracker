@@ -12,6 +12,7 @@ import { NgChartsModule } from "ng2-charts";
 import { ValidateEqualModule } from "ng-validate-equal";
 import { JwBootstrapSwitchNg2Module } from "jw-bootstrap-switch-ng2";
 import { NgxSpinnerModule } from "ngx-spinner";
+import { SocialLoginModule, SocialAuthServiceConfig, GoogleLoginProvider, MicrosoftLoginProvider, FacebookLoginProvider } from '@abacritt/angularx-social-login';
 
 import { AppComponent } from "./components/app/app";
 import { HomeComponent } from "./components/home/home";
@@ -120,6 +121,7 @@ const routes: Routes =
     ValidateEqualModule,
     JwBootstrapSwitchNg2Module,
     NgxSpinnerModule,
+    SocialLoginModule,
   ],
   declarations: [
     AppComponent,
@@ -159,7 +161,38 @@ const routes: Routes =
     ...(environment.production ? [] : [
       { provide: HTTP_INTERCEPTORS, useClass: DeveloperHttpInterceptor, multi: true },
     ]),
-  ],
+    {
+      provide: 'SocialAuthServiceConfig',
+      useValue: {
+        autoLogin: false,
+        providers: [
+          {
+            id: GoogleLoginProvider.PROVIDER_ID,
+            provider: new GoogleLoginProvider(
+              '371697338749-cbgs417cd45vgktq0kmjanbn3lh2lbl6.apps.googleusercontent.com',
+              {
+                oneTapEnabled: false,
+              }
+            )
+          },
+          {
+            id: FacebookLoginProvider.PROVIDER_ID,
+            provider: new FacebookLoginProvider('246885142330300')
+          },
+          {
+            id: MicrosoftLoginProvider.PROVIDER_ID,
+            provider: new MicrosoftLoginProvider('4ecf3d26-e844-4855-9158-b8f6c0121b50', {
+              scopes: ["openid", "email"],
+              redirect_uri: 'http://localhost:4200',
+              logout_redirect_uri: 'http://localhost:4200/logout'
+            }),
+          }
+        ],
+        onError: (err) => {
+          console.error(err);
+        }
+      } as SocialAuthServiceConfig,
+    }],
   bootstrap: [AppComponent],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
 })

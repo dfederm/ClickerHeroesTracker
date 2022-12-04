@@ -1,14 +1,14 @@
-import { Component, OnInit, Input } from "@angular/core";
+import { Component, OnInit, Input, AfterViewInit } from "@angular/core";
 import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
-import { PublicClientApplication } from "@azure/msal-browser";
 
 import { AuthenticationService } from "../../services/authenticationService/authenticationService";
 import { UserService, IUserLogins, IExternalLogin } from "../../services/userService/userService";
 import { NgxSpinnerService } from "ngx-spinner";
+import { FacebookLoginProvider, GoogleLoginProvider, MicrosoftLoginProvider, SocialAuthService } from "@abacritt/angularx-social-login";
 
 export interface ILoginButton {
     name: string;
-    logIn(): void;
+    logIn?(): void;
 }
 
 export interface IErrorResponse {
@@ -20,12 +20,7 @@ export interface IErrorResponse {
     selector: "externalLogins",
     templateUrl: "./externalLogins.html",
 })
-export class ExternalLoginsComponent implements OnInit {
-    // Facebook doesn't give us a way to check if it's initialized, so we track it ourselves.
-    public static facebookInitialized = false;
-
-    public microsoftApp: PublicClientApplication;
-
+export class ExternalLoginsComponent implements OnInit, AfterViewInit {
     @Input()
     public isManageMode: boolean;
 
@@ -41,6 +36,8 @@ export class ExternalLoginsComponent implements OnInit {
 
     public addLogins: ILoginButton[];
 
+    public showGoogleLogin: boolean;
+
     private grantType: string;
 
     private assertion: string;
@@ -48,7 +45,6 @@ export class ExternalLoginsComponent implements OnInit {
     private readonly allLogins: ILoginButton[] = [
         {
             name: "Google",
-            logIn: () => this.googleLogIn(),
         },
         {
             name: "Facebook",
@@ -65,6 +61,7 @@ export class ExternalLoginsComponent implements OnInit {
         public activeModal: NgbActiveModal,
         private readonly userService: UserService,
         private readonly spinnerService: NgxSpinnerService,
+        private readonly socialAuthService: SocialAuthService
     ) { }
 
     public ngOnInit(): void {
@@ -83,6 +80,34 @@ export class ExternalLoginsComponent implements OnInit {
             this.addLogins = this.allLogins;
         }
 
+        this.socialAuthService.authState.subscribe((user) => {
+            console.log(user);
+
+            if (user) {
+                if (user.provider == GoogleLoginProvider.PROVIDER_ID) {
+                    this.logIn("urn:ietf:params:oauth:grant-type:google_identity_token", user.idToken)
+                        .catch((error: { error: string }) => {
+                            if (error && error.error === "popup_closed_by_user") {
+                                return;
+                            }
+
+                            this.error = "There was a problem logging in with Google";
+                        })
+                        .finally(() => {
+                            // TODO: Explain this?
+                            this.socialAuthService.signOut();
+                        });
+                } else if (user.provider == FacebookLoginProvider.PROVIDER_ID) {
+                    // TODO
+                    console.log("FACEBOOK");
+                } else if (user.provider == MicrosoftLoginProvider.PROVIDER_ID) {
+                    // TODO
+                    console.log("MICROSOFT");
+                }
+            }
+        });
+
+        /*
         if (!gapi.auth2) {
             gapi.load("auth2", () => {
                 gapi.auth2.init({
@@ -91,8 +116,10 @@ export class ExternalLoginsComponent implements OnInit {
                 });
             });
         }
+        */
 
         // eslint-disable-next-line
+        /*
         if (!ExternalLoginsComponent.facebookInitialized && typeof (FB) !== "undefined") {
             FB.init({
                 appId: "246885142330300",
@@ -100,15 +127,43 @@ export class ExternalLoginsComponent implements OnInit {
             });
             ExternalLoginsComponent.facebookInitialized = true;
         }
+        */
 
-        this.microsoftApp = new PublicClientApplication({ auth: { clientId: "4ecf3d26-e844-4855-9158-b8f6c0121b50" } });
+        ////this.microsoftApp = new PublicClientApplication({ auth: { clientId: "4ecf3d26-e844-4855-9158-b8f6c0121b50" } });
+    }
+
+    public ngAfterViewInit(): void {
+        // TODO: How to dedupe? Only need to call once.
+        /*
+        google.accounts.id.initialize({
+            client_id: "371697338749-cbgs417cd45vgktq0kmjanbn3lh2lbl6.apps.googleusercontent.com",
+            callback: (response) => {
+                console.log("Encoded JWT ID token: " + response.credential);
+            },
+        });
+
+        google.accounts.id.renderButton(
+            document.getElementById("googleLoginButton"),
+            { type: "standard" }
+        );
+        */
     }
 
     public googleLogIn(): void {
         this.error = null;
         this.provider = "Google";
 
+        /*
+        google.accounts.id.prompt((notification) => {
+            console.debug("isDisplayed: " + notification.isDisplayed())
+            console.debug("isNotDisplayed: " + notification.isNotDisplayed())
+            console.debug("getMomentType: " + notification.getMomentType())
+            console.debug("isSkippedMoment: " + notification.isSkippedMoment())
+        });
+        */
+
         // Need to wrap the promise since the promise returned from gapi doesn't seem to play well with Angular change detection.
+        /*
         Promise.resolve(gapi.auth2.getAuthInstance().signIn())
             .then((user: gapi.auth2.GoogleUser) => this.logIn("urn:ietf:params:oauth:grant-type:google_identity_token", user.getAuthResponse().id_token))
             .catch((error: { error: string }) => {
@@ -118,12 +173,16 @@ export class ExternalLoginsComponent implements OnInit {
 
                 this.error = "There was a problem logging in with Google";
             });
+        */
     }
 
     public facebookLogIn(): void {
         this.error = null;
         this.provider = "Facebook";
 
+        this.socialAuthService.signIn(FacebookLoginProvider.PROVIDER_ID);
+
+        /*
         FB.login(response => {
             if (!response.authResponse) {
                 // User cancelled login or did not fully authorize
@@ -140,12 +199,15 @@ export class ExternalLoginsComponent implements OnInit {
                 this.error = "There was a problem logging in with Facebook";
             }
         });
+        */
     }
 
     public microsoftLogIn(): void {
         this.error = null;
         this.provider = "Microsoft";
 
+        this.socialAuthService.signIn(MicrosoftLoginProvider.PROVIDER_ID);
+        /*
         // There is no signal when the user closes the popup. The promise just never resoles.
         // See: https://github.com/AzureAD/microsoft-authentication-library-for-js/issues/129
         this.microsoftApp.loginPopup({ scopes: ["openid", "email"] })
@@ -157,6 +219,7 @@ export class ExternalLoginsComponent implements OnInit {
 
                 this.error = "There was a problem logging in with Microsoft";
             });
+        */
     }
 
     public chooseUserName(): void {

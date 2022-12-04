@@ -3,9 +3,7 @@
   "compilerOptions": {
     "outDir": "./out-tsc/spec",
     "types": [
-      "jasmine",
-      "gapi.auth2",
-      "facebook-js-sdk"
+      "jasmine"
     ]
   },
   "files": [

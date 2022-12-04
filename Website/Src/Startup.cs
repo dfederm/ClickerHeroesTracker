@@ -66,9 +66,10 @@ namespace ClickerHeroesTrackerWebsite
             // The point at which the routing decision is made.
             app.UseRouting();
 
+            app.UseCors();
+
             app.UseAuthentication();
             app.UseAuthorization();
-            app.UseCors();
 
             // Executes the endpoint that was selected by routing.
             app.UseEndpoints(endpoints =>

@@ -24,9 +24,25 @@
     </div>
     <div *ngIf="addLogins && addLogins.length > 0">
         <h5 *ngIf="isManageMode">Add another service to log in.</h5>
-        <button *ngFor="let addLogin of addLogins"
-                class="btn btn-primary"
-                (click)="addLogin.logIn()">{{ addLogin.name }}</button>
+
+        <span *ngFor="let addLogin of addLogins">
+            <asl-google-signin-button *ngIf="addLogin.name == 'Google'"
+                                      type="standard"
+                                      size="medium"></asl-google-signin-button>
+
+            <div *ngIf="addLogin.name == 'Facebook'"
+                 class="fb-login-button"
+                 data-width=""
+                 data-size="medium"
+                 data-button-type="login_with"
+                 data-layout="default"
+                 data-auto-logout-link="false"
+                 data-use-continue-as="false"></div>
+
+            <button *ngIf="addLogin.name == 'Microsoft'"
+                    class="btn btn-primary"
+                    (click)="addLogin.logIn()">{{ addLogin.name }}</button>
+        </span>
     </div>
 </div>
 <div *ngIf="needUsername">
