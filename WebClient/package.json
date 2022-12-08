@@ -61,7 +61,7 @@
     "@types/node": "^18.11.7",
     "@types/pako": "^2.0.0",
     "@typescript-eslint/eslint-plugin": "^5.41.0",
-    "@typescript-eslint/parser": "^5.41.0",
+    "@typescript-eslint/parser": "^5.46.0",
     "eslint": "^8.26.0",
     "eslint-plugin-import": "^2.26.0",
     "eslint-plugin-jsdoc": "^39.3.25",
