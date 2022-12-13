@@ -8,6 +8,8 @@ namespace ClickerHeroesTrackerWebsite.Models.Api.Clans
 
         public int CurrentRaidLevel { get; set; }
 
+        public int? CurrentNewRaidLevel { get; set; }
+
         public int MemberCount { get; set; }
 
         public int Rank { get; set; }

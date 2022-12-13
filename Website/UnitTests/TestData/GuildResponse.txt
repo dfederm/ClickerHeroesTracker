@@ -1,0 +1,129 @@
+﻿{
+    "success": true,
+    "result": {
+        "guild": {
+            "name": "Some Guild Name",
+            "guildMasterUid": "111111111111111111111111111111",
+            "memberUids": {
+                "000000000000000000000000000000": "member",
+                "111111111111111111111111111111": "member",
+                "222222222222222222222222222222": "member",
+                "333333333333333333333333333333": "member",
+                "444444444444444444444444444444": "member",
+                "555555555555555555555555555555": "member",
+                "666666666666666666666666666666": "member",
+                "777777777777777777777777777777": "member",
+                "888888888888888888888888888888": "member",
+                "999999999999999999999999999999": "member"
+            },
+            "currentNewRaidLevel": 123,
+            "currentRaidLevel": "456789",
+            "autoJoin": false,
+            "newRaidLocked": "true"
+        },
+        "guildMembers": {
+            "0": {
+                "uid": "000000000000000000000000000000",
+                "highestZone": "19375",
+                "nickname": "Member0",
+                "chosenClass": "1",
+                "classLevel": "18",
+                "lastRewardTimestamp": "1670630400",
+                "lastBonusRewardTimestamp": "1670544000"
+            },
+            "1": {
+                "uid": "777777777777777777777777777777",
+                "highestZone": "190569",
+                "nickname": "Member7",
+                "chosenClass": "2",
+                "classLevel": "32",
+                "lastRewardTimestamp": "1670630400",
+                "lastBonusRewardTimestamp": "1670457600"
+            },
+            "2": {
+                "uid": "666666666666666666666666666666",
+                "highestZone": "1266039",
+                "nickname": "Member6",
+                "chosenClass": "3",
+                "classLevel": "25",
+                "lastRewardTimestamp": "1627430400",
+                "lastBonusRewardTimestamp": "1625184000"
+            },
+            "3": {
+                "uid": "888888888888888888888888888888",
+                "highestZone": "18724",
+                "nickname": "Member8",
+                "chosenClass": "3",
+                "classLevel": "27",
+                "lastRewardTimestamp": "1641772800",
+                "lastBonusRewardTimestamp": "1641600000"
+            },
+            "4": {
+                "uid": "111111111111111111111111111111",
+                "highestZone": "1115684",
+                "nickname": "Member1",
+                "chosenClass": "2",
+                "classLevel": "37",
+                "lastRewardTimestamp": "1670630400",
+                "lastBonusRewardTimestamp": "1670544000"
+            },
+            "5": {
+                "uid": "999999999999999999999999999999",
+                "highestZone": "25184",
+                "nickname": "Member9",
+                "chosenClass": "1",
+                "classLevel": "23",
+                "lastRewardTimestamp": "1637971200",
+                "lastBonusRewardTimestamp": "1637884800"
+            },
+            "6": {
+                "uid": "555555555555555555555555555555",
+                "highestZone": "672309",
+                "nickname": "Member5",
+                "chosenClass": "1",
+                "classLevel": "33",
+                "lastRewardTimestamp": "1670630400",
+                "lastBonusRewardTimestamp": "1670544000"
+            },
+            "7": {
+                "uid": "444444444444444444444444444444",
+                "highestZone": "1640159",
+                "nickname": "Member4",
+                "chosenClass": "1",
+                "classLevel": "19",
+                "lastRewardTimestamp": "1612915200",
+                "lastBonusRewardTimestamp": "1612224000"
+            },
+            "8": {
+                "uid": "222222222222222222222222222222",
+                "highestZone": "2631014",
+                "nickname": "Member2",
+                "chosenClass": "2",
+                "classLevel": "37",
+                "lastRewardTimestamp": "1670630400",
+                "lastBonusRewardTimestamp": "1670544000"
+            },
+            "9": {
+                "uid": "333333333333333333333333333333",
+                "highestZone": "3457914",
+                "nickname": "Member3",
+                "chosenClass": "3",
+                "classLevel": "37",
+                "lastRewardTimestamp": "1670630400",
+                "lastBonusRewardTimestamp": "1670544000"
+            }
+        },
+        "user": {
+            "uid": "555555555555555555555555555555",
+            "passwordHash": "0123456789ABCDEF",
+            "highestZone": "672309",
+            "nickname": "Member5",
+            "isGuildRequest": false,
+            "guildName": "Some Guild Name",
+            "chosenClass": "1",
+            "classLevel": "33",
+            "lastRewardTimestamp": "1670630400",
+            "lastBonusRewardTimestamp": "1670544000"
+        }
+    }
+}

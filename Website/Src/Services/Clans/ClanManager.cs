@@ -17,7 +17,7 @@ namespace Website.Services.Clans
 {
     public class ClanManager : IClanManager
     {
-        private const string BaseUrl = "http://clickerheroes-savedgames3-747864888.us-east-1.elb.amazonaws.com";
+        private const string BaseUrl = "https://guilds.clickerheroes.com";
 
         private static readonly char[] MessageDelimeter = { ';' };
 
@@ -215,11 +215,11 @@ namespace Website.Services.Clans
                 WITH NumberedRows
                 AS
                 (
-                    SELECT ROW_NUMBER() OVER (ORDER BY CurrentRaidLevel DESC) AS RowNumber, CurrentRaidLevel, Name, IsBlocked
+                    SELECT ROW_NUMBER() OVER (ORDER BY CurrentRaidLevel DESC) AS RowNumber, CurrentRaidLevel, CurrentNewRaidLevel, Name, IsBlocked
                     FROM Clans
                     WHERE IsBlocked = 0
                 )
-                SELECT RowNumber, Name, CurrentRaidLevel, (SELECT COUNT(*) FROM ClanMembers WHERE ClanMembers.ClanName = Name) AS MemberCount
+                SELECT RowNumber, Name, CurrentRaidLevel, CurrentNewRaidLevel, (SELECT COUNT(*) FROM ClanMembers WHERE ClanMembers.ClanName = Name) AS MemberCount
                 FROM NumberedRows
                 WHERE @Filter = '' OR Name LIKE '%' + @Filter + '%'
                 ORDER BY CurrentRaidLevel DESC
@@ -237,11 +237,13 @@ namespace Website.Services.Clans
                 while (reader.Read())
                 {
                     bool isUserClan = string.Equals(clanName, reader["Name"].ToString(), StringComparison.OrdinalIgnoreCase);
+                    int? currentNewRaidLevel = reader["CurrentNewRaidLevel"] == DBNull.Value ? null : Convert.ToInt32(reader["CurrentNewRaidLevel"]);
 
                     clans.Add(new LeaderboardClan
                     {
                         Name = reader["Name"].ToString(),
                         CurrentRaidLevel = Convert.ToInt32(reader["CurrentRaidLevel"]),
+                        CurrentNewRaidLevel = currentNewRaidLevel,
                         MemberCount = Convert.ToInt32(reader["MemberCount"]),
                         Rank = Convert.ToInt32(reader["RowNumber"]),
                         IsUserClan = isUserClan,
@@ -297,10 +299,10 @@ namespace Website.Services.Clans
                 WITH NumberedRows
                 AS
                 (
-                    SELECT ROW_NUMBER() OVER (ORDER BY CurrentRaidLevel DESC) AS RowNumber, CurrentRaidLevel, Name, IsBlocked
+                    SELECT ROW_NUMBER() OVER (ORDER BY CurrentRaidLevel DESC) AS RowNumber, CurrentRaidLevel, CurrentNewRaidLevel, Name, IsBlocked
                     FROM Clans
                 )
-                SELECT RowNumber, CurrentRaidLevel, @ClanName AS ClanName, IsBlocked
+                SELECT RowNumber, CurrentRaidLevel, CurrentNewRaidLevel, @ClanName AS ClanName, IsBlocked
                 FROM NumberedRows
                 WHERE Name = @ClanName;";
             Dictionary<string, object> parameters = new()
@@ -313,11 +315,13 @@ namespace Website.Services.Clans
                 if (reader.Read())
                 {
                     bool isBlocked = Convert.ToBoolean(reader["IsBlocked"]);
+                    int? currentNewRaidLevel = reader["CurrentNewRaidLevel"] == DBNull.Value ? null : Convert.ToInt32(reader["CurrentNewRaidLevel"]);
 
                     return new ClanData
                     {
                         Rank = isBlocked ? -1 : Convert.ToInt32(reader["RowNumber"]),
                         CurrentRaidLevel = Convert.ToInt32(reader["CurrentRaidLevel"]),
+                        CurrentNewRaidLevel = currentNewRaidLevel,
                         ClanName = reader["ClanName"].ToString(),
                         IsBlocked = isBlocked,
                     };
@@ -330,7 +334,7 @@ namespace Website.Services.Clans
         private async Task<IReadOnlyList<GuildMember>> GetGuildMembersAsync(string clanName)
         {
             const string CommandText = @"
-                SELECT ClanMembers.Id as Uid, Nickname, HighestZone, UserName
+                SELECT ClanMembers.Id as Uid, Nickname, HighestZone, ChosenClass, ClassLevel, UserName
                 FROM ClanMembers
                 LEFT JOIN GameUsers
                 ON ClanMembers.Id = GameUsers.Id
@@ -347,11 +351,16 @@ namespace Website.Services.Clans
                 List<GuildMember> guildMembers = new();
                 while (reader.Read())
                 {
+                    ClanClassType? chosenClass = reader["ChosenClass"] == DBNull.Value ? null : (ClanClassType)Convert.ToInt32(reader["ChosenClass"]);
+                    int? classLevel = reader["ClassLevel"] == DBNull.Value ? null : Convert.ToInt32(reader["ClassLevel"]);
+
                     guildMembers.Add(new GuildMember
                     {
                         Uid = reader["Uid"].ToString(),
                         Nickname = reader["Nickname"].ToString(),
                         HighestZone = Convert.ToInt32(reader["HighestZone"]),
+                        ChosenClass = chosenClass,
+                        ClassLevel = classLevel,
                         UserName = reader["UserName"]?.ToString(),
                     });
                 }
@@ -365,21 +374,23 @@ namespace Website.Services.Clans
             const string CommandText = @"
                 MERGE INTO Clans WITH (HOLDLOCK)
                 USING
-                    (VALUES (@Name, @CurrentRaidLevel, @ClanMasterId))
-                    AS Input(Name, CurrentRaidLevel, ClanMasterId)
+                    (VALUES (@Name, @CurrentRaidLevel, @CurrentNewRaidLevel, @ClanMasterId))
+                    AS Input(Name, CurrentRaidLevel, CurrentNewRaidLevel, ClanMasterId)
                 ON Clans.Name = Input.Name
                 WHEN MATCHED THEN
                     UPDATE
                     SET
                         CurrentRaidLevel = Input.CurrentRaidLevel,
+                        CurrentNewRaidLevel = Input.CurrentNewRaidLevel,
                         ClanMasterId = Input.ClanMasterId
                 WHEN NOT MATCHED THEN
-                    INSERT (Name, CurrentRaidLevel, ClanMasterId)
-                    VALUES (Input.Name, Input.CurrentRaidLevel, Input.ClanMasterId);";
+                    INSERT (Name, CurrentRaidLevel, CurrentNewRaidLevel, ClanMasterId)
+                    VALUES (Input.Name, Input.CurrentRaidLevel, Input.CurrentNewRaidLevel, Input.ClanMasterId);";
             Dictionary<string, object> parameters = new()
             {
                     { "@Name", clan.Guild.Name },
                     { "@CurrentRaidLevel", clan.Guild.CurrentRaidLevel },
+                    { "@CurrentNewRaidLevel", clan.Guild.CurrentNewRaidLevel },
                     { "@ClanMasterId", clan.Guild.GuildMasterUid },
             };
             using (IDatabaseCommand command = _databaseCommandFactory.Create(CommandText, parameters))
@@ -398,25 +409,27 @@ namespace Website.Services.Clans
             /* Build a query that looks like this:
                 MERGE INTO ClanMembers WITH (HOLDLOCK)
                 USING
-                    (VALUES (@Id0, @Nickname0, @HighestZone0, @ClanName), (@Id1, @Nickname1, @HighestZone1, @ClanName), ... )
-                    AS Input(Id, Nickname, HighestZone, ClanName)
+                    (VALUES (@Id0, @Nickname0, @HighestZone0, @ChosenClass0, @ClassLevel0, @ClanName), (@Id1, @Nickname1, @HighestZone1, @ChosenClass1, @ClassLevel1, @ClanName), ... )
+                    AS Input(Id, Nickname, HighestZone, ChosenClass, ClassLevel, ClanName)
                 ON ClanMembers.Id = Input.Id
                 WHEN MATCHED THEN
                     UPDATE
                     SET
                         Nickname = Input.Nickname,
                         HighestZone = Input.HighestZone,
+                        ChosenClass = Input.ChosenClass,
+                        ClassLevel = Input.ClassLevel,
                         ClanName = Input.ClanName
                 WHEN NOT MATCHED BY TARGET THEN
-                    INSERT (Id, Nickname, HighestZone, ClanName)
-                    VALUES (Input.Id, Input.Nickname, Input.HighestZone, Input.ClanName)
+                    INSERT (Id, Nickname, HighestZone, ChosenClass, ClassLevel, ClanName)
+                    VALUES (Input.Id, Input.Nickname, Input.HighestZone, Input.ChosenClass, Input.ClassLevel, Input.ClanName)
                 WHEN NOT MATCHED BY SOURCE AND ClanMembers.ClanName = @ClanName THEN
                     DELETE;
             */
             StringBuilder commandText = new();
             Dictionary<string, object> parameters = new()
             {
-                    { "@ClanName", clan.Guild.Name },
+                { "@ClanName", clan.Guild.Name },
             };
 
             commandText.Append(@"
@@ -433,27 +446,31 @@ namespace Website.Services.Clans
                     commandText.Append(',');
                 }
 
-                commandText.AppendFormat("(@Id{0}, @Nickname{0}, @HighestZone{0}, @ClanName)", i);
+                commandText.AppendFormat("(@Id{0}, @Nickname{0}, @HighestZone{0}, @ChosenClass{0}, @ClassLevel{0}, @ClanName)", i);
                 parameters.Add("@Id" + i, clanMember.Uid);
                 parameters.Add("@Nickname" + i, clanMember.Nickname);
                 parameters.Add("@HighestZone" + i, clanMember.HighestZone);
+                parameters.Add("@ChosenClass" + i, clanMember.ChosenClass.HasValue ? (ClanClassType)clanMember.ChosenClass : null);
+                parameters.Add("@ClassLevel" + i, clanMember.ClassLevel);
 
                 isFirst = false;
             }
 
             commandText.Append(@"
                 )
-                    AS Input(Id, Nickname, HighestZone, ClanName)
+                    AS Input(Id, Nickname, HighestZone, ChosenClass, ClassLevel, ClanName)
                 ON ClanMembers.Id = Input.Id
                 WHEN MATCHED THEN
                     UPDATE
                     SET
                         Nickname = Input.Nickname,
                         HighestZone = Input.HighestZone,
+                        ChosenClass = Input.ChosenClass,
+                        ClassLevel = Input.ClassLevel,
                         ClanName = Input.ClanName
                 WHEN NOT MATCHED BY TARGET THEN
-                    INSERT (Id, Nickname, HighestZone, ClanName)
-                    VALUES (Input.Id, Input.Nickname, Input.HighestZone, Input.ClanName)
+                    INSERT (Id, Nickname, HighestZone, ChosenClass, ClassLevel, ClanName)
+                    VALUES (Input.Id, Input.Nickname, Input.HighestZone, Input.ChosenClass, Input.ClassLevel, Input.ClanName)
                 WHEN NOT MATCHED BY SOURCE AND ClanMembers.ClanName = @ClanName THEN
                     DELETE;");
             using (IDatabaseCommand command = _databaseCommandFactory.Create(commandText.ToString(), parameters))
