@@ -8,6 +8,8 @@ namespace Website.Services.Clans
     {
         public int CurrentRaidLevel { get; set; }
 
+        public int CurrentNewRaidLevel { get; set; }
+
         public string GuildMasterUid { get; set; }
 
         public IDictionary<string, MemberType> MemberUids { get; set; }
