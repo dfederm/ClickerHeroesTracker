@@ -31,7 +31,12 @@ describe("ClansComponent", () => {
 
     let clanMembers = [];
     for (let i = 0; i < userClan.memberCount; i++) {
-        clanMembers.push({ uid: "userId" + i, nickname: "nickname" + i, highestZone: i, userName: i % 2 ? "userName" + i : null });
+        clanMembers.push({
+            uid: "userId" + i,
+            nickname: "nickname" + i,
+            highestZone: i,
+            userName: i % 2 ? "userName" + i : null
+        });
     }
 
     let clanData: IClanData = {
@@ -169,11 +174,12 @@ describe("ClansComponent", () => {
             expect(clanRow.nativeElement.classList.contains("table-success")).toBe(clan === userClan);
 
             let cells = clanRow.children;
-            expect(cells.length).toEqual(4);
+            expect(cells.length).toEqual(5);
             expect(cells[0].nativeElement.textContent.trim()).toEqual(clan.rank.toString());
             expect(cells[1].nativeElement.textContent.trim()).toEqual(clan.name);
             expect(cells[2].nativeElement.textContent.trim()).toEqual(clan.memberCount.toString());
-            expect(cells[3].nativeElement.textContent.trim()).toEqual(clan.currentRaidLevel.toString());
+            expect(cells[3].nativeElement.textContent.trim()).toEqual(clan.currentNewRaidLevel?.toString() ?? "");
+            expect(cells[4].nativeElement.textContent.trim()).toEqual(clan.currentRaidLevel.toString());
         }
 
         let pagination = fixture.debugElement.query(By.css("ngb-pagination"));

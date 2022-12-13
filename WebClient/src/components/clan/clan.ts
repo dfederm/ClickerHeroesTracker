@@ -22,7 +22,9 @@ export class ClanComponent implements OnInit {
 
     public clanName: string;
 
-    public currentRaidLevel: number;
+    public currentRaidLevel?: number;
+
+    public currentLegacyRaidLevel: number;
 
     public rank: number;
 
@@ -138,7 +140,8 @@ export class ClanComponent implements OnInit {
                 // Set the clan name again since it will be normalized
                 this.clanName = response.clanName;
 
-                this.currentRaidLevel = response.currentRaidLevel;
+                this.currentRaidLevel = response.currentNewRaidLevel;
+                this.currentLegacyRaidLevel = response.currentRaidLevel;
                 this.rank = response.rank;
                 this.isBlocked = response.isBlocked;
                 this.guildMembers = response.guildMembers;

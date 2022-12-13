@@ -86,6 +86,7 @@ export class ClansComponent implements OnInit {
                     this.userClan = {
                         name: response.clanName,
                         currentRaidLevel: response.currentRaidLevel,
+                        currentNewRaidLevel: response.currentNewRaidLevel,
                         memberCount: response.guildMembers.length,
                         rank: response.rank,
                         isUserClan: true,
