@@ -25,7 +25,8 @@
                             <th>Rank</th>
                             <th>Name</th>
                             <th>Members</th>
-                            <th>Current Raid Level</th>
+                            <th>Raid Level</th>
+                            <th>Legacy Raid Level</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -37,6 +38,7 @@
                                    routerLink="/clans/{{clan.name}}">{{ clan.name }}</a>
                             </td>
                             <td>{{ clan.memberCount | number }}</td>
+                            <td>{{ clan.currentNewRaidLevel | number }}</td>
                             <td>{{ clan.currentRaidLevel | number }}</td>
                         </tr>
                     </tbody>

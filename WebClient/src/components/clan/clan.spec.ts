@@ -121,9 +121,10 @@ describe("ClanComponent", () => {
         expect(container).not.toBeNull();
 
         let clanInformation = container.queryAll(By.css("li span"));
-        expect(clanInformation.length).toEqual(2);
+        expect(clanInformation.length).toEqual(3);
         expect(clanInformation[0].nativeElement.textContent.trim()).toEqual(clan.rank.toString());
-        expect(clanInformation[1].nativeElement.textContent.trim()).toEqual(clan.currentRaidLevel.toString());
+        expect(clanInformation[1].nativeElement.textContent.trim()).toEqual(clan.currentNewRaidLevel?.toString() ?? "");
+        expect(clanInformation[2].nativeElement.textContent.trim()).toEqual(clan.currentRaidLevel.toString());
     });
 
     it("should display clan members", async () => {
@@ -149,9 +150,11 @@ describe("ClanComponent", () => {
             }
 
             let cells = userRow.children;
-            expect(cells.length).toEqual(2);
+            expect(cells.length).toEqual(4);
             expect(cells[0].nativeElement.textContent.trim().replace(/\s+/g, " ")).toEqual(expectedName);
-            expect(cells[1].nativeElement.textContent.trim()).toEqual(guildMember.highestZone.toString());
+            expect(cells[1].nativeElement.textContent.trim()).toEqual(guildMember.chosenClass?.toString() ?? "");
+            expect(cells[2].nativeElement.textContent.trim()).toEqual(guildMember.classLevel?.toString() ?? "");
+            expect(cells[3].nativeElement.textContent.trim()).toEqual(guildMember.highestZone.toString());
         }
     });
 

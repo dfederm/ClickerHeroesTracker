@@ -6,6 +6,8 @@ import { AuthenticationService } from "../authenticationService/authenticationSe
 import { IPaginationMetadata } from "../../models";
 import { firstValueFrom } from "rxjs";
 
+export type GuildClassType = "rogue" | "mage" | "priest";
+
 export interface IGuildMember {
     highestZone: number;
 
@@ -14,12 +16,18 @@ export interface IGuildMember {
     uid: string;
 
     userName: string;
+
+    chosenClass?: GuildClassType;
+
+    classLevel?: number;
 }
 
 export interface IClanData {
     clanName: string;
 
     currentRaidLevel: number;
+
+    currentNewRaidLevel?: number;
 
     guildMembers: IGuildMember[];
 
@@ -46,6 +54,8 @@ export interface ILeaderboardClan {
     name: string;
 
     currentRaidLevel: number;
+
+    currentNewRaidLevel?: number;
 
     memberCount: number;
 
