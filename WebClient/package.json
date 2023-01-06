@@ -25,7 +25,7 @@
     "@markpieszak/ng-application-insights": "^9.0.2",
     "@ng-bootstrap/ng-bootstrap": "^14.0.0",
     "bootstrap": "^5.2.3",
-    "chart.js": "^4.1.1",
+    "chart.js": "^4.1.2",
     "chartjs-adapter-date-fns": "^3.0.0",
     "crypto-js": "^4.0.0",
     "date-fns": "^2.29.3",
