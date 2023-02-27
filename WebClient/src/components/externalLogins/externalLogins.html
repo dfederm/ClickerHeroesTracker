@@ -24,9 +24,31 @@
     </div>
     <div *ngIf="addLogins && addLogins.length > 0">
         <h5 *ngIf="isManageMode">Add another service to log in.</h5>
-        <button *ngFor="let addLogin of addLogins"
-                class="btn btn-primary"
-                (click)="addLogin.logIn()">{{ addLogin.name }}</button>
+        <div *ngFor="let addLogin of addLogins">
+            <button *ngIf="addLogin == 'Google'"
+                    class="btn"
+                    id="google-signin-button">
+                <!-- Google is special and renders ngAfterViewInit -->
+            </button>
+
+            <button *ngIf="addLogin == 'Facebook'"
+                    class="btn"
+                    (click)="facebookLogIn()">
+                <div style="background-color: #1877f2; color: #fff; width: 215px; border-radius: 4px;">
+                    <img src="/images/facebook_logo.png"
+                         height="24"
+                         style="margin: 8px 8px 8px 2px;" />
+                    <span style="vertical-align: text-top; font-weight: bold;">Log in with Facebook</span>
+                </div>
+            </button>
+
+            <button *ngIf="addLogin == 'Microsoft'"
+                    class="btn"
+                    (click)="microsoftLogIn()">
+                <img src="/images/microsoft_signin.png"
+                     title="Sign in with Microsoft" />
+            </button>
+        </div>
     </div>
 </div>
 <div *ngIf="needUsername">
