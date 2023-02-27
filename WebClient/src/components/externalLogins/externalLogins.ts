@@ -1,15 +1,10 @@
-import { Component, OnInit, Input } from "@angular/core";
+import { Component, OnInit, Input, AfterViewInit, NgZone } from "@angular/core";
 import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
 import { PublicClientApplication } from "@azure/msal-browser";
 
 import { AuthenticationService } from "../../services/authenticationService/authenticationService";
 import { UserService, IUserLogins, IExternalLogin } from "../../services/userService/userService";
 import { NgxSpinnerService } from "ngx-spinner";
-
-export interface ILoginButton {
-    name: string;
-    logIn(): void;
-}
 
 export interface IErrorResponse {
     error: string;
@@ -20,8 +15,7 @@ export interface IErrorResponse {
     selector: "externalLogins",
     templateUrl: "./externalLogins.html",
 })
-export class ExternalLoginsComponent implements OnInit {
-    // Facebook doesn't give us a way to check if it's initialized, so we track it ourselves.
+export class ExternalLoginsComponent implements OnInit, AfterViewInit {
     public static facebookInitialized = false;
 
     public microsoftApp: PublicClientApplication;
@@ -39,25 +33,16 @@ export class ExternalLoginsComponent implements OnInit {
 
     public username: string;
 
-    public addLogins: ILoginButton[];
+    public addLogins: string[];
 
     private grantType: string;
 
     private assertion: string;
 
-    private readonly allLogins: ILoginButton[] = [
-        {
-            name: "Google",
-            logIn: () => this.googleLogIn(),
-        },
-        {
-            name: "Facebook",
-            logIn: () => this.facebookLogIn(),
-        },
-        {
-            name: "Microsoft",
-            logIn: () => this.microsoftLogIn(),
-        },
+    private readonly allLogins: string[] = [
+        "Google",
+        "Facebook",
+        "Microsoft",
     ];
 
     constructor(
@@ -65,6 +50,7 @@ export class ExternalLoginsComponent implements OnInit {
         public activeModal: NgbActiveModal,
         private readonly userService: UserService,
         private readonly spinnerService: NgxSpinnerService,
+        private readonly zone: NgZone
     ) { }
 
     public ngOnInit(): void {
@@ -83,12 +69,21 @@ export class ExternalLoginsComponent implements OnInit {
             this.addLogins = this.allLogins;
         }
 
-        if (!gapi.auth2) {
-            gapi.load("auth2", () => {
-                gapi.auth2.init({
-                    client_id: "371697338749-cbgs417cd45vgktq0kmjanbn3lh2lbl6.apps.googleusercontent.com",
-                    scope: "profile",
-                });
+        if (typeof (google) !== "undefined") {
+            google.accounts.id.initialize({
+                client_id: "371697338749-cbgs417cd45vgktq0kmjanbn3lh2lbl6.apps.googleusercontent.com",
+                callback: ({ credential }) => {
+                    // This callback is not covered by Angular so we have to get it back into Angular
+                    this.zone.run(() => {
+                        this.error = null;
+                        this.provider = "Google";
+
+                        this.logIn("urn:ietf:params:oauth:grant-type:google_identity_token", credential)
+                            .catch(() => {
+                                this.error = "There was a problem logging in with Google";
+                            });
+                    });
+                },
             });
         }
 
@@ -96,7 +91,7 @@ export class ExternalLoginsComponent implements OnInit {
         if (!ExternalLoginsComponent.facebookInitialized && typeof (FB) !== "undefined") {
             FB.init({
                 appId: "246885142330300",
-                version: "v3.1",
+                version: "v16.0",
             });
             ExternalLoginsComponent.facebookInitialized = true;
         }
@@ -104,20 +99,16 @@ export class ExternalLoginsComponent implements OnInit {
         this.microsoftApp = new PublicClientApplication({ auth: { clientId: "4ecf3d26-e844-4855-9158-b8f6c0121b50" } });
     }
 
-    public googleLogIn(): void {
-        this.error = null;
-        this.provider = "Google";
-
-        // Need to wrap the promise since the promise returned from gapi doesn't seem to play well with Angular change detection.
-        Promise.resolve(gapi.auth2.getAuthInstance().signIn())
-            .then((user: gapi.auth2.GoogleUser) => this.logIn("urn:ietf:params:oauth:grant-type:google_identity_token", user.getAuthResponse().id_token))
-            .catch((error: { error: string }) => {
-                if (error && error.error === "popup_closed_by_user") {
-                    return;
-                }
-
-                this.error = "There was a problem logging in with Google";
-            });
+    public ngAfterViewInit(): void {
+        if (google?.accounts?.id?.renderButton) {
+            let googleButton = document.getElementById("google-signin-button");
+            if (googleButton) {
+                google.accounts.id.renderButton(googleButton, {
+                    type: "standard",
+                    size: "large",
+                });
+            }
+        }
     }
 
     public facebookLogIn(): void {
@@ -234,7 +225,7 @@ export class ExternalLoginsComponent implements OnInit {
 
                 this.addLogins = [];
                 for (let i = 0; i < this.allLogins.length; i++) {
-                    if (!loginProviderNames[this.allLogins[i].name]) {
+                    if (!loginProviderNames[this.allLogins[i]]) {
                         this.addLogins.push(this.allLogins[i]);
                     }
                 }

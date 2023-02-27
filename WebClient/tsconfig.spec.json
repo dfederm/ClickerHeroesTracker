@@ -4,7 +4,7 @@
     "outDir": "./out-tsc/spec",
     "types": [
       "jasmine",
-      "gapi.auth2",
+      "google.accounts",
       "facebook-js-sdk"
     ]
   },

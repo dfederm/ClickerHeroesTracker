@@ -11,15 +11,6 @@ import { BehaviorSubject } from "rxjs";
 import { AuthenticationResult } from "@azure/msal-browser";
 import { NgxSpinnerService } from "ngx-spinner";
 
-// eslint-disable-next-line @typescript-eslint/no-namespace
-declare global {
-    // eslint-disable-next-line @typescript-eslint/naming-convention
-    interface Window {
-        gapi: {};
-        FB: {};
-    }
-}
-
 describe("ExternalLoginsComponent", () => {
     let component: ExternalLoginsComponent;
     let fixture: ComponentFixture<ExternalLoginsComponent>;
@@ -32,7 +23,7 @@ describe("ExternalLoginsComponent", () => {
         email: "someEmail",
     };
 
-    let gapiSpy: jasmine.SpyObj<typeof gapi>;
+    let googleAccountsSpy: jasmine.SpyObj<typeof google.accounts.id>;
     let fbSpy: jasmine.SpyObj<typeof FB>;
 
     beforeEach(async () => {
@@ -53,16 +44,16 @@ describe("ExternalLoginsComponent", () => {
             hide: (): void => void 0,
         };
 
-        gapiSpy = jasmine.createSpyObj<typeof gapi>(["load"]);
+        googleAccountsSpy = jasmine.createSpyObj<typeof google.accounts.id>(["initialize"]);
         fbSpy = jasmine.createSpyObj<typeof FB>(["init"]);
 
-        gapiSpy.load.and.callFake((_apiName: string, callback: gapi.LoadCallback) => {
-            gapi.auth2 = jasmine.createSpyObj(["init"]);
-            callback();
-        });
-
         // Mock the global variables. We should figure out a better way to both inject this in the product and mock this in tests.
-        window.gapi = gapiSpy;
+        window.google = {
+            accounts: {
+                id: googleAccountsSpy,
+                oauth2: null,
+            },
+        };
         window.FB = fbSpy;
 
         await TestBed.configureTestingModule(
@@ -84,7 +75,6 @@ describe("ExternalLoginsComponent", () => {
     });
 
     afterEach(() => {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         ExternalLoginsComponent.facebookInitialized = false;
     });
 
@@ -95,8 +85,7 @@ describe("ExternalLoginsComponent", () => {
 
         it("should load the external login sdks", () => {
             // Google
-            expect(gapi.load).toHaveBeenCalledWith("auth2", jasmine.any(Function));
-            expect(gapi.auth2.init).toHaveBeenCalled();
+            expect(google.accounts.id.initialize).toHaveBeenCalled();
 
             // Facebook
             expect(FB.init).toHaveBeenCalled();
@@ -108,16 +97,16 @@ describe("ExternalLoginsComponent", () => {
         it("should only load the external login sdks once", () => {
             let originalMicrosoftApp = component.microsoftApp;
 
-            // Create a whole bunch of components to simulate the user opening and closing the dialog a bunch.
+            // Destory and create a whole bunch of components to simulate the user opening and closing the dialog a bunch.
             for (let i = 0; i < 100; i++) {
-                let dialog = TestBed.createComponent(ExternalLoginsComponent);
-                dialog.detectChanges();
-                dialog.destroy();
+                fixture.destroy();
+                fixture = TestBed.createComponent(ExternalLoginsComponent);
+                fixture.detectChanges();
             }
 
-            // Google
-            expect(gapi.load).toHaveBeenCalledTimes(1);
-            expect(gapi.auth2.init).toHaveBeenCalledTimes(1);
+            // Google does actually need to be initialized each time since it's given a callback tied to the component.
+            // 101 since it's initialized once via beforeEach
+            expect(google.accounts.id.initialize).toHaveBeenCalledTimes(101);
 
             // Facebook
             expect(FB.init).toHaveBeenCalledTimes(1);
@@ -139,73 +128,22 @@ describe("ExternalLoginsComponent", () => {
             let activeModal = TestBed.inject(NgbActiveModal);
             spyOn(activeModal, "close");
 
-            let authResponse = { id_token: "someIdToken" } as gapi.auth2.AuthResponse;
+            let credentialResponse = { credential: "someIdToken" } as google.accounts.id.CredentialResponse;
 
-            let googleUser = jasmine.createSpyObj<gapi.auth2.GoogleUser>(["getAuthResponse"]);
-            googleUser.getAuthResponse.and.returnValue(authResponse);
-
-            let googleAuth = jasmine.createSpyObj<gapi.auth2.GoogleAuth>(["signIn"]);
-            googleAuth.signIn.and.returnValue(Promise.resolve(googleUser));
-
-            let auth2 = jasmine.createSpyObj<typeof gapi.auth2>(["getAuthInstance"]);
-            auth2.getAuthInstance.and.returnValue(googleAuth);
-
-            gapiSpy.auth2 = auth2;
-
-            let buttons = fixture.debugElement.queryAll(By.css("button"));
-            expect(buttons.length).toEqual(3);
-
-            let button = buttons[0];
-            expect(button).not.toBeNull();
-            button.nativeElement.click();
+            // Google makes this into a proper button, so trigger the callback directly.
+            expect(googleAccountsSpy.initialize).toHaveBeenCalledTimes(1);
+            let config = googleAccountsSpy.initialize.calls.first().args[0] as google.accounts.id.IdConfiguration;
+            config.callback(credentialResponse);
 
             await fixture.whenStable();
             fixture.detectChanges();
 
-            expect(auth2.getAuthInstance).toHaveBeenCalled();
-            expect(googleAuth.signIn).toHaveBeenCalled();
-            expect(googleUser.getAuthResponse).toHaveBeenCalled();
-            expect(authenticationService.logInWithAssertion).toHaveBeenCalledWith("urn:ietf:params:oauth:grant-type:google_identity_token", authResponse.id_token, undefined);
+            expect(authenticationService.logInWithAssertion).toHaveBeenCalledWith("urn:ietf:params:oauth:grant-type:google_identity_token", credentialResponse.credential, undefined);
             expect(activeModal.close).toHaveBeenCalled();
 
             // No error
             let error = fixture.debugElement.query(By.css(".alert-danger"));
             expect(error).toBeNull();
-        });
-
-        it("should show an error when Google fails", async () => {
-            let authenticationService = TestBed.inject(AuthenticationService);
-            spyOn(authenticationService, "logInWithAssertion");
-
-            let activeModal = TestBed.inject(NgbActiveModal);
-            spyOn(activeModal, "close");
-
-            let googleAuth = jasmine.createSpyObj<gapi.auth2.GoogleAuth>(["signIn"]);
-            googleAuth.signIn.and.returnValue(Promise.reject());
-
-            let auth2 = jasmine.createSpyObj<typeof gapi.auth2>(["getAuthInstance"]);
-            auth2.getAuthInstance.and.returnValue(googleAuth);
-
-            gapiSpy.auth2 = auth2;
-
-            let buttons = fixture.debugElement.queryAll(By.css("button"));
-            expect(buttons.length).toEqual(3);
-
-            let button = buttons[0];
-            expect(button).not.toBeNull();
-            button.nativeElement.click();
-
-            await fixture.whenStable();
-            fixture.detectChanges();
-
-            expect(auth2.getAuthInstance).toHaveBeenCalled();
-            expect(googleAuth.signIn).toHaveBeenCalled();
-            expect(authenticationService.logInWithAssertion).not.toHaveBeenCalled();
-            expect(activeModal.close).not.toHaveBeenCalled();
-
-            // Error
-            let error = fixture.debugElement.query(By.css(".alert-danger"));
-            expect(error).not.toBeNull();
         });
 
         it("should show an error when authenticationService fails", async () => {
@@ -215,73 +153,22 @@ describe("ExternalLoginsComponent", () => {
             let activeModal = TestBed.inject(NgbActiveModal);
             spyOn(activeModal, "close");
 
-            let authResponse = { id_token: "someIdToken" } as gapi.auth2.AuthResponse;
+            let credentialResponse = { credential: "someIdToken" } as google.accounts.id.CredentialResponse;
 
-            let googleUser = jasmine.createSpyObj<gapi.auth2.GoogleUser>(["getAuthResponse"]);
-            googleUser.getAuthResponse.and.returnValue(authResponse);
-
-            let googleAuth = jasmine.createSpyObj<gapi.auth2.GoogleAuth>(["signIn"]);
-            googleAuth.signIn.and.returnValue(Promise.resolve(googleUser));
-
-            let auth2 = jasmine.createSpyObj<typeof gapi.auth2>(["getAuthInstance"]);
-            auth2.getAuthInstance.and.returnValue(googleAuth);
-
-            gapiSpy.auth2 = auth2;
-
-            let buttons = fixture.debugElement.queryAll(By.css("button"));
-            expect(buttons.length).toEqual(3);
-
-            let button = buttons[0];
-            expect(button).not.toBeNull();
-            button.nativeElement.click();
+            // Google makes this into a proper button, so trigger the callback directly.
+            expect(googleAccountsSpy.initialize).toHaveBeenCalledTimes(1);
+            let config = googleAccountsSpy.initialize.calls.first().args[0] as google.accounts.id.IdConfiguration;
+            config.callback(credentialResponse);
 
             await fixture.whenStable();
             fixture.detectChanges();
 
-            expect(auth2.getAuthInstance).toHaveBeenCalled();
-            expect(googleAuth.signIn).toHaveBeenCalled();
-            expect(googleUser.getAuthResponse).toHaveBeenCalled();
-            expect(authenticationService.logInWithAssertion).toHaveBeenCalledWith("urn:ietf:params:oauth:grant-type:google_identity_token", authResponse.id_token, undefined);
+            expect(authenticationService.logInWithAssertion).toHaveBeenCalledWith("urn:ietf:params:oauth:grant-type:google_identity_token", credentialResponse.credential, undefined);
             expect(activeModal.close).not.toHaveBeenCalled();
 
             // Error
             let error = fixture.debugElement.query(By.css(".alert-danger"));
             expect(error).not.toBeNull();
-        });
-
-        it("should not show an error when cancelled", async () => {
-            let authenticationService = TestBed.inject(AuthenticationService);
-            spyOn(authenticationService, "logInWithAssertion");
-
-            let activeModal = TestBed.inject(NgbActiveModal);
-            spyOn(activeModal, "close");
-
-            let googleAuth = jasmine.createSpyObj<gapi.auth2.GoogleAuth>(["signIn"]);
-            googleAuth.signIn.and.returnValue(Promise.reject({ error: "popup_closed_by_user" }));
-
-            let auth2 = jasmine.createSpyObj<typeof gapi.auth2>(["getAuthInstance"]);
-            auth2.getAuthInstance.and.returnValue(googleAuth);
-
-            gapiSpy.auth2 = auth2;
-
-            let buttons = fixture.debugElement.queryAll(By.css("button"));
-            expect(buttons.length).toEqual(3);
-
-            let button = buttons[0];
-            expect(button).not.toBeNull();
-            button.nativeElement.click();
-
-            await fixture.whenStable();
-            fixture.detectChanges();
-
-            expect(auth2.getAuthInstance).toHaveBeenCalled();
-            expect(googleAuth.signIn).toHaveBeenCalled();
-            expect(authenticationService.logInWithAssertion).not.toHaveBeenCalled();
-            expect(activeModal.close).not.toHaveBeenCalled();
-
-            // No error
-            let error = fixture.debugElement.query(By.css(".alert-danger"));
-            expect(error).toBeNull();
         });
     });
 
@@ -894,7 +781,7 @@ describe("ExternalLoginsComponent", () => {
         });
 
         it("should hide add buttons for registered logins", async () => {
-            let authResponse = { id_token: "someIdToken" };
+            let authResult = { idToken: "someIdToken" } as AuthenticationResult;
             let logins: IUserLogins = {
                 hasPassword: true,
                 externalLogins: [
@@ -931,18 +818,19 @@ describe("ExternalLoginsComponent", () => {
 
             let button: DebugElement = null;
             for (let i = 0; i < buttons.length; i++) {
-                if (buttons[i].nativeElement.textContent.trim() === "Google") {
+                let img = buttons[i].query(By.css("img"));
+                if (img && img.nativeElement.title === "Sign in with Microsoft") {
                     button = buttons[i];
                 }
             }
 
-            gapi.auth2.getAuthInstance = () => ({ signIn: () => Promise.resolve({ getAuthResponse: () => authResponse }) }) as {} as gapi.auth2.GoogleAuth;
+            spyOn(component.microsoftApp, "loginPopup").and.returnValue(Promise.resolve(authResult));
             expect(button).toBeDefined();
             button.nativeElement.click();
 
             await fixture.whenStable();
 
-            expect(authenticationService.logInWithAssertion).toHaveBeenCalledWith("urn:ietf:params:oauth:grant-type:google_identity_token", authResponse.id_token, undefined);
+            expect(authenticationService.logInWithAssertion).toHaveBeenCalledWith("urn:ietf:params:oauth:grant-type:microsoft_identity_token", authResult.idToken, undefined);
 
             // Refreshes the data
             expect(userService.getLogins).toHaveBeenCalledWith(loggedInUser.username);
