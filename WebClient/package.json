@@ -52,7 +52,7 @@
     "@angular-eslint/eslint-plugin-template": "^15.2.1",
     "@angular-eslint/schematics": "^15.2.1",
     "@angular-eslint/template-parser": "^15.2.1",
-    "@angular/cli": "^15.2.4",
+    "@angular/cli": "^15.2.6",
     "@angular/compiler-cli": "^15.2.3",
     "@types/crypto-js": "^4.1.1",
     "@types/facebook-js-sdk": "^3.3.6",
