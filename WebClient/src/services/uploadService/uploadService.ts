@@ -3,7 +3,7 @@ import { HttpClient, HttpParams, HttpErrorResponse } from "@angular/common/http"
 import { HttpErrorHandlerService } from "../httpErrorHandlerService/httpErrorHandlerService";
 import { AuthenticationService } from "../../services/authenticationService/authenticationService";
 import { IUser } from "../../models";
-import Cache from "lru-cache";
+import { LRUCache } from "lru-cache";
 import { AppInsightsService } from "@markpieszak/ng-application-insights";
 import { UserService } from "../userService/userService";
 
@@ -25,7 +25,7 @@ export interface IUpload {
     providedIn: "root",
 })
 export class UploadService {
-    private readonly cache = new Cache<number, IUpload>({ max: 10 });
+    private readonly cache = new LRUCache<number, IUpload>({ max: 10 });
 
     private user: IUser;
 
