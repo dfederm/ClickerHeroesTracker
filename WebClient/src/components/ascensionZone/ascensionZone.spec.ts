@@ -4,7 +4,7 @@ import { By } from "@angular/platform-browser";
 import { ISavedGameData, SavedGame } from "../../models/savedGame";
 import { DebugElement, ChangeDetectorRef } from "@angular/core";
 import { ExponentialPipe } from "../../pipes/exponentialPipe";
-import { AppInsightsService } from "@markpieszak/ng-application-insights";
+import { LoggingService } from "../../services/loggingService/loggingService";
 import { SettingsService } from "../../services/settingsService/settingsService";
 import { BehaviorSubject } from "rxjs";
 
@@ -85,8 +85,8 @@ describe("AscensionZoneComponent", () => {
     savedGame.data = savedGameData as ISavedGameData;
 
     beforeEach(async () => {
-        let appInsights = {
-            trackMetric: (): void => void 0,
+        let loggingService = {
+            logMetric: (): void => void 0,
         };
         let settingsService = { settings: () => settingsSubject };
         let changeDetectorRef = { markForCheck: (): void => void 0 };
@@ -98,7 +98,7 @@ describe("AscensionZoneComponent", () => {
                     ExponentialPipe,
                 ],
                 providers: [
-                    { provide: AppInsightsService, useValue: appInsights },
+                    { provide: LoggingService, useValue: loggingService },
                     { provide: SettingsService, useValue: settingsService },
                     { provide: ChangeDetectorRef, useValue: changeDetectorRef },
                 ],

@@ -6,7 +6,7 @@ import { HttpHeaders, HttpErrorResponse } from "@angular/common/http";
 
 import { UploadService, IUpload } from "./uploadService";
 import { AuthenticationService, IUserInfo } from "../authenticationService/authenticationService";
-import { AppInsightsService } from "@markpieszak/ng-application-insights";
+import { LoggingService } from "../loggingService/loggingService";
 import { UserService } from "../userService/userService";
 import { IUser } from "../../models";
 
@@ -36,7 +36,7 @@ describe("UploadService", () => {
 
         httpErrorHandlerService = jasmine.createSpyObj("httpErrorHandlerService", ["logError"]);
 
-        let appInsights = { trackEvent: (): void => void 0 };
+        let loggingService = { logEvent: (): void => void 0 };
         let userService = { getUser: (): void => void 0 };
 
         TestBed.configureTestingModule(
@@ -49,7 +49,7 @@ describe("UploadService", () => {
                         UploadService,
                         { provide: AuthenticationService, useValue: authenticationService },
                         { provide: HttpErrorHandlerService, useValue: httpErrorHandlerService },
-                        { provide: AppInsightsService, useValue: appInsights },
+                        { provide: LoggingService, useValue: loggingService },
                         { provide: UserService, useValue: userService },
                     ],
             });

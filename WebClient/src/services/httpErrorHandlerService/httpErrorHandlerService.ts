@@ -1,5 +1,5 @@
 import { Injectable } from "@angular/core";
-import { AppInsightsService } from "@markpieszak/ng-application-insights";
+import { LoggingService } from "../../services/loggingService/loggingService";
 import { HttpErrorResponse } from "@angular/common/http";
 
 export interface IValidationErrorResponse {
@@ -11,7 +11,7 @@ export interface IValidationErrorResponse {
 })
 export class HttpErrorHandlerService {
     constructor(
-        private readonly appInsights: AppInsightsService,
+        private readonly loggingService: LoggingService,
     ) { }
 
     public logError(eventName: string, err: HttpErrorResponse): void {
@@ -22,7 +22,7 @@ export class HttpErrorHandlerService {
             // The backend returned an unsuccessful response code.
             : err.error;
 
-        this.appInsights.trackEvent(eventName, { status, message });
+        this.loggingService.logEvent(eventName, { status, message });
     }
 
     public getValidationErrors(err: HttpErrorResponse): string[] {

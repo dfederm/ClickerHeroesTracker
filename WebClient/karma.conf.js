@@ -54,7 +54,9 @@ module.exports = function (config) {
           lines: 75,
           excludes: [
             // Models are ported from game code so some code might not be used
-            'src/models/*.ts'
+            'src/models/*.ts',
+            // The logging service is a very thin wrapper and doesn't need coverage.
+            'src/services/loggingService/loggingService.ts',
           ]
         }
       }

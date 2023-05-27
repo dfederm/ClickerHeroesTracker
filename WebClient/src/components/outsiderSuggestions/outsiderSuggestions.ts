@@ -1,5 +1,5 @@
 import { Component, Input } from "@angular/core";
-import { AppInsightsService } from "@markpieszak/ng-application-insights";
+import { LoggingService } from "../../services/loggingService/loggingService";
 import { gameData } from "../../models/gameData";
 import { SavedGame } from "../../models/savedGame";
 import { Decimal } from "decimal.js";
@@ -40,7 +40,7 @@ export class OutsiderSuggestionsComponent {
     private readonly outsidersByName: { [name: string]: IOutsiderViewModel } = {};
 
     constructor(
-        private readonly appInsights: AppInsightsService,
+        private readonly loggingService: LoggingService,
     ) {
         for (const id in gameData.outsiders) {
             const outsiderDefinition = gameData.outsiders[id];
@@ -236,7 +236,7 @@ export class OutsiderSuggestionsComponent {
         this.outsidersByName.Orphalas.suggestedLevel = orphalasLevel;
         this.outsidersByName["Sen-Akhan"].suggestedLevel = senakhanLevel;
 
-        this.appInsights.trackMetric("OutsiderSuggestions", Date.now() - startTime);
+        this.loggingService.logMetric("OutsiderSuggestions", Date.now() - startTime);
     }
 
     private nOS(ancientSouls: number, transcendentPower: number, zone: number): [number, number, number] {

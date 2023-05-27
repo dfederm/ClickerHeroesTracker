@@ -3,7 +3,7 @@ import { AncientSuggestionsComponent } from "./ancientSuggestions";
 import { By } from "@angular/platform-browser";
 import { FormsModule } from "@angular/forms";
 import { NO_ERRORS_SCHEMA, DebugElement, Pipe, PipeTransform } from "@angular/core";
-import { AppInsightsService } from "@markpieszak/ng-application-insights";
+import { LoggingService } from "../../services/loggingService/loggingService";
 import { BehaviorSubject } from "rxjs";
 import { SettingsService } from "../../services/settingsService/settingsService";
 import { SavedGame, ISavedGameData } from "../../models/savedGame";
@@ -123,9 +123,9 @@ describe("AncientSuggestionsComponent", () => {
     }
 
     beforeEach(async () => {
-        let appInsights = {
-            trackMetric: (): void => void 0,
-            trackEvent: (): void => void 0,
+        let loggingService = {
+            logMetric: (): void => void 0,
+            logEvent: (): void => void 0,
         };
         let settingsService = { settings: () => settingsSubject };
 
@@ -141,7 +141,7 @@ describe("AncientSuggestionsComponent", () => {
                     MockExponentialPipe,
                 ],
                 providers: [
-                    { provide: AppInsightsService, useValue: appInsights },
+                    { provide: LoggingService, useValue: loggingService },
                     { provide: SettingsService, useValue: settingsService },
                     { provide: NgbModal, useValue: modalService },
                     { provide: Router, useValue: router },

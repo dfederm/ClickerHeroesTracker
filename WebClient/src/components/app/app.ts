@@ -1,5 +1,5 @@
 import { Component, OnInit } from "@angular/core";
-import { AppInsightsService } from "@markpieszak/ng-application-insights";
+import { LoggingService } from "../../services/loggingService/loggingService";
 import { NgxSpinnerService } from "ngx-spinner";
 
 import { SettingsService, IUserSettings } from "../../services/settingsService/settingsService";
@@ -27,7 +27,7 @@ export class AppComponent implements OnInit {
   constructor(
     private readonly settingsService: SettingsService,
     private readonly authenticationService: AuthenticationService,
-    private readonly appInsights: AppInsightsService,
+    private readonly loggingService: LoggingService,
     private readonly spinnerService: NgxSpinnerService,
   ) { }
 
@@ -62,9 +62,9 @@ export class AppComponent implements OnInit {
 
   private handleUserInfo(userInfo: IUserInfo): void {
     if (userInfo.isLoggedIn) {
-      this.appInsights.setAuthenticatedUserContext(userInfo.username);
+      this.loggingService.setAuthenticatedUserContext(userInfo.username);
     } else {
-      this.appInsights.clearAuthenticatedUserContext();
+      this.loggingService.clearAuthenticatedUserContext();
     }
 
     this.hasUserInfo = true;

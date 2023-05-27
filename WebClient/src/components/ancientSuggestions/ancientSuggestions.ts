@@ -1,5 +1,5 @@
 import { Component, OnInit, Input } from "@angular/core";
-import { AppInsightsService } from "@markpieszak/ng-application-insights";
+import { LoggingService } from "../../services/loggingService/loggingService";
 import { gameData } from "../../models/gameData";
 import { SettingsService, IUserSettings } from "../../services/settingsService/settingsService";
 import { SavedGame } from "../../models/savedGame";
@@ -117,7 +117,7 @@ export class AncientSuggestionsComponent implements OnInit {
     private autolevelModal: NgbModalRef;
 
     constructor(
-        private readonly appInsights: AppInsightsService,
+        private readonly loggingService: LoggingService,
         private readonly settingsService: SettingsService,
         private readonly modalService: NgbModal,
         private readonly router: Router,
@@ -184,7 +184,7 @@ export class AncientSuggestionsComponent implements OnInit {
         this.autoLeveledSavedGame.updateContent();
 
         this.autolevelModal = this.modalService.open(modal);
-        this.appInsights.trackEvent("Autolevel");
+        this.loggingService.logEvent("Autolevel");
     }
 
     public saveAutolevel(): void {
@@ -192,7 +192,7 @@ export class AncientSuggestionsComponent implements OnInit {
         this.spinnerService.show("modal");
         this.uploadService.create(this.autoLeveledSavedGame.content, true, this.playStyle)
             .then(uploadId => {
-                this.appInsights.trackEvent("SaveAutolevel");
+                this.loggingService.logEvent("SaveAutolevel");
                 return this.router.navigate(["/uploads", uploadId]);
             })
             .then(() => {
@@ -388,12 +388,9 @@ export class AncientSuggestionsComponent implements OnInit {
 
         this.remainingSouls = this.availableSouls.plus(this.spentSouls);
 
-        this.appInsights.trackMetric(
+        this.loggingService.logMetric(
             "AncientSuggestions",
             Date.now() - startTime,
-            null,
-            null,
-            null,
             {
                 suggestionType: this.suggestionType,
                 useSoulsFromAscension: this.useSoulsFromAscension.toString(),

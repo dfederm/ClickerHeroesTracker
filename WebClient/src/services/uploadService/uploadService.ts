@@ -4,7 +4,7 @@ import { HttpErrorHandlerService } from "../httpErrorHandlerService/httpErrorHan
 import { AuthenticationService } from "../../services/authenticationService/authenticationService";
 import { IUser } from "../../models";
 import { LRUCache } from "lru-cache";
-import { AppInsightsService } from "@markpieszak/ng-application-insights";
+import { LoggingService } from "../../services/loggingService/loggingService";
 import { UserService } from "../userService/userService";
 
 export interface IUpload {
@@ -35,7 +35,7 @@ export class UploadService {
         private readonly authenticationService: AuthenticationService,
         private readonly http: HttpClient,
         private readonly httpErrorHandlerService: HttpErrorHandlerService,
-        private readonly appInsights: AppInsightsService,
+        private readonly loggingService: LoggingService,
         private readonly userService: UserService,
     ) {
         this.authenticationService
@@ -66,7 +66,7 @@ export class UploadService {
     public get(id: number): Promise<IUpload> {
         let cachedUpload = this.cache.get(id);
         if (cachedUpload) {
-            this.appInsights.trackEvent("UploadService.get.cacheHit");
+            this.loggingService.logEvent("UploadService.get.cacheHit");
             return Promise.resolve(cachedUpload);
         }
 
