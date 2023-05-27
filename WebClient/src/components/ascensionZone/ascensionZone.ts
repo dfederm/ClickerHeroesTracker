@@ -1,5 +1,5 @@
 import { Component, Input } from "@angular/core";
-import { AppInsightsService } from "@markpieszak/ng-application-insights";
+import { LoggingService } from "../../services/loggingService/loggingService";
 import { gameData } from "../../models/gameData";
 import { SavedGame } from "../../models/savedGame";
 import { Decimal } from "decimal.js";
@@ -42,7 +42,7 @@ export class AscensionZoneComponent {
     private _savedGame: SavedGame;
 
     constructor(
-        private readonly appInsights: AppInsightsService,
+        private readonly loggingService: LoggingService,
     ) {
     }
 
@@ -285,7 +285,7 @@ export class AscensionZoneComponent {
             }
         }
 
-        this.appInsights.trackMetric("AscensionZone", Date.now() - startTime);
+        this.loggingService.logMetric("AscensionZone", Date.now() - startTime);
     }
 
     private getShortName(entity: { name: string }): string {

@@ -1,22 +1,22 @@
 import { TestBed } from "@angular/core/testing";
-import { AppInsightsService } from "@markpieszak/ng-application-insights";
+import { LoggingService } from "../../services/loggingService/loggingService";
 import { HttpErrorResponse } from "@angular/common/http";
 
 import { HttpErrorHandlerService, IValidationErrorResponse } from "./httpErrorHandlerService";
 
 describe("HttpErrorHandlerService", () => {
     let service: HttpErrorHandlerService;
-    let appInsights: AppInsightsService;
+    let loggingService: LoggingService;
 
     beforeEach(() => {
-        appInsights = jasmine.createSpyObj("appInsights", ["trackEvent"]);
+        loggingService = jasmine.createSpyObj("loggingService", ["logEvent"]);
 
         TestBed.configureTestingModule(
             {
                 providers:
                     [
                         HttpErrorHandlerService,
-                        { provide: AppInsightsService, useValue: appInsights },
+                        { provide: LoggingService, useValue: loggingService },
                     ],
             });
 
@@ -25,23 +25,23 @@ describe("HttpErrorHandlerService", () => {
 
     describe("logError", () => {
         it("should log a client error", () => {
-            let appInsightsService = TestBed.inject(AppInsightsService);
+            let loggingService = TestBed.inject(LoggingService);
 
             let error = new ErrorEvent("someType", { message: "someMessage" });
             let err = new HttpErrorResponse({ error });
 
             service.logError("someEventName", err);
-            expect(appInsightsService.trackEvent).toHaveBeenCalledWith("someEventName", { status: "0", message: "someMessage" });
+            expect(loggingService.logEvent).toHaveBeenCalledWith("someEventName", { status: "0", message: "someMessage" });
         });
 
         it("should log a server error", () => {
-            let appInsightsService = TestBed.inject(AppInsightsService);
+            let loggingService = TestBed.inject(LoggingService);
 
             let error = JSON.stringify({ someField: "someValue" });
             let err = new HttpErrorResponse({ status: 123, error });
 
             service.logError("someEventName", err);
-            expect(appInsightsService.trackEvent).toHaveBeenCalledWith("someEventName", { status: "123", message: error });
+            expect(loggingService.logEvent).toHaveBeenCalledWith("someEventName", { status: "123", message: error });
         });
     });
 

@@ -1,4 +1,4 @@
-import { CUSTOM_ELEMENTS_SCHEMA, NgModule } from "@angular/core";
+import { CUSTOM_ELEMENTS_SCHEMA, ErrorHandler, NgModule } from "@angular/core";
 import { BrowserModule } from "@angular/platform-browser";
 import { BrowserAnimationsModule } from "@angular/platform-browser/animations";
 import { FormsModule } from "@angular/forms";
@@ -7,7 +7,6 @@ import { HttpClientModule } from "@angular/common/http";
 import { NgbModule } from "@ng-bootstrap/ng-bootstrap";
 import { ClipboardModule } from "ngx-clipboard";
 import { AdsenseModule } from "ng2-adsense";
-import { ApplicationInsightsModule, AppInsightsService } from "@markpieszak/ng-application-insights";
 import { NgChartsModule } from "ng2-charts";
 import { ValidateEqualModule } from "ng-validate-equal";
 import { JwBootstrapSwitchNg2Module } from "jw-bootstrap-switch-ng2";
@@ -50,6 +49,7 @@ import { TimeAgoPipe } from "./pipes/timeAgoPipe";
 import { environment } from "./environments/environment";
 import { HTTP_INTERCEPTORS } from "@angular/common/http";
 import { DeveloperHttpInterceptor } from "./services/developerHttpInterceptor/developerHttpInterceptor";
+import { ErrorHandlerService } from "./services/errorHandlerService/errorHandlerService";
 
 // Custom url matching for legacy calculation urls. Angular doesn't have great built-in rules for this.
 // This is an exported function because Angular AOT is terrible and can't handle it otherwise.
@@ -114,8 +114,6 @@ const routes: Routes =
     NgbModule,
     ClipboardModule,
     AdsenseModule.forRoot(),
-    // Make sure this matches the API settings as well. Is there a better way to do this?
-    ApplicationInsightsModule.forRoot({ instrumentationKey: "99fba640-790d-484f-83c4-3c97450d8698" }),
     NgChartsModule,
     ValidateEqualModule,
     JwBootstrapSwitchNg2Module,
@@ -155,7 +153,7 @@ const routes: Routes =
     TimeAgoPipe,
   ],
   providers: [
-    AppInsightsService,
+    { provide: ErrorHandler, useClass: ErrorHandlerService },
     ...(environment.production ? [] : [
       { provide: HTTP_INTERCEPTORS, useClass: DeveloperHttpInterceptor, multi: true },
     ]),

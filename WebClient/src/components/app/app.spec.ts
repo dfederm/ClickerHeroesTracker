@@ -4,7 +4,7 @@ import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { Subject } from "rxjs";
 
 import { AppComponent } from "./app";
-import { AppInsightsService } from "@markpieszak/ng-application-insights";
+import { LoggingService } from "../../services/loggingService/loggingService";
 import { SettingsService, IUserSettings } from "../../services/settingsService/settingsService";
 import { AuthenticationService, IUserInfo } from "../../services/authenticationService/authenticationService";
 
@@ -13,7 +13,7 @@ describe("AppComponent", () => {
 
     let settingsSubject = new Subject<IUserSettings>();
     let userInfoSubject = new Subject<IUserInfo>();
-    let appInsights: AppInsightsService;
+    let loggingService: LoggingService;
 
     beforeEach(async () => {
         let settingsService = { settings: () => settingsSubject };
@@ -22,7 +22,7 @@ describe("AppComponent", () => {
             userInfo: () => userInfoSubject,
         };
 
-        appInsights = jasmine.createSpyObj("appInsights", ["setAuthenticatedUserContext", "clearAuthenticatedUserContext"]);
+        loggingService = jasmine.createSpyObj("loggingService", ["setAuthenticatedUserContext", "clearAuthenticatedUserContext"]);
 
         await TestBed.configureTestingModule(
             {
@@ -30,7 +30,7 @@ describe("AppComponent", () => {
                 providers: [
                     { provide: SettingsService, useValue: settingsService },
                     { provide: AuthenticationService, useValue: authenticationService },
-                    { provide: AppInsightsService, useValue: appInsights },
+                    { provide: LoggingService, useValue: loggingService },
                 ],
                 schemas: [NO_ERRORS_SCHEMA],
             })
@@ -88,31 +88,31 @@ describe("AppComponent", () => {
         }
 
         function updateUserInfo(userInfo: IUserInfo): void {
-            (appInsights.setAuthenticatedUserContext as jasmine.Spy).calls.reset();
-            (appInsights.clearAuthenticatedUserContext as jasmine.Spy).calls.reset();
+            (loggingService.setAuthenticatedUserContext as jasmine.Spy).calls.reset();
+            (loggingService.clearAuthenticatedUserContext as jasmine.Spy).calls.reset();
 
             userInfoSubject.next(userInfo);
             fixture.detectChanges();
         }
 
         logOut();
-        expect(appInsights.setAuthenticatedUserContext).not.toHaveBeenCalled();
-        expect(appInsights.clearAuthenticatedUserContext).toHaveBeenCalled();
+        expect(loggingService.setAuthenticatedUserContext).not.toHaveBeenCalled();
+        expect(loggingService.clearAuthenticatedUserContext).toHaveBeenCalled();
 
         logIn();
-        expect(appInsights.setAuthenticatedUserContext).toHaveBeenCalledWith("someUsername0");
-        expect(appInsights.clearAuthenticatedUserContext).not.toHaveBeenCalled();
+        expect(loggingService.setAuthenticatedUserContext).toHaveBeenCalledWith("someUsername0");
+        expect(loggingService.clearAuthenticatedUserContext).not.toHaveBeenCalled();
 
         logIn();
-        expect(appInsights.setAuthenticatedUserContext).toHaveBeenCalledWith("someUsername1");
-        expect(appInsights.clearAuthenticatedUserContext).not.toHaveBeenCalled();
+        expect(loggingService.setAuthenticatedUserContext).toHaveBeenCalledWith("someUsername1");
+        expect(loggingService.clearAuthenticatedUserContext).not.toHaveBeenCalled();
 
         logOut();
-        expect(appInsights.setAuthenticatedUserContext).not.toHaveBeenCalled();
-        expect(appInsights.clearAuthenticatedUserContext).toHaveBeenCalled();
+        expect(loggingService.setAuthenticatedUserContext).not.toHaveBeenCalled();
+        expect(loggingService.clearAuthenticatedUserContext).toHaveBeenCalled();
 
         logIn();
-        expect(appInsights.setAuthenticatedUserContext).toHaveBeenCalledWith("someUsername2");
-        expect(appInsights.clearAuthenticatedUserContext).not.toHaveBeenCalled();
+        expect(loggingService.setAuthenticatedUserContext).toHaveBeenCalledWith("someUsername2");
+        expect(loggingService.clearAuthenticatedUserContext).not.toHaveBeenCalled();
     });
 });
