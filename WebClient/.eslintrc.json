@@ -125,9 +125,9 @@
         "plugin:@angular-eslint/template/recommended"
       ],
       "rules": {
-        "@angular-eslint/template/accessibility-elements-content": "error",
         "@angular-eslint/template/no-any": "error",
-        "@angular-eslint/template/no-distracting-elements": "error"
+        "@angular-eslint/template/no-distracting-elements": "error",
+        "@angular-eslint/template/elements-content": "error"
       }
     }
   ]
