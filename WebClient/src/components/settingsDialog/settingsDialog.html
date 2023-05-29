@@ -61,11 +61,14 @@
                class="col-sm-8 col-form-label">
             Show suggestions for skill ancients (includes Vaagur and Revolc)
         </label>
-        <div class="col-sm-4">
-            <bSwitch [(ngModel)]="settings.shouldLevelSkillAncients"
-                     [switch-size]="'large'"
-                     [switch-disabled]="isSettingPending.shouldLevelSkillAncients"
-                     (changeState)="setSetting('shouldLevelSkillAncients', $event.currentValue)"></bSwitch>
+        <div class="col-sm-4 form-switch fs-2 text-end">
+            <input [(ngModel)]="settings.shouldLevelSkillAncients"
+                   class="form-check-input"
+                   type="checkbox"
+                   role="switch"
+                   id="shouldLevelSkillAncients"
+                   [disabled]="isSettingPending.shouldLevelSkillAncients"
+                   (ngModelChange)="setSetting('shouldLevelSkillAncients', settings.shouldLevelSkillAncients)" />
         </div>
     </div>
     <div *ngIf="settings.playStyle !== 'idle' && settings.shouldLevelSkillAncients"
@@ -105,11 +108,14 @@
                class="col-sm-8 col-form-label">
             Use scientific notation
         </label>
-        <div class="col-sm-4">
-            <bSwitch [(ngModel)]="settings.useScientificNotation"
-                     [switch-size]="'large'"
-                     [switch-disabled]="isSettingPending.useScientificNotation"
-                     (changeState)="setSetting('useScientificNotation', $event.currentValue)"></bSwitch>
+        <div class="col-sm-4 form-switch fs-2 text-end">
+            <input [(ngModel)]="settings.useScientificNotation"
+                   class="form-check-input"
+                   type="checkbox"
+                   role="switch"
+                   id="useScientificNotation"
+                   [disabled]="isSettingPending.useScientificNotation"
+                   (ngModelChange)="setSetting('useScientificNotation', settings.useScientificNotation)" />
         </div>
     </div>
     <div *ngIf="settings.useScientificNotation"
@@ -138,11 +144,14 @@
                class="col-sm-8 col-form-label">
             Use logarithmic scale for graphs
         </label>
-        <div class="col-sm-4">
-            <bSwitch [(ngModel)]="settings.useLogarithmicGraphScale"
-                     [switch-size]="'large'"
-                     [switch-disabled]="isSettingPending.useLogarithmicGraphScale"
-                     (changeState)="setSetting('useLogarithmicGraphScale', $event.currentValue)"></bSwitch>
+        <div class="col-sm-4 form-switch fs-2 text-end">
+            <input [(ngModel)]="settings.useLogarithmicGraphScale"
+                   class="form-check-input"
+                   type="checkbox"
+                   role="switch"
+                   id="useLogarithmicGraphScale"
+                   [disabled]="isSettingPending.useLogarithmicGraphScale"
+                   (ngModelChange)="setSetting('useLogarithmicGraphScale', settings.useLogarithmicGraphScale)" />
         </div>
     </div>
     <div *ngIf="settings.useLogarithmicGraphScale"

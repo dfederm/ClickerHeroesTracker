@@ -30,7 +30,6 @@
     "crypto-js": "^4.0.0",
     "date-fns": "^2.30.0",
     "decimal.js": "^10.4.3",
-    "jw-bootstrap-switch-ng2": "^2.0.5",
     "jwt-decode": "^3.1.2",
     "lru-cache": "^9.1.1",
     "ng-validate-equal": "^6.0.1",

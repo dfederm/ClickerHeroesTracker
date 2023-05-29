@@ -9,7 +9,6 @@ import { ClipboardModule } from "ngx-clipboard";
 import { AdsenseModule } from "ng2-adsense";
 import { NgChartsModule } from "ng2-charts";
 import { ValidateEqualModule } from "ng-validate-equal";
-import { JwBootstrapSwitchNg2Module } from "jw-bootstrap-switch-ng2";
 import { NgxSpinnerModule } from "ngx-spinner";
 
 import { AppComponent } from "./components/app/app";
@@ -116,7 +115,6 @@ const routes: Routes =
     AdsenseModule.forRoot(),
     NgChartsModule,
     ValidateEqualModule,
-    JwBootstrapSwitchNg2Module,
     NgxSpinnerModule,
   ],
   declarations: [
