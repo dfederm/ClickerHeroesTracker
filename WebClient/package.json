@@ -31,7 +31,7 @@
     "date-fns": "^2.30.0",
     "decimal.js": "^10.4.3",
     "jwt-decode": "^3.1.2",
-    "lru-cache": "^9.1.1",
+    "lru-cache": "^9.1.2",
     "ng-validate-equal": "^6.0.1",
     "ng2-adsense": "^13.0.0",
     "ng2-charts": "^4.1.1",
