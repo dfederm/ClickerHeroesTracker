@@ -111,7 +111,7 @@ namespace ClickerHeroesTrackerWebsite
                 .AddServer(options =>
                 {
                     // Enable the token endpoint (required to use the password flow).
-                    options.SetTokenEndpointUris("/api/auth/token");
+                    options.SetTokenEndpointUris("api/auth/token");
 
                     // Allow client applications to use the grant_type=password flow.
                     options.AllowPasswordFlow()
