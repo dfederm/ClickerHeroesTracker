@@ -14,7 +14,7 @@ namespace UnitTests.Services.Authentication
         {
             AssertionGrantOptions options = new();
 
-            Assert.Equal(0, options.AssertionGrantTypeMap.Count);
+            Assert.Empty(options.AssertionGrantTypeMap);
         }
 
         [Fact]
@@ -23,7 +23,7 @@ namespace UnitTests.Services.Authentication
             AssertionGrantOptions options = new();
 
             Assert.Throws<ArgumentNullException>(() => options.AddAssertionGrantType<MockAssertionGrantHandler1>(null));
-            Assert.Equal(0, options.AssertionGrantTypeMap.Count);
+            Assert.Empty(options.AssertionGrantTypeMap);
         }
 
         [Fact]
@@ -33,7 +33,7 @@ namespace UnitTests.Services.Authentication
             AssertionGrantOptions options = new();
             options.AddAssertionGrantType<MockAssertionGrantHandler1>(GrantType);
 
-            Assert.Equal(1, options.AssertionGrantTypeMap.Count);
+            Assert.Single(options.AssertionGrantTypeMap);
             Assert.Equal(typeof(MockAssertionGrantHandler1), options.AssertionGrantTypeMap[GrantType]);
         }
 
@@ -64,7 +64,7 @@ namespace UnitTests.Services.Authentication
             Assert.Throws<InvalidOperationException>(() => options.AddAssertionGrantType<MockAssertionGrantHandler2>(GrantType));
             Assert.Throws<InvalidOperationException>(() => options.AddAssertionGrantType<MockAssertionGrantHandler3>(GrantType));
 
-            Assert.Equal(1, options.AssertionGrantTypeMap.Count);
+            Assert.Single(options.AssertionGrantTypeMap);
             Assert.Equal(typeof(MockAssertionGrantHandler1), options.AssertionGrantTypeMap[GrantType]);
         }
 
