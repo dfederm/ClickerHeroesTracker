@@ -103,7 +103,7 @@ jobs:
           -WebClientDirectory ./deploy/wwwroot `
           -OutputDirectory ./deploy
     - name: Deploy to Azure WebApps (staging slot)
-      uses: azure/webapps-deploy@v2
+      uses: azure/webapps-deploy@v3
       with:
         app-name: ClickerHeroesTracker
         slot-name: staging
