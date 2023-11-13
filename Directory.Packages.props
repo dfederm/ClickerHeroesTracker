@@ -21,6 +21,6 @@
     <PackageVersion Include="xunit.runner.visualstudio" Version="2.5.3" />
   </ItemGroup>
   <ItemGroup>
-    <GlobalPackageReference Include="StyleCop.Analyzers" Version="1.2.0-beta.435" />
+    <GlobalPackageReference Include="StyleCop.Analyzers" Version="1.2.0-beta.507" />
   </ItemGroup>
 </Project>
