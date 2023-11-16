@@ -19,7 +19,7 @@
     "@angular/forms": "^17.0.2",
     "@angular/localize": "^17.0.2",
     "@angular/platform-browser": "^17.0.2",
-    "@angular/platform-browser-dynamic": "^17.0.2",
+    "@angular/platform-browser-dynamic": "^17.0.3",
     "@angular/router": "^17.0.2",
     "@azure/msal-browser": "^3.5.0",
     "@microsoft/applicationinsights-web": "^3.0.5",
