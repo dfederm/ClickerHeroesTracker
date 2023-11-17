@@ -23,7 +23,7 @@
     "@angular/router": "^17.0.2",
     "@azure/msal-browser": "^3.5.0",
     "@microsoft/applicationinsights-web": "^3.0.5",
-    "@ng-bootstrap/ng-bootstrap": "^16.0.0-rc.0",
+    "@ng-bootstrap/ng-bootstrap": "^16.0.0-rc.2",
     "bootstrap": "^5.3.2",
     "chart.js": "^4.4.0",
     "chartjs-adapter-date-fns": "^3.0.0",
