@@ -139,7 +139,8 @@ export class ExternalLoginsComponent implements OnInit, AfterViewInit {
 
         // There is no signal when the user closes the popup. The promise just never resoles.
         // See: https://github.com/AzureAD/microsoft-authentication-library-for-js/issues/129
-        this.microsoftApp.loginPopup({ scopes: ["openid", "email"] })
+        this.microsoftApp.initialize()
+            .then(() => this.microsoftApp.loginPopup({ scopes: ["openid", "email"] }))
             .then(loginResponse => this.logIn("urn:ietf:params:oauth:grant-type:microsoft_identity_token", loginResponse.idToken))
             .catch((error: string) => {
                 if (error && error.startsWith("user_cancelled:")) {
