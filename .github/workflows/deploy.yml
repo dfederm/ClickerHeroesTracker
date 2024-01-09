@@ -85,12 +85,12 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@main
     - name: Download website
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: website-artifacts
         path: ./deploy
     - name: Download web client
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: webclient-artifacts
         path: ./deploy/wwwroot
