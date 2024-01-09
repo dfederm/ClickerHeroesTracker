@@ -3,6 +3,7 @@
 using System;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
@@ -20,6 +21,7 @@ namespace UnitTests.Services.Authentication
         private const string ExternalUserId = "SomeExternalUserId";
         private const string ExternalUserEmail = "SomeExternalUserEmail";
         private const string ConfigurationEndpoint = "https://login.microsoftonline.com/common/v2.0/.well-known/openid-configuration";
+        private const string KeysEndpoint = "https://login.microsoftonline.com/common/discovery/v2.0/keys";
 
         // Taken from http://self-issued.info/docs/draft-ietf-jose-json-web-key.html#rfc.appendix.A.2
         private static readonly JsonWebKey JsonWebKey = new()
@@ -50,8 +52,10 @@ namespace UnitTests.Services.Authentication
             IOptions<AuthenticationSettings> options = Options.Create(authenticationSettings);
 
             OpenIdConnectConfiguration configuration = new();
-            configuration.JsonWebKeySet = new JsonWebKeySet();
-            configuration.JsonWebKeySet.Keys.Add(JsonWebKey);
+            configuration.JwksUri = KeysEndpoint;
+
+            JsonWebKeySet jsonWebKeySet = new();
+            jsonWebKeySet.Keys.Add(JsonWebKey);
 
             using (HttpClientTestingFactory http = new())
             {
@@ -67,6 +71,7 @@ namespace UnitTests.Services.Authentication
                 Task<AssertionGrantResult> resultTask = handler.ValidateAsync(tokenHandler.WriteToken(token));
 
                 http.Expect(ConfigurationEndpoint).Respond(OpenIdConnectConfiguration.Write(configuration));
+                http.Expect(KeysEndpoint).Respond(JsonSerializer.Serialize(jsonWebKeySet));
 
                 AssertionGrantResult result = await resultTask;
                 Assert.NotNull(result);
@@ -91,8 +96,10 @@ namespace UnitTests.Services.Authentication
             IOptions<AuthenticationSettings> options = Options.Create(authenticationSettings);
 
             OpenIdConnectConfiguration configuration = new();
-            configuration.JsonWebKeySet = new JsonWebKeySet();
-            configuration.JsonWebKeySet.Keys.Add(JsonWebKey);
+            configuration.JwksUri = KeysEndpoint;
+
+            JsonWebKeySet jsonWebKeySet = new();
+            jsonWebKeySet.Keys.Add(JsonWebKey);
 
             using (HttpClientTestingFactory http = new())
             {
@@ -108,6 +115,7 @@ namespace UnitTests.Services.Authentication
                 Task<AssertionGrantResult> resultTask = handler.ValidateAsync(tokenHandler.WriteToken(token));
 
                 http.Expect(ConfigurationEndpoint).Respond(OpenIdConnectConfiguration.Write(configuration));
+                http.Expect(KeysEndpoint).Respond(JsonSerializer.Serialize(jsonWebKeySet));
 
                 AssertionGrantResult result = await resultTask;
                 Assert.NotNull(result);
@@ -130,8 +138,10 @@ namespace UnitTests.Services.Authentication
             IOptions<AuthenticationSettings> options = Options.Create(authenticationSettings);
 
             OpenIdConnectConfiguration configuration = new();
-            configuration.JsonWebKeySet = new JsonWebKeySet();
-            configuration.JsonWebKeySet.Keys.Add(JsonWebKey);
+            configuration.JwksUri = KeysEndpoint;
+
+            JsonWebKeySet jsonWebKeySet = new();
+            jsonWebKeySet.Keys.Add(JsonWebKey);
 
             using (HttpClientTestingFactory http = new())
             {
@@ -139,6 +149,7 @@ namespace UnitTests.Services.Authentication
                 Task<AssertionGrantResult> resultTask = handler.ValidateAsync("SomeBadAssertion");
 
                 http.Expect(ConfigurationEndpoint).Respond(OpenIdConnectConfiguration.Write(configuration));
+                http.Expect(KeysEndpoint).Respond(JsonSerializer.Serialize(jsonWebKeySet));
 
                 AssertionGrantResult result = await resultTask;
                 Assert.NotNull(result);
