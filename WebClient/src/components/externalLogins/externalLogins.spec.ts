@@ -318,6 +318,8 @@ describe("ExternalLoginsComponent", () => {
             let activeModal = TestBed.inject(NgbActiveModal);
             spyOn(activeModal, "close");
 
+            spyOn(component.microsoftApp, "initialize").and.returnValue(Promise.resolve());
+
             const token = "someToken";
             let authResult = {
                 idToken: token,
@@ -334,6 +336,7 @@ describe("ExternalLoginsComponent", () => {
             await fixture.whenStable();
             fixture.detectChanges();
 
+            expect(component.microsoftApp.initialize).toHaveBeenCalled();
             expect(component.microsoftApp.loginPopup).toHaveBeenCalledWith({ scopes: ["openid", "email"] });
             expect(authenticationService.logInWithAssertion).toHaveBeenCalledWith("urn:ietf:params:oauth:grant-type:microsoft_identity_token", token, undefined);
             expect(activeModal.close).toHaveBeenCalled();
@@ -350,6 +353,7 @@ describe("ExternalLoginsComponent", () => {
             let activeModal = TestBed.inject(NgbActiveModal);
             spyOn(activeModal, "close");
 
+            spyOn(component.microsoftApp, "initialize").and.returnValue(Promise.resolve());
             spyOn(component.microsoftApp, "loginPopup").and.returnValue(Promise.reject(""));
 
             let buttons = fixture.debugElement.queryAll(By.css("button"));
@@ -362,6 +366,7 @@ describe("ExternalLoginsComponent", () => {
             await fixture.whenStable();
             fixture.detectChanges();
 
+            expect(component.microsoftApp.initialize).toHaveBeenCalled();
             expect(component.microsoftApp.loginPopup).toHaveBeenCalledWith({ scopes: ["openid", "email"] });
             expect(authenticationService.logInWithAssertion).not.toHaveBeenCalled();
             expect(activeModal.close).not.toHaveBeenCalled();
@@ -377,6 +382,8 @@ describe("ExternalLoginsComponent", () => {
 
             let activeModal = TestBed.inject(NgbActiveModal);
             spyOn(activeModal, "close");
+
+            spyOn(component.microsoftApp, "initialize").and.returnValue(Promise.resolve());
 
             const token = "someToken";
             let authResult = {
@@ -394,6 +401,7 @@ describe("ExternalLoginsComponent", () => {
             await fixture.whenStable();
             fixture.detectChanges();
 
+            expect(component.microsoftApp.initialize).toHaveBeenCalled();
             expect(component.microsoftApp.loginPopup).toHaveBeenCalledWith({ scopes: ["openid", "email"] });
             expect(authenticationService.logInWithAssertion).toHaveBeenCalledWith("urn:ietf:params:oauth:grant-type:microsoft_identity_token", token, undefined);
             expect(activeModal.close).not.toHaveBeenCalled();
@@ -410,6 +418,7 @@ describe("ExternalLoginsComponent", () => {
             let activeModal = TestBed.inject(NgbActiveModal);
             spyOn(activeModal, "close");
 
+            spyOn(component.microsoftApp, "initialize").and.returnValue(Promise.resolve());
             spyOn(component.microsoftApp, "loginPopup").and.returnValue(Promise.reject("user_cancelled:User closed the popup window window and cancelled the flow"));
 
             let buttons = fixture.debugElement.queryAll(By.css("button"));
@@ -422,6 +431,7 @@ describe("ExternalLoginsComponent", () => {
             await fixture.whenStable();
             fixture.detectChanges();
 
+            expect(component.microsoftApp.initialize).toHaveBeenCalled();
             expect(component.microsoftApp.loginPopup).toHaveBeenCalledWith({ scopes: ["openid", "email"] });
             expect(authenticationService.logInWithAssertion).not.toHaveBeenCalled();
             expect(activeModal.close).not.toHaveBeenCalled();
@@ -442,6 +452,8 @@ describe("ExternalLoginsComponent", () => {
 
             let errorResponse: IErrorResponse = { error: "account_selection_required" };
             spyOn(authenticationService, "logInWithAssertion").and.returnValue(Promise.reject({ json: () => errorResponse }));
+
+            spyOn(component.microsoftApp, "initialize").and.returnValue(Promise.resolve());
 
             // Using Microsoft login since it's easy to mock, but they should all apply equally
             const token = "someToken";
@@ -824,6 +836,7 @@ describe("ExternalLoginsComponent", () => {
                 }
             }
 
+            spyOn(component.microsoftApp, "initialize").and.returnValue(Promise.resolve());
             spyOn(component.microsoftApp, "loginPopup").and.returnValue(Promise.resolve(authResult));
             expect(button).toBeDefined();
             button.nativeElement.click();
