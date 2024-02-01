@@ -24,7 +24,7 @@ jobs:
     - name: Test
       run: dotnet test --configuration Release --no-build --logger trx --results-directory TestResults --collect:"XPlat Code Coverage"
     - name: Upload coverage to Codecov
-      uses: codecov/codecov-action@v3
+      uses: codecov/codecov-action@v4
       with:
         directory: ./TestResults
         flags: Website
@@ -61,7 +61,7 @@ jobs:
       run: npm run coverage
       working-directory: ./WebClient
     - name: Upload coverage to Codecov
-      uses: codecov/codecov-action@v3
+      uses: codecov/codecov-action@v4
       with:
         files: ./WebClient/logs/coverage/cobertura.xml
         flags: WebClient
