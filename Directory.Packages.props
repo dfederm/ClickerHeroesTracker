@@ -15,7 +15,7 @@
     <PackageVersion Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageVersion Include="OpenIddict.AspNetCore" Version="5.0.1" />
     <PackageVersion Include="OpenIddict.EntityFrameworkCore" Version="5.0.1" />
-    <PackageVersion Include="Sendgrid" Version="9.28.1" />
+    <PackageVersion Include="Sendgrid" Version="9.29.1" />
     <PackageVersion Include="SharpZipLib" Version="1.4.2" />
     <PackageVersion Include="Testing.HttpClient" Version="1.0.0" />
     <PackageVersion Include="xunit" Version="2.6.6" />
