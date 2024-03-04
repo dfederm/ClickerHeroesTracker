@@ -117,7 +117,7 @@ jobs:
           -Slot staging
     # There is not an action to directly slot-swap, so use the Azure CLI
     - name: Log into Azure CLI
-      uses: azure/login@v1
+      uses: azure/login@v2
       with:
         creds: ${{ secrets.AZURE_CREDENTIALS }}
     - name: Swap staging slot to production slot
