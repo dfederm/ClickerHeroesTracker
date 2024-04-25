@@ -23,11 +23,11 @@ jobs:
       run: dotnet build --configuration Release --no-restore
     - name: Test
       run: dotnet test --configuration Release --no-build --logger trx --results-directory TestResults --collect:"XPlat Code Coverage"
-    - name: Upload coverage to Codecov
-      uses: codecov/codecov-action@v3
-      with:
-        directory: ./TestResults
-        flags: Website
+    # - name: Upload coverage to Codecov
+    #   uses: codecov/codecov-action@v3
+    #   with:
+    #     directory: ./TestResults
+    #     flags: Website
     - name: Upload test results
       uses: actions/upload-artifact@v4
       with:
@@ -60,12 +60,12 @@ jobs:
     - name: Test
       run: npm run coverage
       working-directory: ./WebClient
-    - name: Upload coverage to Codecov
-      uses: codecov/codecov-action@v3
-      with:
-        files: ./WebClient/logs/coverage/cobertura.xml
-        flags: WebClient
-        fail_ci_if_error: true
+    # - name: Upload coverage to Codecov
+    #   uses: codecov/codecov-action@v3
+    #   with:
+    #     files: ./WebClient/logs/coverage/cobertura.xml
+    #     flags: WebClient
+    #     fail_ci_if_error: true
     - name: Upload logs
       uses: actions/upload-artifact@v4
       with:
