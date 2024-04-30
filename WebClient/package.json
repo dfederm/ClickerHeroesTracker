@@ -53,7 +53,7 @@
     "@angular-eslint/template-parser": "^17.3.0",
     "@angular/cli": "^17.3.3",
     "@angular/compiler-cli": "^17.3.3",
-    "@types/crypto-js": "^4.2.1",
+    "@types/crypto-js": "^4.2.2",
     "@types/facebook-js-sdk": "^3.3.10",
     "@types/google.accounts": "^0.0.14",
     "@types/jasmine": "^5.1.4",
