@@ -24,7 +24,7 @@
     "@azure/msal-browser": "^3.6.0",
     "@microsoft/applicationinsights-web": "^3.2.0",
     "@ng-bootstrap/ng-bootstrap": "^16.0.0",
-    "bootstrap": "^5.3.2",
+    "bootstrap": "^5.3.3",
     "chart.js": "^4.4.1",
     "chartjs-adapter-date-fns": "^3.0.0",
     "crypto-js": "^4.2.0",
