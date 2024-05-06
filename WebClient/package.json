@@ -34,7 +34,7 @@
     "lru-cache": "^10.1.0",
     "ng-validate-equal": "^6.0.1",
     "ng2-adsense": "^13.0.0",
-    "ng2-charts": "^5.0.4",
+    "ng2-charts": "^6.0.1",
     "ngx-clipboard": "^16.0.0",
     "ngx-spinner": "^16.0.2",
     "ngx-window-token": "^7.0.0",
