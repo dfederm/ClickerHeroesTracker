@@ -60,7 +60,7 @@
     "@types/node": "^20.10.3",
     "@types/pako": "^2.0.3",
     "@typescript-eslint/eslint-plugin": "^7.2.0",
-    "@typescript-eslint/parser": "^7.2.0",
+    "@typescript-eslint/parser": "^7.13.0",
     "eslint": "^8.57.0",
     "eslint-plugin-import": "^2.29.1",
     "eslint-plugin-jsdoc": "^46.9.0",
