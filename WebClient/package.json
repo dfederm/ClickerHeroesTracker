@@ -54,7 +54,7 @@
     "@angular/cli": "^17.3.3",
     "@angular/compiler-cli": "^17.3.3",
     "@types/crypto-js": "^4.2.2",
-    "@types/facebook-js-sdk": "^3.3.10",
+    "@types/facebook-js-sdk": "^3.3.11",
     "@types/google.accounts": "^0.0.14",
     "@types/jasmine": "^5.1.4",
     "@types/node": "^20.10.3",
