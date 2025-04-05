@@ -28,7 +28,7 @@
     "chart.js": "^4.4.2",
     "chartjs-adapter-date-fns": "^3.0.0",
     "crypto-js": "^4.2.0",
-    "date-fns": "^2.30.0",
+    "date-fns": "^4.1.0",
     "decimal.js": "^10.4.3",
     "jwt-decode": "^4.0.0",
     "lru-cache": "^10.1.0",
