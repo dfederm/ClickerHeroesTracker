@@ -12,7 +12,7 @@ import { NgxSpinnerModule } from "ngx-spinner";
 describe("AppComponent", () => {
     let fixture: ComponentFixture<AppComponent>;
 
-    @Component({ selector: "ngx-spinner", template: "", standalone: true })
+    @Component({ selector: "ngx-spinner", template: "" })
     class MockNgxSpinnerComponent {
         @Input()
         public fullScreen: boolean;

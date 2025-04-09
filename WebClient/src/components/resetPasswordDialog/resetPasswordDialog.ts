@@ -11,11 +11,10 @@ import { ValidateEqualModule } from "ng-validate-equal";
     selector: "resetPasswordDialog",
     templateUrl: "./resetPasswordDialog.html",
     imports: [
-      FormsModule,
-      NgxSpinnerModule,
-      ValidateEqualModule,
-    ],
-    standalone: true,
+        FormsModule,
+        NgxSpinnerModule,
+        ValidateEqualModule,
+    ]
 })
 export class ResetPasswordDialogComponent {
     public errors: string[];

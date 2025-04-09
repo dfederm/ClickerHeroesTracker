@@ -8,8 +8,7 @@ import { Subscription } from "rxjs";
     templateUrl: "./ad.html",
     imports: [
         AdsenseModule,
-    ],
-    standalone: true,
+    ]
 })
 export class AdComponent implements OnInit, OnDestroy {
     public rerender = false;

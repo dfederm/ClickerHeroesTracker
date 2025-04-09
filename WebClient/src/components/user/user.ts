@@ -9,7 +9,7 @@ import { ChartDataset, ChartOptions, TooltipItem } from "chart.js";
 import 'chartjs-adapter-date-fns';
 import { ActivatedRoute, RouterLink } from "@angular/router";
 import { NgxSpinnerModule, NgxSpinnerService } from "ngx-spinner";
-import { NgChartsModule } from "ng2-charts";
+import { BaseChartDirective } from "ng2-charts";
 import { UploadsTableComponent } from "../uploadsTable/uploadsTable";
 
 interface IProgressViewModel {
@@ -18,15 +18,14 @@ interface IProgressViewModel {
 }
 
 @Component({
-  selector: "user",
-  templateUrl: "./user.html",
-  imports: [
-    NgChartsModule,
-    NgxSpinnerModule,
-    RouterLink,
-    UploadsTableComponent,
-  ],
-  standalone: true,
+    selector: "user",
+    templateUrl: "./user.html",
+    imports: [
+      BaseChartDirective,
+        NgxSpinnerModule,
+        RouterLink,
+        UploadsTableComponent,
+    ]
 })
 export class UserComponent implements OnInit {
   public userName: string;

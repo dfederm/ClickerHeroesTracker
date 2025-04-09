@@ -21,8 +21,7 @@ interface IChangelogSectionViewModel {
         DatePipe,
         FormsModule,
         NgxSpinnerModule,
-    ],
-    standalone: true,
+    ]
 })
 export class ChangelogComponent implements OnInit {
     public sections: IChangelogSectionViewModel[];

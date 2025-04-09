@@ -17,12 +17,11 @@ import { FormsModule } from "@angular/forms";
     selector: "upload",
     templateUrl: "./uploadDialog.html",
     imports: [
-      FormsModule,
-      NgxSpinnerModule,
-      OpenDialogDirective,
-      TitleCasePipe,
-    ],
-    standalone: true,
+        FormsModule,
+        NgxSpinnerModule,
+        OpenDialogDirective,
+        TitleCasePipe,
+    ]
 })
 export class UploadDialogComponent implements OnInit {
     public errorMessage: string;

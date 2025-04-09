@@ -17,10 +17,9 @@ interface IOutsiderViewModel {
     selector: "outsiderSuggestions",
     templateUrl: "./outsiderSuggestions.html",
     imports: [
-      ExponentialPipe,
-      PercentPipe,
-    ],
-    standalone: true,
+        ExponentialPipe,
+        PercentPipe,
+    ]
 })
 export class OutsiderSuggestionsComponent {
     public outsiders: IOutsiderViewModel[] = [];

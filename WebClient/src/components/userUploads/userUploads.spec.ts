@@ -13,7 +13,7 @@ describe("UserUploadsComponent", () => {
 
     const userName = "someUserName";
 
-    @Component({ selector: "uploadsTable", template: "", standalone: true })
+    @Component({ selector: "uploadsTable", template: "" })
     class MockUploadsTableComponent {
         @Input()
         public userName: string;

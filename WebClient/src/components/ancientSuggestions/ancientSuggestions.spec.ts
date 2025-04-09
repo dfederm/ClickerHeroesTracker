@@ -117,10 +117,7 @@ describe("AncientSuggestionsComponent", () => {
 
     const exponentialPipeTransform = (value: string | Decimal) => "exponentialPipe(" + value + ")";
 
-    @Pipe({
-        name: 'exponential',
-        standalone: true,
-    })
+    @Pipe({ name: 'exponential' })
     class MockExponentialPipe implements PipeTransform {
         public transform = exponentialPipeTransform;
     }

@@ -16,8 +16,7 @@ import { TitleCasePipe } from "@angular/common";
         NgxSpinnerModule,
         OpenDialogDirective,
         TitleCasePipe,
-    ],
-    standalone: true,
+    ]
 })
 export class SettingsDialogComponent implements OnInit {
     public error: string;

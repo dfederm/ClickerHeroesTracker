@@ -13,12 +13,11 @@ import { FormsModule } from "@angular/forms";
     selector: "logInDialog",
     templateUrl: "./logInDialog.html",
     imports: [
-      ExternalLoginsComponent,
-      FormsModule,
-      NgxSpinnerModule,
-      OpenDialogDirective,
-    ],
-    standalone: true,
+        ExternalLoginsComponent,
+        FormsModule,
+        NgxSpinnerModule,
+        OpenDialogDirective,
+    ]
 })
 export class LogInDialogComponent {
     public error: string;

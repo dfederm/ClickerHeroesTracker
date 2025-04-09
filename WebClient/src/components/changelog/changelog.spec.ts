@@ -13,7 +13,7 @@ describe("ChangelogComponent", () => {
     let component: ChangelogComponent;
     let fixture: ComponentFixture<ChangelogComponent>;
 
-    @Component({ selector: "ngx-spinner", template: "", standalone: true })
+    @Component({ selector: "ngx-spinner", template: "" })
     class MockNgxSpinnerComponent {
         @Input()
         public fullScreen: boolean;

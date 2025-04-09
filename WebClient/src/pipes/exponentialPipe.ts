@@ -8,7 +8,6 @@ toFormat(Decimal);
 
 @Pipe({
     name: "exponential",
-    standalone: true,
 })
 export class ExponentialPipe implements PipeTransform {
     private settings: IUserSettings;

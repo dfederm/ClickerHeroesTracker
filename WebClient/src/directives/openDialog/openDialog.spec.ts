@@ -13,19 +13,17 @@ describe("OpenDialogDirective", () => {
     @Component({
         template: "someDialogContent",
         selector: "mockDialog",
-        standalone: true,
     })
     class MockDialogComponent { }
 
     // eslint-disable-next-line max-classes-per-file
     @Component({
-        template: "<a [openDialog]=\"MockDialogComponent\" [dismissCurrentDialog]=\"dismissCurrentDialog\" ></a>",
-        selector: "mock",
-        imports: [
-            OpenDialogDirective,
-        ],
-        standalone: true,
-    })
+    template: "<a [openDialog]=\"MockDialogComponent\" [dismissCurrentDialog]=\"dismissCurrentDialog\" ></a>",
+    selector: "mock",
+    imports: [
+        OpenDialogDirective,
+    ]
+})
     class MockComponent {
         public MockDialogComponent = MockDialogComponent;
         public dismissCurrentDialog: boolean;

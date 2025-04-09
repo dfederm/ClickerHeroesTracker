@@ -15,7 +15,7 @@ describe("HomeComponent", () => {
     let fixture: ComponentFixture<HomeComponent>;
     let userInfo: BehaviorSubject<IUserInfo>;
 
-    @Component({ selector: "changelog", template: "", standalone: true })
+    @Component({ selector: "changelog", template: "" })
     class MockChangelogComponent {
         @Input()
         public showDates: boolean;
@@ -24,7 +24,7 @@ describe("HomeComponent", () => {
         public maxEntries: number;
     }
 
-    @Component({ selector: "uploadsTable", template: "", standalone: true })
+    @Component({ selector: "uploadsTable", template: "" })
     class MockUploadsTableComponent {
         @Input()
         public userName: string;

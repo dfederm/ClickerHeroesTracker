@@ -4,7 +4,6 @@ import { Pipe, PipeTransform, NgZone, ChangeDetectorRef, OnDestroy } from "@angu
 @Pipe({
     name: "timeAgo",
     pure: false,
-    standalone: true,
 })
 export class TimeAgoPipe implements PipeTransform, OnDestroy {
     private timer: number;

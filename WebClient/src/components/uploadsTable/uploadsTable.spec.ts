@@ -32,7 +32,7 @@ describe("UploadsTableComponent", () => {
         });
     }
 
-    @Component({ selector: "ngx-spinner", template: "", standalone: true })
+    @Component({ selector: "ngx-spinner", template: "" })
     class MockNgxSpinnerComponent {
         @Input()
         public fullScreen: boolean;
@@ -40,12 +40,12 @@ describe("UploadsTableComponent", () => {
 
     const exponentialPipeTransform = (value: string | Decimal | number) => "exponentialPipe(" + value + ")";
 
-    @Pipe({ name: 'exponential', standalone: true })
+    @Pipe({ name: 'exponential' })
     class MockExponentialPipe implements PipeTransform {
         public transform = exponentialPipeTransform;
     }
 
-    @Component({ selector: "ngb-pagination", template: "", standalone: true })
+    @Component({ selector: "ngb-pagination", template: "" })
     class MockNgbPaginationComponent {
         @Input()
         public collectionSize: number;

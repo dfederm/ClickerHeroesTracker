@@ -5,19 +5,19 @@
     "outDir": "./dist/out-tsc",
     "forceConsistentCasingInFileNames": true,
     //"strict": true, // TODO: Enable strict mode
-    "noImplicitAny": true, // Remove after enabling strict
+    // Remove after enabling strict
+    "noImplicitAny": true,
+    "esModuleInterop": true,
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "sourceMap": true,
     "declaration": false,
-    "downlevelIteration": true,
     "experimentalDecorators": true,
     "moduleResolution": "node",
     "importHelpers": true,
     "resolveJsonModule": true,
-    "allowSyntheticDefaultImports": true,
     "target": "ES2022",
     "module": "es2020",
     "lib": [

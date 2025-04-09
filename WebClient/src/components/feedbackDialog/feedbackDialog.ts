@@ -14,8 +14,7 @@ import { ValidateEqualModule } from "ng-validate-equal";
         FormsModule,
         NgxSpinnerModule,
         ValidateEqualModule,
-    ],
-    standalone: true,
+    ]
 })
 export class FeedbackDialogComponent implements OnInit {
     public errorMessage: string;

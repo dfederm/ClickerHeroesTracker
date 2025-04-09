@@ -20,13 +20,12 @@ interface IUploadViewModel {
     selector: "uploadsTable",
     templateUrl: "./uploadsTable.html",
     imports: [
-      DatePipe,
-      ExponentialPipe,
-      NgbPagination,
-      NgxSpinnerModule,
-      RouterLink,
-    ],
-    standalone: true,
+        DatePipe,
+        ExponentialPipe,
+        NgbPagination,
+        NgxSpinnerModule,
+        RouterLink,
+    ]
 })
 export class UploadsTableComponent implements OnInit {
     public uploads: IUploadViewModel[];

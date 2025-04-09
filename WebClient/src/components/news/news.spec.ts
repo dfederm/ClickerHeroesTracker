@@ -8,7 +8,7 @@ import { ChangelogComponent } from "../changelog/changelog";
 describe("NewsComponent", () => {
     let fixture: ComponentFixture<NewsComponent>;
 
-    @Component({ selector: "changelog", template: "", standalone: true })
+    @Component({ selector: "changelog", template: "" })
     class MockChangelogComponent {
         @Input()
         public showDates: boolean;

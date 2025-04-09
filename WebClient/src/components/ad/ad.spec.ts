@@ -15,7 +15,6 @@ describe("AdComponent", () => {
     @Component({
         selector: "ng-adsense",
         template: "{{ renderNumber }}",
-        standalone: true,
     })
     class MockAdsenseComponent {
         @Input()

@@ -10,16 +10,15 @@ import { BannerComponent } from "../banner/banner";
 import { AdComponent } from "../ad/ad";
 
 @Component({
-  selector: "app",
-  templateUrl: "./app.html",
-  imports: [
-    AdComponent,
-    BannerComponent,
-    NavbarComponent,
-    NgxSpinnerModule,
-    RouterOutlet,
-  ],
-  standalone: true,
+    selector: "app",
+    templateUrl: "./app.html",
+    imports: [
+        AdComponent,
+        BannerComponent,
+        NavbarComponent,
+        NgxSpinnerModule,
+        RouterOutlet,
+    ]
 })
 export class AppComponent implements OnInit {
   public static defaultTheme = "light";

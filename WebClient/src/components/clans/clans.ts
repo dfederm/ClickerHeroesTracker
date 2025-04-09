@@ -17,8 +17,7 @@ import { RouterLink } from "@angular/router";
         NgClass,
         NgxSpinnerModule,
         RouterLink,
-    ],
-    standalone: true,
+    ]
 })
 export class ClansComponent implements OnInit {
     public isError = false;

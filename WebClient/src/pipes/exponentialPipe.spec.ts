@@ -40,13 +40,12 @@ describe("ExponentialPipe", () => {
     let settingsSubject = new BehaviorSubject(settingsWithScientificNotation);
 
     @Component({
-        template: "{{ value | exponential }}",
-        selector: "mock",
-        imports: [
-            ExponentialPipe,
-        ],
-        standalone: true,
-    })
+    template: "{{ value | exponential }}",
+    selector: "mock",
+    imports: [
+        ExponentialPipe,
+    ]
+})
     class MockComponent {
         public value: number | Decimal;
     }

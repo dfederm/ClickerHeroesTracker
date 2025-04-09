@@ -14,13 +14,12 @@ import { ValidateEqualModule } from "ng-validate-equal";
     selector: "registerDialog",
     templateUrl: "./registerDialog.html",
     imports: [
-      ExternalLoginsComponent,
-      FormsModule,
-      NgxSpinnerModule,
-      OpenDialogDirective,
-      ValidateEqualModule,
-    ],
-    standalone: true,
+        ExternalLoginsComponent,
+        FormsModule,
+        NgxSpinnerModule,
+        OpenDialogDirective,
+        ValidateEqualModule,
+    ]
 })
 export class RegisterDialogComponent {
     public errors: string[];

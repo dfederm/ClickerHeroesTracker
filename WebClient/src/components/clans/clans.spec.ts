@@ -16,13 +16,13 @@ describe("ClansComponent", () => {
     let component: ClansComponent;
     let fixture: ComponentFixture<ClansComponent>;
 
-    @Component({ selector: "ngx-spinner", template: "", standalone: true })
+    @Component({ selector: "ngx-spinner", template: "" })
     class MockNgxSpinnerComponent {
         @Input()
         public fullScreen: boolean;
     }
 
-    @Component({ selector: "ngb-pagination", template: "", standalone: true })
+    @Component({ selector: "ngb-pagination", template: "" })
     class MockNgbPaginationComponent {
         @Input()
         public collectionSize: number;

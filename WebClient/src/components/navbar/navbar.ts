@@ -18,8 +18,7 @@ import { NgbCollapse } from "@ng-bootstrap/ng-bootstrap";
         NgbCollapse,
         OpenDialogDirective,
         RouterLink,
-    ],
-    standalone: true,
+    ]
 })
 export class NavbarComponent implements OnInit {
     public isCollapsed = true;

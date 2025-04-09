@@ -28,8 +28,7 @@ interface ICalculateAscensionZoneData {
     templateUrl: "./ascensionZone.html",
     imports: [
         ExponentialPipe,
-    ],
-    standalone: true,
+    ]
 })
 export class AscensionZoneComponent {
     public calculateAscensionZoneSteps: ICalculateAscensionZoneData[];

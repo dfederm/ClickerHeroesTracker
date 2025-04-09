@@ -42,8 +42,7 @@ interface IAncientViewModel {
         NgbTooltip,
         NgxSpinnerModule,
         OpenDialogDirective,
-    ],
-    standalone: true,
+    ]
 })
 export class AncientSuggestionsComponent implements OnInit {
     private static readonly exponentialRegex = /^(\d+(\.\d+)?)e\+?(\d+)$/i;

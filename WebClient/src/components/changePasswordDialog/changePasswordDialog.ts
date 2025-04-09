@@ -16,8 +16,7 @@ import { ValidateEqualModule } from "ng-validate-equal";
         FormsModule,
         NgxSpinnerModule,
         ValidateEqualModule,
-    ],
-    standalone: true,
+    ]
 })
 export class ChangePasswordDialogComponent implements OnInit {
     public errors: string[];

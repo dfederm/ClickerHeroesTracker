@@ -11,13 +11,13 @@ import { NgxSpinnerModule } from "ngx-spinner";
 describe("LogInDialogComponent", () => {
     let fixture: ComponentFixture<LogInDialogComponent>;
 
-    @Component({ selector: "ngx-spinner", template: "", standalone: true })
+    @Component({ selector: "ngx-spinner", template: "" })
     class MockNgxSpinnerComponent {
         @Input()
         public fullScreen: boolean;
     }
     
-    @Component({selector: "externalLogins", template: "", standalone: true})
+    @Component({selector: "externalLogins", template: ""})
     class MockExternalLoginsComponent { }
     
     beforeEach(async () => {

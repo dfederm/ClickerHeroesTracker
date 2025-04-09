@@ -3,13 +3,12 @@ import { ActivatedRoute, RouterLink } from "@angular/router";
 import { UploadsTableComponent } from "../uploadsTable/uploadsTable";
 
 @Component({
-  selector: "userUploads",
-  templateUrl: "./userUploads.html",
-  imports: [
-    RouterLink,
-    UploadsTableComponent,
-  ],
-  standalone: true,
+    selector: "userUploads",
+    templateUrl: "./userUploads.html",
+    imports: [
+        RouterLink,
+        UploadsTableComponent,
+    ]
 })
 export class UserUploadsComponent implements OnInit {
   public userName: string;

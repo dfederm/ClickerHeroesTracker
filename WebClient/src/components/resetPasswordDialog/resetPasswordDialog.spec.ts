@@ -11,7 +11,7 @@ describe("ResetPasswordDialogComponent", () => {
     let component: ResetPasswordDialogComponent;
     let fixture: ComponentFixture<ResetPasswordDialogComponent>;
 
-    @Component({ selector: "ngx-spinner", template: "", standalone: true })
+    @Component({ selector: "ngx-spinner", template: "" })
     class MockNgxSpinnerComponent {
         @Input()
         public fullScreen: boolean;

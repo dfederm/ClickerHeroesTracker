@@ -14,8 +14,7 @@ import { OpenDialogDirective } from "src/directives/openDialog/openDialog";
         OpenDialogDirective,
         RouterLink,
         UploadsTableComponent,
-    ],
-    standalone: true,
+    ]
 })
 export class HomeComponent implements OnInit {
     public UploadDialogComponent = UploadDialogComponent;

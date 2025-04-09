@@ -13,18 +13,18 @@ import { IUser } from "../../models";
 import { NgxSpinnerModule, NgxSpinnerService } from "ngx-spinner";
 import { Component, Directive, Input } from "@angular/core";
 import { UploadsTableComponent } from "../uploadsTable/uploadsTable";
-import { NgChartsModule } from "ng2-charts";
+import { BaseChartDirective } from "ng2-charts";
 
 describe("UserComponent", () => {
     let fixture: ComponentFixture<UserComponent>;
 
-    @Component({ selector: "ngx-spinner", template: "", standalone: true })
+    @Component({ selector: "ngx-spinner", template: "" })
     class MockNgxSpinnerComponent {
         @Input()
         public fullScreen: boolean;
     }
 
-    @Component({ selector: "uploadsTable", template: "", standalone: true })
+    @Component({ selector: "uploadsTable", template: "" })
     class MockUploadsTableComponent {
         @Input()
         public userName: string;
@@ -35,7 +35,6 @@ describe("UserComponent", () => {
 
     @Directive({
         selector: "canvas[baseChart]",
-        standalone: true,
     })
     class MockBaseChartDirective {
         @Input()
@@ -140,7 +139,7 @@ describe("UserComponent", () => {
             })
             .compileComponents();
         TestBed.overrideComponent(UserComponent, {
-            remove: { imports: [ NgxSpinnerModule, UploadsTableComponent, NgChartsModule ]},
+            remove: { imports: [ NgxSpinnerModule, UploadsTableComponent, BaseChartDirective ]},
             add: { imports: [ MockNgxSpinnerComponent, MockUploadsTableComponent, MockBaseChartDirective ] },
         });
 

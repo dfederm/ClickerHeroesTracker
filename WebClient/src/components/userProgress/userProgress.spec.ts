@@ -12,7 +12,7 @@ import { SettingsService } from "../../services/settingsService/settingsService"
 import { ExponentialPipe } from "../../pipes/exponentialPipe";
 import { PercentPipe } from "@angular/common";
 import { NgxSpinnerModule } from "ngx-spinner";
-import { NgChartsModule } from "ng2-charts";
+import { BaseChartDirective } from "ng2-charts";
 
 describe("UserProgressComponent", () => {
     let component: UserProgressComponent;
@@ -20,7 +20,7 @@ describe("UserProgressComponent", () => {
     let routeParams: BehaviorSubject<Params>;
     let queryParams: BehaviorSubject<Params>;
 
-    @Component({ selector: "ngx-spinner", template: "", standalone: true })
+    @Component({ selector: "ngx-spinner", template: "" })
     class MockNgxSpinnerComponent {
         @Input()
         public fullScreen: boolean;
@@ -28,7 +28,6 @@ describe("UserProgressComponent", () => {
 
     @Directive({
         selector: "canvas[baseChart]",
-        standalone: true,
     })
     class MockBaseChartDirective {
         @Input()
@@ -115,7 +114,7 @@ describe("UserProgressComponent", () => {
             })
             .compileComponents();
         TestBed.overrideComponent(UserProgressComponent, {
-            remove: { imports: [ NgxSpinnerModule, NgChartsModule ]},
+            remove: { imports: [ NgxSpinnerModule, BaseChartDirective ]},
             add: { imports: [ MockNgxSpinnerComponent, MockBaseChartDirective ] },
         });
 
