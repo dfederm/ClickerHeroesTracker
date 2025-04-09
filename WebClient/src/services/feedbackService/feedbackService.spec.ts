@@ -1,6 +1,6 @@
 import { TestBed, fakeAsync, tick } from "@angular/core/testing";
-import { HttpClientTestingModule, HttpTestingController } from "@angular/common/http/testing";
-import { HttpHeaders, HttpErrorResponse } from "@angular/common/http";
+import { HttpTestingController, provideHttpClientTesting } from "@angular/common/http/testing";
+import { HttpHeaders, HttpErrorResponse, provideHttpClient } from "@angular/common/http";
 import { HttpErrorHandlerService } from "../httpErrorHandlerService/httpErrorHandlerService";
 
 import { FeedbackService } from "./feedbackService";
@@ -21,18 +21,15 @@ describe("FeedbackService", () => {
 
         httpErrorHandlerService = jasmine.createSpyObj("httpErrorHandlerService", ["logError"]);
 
-        TestBed.configureTestingModule(
-            {
-                imports: [
-                    HttpClientTestingModule,
-                ],
-                providers:
-                    [
-                        FeedbackService,
-                        { provide: AuthenticationService, useValue: authenticationService },
-                        { provide: HttpErrorHandlerService, useValue: httpErrorHandlerService },
-                    ],
-            });
+        TestBed.configureTestingModule({
+            providers: [
+                FeedbackService,
+                provideHttpClient(),
+                provideHttpClientTesting(),
+                { provide: AuthenticationService, useValue: authenticationService },
+                { provide: HttpErrorHandlerService, useValue: httpErrorHandlerService },
+            ],
+        });
 
         feedbackService = TestBed.inject(FeedbackService);
         httpMock = TestBed.inject(HttpTestingController);

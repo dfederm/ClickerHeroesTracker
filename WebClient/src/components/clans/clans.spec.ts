@@ -1,4 +1,3 @@
-import { NO_ERRORS_SCHEMA } from "@angular/core";
 import { By } from "@angular/platform-browser";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 
@@ -8,10 +7,44 @@ import { AuthenticationService, IUserInfo } from "../../services/authenticationS
 import { BehaviorSubject } from "rxjs";
 import { UserService } from "../../services/userService/userService";
 import { IUser } from "../../models";
+import { Component, Input } from "@angular/core";
+import { NgxSpinnerModule, NgxSpinnerService } from "ngx-spinner";
+import { provideRouter } from "@angular/router";
+import { NgbPagination } from "@ng-bootstrap/ng-bootstrap";
 
 describe("ClansComponent", () => {
     let component: ClansComponent;
     let fixture: ComponentFixture<ClansComponent>;
+
+    @Component({ selector: "ngx-spinner", template: "", standalone: true })
+    class MockNgxSpinnerComponent {
+        @Input()
+        public fullScreen: boolean;
+    }
+
+    @Component({ selector: "ngb-pagination", template: "", standalone: true })
+    class MockNgbPaginationComponent {
+        @Input()
+        public collectionSize: number;
+
+        @Input()
+        public page: number;
+
+        @Input()
+        public pageSize: number;
+
+        @Input()
+        public maxSize: number;
+
+        @Input()
+        public rotate: boolean;
+
+        @Input()
+        public ellipses: boolean;
+
+        @Input()
+        public boundaryLinks: boolean;
+    }
 
     let clans: ILeaderboardClan[] =
         [
@@ -87,17 +120,27 @@ describe("ClansComponent", () => {
             getUser: (): Promise<IUser> => Promise.resolve(user),
         };
 
+        let spinnerService = {
+            show: (): void => void 0,
+            hide: (): void => void 0,
+        };
+
         await TestBed.configureTestingModule(
             {
-                declarations: [ClansComponent],
+                imports: [ClansComponent],
                 providers: [
+                    provideRouter([]),
                     { provide: ClanService, useValue: clanService },
                     { provide: AuthenticationService, useValue: authenticationService },
                     { provide: UserService, useValue: userService },
+                    { provide: NgxSpinnerService, useValue: spinnerService },
                 ],
-                schemas: [NO_ERRORS_SCHEMA],
             })
             .compileComponents();
+        TestBed.overrideComponent(ClansComponent, {
+            remove: { imports: [ NgxSpinnerModule, NgbPagination ]},
+            add: { imports: [ MockNgxSpinnerComponent, MockNgbPaginationComponent ] },
+        });
 
         fixture = TestBed.createComponent(ClansComponent);
         component = fixture.componentInstance;
@@ -182,14 +225,14 @@ describe("ClansComponent", () => {
             expect(cells[4].nativeElement.textContent.trim()).toEqual(clan.currentRaidLevel.toString());
         }
 
-        let pagination = fixture.debugElement.query(By.css("ngb-pagination"));
+        let pagination = fixture.debugElement.query(By.css("ngb-pagination"))?.componentInstance as MockNgbPaginationComponent;
         expect(pagination).not.toBeNull();
-        expect(pagination.properties.collectionSize).toEqual(clans.length);
-        expect(pagination.properties.page).toEqual(page);
-        expect(pagination.properties.pageSize).toEqual(component.count);
-        expect(pagination.properties.maxSize).toEqual(5);
-        expect(pagination.properties.rotate).toEqual(true);
-        expect(pagination.properties.ellipses).toEqual(false);
-        expect(pagination.properties.boundaryLinks).toEqual(true);
+        expect(pagination.collectionSize).toEqual(clans.length);
+        expect(pagination.page).toEqual(page);
+        expect(pagination.pageSize).toEqual(component.count);
+        expect(pagination.maxSize).toEqual(5);
+        expect(pagination.rotate).toEqual(true);
+        expect(pagination.ellipses).toEqual(false);
+        expect(pagination.boundaryLinks).toEqual(true);
     }
 });

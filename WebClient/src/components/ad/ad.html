@@ -1,6 +1,8 @@
 <div class="container">
-    <ng-adsense *ngIf="!rerender"
-                [adClient]="'ca-pub-7807152857287265'"
-                [adSlot]="2070554767">
+  @if (!rerender) {
+    <ng-adsense
+      [adClient]="'ca-pub-7807152857287265'"
+      [adSlot]="2070554767">
     </ng-adsense>
+  }
 </div>

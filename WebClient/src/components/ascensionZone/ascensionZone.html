@@ -1,37 +1,43 @@
 <p>
-    This is the zone at which you stop insta-killing monsters.
+  This is the zone at which you stop insta-killing monsters.
 </p>
 <p class="text-muted">
-    This feature is not complete yet as it assumes an idle playstyle and may not fully account for some aspects of the game.
+  This feature is not complete yet as it assumes an idle playstyle and may not fully account for some aspects of the game.
 </p>
 <p class="text-muted">
-    Each row is a "step" in the calculation, ie. where purchasing hero levels is required to continue insta-killing.
+  Each row is a "step" in the calculation, ie. where purchasing hero levels is required to continue insta-killing.
 </p>
 <div>
-    <button *ngIf="!calculateAscensionZoneSteps"
-            class="btn btn-secondary"
-            (click)="calculateAscensionZone()">Calculate</button>
+  @if (!calculateAscensionZoneSteps) {
+    <button
+      class="btn btn-secondary"
+    (click)="calculateAscensionZone()">Calculate</button>
+  }
 </div>
-<table *ngIf="calculateAscensionZoneSteps"
-       class="table table-sm table-striped">
+@if (calculateAscensionZoneSteps) {
+  <table
+    class="table table-sm table-striped">
     <thead>
-        <tr>
-            <th>Zone</th>
-            <th>Current Hero</th>
-            <th>Hero Level</th>
-            <th>Hero Gilds</th>
-            <th>Damage</th>
-            <th>Gold</th>
-        </tr>
+      <tr>
+        <th>Zone</th>
+        <th>Current Hero</th>
+        <th>Hero Level</th>
+        <th>Hero Gilds</th>
+        <th>Damage</th>
+        <th>Gold</th>
+      </tr>
     </thead>
     <tbody>
-        <tr *ngFor="let data of calculateAscensionZoneSteps">
-            <td class="text-end">{{ data.zone }}</td>
-            <td>{{ data.hero }}</td>
-            <td class="text-end">{{ data.heroLevel }}</td>
-            <td class="text-end">{{ data.heroGilds }}</td>
-            <td class="text-end">{{ data.damage | exponential }}</td>
-            <td class="text-end">{{ data.gold | exponential }}</td>
+      @for (data of calculateAscensionZoneSteps; track data) {
+        <tr>
+          <td class="text-end">{{ data.zone }}</td>
+          <td>{{ data.hero }}</td>
+          <td class="text-end">{{ data.heroLevel }}</td>
+          <td class="text-end">{{ data.heroGilds }}</td>
+          <td class="text-end">{{ data.damage | exponential }}</td>
+          <td class="text-end">{{ data.gold | exponential }}</td>
         </tr>
+      }
     </tbody>
-</table>
+  </table>
+}

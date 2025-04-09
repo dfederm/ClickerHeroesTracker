@@ -1,15 +1,25 @@
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { By } from "@angular/platform-browser";
-import { FormsModule } from "@angular/forms";
 import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
-import { DebugElement, NO_ERRORS_SCHEMA } from "@angular/core";
+import { Component, DebugElement, Input } from "@angular/core";
 
 import { LogInDialogComponent } from "./logInDialog";
 import { AuthenticationService } from "../../services/authenticationService/authenticationService";
+import { ExternalLoginsComponent } from "../externalLogins/externalLogins";
+import { NgxSpinnerModule } from "ngx-spinner";
 
 describe("LogInDialogComponent", () => {
     let fixture: ComponentFixture<LogInDialogComponent>;
 
+    @Component({ selector: "ngx-spinner", template: "", standalone: true })
+    class MockNgxSpinnerComponent {
+        @Input()
+        public fullScreen: boolean;
+    }
+    
+    @Component({selector: "externalLogins", template: "", standalone: true})
+    class MockExternalLoginsComponent { }
+    
     beforeEach(async () => {
         let authenticationService = {
             logInWithPassword: (): void => void 0,
@@ -18,15 +28,19 @@ describe("LogInDialogComponent", () => {
 
         await TestBed.configureTestingModule(
             {
-                imports: [FormsModule],
-                declarations: [LogInDialogComponent],
+                imports: [
+                    LogInDialogComponent,
+                ],
                 providers: [
                     { provide: AuthenticationService, useValue: authenticationService },
                     { provide: NgbActiveModal, useValue: activeModal },
                 ],
-                schemas: [NO_ERRORS_SCHEMA],
             })
             .compileComponents();
+        TestBed.overrideComponent(LogInDialogComponent, {
+            remove: { imports: [NgxSpinnerModule, ExternalLoginsComponent]},
+            add: { imports: [MockNgxSpinnerComponent, MockExternalLoginsComponent]},
+        });
 
         fixture = TestBed.createComponent(LogInDialogComponent);
         

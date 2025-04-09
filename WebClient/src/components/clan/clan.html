@@ -1,118 +1,143 @@
 <div class="container">
-    <h2>{{ clanName }}</h2>
-    <div class="row">
-        <div class="col-md-6">
-            <ngx-spinner name="clanInformation"
-                         [fullScreen]="false"
-                         type="ball-pulse"></ngx-spinner>
-            <p *ngIf="isClanInformationError"
-               class="alert alert-danger">
-                There was a problem getting the clan's data
-            </p>
-            <p *ngIf="!guildMembers && !isClanInformationError && !isClanInformationLoading"
-               class="alert alert-danger">
-                This clan does not exist
-            </p>
-            <p *ngIf="isBlocked && !isClanInformationError && !isClanInformationLoading"
-               class="alert alert-warning">
-                This clan is blocked from the leaderboard
-            </p>
-            <ul *ngIf="guildMembers && !isClanInformationError && !isClanInformationLoading"
-                class="list-inline">
-                <li *ngIf="!isBlocked">
-                    <label>Rank:</label>
-                    <span>{{ rank | number }}</span>
-                </li>
-                <li>
-                    <label>Raid Level:</label>
-                    <span>{{ currentRaidLevel | number }}</span>
-                </li>
-                <li>
-                    <label>Legacy Raid Level:</label>
-                    <span>{{ currentLegacyRaidLevel | number }}</span>
-                </li>
-            </ul>
-        </div>
+  <h2>{{ clanName }}</h2>
+  <div class="row">
+    <div class="col-md-6">
+      <ngx-spinner name="clanInformation"
+        [fullScreen]="false"
+      type="ball-pulse"></ngx-spinner>
+      @if (isClanInformationError) {
+        <p
+          class="alert alert-danger">
+          There was a problem getting the clan's data
+        </p>
+      }
+      @if (!guildMembers && !isClanInformationError && !isClanInformationLoading) {
+        <p
+          class="alert alert-danger">
+          This clan does not exist
+        </p>
+      }
+      @if (isBlocked && !isClanInformationError && !isClanInformationLoading) {
+        <p
+          class="alert alert-warning">
+          This clan is blocked from the leaderboard
+        </p>
+      }
+      @if (guildMembers && !isClanInformationError && !isClanInformationLoading) {
+        <ul
+          class="list-inline">
+          @if (!isBlocked) {
+            <li>
+              <label>Rank:</label>
+              <span>{{ rank | number }}</span>
+            </li>
+          }
+          <li>
+            <label>Raid Level:</label>
+            <span>{{ currentRaidLevel | number }}</span>
+          </li>
+          <li>
+            <label>Legacy Raid Level:</label>
+            <span>{{ currentLegacyRaidLevel | number }}</span>
+          </li>
+        </ul>
+      }
     </div>
-    <div *ngIf="isAdmin && !isClanInformationError && !isClanInformationLoading"
-         class="row">
-        <div class="col-md-6">
-            <p *ngIf="isActionsError"
-               class="alert alert-danger">
-                Oops! Something went wrong.
-            </p>
-            <ngx-spinner name="clanActions"
-                         [fullScreen]="false"
-                         type="ball-pulse"></ngx-spinner>
-            <button class="btn btn-secondary"
-                    (click)="toggleBlock()">
-                {{ isBlocked ? "Unblock" : "Block" }}
-            </button>
-        </div>
+  </div>
+  @if (isAdmin && !isClanInformationError && !isClanInformationLoading) {
+    <div
+      class="row">
+      <div class="col-md-6">
+        @if (isActionsError) {
+          <p
+            class="alert alert-danger">
+            Oops! Something went wrong.
+          </p>
+        }
+        <ngx-spinner name="clanActions"
+          [fullScreen]="false"
+        type="ball-pulse"></ngx-spinner>
+        <button class="btn btn-secondary"
+          (click)="toggleBlock()">
+          {{ isBlocked ? "Unblock" : "Block" }}
+        </button>
+      </div>
     </div>
-    <div class="row">
-        <div *ngIf="guildMembers && guildMembers.length"
-             class="col-lg-6">
-            <h3>Clan Members</h3>
-            <table class="table table-sm table-striped">
-                <thead>
-                    <tr>
-                        <th>Name</th>
-                        <th>Class</th>
-                        <th class="text-end">Level</th>
-                        <th class="text-end">Highest Zone</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr *ngFor="let guildMember of guildMembers">
-                        <td>
-                            {{ guildMember.nickname }}
-                            <span *ngIf="guildMember.userName">
-                                (
-                                <a routerLink="/users/{{ guildMember.userName }}">{{ guildMember.userName }}</a>
-                                )
-                            </span>
-                        </td>
-                        <td>{{ guildMember.chosenClass | titlecase }}</td>
-                        <td class="text-end">{{ guildMember.classLevel }}</td>
-                        <td class="text-end">{{ guildMember.highestZone | number }}</td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-        <div *ngIf="isUserClan"
-             class="col-lg-6">
-            <h3>Message Board</h3>
-            <ngx-spinner name="clanMessages"
-                         [fullScreen]="false"
-                         type="ball-pulse"></ngx-spinner>
-            <p *ngIf="messagesError"
-               class="alert alert-danger">
-                {{ messagesError }}
-            </p>
-            <form (ngSubmit)="sendMessage()"
-                  class="form-inline">
-                <input type="text"
-                       id="newMessage"
-                       name="newMessage"
-                       class="form-control"
-                       maxlength="150"
-                       [(ngModel)]="newMessage" />
-                <button type="submit"
-                        class="btn btn-success">Send</button>
-            </form>
-            <div *ngFor="let message of messages"
-                 class="clan-message">
-                <p>
+  }
+  <div class="row">
+    @if (guildMembers && guildMembers.length) {
+      <div
+        class="col-lg-6">
+        <h3>Clan Members</h3>
+        <table class="table table-sm table-striped">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Class</th>
+              <th class="text-end">Level</th>
+              <th class="text-end">Highest Zone</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (guildMember of guildMembers; track guildMember) {
+              <tr>
+                <td>
+                  {{ guildMember.nickname }}
+                  @if (guildMember.userName) {
                     <span>
-                        ({{ message.date | timeAgo }})
+                      (
+                      <a routerLink="/users/{{ guildMember.userName }}">{{ guildMember.userName }}</a>
+                      )
                     </span>
-                    <span [ngClass]="{'text-muted' : !message.username}">
-                        {{ message.username || "(Unknown)" }}
-                    </span>
-                </p>
-                <p class="clan-message-content">{{ message.content }}</p>
+                  }
+                </td>
+                <td>{{ guildMember.chosenClass | titlecase }}</td>
+                <td class="text-end">{{ guildMember.classLevel }}</td>
+                <td class="text-end">{{ guildMember.highestZone | number }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+    @if (isUserClan) {
+      <div
+        class="col-lg-6">
+        <h3>Message Board</h3>
+        <ngx-spinner name="clanMessages"
+          [fullScreen]="false"
+        type="ball-pulse"></ngx-spinner>
+        @if (messagesError) {
+          <p
+            class="alert alert-danger">
+            {{ messagesError }}
+          </p>
+        }
+        <form (ngSubmit)="sendMessage()"
+          class="form-inline">
+          <input type="text"
+            id="newMessage"
+            name="newMessage"
+            class="form-control"
+            maxlength="150"
+            [(ngModel)]="newMessage" />
+            <button type="submit"
+            class="btn btn-success">Send</button>
+          </form>
+          @for (message of messages; track message) {
+            <div class="clan-message">
+              <p>
+                <span>
+                  ({{ message.date | timeAgo }})
+                </span>
+                <span [ngClass]="{'text-muted' : !message.username}">
+                  {{ message.username || "(Unknown)" }}
+                </span>
+              </p>
+              <p class="clan-message-content">{{ message.content }}</p>
             </div>
+          }
         </div>
+      }
     </div>
-</div>
+  </div>

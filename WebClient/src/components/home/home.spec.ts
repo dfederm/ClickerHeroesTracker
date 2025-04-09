@@ -1,15 +1,37 @@
-import { NO_ERRORS_SCHEMA } from "@angular/core";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { By } from "@angular/platform-browser";
 
 import { HomeComponent } from "./home";
 import { AuthenticationService, IUserInfo } from "../../services/authenticationService/authenticationService";
 import { BehaviorSubject } from "rxjs";
+import { provideRouter } from "@angular/router";
+import { Component, Input } from "@angular/core";
+import { ChangelogComponent } from "../changelog/changelog";
+import { UploadsTableComponent } from "../uploadsTable/uploadsTable";
+import { OpenDialogDirective } from "src/directives/openDialog/openDialog";
 
 describe("HomeComponent", () => {
     let component: HomeComponent;
     let fixture: ComponentFixture<HomeComponent>;
     let userInfo: BehaviorSubject<IUserInfo>;
+
+    @Component({ selector: "changelog", template: "", standalone: true })
+    class MockChangelogComponent {
+        @Input()
+        public showDates: boolean;
+
+        @Input()
+        public maxEntries: number;
+    }
+
+    @Component({ selector: "uploadsTable", template: "", standalone: true })
+    class MockUploadsTableComponent {
+        @Input()
+        public userName: string;
+
+        @Input()
+        public count: number;
+    }
 
     const loggedInUser: IUserInfo = {
         isLoggedIn: true,
@@ -28,13 +50,17 @@ describe("HomeComponent", () => {
 
         await TestBed.configureTestingModule(
             {
-                declarations: [HomeComponent],
-                schemas: [NO_ERRORS_SCHEMA],
+                imports: [HomeComponent],
                 providers: [
+                    provideRouter([]),
                     { provide: AuthenticationService, useValue: authenticationService },
                 ],
             })
             .compileComponents();
+        TestBed.overrideComponent(HomeComponent, {
+            remove: { imports: [ChangelogComponent, UploadsTableComponent]},
+            add: { imports: [MockChangelogComponent, MockUploadsTableComponent] },
+        });
 
         fixture = TestBed.createComponent(HomeComponent);
         component = fixture.componentInstance;
@@ -52,7 +78,8 @@ describe("HomeComponent", () => {
 
         let uploadLink = jumbotron.query(By.css("a"));
         expect(uploadLink).not.toBeNull();
-        expect(uploadLink.properties.openDialog).toEqual(component.UploadDialogComponent);
+        let openDialogDirective = uploadLink.injector.get(OpenDialogDirective) as OpenDialogDirective;
+        expect(openDialogDirective.openDialog).toEqual(component.UploadDialogComponent);
     });
 
     it("should display the short changelog", () => {
@@ -61,10 +88,10 @@ describe("HomeComponent", () => {
         let containers = fixture.debugElement.queryAll(By.css(".col-md-6"));
         let changelogContainer = containers[0];
 
-        let changelog = changelogContainer.query(By.css("changelog"));
+        let changelog = changelogContainer.query(By.css("changelog"))?.componentInstance as MockChangelogComponent;
         expect(changelog).not.toBeNull();
-        expect(changelog.properties.showDates).toEqual(false);
-        expect(changelog.properties.maxEntries).toEqual(5);
+        expect(changelog.showDates).toEqual(false);
+        expect(changelog.maxEntries).toEqual(5);
 
         let fullChangelogLink = changelogContainer.query(By.css("a"));
         expect(fullChangelogLink).not.toBeNull();
@@ -87,13 +114,13 @@ describe("HomeComponent", () => {
 
         let uploadsContainer = containers[1];
 
-        let uploadsTable = uploadsContainer.query(By.css("uploadsTable"));
+        let uploadsTable = uploadsContainer.query(By.css("uploadsTable"))?.componentInstance as MockUploadsTableComponent;
         expect(uploadsTable).not.toBeNull();
-        expect(uploadsTable.properties.userName).toEqual("someUsername");
-        expect(uploadsTable.properties.count).toEqual(5);
+        expect(uploadsTable.userName).toEqual("someUsername");
+        expect(uploadsTable.count).toEqual(5);
 
         let allUploadsLink = uploadsContainer.query(By.css("a"));
         expect(allUploadsLink).not.toBeNull();
-        expect(allUploadsLink.properties.routerLink).toEqual("/users/someUsername/uploads");
+        expect(allUploadsLink.attributes.href).toEqual("/users/someUsername/uploads");
     });
 });

@@ -2,12 +2,23 @@ import { Component, OnInit } from "@angular/core";
 import { ClanService, ILeaderboardClan, ILeaderboardSummaryListResponse } from "../../services/clanService/clanService";
 import { AuthenticationService, IUserInfo } from "../../services/authenticationService/authenticationService";
 import { UserService } from "../../services/userService/userService";
-import { NgxSpinnerService } from "ngx-spinner";
+import { NgxSpinnerModule, NgxSpinnerService } from "ngx-spinner";
 import { debounceTime, map, Subject } from "rxjs";
+import { NgbPagination } from "@ng-bootstrap/ng-bootstrap";
+import { DecimalPipe, NgClass } from "@angular/common";
+import { RouterLink } from "@angular/router";
 
 @Component({
     selector: "clans",
     templateUrl: "./clans.html",
+    imports: [
+        DecimalPipe,
+        NgbPagination,
+        NgClass,
+        NgxSpinnerModule,
+        RouterLink,
+    ],
+    standalone: true,
 })
 export class ClansComponent implements OnInit {
     public isError = false;

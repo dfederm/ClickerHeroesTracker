@@ -1,45 +1,47 @@
 <div class="modal-header">
-    <h4 class="modal-title">Log in</h4>
-    <button type="button"
-            class="btn-close"
-            (click)="activeModal.dismiss()"></button>
+  <h4 class="modal-title">Log in</h4>
+  <button type="button"
+    class="btn-close"
+  (click)="activeModal.dismiss()"></button>
 </div>
 <div class="modal-body">
-    <div *ngIf="error"
-         class="alert alert-danger">
-        {{ error }}
+  @if (error) {
+    <div
+      class="alert alert-danger">
+      {{ error }}
     </div>
-    <ngx-spinner name="logInDialog"
-                 [fullScreen]="false"
-                 type="ball-pulse"></ngx-spinner>
-    <form (ngSubmit)="logIn()">
-        <div class="mb-3">
-            <label for="username">Username or Email</label>
-            <input type="text"
-                   class="form-control"
-                   id="username"
-                   name="username"
-                   [(ngModel)]="username" />
-        </div>
-        <div class="mb-3">
-            <label for="password">Password</label>
-            <input type="password"
-                   class="form-control"
-                   id="password"
-                   name="password"
-                   [(ngModel)]="password" />
+  }
+  <ngx-spinner name="logInDialog"
+    [fullScreen]="false"
+  type="ball-pulse"></ngx-spinner>
+  <form (ngSubmit)="logIn()">
+    <div class="mb-3">
+      <label for="username">Username or Email</label>
+      <input type="text"
+        class="form-control"
+        id="username"
+        name="username"
+        [(ngModel)]="username" />
+      </div>
+      <div class="mb-3">
+        <label for="password">Password</label>
+        <input type="password"
+          class="form-control"
+          id="password"
+          name="password"
+          [(ngModel)]="password" />
         </div>
         <button type="submit"
-                class="btn btn-primary">Log in</button>
+        class="btn btn-primary">Log in</button>
         <p>
-            <a [openDialog]="RegisterDialogComponent"
-               [dismissCurrentDialog]="true">Register as a new user?</a>
+          <a [openDialog]="RegisterDialogComponent"
+          [dismissCurrentDialog]="true">Register as a new user?</a>
         </p>
         <p>
-            <a [openDialog]="ResetPasswordDialogComponent"
-               [dismissCurrentDialog]="true">Forgot your password?</a>
+          <a [openDialog]="ResetPasswordDialogComponent"
+          [dismissCurrentDialog]="true">Forgot your password?</a>
         </p>
-    </form>
-    <h4 class="pt-2 pb-2">Use another service to log in</h4>
-    <externalLogins></externalLogins>
-</div>
+      </form>
+      <h4 class="pt-2 pb-2">Use another service to log in</h4>
+      <externalLogins></externalLogins>
+    </div>

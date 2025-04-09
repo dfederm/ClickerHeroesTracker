@@ -1,17 +1,26 @@
 import { ComponentFixture, TestBed } from "@angular/core/testing";
-import { FormsModule } from "@angular/forms";
 import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
-import { ValidateEqualModule } from "ng-validate-equal";
 
 import { RegisterDialogComponent } from "./registerDialog";
 import { AuthenticationService } from "../../services/authenticationService/authenticationService";
 import { UserService } from "../../services/userService/userService";
 import { By } from "@angular/platform-browser";
-import { DebugElement, NO_ERRORS_SCHEMA } from "@angular/core";
+import { Component, DebugElement, Input } from "@angular/core";
+import { ExternalLoginsComponent } from "../externalLogins/externalLogins";
+import { NgxSpinnerModule } from "ngx-spinner";
 
 describe("RegisterDialogComponent", () => {
     let fixture: ComponentFixture<RegisterDialogComponent>;
 
+    @Component({ selector: "ngx-spinner", template: "", standalone: true })
+    class MockNgxSpinnerComponent {
+        @Input()
+        public fullScreen: boolean;
+    }
+    
+    @Component({selector: "externalLogins", template: "", standalone: true})
+    class MockExternalLoginsComponent { }
+    
     beforeEach(async () => {
         let authenticationService = {
             logInWithPassword: (): void => void 0,
@@ -24,10 +33,6 @@ describe("RegisterDialogComponent", () => {
         await TestBed.configureTestingModule(
             {
                 imports: [
-                    FormsModule,
-                    ValidateEqualModule,
-                ],
-                declarations: [
                     RegisterDialogComponent,
                 ],
                 providers: [
@@ -35,9 +40,12 @@ describe("RegisterDialogComponent", () => {
                     { provide: UserService, useValue: userService },
                     { provide: NgbActiveModal, useValue: activeModal },
                 ],
-                schemas: [NO_ERRORS_SCHEMA],
             })
             .compileComponents();
+        TestBed.overrideComponent(RegisterDialogComponent, {
+            remove: { imports: [ NgxSpinnerModule, ExternalLoginsComponent ]},
+            add: { imports: [ MockNgxSpinnerComponent, MockExternalLoginsComponent ] },
+        });
 
         fixture = TestBed.createComponent(RegisterDialogComponent);
         fixture.detectChanges();

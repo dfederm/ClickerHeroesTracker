@@ -3,6 +3,8 @@ import { LoggingService } from "../../services/loggingService/loggingService";
 import { gameData } from "../../models/gameData";
 import { SavedGame } from "../../models/savedGame";
 import { Decimal } from "decimal.js";
+import { PercentPipe } from "@angular/common";
+import { ExponentialPipe } from "src/pipes/exponentialPipe";
 
 interface IOutsiderViewModel {
     id: number;
@@ -14,6 +16,11 @@ interface IOutsiderViewModel {
 @Component({
     selector: "outsiderSuggestions",
     templateUrl: "./outsiderSuggestions.html",
+    imports: [
+      ExponentialPipe,
+      PercentPipe,
+    ],
+    standalone: true,
 })
 export class OutsiderSuggestionsComponent {
     public outsiders: IOutsiderViewModel[] = [];

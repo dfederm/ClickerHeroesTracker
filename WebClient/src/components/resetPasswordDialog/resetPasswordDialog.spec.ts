@@ -1,17 +1,22 @@
 import { ComponentFixture, TestBed } from "@angular/core/testing";
-import { FormsModule } from "@angular/forms";
 import { NgbActiveModal, NgbModal } from "@ng-bootstrap/ng-bootstrap";
-import { ValidateEqualModule } from "ng-validate-equal";
 
 import { ResetPasswordDialogComponent } from "./resetPasswordDialog";
 import { UserService } from "../../services/userService/userService";
 import { By } from "@angular/platform-browser";
-import { DebugElement, NO_ERRORS_SCHEMA } from "@angular/core";
+import { Component, DebugElement, Input } from "@angular/core";
+import { NgxSpinnerModule } from "ngx-spinner";
 
 describe("ResetPasswordDialogComponent", () => {
     let component: ResetPasswordDialogComponent;
     let fixture: ComponentFixture<ResetPasswordDialogComponent>;
 
+    @Component({ selector: "ngx-spinner", template: "", standalone: true })
+    class MockNgxSpinnerComponent {
+        @Input()
+        public fullScreen: boolean;
+    }
+    
     beforeEach(async () => {
         let userService = {
             resetPassword: (): void => void 0,
@@ -23,10 +28,6 @@ describe("ResetPasswordDialogComponent", () => {
         await TestBed.configureTestingModule(
             {
                 imports: [
-                    FormsModule,
-                    ValidateEqualModule,
-                ],
-                declarations: [
                     ResetPasswordDialogComponent,
                 ],
                 providers: [
@@ -34,9 +35,12 @@ describe("ResetPasswordDialogComponent", () => {
                     { provide: NgbActiveModal, useValue: activeModal },
                     { provide: NgbModal, useValue: modalService },
                 ],
-                schemas: [NO_ERRORS_SCHEMA],
             })
             .compileComponents();
+        TestBed.overrideComponent(ResetPasswordDialogComponent, {
+            remove: { imports: [ NgxSpinnerModule ]},
+            add: { imports: [ MockNgxSpinnerComponent ] },
+        });
 
         fixture = TestBed.createComponent(ResetPasswordDialogComponent);
         component = fixture.componentInstance;

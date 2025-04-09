@@ -1,5 +1,5 @@
 import { Component, OnInit, Inject, LOCALE_ID } from "@angular/core";
-import { ActivatedRoute, Params, Router } from "@angular/router";
+import { ActivatedRoute, Params, Router, RouterLink } from "@angular/router";
 import { UserService, IProgressData } from "../../services/userService/userService";
 
 import { Decimal } from "decimal.js";
@@ -7,8 +7,9 @@ import { ChartDataset, ChartOptions, TooltipItem } from "chart.js";
 import 'chartjs-adapter-date-fns';
 import { SettingsService, IUserSettings } from "../../services/settingsService/settingsService";
 import { ExponentialPipe } from "../../pipes/exponentialPipe";
-import { PercentPipe } from "@angular/common";
-import { NgxSpinnerService } from "ngx-spinner";
+import { NgClass, PercentPipe } from "@angular/common";
+import { NgxSpinnerModule, NgxSpinnerService } from "ngx-spinner";
+import { NgChartsModule } from "ng2-charts";
 
 interface IChartViewModel {
     isProminent: boolean;
@@ -19,6 +20,13 @@ interface IChartViewModel {
 @Component({
     selector: "userProgress",
     templateUrl: "./userProgress.html",
+    imports: [
+        NgChartsModule,
+        NgClass,
+        NgxSpinnerModule,
+        RouterLink,
+    ],
+    standalone: true,
 })
 export class UserProgressComponent implements OnInit {
     private static readonly timeRanges = [

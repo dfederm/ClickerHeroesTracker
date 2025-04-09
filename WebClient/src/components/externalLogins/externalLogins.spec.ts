@@ -1,18 +1,24 @@
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { By } from "@angular/platform-browser";
-import { FormsModule } from "@angular/forms";
 import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
-import { DebugElement, NO_ERRORS_SCHEMA } from "@angular/core";
+import { Component, DebugElement, Input } from "@angular/core";
 
 import { ExternalLoginsComponent, IErrorResponse } from "./externalLogins";
 import { AuthenticationService, IUserInfo } from "../../services/authenticationService/authenticationService";
 import { UserService, IUserLogins } from "../../services/userService/userService";
 import { BehaviorSubject } from "rxjs";
 import { AuthenticationResult } from "@azure/msal-browser";
-import { NgxSpinnerService } from "ngx-spinner";
+import { NgxSpinnerModule, NgxSpinnerService } from "ngx-spinner";
 
 describe("ExternalLoginsComponent", () => {
     let component: ExternalLoginsComponent;
+
+    @Component({ selector: "ngx-spinner", template: "", standalone: true })
+    class MockNgxSpinnerComponent {
+        @Input()
+        public fullScreen: boolean;
+    }
+
     let fixture: ComponentFixture<ExternalLoginsComponent>;
     let userInfo: BehaviorSubject<IUserInfo>;
 
@@ -58,17 +64,21 @@ describe("ExternalLoginsComponent", () => {
 
         await TestBed.configureTestingModule(
             {
-                imports: [FormsModule],
-                declarations: [ExternalLoginsComponent],
+                imports: [
+                    ExternalLoginsComponent,
+                ],
                 providers: [
                     { provide: AuthenticationService, useValue: authenticationService },
                     { provide: NgbActiveModal, useValue: activeModal },
                     { provide: UserService, useValue: userService },
                     { provide: NgxSpinnerService, useValue: spinnerService },
                 ],
-                schemas: [NO_ERRORS_SCHEMA],
             })
             .compileComponents();
+        TestBed.overrideComponent(ExternalLoginsComponent, {
+            remove: { imports: [ NgxSpinnerModule ]},
+            add: { imports: [ MockNgxSpinnerComponent ] },
+        });
 
         fixture = TestBed.createComponent(ExternalLoginsComponent);
         component = fixture.componentInstance;

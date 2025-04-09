@@ -4,12 +4,17 @@ import { gameData } from "../../models/gameData";
 import { SettingsService, IUserSettings } from "../../services/settingsService/settingsService";
 import { SavedGame } from "../../models/savedGame";
 import { Decimal } from "decimal.js";
-import { NgbModal, NgbModalRef } from "@ng-bootstrap/ng-bootstrap";
+import { NgbModal, NgbModalRef, NgbTooltip } from "@ng-bootstrap/ng-bootstrap";
 import { FeedbackDialogComponent } from "../feedbackDialog/feedbackDialog";
 import { UploadService } from "../../services/uploadService/uploadService";
 import { Router } from "@angular/router";
 import { HttpErrorResponse } from "@angular/common/http";
-import { NgxSpinnerService } from "ngx-spinner";
+import { NgxSpinnerModule, NgxSpinnerService } from "ngx-spinner";
+import { ExponentialPipe } from "src/pipes/exponentialPipe";
+import { ClipboardModule } from "ngx-clipboard";
+import { NgClass } from "@angular/common";
+import { OpenDialogDirective } from "src/directives/openDialog/openDialog";
+import { FormsModule } from "@angular/forms";
 
 interface IAncientViewModel {
     id: string;
@@ -29,6 +34,16 @@ interface IAncientViewModel {
     selector: "ancientSuggestions",
     templateUrl: "./ancientSuggestions.html",
     styleUrls: ["./ancientSuggestions.css"],
+    imports: [
+        ClipboardModule,
+        ExponentialPipe,
+        FormsModule,
+        NgClass,
+        NgbTooltip,
+        NgxSpinnerModule,
+        OpenDialogDirective,
+    ],
+    standalone: true,
 })
 export class AncientSuggestionsComponent implements OnInit {
     private static readonly exponentialRegex = /^(\d+(\.\d+)?)e\+?(\d+)$/i;

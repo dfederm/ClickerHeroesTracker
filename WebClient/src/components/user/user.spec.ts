@@ -1,4 +1,3 @@
-import { NO_ERRORS_SCHEMA } from "@angular/core";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { By } from "@angular/platform-browser";
 import Decimal from "decimal.js";
@@ -8,13 +7,46 @@ import { BehaviorSubject } from "rxjs";
 import { UserComponent } from "./user";
 import { UserService, IProgressData, IFollowsData } from "../../services/userService/userService";
 import { SettingsService } from "../../services/settingsService/settingsService";
-import { ActivatedRoute } from "@angular/router";
+import { ActivatedRoute, RouterLink } from "@angular/router";
 import { AuthenticationService, IUserInfo } from "../../services/authenticationService/authenticationService";
 import { IUser } from "../../models";
-import { NgxSpinnerService } from "ngx-spinner";
+import { NgxSpinnerModule, NgxSpinnerService } from "ngx-spinner";
+import { Component, Directive, Input } from "@angular/core";
+import { UploadsTableComponent } from "../uploadsTable/uploadsTable";
+import { NgChartsModule } from "ng2-charts";
 
 describe("UserComponent", () => {
     let fixture: ComponentFixture<UserComponent>;
+
+    @Component({ selector: "ngx-spinner", template: "", standalone: true })
+    class MockNgxSpinnerComponent {
+        @Input()
+        public fullScreen: boolean;
+    }
+
+    @Component({ selector: "uploadsTable", template: "", standalone: true })
+    class MockUploadsTableComponent {
+        @Input()
+        public userName: string;
+
+        @Input()
+        public count: number;
+    }
+
+    @Directive({
+        selector: "canvas[baseChart]",
+        standalone: true,
+    })
+    class MockBaseChartDirective {
+        @Input()
+        public type: string;
+
+        @Input()
+        public datasets: ChartDataset<"line">[];
+
+        @Input()
+        public options: ChartOptions<"line">;
+    }
 
     const userName = "someUserName";
 
@@ -97,7 +129,7 @@ describe("UserComponent", () => {
 
         await TestBed.configureTestingModule(
             {
-                declarations: [UserComponent],
+                imports: [UserComponent],
                 providers: [
                     { provide: ActivatedRoute, useValue: route },
                     { provide: UserService, useValue: userService },
@@ -105,9 +137,12 @@ describe("UserComponent", () => {
                     { provide: AuthenticationService, useValue: authenticationService },
                     { provide: NgxSpinnerService, useValue: spinnerService },
                 ],
-                schemas: [NO_ERRORS_SCHEMA],
             })
             .compileComponents();
+        TestBed.overrideComponent(UserComponent, {
+            remove: { imports: [ NgxSpinnerModule, UploadsTableComponent, NgChartsModule ]},
+            add: { imports: [ MockNgxSpinnerComponent, MockUploadsTableComponent, MockBaseChartDirective ] },
+        });
 
         fixture = TestBed.createComponent(UserComponent);
     });
@@ -335,11 +370,11 @@ describe("UserComponent", () => {
 
             let uploadsContainer = containers[1];
 
-            let uploadsTable = uploadsContainer.query(By.css("uploadsTable"));
+            let uploadsTable = uploadsContainer.query(By.css("uploadsTable"))?.componentInstance as UploadsTableComponent;
             expect(uploadsTable).not.toBeNull();
-            expect(uploadsTable.properties.userName).toEqual(userName);
-            expect(uploadsTable.properties.count).toEqual(10);
-            expect(uploadsTable.properties.paginate).toBeFalsy();
+            expect(uploadsTable.userName).toEqual(userName);
+            expect(uploadsTable.count).toEqual(10);
+            expect(uploadsTable.paginate).toBeFalsy();
         });
     });
 
@@ -360,17 +395,17 @@ describe("UserComponent", () => {
             let warning = progressContainer.query(By.css(".alert-warning"));
             expect(warning).toBeNull();
 
-            let chart = progressContainer.query(By.css("canvas"));
+            let chart = progressContainer.query(By.directive(MockBaseChartDirective));
             expect(chart).not.toBeNull();
-            expect(chart.attributes.baseChart).toBeDefined();
-            expect(chart.attributes.height).toEqual("235");
-            expect(chart.properties.type).toEqual("line");
+            expect(chart.properties.height).toEqual(235);
 
-            let datasets: ChartDataset<"line">[] = chart.properties.datasets;
-            expect(datasets).toBeTruthy();
-            expect(datasets.length).toEqual(1);
+            let chartDirective = chart.injector.get(MockBaseChartDirective) as MockBaseChartDirective;
+            expect(chartDirective).not.toBeNull();
+            expect(chartDirective.type).toEqual("line");
 
-            let data = datasets[0].data as ScatterDataPoint[];
+            expect(chartDirective.datasets).toBeTruthy();
+            expect(chartDirective.datasets.length).toEqual(1);
+            let data = chartDirective.datasets[0].data as ScatterDataPoint[];
             let dataKeys = Object.keys(progress.soulsSpentData);
             expect(data.length).toEqual(dataKeys.length);
             for (let i = 0; i < data.length; i++) {
@@ -378,10 +413,9 @@ describe("UserComponent", () => {
                 expect(data[i].y).toEqual(Number(progress.soulsSpentData[dataKeys[i]]));
             }
 
-            let options: ChartOptions<"line"> = chart.properties.options;
-            expect(options).toBeTruthy();
-            expect(options.plugins.title.text).toEqual("Souls Spent");
-            expect(options.scales.yAxis.type).toEqual("linear");
+            expect(chartDirective.options).toBeTruthy();
+            expect(chartDirective.options.plugins.title.text).toEqual("Souls Spent");
+            expect(chartDirective.options.scales.yAxis.type).toEqual("linear");
         });
 
         it("should display a chart with logarithmic scale", async () => {
@@ -411,17 +445,17 @@ describe("UserComponent", () => {
             let warning = progressContainer.query(By.css(".alert-warning"));
             expect(warning).toBeNull();
 
-            let chart = progressContainer.query(By.css("canvas"));
+            let chart = progressContainer.query(By.directive(MockBaseChartDirective));
             expect(chart).not.toBeNull();
-            expect(chart.attributes.baseChart).toBeDefined();
-            expect(chart.attributes.height).toEqual("235");
-            expect(chart.properties.type).toEqual("line");
+            expect(chart.properties.height).toEqual(235);
 
-            let datasets: ChartDataset<"line">[] = chart.properties.datasets;
-            expect(datasets).toBeTruthy();
-            expect(datasets.length).toEqual(1);
+            let chartDirective = chart.injector.get(MockBaseChartDirective) as MockBaseChartDirective;
+            expect(chartDirective).not.toBeNull();
+            expect(chartDirective.type).toEqual("line");
 
-            let data = datasets[0].data as ScatterDataPoint[];
+            expect(chartDirective.datasets).toBeTruthy();
+            expect(chartDirective.datasets.length).toEqual(1);
+            let data = chartDirective.datasets[0].data as ScatterDataPoint[];
             let dataKeys = Object.keys(soulsSpentData);
             expect(data.length).toEqual(dataKeys.length);
             for (let i = 0; i < data.length; i++) {
@@ -431,12 +465,11 @@ describe("UserComponent", () => {
                 expect(data[i].y).toEqual(new Decimal(soulsSpentData[dataKeys[i]]).log().toNumber());
             }
 
-            let options: ChartOptions<"line"> = chart.properties.options;
-            expect(options).toBeTruthy();
-            expect(options.plugins.title.text).toEqual("Souls Spent");
+            expect(chartDirective.options).toBeTruthy();
+            expect(chartDirective.options.plugins.title.text).toEqual("Souls Spent");
 
             // Linear since we're manually managing log scale
-            expect(options.scales.yAxis.type).toEqual("linear");
+            expect(chartDirective.options.scales.yAxis.type).toEqual("linear");
         });
 
         it("should show an error when userService.getProgress fails", async () => {
@@ -452,7 +485,7 @@ describe("UserComponent", () => {
 
             let progressContainer = containers[2];
 
-            let chart = progressContainer.query(By.css("canvas"));
+            let chart = progressContainer.query(By.directive(MockBaseChartDirective));
             expect(chart).toBeNull();
 
             let error = progressContainer.query(By.css(".alert-danger"));
@@ -475,7 +508,7 @@ describe("UserComponent", () => {
 
             let progressContainer = containers[2];
 
-            let chart = progressContainer.query(By.css("canvas"));
+            let chart = progressContainer.query(By.directive(MockBaseChartDirective));
             expect(chart).toBeNull();
 
             let error = progressContainer.query(By.css(".alert-danger"));
@@ -520,7 +553,8 @@ describe("UserComponent", () => {
 
                 let compareCell = cells[1];
                 let link = compareCell.query(By.css("a"));
-                expect(link.properties.routerLink).toEqual(`/users/${userName}/compare/${expectedFollow}`);
+                let routerLink = link.injector.get(RouterLink) as RouterLink;
+                expect(routerLink.href).toEqual(`/users/${userName}/compare/${expectedFollow}`);
                 expect(link.nativeElement.textContent.trim()).toEqual("Compare");
             }
         });

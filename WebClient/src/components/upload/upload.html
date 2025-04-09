@@ -1,188 +1,200 @@
 <div class="container">
-    <h2>Calculator</h2>
-    <p *ngIf="errorMessage"
-       class="alert alert-danger">
-        {{ errorMessage }}
+  <h2>Calculator</h2>
+  @if (errorMessage) {
+    <p
+      class="alert alert-danger">
+      {{ errorMessage }}
     </p>
-    <ngx-spinner name="upload"
-                 [fullScreen]="false"
-                 type="ball-pulse"></ngx-spinner>
-    <div class="row">
-        <div class="col-md-6">
-            <ul class="list-inline">
-                <li>
-                    <label>User:</label>
-                    <a *ngIf="userName"
-                       routerLink="/users/{{userName}}">{{ userName }}</a>
-                    <span *ngIf="!userName"
-                          class="text-muted">(Anonymous)</span>
-                    <a *ngIf="clanName"
-                       routerLink="/clans/{{clanName}}">&lt;{{ clanName }}&gt;</a>
-                </li>
-                <li>
-                    <label>Save Time:</label>
-                    <span title="Uploaded {{ uploadTime | date:'short' }}">
-                        {{ saveTime | date:'short' }}
-                    </span>
-                </li>
-                <li>
-                    <label>Play Style:</label>
-                    <span>{{ playStyle | titlecase }}</span>
-                </li>
-            </ul>
-        </div>
-        <div class="col-md-6">
-            <button class="btn btn-secondary"
-                    (click)="openModal(viewSaveDataModal)">
-                View Save Data
-            </button>
-            <ng-template #viewSaveDataModal
-                         let-c="close"
-                         let-d="dismiss">
-                <div class="modal-header">
-                    <h4 class="modal-title">Save Data</h4>
-                    <button type="button"
-                            class="btn-close"
-                            (click)="d()"></button>
-                </div>
-                <div class="modal-body">
-                    <ul ngbNav
-                        #viewSaveDataNav="ngbNav"
-                        class="nav-tabs">
-                        <li ngbNavItem>
-                            <a ngbNavLink>Shareable</a>
-                            <ng-template ngbNavContent>
-                                <p>This has been scrubbed of personal data and is safely shareable.</p>
-                                <textarea class="form-control"
-                                          rows="2"
-                                          #scrubbedContent
-                                          readonly>{{ savedGame.scrubbedContent }}</textarea>
-                                <button type="button"
-                                        class="btn btn-primary float-end"
-                                        [ngxClipboard]="scrubbedContent"
-                                        (cbOnSuccess)="c()">Copy to Clipboard</button>
-                            </ng-template>
-                        </li>
-                        <li ngbNavItem
-                            *ngIf="!savedGame.isScrubbed">
-                            <a ngbNavLink>Raw Data</a>
-                            <ng-template ngbNavContent>
-                                <p class="alert alert-warning">This is the exact content you previously uploaded. It generally should not be shared
-                                    to other players as it may contain personal data.</p>
-                                <textarea class="form-control"
-                                          rows="2"
-                                          #rawContent
-                                          readonly>{{ savedGame.content }}</textarea>
-                                <button type="button"
-                                        class="btn btn-primary float-end"
-                                        [ngxClipboard]="rawContent"
-                                        (cbOnSuccess)="c()">Copy to Clipboard</button>
-                            </ng-template>
-                        </li>
-                    </ul>
-                    <div class="mb-3"
-                         [ngbNavOutlet]="viewSaveDataNav">
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button"
-                            class="btn btn-secondary"
-                            (click)="d()">Close</button>
-                </div>
-            </ng-template>
-
-            <button *ngIf="userName && userInfo && userName === userInfo.username"
-                    class="btn btn-danger"
-                    (click)="openModal(deleteUploadModal)">
-                Delete
-            </button>
-            <ng-template #deleteUploadModal
-                         let-c="close"
-                         let-d="dismiss">
-                <div class="modal-header">
-                    <h4 class="modal-title">Delete Upload</h4>
-                    <button type="button"
-                            class="btn-close"
-                            (click)="d()"></button>
-                </div>
-                <div class="modal-body">
-                    <p class="alert alert-danger">
-                        Are you sure? This cannot be undone!
-                    </p>
-                </div>
-                <div class="modal-footer">
-                    <button type="button"
-                            class="btn btn-secondary"
-                            (click)="d()">Cancel</button>
-                    <button type="button"
-                            class="btn btn-danger"
-                            (click)="deleteUpload(c)">Delete</button>
-                </div>
-            </ng-template>
-        </div>
+  }
+  <ngx-spinner name="upload"
+    [fullScreen]="false"
+  type="ball-pulse"></ngx-spinner>
+  <div class="row">
+    <div class="col-md-6">
+      <ul class="list-inline">
+        <li>
+          <label>User:</label>
+          @if (userName) {
+            <a
+            routerLink="/users/{{userName}}">{{ userName }}</a>
+          }
+          @if (!userName) {
+            <span
+            class="text-muted">(Anonymous)</span>
+          }
+          @if (clanName) {
+            <a
+            routerLink="/clans/{{clanName}}">&lt;{{ clanName }}&gt;</a>
+          }
+        </li>
+        <li>
+          <label>Save Time:</label>
+          <span title="Uploaded {{ uploadTime | date:'short' }}">
+            {{ saveTime | date:'short' }}
+          </span>
+        </li>
+        <li>
+          <label>Play Style:</label>
+          <span>{{ playStyle | titlecase }}</span>
+        </li>
+      </ul>
     </div>
-    <div class="row">
-        <div class="col-lg-6">
-            <h4>Ancients:</h4>
-            <ancientSuggestions [playStyle]="playStyle"
-                                [savedGame]="savedGame"></ancientSuggestions>
+    <div class="col-md-6">
+      <button class="btn btn-secondary"
+        (click)="openModal(viewSaveDataModal)">
+        View Save Data
+      </button>
+      <ng-template #viewSaveDataModal
+        let-c="close"
+        let-d="dismiss">
+        <div class="modal-header">
+          <h4 class="modal-title">Save Data</h4>
+          <button type="button"
+            class="btn-close"
+          (click)="d()"></button>
         </div>
-        <div class="col-lg-6">
-            <h4>Outsider:</h4>
-            <outsiderSuggestions [savedGame]="savedGame"></outsiderSuggestions>
-
-            <h4>Miscellaneous stats:</h4>
-            <table class="table table-sm table-striped">
-                <tbody>
-                    <tr>
-                        <td>Hero Souls Spent</td>
-                        <td class="text-end">{{ heroSoulsSpent | exponential }}</td>
-                    </tr>
-                    <tr>
-                        <td>Hero Souls Sacrificed</td>
-                        <td class="text-end">{{ heroSoulsSacrificed | exponential }}</td>
-                    </tr>
-                    <tr>
-                        <td>Ancient Souls Earned</td>
-                        <td class="text-end">{{ totalAncientSouls | exponential }}</td>
-                    </tr>
-                    <tr>
-                        <td>Transcendent Power</td>
-                        <td class="text-end">{{ (transcendentPower ? transcendentPower.toNumber() : 0) | percent:'1.1-3' }}</td>
-                    </tr>
-                    <tr>
-                        <td>Titan Damage</td>
-                        <td class="text-end">{{ titanDamage | exponential }}</td>
-                    </tr>
-                    <tr>
-                        <td>Highest Zone</td>
-                        <td class="text-end">{{ highestZoneThisTranscension | exponential }}</td>
-                    </tr>
-                    <tr>
-                        <td>Highest Zone (Lifetime)</td>
-                        <td class="text-end">{{ highestZoneLifetime | exponential }}</td>
-                    </tr>
-                    <tr>
-                        <td>Ascensions</td>
-                        <td class="text-end">{{ ascensionsThisTranscension | exponential }}</td>
-                    </tr>
-                    <tr>
-                        <td>Ascensions (Lifetime)</td>
-                        <td class="text-end">{{ ascensionsLifetime | exponential }}</td>
-                    </tr>
-                    <tr>
-                        <td>Rubies</td>
-                        <td class="text-end">{{ rubies | exponential }}</td>
-                    </tr>
-                    <tr>
-                        <td>Autoclickers</td>
-                        <td class="text-end">{{ autoclickers | exponential }}</td>
-                    </tr>
-                </tbody>
-            </table>
-
-            <h4>Optimal Ascension Zone (Experimental):</h4>
-            <ascensionZone [savedGame]="savedGame"></ascensionZone>
+        <div class="modal-body">
+          <ul ngbNav
+            #viewSaveDataNav="ngbNav"
+            class="nav-tabs">
+            <li ngbNavItem>
+              <a ngbNavLink>Shareable</a>
+              <ng-template ngbNavContent>
+                <p>This has been scrubbed of personal data and is safely shareable.</p>
+                <textarea class="form-control"
+                  rows="2"
+                  #scrubbedContent
+                readonly>{{ savedGame.scrubbedContent }}</textarea>
+                <button type="button"
+                  class="btn btn-primary float-end"
+                  [ngxClipboard]="scrubbedContent"
+                (cbOnSuccess)="c()">Copy to Clipboard</button>
+              </ng-template>
+            </li>
+            @if (!savedGame.isScrubbed) {
+              <li ngbNavItem
+                >
+                <a ngbNavLink>Raw Data</a>
+                <ng-template ngbNavContent>
+                  <p class="alert alert-warning">This is the exact content you previously uploaded. It generally should not be shared
+                  to other players as it may contain personal data.</p>
+                  <textarea class="form-control"
+                    rows="2"
+                    #rawContent
+                  readonly>{{ savedGame.content }}</textarea>
+                  <button type="button"
+                    class="btn btn-primary float-end"
+                    [ngxClipboard]="rawContent"
+                  (cbOnSuccess)="c()">Copy to Clipboard</button>
+                </ng-template>
+              </li>
+            }
+          </ul>
+          <div class="mb-3"
+            [ngbNavOutlet]="viewSaveDataNav">
+          </div>
         </div>
+        <div class="modal-footer">
+          <button type="button"
+            class="btn btn-secondary"
+          (click)="d()">Close</button>
+        </div>
+      </ng-template>
+
+      @if (userName && userInfo && userName === userInfo.username) {
+        <button
+          class="btn btn-danger"
+          (click)="openModal(deleteUploadModal)">
+          Delete
+        </button>
+      }
+      <ng-template #deleteUploadModal
+        let-c="close"
+        let-d="dismiss">
+        <div class="modal-header">
+          <h4 class="modal-title">Delete Upload</h4>
+          <button type="button"
+            class="btn-close"
+          (click)="d()"></button>
+        </div>
+        <div class="modal-body">
+          <p class="alert alert-danger">
+            Are you sure? This cannot be undone!
+          </p>
+        </div>
+        <div class="modal-footer">
+          <button type="button"
+            class="btn btn-secondary"
+          (click)="d()">Cancel</button>
+          <button type="button"
+            class="btn btn-danger"
+          (click)="deleteUpload(c)">Delete</button>
+        </div>
+      </ng-template>
     </div>
+  </div>
+  <div class="row">
+    <div class="col-lg-6">
+      <h4>Ancients:</h4>
+      <ancientSuggestions [playStyle]="playStyle"
+      [savedGame]="savedGame"></ancientSuggestions>
+    </div>
+    <div class="col-lg-6">
+      <h4>Outsider:</h4>
+      <outsiderSuggestions [savedGame]="savedGame"></outsiderSuggestions>
+
+      <h4>Miscellaneous stats:</h4>
+      <table class="table table-sm table-striped">
+        <tbody>
+          <tr>
+            <td>Hero Souls Spent</td>
+            <td class="text-end">{{ heroSoulsSpent | exponential }}</td>
+          </tr>
+          <tr>
+            <td>Hero Souls Sacrificed</td>
+            <td class="text-end">{{ heroSoulsSacrificed | exponential }}</td>
+          </tr>
+          <tr>
+            <td>Ancient Souls Earned</td>
+            <td class="text-end">{{ totalAncientSouls | exponential }}</td>
+          </tr>
+          <tr>
+            <td>Transcendent Power</td>
+            <td class="text-end">{{ (transcendentPower ? transcendentPower.toNumber() : 0) | percent:'1.1-3' }}</td>
+          </tr>
+          <tr>
+            <td>Titan Damage</td>
+            <td class="text-end">{{ titanDamage | exponential }}</td>
+          </tr>
+          <tr>
+            <td>Highest Zone</td>
+            <td class="text-end">{{ highestZoneThisTranscension | exponential }}</td>
+          </tr>
+          <tr>
+            <td>Highest Zone (Lifetime)</td>
+            <td class="text-end">{{ highestZoneLifetime | exponential }}</td>
+          </tr>
+          <tr>
+            <td>Ascensions</td>
+            <td class="text-end">{{ ascensionsThisTranscension | exponential }}</td>
+          </tr>
+          <tr>
+            <td>Ascensions (Lifetime)</td>
+            <td class="text-end">{{ ascensionsLifetime | exponential }}</td>
+          </tr>
+          <tr>
+            <td>Rubies</td>
+            <td class="text-end">{{ rubies | exponential }}</td>
+          </tr>
+          <tr>
+            <td>Autoclickers</td>
+            <td class="text-end">{{ autoclickers | exponential }}</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h4>Optimal Ascension Zone (Experimental):</h4>
+      <ascensionZone [savedGame]="savedGame"></ascensionZone>
+    </div>
+  </div>
 </div>

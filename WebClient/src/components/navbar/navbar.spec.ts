@@ -1,12 +1,13 @@
-import { NO_ERRORS_SCHEMA, Type } from "@angular/core";
+import { Type } from "@angular/core";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { By } from "@angular/platform-browser";
 import { NgbModal } from "@ng-bootstrap/ng-bootstrap";
 import { BehaviorSubject, Subject } from "rxjs";
-import { Router, Event as NavigationEvent, NavigationEnd, NavigationCancel } from "@angular/router";
+import { Router, Event as NavigationEvent, NavigationEnd, NavigationCancel, provideRouter } from "@angular/router";
 
 import { NavbarComponent } from "./navbar";
 import { AuthenticationService, IUserInfo } from "../../services/authenticationService/authenticationService";
+import { OpenDialogDirective } from "src/directives/openDialog/openDialog";
 
 describe("NavbarComponent", () => {
     let component: NavbarComponent;
@@ -28,28 +29,23 @@ describe("NavbarComponent", () => {
         let authenticationService = { userInfo: (): void => void 0, logOut: (): void => void 0 };
         let modalService = { open: (): void => void 0 };
 
-        navigationEvents = new Subject();
-        let router = {
-            events: {
-                // eslint-disable-next-line import/no-deprecated
-                subscribe: navigationEvents.subscribe.bind(navigationEvents),
-            },
-        };
-
         await TestBed.configureTestingModule(
             {
-                declarations: [NavbarComponent],
+                imports: [NavbarComponent],
                 providers: [
+                    provideRouter([]),
                     { provide: AuthenticationService, useValue: authenticationService },
-                    { provide: Router, useValue: router },
                     { provide: NgbModal, useValue: modalService },
                 ],
-                schemas: [NO_ERRORS_SCHEMA],
             })
             .compileComponents();
 
         fixture = TestBed.createComponent(NavbarComponent);
         component = fixture.componentInstance;
+
+        navigationEvents = new Subject();
+        let router = TestBed.inject(Router);
+        spyOn(router.events, "subscribe").and.callFake(navigationEvents.subscribe.bind(navigationEvents));
     });
 
     it("should display the anonymous nav bar when the user is not logged in", async () => {
@@ -86,12 +82,13 @@ describe("NavbarComponent", () => {
 
             if (expectations.url) {
                 // It may be either an attribute or property depending on whether it's static. It may also be a normal href
-                let actualLink = link.attributes.routerLink || link.properties.routerLink || link.attributes.href;
+                let actualLink = link.attributes.routerLink || link.attributes.routerLink || link.attributes.href;
                 expect(actualLink).toEqual(expectations.url);
             }
 
             if (expectations.dialog) {
-                expect(link.properties.openDialog).toEqual(expectations.dialog);
+                let openDialogDirective = link.injector.get(OpenDialogDirective) as OpenDialogDirective;
+                expect(openDialogDirective.openDialog).toEqual(expectations.dialog);
             }
         }
     });
@@ -129,7 +126,7 @@ describe("NavbarComponent", () => {
 
             if (expectations.url) {
                 // It may be either an attribute or property depending on whether it's static. It may also be a normal href
-                let actualLink = link.attributes.routerLink || link.properties.routerLink || link.attributes.href;
+                let actualLink = link.attributes.routerLink || link.attributes.routerLink || link.attributes.href;
                 expect(actualLink).toEqual(expectations.url);
             }
 
@@ -140,7 +137,8 @@ describe("NavbarComponent", () => {
             }
 
             if (expectations.dialog) {
-                expect(link.properties.openDialog).toEqual(expectations.dialog);
+                let openDialogDirective = link.injector.get(OpenDialogDirective) as OpenDialogDirective;
+                expect(openDialogDirective.openDialog).toEqual(expectations.dialog);
             }
         }
     });

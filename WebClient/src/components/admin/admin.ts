@@ -1,10 +1,13 @@
 import { Component, OnInit } from "@angular/core";
 import { HttpClient, HttpErrorResponse } from "@angular/common/http";
-import { NgxSpinnerService } from "ngx-spinner";
+import { NgxSpinnerModule, NgxSpinnerService } from "ngx-spinner";
 import { HttpErrorHandlerService } from "../../services/httpErrorHandlerService/httpErrorHandlerService";
 import { AuthenticationService } from "../../services/authenticationService/authenticationService";
 import { UploadService } from "../../services/uploadService/uploadService";
 import { IBlockClanRequest } from "../../models";
+import { FormsModule } from "@angular/forms";
+import { PercentPipe } from "@angular/common";
+import { NgbProgressbar } from "@ng-bootstrap/ng-bootstrap";
 
 export interface IPruneInvalidAuthTokensRequest {
     batchSize: number;
@@ -13,6 +16,13 @@ export interface IPruneInvalidAuthTokensRequest {
 @Component({
     selector: "admin",
     templateUrl: "./admin.html",
+    imports: [
+        FormsModule,
+        NgbProgressbar,
+        NgxSpinnerModule,
+        PercentPipe,
+    ],
+    standalone: true,
 })
 export class AdminComponent implements OnInit {
     public static numParallelDeletes = 10;

@@ -1,5 +1,5 @@
 import { inflate, deflate, inflateRaw, deflateRaw } from "pako";
-import * as MD5 from "crypto-js/md5";
+import MD5 from "crypto-js/md5";
 
 export interface IItemData {
     bonusType1: number;

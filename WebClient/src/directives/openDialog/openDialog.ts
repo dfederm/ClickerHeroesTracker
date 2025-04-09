@@ -3,6 +3,7 @@ import { NgbModal, NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
 
 @Directive({
     selector: "[openDialog]",
+    standalone: true,
 })
 export class OpenDialogDirective {
     @Input()

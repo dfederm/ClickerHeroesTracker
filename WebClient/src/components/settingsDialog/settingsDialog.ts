@@ -3,11 +3,21 @@ import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
 
 import { SettingsService, PlayStyle, Theme, IUserSettings, GraphSpacingType } from "../../services/settingsService/settingsService";
 import { ChangePasswordDialogComponent } from "../changePasswordDialog/changePasswordDialog";
-import { NgxSpinnerService } from "ngx-spinner";
+import { NgxSpinnerModule, NgxSpinnerService } from "ngx-spinner";
+import { OpenDialogDirective } from "src/directives/openDialog/openDialog";
+import { FormsModule } from "@angular/forms";
+import { TitleCasePipe } from "@angular/common";
 
 @Component({
     selector: "settingsDialog",
     templateUrl: "./settingsDialog.html",
+    imports: [
+        FormsModule,
+        NgxSpinnerModule,
+        OpenDialogDirective,
+        TitleCasePipe,
+    ],
+    standalone: true,
 })
 export class SettingsDialogComponent implements OnInit {
     public error: string;

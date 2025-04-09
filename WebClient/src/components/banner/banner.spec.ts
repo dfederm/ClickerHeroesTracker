@@ -1,4 +1,3 @@
-import { NO_ERRORS_SCHEMA } from "@angular/core";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { By } from "@angular/platform-browser";
 import { BehaviorSubject } from "rxjs";
@@ -18,11 +17,10 @@ describe("BannerComponent", () => {
 
         await TestBed.configureTestingModule(
             {
-                declarations: [BannerComponent],
+                imports: [BannerComponent],
                 providers: [
                     { provide: VersionService, useValue: versionService },
                 ],
-                schemas: [NO_ERRORS_SCHEMA],
             })
             .compileComponents();
 

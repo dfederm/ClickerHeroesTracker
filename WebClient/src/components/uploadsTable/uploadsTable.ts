@@ -1,7 +1,11 @@
 import { Component, OnInit, Input } from "@angular/core";
 import { UserService, IUploadSummaryListResponse } from "../../services/userService/userService";
 import { Decimal } from "decimal.js";
-import { NgxSpinnerService } from "ngx-spinner";
+import { NgxSpinnerModule, NgxSpinnerService } from "ngx-spinner";
+import { NgbPagination } from "@ng-bootstrap/ng-bootstrap";
+import { RouterLink } from "@angular/router";
+import { DatePipe } from "@angular/common";
+import { ExponentialPipe } from "src/pipes/exponentialPipe";
 
 interface IUploadViewModel {
     id: number;
@@ -15,6 +19,14 @@ interface IUploadViewModel {
 @Component({
     selector: "uploadsTable",
     templateUrl: "./uploadsTable.html",
+    imports: [
+      DatePipe,
+      ExponentialPipe,
+      NgbPagination,
+      NgxSpinnerModule,
+      RouterLink,
+    ],
+    standalone: true,
 })
 export class UploadsTableComponent implements OnInit {
     public uploads: IUploadViewModel[];

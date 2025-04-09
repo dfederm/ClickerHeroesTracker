@@ -1,7 +1,6 @@
 import { ComponentFixture, TestBed } from "@angular/core/testing";
-import { ActivatedRoute, Router, Params } from "@angular/router";
-import { FormsModule } from "@angular/forms";
-import { NO_ERRORS_SCHEMA, DebugElement, ChangeDetectorRef, Pipe, PipeTransform } from "@angular/core";
+import { ActivatedRoute, Router, Params, provideRouter, RouterLink } from "@angular/router";
+import { DebugElement, ChangeDetectorRef, Pipe, PipeTransform, Component, Input } from "@angular/core";
 import { By } from "@angular/platform-browser";
 import { BehaviorSubject } from "rxjs";
 import { DatePipe, PercentPipe } from "@angular/common";
@@ -13,6 +12,11 @@ import { AuthenticationService, IUserInfo } from "../../services/authenticationS
 import { UploadService, IUpload } from "../../services/uploadService/uploadService";
 import { SettingsService } from "../../services/settingsService/settingsService";
 import { SavedGame } from "../../models/savedGame";
+import { NgxSpinnerModule } from "ngx-spinner";
+import { AncientSuggestionsComponent } from "../ancientSuggestions/ancientSuggestions";
+import { OutsiderSuggestionsComponent } from "../outsiderSuggestions/outsiderSuggestions";
+import { AscensionZoneComponent } from "../ascensionZone/ascensionZone";
+import { ExponentialPipe } from "src/pipes/exponentialPipe";
 
 describe("UploadComponent", () => {
     let component: UploadComponent;
@@ -30,9 +34,36 @@ describe("UploadComponent", () => {
 
     let settingsSubject = new BehaviorSubject(settings);
 
+    @Component({ selector: "ngx-spinner", template: "", standalone: true })
+    class MockNgxSpinnerComponent {
+        @Input()
+        public fullScreen: boolean;
+    }
+
+    @Component({ selector: "ancientSuggestions", template: "", standalone: true })
+    class MockAncientSuggestionsComponent {
+        @Input()
+        public playStyle: string;
+
+        @Input()
+        public savedGame: SavedGame;
+    }
+
+    @Component({ selector: "outsiderSuggestions", template: "", standalone: true })
+    class MockOutsiderSuggestionsComponent {
+        @Input()
+        public savedGame: SavedGame;
+    }
+
+    @Component({ selector: "ascensionZone", template: "", standalone: true })
+    class MockAscensionZoneComponent {
+        @Input()
+        public savedGame: SavedGame;
+    }
+
     const exponentialPipeTransform = (value: string | Decimal) => "exponentialPipe(" + value + ")";
 
-    @Pipe({ name: 'exponential' })
+    @Pipe({ name: 'exponential', standalone: true })
     class MockExponentialPipe implements PipeTransform {
         public transform = exponentialPipeTransform;
     }
@@ -66,7 +97,6 @@ describe("UploadComponent", () => {
                 };
             }),
         };
-        let router = { navigate: (): void => void 0 };
         routeParams = new BehaviorSubject({ id: 123 });
         let route = { params: routeParams };
         let settingsService = { settings: () => settingsSubject };
@@ -75,26 +105,26 @@ describe("UploadComponent", () => {
 
         await TestBed.configureTestingModule(
             {
-                imports: [FormsModule],
-                declarations: [
+                imports: [
                     UploadComponent,
-                    MockExponentialPipe,
                 ],
                 providers: [
+                    provideRouter([]),
                     { provide: AuthenticationService, useValue: authenticationService },
                     { provide: ActivatedRoute, useValue: route },
-                    { provide: Router, useValue: router },
                     { provide: UploadService, useValue: uploadService },
                     { provide: SettingsService, useValue: settingsService },
                     { provide: ChangeDetectorRef, useValue: changeDetectorRef },
                     { provide: NgbModal, useValue: modalService },
                     DatePipe,
                     PercentPipe,
-                    MockExponentialPipe,
                 ],
-                schemas: [NO_ERRORS_SCHEMA],
             })
             .compileComponents();
+        TestBed.overrideComponent(UploadComponent, {
+            remove: { imports: [ NgxSpinnerModule, AncientSuggestionsComponent, OutsiderSuggestionsComponent, AscensionZoneComponent, ExponentialPipe ]},
+            add: { imports: [ MockNgxSpinnerComponent, MockAncientSuggestionsComponent, MockOutsiderSuggestionsComponent, MockAscensionZoneComponent, MockExponentialPipe ] },
+        });
 
         fixture = TestBed.createComponent(UploadComponent);
         component = fixture.componentInstance;
@@ -199,7 +229,9 @@ describe("UploadComponent", () => {
 
             let userNameItem = items[0];
             let userNameValueElement = userNameItem.query(By.css("a"));
-            expect(userNameValueElement.properties.routerLink).toEqual(`/users/${upload.user.name}`);
+
+            let routerLink = userNameValueElement.injector.get(RouterLink) as RouterLink;
+            expect(routerLink.href).toEqual(`/users/${upload.user.name}`);
             expect(userNameValueElement.nativeElement.classList.contains("text-muted")).toEqual(false);
             expect(getNormalizedTextContent(userNameValueElement)).toEqual(upload.user.name);
 

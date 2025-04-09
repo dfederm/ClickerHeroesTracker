@@ -1,16 +1,23 @@
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
 import { By } from "@angular/platform-browser";
-import { FormsModule } from "@angular/forms";
-import { NO_ERRORS_SCHEMA, DebugElement } from "@angular/core";
+import { Component, DebugElement, Input } from "@angular/core";
 import { BehaviorSubject } from "rxjs";
 
 import { FeedbackDialogComponent } from "./feedbackDialog";
 import { AuthenticationService, IUserInfo } from "../../services/authenticationService/authenticationService";
 import { FeedbackService } from "../../services/feedbackService/feedbackService";
+import { NgxSpinnerModule } from "ngx-spinner";
 
 describe("FeedbackDialogComponent", () => {
     let component: FeedbackDialogComponent;
+
+    @Component({ selector: "ngx-spinner", template: "", standalone: true })
+    class MockNgxSpinnerComponent {
+        @Input()
+        public fullScreen: boolean;
+    }
+
     let fixture: ComponentFixture<FeedbackDialogComponent>;
     let userInfo: BehaviorSubject<IUserInfo>;
 
@@ -35,16 +42,20 @@ describe("FeedbackDialogComponent", () => {
 
         await TestBed.configureTestingModule(
             {
-                imports: [FormsModule],
-                declarations: [FeedbackDialogComponent],
+                imports: [
+                    FeedbackDialogComponent,
+                ],
                 providers: [
                     { provide: AuthenticationService, useValue: authenticationService },
                     { provide: FeedbackService, useValue: feedbackService },
                     { provide: NgbActiveModal, useValue: activeModal },
                 ],
-                schemas: [NO_ERRORS_SCHEMA],
             })
             .compileComponents();
+        TestBed.overrideComponent(FeedbackDialogComponent, {
+            remove: { imports: [ NgxSpinnerModule ]},
+            add: { imports: [ MockNgxSpinnerComponent ] },
+        });
 
         fixture = TestBed.createComponent(FeedbackDialogComponent);
         component = fixture.componentInstance;

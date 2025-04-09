@@ -1,13 +1,25 @@
 import { Component, OnInit } from "@angular/core";
 import { LoggingService } from "../../services/loggingService/loggingService";
-import { NgxSpinnerService } from "ngx-spinner";
+import { NgxSpinnerModule, NgxSpinnerService } from "ngx-spinner";
 
 import { SettingsService, IUserSettings } from "../../services/settingsService/settingsService";
 import { AuthenticationService, IUserInfo } from "../../services/authenticationService/authenticationService";
+import { RouterOutlet } from "@angular/router";
+import { NavbarComponent } from "../navbar/navbar";
+import { BannerComponent } from "../banner/banner";
+import { AdComponent } from "../ad/ad";
 
 @Component({
   selector: "app",
   templateUrl: "./app.html",
+  imports: [
+    AdComponent,
+    BannerComponent,
+    NavbarComponent,
+    NgxSpinnerModule,
+    RouterOutlet,
+  ],
+  standalone: true,
 })
 export class AppComponent implements OnInit {
   public static defaultTheme = "light";
@@ -38,7 +50,7 @@ export class AppComponent implements OnInit {
     // Get the auth headers simply because it forces a wait on fetching the initial auth tokens.
     this.authenticationService
       .getAuthHeaders()
-      .catch(() => void 0) // Swallow errors
+      .catch((): number => void 0) // Swallow errors
       .then(() => {
         this.authenticationService
           .userInfo()

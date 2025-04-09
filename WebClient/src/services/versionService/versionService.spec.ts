@@ -1,8 +1,9 @@
 import { TestBed, fakeAsync, tick, discardPeriodicTasks } from "@angular/core/testing";
-import { HttpClientTestingModule, HttpTestingController } from "@angular/common/http/testing";
+import { HttpTestingController, provideHttpClientTesting } from "@angular/common/http/testing";
 import { HttpErrorHandlerService } from "../httpErrorHandlerService/httpErrorHandlerService";
 
 import { VersionService, IVersion } from "./versionService";
+import { provideHttpClient } from "@angular/common/http";
 
 describe("VersionService", () => {
     let versionService: VersionService;
@@ -13,16 +14,14 @@ describe("VersionService", () => {
             logError: (): void => void 0,
         };
 
-        TestBed.configureTestingModule(
-            {
-                imports: [
-                    HttpClientTestingModule,
-                ],
-                providers: [
-                    VersionService,
-                    { provide: HttpErrorHandlerService, useValue: httpErrorHandlerService },
-                ],
-            });
+        TestBed.configureTestingModule({
+            providers: [
+                VersionService,
+                provideHttpClient(),
+                provideHttpClientTesting(),
+                { provide: HttpErrorHandlerService, useValue: httpErrorHandlerService },
+            ],
+        });
 
         httpMock = TestBed.inject(HttpTestingController);
         versionService = TestBed.inject(VersionService);

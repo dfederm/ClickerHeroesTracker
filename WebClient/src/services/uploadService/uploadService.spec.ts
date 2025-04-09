@@ -1,8 +1,8 @@
 import { TestBed, fakeAsync, tick } from "@angular/core/testing";
-import { HttpClientTestingModule, HttpTestingController } from "@angular/common/http/testing";
+import { HttpTestingController, provideHttpClientTesting } from "@angular/common/http/testing";
 import { BehaviorSubject } from "rxjs";
 import { HttpErrorHandlerService } from "../httpErrorHandlerService/httpErrorHandlerService";
-import { HttpHeaders, HttpErrorResponse } from "@angular/common/http";
+import { HttpHeaders, HttpErrorResponse, provideHttpClient } from "@angular/common/http";
 
 import { UploadService, IUpload } from "./uploadService";
 import { AuthenticationService, IUserInfo } from "../authenticationService/authenticationService";
@@ -39,20 +39,17 @@ describe("UploadService", () => {
         let loggingService = { logEvent: (): void => void 0 };
         let userService = { getUser: (): void => void 0 };
 
-        TestBed.configureTestingModule(
-            {
-                imports: [
-                    HttpClientTestingModule,
-                ],
-                providers:
-                    [
-                        UploadService,
-                        { provide: AuthenticationService, useValue: authenticationService },
-                        { provide: HttpErrorHandlerService, useValue: httpErrorHandlerService },
-                        { provide: LoggingService, useValue: loggingService },
-                        { provide: UserService, useValue: userService },
-                    ],
-            });
+        TestBed.configureTestingModule({
+            providers: [
+                UploadService,
+                provideHttpClient(),
+                provideHttpClientTesting(),
+                { provide: AuthenticationService, useValue: authenticationService },
+                { provide: HttpErrorHandlerService, useValue: httpErrorHandlerService },
+                { provide: LoggingService, useValue: loggingService },
+                { provide: UserService, useValue: userService },
+            ],
+        });
 
         uploadService = TestBed.inject(UploadService);
         httpMock = TestBed.inject(HttpTestingController);

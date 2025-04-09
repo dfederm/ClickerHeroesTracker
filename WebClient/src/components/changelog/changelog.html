@@ -1,60 +1,85 @@
-<p *ngIf="isError"
-   class="alert alert-danger">
-  There was a problem getting the site news
-</p>
+@if (isError) {
+  <p
+    class="alert alert-danger">
+    There was a problem getting the site news
+  </p>
+}
 <ngx-spinner name="changelog"
-             [fullScreen]="false"
-             type="ball-pulse"></ngx-spinner>
+  [fullScreen]="false"
+type="ball-pulse"></ngx-spinner>
 
-<button *ngIf="canEdit"
-        class="btn btn-primary"
-        (click)="addSection()">
-  Add
-</button>
-<div *ngFor="let section of sections">
-  <h3 *ngIf="section.date && !section.isNew">
-    {{ section.date | date:'shortDate' }}
-    <button *ngIf="canEdit && !section.editable"
+@if (canEdit) {
+  <button
+    class="btn btn-primary"
+    (click)="addSection()">
+    Add
+  </button>
+}
+@for (section of sections; track section) {
+  <div>
+    @if (section.date && !section.isNew) {
+      <h3>
+        {{ section.date | date:'shortDate' }}
+        @if (canEdit && !section.editable) {
+          <button
             class="btn btn-primary"
             (click)="section.editable = true">
-      Edit
-    </button>
-    <button *ngIf="canEdit && !section.editable"
+            Edit
+          </button>
+        }
+        @if (canEdit && !section.editable) {
+          <button
             class="btn btn-danger"
             (click)="delete(section)">
-      Delete
-    </button>
-  </h3>
-  <h3 *ngIf="section.isNew">
-    <input type="text"
-           class="form-control form-control-lg"
-           [(ngModel)]="section.date" />
-  </h3>
-  <ul>
-    <li *ngFor="let entry of section.entries; index as i">
-      <span *ngIf="!section.editable"
-            [innerHTML]="entry.message"></span>
-      <textarea type="text"
-                *ngIf="section.editable"
+            Delete
+          </button>
+        }
+      </h3>
+    }
+    @if (section.isNew) {
+      <h3>
+        <input type="text"
+          class="form-control form-control-lg"
+          [(ngModel)]="section.date" />
+        </h3>
+      }
+      <ul>
+        @for (entry of section.entries; track entry; let i = $index) {
+          <li>
+            @if (!section.editable) {
+              <span
+              [innerHTML]="entry.message"></span>
+            }
+            @if (section.editable) {
+              <textarea type="text"
                 rows="2"
                 class="form-control"
-                [(ngModel)]="section.entries[i].message"></textarea>
-    </li>
-    <li *ngIf="section.editable">
-      <button class="btn btn-primary"
+              [(ngModel)]="section.entries[i].message"></textarea>
+            }
+          </li>
+        }
+        @if (section.editable) {
+          <li>
+            <button class="btn btn-primary"
               (click)="addMessage(section)">
-        Add
-      </button>
-    </li>
-  </ul>
-  <button *ngIf="section.editable"
+              Add
+            </button>
+          </li>
+        }
+      </ul>
+      @if (section.editable) {
+        <button
           class="btn btn-primary"
           (click)="save(section)">
-    Save
-  </button>
-  <button *ngIf="section.editable"
+          Save
+        </button>
+      }
+      @if (section.editable) {
+        <button
           class="btn btn-primary"
           (click)="section.editable = false">
-    Cancel
-  </button>
-</div>
+          Cancel
+        </button>
+      }
+    </div>
+  }

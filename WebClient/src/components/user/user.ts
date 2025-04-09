@@ -7,8 +7,10 @@ import { AuthenticationService, IUserInfo } from "../../services/authenticationS
 import { Decimal } from "decimal.js";
 import { ChartDataset, ChartOptions, TooltipItem } from "chart.js";
 import 'chartjs-adapter-date-fns';
-import { ActivatedRoute } from "@angular/router";
-import { NgxSpinnerService } from "ngx-spinner";
+import { ActivatedRoute, RouterLink } from "@angular/router";
+import { NgxSpinnerModule, NgxSpinnerService } from "ngx-spinner";
+import { NgChartsModule } from "ng2-charts";
+import { UploadsTableComponent } from "../uploadsTable/uploadsTable";
 
 interface IProgressViewModel {
   datasets: ChartDataset<"line">[];
@@ -18,6 +20,13 @@ interface IProgressViewModel {
 @Component({
   selector: "user",
   templateUrl: "./user.html",
+  imports: [
+    NgChartsModule,
+    NgxSpinnerModule,
+    RouterLink,
+    UploadsTableComponent,
+  ],
+  standalone: true,
 })
 export class UserComponent implements OnInit {
   public userName: string;

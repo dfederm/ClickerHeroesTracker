@@ -14,11 +14,13 @@
         </tr>
     </thead>
     <tbody>
-        <tr *ngFor="let outsider of outsiders">
-            <td>{{ outsider.name }}:</td>
-            <td class="text-end">{{ outsider.currentLevel | exponential }}</td>
-            <td class="text-end">{{ outsider.suggestedLevel | exponential }}</td>
-        </tr>
+        @for (outsider of outsiders; track outsider) {
+            <tr>
+                <td>{{ outsider.name }}:</td>
+                <td class="text-end">{{ outsider.currentLevel | exponential }}</td>
+                <td class="text-end">{{ outsider.suggestedLevel | exponential }}</td>
+            </tr>
+        }
     </tbody>
     <tfoot>
         <tr>

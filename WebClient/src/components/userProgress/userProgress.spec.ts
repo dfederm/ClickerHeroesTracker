@@ -1,7 +1,7 @@
-import { NO_ERRORS_SCHEMA, LOCALE_ID } from "@angular/core";
+import { Component, Directive, Input, LOCALE_ID } from "@angular/core";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { By } from "@angular/platform-browser";
-import { ActivatedRoute, NavigationExtras, Params, Router } from "@angular/router";
+import { ActivatedRoute, NavigationExtras, Params, provideRouter, Router } from "@angular/router";
 import { BehaviorSubject } from "rxjs";
 import Decimal from "decimal.js";
 
@@ -11,6 +11,8 @@ import { ChartDataset, ChartOptions, ScatterDataPoint } from "chart.js";
 import { SettingsService } from "../../services/settingsService/settingsService";
 import { ExponentialPipe } from "../../pipes/exponentialPipe";
 import { PercentPipe } from "@angular/common";
+import { NgxSpinnerModule } from "ngx-spinner";
+import { NgChartsModule } from "ng2-charts";
 
 describe("UserProgressComponent", () => {
     let component: UserProgressComponent;
@@ -18,6 +20,27 @@ describe("UserProgressComponent", () => {
     let routeParams: BehaviorSubject<Params>;
     let queryParams: BehaviorSubject<Params>;
 
+    @Component({ selector: "ngx-spinner", template: "", standalone: true })
+    class MockNgxSpinnerComponent {
+        @Input()
+        public fullScreen: boolean;
+    }
+
+    @Directive({
+        selector: "canvas[baseChart]",
+        standalone: true,
+    })
+    class MockBaseChartDirective {
+        @Input()
+        public type: string;
+
+        @Input()
+        public datasets: ChartDataset<"line">[];
+
+        @Input()
+        public options: ChartOptions<"line">;
+    }
+    
     let progress: IProgressData = {
         soulsSpentData: createData(0),
         titanDamageData: createData(1),
@@ -79,30 +102,34 @@ describe("UserProgressComponent", () => {
         queryParams = new BehaviorSubject({});
         let route = { params: routeParams, queryParams: queryParams };
 
-        let router = {
-            navigate: (_commands: any[], extras?: NavigationExtras) => {
-                if (extras.queryParams) {
-                    queryParams.next(extras.queryParams);
-                }
-            }
-        };
-
         await TestBed.configureTestingModule(
             {
-                declarations: [UserProgressComponent],
+                imports: [UserProgressComponent],
                 providers: [
+                    provideRouter([]),
                     { provide: ActivatedRoute, useValue: route },
-                    { provide: Router, useValue: router },
                     { provide: UserService, useValue: userService },
                     { provide: SettingsService, useValue: settingsService },
                     { provide: LOCALE_ID, useValue: locale },
                 ],
-                schemas: [NO_ERRORS_SCHEMA],
             })
             .compileComponents();
+        TestBed.overrideComponent(UserProgressComponent, {
+            remove: { imports: [ NgxSpinnerModule, NgChartsModule ]},
+            add: { imports: [ MockNgxSpinnerComponent, MockBaseChartDirective ] },
+        });
 
         fixture = TestBed.createComponent(UserProgressComponent);
         component = fixture.componentInstance;
+
+        let router = TestBed.inject(Router);
+        spyOn(router, "navigate").and.callFake((_commands: any[], extras?: NavigationExtras) => {
+            if (extras.queryParams) {
+                queryParams.next(extras.queryParams);
+            }
+
+            return Promise.resolve(true);
+        });
     });
 
     describe("Range Selector", () => {
@@ -193,26 +220,26 @@ describe("UserProgressComponent", () => {
             let warning = fixture.debugElement.query(By.css(".alert-warning"));
             expect(warning).toBeNull();
 
-            let charts = fixture.debugElement.queryAll(By.css("canvas"));
+            let charts = fixture.debugElement.queryAll(By.directive(MockBaseChartDirective));
             expect(charts.length).toEqual(16);
 
             for (let i = 0; i < charts.length; i++) {
                 let chart = charts[i];
 
                 expect(chart).not.toBeNull();
-                expect(chart.attributes.baseChart).toBeDefined();
-                expect(chart.attributes.height).toEqual("235");
-                expect(chart.properties.type).toEqual("line");
+                expect(chart.properties.height).toEqual(235);
+    
+                let chartDirective = chart.injector.get(MockBaseChartDirective) as MockBaseChartDirective;
+                expect(chartDirective).not.toBeNull();
+                expect(chartDirective.type).toEqual("line");
 
-                let options: ChartOptions<"line"> = chart.properties.options;
-                expect(options).toBeTruthy();
-                expect(options.plugins.title.text).toEqual(expectedChartOrder[i].title);
+                expect(chartDirective.options).toBeTruthy();
+                expect(chartDirective.options.plugins.title.text).toEqual(expectedChartOrder[i].title);
 
-                let datasets: ChartDataset[] = chart.properties.datasets;
-                expect(datasets).toBeTruthy();
-                expect(datasets.length).toEqual(1);
+                expect(chartDirective.datasets).toBeTruthy();
+                expect(chartDirective.datasets.length).toEqual(1);
 
-                let data = datasets[0].data as ScatterDataPoint[];
+                let data = chartDirective.datasets[0].data as ScatterDataPoint[];
                 let expectedData = expectedChartOrder[i].data;
                 let isLogarithmic = expectedChartOrder[i].isLogarithmic;
                 let isPercent = expectedChartOrder[i].isPercent;
@@ -221,7 +248,7 @@ describe("UserProgressComponent", () => {
                 for (let j = 0; j < data.length; j++) {
                     let expectedDate = new Date(dataKeys[j]);
                     expect(data[j].x).toEqual(expectedDate.getTime());
-                    expect((options.plugins.tooltip.callbacks.title as Function)([{ parsed: { x: dataKeys[j] } }])).toEqual(expectedDate.toLocaleString());
+                    expect((chartDirective.options.plugins.tooltip.callbacks.title as Function)([{ parsed: { x: dataKeys[j] } }])).toEqual(expectedDate.toLocaleString());
 
                     // When logarithmic, the value we plot is actually the log of the value to fake log scale
                     let rawExpectedValue = expectedData[dataKeys[j]];
@@ -236,12 +263,12 @@ describe("UserProgressComponent", () => {
                     let expectedLabel = isPercent
                         ? percentPipe.transform(expectedValue / 100, "1.1-3")
                         : ExponentialPipe.formatNumber(expectedLabelNum, settings);
-                    expect((options.plugins.tooltip.callbacks.label as Function)({ parsed: { y: expectedValue } })).toEqual(expectedLabel);
-                    expect((<any>options.scales.yAxis.ticks).callback(expectedValue, null, null)).toEqual(expectedLabel);
+                    expect((chartDirective.options.plugins.tooltip.callbacks.label as Function)({ parsed: { y: expectedValue } })).toEqual(expectedLabel);
+                    expect((<any>chartDirective.options.scales.yAxis.ticks).callback(expectedValue, null, null)).toEqual(expectedLabel);
                 }
 
                 // Linear even when logarithmic since we're manually managing log scale
-                expect(options.scales.yAxis.type).toEqual("linear");
+                expect(chartDirective.options.scales.yAxis.type).toEqual("linear");
             }
         });
 

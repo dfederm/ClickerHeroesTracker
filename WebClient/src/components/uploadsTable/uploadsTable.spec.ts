@@ -1,13 +1,17 @@
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { By } from "@angular/platform-browser";
 import { DatePipe } from "@angular/common";
-import { NO_ERRORS_SCHEMA, ChangeDetectorRef, Pipe, PipeTransform } from "@angular/core";
+import { ChangeDetectorRef, Component, Input, Pipe, PipeTransform } from "@angular/core";
 import { Decimal } from "decimal.js";
 
 import { UploadsTableComponent } from "./uploadsTable";
 import { UserService, IUploadSummaryListResponse, IUploadSummary } from "../../services/userService/userService";
 import { SettingsService } from "../../services/settingsService/settingsService";
 import { BehaviorSubject } from "rxjs";
+import { ExponentialPipe } from "src/pipes/exponentialPipe";
+import { provideRouter, RouterLink } from "@angular/router";
+import { NgbPagination } from "@ng-bootstrap/ng-bootstrap";
+import { NgxSpinnerModule } from "ngx-spinner";
 
 describe("UploadsTableComponent", () => {
     let component: UploadsTableComponent;
@@ -28,13 +32,43 @@ describe("UploadsTableComponent", () => {
         });
     }
 
+    @Component({ selector: "ngx-spinner", template: "", standalone: true })
+    class MockNgxSpinnerComponent {
+        @Input()
+        public fullScreen: boolean;
+    }
+
     const exponentialPipeTransform = (value: string | Decimal | number) => "exponentialPipe(" + value + ")";
 
-    @Pipe({ name: 'exponential' })
+    @Pipe({ name: 'exponential', standalone: true })
     class MockExponentialPipe implements PipeTransform {
         public transform = exponentialPipeTransform;
     }
 
+    @Component({ selector: "ngb-pagination", template: "", standalone: true })
+    class MockNgbPaginationComponent {
+        @Input()
+        public collectionSize: number;
+
+        @Input()
+        public page: number;
+
+        @Input()
+        public pageSize: number;
+
+        @Input()
+        public maxSize: number;
+
+        @Input()
+        public rotate: boolean;
+
+        @Input()
+        public ellipses: boolean;
+
+        @Input()
+        public boundaryLinks: boolean;
+    }
+    
     beforeEach(async () => {
         let userService = {
             getUploads(userName: string, page: number, count: number): Promise<IUploadSummaryListResponse> {
@@ -55,20 +89,22 @@ describe("UploadsTableComponent", () => {
 
         await TestBed.configureTestingModule(
             {
-                declarations: [
+                imports: [
                     UploadsTableComponent,
-                    MockExponentialPipe,
                 ],
                 providers: [
+                    provideRouter([]),
                     { provide: UserService, useValue: userService },
                     { provide: SettingsService, useValue: settingsService },
                     { provide: ChangeDetectorRef, useValue: changeDetectorRef },
                     DatePipe,
-                    MockExponentialPipe,
                 ],
-                schemas: [NO_ERRORS_SCHEMA],
             })
             .compileComponents();
+        TestBed.overrideComponent(UploadsTableComponent, {
+            remove: { imports: [NgxSpinnerModule, ExponentialPipe, NgbPagination] },
+            add: { imports: [MockNgxSpinnerComponent, MockExponentialPipe, MockNgbPaginationComponent] },
+        });
 
         fixture = TestBed.createComponent(UploadsTableComponent);
         component = fixture.componentInstance;
@@ -163,21 +199,22 @@ describe("UploadsTableComponent", () => {
 
             let viewCell = cells[4];
             let link = viewCell.query(By.css("a"));
-            expect(link.properties.routerLink).toEqual(`/uploads/${expectedUpload.id}`);
+            let routerLink = link.injector.get(RouterLink) as RouterLink;
+            expect(routerLink.href).toEqual(`/uploads/${expectedUpload.id}`);
         }
 
-        let pagination = fixture.debugElement.query(By.css("ngb-pagination"));
+        let pagination = fixture.debugElement.query(By.css("ngb-pagination"))?.componentInstance as MockNgbPaginationComponent;
         if (component.paginate) {
             expect(pagination).not.toBeNull();
-            expect(pagination.properties.collectionSize).toEqual(uploads.length);
-            expect(pagination.properties.page).toEqual(page);
-            expect(pagination.properties.pageSize).toEqual(component.count);
-            expect(pagination.properties.maxSize).toEqual(5);
-            expect(pagination.properties.rotate).toEqual(true);
-            expect(pagination.properties.ellipses).toEqual(false);
-            expect(pagination.properties.boundaryLinks).toEqual(true);
+            expect(pagination.collectionSize).toEqual(uploads.length);
+            expect(pagination.page).toEqual(page);
+            expect(pagination.pageSize).toEqual(component.count);
+            expect(pagination.maxSize).toEqual(5);
+            expect(pagination.rotate).toEqual(true);
+            expect(pagination.ellipses).toEqual(false);
+            expect(pagination.boundaryLinks).toEqual(true);
         } else {
-            expect(pagination).toBeNull();
+            expect(pagination).toBeUndefined();
         }
     }
 });

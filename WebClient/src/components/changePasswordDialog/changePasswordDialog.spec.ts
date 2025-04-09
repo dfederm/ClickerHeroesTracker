@@ -1,18 +1,37 @@
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { By } from "@angular/platform-browser";
-import { FormsModule } from "@angular/forms";
 import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
-import { DebugElement, NO_ERRORS_SCHEMA } from "@angular/core";
+import { Component, DebugElement, Input } from "@angular/core";
 import { BehaviorSubject } from "rxjs";
-import { ValidateEqualModule } from "ng-validate-equal";
 
 import { ChangePasswordDialogComponent } from "./changePasswordDialog";
 import { AuthenticationService, IUserInfo } from "../../services/authenticationService/authenticationService";
 import { UserService, IUserLogins } from "../../services/userService/userService";
-import { NgxSpinnerService } from "ngx-spinner";
+import { NgxSpinnerModule, NgxSpinnerService } from "ngx-spinner";
+import { ExternalLoginsComponent } from "../externalLogins/externalLogins";
 
 describe("ChangePasswordDialogComponent", () => {
     let fixture: ComponentFixture<ChangePasswordDialogComponent>;
+
+    @Component({
+        selector: "ngx-spinner",
+        template: "",
+        standalone: true,
+    })
+    class MockNgxSpinnerComponent {
+        @Input()
+        public fullScreen: boolean;
+    }
+
+    @Component({
+        selector: "externalLogins",
+        template: "",
+        standalone: true,
+    })
+    class MockExternalLoginsComponent {
+        @Input()
+        public isManageMode: boolean;
+    }
 
     const loggedInUser: IUserInfo = {
         isLoggedIn: true,
@@ -48,19 +67,20 @@ describe("ChangePasswordDialogComponent", () => {
         await TestBed.configureTestingModule(
             {
                 imports: [
-                    FormsModule,
-                    ValidateEqualModule,
+                    ChangePasswordDialogComponent,
                 ],
-                declarations: [ChangePasswordDialogComponent],
                 providers: [
                     { provide: AuthenticationService, useValue: authenticationService },
                     { provide: UserService, useValue: userService },
                     { provide: NgbActiveModal, useValue: activeModal },
                     { provide: NgxSpinnerService, useValue: spinnerService },
                 ],
-                schemas: [NO_ERRORS_SCHEMA],
             })
             .compileComponents();
+        TestBed.overrideComponent(ChangePasswordDialogComponent, {
+            remove: { imports: [NgxSpinnerModule, ExternalLoginsComponent]},
+            add: { imports: [MockNgxSpinnerComponent, MockExternalLoginsComponent]},
+        });
 
         fixture = TestBed.createComponent(ChangePasswordDialogComponent);
     });

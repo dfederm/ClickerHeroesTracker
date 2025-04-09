@@ -1,10 +1,15 @@
 import { Component, OnInit, OnDestroy, ChangeDetectorRef } from "@angular/core";
 import { Router, NavigationEnd } from "@angular/router";
+import { AdsenseModule } from "ng2-adsense";
 import { Subscription } from "rxjs";
 
 @Component({
     selector: "ad",
     templateUrl: "./ad.html",
+    imports: [
+        AdsenseModule,
+    ],
+    standalone: true,
 })
 export class AdComponent implements OnInit, OnDestroy {
     public rerender = false;

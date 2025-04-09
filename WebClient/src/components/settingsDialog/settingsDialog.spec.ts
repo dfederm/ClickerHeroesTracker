@@ -1,16 +1,23 @@
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { FormsModule } from "@angular/forms";
 import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
-import { NO_ERRORS_SCHEMA } from "@angular/core";
 import { BehaviorSubject } from "rxjs";
 import { By } from "@angular/platform-browser";
 
 import { SettingsDialogComponent } from "./settingsDialog";
 import { SettingsService, IUserSettings } from "../../services/settingsService/settingsService";
+import { NgxSpinnerModule } from "ngx-spinner";
+import { Component, Input } from "@angular/core";
 
 describe("SettingsDialogComponent", () => {
     let component: SettingsDialogComponent;
     let fixture: ComponentFixture<SettingsDialogComponent>;
+
+    @Component({ selector: "ngx-spinner", template: "", standalone: true })
+    class MockNgxSpinnerComponent {
+        @Input()
+        public fullScreen: boolean;
+    }
 
     // "Fully expanded" settings, ie, show all possible inputs
     const settings: IUserSettings = {
@@ -38,18 +45,19 @@ describe("SettingsDialogComponent", () => {
         await TestBed.configureTestingModule(
             {
                 imports: [
-                    FormsModule,
-                ],
-                declarations: [
                     SettingsDialogComponent,
+                    FormsModule,
                 ],
                 providers: [
                     { provide: SettingsService, useValue: settingsService },
                     { provide: NgbActiveModal, useValue: activeModal },
                 ],
-                schemas: [NO_ERRORS_SCHEMA],
             })
             .compileComponents();
+        TestBed.overrideComponent(SettingsDialogComponent, {
+            remove: { imports: [ NgxSpinnerModule ]},
+            add: { imports: [ MockNgxSpinnerComponent ] },
+        });
 
         fixture = TestBed.createComponent(SettingsDialogComponent);
         component = fixture.componentInstance;

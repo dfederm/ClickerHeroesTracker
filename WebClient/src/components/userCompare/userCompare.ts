@@ -1,5 +1,5 @@
 import { Component, OnInit } from "@angular/core";
-import { ActivatedRoute, Params, Router } from "@angular/router";
+import { ActivatedRoute, Params, Router, RouterLink } from "@angular/router";
 import { UserService, IProgressData } from "../../services/userService/userService";
 import { SettingsService, IUserSettings } from "../../services/settingsService/settingsService";
 
@@ -7,7 +7,9 @@ import { Decimal } from "decimal.js";
 import { ChartDataset, ChartOptions, TooltipItem } from "chart.js";
 import 'chartjs-adapter-date-fns';
 import { ExponentialPipe } from "../../pipes/exponentialPipe";
-import { NgxSpinnerService } from "ngx-spinner";
+import { NgxSpinnerModule, NgxSpinnerService } from "ngx-spinner";
+import { NgChartsModule } from "ng2-charts";
+import { NgClass } from "@angular/common";
 
 interface IChartViewModel {
     isProminent: boolean;
@@ -18,6 +20,13 @@ interface IChartViewModel {
 @Component({
     selector: "userCompare",
     templateUrl: "./userCompare.html",
+    imports: [
+        NgChartsModule,
+        NgClass,
+        NgxSpinnerModule,
+        RouterLink,
+    ],
+    standalone: true,
 })
 export class UserCompareComponent implements OnInit {
     private static readonly timeRanges = [

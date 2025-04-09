@@ -1,19 +1,31 @@
-import { NO_ERRORS_SCHEMA } from "@angular/core";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { By } from "@angular/platform-browser";
 
 import { NewsComponent } from "./news";
+import { Component, Input } from "@angular/core";
+import { ChangelogComponent } from "../changelog/changelog";
 
 describe("NewsComponent", () => {
     let fixture: ComponentFixture<NewsComponent>;
 
+    @Component({ selector: "changelog", template: "", standalone: true })
+    class MockChangelogComponent {
+        @Input()
+        public showDates: boolean;
+    }
+
     beforeEach(async () => {
         await TestBed.configureTestingModule(
             {
-                declarations: [NewsComponent],
-                schemas: [NO_ERRORS_SCHEMA],
+                imports: [
+                    NewsComponent,
+                ],
             })
             .compileComponents();
+        TestBed.overrideComponent(NewsComponent, {
+            remove: { imports: [ ChangelogComponent ]},
+            add: { imports: [ MockChangelogComponent ] },
+        });
 
         fixture = TestBed.createComponent(NewsComponent);
     });
@@ -24,8 +36,8 @@ describe("NewsComponent", () => {
         let changelogContainer = fixture.debugElement.query(By.css(".container"));
         expect(changelogContainer).not.toBeNull();
 
-        let changelog = changelogContainer.query(By.css("changelog"));
+        let changelog = changelogContainer.query(By.css("changelog"))?.componentInstance as MockChangelogComponent;
         expect(changelog).not.toBeNull();
-        expect(changelog.properties.showDates).toEqual(true);
+        expect(changelog.showDates).toEqual(true);
     });
 });

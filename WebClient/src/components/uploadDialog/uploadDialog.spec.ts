@@ -2,7 +2,7 @@ import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
 import { By } from "@angular/platform-browser";
 import { FormsModule } from "@angular/forms";
-import { NO_ERRORS_SCHEMA, DebugElement } from "@angular/core";
+import { Component, DebugElement, Input } from "@angular/core";
 import { HttpErrorResponse } from "@angular/common/http";
 import { Router } from "@angular/router";
 import { BehaviorSubject } from "rxjs";
@@ -11,12 +11,19 @@ import { UploadDialogComponent } from "./uploadDialog";
 import { AuthenticationService, IUserInfo } from "../../services/authenticationService/authenticationService";
 import { UploadService } from "../../services/uploadService/uploadService";
 import { SettingsService } from "../../services/settingsService/settingsService";
+import { NgxSpinnerModule } from "ngx-spinner";
 
 describe("UploadDialogComponent", () => {
     let component: UploadDialogComponent;
     let fixture: ComponentFixture<UploadDialogComponent>;
     let userInfo: BehaviorSubject<IUserInfo>;
 
+    @Component({ selector: "ngx-spinner", template: "", standalone: true })
+    class MockNgxSpinnerComponent {
+        @Input()
+        public fullScreen: boolean;
+    }
+    
     const loggedInUser: IUserInfo = {
         isLoggedIn: true,
         id: "someId",
@@ -43,8 +50,10 @@ describe("UploadDialogComponent", () => {
 
         await TestBed.configureTestingModule(
             {
-                imports: [FormsModule],
-                declarations: [UploadDialogComponent],
+                imports: [
+                    FormsModule,
+                    UploadDialogComponent,
+                ],
                 providers: [
                     { provide: AuthenticationService, useValue: authenticationService },
                     { provide: UploadService, useValue: uploadService },
@@ -52,9 +61,12 @@ describe("UploadDialogComponent", () => {
                     { provide: NgbActiveModal, useValue: activeModal },
                     { provide: Router, useValue: router },
                 ],
-                schemas: [NO_ERRORS_SCHEMA],
             })
             .compileComponents();
+        TestBed.overrideComponent(UploadDialogComponent, {
+            remove: { imports: [ NgxSpinnerModule ]},
+            add: { imports: [ MockNgxSpinnerComponent ] },
+        });
 
         fixture = TestBed.createComponent(UploadDialogComponent);
         component = fixture.componentInstance;
