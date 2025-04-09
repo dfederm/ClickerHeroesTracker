@@ -13,7 +13,7 @@ import { IUser } from "../../models";
 import { NgxSpinnerModule, NgxSpinnerService } from "ngx-spinner";
 import { Component, Directive, Input } from "@angular/core";
 import { UploadsTableComponent } from "../uploadsTable/uploadsTable";
-import { NgChartsModule } from "ng2-charts";
+import { BaseChartDirective } from "ng2-charts";
 
 describe("UserComponent", () => {
     let fixture: ComponentFixture<UserComponent>;
@@ -139,7 +139,7 @@ describe("UserComponent", () => {
             })
             .compileComponents();
         TestBed.overrideComponent(UserComponent, {
-            remove: { imports: [ NgxSpinnerModule, UploadsTableComponent, NgChartsModule ]},
+            remove: { imports: [ NgxSpinnerModule, UploadsTableComponent, BaseChartDirective ]},
             add: { imports: [ MockNgxSpinnerComponent, MockUploadsTableComponent, MockBaseChartDirective ] },
         });
 

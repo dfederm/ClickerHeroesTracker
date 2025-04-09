@@ -9,7 +9,7 @@ import { SavedGame } from "../../models/savedGame";
 import { NgxSpinnerModule, NgxSpinnerService } from "ngx-spinner";
 import { AscensionZoneComponent } from "../ascensionZone/ascensionZone";
 import { ExponentialPipe } from "src/pipes/exponentialPipe";
-import { DatePipe, NgTemplateOutlet, PercentPipe, TitleCasePipe } from "@angular/common";
+import { DatePipe, PercentPipe, TitleCasePipe } from "@angular/common";
 import { OutsiderSuggestionsComponent } from "../outsiderSuggestions/outsiderSuggestions";
 import { AncientSuggestionsComponent } from "../ancientSuggestions/ancientSuggestions";
 import { ClipboardModule } from "ngx-clipboard";
@@ -23,7 +23,6 @@ import { ClipboardModule } from "ngx-clipboard";
         ClipboardModule,
         DatePipe,
         ExponentialPipe,
-        NgTemplateOutlet,
         NgbNavModule,
         NgxSpinnerModule,
         OutsiderSuggestionsComponent,

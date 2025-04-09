@@ -25,6 +25,7 @@ import { AdsenseModule } from 'ng2-adsense';
 import { ValidateEqualModule } from 'ng-validate-equal';
 import { NgxSpinnerModule } from 'ngx-spinner';
 import { AppComponent } from './components/app/app';
+import { provideCharts, withDefaultRegisterables } from 'ng2-charts';
 
 // Custom url matching for legacy calculation urls. Angular doesn't have great built-in rules for this.
 // This is an exported function because Angular AOT is terrible and can't handle it otherwise.
@@ -92,5 +93,6 @@ bootstrapApplication(AppComponent, {
         provideAnimations(),
         provideRouter(routes),
         provideHttpClient(withInterceptorsFromDi()),
+        provideCharts(withDefaultRegisterables()),
     ]
 }).catch(err => console.error(err));

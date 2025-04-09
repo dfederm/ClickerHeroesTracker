@@ -12,7 +12,7 @@ import { SettingsService } from "../../services/settingsService/settingsService"
 import { ExponentialPipe } from "../../pipes/exponentialPipe";
 import { PercentPipe } from "@angular/common";
 import { NgxSpinnerModule } from "ngx-spinner";
-import { NgChartsModule } from "ng2-charts";
+import { BaseChartDirective } from "ng2-charts";
 
 describe("UserProgressComponent", () => {
     let component: UserProgressComponent;
@@ -114,7 +114,7 @@ describe("UserProgressComponent", () => {
             })
             .compileComponents();
         TestBed.overrideComponent(UserProgressComponent, {
-            remove: { imports: [ NgxSpinnerModule, NgChartsModule ]},
+            remove: { imports: [ NgxSpinnerModule, BaseChartDirective ]},
             add: { imports: [ MockNgxSpinnerComponent, MockBaseChartDirective ] },
         });
 

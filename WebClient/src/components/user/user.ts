@@ -9,7 +9,7 @@ import { ChartDataset, ChartOptions, TooltipItem } from "chart.js";
 import 'chartjs-adapter-date-fns';
 import { ActivatedRoute, RouterLink } from "@angular/router";
 import { NgxSpinnerModule, NgxSpinnerService } from "ngx-spinner";
-import { NgChartsModule } from "ng2-charts";
+import { BaseChartDirective } from "ng2-charts";
 import { UploadsTableComponent } from "../uploadsTable/uploadsTable";
 
 interface IProgressViewModel {
@@ -21,7 +21,7 @@ interface IProgressViewModel {
     selector: "user",
     templateUrl: "./user.html",
     imports: [
-        NgChartsModule,
+      BaseChartDirective,
         NgxSpinnerModule,
         RouterLink,
         UploadsTableComponent,
