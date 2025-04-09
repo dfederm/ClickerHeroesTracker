@@ -2,7 +2,7 @@ import { enableProdMode, ErrorHandler, importProvidersFrom } from '@angular/core
 
 import { environment } from './environments/environment';
 import { ErrorHandlerService } from './services/errorHandlerService/errorHandlerService';
-import { HTTP_INTERCEPTORS, HttpClientModule } from '@angular/common/http';
+import { HTTP_INTERCEPTORS, provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import { DeveloperHttpInterceptor } from './services/developerHttpInterceptor/developerHttpInterceptor';
 import { BrowserModule, bootstrapApplication } from '@angular/platform-browser';
 import { provideAnimations } from '@angular/platform-browser/animations';
@@ -84,12 +84,13 @@ if (environment.production) {
 
 bootstrapApplication(AppComponent, {
     providers: [
-        importProvidersFrom(BrowserModule, FormsModule, HttpClientModule, NgbModule, ClipboardModule, AdsenseModule.forRoot(), ValidateEqualModule, NgxSpinnerModule),
+        importProvidersFrom(BrowserModule, FormsModule, NgbModule, ClipboardModule, AdsenseModule.forRoot(), ValidateEqualModule, NgxSpinnerModule),
         { provide: ErrorHandler, useClass: ErrorHandlerService },
         ...(environment.production ? [] : [
             { provide: HTTP_INTERCEPTORS, useClass: DeveloperHttpInterceptor, multi: true },
         ]),
         provideAnimations(),
         provideRouter(routes),
+        provideHttpClient(withInterceptorsFromDi()),
     ]
 }).catch(err => console.error(err));
