@@ -1,7 +1,9 @@
-<ngb-alert *ngIf="showReloadBanner"
-           [type]="'info'"
-           [dismissible]="false">
+@if (showReloadBanner) {
+  <ngb-alert
+    [type]="'info'"
+    [dismissible]="false">
     The site has an update!
     <a href="#"
-       (click)="reload($event)">Refresh</a>
-</ngb-alert>
+    (click)="reload($event)">Refresh</a>
+  </ngb-alert>
+}

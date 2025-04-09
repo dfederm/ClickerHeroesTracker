@@ -1,7 +1,7 @@
 import { TestBed, fakeAsync, tick } from "@angular/core/testing";
-import { HttpClientTestingModule, HttpTestingController } from "@angular/common/http/testing";
+import { HttpTestingController, provideHttpClientTesting } from "@angular/common/http/testing";
 import { HttpErrorHandlerService } from "../httpErrorHandlerService/httpErrorHandlerService";
-import { HttpHeaders, HttpErrorResponse } from "@angular/common/http";
+import { HttpHeaders, HttpErrorResponse, provideHttpClient } from "@angular/common/http";
 
 import { UserService, IProgressData, IFollowsData, IUserLogins, IUploadSummaryListResponse } from "./userService";
 import { AuthenticationService } from "../authenticationService/authenticationService";
@@ -26,18 +26,15 @@ describe("UserService", () => {
         httpErrorHandlerService = jasmine.createSpyObj("httpErrorHandlerService", ["logError", "getValidationErrors"]);
         (httpErrorHandlerService.getValidationErrors as jasmine.Spy).and.returnValue(expectedValidationErrors);
 
-        TestBed.configureTestingModule(
-            {
-                imports: [
-                    HttpClientTestingModule,
-                ],
-                providers:
-                    [
-                        UserService,
-                        { provide: AuthenticationService, useValue: authenticationService },
-                        { provide: HttpErrorHandlerService, useValue: httpErrorHandlerService },
-                    ],
-            });
+        TestBed.configureTestingModule({
+            providers: [
+                UserService,
+                provideHttpClient(),
+                provideHttpClientTesting(),
+                { provide: AuthenticationService, useValue: authenticationService },
+                { provide: HttpErrorHandlerService, useValue: httpErrorHandlerService },
+            ],
+        });
 
         userService = TestBed.inject(UserService);
         httpMock = TestBed.inject(HttpTestingController);

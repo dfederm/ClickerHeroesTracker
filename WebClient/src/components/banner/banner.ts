@@ -1,10 +1,15 @@
 import { Component, OnInit, OnDestroy } from "@angular/core";
 import { Subscription } from "rxjs";
 import { VersionService } from "../../services/versionService/versionService";
+import { NgbAlert } from "@ng-bootstrap/ng-bootstrap";
 
 @Component({
     selector: "banner",
     templateUrl: "./banner.html",
+    imports: [
+        NgbAlert,
+    ],
+    standalone: true,
 })
 export class BannerComponent implements OnInit, OnDestroy {
     public showReloadBanner = false;

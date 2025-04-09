@@ -1,7 +1,6 @@
-import { NO_ERRORS_SCHEMA } from "@angular/core";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { By } from "@angular/platform-browser";
-import { ActivatedRoute, NavigationExtras, Params, Router } from "@angular/router";
+import { ActivatedRoute, NavigationExtras, Params, provideRouter, Router } from "@angular/router";
 import { BehaviorSubject } from "rxjs";
 import Decimal from "decimal.js";
 
@@ -10,12 +9,36 @@ import { UserService, IProgressData } from "../../services/userService/userServi
 import { ChartDataset, ChartOptions, ScatterDataPoint } from "chart.js";
 import { SettingsService } from "../../services/settingsService/settingsService";
 import { ExponentialPipe } from "../../pipes/exponentialPipe";
+import { Component, Directive, Input } from "@angular/core";
+import { NgxSpinnerModule } from "ngx-spinner";
+import { NgChartsModule } from "ng2-charts";
 
 describe("UserCompareComponent", () => {
     let component: UserCompareComponent;
     let fixture: ComponentFixture<UserCompareComponent>;
     let routeParams: BehaviorSubject<Params>;
     let queryParams: BehaviorSubject<Params>;
+
+    @Component({ selector: "ngx-spinner", template: "", standalone: true })
+    class MockNgxSpinnerComponent {
+        @Input()
+        public fullScreen: boolean;
+    }
+
+    @Directive({
+        selector: "canvas[baseChart]",
+        standalone: true,
+    })
+    class MockBaseChartDirective {
+        @Input()
+        public type: string;
+
+        @Input()
+        public datasets: ChartDataset<"line">[];
+
+        @Input()
+        public options: ChartOptions<"line">;
+    }
 
     let userProgress: IProgressData = {
         soulsSpentData: createData(100),
@@ -107,28 +130,33 @@ describe("UserCompareComponent", () => {
         queryParams = new BehaviorSubject({});
         let route = { params: routeParams, queryParams: queryParams };
 
-        let router = {
-            navigate: (_commands: any[], extras?: NavigationExtras) => {
-                if (extras.queryParams) {
-                    queryParams.next(extras.queryParams);
-                }
-            }
-        };
-
         await TestBed.configureTestingModule(
             {
-                declarations: [UserCompareComponent],
+                imports: [UserCompareComponent],
                 providers: [
+                    provideRouter([]),
                     { provide: ActivatedRoute, useValue: route },
-                    { provide: Router, useValue: router },
                     { provide: UserService, useValue: userService },
                     { provide: SettingsService, useValue: settingsService },
                 ],
-                schemas: [NO_ERRORS_SCHEMA],
             })
             .compileComponents();
+        TestBed.overrideComponent(UserCompareComponent, {
+            remove: { imports: [ NgxSpinnerModule, NgChartsModule ]},
+            add: { imports: [ MockNgxSpinnerComponent, MockBaseChartDirective ] },
+        });
+
         fixture = TestBed.createComponent(UserCompareComponent);
         component = fixture.componentInstance;
+
+        let router = TestBed.inject(Router);
+        spyOn(router, "navigate").and.callFake((_commands: any[], extras?: NavigationExtras) => {
+            if (extras.queryParams) {
+                queryParams.next(extras.queryParams);
+            }
+
+            return Promise.resolve(true);
+        });
     });
 
     describe("Range Selector", () => {
@@ -219,34 +247,34 @@ describe("UserCompareComponent", () => {
             let warning = fixture.debugElement.query(By.css(".alert-warning"));
             expect(warning).toBeNull();
 
-            let charts = fixture.debugElement.queryAll(By.css("canvas"));
+            let charts = fixture.debugElement.queryAll(By.directive(MockBaseChartDirective));
             expect(charts.length).toEqual(16);
 
             for (let i = 0; i < charts.length; i++) {
                 let chart = charts[i];
 
                 expect(chart).not.toBeNull();
-                expect(chart.attributes.baseChart).toBeDefined();
-                expect(chart.attributes.height).toEqual("235");
-                expect(chart.properties.type).toEqual("line");
-
-                let options: ChartOptions<"line"> = chart.properties.options;
-                expect(options).toBeTruthy();
-                expect(options.plugins.title.text).toEqual(expectedChartOrder[i].title);
+                expect(chart.properties.height).toEqual(235);
+    
+                let chartDirective = chart.injector.get(MockBaseChartDirective) as MockBaseChartDirective;
+                expect(chartDirective).not.toBeNull();
+                expect(chartDirective.type).toEqual("line");
+    
+                expect(chartDirective.options).toBeTruthy();
+                expect(chartDirective.options.plugins.title.text).toEqual(expectedChartOrder[i].title);
 
                 let isLogarithmic = expectedChartOrder[i].isLogarithmic;
-                let datasets: ChartDataset<"line">[] = chart.properties.datasets;
-                expect(datasets).toBeTruthy();
-                expect(datasets.length).toEqual(2);
+                expect(chartDirective.datasets).toBeTruthy();
+                expect(chartDirective.datasets.length).toEqual(2);
 
-                let data1 = datasets[0].data as ScatterDataPoint[];
+                let data1 = chartDirective.datasets[0].data as ScatterDataPoint[];
                 let expectedData1 = expectedChartOrder[i].data1;
                 let dataKeys1 = Object.keys(expectedData1);
                 expect(data1.length).toEqual(dataKeys1.length);
                 for (let j = 0; j < data1.length; j++) {
                     let expectedDate = new Date(dataKeys1[j]);
                     expect(data1[j].x).toEqual(expectedDate.getTime());
-                    expect((options.plugins.tooltip.callbacks.title as Function)([{ parsed: { x: dataKeys1[j] } }])).toEqual(expectedDate.toLocaleString());
+                    expect((chartDirective.options.plugins.tooltip.callbacks.title as Function)([{ parsed: { x: dataKeys1[j] } }])).toEqual(expectedDate.toLocaleString());
 
                     // When logarithmic, the value we plot is actually the log of the value to fake log scale
                     let rawExpectedValue = expectedData1[dataKeys1[j]];
@@ -259,18 +287,18 @@ describe("UserCompareComponent", () => {
                         ? Decimal.pow(10, expectedValue)
                         : Number(expectedValue);
                     let expectedLabel = ExponentialPipe.formatNumber(expectedLabelNum, settings);
-                    expect((options.plugins.tooltip.callbacks.label as Function)({ parsed: { y: expectedValue }, datasetIndex: 0 })).toEqual("someUserName: " + expectedLabel);
-                    expect((<any>options.scales.yAxis.ticks).callback(expectedValue, null, null)).toEqual(expectedLabel);
+                    expect((chartDirective.options.plugins.tooltip.callbacks.label as Function)({ parsed: { y: expectedValue }, datasetIndex: 0 })).toEqual("someUserName: " + expectedLabel);
+                    expect((<any>chartDirective.options.scales.yAxis.ticks).callback(expectedValue, null, null)).toEqual(expectedLabel);
                 }
 
-                let data2 = datasets[1].data as ScatterDataPoint[];
+                let data2 = chartDirective.datasets[1].data as ScatterDataPoint[];
                 let expectedData2 = expectedChartOrder[i].data2;
                 let dataKeys2 = Object.keys(expectedData2);
                 expect(data2.length).toEqual(dataKeys2.length);
                 for (let j = 0; j < data2.length; j++) {
                     let expectedDate = new Date(dataKeys2[j]);
                     expect(data2[j].x).toEqual(expectedDate.getTime());
-                    expect((options.plugins.tooltip.callbacks.title as Function)([{ parsed: { x: dataKeys2[j] } }])).toEqual(expectedDate.toLocaleString());
+                    expect((chartDirective.options.plugins.tooltip.callbacks.title as Function)([{ parsed: { x: dataKeys2[j] } }])).toEqual(expectedDate.toLocaleString());
 
                     // When logarithmic, the value we plot is actually the log of the value to fake log scale
                     let rawExpectedValue = expectedData2[dataKeys2[j]];
@@ -283,12 +311,12 @@ describe("UserCompareComponent", () => {
                         ? Decimal.pow(10, expectedValue)
                         : Number(expectedValue);
                     let expectedLabel = ExponentialPipe.formatNumber(expectedLabelNum, settings);
-                    expect((options.plugins.tooltip.callbacks.label as Function)({ parsed: { y: expectedValue }, datasetIndex: 1 })).toEqual("someOtherUserName: " + expectedLabel);
-                    expect((<any>options.scales.yAxis.ticks).callback(expectedValue, null, null)).toEqual(expectedLabel);
+                    expect((chartDirective.options.plugins.tooltip.callbacks.label as Function)({ parsed: { y: expectedValue }, datasetIndex: 1 })).toEqual("someOtherUserName: " + expectedLabel);
+                    expect((<any>chartDirective.options.scales.yAxis.ticks).callback(expectedValue, null, null)).toEqual(expectedLabel);
                 }
 
                 // Linear even when logarithmic since we're manually managing log scale
-                expect(options.scales.yAxis.type).toEqual("linear");
+                expect(chartDirective.options.scales.yAxis.type).toEqual("linear");
             }
         });
 

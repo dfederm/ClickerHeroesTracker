@@ -2,16 +2,29 @@ import { Component, OnInit } from "@angular/core";
 import { ClanService, IGuildMember, IMessage } from "../../services/clanService/clanService";
 import { AuthenticationService, IUserInfo } from "../../services/authenticationService/authenticationService";
 import { UserService } from "../../services/userService/userService";
-import { ActivatedRoute } from "@angular/router";
+import { ActivatedRoute, RouterLink } from "@angular/router";
 import { HttpClient, HttpErrorResponse } from "@angular/common/http";
 import { HttpErrorHandlerService } from "../../services/httpErrorHandlerService/httpErrorHandlerService";
 import { IBlockClanRequest } from "../../models";
-import { NgxSpinnerService } from "ngx-spinner";
+import { NgxSpinnerModule, NgxSpinnerService } from "ngx-spinner";
+import { DecimalPipe, NgClass, TitleCasePipe } from "@angular/common";
+import { TimeAgoPipe } from "src/pipes/timeAgoPipe";
+import { FormsModule } from "@angular/forms";
 
 @Component({
     selector: "clan",
     templateUrl: "./clan.html",
     styleUrls: ["./clan.css"],
+    imports: [
+        DecimalPipe,
+        FormsModule,
+        NgClass,
+        NgxSpinnerModule,
+        RouterLink,
+        TimeAgoPipe,
+        TitleCasePipe,
+    ],
+    standalone: true,
 })
 export class ClanComponent implements OnInit {
     public isClanInformationError = false;

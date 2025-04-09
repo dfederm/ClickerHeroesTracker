@@ -3,11 +3,19 @@ import { NgbActiveModal, NgbModal } from "@ng-bootstrap/ng-bootstrap";
 
 import { LogInDialogComponent } from "../logInDialog/logInDialog";
 import { UserService } from "../../services/userService/userService";
-import { NgxSpinnerService } from "ngx-spinner";
+import { NgxSpinnerModule, NgxSpinnerService } from "ngx-spinner";
+import { FormsModule } from "@angular/forms";
+import { ValidateEqualModule } from "ng-validate-equal";
 
 @Component({
     selector: "resetPasswordDialog",
     templateUrl: "./resetPasswordDialog.html",
+    imports: [
+      FormsModule,
+      NgxSpinnerModule,
+      ValidateEqualModule,
+    ],
+    standalone: true,
 })
 export class ResetPasswordDialogComponent {
     public errors: string[];

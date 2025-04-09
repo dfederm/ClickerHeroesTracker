@@ -1,4 +1,4 @@
-import { NO_ERRORS_SCHEMA, Component } from "@angular/core";
+import { Component } from "@angular/core";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { Decimal } from "decimal.js";
 import { BehaviorSubject } from "rxjs";
@@ -42,6 +42,10 @@ describe("ExponentialPipe", () => {
     @Component({
         template: "{{ value | exponential }}",
         selector: "mock",
+        imports: [
+            ExponentialPipe,
+        ],
+        standalone: true,
     })
     class MockComponent {
         public value: number | Decimal;
@@ -51,15 +55,13 @@ describe("ExponentialPipe", () => {
         let settingsService = { settings: () => settingsSubject };
         fixture = TestBed.configureTestingModule(
             {
-                declarations:
-                    [
-                        ExponentialPipe,
-                        MockComponent,
-                    ],
+                imports: [
+                    ExponentialPipe,
+                    MockComponent,
+                ],
                 providers: [
                     { provide: SettingsService, useValue: settingsService },
                 ],
-                schemas: [NO_ERRORS_SCHEMA],
             })
             .createComponent(MockComponent);
 

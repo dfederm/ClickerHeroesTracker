@@ -1,90 +1,118 @@
-<div *ngIf="error"
-     class="alert alert-danger">
+@if (error) {
+  <div
+    class="alert alert-danger">
     {{ error }}
-</div>
+  </div>
+}
 <ngx-spinner name="externalLogins"
-             [fullScreen]="false"
-             type="ball-pulse"></ngx-spinner>
-<div *ngIf="!needUsername">
-    <div *ngIf="isManageMode && logins && logins.externalLogins">
+  [fullScreen]="false"
+type="ball-pulse"></ngx-spinner>
+@if (!needUsername) {
+  <div>
+    @if (isManageMode && logins && logins.externalLogins) {
+      <div>
         <h5>Registered Logins</h5>
         <table class="table table-sm table-striped">
-            <tbody>
-                <tr *ngFor="let externalLogin of logins.externalLogins">
-                    <td>{{ externalLogin.providerName }}</td>
-                    <td class="text-end">
-                        <!-- Don't allow users to remove the only way they have to log in -->
-                        <button *ngIf="logins.hasPassword || logins.externalLogins.length > 1"
-                                class="btn btn-primary"
-                                (click)="removeLogin(externalLogin)">Remove</button>
-                    </td>
-                </tr>
-            </tbody>
+          <tbody>
+            @for (externalLogin of logins.externalLogins; track externalLogin) {
+              <tr>
+                <td>{{ externalLogin.providerName }}</td>
+                <td class="text-end">
+                  <!-- Don't allow users to remove the only way they have to log in -->
+                  @if (logins.hasPassword || logins.externalLogins.length > 1) {
+                    <button
+                      class="btn btn-primary"
+                    (click)="removeLogin(externalLogin)">Remove</button>
+                  }
+                </td>
+              </tr>
+            }
+          </tbody>
         </table>
-    </div>
-    <div *ngIf="addLogins && addLogins.length > 0">
-        <h5 *ngIf="isManageMode">Add another service to log in.</h5>
-        <div *ngFor="let addLogin of addLogins">
-            <button *ngIf="addLogin == 'Google'"
-                    class="btn"
-                    id="google-signin-button">
+      </div>
+    }
+    @if (addLogins && addLogins.length > 0) {
+      <div>
+        @if (isManageMode) {
+          <h5>Add another service to log in.</h5>
+        }
+        @for (addLogin of addLogins; track addLogin) {
+          <div>
+            @if (addLogin == 'Google') {
+              <button
+                class="btn"
+                id="google-signin-button">
                 <!-- Google is special and renders ngAfterViewInit -->
-            </button>
-
-            <button *ngIf="addLogin == 'Facebook'"
-                    class="btn"
-                    (click)="facebookLogIn()">
+              </button>
+            }
+            @if (addLogin == 'Facebook') {
+              <button
+                class="btn"
+                (click)="facebookLogIn()">
                 <div style="background-color: #1877f2; color: #fff; width: 215px; border-radius: 4px;">
-                    <img src="/images/facebook_logo.png"
-                         height="24"
-                         style="margin: 8px 8px 8px 2px;" />
+                  <img src="/images/facebook_logo.png"
+                    height="24"
+                    style="margin: 8px 8px 8px 2px;" />
                     <span style="vertical-align: text-top; font-weight: bold;">Log in with Facebook</span>
-                </div>
-            </button>
-
-            <button *ngIf="addLogin == 'Microsoft'"
-                    class="btn"
-                    (click)="microsoftLogIn()">
-                <img src="/images/microsoft_signin.png"
-                     title="Sign in with Microsoft" />
-            </button>
-        </div>
-    </div>
-</div>
-<div *ngIf="needUsername">
-    <p>
-        You've successfully logged in with
-        <strong>{{ provider }}</strong>. Please pick a user name for this site
-    </p>
-    <p>
-        Already have an account? First log in with your password and then go to your settings to add a social login
-    </p>
-    <form (ngSubmit)="chooseUserName()"
+                  </div>
+                </button>
+              }
+              @if (addLogin == 'Microsoft') {
+                <button
+                  class="btn"
+                  (click)="microsoftLogIn()">
+                  <img src="/images/microsoft_signin.png"
+                    title="Sign in with Microsoft" />
+                  </button>
+                }
+              </div>
+            }
+          </div>
+        }
+      </div>
+    }
+    @if (needUsername) {
+      <div>
+        <p>
+          You've successfully logged in with
+          <strong>{{ provider }}</strong>. Please pick a user name for this site
+        </p>
+        <p>
+          Already have an account? First log in with your password and then go to your settings to add a social login
+        </p>
+        <form (ngSubmit)="chooseUserName()"
           #registerForm="ngForm">
-        <div class="mb-3"
-             [class.has-danger]="!(formUsername.valid || formUsername.pristine)">
+          <div class="mb-3"
+            [class.has-danger]="!(formUsername.valid || formUsername.pristine)">
             <label for="username">Username</label>
             <input type="text"
-                   class="form-control"
-                   [class.form-control-danger]="!(formUsername.valid || formUsername.pristine)"
-                   id="username"
-                   name="username"
-                   [(ngModel)]="username"
-                   #formUsername="ngModel"
-                   required
-                   minlength="5" />
-            <div *ngIf="formUsername.invalid && (formUsername.dirty || formUsername.touched)"
-                 class="alert alert-danger">
-                <div *ngIf="formUsername.errors.required">
-                    Username is required
+              class="form-control"
+              [class.form-control-danger]="!(formUsername.valid || formUsername.pristine)"
+              id="username"
+              name="username"
+              [(ngModel)]="username"
+              #formUsername="ngModel"
+              required
+              minlength="5" />
+              @if (formUsername.invalid && (formUsername.dirty || formUsername.touched)) {
+                <div
+                  class="alert alert-danger">
+                  @if (formUsername.errors.required) {
+                    <div>
+                      Username is required
+                    </div>
+                  }
+                  @if (formUsername.errors.minlength) {
+                    <div>
+                      Username must be at least 5 characters long
+                    </div>
+                  }
                 </div>
-                <div *ngIf="formUsername.errors.minlength">
-                    Username must be at least 5 characters long
-                </div>
+              }
             </div>
+            <button type="submit"
+              [disabled]="!registerForm.form.valid"
+            class="btn btn-primary">Register</button>
+          </form>
         </div>
-        <button type="submit"
-                [disabled]="!registerForm.form.valid"
-                class="btn btn-primary">Register</button>
-    </form>
-</div>
+      }

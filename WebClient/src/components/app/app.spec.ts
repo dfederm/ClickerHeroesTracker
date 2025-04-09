@@ -1,4 +1,3 @@
-import { NO_ERRORS_SCHEMA } from "@angular/core";
 import { HttpHeaders } from "@angular/common/http";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { Subject } from "rxjs";
@@ -7,9 +6,17 @@ import { AppComponent } from "./app";
 import { LoggingService } from "../../services/loggingService/loggingService";
 import { SettingsService, IUserSettings } from "../../services/settingsService/settingsService";
 import { AuthenticationService, IUserInfo } from "../../services/authenticationService/authenticationService";
+import { Component, Input } from "@angular/core";
+import { NgxSpinnerModule } from "ngx-spinner";
 
 describe("AppComponent", () => {
     let fixture: ComponentFixture<AppComponent>;
+
+    @Component({ selector: "ngx-spinner", template: "", standalone: true })
+    class MockNgxSpinnerComponent {
+        @Input()
+        public fullScreen: boolean;
+    }
 
     let settingsSubject = new Subject<IUserSettings>();
     let userInfoSubject = new Subject<IUserInfo>();
@@ -26,15 +33,18 @@ describe("AppComponent", () => {
 
         await TestBed.configureTestingModule(
             {
-                declarations: [AppComponent],
+                imports: [AppComponent],
                 providers: [
                     { provide: SettingsService, useValue: settingsService },
                     { provide: AuthenticationService, useValue: authenticationService },
                     { provide: LoggingService, useValue: loggingService },
                 ],
-                schemas: [NO_ERRORS_SCHEMA],
             })
             .compileComponents();
+        TestBed.overrideComponent(AppComponent, {
+            remove: { imports: [ NgxSpinnerModule ]},
+            add: { imports: [ MockNgxSpinnerComponent ] },
+        });
 
         fixture = TestBed.createComponent(AppComponent);
 

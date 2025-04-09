@@ -1,89 +1,112 @@
 <div class="container">
-    <h2>Admin</h2>
-    <h3>Commands</h3>
-    <div class="row">
-        <div class="col-md-4">
-            <p>Stale uploads (anonymous only).</p>
-            <div *ngIf="staleUploadError"
-                 class="alert alert-danger">
-                {{ staleUploadError }}
-            </div>
-            <ngx-spinner name="staleUploads"
-                         [fullScreen]="false"
-                         type="ball-pulse"></ngx-spinner>
-            <div *ngIf="staleUploadIds">
-                <p>{{ totalStaleUploads - deletedStaleUploads }} stale uploads</p>
-                <p>
-                    <ngb-progressbar type="info"
-                                     [value]="100 * deletedStaleUploads / totalStaleUploads"
-                                     [striped]="true"
-                                     [animated]="true">
-                        <b>{{ (deletedStaleUploads / totalStaleUploads) | percent:'.2' }}</b>
-                    </ngb-progressbar>
-                </p>
-            </div>
-            <button *ngIf="!deletesInProgress"
-                    class="btn btn-primary"
-                    (click)="fetchStaleUploads()">Fetch</button>
-            <button *ngIf="!deletesInProgress && staleUploadIds && staleUploadIds.length > 0"
-                    class="btn btn-primary"
-                    (click)="deleteStaleUploads()">Delete</button>
-            <button *ngIf="deletesInProgress"
-                    class="btn btn-primary"
-                    (click)="cancelDeleteStaleUploads()">Cancel</button>
+  <h2>Admin</h2>
+  <h3>Commands</h3>
+  <div class="row">
+    <div class="col-md-4">
+      <p>Stale uploads (anonymous only).</p>
+      @if (staleUploadError) {
+        <div
+          class="alert alert-danger">
+          {{ staleUploadError }}
         </div>
-        <div class="col-md-4">
-            <p>Invalid Auth Tokens</p>
-            <div *ngIf="invalidAuthTokensError"
-                 class="alert alert-danger">
-                {{ invalidAuthTokensError }}
-            </div>
-            <ngx-spinner name="invalidAuthTokens"
-                         [fullScreen]="false"
-                         type="ball-pulse"></ngx-spinner>
-            <div *ngIf="totalInvalidAuthTokens !== undefined">
-                <p>{{ totalInvalidAuthTokens - prunedInvalidAuthTokens }} Invalid Auth Tokens</p>
-                <p>
-                    <ngb-progressbar type="info"
-                                     [value]="100 * prunedInvalidAuthTokens / totalInvalidAuthTokens"
-                                     [striped]="true"
-                                     [animated]="true">
-                        <b>{{ (prunedInvalidAuthTokens / totalInvalidAuthTokens) | percent:'.2' }}</b>
-                    </ngb-progressbar>
-                </p>
-            </div>
-            <button *ngIf="!pruningInProgress"
-                    class="btn btn-primary"
-                    (click)="fetchInvalidAuthTokens()">Fetch</button>
-            <button *ngIf="!pruningInProgress && prunedInvalidAuthTokens < totalInvalidAuthTokens"
-                    class="btn btn-primary"
-                    (click)="pruneInvalidAuthTokens()">Prune</button>
-            <button *ngIf="pruningInProgress"
-                    class="btn btn-primary"
-                    (click)="cancelPruneInvalidAuthTokens()">Cancel</button>
+      }
+      <ngx-spinner name="staleUploads"
+        [fullScreen]="false"
+      type="ball-pulse"></ngx-spinner>
+      @if (staleUploadIds) {
+        <div>
+          <p>{{ totalStaleUploads - deletedStaleUploads }} stale uploads</p>
+          <p>
+            <ngb-progressbar type="info"
+              [value]="100 * deletedStaleUploads / totalStaleUploads"
+              [striped]="true"
+              [animated]="true">
+              <b>{{ (deletedStaleUploads / totalStaleUploads) | percent:'.2' }}</b>
+            </ngb-progressbar>
+          </p>
         </div>
-        <div class="col-md-4">
-            <p>Blocked clans</p>
-            <div *ngIf="blockedClansError"
-                 class="alert alert-danger">
-                {{ blockedClansError }}
-            </div>
-            <ngx-spinner name="blockedClans"
-                         [fullScreen]="false"
-                         type="ball-pulse"></ngx-spinner>
-            <form (ngSubmit)="unblockClan()"
-                  #unblockClanForm="ngForm">
-                <label for="unblockClanName">Clan Name</label>
-                <select class="form-select"
-                        id="unblockClanName"
-                        name="unblockClanName"
-                        [(ngModel)]="unblockClanName">
-                    <option *ngFor="let clanName of blockedClans"
-                            [ngValue]="clanName">{{ clanName }}</option>
-                </select>
-                <button type="submit"
-                        class="btn btn-primary">Unblock</button>
-            </form>
-        </div>
+      }
+      @if (!deletesInProgress) {
+        <button
+          class="btn btn-primary"
+        (click)="fetchStaleUploads()">Fetch</button>
+      }
+      @if (!deletesInProgress && staleUploadIds && staleUploadIds.length > 0) {
+        <button
+          class="btn btn-primary"
+        (click)="deleteStaleUploads()">Delete</button>
+      }
+      @if (deletesInProgress) {
+        <button
+          class="btn btn-primary"
+        (click)="cancelDeleteStaleUploads()">Cancel</button>
+      }
     </div>
+    <div class="col-md-4">
+      <p>Invalid Auth Tokens</p>
+      @if (invalidAuthTokensError) {
+        <div
+          class="alert alert-danger">
+          {{ invalidAuthTokensError }}
+        </div>
+      }
+      <ngx-spinner name="invalidAuthTokens"
+        [fullScreen]="false"
+      type="ball-pulse"></ngx-spinner>
+      @if (totalInvalidAuthTokens !== undefined) {
+        <div>
+          <p>{{ totalInvalidAuthTokens - prunedInvalidAuthTokens }} Invalid Auth Tokens</p>
+          <p>
+            <ngb-progressbar type="info"
+              [value]="100 * prunedInvalidAuthTokens / totalInvalidAuthTokens"
+              [striped]="true"
+              [animated]="true">
+              <b>{{ (prunedInvalidAuthTokens / totalInvalidAuthTokens) | percent:'.2' }}</b>
+            </ngb-progressbar>
+          </p>
+        </div>
+      }
+      @if (!pruningInProgress) {
+        <button
+          class="btn btn-primary"
+        (click)="fetchInvalidAuthTokens()">Fetch</button>
+      }
+      @if (!pruningInProgress && prunedInvalidAuthTokens < totalInvalidAuthTokens) {
+        <button
+          class="btn btn-primary"
+        (click)="pruneInvalidAuthTokens()">Prune</button>
+      }
+      @if (pruningInProgress) {
+        <button
+          class="btn btn-primary"
+        (click)="cancelPruneInvalidAuthTokens()">Cancel</button>
+      }
+    </div>
+    <div class="col-md-4">
+      <p>Blocked clans</p>
+      @if (blockedClansError) {
+        <div
+          class="alert alert-danger">
+          {{ blockedClansError }}
+        </div>
+      }
+      <ngx-spinner name="blockedClans"
+        [fullScreen]="false"
+      type="ball-pulse"></ngx-spinner>
+      <form (ngSubmit)="unblockClan()"
+        #unblockClanForm="ngForm">
+        <label for="unblockClanName">Clan Name</label>
+        <select class="form-select"
+          id="unblockClanName"
+          name="unblockClanName"
+          [(ngModel)]="unblockClanName">
+          @for (clanName of blockedClans; track clanName) {
+            <option [ngValue]="clanName">{{ clanName }}</option>
+          }
+        </select>
+        <button type="submit"
+        class="btn btn-primary">Unblock</button>
+      </form>
+    </div>
+  </div>
 </div>

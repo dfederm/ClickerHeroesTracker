@@ -1,18 +1,37 @@
-import { NO_ERRORS_SCHEMA, DebugElement } from "@angular/core";
+import { DebugElement, Component, Input } from "@angular/core";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { By } from "@angular/platform-browser";
-import { FormsModule } from "@angular/forms";
-import { HttpClientTestingModule, HttpTestingController } from "@angular/common/http/testing";
-import { HttpHeaders, HttpErrorResponse } from "@angular/common/http";
+import { HttpTestingController, provideHttpClientTesting } from "@angular/common/http/testing";
+import { HttpHeaders, HttpErrorResponse, provideHttpClient } from "@angular/common/http";
 
 import { AdminComponent } from "./admin";
 import { AuthenticationService } from "../../services/authenticationService/authenticationService";
 import { HttpErrorHandlerService } from "../../services/httpErrorHandlerService/httpErrorHandlerService";
 import { UploadService } from "../../services/uploadService/uploadService";
+import { NgbProgressbar } from "@ng-bootstrap/ng-bootstrap";
+import { NgxSpinnerModule } from "ngx-spinner";
 
 describe("AdminComponent", () => {
     let fixture: ComponentFixture<AdminComponent>;
     let httpMock: HttpTestingController;
+
+    @Component({ selector: "ngx-spinner", template: "", standalone: true })
+    class MockNgxSpinnerComponent {
+        @Input()
+        public fullScreen: boolean;
+    }
+
+    @Component({ selector: "ngb-progressbar", template: "", standalone: true })
+    class MockProgressBarComponent {
+        @Input()
+        public value: number;
+
+        @Input()
+        public striped: boolean;
+
+        @Input()
+        public animated: boolean;
+    }
 
     const staleUploadsRequest = { method: "get", url: "/api/admin/staleuploads" };
     const countInvalidAuthTokensRequest = { method: "get", url: "/api/admin/countinvalidauthtokens" };
@@ -34,18 +53,21 @@ describe("AdminComponent", () => {
         await TestBed.configureTestingModule(
             {
                 imports: [
-                    FormsModule,
-                    HttpClientTestingModule,
+                    AdminComponent,
                 ],
                 providers: [
+                    provideHttpClient(),
+                    provideHttpClientTesting(),
                     { provide: AuthenticationService, useValue: authenticationService },
                     { provide: HttpErrorHandlerService, useValue: httpErrorHandlerService },
                     { provide: UploadService, useValue: uploadService },
                 ],
-                declarations: [AdminComponent],
-                schemas: [NO_ERRORS_SCHEMA],
             })
             .compileComponents();
+        TestBed.overrideComponent(AdminComponent, {
+            remove: { imports: [ NgxSpinnerModule, NgbProgressbar ]},
+            add: { imports: [ MockNgxSpinnerComponent, MockProgressBarComponent ] },
+        });
 
         httpMock = TestBed.inject(HttpTestingController);
         fixture = TestBed.createComponent(AdminComponent);
@@ -146,7 +168,9 @@ describe("AdminComponent", () => {
 
             let progressBar = container.query(By.css("ngb-progressbar"));
             expect(progressBar).not.toBeNull();
-            expect(progressBar.properties.value).toEqual(0);
+
+            let mockProgressBarComponent = progressBar.componentInstance as MockProgressBarComponent;
+            expect(mockProgressBarComponent.value).toEqual(0);
 
             let buttons = container.queryAll(By.css("button"));
             expect(buttons.length).toEqual(2);
@@ -204,7 +228,9 @@ describe("AdminComponent", () => {
 
             let progressBar = container.query(By.css("ngb-progressbar"));
             expect(progressBar).not.toBeNull();
-            expect(progressBar.properties.value).toEqual(0);
+
+            let mockProgressBarComponent = progressBar.componentInstance as MockProgressBarComponent;
+            expect(mockProgressBarComponent.value).toEqual(0);
 
             let buttons = container.queryAll(By.css("button"));
             expect(buttons.length).toEqual(2);
@@ -220,7 +246,7 @@ describe("AdminComponent", () => {
                 expect(uploadService.delete).toHaveBeenCalledWith(staleuploads[i]);
             }
 
-            expect(progressBar.properties.value).toEqual(100);
+            expect(mockProgressBarComponent.value).toEqual(100);
 
             buttons = container.queryAll(By.css("button"));
             expect(buttons.length).toEqual(1);
@@ -258,7 +284,9 @@ describe("AdminComponent", () => {
 
             let progressBar = container.query(By.css("ngb-progressbar"));
             expect(progressBar).not.toBeNull();
-            expect(progressBar.properties.value).toEqual(0);
+
+            let mockProgressBarComponent = progressBar.componentInstance as MockProgressBarComponent;
+            expect(mockProgressBarComponent.value).toEqual(0);
 
             let buttons = container.queryAll(By.css("button"));
             expect(buttons.length).toEqual(2);
@@ -277,7 +305,7 @@ describe("AdminComponent", () => {
 
             (uploadService.delete as jasmine.Spy).calls.reset();
 
-            expect(progressBar.properties.value).toEqual(100 * numDeletedStaleUploads / staleuploads.length);
+            expect(mockProgressBarComponent.value).toEqual(100 * numDeletedStaleUploads / staleuploads.length);
 
             buttons = container.queryAll(By.css("button"));
             expect(buttons.length).toEqual(1);
@@ -300,7 +328,7 @@ describe("AdminComponent", () => {
             expect(uploadService.delete).not.toHaveBeenCalled();
 
             // We will only have let the pending requests finish before stopping
-            expect(progressBar.properties.value).toEqual(100 * (numDeletedStaleUploads + AdminComponent.numParallelDeletes) / staleuploads.length);
+            expect(mockProgressBarComponent.value).toEqual(100 * (numDeletedStaleUploads + AdminComponent.numParallelDeletes) / staleuploads.length);
 
             buttons = container.queryAll(By.css("button"));
             expect(buttons.length).toEqual(2);
@@ -366,7 +394,9 @@ describe("AdminComponent", () => {
 
             let progressBar = container.query(By.css("ngb-progressbar"));
             expect(progressBar).not.toBeNull();
-            expect(progressBar.properties.value).toEqual(0);
+
+            let mockProgressBarComponent = progressBar.componentInstance as MockProgressBarComponent;
+            expect(mockProgressBarComponent.value).toEqual(0);
 
             let buttons = container.queryAll(By.css("button"));
             expect(buttons.length).toEqual(2);
@@ -417,7 +447,9 @@ describe("AdminComponent", () => {
 
             let progressBar = container.query(By.css("ngb-progressbar"));
             expect(progressBar).not.toBeNull();
-            expect(progressBar.properties.value).toEqual(0);
+
+            let mockProgressBarComponent = progressBar.componentInstance as MockProgressBarComponent;
+            expect(mockProgressBarComponent.value).toEqual(0);
 
             let buttons = container.queryAll(By.css("button"));
             expect(buttons.length).toEqual(2);
@@ -436,7 +468,7 @@ describe("AdminComponent", () => {
                 fixture.detectChanges();
             }
 
-            expect(progressBar.properties.value).toEqual(100);
+            expect(mockProgressBarComponent.value).toEqual(100);
 
             buttons = container.queryAll(By.css("button"));
             expect(buttons.length).toEqual(1);
@@ -465,7 +497,9 @@ describe("AdminComponent", () => {
 
             let progressBar = container.query(By.css("ngb-progressbar"));
             expect(progressBar).not.toBeNull();
-            expect(progressBar.properties.value).toEqual(0);
+
+            let mockProgressBarComponent = progressBar.componentInstance as MockProgressBarComponent;
+            expect(mockProgressBarComponent.value).toEqual(0);
 
             let buttons = container.queryAll(By.css("button"));
             expect(buttons.length).toEqual(2);
@@ -485,7 +519,7 @@ describe("AdminComponent", () => {
                 fixture.detectChanges();
             }
 
-            expect(progressBar.properties.value).toEqual(100 * numPrunedInvalidAuthTokens / countInvalidAuthTokens);
+            expect(mockProgressBarComponent.value).toEqual(100 * numPrunedInvalidAuthTokens / countInvalidAuthTokens);
 
             buttons = container.queryAll(By.css("button"));
             expect(buttons.length).toEqual(1);
@@ -505,7 +539,7 @@ describe("AdminComponent", () => {
             fixture.detectChanges();
 
             // We will only have let the pending requests finish before stopping
-            expect(progressBar.properties.value).toEqual(100 * numPrunedInvalidAuthTokens / countInvalidAuthTokens);
+            expect(mockProgressBarComponent.value).toEqual(100 * numPrunedInvalidAuthTokens / countInvalidAuthTokens);
 
             buttons = container.queryAll(By.css("button"));
             expect(buttons.length).toEqual(2);

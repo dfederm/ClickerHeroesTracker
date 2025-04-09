@@ -3,11 +3,21 @@ import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
 
 import { AuthenticationService } from "../../services/authenticationService/authenticationService";
 import { UserService, IUserLogins } from "../../services/userService/userService";
-import { NgxSpinnerService } from "ngx-spinner";
+import { NgxSpinnerModule, NgxSpinnerService } from "ngx-spinner";
+import { ExternalLoginsComponent } from "../externalLogins/externalLogins";
+import { FormsModule } from "@angular/forms";
+import { ValidateEqualModule } from "ng-validate-equal";
 
 @Component({
     selector: "changePasswordDialog",
     templateUrl: "./changePasswordDialog.html",
+    imports: [
+        ExternalLoginsComponent,
+        FormsModule,
+        NgxSpinnerModule,
+        ValidateEqualModule,
+    ],
+    standalone: true,
 })
 export class ChangePasswordDialogComponent implements OnInit {
     public errors: string[];

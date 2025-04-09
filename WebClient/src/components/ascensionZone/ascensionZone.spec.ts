@@ -3,7 +3,6 @@ import { AscensionZoneComponent } from "./ascensionZone";
 import { By } from "@angular/platform-browser";
 import { ISavedGameData, SavedGame } from "../../models/savedGame";
 import { DebugElement, ChangeDetectorRef } from "@angular/core";
-import { ExponentialPipe } from "../../pipes/exponentialPipe";
 import { LoggingService } from "../../services/loggingService/loggingService";
 import { SettingsService } from "../../services/settingsService/settingsService";
 import { BehaviorSubject } from "rxjs";
@@ -93,9 +92,8 @@ describe("AscensionZoneComponent", () => {
 
         await TestBed.configureTestingModule(
             {
-                declarations: [
+                imports: [
                     AscensionZoneComponent,
-                    ExponentialPipe,
                 ],
                 providers: [
                     { provide: LoggingService, useValue: loggingService },

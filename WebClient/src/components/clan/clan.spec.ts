@@ -1,8 +1,7 @@
-import { NO_ERRORS_SCHEMA, DebugElement, Pipe, PipeTransform } from "@angular/core";
+import { Component, DebugElement, Input, Pipe, PipeTransform } from "@angular/core";
 import { By } from "@angular/platform-browser";
-import { FormsModule } from "@angular/forms";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
-import { HttpClientTestingModule } from "@angular/common/http/testing";
+import { provideHttpClientTesting } from "@angular/common/http/testing";
 import { ClanComponent } from "./clan";
 import { ClanService, IClanData, IMessage } from "../../services/clanService/clanService";
 import { AuthenticationService, IUserInfo } from "../../services/authenticationService/authenticationService";
@@ -11,6 +10,9 @@ import { UserService } from "../../services/userService/userService";
 import { IUser } from "../../models";
 import { Params, ActivatedRoute } from "@angular/router";
 import { HttpErrorHandlerService } from "../../services/httpErrorHandlerService/httpErrorHandlerService";
+import { TimeAgoPipe } from "src/pipes/timeAgoPipe";
+import { provideHttpClient } from "@angular/common/http";
+import { NgxSpinnerModule } from "ngx-spinner";
 
 describe("ClanComponent", () => {
     let fixture: ComponentFixture<ClanComponent>;
@@ -47,9 +49,15 @@ describe("ClanComponent", () => {
         clanName: clan.clanName,
     };
 
+    @Component({ selector: "ngx-spinner", template: "", standalone: true })
+    class MockNgxSpinnerComponent {
+        @Input()
+        public fullScreen: boolean;
+    }
+
     const timeAgoPipeTransform = (value: string) => "timeAgo(" + value + ")";
 
-    @Pipe({ name: 'timeAgo' })
+    @Pipe({ name: 'timeAgo', standalone: true })
     class MockTimeAgoPipe implements PipeTransform {
         public transform = timeAgoPipeTransform;
     }
@@ -86,23 +94,23 @@ describe("ClanComponent", () => {
         await TestBed.configureTestingModule(
             {
                 imports: [
-                    FormsModule,
-                    HttpClientTestingModule,
-                ],
-                declarations: [
                     ClanComponent,
-                    MockTimeAgoPipe,
                 ],
                 providers: [
+                    provideHttpClient(),
+                    provideHttpClientTesting(),
                     { provide: ClanService, useValue: clanService },
                     { provide: AuthenticationService, useValue: authenticationService },
                     { provide: UserService, useValue: userService },
                     { provide: ActivatedRoute, useValue: route },
                     { provide: HttpErrorHandlerService, useValue: httpErrorHandlerService },
                 ],
-                schemas: [NO_ERRORS_SCHEMA],
             })
             .compileComponents();
+        TestBed.overrideComponent(ClanComponent, {
+            remove: { imports: [ NgxSpinnerModule, TimeAgoPipe ]},
+            add: { imports: [ MockNgxSpinnerComponent, MockTimeAgoPipe ] },
+        });
 
         fixture = TestBed.createComponent(ClanComponent);
     });

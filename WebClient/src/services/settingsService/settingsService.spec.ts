@@ -1,6 +1,6 @@
 import { TestBed, fakeAsync, tick, discardPeriodicTasks } from "@angular/core/testing";
-import { HttpClientTestingModule, HttpTestingController, TestRequest } from "@angular/common/http/testing";
-import { HttpHeaders } from "@angular/common/http";
+import { HttpTestingController, provideHttpClientTesting, TestRequest } from "@angular/common/http/testing";
+import { HttpHeaders, provideHttpClient } from "@angular/common/http";
 import { BehaviorSubject } from "rxjs";
 import { HttpErrorHandlerService } from "../httpErrorHandlerService/httpErrorHandlerService";
 
@@ -35,18 +35,15 @@ describe("SettingsService", () => {
             logError: (): void => void 0,
         };
 
-        TestBed.configureTestingModule(
-            {
-                imports: [
-                    HttpClientTestingModule,
-                ],
-                providers:
-                    [
-                        { provide: AuthenticationService, useValue: authenticationService },
-                        SettingsService,
-                        { provide: HttpErrorHandlerService, useValue: httpErrorHandlerService },
-                    ],
-            });
+        TestBed.configureTestingModule({
+            providers: [
+                SettingsService,
+                provideHttpClient(),
+                provideHttpClientTesting(),
+                { provide: AuthenticationService, useValue: authenticationService },
+                { provide: HttpErrorHandlerService, useValue: httpErrorHandlerService },
+            ],
+        });
 
         httpMock = TestBed.inject(HttpTestingController);
 

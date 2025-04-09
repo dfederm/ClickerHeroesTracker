@@ -1,66 +1,73 @@
 <div class="modal-header">
-    <h4 class="modal-title">Upload your save</h4>
-    <button type="button"
-            class="btn-close"
-            (click)="activeModal.dismiss()"></button>
+  <h4 class="modal-title">Upload your save</h4>
+  <button type="button"
+    class="btn-close"
+  (click)="activeModal.dismiss()"></button>
 </div>
 <div class="modal-body">
-    <div *ngIf="errorMessage"
-         class="alert alert-danger">
-        {{ errorMessage }}
+  @if (errorMessage) {
+    <div
+      class="alert alert-danger">
+      {{ errorMessage }}
     </div>
-    <ngx-spinner name="uploadDialog"
-                 [fullScreen]="false"
-                 type="ball-pulse"></ngx-spinner>
-    <form (ngSubmit)="upload()">
-        <div class="mb-3">
-            <label for="encodedSaveData">Save Data</label>
-            <textarea class="form-control"
-                      rows="2"
-                      id="encodedSaveData"
-                      name="encodedSaveData"
-                      placeholder="Paste save data"
-                      [(ngModel)]="encodedSaveData"></textarea> or
-            <button type="button"
-                    class="btn btn-primary"
-                    (click)="fileInput.click()">Load a File</button>
-            <input type="file"
-                   #fileInput
-                   class="d-none"
-                   (change)="uploadFile($event)" />
-        </div>
-        <fieldset class="mb-3">
-            <legend class="col-form-legend">Play Style</legend>
-            <div *ngFor="let p of playStyles"
-                 class="form-check form-check-inline">
-                <label class="form-check-label">
-                    <input class="form-check-input"
-                           type="radio"
-                           name="playStyle"
-                           [(ngModel)]="playStyle"
-                           [value]="p"> {{ p | titlecase }}
-                </label>
-            </div>
-        </fieldset>
-        <div *ngIf="userInfo.isLoggedIn"
-             class="mb-3 form-check">
+  }
+  <ngx-spinner name="uploadDialog"
+    [fullScreen]="false"
+  type="ball-pulse"></ngx-spinner>
+  <form (ngSubmit)="upload()">
+    <div class="mb-3">
+      <label for="encodedSaveData">Save Data</label>
+      <textarea class="form-control"
+        rows="2"
+        id="encodedSaveData"
+        name="encodedSaveData"
+        placeholder="Paste save data"
+      [(ngModel)]="encodedSaveData"></textarea> or
+      <button type="button"
+        class="btn btn-primary"
+      (click)="fileInput.click()">Load a File</button>
+      <input type="file"
+        #fileInput
+        class="d-none"
+        (change)="uploadFile($event)" />
+      </div>
+      <fieldset class="mb-3">
+        <legend class="col-form-legend">Play Style</legend>
+        @for (p of playStyles; track p) {
+          <div class="form-check form-check-inline">
             <label class="form-check-label">
-                <input class="form-check-input"
-                       id="addToProgress"
-                       name="addToProgress"
-                       [(ngModel)]="addToProgress"
-                       type="checkbox"> Add this upload to my progress
-            </label>
-        </div>
-        <div *ngIf="!userInfo.isLoggedIn"
-             class="alert alert-warning">
-            Progress can only be tracked over time for logged in users. Please
-            <a [openDialog]="LogInDialogComponent"
-               class="alert-link">Log in</a> or
-            <a [openDialog]="RegisterDialogComponent"
-               class="alert-link">Register</a>.
-        </div>
-        <button type="submit"
-                class="btn btn-primary">Upload</button>
-    </form>
-</div>
+              <input class="form-check-input"
+                type="radio"
+                name="playStyle"
+                [(ngModel)]="playStyle"
+                [value]="p"> {{ p | titlecase }}
+              </label>
+            </div>
+          }
+        </fieldset>
+        @if (userInfo.isLoggedIn) {
+          <div
+            class="mb-3 form-check">
+            <label class="form-check-label">
+              <input class="form-check-input"
+                id="addToProgress"
+                name="addToProgress"
+                [(ngModel)]="addToProgress"
+                type="checkbox"> Add this upload to my progress
+              </label>
+            </div>
+          }
+          @if (!userInfo.isLoggedIn) {
+            <div
+              class="alert alert-warning">
+              Progress can only be tracked over time for logged in users. Please
+              <a [openDialog]="LogInDialogComponent"
+              class="alert-link">Log in</a> or
+              <a [openDialog]="RegisterDialogComponent"
+              class="alert-link">Register</a>.
+            </div>
+          }
+          <button type="submit"
+          class="btn btn-primary">Upload</button>
+        </form>
+      </div>

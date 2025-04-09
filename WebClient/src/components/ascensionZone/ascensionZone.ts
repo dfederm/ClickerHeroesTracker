@@ -12,6 +12,7 @@ import { Ancient } from "../../models/ancient";
 import { Outsider } from "../../models/outsider";
 import { Upgrade } from "../../models/upgrade";
 import { Attributes } from "../../models/attributes";
+import { ExponentialPipe } from "src/pipes/exponentialPipe";
 
 interface ICalculateAscensionZoneData {
     zone: number;
@@ -25,6 +26,10 @@ interface ICalculateAscensionZoneData {
 @Component({
     selector: "ascensionZone",
     templateUrl: "./ascensionZone.html",
+    imports: [
+        ExponentialPipe,
+    ],
+    standalone: true,
 })
 export class AscensionZoneComponent {
     public calculateAscensionZoneSteps: ICalculateAscensionZoneData[];

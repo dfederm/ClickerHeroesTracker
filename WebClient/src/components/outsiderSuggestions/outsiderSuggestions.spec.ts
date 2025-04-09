@@ -71,10 +71,10 @@ describe("OutsiderSuggestionsComponent", () => {
 
         await TestBed.configureTestingModule(
             {
-                imports: [FormsModule],
-                declarations: [
+                imports: [
                     OutsiderSuggestionsComponent,
                     ExponentialPipe,
+                    FormsModule,
                 ],
                 providers: [
                     { provide: LoggingService, useValue: loggingService },

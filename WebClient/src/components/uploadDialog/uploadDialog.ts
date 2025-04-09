@@ -8,11 +8,21 @@ import { RegisterDialogComponent } from "../registerDialog/registerDialog";
 import { AuthenticationService, IUserInfo } from "../../services/authenticationService/authenticationService";
 import { UploadService } from "../../services/uploadService/uploadService";
 import { SettingsService, PlayStyle } from "../../services/settingsService/settingsService";
-import { NgxSpinnerService } from "ngx-spinner";
+import { NgxSpinnerModule, NgxSpinnerService } from "ngx-spinner";
+import { OpenDialogDirective } from "src/directives/openDialog/openDialog";
+import { TitleCasePipe } from "@angular/common";
+import { FormsModule } from "@angular/forms";
 
 @Component({
     selector: "upload",
     templateUrl: "./uploadDialog.html",
+    imports: [
+      FormsModule,
+      NgxSpinnerModule,
+      OpenDialogDirective,
+      TitleCasePipe,
+    ],
+    standalone: true,
 })
 export class UploadDialogComponent implements OnInit {
     public errorMessage: string;

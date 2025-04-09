@@ -4,7 +4,9 @@ import { PublicClientApplication } from "@azure/msal-browser";
 
 import { AuthenticationService } from "../../services/authenticationService/authenticationService";
 import { UserService, IUserLogins, IExternalLogin } from "../../services/userService/userService";
-import { NgxSpinnerService } from "ngx-spinner";
+import { NgxSpinnerModule, NgxSpinnerService } from "ngx-spinner";
+import { FormsModule } from "@angular/forms";
+import { ValidateEqualModule } from "ng-validate-equal";
 
 export interface IErrorResponse {
     error: string;
@@ -14,6 +16,12 @@ export interface IErrorResponse {
 @Component({
     selector: "externalLogins",
     templateUrl: "./externalLogins.html",
+    imports: [
+        FormsModule,
+        NgxSpinnerModule,
+        ValidateEqualModule,
+    ],
+    standalone: true,
 })
 export class ExternalLoginsComponent implements OnInit, AfterViewInit {
     public static facebookInitialized = false;

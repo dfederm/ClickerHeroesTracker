@@ -4,11 +4,23 @@ import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
 import { LogInDialogComponent } from "../logInDialog/logInDialog";
 import { AuthenticationService } from "../../services/authenticationService/authenticationService";
 import { UserService } from "../../services/userService/userService";
-import { NgxSpinnerService } from "ngx-spinner";
+import { NgxSpinnerModule, NgxSpinnerService } from "ngx-spinner";
+import { ExternalLoginsComponent } from "../externalLogins/externalLogins";
+import { OpenDialogDirective } from "src/directives/openDialog/openDialog";
+import { FormsModule } from "@angular/forms";
+import { ValidateEqualModule } from "ng-validate-equal";
 
 @Component({
     selector: "registerDialog",
     templateUrl: "./registerDialog.html",
+    imports: [
+      ExternalLoginsComponent,
+      FormsModule,
+      NgxSpinnerModule,
+      OpenDialogDirective,
+      ValidateEqualModule,
+    ],
+    standalone: true,
 })
 export class RegisterDialogComponent {
     public errors: string[];

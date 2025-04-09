@@ -1,10 +1,12 @@
-<p *ngIf="isError"
-   class="alert alert-danger">
-  There was a problem getting your uploads
-</p>
+@if (isError) {
+  <p
+    class="alert alert-danger">
+    There was a problem getting your uploads
+  </p>
+}
 <ngx-spinner name="uploadsTable"
-             [fullScreen]="false"
-             type="ball-pulse"></ngx-spinner>
+  [fullScreen]="false"
+type="ball-pulse"></ngx-spinner>
 
 <table class="table table-sm table-striped">
   <thead>
@@ -17,26 +19,30 @@
     </tr>
   </thead>
   <tbody>
-    <tr *ngFor="let upload of uploads">
-      <td>{{ upload.ascensionNumber | exponential }}</td>
-      <td>{{ upload.zone | exponential }}</td>
-      <td>{{ upload.souls | exponential }}</td>
-      <td title="Uploaded {{ upload.uploadTime | date:'short' }}">
-        {{ upload.saveTime | date:'short' }}
-      </td>
-      <td class="text-end">
-        <a routerLink="/uploads/{{upload.id}}">View</a>
-      </td>
-    </tr>
+    @for (upload of uploads; track upload) {
+      <tr>
+        <td>{{ upload.ascensionNumber | exponential }}</td>
+        <td>{{ upload.zone | exponential }}</td>
+        <td>{{ upload.souls | exponential }}</td>
+        <td title="Uploaded {{ upload.uploadTime | date:'short' }}">
+          {{ upload.saveTime | date:'short' }}
+        </td>
+        <td class="text-end">
+          <a routerLink="/uploads/{{upload.id}}">View</a>
+        </td>
+      </tr>
+    }
   </tbody>
 </table>
 
-<ngb-pagination *ngIf="paginate"
-                [collectionSize]="totalUploads"
-                [(page)]="page"
-                [pageSize]="count"
-                [maxSize]="5"
-                [rotate]="true"
-                [ellipses]="false"
-                [boundaryLinks]="true">
-</ngb-pagination>
+@if (paginate) {
+  <ngb-pagination
+    [collectionSize]="totalUploads"
+    [(page)]="page"
+    [pageSize]="count"
+    [maxSize]="5"
+    [rotate]="true"
+    [ellipses]="false"
+    [boundaryLinks]="true">
+  </ngb-pagination>
+}

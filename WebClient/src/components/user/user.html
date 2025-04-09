@@ -1,92 +1,115 @@
 <div class="container">
-    <h2>
-        {{ userName }}
-        <a *ngIf="clanName"
-           routerLink="/clans/{{clanName}}">&lt;{{ clanName }}&gt;</a>
-    </h2>
-    <div *ngIf="currentUserName && currentUserName !== userName"
-         class="row">
-        <div class="col-md-6">
-            <p *ngIf="isActionsError"
-               class="alert alert-danger">
-                Oops! Something went wrong.
-            </p>
-            <ngx-spinner name="userActions"
-                         [fullScreen]="false"
-                         type="ball-pulse"></ngx-spinner>
-            <button *ngIf="!isCurrentUserFollowing"
-                    class="btn btn-secondary"
-                    (click)="follow()">
-                Follow
-            </button>
-            <button *ngIf="isCurrentUserFollowing"
-                    class="btn btn-secondary"
-                    (click)="unfollow()">
-                Unfollow
-            </button>
-        </div>
+  <h2>
+    {{ userName }}
+    @if (clanName) {
+      <a
+      routerLink="/clans/{{clanName}}">&lt;{{ clanName }}&gt;</a>
+    }
+  </h2>
+  @if (currentUserName && currentUserName !== userName) {
+    <div
+      class="row">
+      <div class="col-md-6">
+        @if (isActionsError) {
+          <p
+            class="alert alert-danger">
+            Oops! Something went wrong.
+          </p>
+        }
+        <ngx-spinner name="userActions"
+          [fullScreen]="false"
+        type="ball-pulse"></ngx-spinner>
+        @if (!isCurrentUserFollowing) {
+          <button
+            class="btn btn-secondary"
+            (click)="follow()">
+            Follow
+          </button>
+        }
+        @if (isCurrentUserFollowing) {
+          <button
+            class="btn btn-secondary"
+            (click)="unfollow()">
+            Unfollow
+          </button>
+        }
+      </div>
     </div>
-    <div class="row">
-        <div class="col-md-6">
-            <h4>Recent Uploads:</h4>
-            <uploadsTable [userName]="userName"
-                          [count]="10"></uploadsTable>
-            <p>
-                <a routerLink="/users/{{userName}}/uploads"
-                   class="btn btn-secondary">See all »</a>
-            </p>
-        </div>
-        <div class="col-md-6">
-            <h4>Progress Summary:</h4>
-            <p *ngIf="isProgressError"
-               class="alert alert-danger">
-                Oops! Something went wrong while fetching progress
-            </p>
-            <p *ngIf="!progress && !isProgressError && !isProgressLoading"
-               class="alert alert-warning">
-                No uploads in the last week!
-            </p>
-            <ngx-spinner name="userProgress"
-                         [fullScreen]="false"
-                         type="ball-pulse"></ngx-spinner>
-            <!-- Height is intedned to be 400px, but for some reason the chart is 1.7x what we specify, so use 235 -->
-            <canvas baseChart
-                    *ngIf="progress"
-                    height="235"
-                    [type]="'line'"
-                    [datasets]="progress.datasets"
-                    [options]="progress.options">
-            </canvas>
-            <p>
-                <a routerLink="/users/{{userName}}/progress"
-                   class="btn btn-secondary">See all »</a>
-            </p>
-        </div>
-        <div class="col-md-6">
-            <h4>Following:</h4>
-            <p *ngIf="isFollowsError"
-               class="alert alert-danger">
-                Oops! Something went wrong while fetching followed users
-            </p>
-            <p *ngIf="(!follows || !follows.length) && !isFollowsError">
-                {{ currentUserName && currentUserName !== userName ? userName + ' is' : 'You are' }} currently not following any users.
-            </p>
-            <ngx-spinner name="userFollows"
-                         [fullScreen]="false"
-                         type="ball-pulse"></ngx-spinner>
-            <table *ngIf="follows && follows.length"
-                   class="table table-sm table-striped">
-                <tbody>
-                    <tr *ngFor="let follow of follows">
-                        <td>
-                            <a routerLink="/users/{{follow}}">{{ follow }}</a>
-                        </td>
-                        <td class="text-end">
-                            <a routerLink="/users/{{userName}}/compare/{{follow}}">Compare</a>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
+  }
+  <div class="row">
+    <div class="col-md-6">
+      <h4>Recent Uploads:</h4>
+      <uploadsTable [userName]="userName"
+      [count]="10"></uploadsTable>
+      <p>
+        <a routerLink="/users/{{userName}}/uploads"
+        class="btn btn-secondary">See all »</a>
+      </p>
     </div>
+    <div class="col-md-6">
+      <h4>Progress Summary:</h4>
+      @if (isProgressError) {
+        <p
+          class="alert alert-danger">
+          Oops! Something went wrong while fetching progress
+        </p>
+      }
+      @if (!progress && !isProgressError && !isProgressLoading) {
+        <p
+          class="alert alert-warning">
+          No uploads in the last week!
+        </p>
+      }
+      <ngx-spinner name="userProgress"
+        [fullScreen]="false"
+      type="ball-pulse"></ngx-spinner>
+      <!-- Height is intedned to be 400px, but for some reason the chart is 1.7x what we specify, so use 235 -->
+      @if (progress) {
+        <canvas baseChart
+          height="235"
+          [type]="'line'"
+          [datasets]="progress.datasets"
+          [options]="progress.options">
+        </canvas>
+      }
+      <p>
+        <a routerLink="/users/{{userName}}/progress"
+        class="btn btn-secondary">See all »</a>
+      </p>
+    </div>
+    <div class="col-md-6">
+      <h4>Following:</h4>
+      @if (isFollowsError) {
+        <p
+          class="alert alert-danger">
+          Oops! Something went wrong while fetching followed users
+        </p>
+      }
+      @if ((!follows || !follows.length) && !isFollowsError) {
+        <p>
+          {{ currentUserName && currentUserName !== userName ? userName + ' is' : 'You are' }} currently not following any users.
+        </p>
+      }
+      <ngx-spinner name="userFollows"
+        [fullScreen]="false"
+      type="ball-pulse"></ngx-spinner>
+      @if (follows && follows.length) {
+        <table
+          class="table table-sm table-striped">
+          <tbody>
+            @for (follow of follows; track follow) {
+              <tr>
+                <td>
+                  <a routerLink="/users/{{follow}}">{{ follow }}</a>
+                </td>
+                <td class="text-end">
+                  <a routerLink="/users/{{userName}}/compare/{{follow}}">Compare</a>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      }
+    </div>
+  </div>
 </div>

@@ -1,17 +1,24 @@
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { By } from "@angular/platform-browser";
 import { DatePipe } from "@angular/common";
-import { NO_ERRORS_SCHEMA, DebugElement } from "@angular/core";
+import { Component, DebugElement, Input } from "@angular/core";
 import { BehaviorSubject } from "rxjs";
-import { FormsModule } from "@angular/forms";
 
 import { ChangelogComponent } from "./changelog";
 import { NewsService, ISiteNewsEntryListResponse, ISiteNewsEntry } from "../../services/newsService/newsService";
 import { AuthenticationService, IUserInfo } from "../../services/authenticationService/authenticationService";
+import { NgxSpinnerModule } from "ngx-spinner";
 
 describe("ChangelogComponent", () => {
     let component: ChangelogComponent;
     let fixture: ComponentFixture<ChangelogComponent>;
+
+    @Component({ selector: "ngx-spinner", template: "", standalone: true })
+    class MockNgxSpinnerComponent {
+        @Input()
+        public fullScreen: boolean;
+    }
+
     let userInfo: BehaviorSubject<IUserInfo>;
 
     const siteNewsEntryListResponse: ISiteNewsEntryListResponse = {
@@ -47,16 +54,20 @@ describe("ChangelogComponent", () => {
 
         await TestBed.configureTestingModule(
             {
-                imports: [FormsModule],
-                declarations: [ChangelogComponent],
+                imports: [
+                    ChangelogComponent,
+                ],
                 providers: [
                     { provide: NewsService, useValue: newsService },
                     DatePipe,
                     { provide: AuthenticationService, useValue: authenticationService },
                 ],
-                schemas: [NO_ERRORS_SCHEMA],
             })
             .compileComponents();
+        TestBed.overrideComponent(ChangelogComponent, {
+            remove: { imports: [ NgxSpinnerModule ]},
+            add: { imports: [ MockNgxSpinnerComponent ] },
+        });
 
         fixture = TestBed.createComponent(ChangelogComponent);
         component = fixture.componentInstance;

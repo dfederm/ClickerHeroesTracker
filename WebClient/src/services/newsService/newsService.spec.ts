@@ -1,6 +1,6 @@
 import { TestBed, fakeAsync, tick } from "@angular/core/testing";
-import { HttpClientTestingModule, HttpTestingController } from "@angular/common/http/testing";
-import { HttpErrorResponse, HttpHeaders } from "@angular/common/http";
+import { HttpTestingController, provideHttpClientTesting } from "@angular/common/http/testing";
+import { HttpErrorResponse, HttpHeaders, provideHttpClient } from "@angular/common/http";
 
 import { NewsService, ISiteNewsEntryListResponse, ISiteNewsEntry } from "./newsService";
 import { HttpErrorHandlerService } from "../httpErrorHandlerService/httpErrorHandlerService";
@@ -18,18 +18,15 @@ describe("NewsService", () => {
         authenticationService = jasmine.createSpyObj("authenticationService", ["getAuthHeaders"]);
         (authenticationService.getAuthHeaders as jasmine.Spy).and.returnValue(Promise.resolve(new HttpHeaders()));
 
-        TestBed.configureTestingModule(
-            {
-                imports: [
-                    HttpClientTestingModule,
-                ],
-                providers:
-                    [
-                        NewsService,
-                        { provide: HttpErrorHandlerService, useValue: httpErrorHandlerService },
-                        { provide: AuthenticationService, useValue: authenticationService },
-                    ],
-            });
+        TestBed.configureTestingModule({
+            providers: [
+                NewsService,
+                provideHttpClient(),
+                provideHttpClientTesting(),
+                { provide: HttpErrorHandlerService, useValue: httpErrorHandlerService },
+                { provide: AuthenticationService, useValue: authenticationService },
+            ],
+        });
 
         newsService = TestBed.inject(NewsService);
         httpMock = TestBed.inject(HttpTestingController);

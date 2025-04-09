@@ -1,165 +1,181 @@
 <p class="text-muted">
-    Based on the
-    <a href="https://redd.it/4naohc"
-       target="_blank">
-        Math by /u/sugima
-    </a>
+  Based on the
+  <a href="https://redd.it/4naohc"
+    target="_blank">
+    Math by /u/sugima
+  </a>
 </p>
 <fieldset class="mb-3">
-    <legend class="col-form-legend">Suggestion Type</legend>
-    <div class="form-check form-check-inline">
-        <label class="form-check-label">
-            <input class="form-check-input"
-                   type="radio"
-                   name="suggestionType"
-                   [(ngModel)]="suggestionType"
-                   [value]="'AvailableSouls'">
-            <span>Available Souls</span>
-            <span class="text-muted"
-                  placement="right"
-                  container="body"
-                  ngbTooltip="This mode suggests what to buy based on the souls you currently have available">(?)</span>
-        </label>
-    </div>
-    <div class="form-check form-check-inline">
-        <label class="form-check-label">
-            <input class="form-check-input"
-                   type="radio"
-                   name="suggestionType"
-                   [(ngModel)]="suggestionType"
-                   [value]="'RulesOfThumb'">
-            <span>Rules of Thumb</span>
-            <span class="text-muted"
-                  placement="right"
-                  container="body"
-                  ngbTooltip="This shows the optimal levels based on your primary ancient's level. It does not take into account what you can afford currently">(?)</span>
-        </label>
-    </div>
-</fieldset>
-<div *ngIf="suggestionType == 'AvailableSouls'"
-     class="form-check mb-3">
+  <legend class="col-form-legend">Suggestion Type</legend>
+  <div class="form-check form-check-inline">
     <label class="form-check-label">
-        <input class="form-check-input"
-               name="useSoulsFromAscension"
-               [(ngModel)]="useSoulsFromAscension"
-               type="checkbox">
-        <span>Include souls from ascension (+{{ pendingSouls | exponential }})</span>
-    </label>
-</div>
-<div class="mb-3">
-    <button class="btn btn-secondary"
-            [disabled]="suggestionType != 'AvailableSouls' || useSoulsFromAscension"
-            (click)="openAutolevelModal(autolevelModal)">
-        Autolevel
-    </button>
-    <span class="text-muted"
+      <input class="form-check-input"
+        type="radio"
+        name="suggestionType"
+        [(ngModel)]="suggestionType"
+        [value]="'AvailableSouls'">
+        <span>Available Souls</span>
+        <span class="text-muted"
           placement="right"
           container="body"
-          ngbTooltip="The Autolevel feature is only enabled when using available souls and without using souls from ascension">(?)</span>
-    <ng-template #autolevelModal
-                 let-c="close"
-                 let-d="dismiss">
-        <div class="modal-header">
+        ngbTooltip="This mode suggests what to buy based on the souls you currently have available">(?)</span>
+      </label>
+    </div>
+    <div class="form-check form-check-inline">
+      <label class="form-check-label">
+        <input class="form-check-input"
+          type="radio"
+          name="suggestionType"
+          [(ngModel)]="suggestionType"
+          [value]="'RulesOfThumb'">
+          <span>Rules of Thumb</span>
+          <span class="text-muted"
+            placement="right"
+            container="body"
+          ngbTooltip="This shows the optimal levels based on your primary ancient's level. It does not take into account what you can afford currently">(?)</span>
+        </label>
+      </div>
+    </fieldset>
+    @if (suggestionType == 'AvailableSouls') {
+      <div
+        class="form-check mb-3">
+        <label class="form-check-label">
+          <input class="form-check-input"
+            name="useSoulsFromAscension"
+            [(ngModel)]="useSoulsFromAscension"
+            type="checkbox">
+            <span>Include souls from ascension (+{{ pendingSouls | exponential }})</span>
+          </label>
+        </div>
+      }
+      <div class="mb-3">
+        <button class="btn btn-secondary"
+          [disabled]="suggestionType != 'AvailableSouls' || useSoulsFromAscension"
+          (click)="openAutolevelModal(autolevelModal)">
+          Autolevel
+        </button>
+        <span class="text-muted"
+          placement="right"
+          container="body"
+        ngbTooltip="The Autolevel feature is only enabled when using available souls and without using souls from ascension">(?)</span>
+        <ng-template #autolevelModal
+          let-c="close"
+          let-d="dismiss">
+          <div class="modal-header">
             <h4 class="modal-title">Autolevel ancients</h4>
             <button type="button"
-                    class="btn-close"
-                    (click)="d()"></button>
-        </div>
-        <div class="modal-body">
-            <div *ngIf="modalErrorMessage"
-                 class="alert alert-danger">
+              class="btn-close"
+            (click)="d()"></button>
+          </div>
+          <div class="modal-body">
+            @if (modalErrorMessage) {
+              <div
+                class="alert alert-danger">
                 {{ modalErrorMessage }}
-            </div>
+              </div>
+            }
             <ngx-spinner name="modal"
-                         [fullScreen]="false"
-                         type="ball-pulse"></ngx-spinner>
+              [fullScreen]="false"
+            type="ball-pulse"></ngx-spinner>
             <p class="alert alert-warning">
-                This feature is experimental and is considered cheating. Please report any problems via the
-                <a [openDialog]="FeedbackDialogComponent">feedback form</a> or on
-                <a href="https://github.com/dfederm/ClickerHeroesTracker/issues"
-                   target="_blank">Github</a>.
+              This feature is experimental and is considered cheating. Please report any problems via the
+              <a [openDialog]="FeedbackDialogComponent">feedback form</a> or on
+              <a href="https://github.com/dfederm/ClickerHeroesTracker/issues"
+              target="_blank">Github</a>.
             </p>
-            <p *ngIf="autoLeveledSavedGame.isScrubbed"
-               class="alert alert-warning">
+            @if (autoLeveledSavedGame.isScrubbed) {
+              <p
+                class="alert alert-warning">
                 You are either not logged in or this is not your save, so this has been scrubbed of personal data. If used, you will not be logged in and clan information will be gone.
-            </p>
+              </p>
+            }
             <p>
-                Import this into Clicker Heroes:
+              Import this into Clicker Heroes:
             </p>
             <textarea class="form-control"
-                      rows="2"
-                      #rawContent
-                      readonly>{{ autoLeveledSavedGame.content }}</textarea>
-            <button *ngIf="!autoLeveledSavedGame.isScrubbed"
-                    type="button"
-                    class="btn btn-primary"
-                    (click)="saveAutolevel()">Add to Progress</button>
+              rows="2"
+              #rawContent
+            readonly>{{ autoLeveledSavedGame.content }}</textarea>
+            @if (!autoLeveledSavedGame.isScrubbed) {
+              <button
+                type="button"
+                class="btn btn-primary"
+              (click)="saveAutolevel()">Add to Progress</button>
+            }
             <button type="button"
-                    class="btn btn-primary float-right"
-                    [ngxClipboard]="rawContent"
-                    (cbOnSuccess)="c()">Copy to Clipboard</button>
-        </div>
-        <div class="modal-footer">
+              class="btn btn-primary float-right"
+              [ngxClipboard]="rawContent"
+            (cbOnSuccess)="c()">Copy to Clipboard</button>
+          </div>
+          <div class="modal-footer">
             <button type="button"
-                    class="btn btn-secondary"
-                    (click)="d()">Close</button>
-        </div>
-    </ng-template>
-</div>
-<table class="table table-sm table-striped">
-    <thead>
-        <tr>
+              class="btn btn-secondary"
+            (click)="d()">Close</button>
+          </div>
+        </ng-template>
+      </div>
+      <table class="table table-sm table-striped">
+        <thead>
+          <tr>
             <th>Ancient</th>
             <th>Current</th>
             <th>Suggested</th>
             <th>Difference</th>
-        </tr>
-    </thead>
-    <tbody>
-        <tr *ngFor="let ancient of ancients">
-            <td>
+          </tr>
+        </thead>
+        <tbody>
+          @for (ancient of ancients; track ancient) {
+            <tr>
+              <td>
                 {{ ancient.name }}:
-            </td>
+              </td>
 
-            <td class="text-end">
+              <td class="text-end">
                 {{ ancient.ancientLevel | exponential }}
-                <span *ngIf="!ancient.itemLevel.isZero()"
-                      placement="right"
-                      container="body"
-                      ngbTooltip="Effective Level: {{ancient.effectiveLevel | exponential}}">
+                @if (!ancient.itemLevel.isZero()) {
+                  <span
+                    placement="right"
+                    container="body"
+                    ngbTooltip="Effective Level: {{ancient.effectiveLevel | exponential}}">
                     (*)
-                </span>
-            </td>
+                  </span>
+                }
+              </td>
 
-            <td class="text-end">
+              <td class="text-end">
                 {{ ancient.isBase ? "N/A" : ancient.suggestedLevel !== undefined ? (ancient.suggestedLevel | exponential) : "-" }}
-                <span *ngIf="ancient.isBase"
-                      class="text-muted"
-                      placement="right"
-                      container="body"
-                      ngbTooltip="The formulae are based on this ancient. If all suggestions are negative or zero, level this ancient.">
+                @if (ancient.isBase) {
+                  <span
+                    class="text-muted"
+                    placement="right"
+                    container="body"
+                    ngbTooltip="The formulae are based on this ancient. If all suggestions are negative or zero, level this ancient.">
                     (*)
-                </span>
-            </td>
-            <td class="text-end"
+                  </span>
+                }
+              </td>
+              <td class="text-end"
                 [ngClass]="{'copiable font-weight-bold' : ancient.diffCopyValue}"
                 ngxClipboard
                 [cbContent]="ancient.diffCopyValue">
                 <!-- Need to use a separate container as both ngxClipboard and ngbTooltip use the 'container' attribute and they're incompatible -->
                 <div placement="right"
-                     container="body"
-                     ngbTooltip="{{ancient.diffValue !== undefined ? 'Click to copy to clipboard' : ''}}">
-                    {{ ancient.diffValue !== undefined && !ancient.isBase ? (ancient.diffValue | exponential) : "-" }}
+                  container="body"
+                  ngbTooltip="{{ancient.diffValue !== undefined ? 'Click to copy to clipboard' : ''}}">
+                  {{ ancient.diffValue !== undefined && !ancient.isBase ? (ancient.diffValue | exponential) : "-" }}
                 </div>
-            </td>
-        </tr>
-    </tbody>
-    <tfoot *ngIf="this.suggestionType === 'AvailableSouls'">
-        <tr>
-            <th>Hero Souls</th>
-            <td class="text-end">{{ availableSouls | exponential }}</td>
-            <td class="text-end">{{ spentSouls | exponential }}</td>
-            <td class="text-end">{{ remainingSouls | exponential }}</td>
-        </tr>
-    </tfoot>
-</table>
+              </td>
+            </tr>
+          }
+        </tbody>
+        @if (this.suggestionType === 'AvailableSouls') {
+          <tfoot>
+            <tr>
+              <th>Hero Souls</th>
+              <td class="text-end">{{ availableSouls | exponential }}</td>
+              <td class="text-end">{{ spentSouls | exponential }}</td>
+              <td class="text-end">{{ remainingSouls | exponential }}</td>
+            </tr>
+          </tfoot>
+        }
+      </table>

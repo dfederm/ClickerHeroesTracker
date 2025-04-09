@@ -1,8 +1,10 @@
 import { Component, OnInit, Input } from "@angular/core";
-import { NgxSpinnerService } from "ngx-spinner";
+import { NgxSpinnerModule, NgxSpinnerService } from "ngx-spinner";
 
 import { NewsService, ISiteNewsEntryListResponse } from "../../services/newsService/newsService";
 import { AuthenticationService } from "../../services/authenticationService/authenticationService";
+import { FormsModule } from "@angular/forms";
+import { DatePipe } from "@angular/common";
 
 interface IChangelogSectionViewModel {
     date?: Date;
@@ -15,6 +17,12 @@ interface IChangelogSectionViewModel {
 @Component({
     selector: "changelog",
     templateUrl: "./changelog.html",
+    imports: [
+        DatePipe,
+        FormsModule,
+        NgxSpinnerModule,
+    ],
+    standalone: true,
 })
 export class ChangelogComponent implements OnInit {
     public sections: IChangelogSectionViewModel[];

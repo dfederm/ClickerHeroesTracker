@@ -1,33 +1,35 @@
 <div class="container">
-    <div class="row p-5 mb-4 rounded-3">
-        <div class="container-fluid py-5">
-            <h1 class="display-5">Clicker Heroes Tracker</h1>
-            <p class="lead">Try uploading your save to get started</p>
-            <p>
-                <a class="btn btn-primary btn-lg"
-                   [openDialog]="UploadDialogComponent">Upload »</a>
-            </p>
-        </div>
+  <div class="row p-5 mb-4 rounded-3">
+    <div class="container-fluid py-5">
+      <h1 class="display-5">Clicker Heroes Tracker</h1>
+      <p class="lead">Try uploading your save to get started</p>
+      <p>
+        <a class="btn btn-primary btn-lg"
+        [openDialog]="UploadDialogComponent">Upload »</a>
+      </p>
     </div>
-    <div class="row align-items-md-stretch">
-        <div class="col-md-6">
-            <h2>What's New</h2>
-            <changelog [showDates]="false"
-                       [maxEntries]="5"></changelog>
-            <p>
-                <a routerLink="/news"
-                   class="btn btn-secondary">See all »</a>
-            </p>
-        </div>
-        <div *ngIf="userName"
-             class="col-md-6">
-            <h2>Your Recent Uploads:</h2>
-            <uploadsTable [userName]="userName"
-                          [count]="5"></uploadsTable>
-            <p>
-                <a routerLink="/users/{{userName}}/uploads"
-                   class="btn btn-secondary">See all »</a>
-            </p>
-        </div>
+  </div>
+  <div class="row align-items-md-stretch">
+    <div class="col-md-6">
+      <h2>What's New</h2>
+      <changelog [showDates]="false"
+      [maxEntries]="5"></changelog>
+      <p>
+        <a routerLink="/news"
+        class="btn btn-secondary">See all »</a>
+      </p>
     </div>
+    @if (userName) {
+      <div
+        class="col-md-6">
+        <h2>Your Recent Uploads:</h2>
+        <uploadsTable [userName]="userName"
+        [count]="5"></uploadsTable>
+        <p>
+          <a routerLink="/users/{{userName}}/uploads"
+          class="btn btn-secondary">See all »</a>
+        </p>
+      </div>
+    }
+  </div>
 </div>

@@ -1,38 +1,44 @@
 <div class="container">
-    <h2>
-        <a routerLink="/users/{{userName}}">{{ userName }}</a>'s Progress
-    </h2>
-    <div class="btn-group">
-        <button *ngFor="let range of ranges"
-                class="btn btn-primary"
-                [ngClass]="{'disabled': selectedRange === range}"
-                (click)="selectedRange = range">
-            {{ range }}
-        </button>
-    </div>
+  <h2>
+    <a routerLink="/users/{{userName}}">{{ userName }}</a>'s Progress
+  </h2>
+  <div class="btn-group">
+    @for (range of ranges; track range) {
+      <button class="btn btn-primary"
+        [ngClass]="{'disabled': selectedRange === range}"
+        (click)="selectedRange = range">
+        {{ range }}
+      </button>
+    }
+  </div>
 
-    <p *ngIf="isError"
-       class="alert alert-danger">
-        Oops! Something went wrong while fetching progress
+  @if (isError) {
+    <p
+      class="alert alert-danger">
+      Oops! Something went wrong while fetching progress
     </p>
-    <p *ngIf="charts && !charts.length"
-       class="alert alert-warning">
-        This user has no uploaded data for that time period
+  }
+  @if (charts && !charts.length) {
+    <p
+      class="alert alert-warning">
+      This user has no uploaded data for that time period
     </p>
-    <ngx-spinner name="userProgress"
-                 [fullScreen]="false"
-                 type="ball-pulse"></ngx-spinner>
+  }
+  <ngx-spinner name="userProgress"
+    [fullScreen]="false"
+  type="ball-pulse"></ngx-spinner>
 
-    <div class="row">
-        <div *ngFor="let chart of charts"
-             class="col-md-{{chart.isProminent ? '6' : '4'}}">
-            <!-- Height is intended to be 400px, but for some reason the chart is 1.7x what we specify, so use 235 -->
-            <canvas baseChart
-                    height="235"
-                    [type]="'line'"
-                    [datasets]="chart.datasets"
-                    [options]="chart.options">
-            </canvas>
-        </div>
-    </div>
+  <div class="row">
+    @for (chart of charts; track chart) {
+      <div class="col-md-{{chart.isProminent ? '6' : '4'}}">
+        <!-- Height is intended to be 400px, but for some reason the chart is 1.7x what we specify, so use 235 -->
+        <canvas baseChart
+          height="235"
+          [type]="'line'"
+          [datasets]="chart.datasets"
+          [options]="chart.options">
+        </canvas>
+      </div>
+    }
+  </div>
 </div>

@@ -1,6 +1,6 @@
 import { TestBed, fakeAsync, tick } from "@angular/core/testing";
-import { HttpClientTestingModule, HttpTestingController } from "@angular/common/http/testing";
-import { HttpHeaders, HttpErrorResponse } from "@angular/common/http";
+import { HttpTestingController, provideHttpClientTesting } from "@angular/common/http/testing";
+import { HttpHeaders, HttpErrorResponse, provideHttpClient } from "@angular/common/http";
 import { HttpErrorHandlerService } from "../httpErrorHandlerService/httpErrorHandlerService";
 
 import { ClanService, ISendMessageResponse, IClanData, ILeaderboardSummaryListResponse, IMessage } from "./clanService";
@@ -18,18 +18,15 @@ describe("ClanService", () => {
 
         httpErrorHandlerService = jasmine.createSpyObj("httpErrorHandlerService", ["logError"]);
 
-        TestBed.configureTestingModule(
-            {
-                imports: [
-                    HttpClientTestingModule,
+        TestBed.configureTestingModule({
+            providers: [
+                    ClanService,
+                    provideHttpClient(),
+                    provideHttpClientTesting(),
+                    { provide: AuthenticationService, useValue: authenticationService },
+                    { provide: HttpErrorHandlerService, useValue: httpErrorHandlerService },
                 ],
-                providers:
-                    [
-                        ClanService,
-                        { provide: AuthenticationService, useValue: authenticationService },
-                        { provide: HttpErrorHandlerService, useValue: httpErrorHandlerService },
-                    ],
-            });
+        });
 
         clanService = TestBed.inject(ClanService);
         httpMock = TestBed.inject(HttpTestingController);

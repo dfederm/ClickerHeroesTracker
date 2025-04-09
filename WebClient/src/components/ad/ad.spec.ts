@@ -5,6 +5,7 @@ import { Router, Event as NavigationEvent, NavigationEnd, NavigationCancel } fro
 import { Subject } from "rxjs";
 
 import { AdComponent } from "./ad";
+import { AdsenseModule } from "ng2-adsense";
 
 describe("AdComponent", () => {
     let fixture: ComponentFixture<AdComponent>;
@@ -14,8 +15,9 @@ describe("AdComponent", () => {
     @Component({
         selector: "ng-adsense",
         template: "{{ renderNumber }}",
+        standalone: true,
     })
-    class MockAdComponent {
+    class MockAdsenseComponent {
         @Input()
         public adClient: string;
 
@@ -42,15 +44,18 @@ describe("AdComponent", () => {
 
         await TestBed.configureTestingModule(
             {
-                declarations: [
+                imports: [
                     AdComponent,
-                    MockAdComponent,
                 ],
                 providers: [
                     { provide: Router, useValue: router },
                 ],
             })
             .compileComponents();
+        TestBed.overrideComponent(AdComponent, {
+            remove: { imports: [ AdsenseModule ]},
+            add: { imports: [ MockAdsenseComponent ] },
+        });
         fixture = TestBed.createComponent(AdComponent);
     });
 
@@ -82,9 +87,9 @@ describe("AdComponent", () => {
         let ad = fixture.debugElement.query(By.css("ng-adsense"));
         expect(ad).not.toBeNull();
 
-        let mockAdComponent = ad.componentInstance as MockAdComponent;
-        expect(mockAdComponent.adClient).toEqual("ca-pub-7807152857287265");
-        expect(mockAdComponent.adSlot).toEqual(2070554767);
+        let mockAdsenseComponent = ad.componentInstance as MockAdsenseComponent;
+        expect(mockAdsenseComponent.adClient).toEqual("ca-pub-7807152857287265");
+        expect(mockAdsenseComponent.adSlot).toEqual(2070554767);
         expect(ad.nativeElement.textContent).toEqual(expectedTimesRendered.toString());
         expect(timesRendered).toEqual(expectedTimesRendered);
     }

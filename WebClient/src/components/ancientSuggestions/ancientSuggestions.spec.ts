@@ -1,8 +1,7 @@
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { AncientSuggestionsComponent } from "./ancientSuggestions";
 import { By } from "@angular/platform-browser";
-import { FormsModule } from "@angular/forms";
-import { NO_ERRORS_SCHEMA, DebugElement, Pipe, PipeTransform } from "@angular/core";
+import { DebugElement, Pipe, PipeTransform } from "@angular/core";
 import { LoggingService } from "../../services/loggingService/loggingService";
 import { BehaviorSubject } from "rxjs";
 import { SettingsService } from "../../services/settingsService/settingsService";
@@ -12,6 +11,7 @@ import { Decimal } from "decimal.js";
 import { UploadService } from "../../services/uploadService/uploadService";
 import { NgbModal, NgbModalRef } from "@ng-bootstrap/ng-bootstrap";
 import { Router } from "@angular/router";
+import { ExponentialPipe } from "src/pipes/exponentialPipe";
 
 describe("AncientSuggestionsComponent", () => {
     let fixture: ComponentFixture<AncientSuggestionsComponent>;
@@ -117,7 +117,10 @@ describe("AncientSuggestionsComponent", () => {
 
     const exponentialPipeTransform = (value: string | Decimal) => "exponentialPipe(" + value + ")";
 
-    @Pipe({ name: 'exponential' })
+    @Pipe({
+        name: 'exponential',
+        standalone: true,
+    })
     class MockExponentialPipe implements PipeTransform {
         public transform = exponentialPipeTransform;
     }
@@ -135,10 +138,8 @@ describe("AncientSuggestionsComponent", () => {
 
         await TestBed.configureTestingModule(
             {
-                imports: [FormsModule],
-                declarations: [
+                imports: [
                     AncientSuggestionsComponent,
-                    MockExponentialPipe,
                 ],
                 providers: [
                     { provide: LoggingService, useValue: loggingService },
@@ -147,9 +148,12 @@ describe("AncientSuggestionsComponent", () => {
                     { provide: Router, useValue: router },
                     { provide: UploadService, useValue: uploadService },
                 ],
-                schemas: [NO_ERRORS_SCHEMA],
             })
             .compileComponents();
+        TestBed.overrideComponent(AncientSuggestionsComponent, {
+            remove: { imports: [ ExponentialPipe ] },
+            add: { imports: [ MockExponentialPipe ] }
+        });
 
         fixture = TestBed.createComponent(AncientSuggestionsComponent);
         component = fixture.componentInstance;

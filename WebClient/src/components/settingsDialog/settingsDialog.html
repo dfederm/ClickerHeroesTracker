@@ -1,216 +1,234 @@
 <div class="modal-header">
-    <h4 class="modal-title">Settings</h4>
-    <button type="button"
-            class="btn-close"
-            (click)="activeModal.dismiss()"></button>
+  <h4 class="modal-title">Settings</h4>
+  <button type="button"
+    class="btn-close"
+  (click)="activeModal.dismiss()"></button>
 </div>
 <div class="modal-body">
-    <div *ngIf="error"
-         class="alert alert-danger">
-        {{ error }}
+  @if (error) {
+    <div
+      class="alert alert-danger">
+      {{ error }}
     </div>
-    <ngx-spinner name="settingsDialog"
-                 [fullScreen]="false"
-                 type="ball-pulse"></ngx-spinner>
-    <div class="row mb-3">
-        <div class="col-sm-8 col-form-label">
-            Play Style
-            <a href="https://www.reddit.com/r/ClickerHeroes/wiki/introduction#wiki_types_of_playstyle_builds"
-               target="_blank"
-               class="text-muted"
-               placement="right"
-               container="body"
-               ngbTooltip="This is how you play the game. Click for details on Idle and Active. Hybrid is basically Idle but using all cooldowns before ascending.">(?)</a>
-        </div>
-        <div class="col-sm-4">
-            <select class="form-select"
-                    [(ngModel)]="settings.playStyle"
-                    (change)="setSetting('playStyle', settings.playStyle)"
-                    [disabled]="isSettingPending.playStyle">
-                <option *ngFor="let p of playStyles"
-                        [ngValue]="p">{{ p | titlecase }}</option>
-            </select>
-        </div>
+  }
+  <ngx-spinner name="settingsDialog"
+    [fullScreen]="false"
+  type="ball-pulse"></ngx-spinner>
+  <div class="row mb-3">
+    <div class="col-sm-8 col-form-label">
+      Play Style
+      <a href="https://www.reddit.com/r/ClickerHeroes/wiki/introduction#wiki_types_of_playstyle_builds"
+        target="_blank"
+        class="text-muted"
+        placement="right"
+        container="body"
+      ngbTooltip="This is how you play the game. Click for details on Idle and Active. Hybrid is basically Idle but using all cooldowns before ascending.">(?)</a>
     </div>
-    <div *ngIf="settings.playStyle === 'hybrid'"
-         class="row mb-3">
-        <label for="hybridRatio"
-               class="col-sm-8 col-form-label">
-            Hybrid Ratio
-            <a class="text-muted"
-               placement="right"
-               container="body"
-               ngbTooltip="This is the ratio to use for leveling idle and active ancients. 100 would mean 100:1 Siya:Frags (focusing idle), while 0.01 would mean 1:100 (focusing active).">(?)</a>
-        </label>
-        <div class="col-sm-4">
-            <input type="number"
-                   min="0"
-                   step="any"
-                   class="form-control"
-                   id="hybridRatio"
-                   name="hybridRatio"
-                   [(ngModel)]="settings.hybridRatio"
-                   (keyup.enter)="setSetting('hybridRatio', settings.hybridRatio)"
-                   (blur)="setSetting('hybridRatio', settings.hybridRatio)"
-                   [disabled]="isSettingPending.hybridRatio" />
-        </div>
+    <div class="col-sm-4">
+      <select class="form-select"
+        [(ngModel)]="settings.playStyle"
+        (change)="setSetting('playStyle', settings.playStyle)"
+        [disabled]="isSettingPending.playStyle">
+        @for (p of playStyles; track p) {
+          <option [ngValue]="p">{{ p | titlecase }}</option>
+        }
+      </select>
     </div>
-    <div *ngIf="settings.playStyle !== 'idle'"
-         class="row mb-3">
+  </div>
+  @if (settings.playStyle === 'hybrid') {
+    <div
+      class="row mb-3">
+      <label for="hybridRatio"
+        class="col-sm-8 col-form-label">
+        Hybrid Ratio
+        <a class="text-muted"
+          placement="right"
+          container="body"
+        ngbTooltip="This is the ratio to use for leveling idle and active ancients. 100 would mean 100:1 Siya:Frags (focusing idle), while 0.01 would mean 1:100 (focusing active).">(?)</a>
+      </label>
+      <div class="col-sm-4">
+        <input type="number"
+          min="0"
+          step="any"
+          class="form-control"
+          id="hybridRatio"
+          name="hybridRatio"
+          [(ngModel)]="settings.hybridRatio"
+          (keyup.enter)="setSetting('hybridRatio', settings.hybridRatio)"
+          (blur)="setSetting('hybridRatio', settings.hybridRatio)"
+          [disabled]="isSettingPending.hybridRatio" />
+        </div>
+      </div>
+    }
+    @if (settings.playStyle !== 'idle') {
+      <div
+        class="row mb-3">
         <label for="shouldLevelSkillAncients"
-               class="col-sm-8 col-form-label">
-            Show suggestions for skill ancients (includes Vaagur and Revolc)
+          class="col-sm-8 col-form-label">
+          Show suggestions for skill ancients (includes Vaagur and Revolc)
         </label>
         <div class="col-sm-4 form-switch fs-2 text-end">
-            <input [(ngModel)]="settings.shouldLevelSkillAncients"
-                   class="form-check-input"
-                   type="checkbox"
-                   role="switch"
-                   id="shouldLevelSkillAncients"
-                   [disabled]="isSettingPending.shouldLevelSkillAncients"
-                   (ngModelChange)="setSetting('shouldLevelSkillAncients', settings.shouldLevelSkillAncients)" />
+          <input [(ngModel)]="settings.shouldLevelSkillAncients"
+            class="form-check-input"
+            type="checkbox"
+            role="switch"
+            id="shouldLevelSkillAncients"
+            [disabled]="isSettingPending.shouldLevelSkillAncients"
+            (ngModelChange)="setSetting('shouldLevelSkillAncients', settings.shouldLevelSkillAncients)" />
+          </div>
         </div>
-    </div>
-    <div *ngIf="settings.playStyle !== 'idle' && settings.shouldLevelSkillAncients"
-         class="row mb-3">
-        <div class="col-sm-8 col-form-label">
+      }
+      @if (settings.playStyle !== 'idle' && settings.shouldLevelSkillAncients) {
+        <div
+          class="row mb-3">
+          <div class="col-sm-8 col-form-label">
             Ancient which skill ancients suggestions are based on
-        </div>
-        <div class="col-sm-4">
+          </div>
+          <div class="col-sm-4">
             <select class="form-select"
-                    [(ngModel)]="settings.skillAncientBaseAncient"
-                    (change)="setSetting('skillAncientBaseAncient', settings.skillAncientBaseAncient)"
-                    [disabled]="isSettingPending.skillAncientBaseAncient">
-                <option *ngFor="let a of skillAncientBaseAncients"
-                        [ngValue]="a.id">{{ a.name }}</option>
+              [(ngModel)]="settings.skillAncientBaseAncient"
+              (change)="setSetting('skillAncientBaseAncient', settings.skillAncientBaseAncient)"
+              [disabled]="isSettingPending.skillAncientBaseAncient">
+              @for (a of skillAncientBaseAncients; track a) {
+                <option [ngValue]="a.id">{{ a.name }}</option>
+              }
             </select>
+          </div>
         </div>
-    </div>
-    <div *ngIf="settings.playStyle !== 'idle' && settings.shouldLevelSkillAncients"
-         class="row mb-3">
-        <label for="skillAncientLevelDiff"
-               class="col-sm-8 col-form-label">
+      }
+      @if (settings.playStyle !== 'idle' && settings.shouldLevelSkillAncients) {
+        <div
+          class="row mb-3">
+          <label for="skillAncientLevelDiff"
+            class="col-sm-8 col-form-label">
             Number of levels skill ancients should be higher/lower than the ancient they're based on
-        </label>
-        <div class="col-sm-4">
+          </label>
+          <div class="col-sm-4">
             <input type="number"
-                   class="form-control"
-                   id="skillAncientLevelDiff"
-                   name="skillAncientLevelDiff"
-                   [(ngModel)]="settings.skillAncientLevelDiff"
-                   (keyup.enter)="setSetting('skillAncientLevelDiff', settings.skillAncientLevelDiff)"
-                   (blur)="setSetting('skillAncientLevelDiff', settings.skillAncientLevelDiff)"
-                   [disabled]="isSettingPending.skillAncientLevelDiff" />
-        </div>
-    </div>
-    <div class="row mb-3">
-        <label for="useScientificNotation"
-               class="col-sm-8 col-form-label">
+              class="form-control"
+              id="skillAncientLevelDiff"
+              name="skillAncientLevelDiff"
+              [(ngModel)]="settings.skillAncientLevelDiff"
+              (keyup.enter)="setSetting('skillAncientLevelDiff', settings.skillAncientLevelDiff)"
+              (blur)="setSetting('skillAncientLevelDiff', settings.skillAncientLevelDiff)"
+              [disabled]="isSettingPending.skillAncientLevelDiff" />
+            </div>
+          </div>
+        }
+        <div class="row mb-3">
+          <label for="useScientificNotation"
+            class="col-sm-8 col-form-label">
             Use scientific notation
-        </label>
-        <div class="col-sm-4 form-switch fs-2 text-end">
+          </label>
+          <div class="col-sm-4 form-switch fs-2 text-end">
             <input [(ngModel)]="settings.useScientificNotation"
-                   class="form-check-input"
-                   type="checkbox"
-                   role="switch"
-                   id="useScientificNotation"
-                   [disabled]="isSettingPending.useScientificNotation"
-                   (ngModelChange)="setSetting('useScientificNotation', settings.useScientificNotation)" />
-        </div>
-    </div>
-    <div *ngIf="settings.useScientificNotation"
-         class="row mb-3">
-        <label for="scientificNotationThreshold"
-               class="col-sm-8 col-form-label">
-            Scientific notation threshold
-            <a class="text-muted"
-               placement="right"
-               container="body"
-               ngbTooltip="The value at which to start showing numbers in scientific notation. Use &quot;0&quot; to always use it.">(?)</a>
-        </label>
-        <div class="col-sm-4">
-            <input type="number"
-                   class="form-control"
-                   id="scientificNotationThreshold"
-                   name="scientificNotationThreshold"
-                   [(ngModel)]="settings.scientificNotationThreshold"
-                   (keyup.enter)="setSetting('scientificNotationThreshold', settings.scientificNotationThreshold)"
-                   (blur)="setSetting('scientificNotationThreshold', settings.scientificNotationThreshold)"
-                   [disabled]="isSettingPending.scientificNotationThreshold" />
-        </div>
-    </div>
-    <div class="row mb-3">
-        <label for="useLogarithmicGraphScale"
-               class="col-sm-8 col-form-label">
-            Use logarithmic scale for graphs
-        </label>
-        <div class="col-sm-4 form-switch fs-2 text-end">
-            <input [(ngModel)]="settings.useLogarithmicGraphScale"
-                   class="form-check-input"
-                   type="checkbox"
-                   role="switch"
-                   id="useLogarithmicGraphScale"
-                   [disabled]="isSettingPending.useLogarithmicGraphScale"
-                   (ngModelChange)="setSetting('useLogarithmicGraphScale', settings.useLogarithmicGraphScale)" />
-        </div>
-    </div>
-    <div *ngIf="settings.useLogarithmicGraphScale"
-         class="row mb-3">
-        <label for="logarithmicGraphScaleThreshold"
-               class="col-sm-8 col-form-label">
-            Logarithmic scale threshold
-            <a class="text-muted"
-               placement="right"
-               container="body"
-               ngbTooltip="The range (max - min values) a graph must be to start using logarithmic scale. Use &quot;0&quot; to always use it.">(?)</a>
-        </label>
-        <div class="col-sm-4">
-            <input type="number"
-                   class="form-control"
-                   id="logarithmicGraphScaleThreshold"
-                   name="logarithmicGraphScaleThreshold"
-                   (keyup.enter)="setSetting('logarithmicGraphScaleThreshold', settings.logarithmicGraphScaleThreshold)"
-                   (blur)="setSetting('logarithmicGraphScaleThreshold', settings.logarithmicGraphScaleThreshold)"
-                   [(ngModel)]="settings.logarithmicGraphScaleThreshold"
-                   [disabled]="isSettingPending.logarithmicGraphScaleThreshold" />
-        </div>
-    </div>
-    <div class="row mb-3">
-        <div class="col-sm-8 col-form-label">
-            Graph Spacing Type
-            <a class="text-muted"
-               placement="right"
-               container="body"
-               ngbTooltip="This determines the x-axis for graphs. 'Time' will show progress over time while 'Ascension' will show progress per ascension.">(?)</a>
-        </div>
-        <div class="col-sm-4">
-            <select class="form-select"
-                    [(ngModel)]="settings.graphSpacingType"
-                    (change)="setSetting('graphSpacingType', settings.graphSpacingType)"
-                    [disabled]="isSettingPending.graphSpacingType">
-                <option *ngFor="let t of graphSpacingTypes"
-                        [ngValue]="t">{{ t | titlecase }}</option>
-            </select>
-        </div>
-    </div>
-    <div class="row mb-3">
-        <div class="col-sm-8 col-form-label">
-            Site theme
-        </div>
-        <div class="col-sm-4">
-            <select class="form-select"
-                    [(ngModel)]="settings.theme"
-                    (change)="setSetting('theme', settings.theme)"
-                    [disabled]="isSettingPending.theme">
-                <option *ngFor="let t of themes"
-                        [ngValue]="t">{{ t | titlecase }}</option>
-            </select>
-        </div>
-    </div>
-</div>
-<div class="modal-footer">
-    <p>
-        <a [openDialog]="ChangePasswordDialogComponent"
-           [dismissCurrentDialog]="true">Change password or other log in options?</a>
-    </p>
-</div>
+              class="form-check-input"
+              type="checkbox"
+              role="switch"
+              id="useScientificNotation"
+              [disabled]="isSettingPending.useScientificNotation"
+              (ngModelChange)="setSetting('useScientificNotation', settings.useScientificNotation)" />
+            </div>
+          </div>
+          @if (settings.useScientificNotation) {
+            <div
+              class="row mb-3">
+              <label for="scientificNotationThreshold"
+                class="col-sm-8 col-form-label">
+                Scientific notation threshold
+                <a class="text-muted"
+                  placement="right"
+                  container="body"
+                ngbTooltip="The value at which to start showing numbers in scientific notation. Use &quot;0&quot; to always use it.">(?)</a>
+              </label>
+              <div class="col-sm-4">
+                <input type="number"
+                  class="form-control"
+                  id="scientificNotationThreshold"
+                  name="scientificNotationThreshold"
+                  [(ngModel)]="settings.scientificNotationThreshold"
+                  (keyup.enter)="setSetting('scientificNotationThreshold', settings.scientificNotationThreshold)"
+                  (blur)="setSetting('scientificNotationThreshold', settings.scientificNotationThreshold)"
+                  [disabled]="isSettingPending.scientificNotationThreshold" />
+                </div>
+              </div>
+            }
+            <div class="row mb-3">
+              <label for="useLogarithmicGraphScale"
+                class="col-sm-8 col-form-label">
+                Use logarithmic scale for graphs
+              </label>
+              <div class="col-sm-4 form-switch fs-2 text-end">
+                <input [(ngModel)]="settings.useLogarithmicGraphScale"
+                  class="form-check-input"
+                  type="checkbox"
+                  role="switch"
+                  id="useLogarithmicGraphScale"
+                  [disabled]="isSettingPending.useLogarithmicGraphScale"
+                  (ngModelChange)="setSetting('useLogarithmicGraphScale', settings.useLogarithmicGraphScale)" />
+                </div>
+              </div>
+              @if (settings.useLogarithmicGraphScale) {
+                <div
+                  class="row mb-3">
+                  <label for="logarithmicGraphScaleThreshold"
+                    class="col-sm-8 col-form-label">
+                    Logarithmic scale threshold
+                    <a class="text-muted"
+                      placement="right"
+                      container="body"
+                    ngbTooltip="The range (max - min values) a graph must be to start using logarithmic scale. Use &quot;0&quot; to always use it.">(?)</a>
+                  </label>
+                  <div class="col-sm-4">
+                    <input type="number"
+                      class="form-control"
+                      id="logarithmicGraphScaleThreshold"
+                      name="logarithmicGraphScaleThreshold"
+                      (keyup.enter)="setSetting('logarithmicGraphScaleThreshold', settings.logarithmicGraphScaleThreshold)"
+                      (blur)="setSetting('logarithmicGraphScaleThreshold', settings.logarithmicGraphScaleThreshold)"
+                      [(ngModel)]="settings.logarithmicGraphScaleThreshold"
+                      [disabled]="isSettingPending.logarithmicGraphScaleThreshold" />
+                    </div>
+                  </div>
+                }
+                <div class="row mb-3">
+                  <div class="col-sm-8 col-form-label">
+                    Graph Spacing Type
+                    <a class="text-muted"
+                      placement="right"
+                      container="body"
+                    ngbTooltip="This determines the x-axis for graphs. 'Time' will show progress over time while 'Ascension' will show progress per ascension.">(?)</a>
+                  </div>
+                  <div class="col-sm-4">
+                    <select class="form-select"
+                      [(ngModel)]="settings.graphSpacingType"
+                      (change)="setSetting('graphSpacingType', settings.graphSpacingType)"
+                      [disabled]="isSettingPending.graphSpacingType">
+                      @for (t of graphSpacingTypes; track t) {
+                        <option [ngValue]="t">{{ t | titlecase }}</option>
+                      }
+                    </select>
+                  </div>
+                </div>
+                <div class="row mb-3">
+                  <div class="col-sm-8 col-form-label">
+                    Site theme
+                  </div>
+                  <div class="col-sm-4">
+                    <select class="form-select"
+                      [(ngModel)]="settings.theme"
+                      (change)="setSetting('theme', settings.theme)"
+                      [disabled]="isSettingPending.theme">
+                      @for (t of themes; track t) {
+                        <option [ngValue]="t">{{ t | titlecase }}</option>
+                      }
+                    </select>
+                  </div>
+                </div>
+              </div>
+              <div class="modal-footer">
+                <p>
+                  <a [openDialog]="ChangePasswordDialogComponent"
+                  [dismissCurrentDialog]="true">Change password or other log in options?</a>
+                </p>
+              </div>

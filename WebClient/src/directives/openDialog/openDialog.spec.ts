@@ -1,4 +1,4 @@
-import { NO_ERRORS_SCHEMA, Component, DebugElement } from "@angular/core";
+import { Component, DebugElement } from "@angular/core";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { By } from "@angular/platform-browser";
 import { NgbModal, NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
@@ -13,6 +13,7 @@ describe("OpenDialogDirective", () => {
     @Component({
         template: "someDialogContent",
         selector: "mockDialog",
+        standalone: true,
     })
     class MockDialogComponent { }
 
@@ -20,6 +21,10 @@ describe("OpenDialogDirective", () => {
     @Component({
         template: "<a [openDialog]=\"MockDialogComponent\" [dismissCurrentDialog]=\"dismissCurrentDialog\" ></a>",
         selector: "mock",
+        imports: [
+            OpenDialogDirective,
+        ],
+        standalone: true,
     })
     class MockComponent {
         public MockDialogComponent = MockDialogComponent;
@@ -31,18 +36,14 @@ describe("OpenDialogDirective", () => {
         let activeModal = { dismiss: (): void => void 0 };
         fixture = TestBed.configureTestingModule(
             {
-                declarations:
-                    [
-                        OpenDialogDirective,
-                        MockComponent,
-                        MockDialogComponent,
-                    ],
-                providers:
-                    [
-                        { provide: NgbModal, useValue: modalService },
-                        { provide: NgbActiveModal, useValue: activeModal },
-                    ],
-                schemas: [NO_ERRORS_SCHEMA],
+                imports: [
+                    MockComponent,
+                    MockDialogComponent,
+                ],
+                providers: [
+                    { provide: NgbModal, useValue: modalService },
+                    { provide: NgbActiveModal, useValue: activeModal },
+                ],
             })
             .createComponent(MockComponent);
 

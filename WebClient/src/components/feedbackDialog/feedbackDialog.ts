@@ -3,11 +3,19 @@ import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
 
 import { AuthenticationService, IUserInfo } from "../../services/authenticationService/authenticationService";
 import { FeedbackService } from "../../services/feedbackService/feedbackService";
-import { NgxSpinnerService } from "ngx-spinner";
+import { NgxSpinnerModule, NgxSpinnerService } from "ngx-spinner";
+import { FormsModule } from "@angular/forms";
+import { ValidateEqualModule } from "ng-validate-equal";
 
 @Component({
     selector: "feedback",
     templateUrl: "./feedbackDialog.html",
+    imports: [
+        FormsModule,
+        NgxSpinnerModule,
+        ValidateEqualModule,
+    ],
+    standalone: true,
 })
 export class FeedbackDialogComponent implements OnInit {
     public errorMessage: string;

@@ -1,16 +1,37 @@
 import { Component, OnInit } from "@angular/core";
-import { ActivatedRoute, Router } from "@angular/router";
+import { ActivatedRoute, Router, RouterLink } from "@angular/router";
 import { UploadService, IUpload } from "../../services/uploadService/uploadService";
 import { AuthenticationService, IUserInfo } from "../../services/authenticationService/authenticationService";
 import { Decimal } from "decimal.js";
-import { NgbModal } from "@ng-bootstrap/ng-bootstrap";
+import { NgbModal, NgbNavModule } from "@ng-bootstrap/ng-bootstrap";
 import { switchMap } from "rxjs/operators";
 import { SavedGame } from "../../models/savedGame";
-import { NgxSpinnerService } from "ngx-spinner";
+import { NgxSpinnerModule, NgxSpinnerService } from "ngx-spinner";
+import { AscensionZoneComponent } from "../ascensionZone/ascensionZone";
+import { ExponentialPipe } from "src/pipes/exponentialPipe";
+import { DatePipe, NgTemplateOutlet, PercentPipe, TitleCasePipe } from "@angular/common";
+import { OutsiderSuggestionsComponent } from "../outsiderSuggestions/outsiderSuggestions";
+import { AncientSuggestionsComponent } from "../ancientSuggestions/ancientSuggestions";
+import { ClipboardModule } from "ngx-clipboard";
 
 @Component({
     selector: "upload",
     templateUrl: "./upload.html",
+    imports: [
+      AncientSuggestionsComponent,
+      AscensionZoneComponent,
+      ClipboardModule,
+      DatePipe,
+      ExponentialPipe,
+      NgTemplateOutlet,
+      NgbNavModule,
+      NgxSpinnerModule,
+      OutsiderSuggestionsComponent,
+      PercentPipe,
+      RouterLink,
+      TitleCasePipe,
+    ],
+    standalone: true,
 })
 export class UploadComponent implements OnInit {
     public userInfo: IUserInfo;
@@ -59,7 +80,10 @@ export class UploadComponent implements OnInit {
                 this.spinnerService.show("upload");
                 return this.uploadService.get(+params.id);
             }),
-        ).subscribe(upload => this.handleUpload(upload), () => this.handleError("There was a problem getting that upload"));
+        ).subscribe({
+            next: upload => this.handleUpload(upload),
+            error: () => this.handleError("There was a problem getting that upload")
+        });
     }
 
     public openModal(modal: {}): void {

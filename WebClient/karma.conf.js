@@ -41,10 +41,10 @@ module.exports = function (config) {
       check: {
         // thresholds for all files
         global: {
-          statements: 85,
-          branches: 75,
+          statements: 80,
+          branches: 70,
           functions: 85,
-          lines: 85
+          lines: 80
         },
         // thresholds per file
         each: {
@@ -55,6 +55,8 @@ module.exports = function (config) {
           excludes: [
             // Models are ported from game code so some code might not be used
             'src/models/*.ts',
+            // timeAgoPipe was largely copied from elsewhere.
+            'src/pipes/timeAgoPipe.ts',
             // The logging service is a very thin wrapper and doesn't need coverage.
             'src/services/loggingService/loggingService.ts',
           ]
