@@ -18,20 +18,19 @@ import { ClipboardModule } from "ngx-clipboard";
     selector: "upload",
     templateUrl: "./upload.html",
     imports: [
-      AncientSuggestionsComponent,
-      AscensionZoneComponent,
-      ClipboardModule,
-      DatePipe,
-      ExponentialPipe,
-      NgTemplateOutlet,
-      NgbNavModule,
-      NgxSpinnerModule,
-      OutsiderSuggestionsComponent,
-      PercentPipe,
-      RouterLink,
-      TitleCasePipe,
-    ],
-    standalone: true,
+        AncientSuggestionsComponent,
+        AscensionZoneComponent,
+        ClipboardModule,
+        DatePipe,
+        ExponentialPipe,
+        NgTemplateOutlet,
+        NgbNavModule,
+        NgxSpinnerModule,
+        OutsiderSuggestionsComponent,
+        PercentPipe,
+        RouterLink,
+        TitleCasePipe,
+    ]
 })
 export class UploadComponent implements OnInit {
     public userInfo: IUserInfo;

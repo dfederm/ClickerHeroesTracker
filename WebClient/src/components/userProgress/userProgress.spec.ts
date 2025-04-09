@@ -20,7 +20,7 @@ describe("UserProgressComponent", () => {
     let routeParams: BehaviorSubject<Params>;
     let queryParams: BehaviorSubject<Params>;
 
-    @Component({ selector: "ngx-spinner", template: "", standalone: true })
+    @Component({ selector: "ngx-spinner", template: "" })
     class MockNgxSpinnerComponent {
         @Input()
         public fullScreen: boolean;
@@ -28,7 +28,6 @@ describe("UserProgressComponent", () => {
 
     @Directive({
         selector: "canvas[baseChart]",
-        standalone: true,
     })
     class MockBaseChartDirective {
         @Input()

@@ -13,7 +13,7 @@ import { NgxSpinnerModule, NgxSpinnerService } from "ngx-spinner";
 describe("ExternalLoginsComponent", () => {
     let component: ExternalLoginsComponent;
 
-    @Component({ selector: "ngx-spinner", template: "", standalone: true })
+    @Component({ selector: "ngx-spinner", template: "" })
     class MockNgxSpinnerComponent {
         @Input()
         public fullScreen: boolean;

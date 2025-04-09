@@ -25,8 +25,7 @@ interface IChartViewModel {
         NgClass,
         NgxSpinnerModule,
         RouterLink,
-    ],
-    standalone: true,
+    ]
 })
 export class UserCompareComponent implements OnInit {
     private static readonly timeRanges = [

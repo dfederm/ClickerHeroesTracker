@@ -23,8 +23,7 @@ import { FormsModule } from "@angular/forms";
         RouterLink,
         TimeAgoPipe,
         TitleCasePipe,
-    ],
-    standalone: true,
+    ]
 })
 export class ClanComponent implements OnInit {
     public isClanInformationError = false;

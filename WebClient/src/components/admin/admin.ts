@@ -21,8 +21,7 @@ export interface IPruneInvalidAuthTokensRequest {
         NgbProgressbar,
         NgxSpinnerModule,
         PercentPipe,
-    ],
-    standalone: true,
+    ]
 })
 export class AdminComponent implements OnInit {
     public static numParallelDeletes = 10;

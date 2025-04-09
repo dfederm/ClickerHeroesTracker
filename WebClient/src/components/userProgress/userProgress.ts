@@ -25,8 +25,7 @@ interface IChartViewModel {
         NgClass,
         NgxSpinnerModule,
         RouterLink,
-    ],
-    standalone: true,
+    ]
 })
 export class UserProgressComponent implements OnInit {
     private static readonly timeRanges = [

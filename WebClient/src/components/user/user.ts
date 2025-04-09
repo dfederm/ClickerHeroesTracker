@@ -18,15 +18,14 @@ interface IProgressViewModel {
 }
 
 @Component({
-  selector: "user",
-  templateUrl: "./user.html",
-  imports: [
-    NgChartsModule,
-    NgxSpinnerModule,
-    RouterLink,
-    UploadsTableComponent,
-  ],
-  standalone: true,
+    selector: "user",
+    templateUrl: "./user.html",
+    imports: [
+        NgChartsModule,
+        NgxSpinnerModule,
+        RouterLink,
+        UploadsTableComponent,
+    ]
 })
 export class UserComponent implements OnInit {
   public userName: string;

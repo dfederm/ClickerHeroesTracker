@@ -18,13 +18,13 @@ import { NgChartsModule } from "ng2-charts";
 describe("UserComponent", () => {
     let fixture: ComponentFixture<UserComponent>;
 
-    @Component({ selector: "ngx-spinner", template: "", standalone: true })
+    @Component({ selector: "ngx-spinner", template: "" })
     class MockNgxSpinnerComponent {
         @Input()
         public fullScreen: boolean;
     }
 
-    @Component({ selector: "uploadsTable", template: "", standalone: true })
+    @Component({ selector: "uploadsTable", template: "" })
     class MockUploadsTableComponent {
         @Input()
         public userName: string;
@@ -35,7 +35,6 @@ describe("UserComponent", () => {
 
     @Directive({
         selector: "canvas[baseChart]",
-        standalone: true,
     })
     class MockBaseChartDirective {
         @Input()
