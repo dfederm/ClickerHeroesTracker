@@ -1,4 +1,4 @@
-import { TestBed, fakeAsync, tick, discardPeriodicTasks } from "@angular/core/testing";
+import { TestBed, fakeAsync, tick } from "@angular/core/testing";
 import { HttpTestingController, provideHttpClientTesting, TestRequest } from "@angular/common/http/testing";
 import { HttpHeaders, provideHttpClient } from "@angular/common/http";
 import { BehaviorSubject } from "rxjs";
@@ -58,9 +58,13 @@ describe("SettingsService", () => {
 
     describe("settings", () => {
         it("should return default settings initially when there is no cached data", fakeAsync(() => {
-            let settingsLog = createService();
+            let settingsService = TestBed.inject(SettingsService);
+            let settingsLog = getSettingsLog(settingsService);
+
             expect(settingsLog.length).toEqual(1);
             expect(settingsLog[0]).toEqual(SettingsService.defaultSettings);
+
+            settingsService.ngOnDestroy();
         }));
 
         it("should return cached settings initially when there is cached data and the user is not logged in", fakeAsync(() => {
@@ -79,12 +83,15 @@ describe("SettingsService", () => {
             };
             (localStorage.getItem as jasmine.Spy).and.returnValue(JSON.stringify(expectedSettings));
 
-            let settingsLog = createService();
+            let settingsService = TestBed.inject(SettingsService);
+            let settingsLog = getSettingsLog(settingsService);
 
             expect(settingsLog.length).toEqual(1);
             expect(settingsLog[0]).toEqual(expectedSettings);
             expect(localStorage.getItem).toHaveBeenCalledWith(SettingsService.settingsKey);
             expect(localStorage.removeItem).not.toHaveBeenCalled();
+
+            settingsService.ngOnDestroy();
         }));
 
         it("should return cached settings initially when there is cached data and the user is logged in", fakeAsync(() => {
@@ -104,7 +111,9 @@ describe("SettingsService", () => {
             (localStorage.getItem as jasmine.Spy).and.returnValue(JSON.stringify(expectedSettings));
 
             userInfo.next(loggedInUser);
-            let settingsLog = createService();
+
+            let settingsService = TestBed.inject(SettingsService);
+            let settingsLog = getSettingsLog(settingsService);
 
             // Tick the getAuthHeaders call
             tick();
@@ -116,11 +125,15 @@ describe("SettingsService", () => {
             expect(settingsLog[0]).toEqual(expectedSettings);
             expect(localStorage.getItem).toHaveBeenCalledWith(SettingsService.settingsKey);
             expect(localStorage.removeItem).not.toHaveBeenCalled();
+
+            settingsService.ngOnDestroy();
         }));
 
         it("should return settings when logged in", fakeAsync(() => {
             userInfo.next(loggedInUser);
-            let settingsLog = createService();
+
+            let settingsService = TestBed.inject(SettingsService);
+            let settingsLog = getSettingsLog(settingsService);
 
             // Tick the getAuthHeaders call, but don't tick longer than the refresh interval
             tick(1);
@@ -133,13 +146,14 @@ describe("SettingsService", () => {
             expect(settingsLog[1]).toEqual(expectedSettings);
             expect(localStorage.setItem).toHaveBeenCalledWith(SettingsService.settingsKey, JSON.stringify(expectedSettings));
 
-            // An interval was started, so abandon it.
-            discardPeriodicTasks();
+            settingsService.ngOnDestroy();
         }));
 
         it("should return default settings after logging out", fakeAsync(() => {
             userInfo.next(loggedInUser);
-            let settingsLog = createService();
+
+            let settingsService = TestBed.inject(SettingsService);
+            let settingsLog = getSettingsLog(settingsService);
 
             // Tick the getAuthHeaders call, but don't tick longer than the refresh interval
             tick(1);
@@ -155,11 +169,15 @@ describe("SettingsService", () => {
 
             // The cache is cleared
             expect(localStorage.removeItem).toHaveBeenCalledWith(SettingsService.settingsKey);
+
+            settingsService.ngOnDestroy();
         }));
 
         it("should update the settings when it changes", fakeAsync(() => {
             userInfo.next(loggedInUser);
-            let settingsLog = createService();
+
+            let settingsService = TestBed.inject(SettingsService);
+            let settingsLog = getSettingsLog(settingsService);
 
             // Tick the getAuthHeaders call, but don't tick longer than the refresh interval
             tick(1);
@@ -176,13 +194,14 @@ describe("SettingsService", () => {
             expect(settingsLog[1]).toEqual(expectedSettings0);
             expect(settingsLog[2]).toEqual(expectedSettings1);
 
-            // An interval was started, so abandon it.
-            discardPeriodicTasks();
+            settingsService.ngOnDestroy();
         }));
 
         it("should not update the settings when it doesn't change", fakeAsync(() => {
             userInfo.next(loggedInUser);
-            let settingsLog = createService();
+
+            let settingsService = TestBed.inject(SettingsService);
+            let settingsLog = getSettingsLog(settingsService);
 
             // Tick the getAuthHeaders call, but don't tick longer than the refresh interval
             tick(1);
@@ -211,13 +230,14 @@ describe("SettingsService", () => {
             expect(settingsLog[2]).toEqual(expectedSettings1);
             expect(settingsLog[3]).toEqual(expectedSettings2);
 
-            // An interval was started, so abandon it.
-            discardPeriodicTasks();
+            settingsService.ngOnDestroy();
         }));
 
         it("should not update the settings when it errors", fakeAsync(() => {
             userInfo.next(loggedInUser);
-            let settingsLog = createService();
+
+            let settingsService = TestBed.inject(SettingsService);
+            let settingsLog = getSettingsLog(settingsService);
 
             // Tick the getAuthHeaders call, but don't tick longer than the refresh interval
             tick(1);
@@ -246,13 +266,15 @@ describe("SettingsService", () => {
             expect(settingsLog[2]).toEqual(expectedSettings1);
             expect(settingsLog[3]).toEqual(expectedSettings2);
 
-            // An interval was started, so abandon it.
-            discardPeriodicTasks();
+            settingsService.ngOnDestroy();
         }));
 
         it("should retry the initial fetch", fakeAsync(() => {
             userInfo.next(loggedInUser);
-            let settingsLog = createService();
+
+            let settingsService = TestBed.inject(SettingsService);
+            let settingsLog = getSettingsLog(settingsService);
+
             let retryDelay = SettingsService.retryDelay;
 
             // Tick the getAuthHeaders call, but don't tick longer than the refresh interval
@@ -275,18 +297,14 @@ describe("SettingsService", () => {
             expect(settingsLog[0]).toEqual(SettingsService.defaultSettings);
             expect(settingsLog[1]).toEqual(expectedSettings);
 
-            // An interval was started, so abandon it.
-            discardPeriodicTasks();
+            settingsService.ngOnDestroy();
         }));
 
-        function createService(): IUserSettings[] {
+        function getSettingsLog(settingsService: SettingsService): IUserSettings[] {
             let settingsLog: IUserSettings[] = [];
-            let settingsService = TestBed.inject(SettingsService);
-
             settingsService.settings().subscribe(settings => {
                 settingsLog.push(settings);
             });
-
             return settingsLog;
         }
     });
@@ -311,6 +329,8 @@ describe("SettingsService", () => {
 
             expect(resolved).toEqual(false);
             expect(rejected).toEqual(false);
+
+            settingsService.ngOnDestroy();
         }));
 
         it("should only refresh the settings once all pending patches are complete", fakeAsync(() => {
@@ -368,8 +388,7 @@ describe("SettingsService", () => {
             expect(settingsLog[0]).toEqual(expectedSettings1);
             expect(settingsLog[1]).toEqual(expectedSettings2);
 
-            // An interval was started, so abandon it.
-            discardPeriodicTasks();
+            settingsService.ngOnDestroy();
         }));
 
         it("should not refresh the settings if a patch happens during a refresh", fakeAsync(() => {
@@ -396,6 +415,8 @@ describe("SettingsService", () => {
 
             expect(resolved).toEqual(false);
             expect(rejected).toEqual(false);
+
+            settingsService.ngOnDestroy();
         }));
 
         it("should start refreshing the settings again after patches fail", fakeAsync(() => {
@@ -429,8 +450,7 @@ describe("SettingsService", () => {
             expect(settingsLog[0]).toEqual(expectedSettings1);
             expect(settingsLog[1]).toEqual(expectedSettings2);
 
-            // An interval was started, so abandon it.
-            discardPeriodicTasks();
+            settingsService.ngOnDestroy();
         }));
 
         it("should update settings when the user is not logged in", async () => {
@@ -452,6 +472,8 @@ describe("SettingsService", () => {
 
             expect(settingsLog.length).toEqual(1);
             expect(settingsLog[0]).toEqual(Object.assign({}, SettingsService.defaultSettings, { playStyle: "somePlayStyle" }));
+
+            settingsService.ngOnDestroy();
         });
 
         function createService(): IUserSettings[] {
