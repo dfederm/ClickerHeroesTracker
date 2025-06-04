@@ -8,7 +8,7 @@ import { ChartDataset, ChartOptions, TooltipItem } from "chart.js";
 import 'chartjs-adapter-date-fns';
 import { ExponentialPipe } from "../../pipes/exponentialPipe";
 import { NgxSpinnerModule, NgxSpinnerService } from "ngx-spinner";
-import { NgChartsModule } from "ng2-charts";
+import { BaseChartDirective } from "ng2-charts";
 import { NgClass } from "@angular/common";
 
 interface IChartViewModel {
@@ -21,12 +21,11 @@ interface IChartViewModel {
     selector: "userCompare",
     templateUrl: "./userCompare.html",
     imports: [
-        NgChartsModule,
+        BaseChartDirective,
         NgClass,
         NgxSpinnerModule,
         RouterLink,
-    ],
-    standalone: true,
+    ]
 })
 export class UserCompareComponent implements OnInit {
     private static readonly timeRanges = [

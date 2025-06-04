@@ -1,4 +1,4 @@
-import { TestBed, fakeAsync, tick, discardPeriodicTasks } from "@angular/core/testing";
+import { TestBed, fakeAsync, tick } from "@angular/core/testing";
 import { HttpTestingController, provideHttpClientTesting } from "@angular/common/http/testing";
 import { HttpErrorHandlerService } from "../httpErrorHandlerService/httpErrorHandlerService";
 
@@ -48,8 +48,7 @@ describe("VersionService", () => {
             expect(versionLog.length).toEqual(1);
             expect(versionLog[0]).toEqual(expectedVersion);
 
-            // An interval was started, so abandon it.
-            discardPeriodicTasks();
+            versionService.ngOnDestroy();
         }));
 
         it("should update the version when it changes", fakeAsync(() => {
@@ -64,8 +63,7 @@ describe("VersionService", () => {
             expect(versionLog[0]).toEqual(expectedVersion0);
             expect(versionLog[1]).toEqual(expectedVersion1);
 
-            // An interval was started, so abandon it.
-            discardPeriodicTasks();
+            versionService.ngOnDestroy();
         }));
 
         it("should not update the version when it doesn't change", fakeAsync(() => {
@@ -92,8 +90,7 @@ describe("VersionService", () => {
             expect(versionLog[1]).toEqual(expectedVersion1);
             expect(versionLog[2]).toEqual(expectedVersion2);
 
-            // An interval was started, so abandon it.
-            discardPeriodicTasks();
+            versionService.ngOnDestroy();
         }));
 
         it("should not update the version when it errors", fakeAsync(() => {
@@ -120,8 +117,7 @@ describe("VersionService", () => {
             expect(versionLog[1]).toEqual(expectedVersion1);
             expect(versionLog[2]).toEqual(expectedVersion2);
 
-            // An interval was started, so abandon it.
-            discardPeriodicTasks();
+            versionService.ngOnDestroy();
         }));
 
         it("should retry the initial fetch", fakeAsync(() => {
@@ -143,8 +139,7 @@ describe("VersionService", () => {
             expect(versionLog.length).toEqual(1);
             expect(versionLog[0]).toEqual(expectedVersion);
 
-            // An interval was started, so abandon it.
-            discardPeriodicTasks();
+            versionService.ngOnDestroy();
         }));
 
         function respondToLastConnection(index: number): IVersion {

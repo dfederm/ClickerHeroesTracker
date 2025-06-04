@@ -1,7 +1,7 @@
-import { Injectable } from "@angular/core";
+import { Injectable, OnDestroy } from "@angular/core";
 import { HttpClient, HttpErrorResponse } from "@angular/common/http";
-import { Observable, BehaviorSubject, interval } from "rxjs";
-import { filter, distinctUntilChanged } from "rxjs/operators";
+import { Observable, BehaviorSubject, interval, Subscription } from "rxjs";
+import { filter, distinctUntilChanged, map } from "rxjs/operators";
 import { HttpErrorHandlerService } from "../httpErrorHandlerService/httpErrorHandlerService";
 
 export interface IVersion {
@@ -14,13 +14,16 @@ export interface IVersion {
 @Injectable({
     providedIn: "root",
 })
-export class VersionService {
+export class VersionService implements OnDestroy {
     // Poll the version every hour
     public static pollingInterval = 60 * 60 * 1000;
 
     public static retryDelay = 1000;
 
     private readonly version: BehaviorSubject<IVersion>;
+
+    private refreshSubscription: Subscription;
+    private retryTimeout: NodeJS.Timeout;
 
     constructor(
         private readonly http: HttpClient,
@@ -37,6 +40,18 @@ export class VersionService {
         this.fetchVersionInitial();
     }
 
+    public ngOnDestroy() {
+        if (this.refreshSubscription) {
+            this.refreshSubscription.unsubscribe();
+            this.refreshSubscription = null;
+        }
+
+        if (this.retryTimeout) {
+            clearTimeout(this.retryTimeout);
+            this.retryTimeout = null;
+        }
+    }
+
     public getVersion(): Observable<IVersion> {
         return this.version.pipe(
             filter(version => version != null),
@@ -49,8 +64,11 @@ export class VersionService {
             .then(() => this.scheduleRefresh())
             .catch(() => {
                 // If the initial fetch fails, retry after a delay
-                setTimeout(
-                    (newDelay: number) => this.fetchVersionInitial(newDelay),
+                this.retryTimeout = setTimeout(
+                    (newDelay: number) => {
+                        this.retryTimeout = null;
+                        return this.fetchVersionInitial(newDelay);
+                    },
                     retryDelay,
                     // Exponential backoff, max out at the polling interval
                     Math.min(2 * retryDelay, VersionService.pollingInterval),
@@ -71,11 +89,12 @@ export class VersionService {
     }
 
     private scheduleRefresh(): void {
-        interval(VersionService.pollingInterval)
-            .forEach(() => {
+        this.refreshSubscription = interval(VersionService.pollingInterval).pipe(
+            map(() => {
                 this.fetchVersion()
                     // Just swallow errors from polling
                     .catch(() => void 0);
-            });
+            }),
+        ).subscribe();
     }
 }

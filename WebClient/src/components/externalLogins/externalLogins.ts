@@ -20,8 +20,7 @@ export interface IErrorResponse {
         FormsModule,
         NgxSpinnerModule,
         ValidateEqualModule,
-    ],
-    standalone: true,
+    ]
 })
 export class ExternalLoginsComponent implements OnInit, AfterViewInit {
     public static facebookInitialized = false;

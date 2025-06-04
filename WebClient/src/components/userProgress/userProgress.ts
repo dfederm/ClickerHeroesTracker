@@ -9,7 +9,7 @@ import { SettingsService, IUserSettings } from "../../services/settingsService/s
 import { ExponentialPipe } from "../../pipes/exponentialPipe";
 import { NgClass, PercentPipe } from "@angular/common";
 import { NgxSpinnerModule, NgxSpinnerService } from "ngx-spinner";
-import { NgChartsModule } from "ng2-charts";
+import { BaseChartDirective } from "ng2-charts";
 
 interface IChartViewModel {
     isProminent: boolean;
@@ -21,12 +21,11 @@ interface IChartViewModel {
     selector: "userProgress",
     templateUrl: "./userProgress.html",
     imports: [
-        NgChartsModule,
+        BaseChartDirective,
         NgClass,
         NgxSpinnerModule,
         RouterLink,
-    ],
-    standalone: true,
+    ]
 })
 export class UserProgressComponent implements OnInit {
     private static readonly timeRanges = [

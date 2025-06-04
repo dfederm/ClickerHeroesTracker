@@ -16,7 +16,6 @@ describe("ChangePasswordDialogComponent", () => {
     @Component({
         selector: "ngx-spinner",
         template: "",
-        standalone: true,
     })
     class MockNgxSpinnerComponent {
         @Input()
@@ -26,7 +25,6 @@ describe("ChangePasswordDialogComponent", () => {
     @Component({
         selector: "externalLogins",
         template: "",
-        standalone: true,
     })
     class MockExternalLoginsComponent {
         @Input()

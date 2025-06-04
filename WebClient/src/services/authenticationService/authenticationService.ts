@@ -1,4 +1,4 @@
-import { Injectable } from "@angular/core";
+import { Injectable, OnDestroy } from "@angular/core";
 import { HttpClient, HttpHeaders, HttpParams, HttpErrorResponse } from "@angular/common/http";
 import { Observable, BehaviorSubject, Subscription, interval } from "rxjs";
 import { jwtDecode } from "jwt-decode"
@@ -25,7 +25,7 @@ export interface IUserInfo {
 @Injectable({
     providedIn: "root",
 })
-export class AuthenticationService {
+export class AuthenticationService implements OnDestroy {
     private static readonly tokensKey: string = "auth-tokens";
 
     private currentTokens: IAuthTokenModel;
@@ -52,6 +52,10 @@ export class AuthenticationService {
                 .then(() => this.scheduleRefresh())
                 .catch(() => this.logOut());
         }
+    }
+
+    public ngOnDestroy() {
+        this.cancelRefresh();
     }
 
     public logInWithPassword(username: string, password: string): Promise<void> {
@@ -84,11 +88,7 @@ export class AuthenticationService {
         localStorage.removeItem(AuthenticationService.tokensKey);
         this.currentTokens = null;
         this.userInfoSubject.next(this.getUserInfo());
-
-        if (this.refreshSubscription) {
-            this.refreshSubscription.unsubscribe();
-            this.refreshSubscription = null;
-        }
+        this.cancelRefresh();
     }
 
     public userInfo(): Observable<IUserInfo> {
@@ -163,6 +163,13 @@ export class AuthenticationService {
         this.refreshSubscription = interval(this.currentTokens.expires_in / 2 * 1000).pipe(
             map(() => this.refreshTokens()),
         ).subscribe();
+    }
+
+    private cancelRefresh(): void {
+        if (this.refreshSubscription) {
+            this.refreshSubscription.unsubscribe();
+            this.refreshSubscription = null;
+        }
     }
 
     private getUserInfo(): IUserInfo {

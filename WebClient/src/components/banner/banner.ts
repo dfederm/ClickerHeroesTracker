@@ -8,8 +8,7 @@ import { NgbAlert } from "@ng-bootstrap/ng-bootstrap";
     templateUrl: "./banner.html",
     imports: [
         NgbAlert,
-    ],
-    standalone: true,
+    ]
 })
 export class BannerComponent implements OnInit, OnDestroy {
     public showReloadBanner = false;

@@ -1,4 +1,4 @@
-import { TestBed, fakeAsync, tick, discardPeriodicTasks } from "@angular/core/testing";
+import { TestBed, fakeAsync, tick } from "@angular/core/testing";
 import { HttpTestingController, provideHttpClientTesting } from "@angular/common/http/testing";
 import { HttpErrorHandlerService } from "../httpErrorHandlerService/httpErrorHandlerService";
 
@@ -85,8 +85,8 @@ describe("AuthenticationService", () => {
             expect(localStorage.getItem).toHaveBeenCalledWith("auth-tokens");
             expect(localStorage.setItem).toHaveBeenCalledWith("auth-tokens", JSON.stringify(newTokens));
 
-            // An interval was started, so abandon it.
-            discardPeriodicTasks();
+            // Cleanup
+            authenticationService.ngOnDestroy();
         }));
 
         it("should be logged out initially but logged in eventually once the token is refreshed when local storage is populated with an expired token", fakeAsync(() => {
@@ -119,8 +119,8 @@ describe("AuthenticationService", () => {
             expect(localStorage.getItem).toHaveBeenCalledWith("auth-tokens");
             expect(localStorage.setItem).toHaveBeenCalledWith("auth-tokens", JSON.stringify(newTokens));
 
-            // An interval was started, so abandon it.
-            discardPeriodicTasks();
+            // Cleanup
+            authenticationService.ngOnDestroy();
         }));
     });
 
@@ -222,8 +222,8 @@ describe("AuthenticationService", () => {
             expect(error).toBeUndefined();
             expect(userInfoLog).toEqual([notLoggedInUser, userInfo, refreshedUserInfo]);
 
-            // An interval was started, so abandon it.
-            discardPeriodicTasks();
+            // Cleanup
+            authenticationService.ngOnDestroy();
         }));
     });
 
@@ -306,8 +306,8 @@ describe("AuthenticationService", () => {
             expect(error).toBeUndefined();
             expect(userInfoLog).toEqual([notLoggedInUser, userInfo, refreshedUserInfo]);
 
-            // An interval was started, so abandon it.
-            discardPeriodicTasks();
+            // Cleanup
+            authenticationService.ngOnDestroy();
         }));
 
         it("should add the username when provided", fakeAsync(() => {

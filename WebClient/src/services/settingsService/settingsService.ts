@@ -1,4 +1,4 @@
-import { Injectable } from "@angular/core";
+import { Injectable, OnDestroy } from "@angular/core";
 import { HttpClient, HttpErrorResponse } from "@angular/common/http";
 import { Observable, BehaviorSubject, Subscription, interval } from "rxjs";
 import { map, distinctUntilChanged } from "rxjs/operators";
@@ -29,7 +29,7 @@ export interface IUserSettings {
 @Injectable({
     providedIn: "root",
 })
-export class SettingsService {
+export class SettingsService implements OnDestroy {
     // Sync settings every hour
     public static syncInterval = 60 * 60 * 1000;
 
@@ -56,6 +56,7 @@ export class SettingsService {
     private userName: string;
 
     private refreshSubscription: Subscription;
+    private retryTimeout: NodeJS.Timeout;
 
     private numPendingPatches = 0;
 
@@ -89,6 +90,18 @@ export class SettingsService {
                     }
                 }
             });
+    }
+
+    public ngOnDestroy() {
+        if (this.refreshSubscription) {
+            this.refreshSubscription.unsubscribe();
+            this.refreshSubscription = null;
+        }
+
+        if (this.retryTimeout) {
+            clearTimeout(this.retryTimeout);
+            this.retryTimeout = null;
+        }
     }
 
     public settings(): Observable<IUserSettings> {
@@ -138,8 +151,11 @@ export class SettingsService {
                 }
 
                 // If the initial fetch fails, retry after a delay
-                setTimeout(
-                    (newDelay: number) => this.fetchSettingsInitial(newDelay),
+                this.retryTimeout = setTimeout(
+                    (newDelay: number) => {
+                        this.retryTimeout = null;
+                        return this.fetchSettingsInitial(newDelay);
+                    },
                     retryDelay,
                     // Exponential backoff, max out at the sync interval
                     Math.min(2 * retryDelay, SettingsService.syncInterval),

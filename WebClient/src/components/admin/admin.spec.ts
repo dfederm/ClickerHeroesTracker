@@ -15,13 +15,13 @@ describe("AdminComponent", () => {
     let fixture: ComponentFixture<AdminComponent>;
     let httpMock: HttpTestingController;
 
-    @Component({ selector: "ngx-spinner", template: "", standalone: true })
+    @Component({ selector: "ngx-spinner", template: "" })
     class MockNgxSpinnerComponent {
         @Input()
         public fullScreen: boolean;
     }
 
-    @Component({ selector: "ngb-progressbar", template: "", standalone: true })
+    @Component({ selector: "ngb-progressbar", template: "" })
     class MockProgressBarComponent {
         @Input()
         public value: number;

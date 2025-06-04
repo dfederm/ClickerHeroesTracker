@@ -34,13 +34,13 @@ describe("UploadComponent", () => {
 
     let settingsSubject = new BehaviorSubject(settings);
 
-    @Component({ selector: "ngx-spinner", template: "", standalone: true })
+    @Component({ selector: "ngx-spinner", template: "" })
     class MockNgxSpinnerComponent {
         @Input()
         public fullScreen: boolean;
     }
 
-    @Component({ selector: "ancientSuggestions", template: "", standalone: true })
+    @Component({ selector: "ancientSuggestions", template: "" })
     class MockAncientSuggestionsComponent {
         @Input()
         public playStyle: string;
@@ -49,13 +49,13 @@ describe("UploadComponent", () => {
         public savedGame: SavedGame;
     }
 
-    @Component({ selector: "outsiderSuggestions", template: "", standalone: true })
+    @Component({ selector: "outsiderSuggestions", template: "" })
     class MockOutsiderSuggestionsComponent {
         @Input()
         public savedGame: SavedGame;
     }
 
-    @Component({ selector: "ascensionZone", template: "", standalone: true })
+    @Component({ selector: "ascensionZone", template: "" })
     class MockAscensionZoneComponent {
         @Input()
         public savedGame: SavedGame;
@@ -63,7 +63,7 @@ describe("UploadComponent", () => {
 
     const exponentialPipeTransform = (value: string | Decimal) => "exponentialPipe(" + value + ")";
 
-    @Pipe({ name: 'exponential', standalone: true })
+    @Pipe({ name: 'exponential' })
     class MockExponentialPipe implements PipeTransform {
         public transform = exponentialPipeTransform;
     }

@@ -18,7 +18,7 @@ describe("UploadDialogComponent", () => {
     let fixture: ComponentFixture<UploadDialogComponent>;
     let userInfo: BehaviorSubject<IUserInfo>;
 
-    @Component({ selector: "ngx-spinner", template: "", standalone: true })
+    @Component({ selector: "ngx-spinner", template: "" })
     class MockNgxSpinnerComponent {
         @Input()
         public fullScreen: boolean;

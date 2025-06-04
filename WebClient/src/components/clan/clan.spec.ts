@@ -49,7 +49,7 @@ describe("ClanComponent", () => {
         clanName: clan.clanName,
     };
 
-    @Component({ selector: "ngx-spinner", template: "", standalone: true })
+    @Component({ selector: "ngx-spinner", template: "" })
     class MockNgxSpinnerComponent {
         @Input()
         public fullScreen: boolean;
@@ -57,7 +57,7 @@ describe("ClanComponent", () => {
 
     const timeAgoPipeTransform = (value: string) => "timeAgo(" + value + ")";
 
-    @Pipe({ name: 'timeAgo', standalone: true })
+    @Pipe({ name: 'timeAgo' })
     class MockTimeAgoPipe implements PipeTransform {
         public transform = timeAgoPipeTransform;
     }
