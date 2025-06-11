@@ -14,12 +14,12 @@ using ClickerHeroesTrackerWebsite.Models.Game;
 using ClickerHeroesTrackerWebsite.Models.Settings;
 using ClickerHeroesTrackerWebsite.Services.Database;
 using ClickerHeroesTrackerWebsite.Services.Email;
-using Microsoft.ApplicationInsights;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Website.Models.Api.Users;
 using Website.Services.Clans;
+using Website.Services.Telemetry;
 
 namespace Website.Controllers
 {
@@ -30,7 +30,7 @@ namespace Website.Controllers
     {
         private readonly GameData _gameData;
 
-        private readonly TelemetryClient _telemetryClient;
+        private readonly ITelemetryClient _telemetryClient;
 
         private readonly IDatabaseCommandFactory _databaseCommandFactory;
 
@@ -44,7 +44,7 @@ namespace Website.Controllers
 
         public UserController(
             GameData gameData,
-            TelemetryClient telemetryClient,
+            ITelemetryClient telemetryClient,
             IDatabaseCommandFactory databaseCommandFactory,
             IUserSettingsProvider userSettingsProvider,
             UserManager<ApplicationUser> userManager,
@@ -434,7 +434,11 @@ namespace Website.Controllers
 
                     if (!_gameData.Ancients.TryGetValue(ancientId, out Ancient ancient))
                     {
-                        _telemetryClient.TrackEvent("Unknown Ancient", new Dictionary<string, string> { { "AncientId", ancientId.ToString() } });
+                        _telemetryClient.TrackCustomEvent(
+                            "UnknownAncient",
+                            [
+                                new KeyValuePair<string, string>("AncientId", ancientId.ToString())
+                            ]);
                         continue;
                     }
 
@@ -460,7 +464,11 @@ namespace Website.Controllers
 
                     if (!_gameData.Outsiders.TryGetValue(outsiderId, out Outsider outsider))
                     {
-                        _telemetryClient.TrackEvent("Unknown Outsider", new Dictionary<string, string> { { "OutsiderId", outsiderId.ToString() } });
+                        _telemetryClient.TrackCustomEvent(
+                            "UnknownOutsider",
+                            [
+                                new KeyValuePair<string, string>("OutsiderId", outsiderId.ToString())
+                            ]);
                         continue;
                     }
 

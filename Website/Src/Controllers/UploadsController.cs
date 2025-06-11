@@ -14,10 +14,10 @@ using ClickerHeroesTrackerWebsite.Models.Settings;
 using ClickerHeroesTrackerWebsite.Models.Stats;
 using ClickerHeroesTrackerWebsite.Services.Database;
 using ClickerHeroesTrackerWebsite.Utility;
-using Microsoft.ApplicationInsights;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using Website.Services.Clans;
 
 namespace ClickerHeroesTrackerWebsite.Controllers
@@ -27,6 +27,8 @@ namespace ClickerHeroesTrackerWebsite.Controllers
     [ApiController]
     public sealed class UploadsController : Controller
     {
+        private readonly ILogger _logger;
+
         private readonly IDatabaseCommandFactory _databaseCommandFactory;
 
         private readonly GameData _gameData;
@@ -37,22 +39,20 @@ namespace ClickerHeroesTrackerWebsite.Controllers
 
         private readonly IClanManager _clanManager;
 
-        private readonly TelemetryClient _telemetryClient;
-
         public UploadsController(
+            ILogger<UploadsController> logger,
             IDatabaseCommandFactory databaseCommandFactory,
             GameData gameData,
             IUserSettingsProvider userSettingsProvider,
             UserManager<ApplicationUser> userManager,
-            IClanManager clanManager,
-            TelemetryClient telemetryClient)
+            IClanManager clanManager)
         {
+            _logger = logger;
             _databaseCommandFactory = databaseCommandFactory;
             _gameData = gameData;
             _userSettingsProvider = userSettingsProvider;
             _userManager = userManager;
             _clanManager = clanManager;
-            _telemetryClient = telemetryClient;
         }
 
         [Route("{uploadId:int}")]
@@ -310,11 +310,7 @@ namespace ClickerHeroesTrackerWebsite.Controllers
             }
             catch (Exception e)
             {
-                Dictionary<string, string> properties = new()
-                {
-                    { "UploadId", uploadId.ToString() },
-                };
-                _telemetryClient.TrackException(e, properties);
+                _logger.LogError(e, "Exception while updating clan for UploadId {UploadId}", uploadId);
             }
 
             return uploadId;
