@@ -1,10 +1,10 @@
 ﻿// Copyright (C) Clicker Heroes Tracker. All Rights Reserved.
 
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using ClickerHeroesTrackerWebsite.Models;
 using ClickerHeroesTrackerWebsite.Services.Email;
-using Microsoft.ApplicationInsights;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -13,6 +13,7 @@ using Newtonsoft.Json;
 using SendGrid;
 using SendGrid.Helpers.Mail;
 using Website.Models.Api.Feedback;
+using Website.Services.Telemetry;
 
 namespace Website.Controllers
 {
@@ -26,7 +27,7 @@ namespace Website.Controllers
     {
         private readonly UserManager<ApplicationUser> _userManager;
 
-        private readonly TelemetryClient _telemetryClient;
+        private readonly ITelemetryClient _telemetryClient;
 
         private readonly EmailSenderSettings _emailSenderSettings;
 
@@ -35,7 +36,7 @@ namespace Website.Controllers
         /// </summary>
         public FeedbackController(
             UserManager<ApplicationUser> userManager,
-            TelemetryClient telemetryClient,
+            ITelemetryClient telemetryClient,
             IOptions<EmailSenderSettings> emailSenderSettingsOptions)
         {
             _userManager = userManager;
@@ -73,7 +74,7 @@ namespace Website.Controllers
                 { "Comments", feedback.Comments },
             };
 
-            _telemetryClient.TrackEvent("FeedbackSubmit", feedbackData);
+            _telemetryClient.TrackCustomEvent("FeedbackSubmit", feedbackData.ToArray());
 
             SendGridClient client = new(_emailSenderSettings.ApiKey);
 

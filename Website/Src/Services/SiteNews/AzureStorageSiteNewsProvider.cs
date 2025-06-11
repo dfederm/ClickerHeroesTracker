@@ -2,12 +2,10 @@
 
 using System;
 using System.Collections.Generic;
-using System.Net;
 using System.Threading.Tasks;
 using Azure;
 using Azure.Data.Tables;
-using ClickerHeroesTrackerWebsite.Utility;
-using Microsoft.ApplicationInsights;
+using Website.Services.Telemetry;
 
 namespace Website.Services.SiteNews
 {
@@ -15,14 +13,14 @@ namespace Website.Services.SiteNews
     {
         private readonly TableServiceClient _tableClient;
 
-        private readonly TelemetryClient _telemetryClient;
+        private readonly ITelemetryClient _telemetryClient;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="AzureStorageSiteNewsProvider"/> class.
         /// </summary>
         /// <param name="tableClient">The azure table client.</param>
         /// <param name="telemetryClient">The telemetry client to log errors.</param>
-        public AzureStorageSiteNewsProvider(TableServiceClient tableClient, TelemetryClient telemetryClient)
+        public AzureStorageSiteNewsProvider(TableServiceClient tableClient, ITelemetryClient telemetryClient)
         {
             _tableClient = tableClient ?? throw new ArgumentNullException(nameof(tableClient));
             _telemetryClient = telemetryClient ?? throw new ArgumentNullException(nameof(telemetryClient));
@@ -66,7 +64,7 @@ namespace Website.Services.SiteNews
                 Response response = responses.Value[i];
                 if (response.IsError)
                 {
-                    _telemetryClient.TrackFailedTableResult(response, batchOperation[i].Entity);
+                    TrackFailedTableResult(response, batchOperation[i].Entity);
                     returnStatusCode = response.Status;
                 }
             }
@@ -98,7 +96,7 @@ namespace Website.Services.SiteNews
                 Response response = responses.Value[i];
                 if (response.IsError)
                 {
-                    _telemetryClient.TrackFailedTableResult(response, batchOperation[i].Entity);
+                    TrackFailedTableResult(response, batchOperation[i].Entity);
                     returnStatusCode = response.Status;
                 }
             }
@@ -122,7 +120,12 @@ namespace Website.Services.SiteNews
             {
                 if (!DateTime.TryParse(entity.PartitionKey, out DateTime date))
                 {
-                    _telemetryClient.TrackInvalidTableEntry(entity);
+                    _telemetryClient.TrackCustomEvent(
+                        "InvalidTableEntry",
+                        [
+                            new KeyValuePair<string, string>("PartitionKey", entity.PartitionKey),
+                            new KeyValuePair<string, string>("RowKey", entity.RowKey),
+                        ]);
                     continue;
                 }
 
@@ -151,5 +154,14 @@ namespace Website.Services.SiteNews
         }
 
         private TableClient GetTableClient() => _tableClient.GetTableClient("SiteNews");
+
+        private void TrackFailedTableResult(Response response, ITableEntity tableEntity)
+            => _telemetryClient.TrackCustomEvent(
+                "FailedTableResult",
+                [
+                    new KeyValuePair<string, string>("OperationEntity-PartitionKey", tableEntity?.PartitionKey ?? "<none>"),
+                    new KeyValuePair<string, string>("OperationEntity-RowKey", tableEntity?.RowKey ?? "<none>"),
+                    new KeyValuePair<string, string>("Result-HttpStatusCode", response.Status.ToString()),
+                ]);
     }
 }

@@ -15,6 +15,7 @@ using Microsoft.Extensions.Options;
 using OpenIddict.Abstractions;
 using OpenIddict.Server.AspNetCore;
 using Website.Services.Authentication;
+using Website.Services.Telemetry;
 using SignInResult = Microsoft.AspNetCore.Identity.SignInResult;
 
 namespace ClickerHeroesTrackerWebsite.Controllers
@@ -36,17 +37,20 @@ namespace ClickerHeroesTrackerWebsite.Controllers
         private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly IAssertionGrantHandlerProvider _assertionGrantHandlerProvider;
+        private readonly ITelemetryClient _telemetryClient;
 
         public AuthenticationController(
             IOptions<IdentityOptions> identityOptions,
             SignInManager<ApplicationUser> signInManager,
             UserManager<ApplicationUser> userManager,
-            IAssertionGrantHandlerProvider assertionGrantHandlerProvider)
+            IAssertionGrantHandlerProvider assertionGrantHandlerProvider,
+            ITelemetryClient telemetryClient)
         {
             _identityOptions = identityOptions;
             _signInManager = signInManager;
             _userManager = userManager;
             _assertionGrantHandlerProvider = assertionGrantHandlerProvider;
+            _telemetryClient = telemetryClient;
         }
 
         [HttpPost("token")]
@@ -263,6 +267,12 @@ namespace ClickerHeroesTrackerWebsite.Controllers
 
                 claim.SetDestinations(destinations);
             }
+
+            _telemetryClient.IncrementCounter(
+                "SignIn",
+                [
+                    new KeyValuePair<string, string>("GrantType", request.GrantType),
+                ]);
 
             return SignIn(principal, OpenIddictServerAspNetCoreDefaults.AuthenticationScheme);
         }

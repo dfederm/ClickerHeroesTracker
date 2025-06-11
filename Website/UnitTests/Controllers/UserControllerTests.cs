@@ -13,12 +13,11 @@ using ClickerHeroesTrackerWebsite.Models.Settings;
 using ClickerHeroesTrackerWebsite.Services.Database;
 using ClickerHeroesTrackerWebsite.Services.Email;
 using ClickerHeroesTrackerWebsite.Tests.Mocks;
-using Microsoft.ApplicationInsights;
-using Microsoft.ApplicationInsights.Extensibility;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
+using UnitTests.Mocks;
 using Website.Controllers;
 using Website.Models.Api.Users;
 using Website.Services.Clans;
@@ -39,7 +38,7 @@ namespace UnitTests.Controllers
             };
 
             GameData gameData = MockGameData.RealData;
-            TelemetryClient telemetryClient = new(new TelemetryConfiguration());
+            MockTelemetryClient telemetryClient = new();
             Mock<IDatabaseCommandFactory> mockDatabaseCommandFactory = new(MockBehavior.Strict);
             Mock<IUserSettingsProvider> mockUserSettingsProvider = new(MockBehavior.Strict);
             Mock<UserManager<ApplicationUser>> mockUserManager = MockUserManager.CreateMock();
@@ -83,7 +82,7 @@ namespace UnitTests.Controllers
             };
 
             GameData gameData = MockGameData.RealData;
-            TelemetryClient telemetryClient = new(new TelemetryConfiguration());
+            MockTelemetryClient telemetryClient = new();
             Mock<IDatabaseCommandFactory> mockDatabaseCommandFactory = new(MockBehavior.Strict);
             Mock<IUserSettingsProvider> mockUserSettingsProvider = new(MockBehavior.Strict);
             Mock<UserManager<ApplicationUser>> mockUserManager = MockUserManager.CreateMock();
@@ -125,7 +124,7 @@ namespace UnitTests.Controllers
             const string ClanName = "SomeClanName";
 
             GameData gameData = MockGameData.RealData;
-            TelemetryClient telemetryClient = new(new TelemetryConfiguration());
+            MockTelemetryClient telemetryClient = new();
             Mock<IDatabaseCommandFactory> mockDatabaseCommandFactory = new(MockBehavior.Strict);
             Mock<IUserSettingsProvider> mockUserSettingsProvider = new(MockBehavior.Strict);
 
@@ -182,7 +181,7 @@ namespace UnitTests.Controllers
             const string UserName = "SomeUserName";
 
             GameData gameData = MockGameData.RealData;
-            TelemetryClient telemetryClient = new(new TelemetryConfiguration());
+            MockTelemetryClient telemetryClient = new();
             Mock<IDatabaseCommandFactory> mockDatabaseCommandFactory = new(MockBehavior.Strict);
             Mock<IUserSettingsProvider> mockUserSettingsProvider = new(MockBehavior.Strict);
             Mock<ClaimsPrincipal> mockCurrentUser = new(MockBehavior.Strict);
@@ -226,7 +225,7 @@ namespace UnitTests.Controllers
             const string UserName = "SomeUserName";
 
             GameData gameData = MockGameData.RealData;
-            TelemetryClient telemetryClient = new(new TelemetryConfiguration());
+            MockTelemetryClient telemetryClient = new();
             Mock<IDatabaseCommandFactory> mockDatabaseCommandFactory = new(MockBehavior.Strict);
             Mock<IUserSettingsProvider> mockUserSettingsProvider = new(MockBehavior.Strict);
 
@@ -280,7 +279,7 @@ namespace UnitTests.Controllers
             const string RequestPath = "/SomeRequestPath";
 
             GameData gameData = MockGameData.RealData;
-            TelemetryClient telemetryClient = new(new TelemetryConfiguration());
+            MockTelemetryClient telemetryClient = new();
 
             List<int> expectedUploadIds = Enumerable.Range(0, 3).ToList();
             List<IDictionary<string, object>> getUploadsDatasets = expectedUploadIds
@@ -396,7 +395,7 @@ namespace UnitTests.Controllers
         public static async Task Uploads_ParameterValidation(string userName, int page, int count)
         {
             GameData gameData = MockGameData.RealData;
-            TelemetryClient telemetryClient = new(new TelemetryConfiguration());
+            MockTelemetryClient telemetryClient = new();
             Mock<IDatabaseCommandFactory> mockDatabaseCommandFactory = new(MockBehavior.Strict);
             Mock<IUserSettingsProvider> mockUserSettingsProvider = new(MockBehavior.Strict);
             Mock<UserManager<ApplicationUser>> mockUserManager = MockUserManager.CreateMock();
@@ -435,7 +434,7 @@ namespace UnitTests.Controllers
             const int Count = 34;
 
             GameData gameData = MockGameData.RealData;
-            TelemetryClient telemetryClient = new(new TelemetryConfiguration());
+            MockTelemetryClient telemetryClient = new();
             Mock<IDatabaseCommandFactory> mockDatabaseCommandFactory = new(MockBehavior.Strict);
             Mock<IUserSettingsProvider> mockUserSettingsProvider = new(MockBehavior.Strict);
 
@@ -479,7 +478,7 @@ namespace UnitTests.Controllers
             const int Count = 34;
 
             GameData gameData = MockGameData.RealData;
-            TelemetryClient telemetryClient = new(new TelemetryConfiguration());
+            MockTelemetryClient telemetryClient = new();
             Mock<IDatabaseCommandFactory> mockDatabaseCommandFactory = new(MockBehavior.Strict);
             Mock<IUserSettingsProvider> mockUserSettingsProvider = new(MockBehavior.Strict);
             ApplicationUser mockUser = new();
@@ -525,7 +524,7 @@ namespace UnitTests.Controllers
             const string UserId = "SomeUserId";
 
             GameData gameData = MockGameData.RealData;
-            TelemetryClient telemetryClient = new(new TelemetryConfiguration());
+            MockTelemetryClient telemetryClient = new();
 
             List<string> follows = Enumerable.Range(0, 3)
                 .Select(i => "SomeUser" + i)
@@ -591,7 +590,7 @@ namespace UnitTests.Controllers
             const string UserName = "SomeUserName";
 
             GameData gameData = MockGameData.RealData;
-            TelemetryClient telemetryClient = new(new TelemetryConfiguration());
+            MockTelemetryClient telemetryClient = new();
             Mock<IDatabaseCommandFactory> mockDatabaseCommandFactory = new(MockBehavior.Strict);
             Mock<IUserSettingsProvider> mockUserSettingsProvider = new(MockBehavior.Strict);
             Mock<UserManager<ApplicationUser>> mockUserManager = MockUserManager.CreateMock();
@@ -631,7 +630,7 @@ namespace UnitTests.Controllers
             const string UserName = "SomeUserName";
 
             GameData gameData = MockGameData.RealData;
-            TelemetryClient telemetryClient = new(new TelemetryConfiguration());
+            MockTelemetryClient telemetryClient = new();
             Mock<IDatabaseCommandFactory> mockDatabaseCommandFactory = new(MockBehavior.Strict);
             Mock<IUserSettingsProvider> mockUserSettingsProvider = new(MockBehavior.Strict);
             ApplicationUser mockUser = new();
@@ -682,7 +681,7 @@ namespace UnitTests.Controllers
             };
 
             GameData gameData = MockGameData.RealData;
-            TelemetryClient telemetryClient = new(new TelemetryConfiguration());
+            MockTelemetryClient telemetryClient = new();
 
             Dictionary<string, object> mockDatabaseCommandParameters = new() { { "@UserId", UserId }, { "@FollowUserId", FollowUserId } };
             Mock<IDatabaseCommand> mockDatabaseCommand = MockDatabaseHelper.CreateMockDatabaseCommand(mockDatabaseCommandParameters);
@@ -757,7 +756,7 @@ namespace UnitTests.Controllers
             };
 
             GameData gameData = MockGameData.RealData;
-            TelemetryClient telemetryClient = new(new TelemetryConfiguration());
+            MockTelemetryClient telemetryClient = new();
             Mock<IDatabaseCommandFactory> mockDatabaseCommandFactory = new(MockBehavior.Strict);
             Mock<IUserSettingsProvider> mockUserSettingsProvider = new(MockBehavior.Strict);
             Mock<ClaimsPrincipal> mockCurrentUser = new(MockBehavior.Strict);
@@ -804,7 +803,7 @@ namespace UnitTests.Controllers
             };
 
             GameData gameData = MockGameData.RealData;
-            TelemetryClient telemetryClient = new(new TelemetryConfiguration());
+            MockTelemetryClient telemetryClient = new();
             Mock<IDatabaseCommandFactory> mockDatabaseCommandFactory = new(MockBehavior.Strict);
             Mock<IUserSettingsProvider> mockUserSettingsProvider = new(MockBehavior.Strict);
             ApplicationUser mockUser = new();
@@ -856,7 +855,7 @@ namespace UnitTests.Controllers
             };
 
             GameData gameData = MockGameData.RealData;
-            TelemetryClient telemetryClient = new(new TelemetryConfiguration());
+            MockTelemetryClient telemetryClient = new();
             Mock<IDatabaseCommandFactory> mockDatabaseCommandFactory = new(MockBehavior.Strict);
             Mock<IUserSettingsProvider> mockUserSettingsProvider = new(MockBehavior.Strict);
             ApplicationUser mockUser = new();
@@ -918,7 +917,7 @@ namespace UnitTests.Controllers
             };
 
             GameData gameData = MockGameData.RealData;
-            TelemetryClient telemetryClient = new(new TelemetryConfiguration());
+            MockTelemetryClient telemetryClient = new();
             Mock<IDatabaseCommandFactory> mockDatabaseCommandFactory = new(MockBehavior.Strict);
             Mock<IUserSettingsProvider> mockUserSettingsProvider = new(MockBehavior.Strict);
             ApplicationUser mockUser = new();
@@ -985,7 +984,7 @@ namespace UnitTests.Controllers
             };
 
             GameData gameData = MockGameData.RealData;
-            TelemetryClient telemetryClient = new(new TelemetryConfiguration());
+            MockTelemetryClient telemetryClient = new();
             Mock<IDatabaseCommandFactory> mockDatabaseCommandFactory = new(MockBehavior.Strict);
             Mock<IUserSettingsProvider> mockUserSettingsProvider = new(MockBehavior.Strict);
             ApplicationUser mockUser = new();
@@ -1051,7 +1050,7 @@ namespace UnitTests.Controllers
             };
 
             GameData gameData = MockGameData.RealData;
-            TelemetryClient telemetryClient = new(new TelemetryConfiguration());
+            MockTelemetryClient telemetryClient = new();
 
             Dictionary<string, object> mockDatabaseCommandParameters = new() { { "@UserId", UserId }, { "@FollowUserId", FollowUserId } };
             Mock<IDatabaseCommand> mockDatabaseCommand = MockDatabaseHelper.CreateMockDatabaseCommand(mockDatabaseCommandParameters);
@@ -1128,7 +1127,7 @@ namespace UnitTests.Controllers
             const string FollowUserId = "SomeFollowUserId";
 
             GameData gameData = MockGameData.RealData;
-            TelemetryClient telemetryClient = new(new TelemetryConfiguration());
+            MockTelemetryClient telemetryClient = new();
 
             Dictionary<string, object> mockDatabaseCommandParameters = new() { { "@UserId", UserId }, { "@FollowUserId", FollowUserId } };
             Mock<IDatabaseCommand> mockDatabaseCommand = MockDatabaseHelper.CreateMockDatabaseCommand(mockDatabaseCommandParameters, 1);
@@ -1199,7 +1198,7 @@ namespace UnitTests.Controllers
             const string FollowUserName = "SomeFollowUserName";
 
             GameData gameData = MockGameData.RealData;
-            TelemetryClient telemetryClient = new(new TelemetryConfiguration());
+            MockTelemetryClient telemetryClient = new();
             Mock<IDatabaseCommandFactory> mockDatabaseCommandFactory = new(MockBehavior.Strict);
             Mock<IUserSettingsProvider> mockUserSettingsProvider = new(MockBehavior.Strict);
             Mock<ClaimsPrincipal> mockCurrentUser = new(MockBehavior.Strict);
@@ -1242,7 +1241,7 @@ namespace UnitTests.Controllers
             const string FollowUserName = "SomeFollowUserName";
 
             GameData gameData = MockGameData.RealData;
-            TelemetryClient telemetryClient = new(new TelemetryConfiguration());
+            MockTelemetryClient telemetryClient = new();
             Mock<IDatabaseCommandFactory> mockDatabaseCommandFactory = new(MockBehavior.Strict);
             Mock<IUserSettingsProvider> mockUserSettingsProvider = new(MockBehavior.Strict);
             ApplicationUser mockUser = new();
@@ -1290,7 +1289,7 @@ namespace UnitTests.Controllers
             const string FollowUserName = "SomeFollowUserName";
 
             GameData gameData = MockGameData.RealData;
-            TelemetryClient telemetryClient = new(new TelemetryConfiguration());
+            MockTelemetryClient telemetryClient = new();
             Mock<IDatabaseCommandFactory> mockDatabaseCommandFactory = new(MockBehavior.Strict);
             Mock<IUserSettingsProvider> mockUserSettingsProvider = new(MockBehavior.Strict);
             ApplicationUser mockUser = new();
@@ -1348,7 +1347,7 @@ namespace UnitTests.Controllers
             const string FollowUserName = "SomeFollowUserName";
 
             GameData gameData = MockGameData.RealData;
-            TelemetryClient telemetryClient = new(new TelemetryConfiguration());
+            MockTelemetryClient telemetryClient = new();
             Mock<IDatabaseCommandFactory> mockDatabaseCommandFactory = new(MockBehavior.Strict);
             Mock<IUserSettingsProvider> mockUserSettingsProvider = new(MockBehavior.Strict);
             ApplicationUser mockUser = new();
@@ -1411,7 +1410,7 @@ namespace UnitTests.Controllers
             const string FollowUserName = "SomeFollowUserName";
 
             GameData gameData = MockGameData.RealData;
-            TelemetryClient telemetryClient = new(new TelemetryConfiguration());
+            MockTelemetryClient telemetryClient = new();
             Mock<IDatabaseCommandFactory> mockDatabaseCommandFactory = new(MockBehavior.Strict);
             Mock<IUserSettingsProvider> mockUserSettingsProvider = new(MockBehavior.Strict);
             ApplicationUser mockUser = new();
@@ -1473,7 +1472,7 @@ namespace UnitTests.Controllers
             const string FollowUserId = "SomeFollowUserId";
 
             GameData gameData = MockGameData.RealData;
-            TelemetryClient telemetryClient = new(new TelemetryConfiguration());
+            MockTelemetryClient telemetryClient = new();
 
             Dictionary<string, object> mockDatabaseCommandParameters = new() { { "@UserId", UserId }, { "@FollowUserId", FollowUserId } };
             Mock<IDatabaseCommand> mockDatabaseCommand = MockDatabaseHelper.CreateMockDatabaseCommand(mockDatabaseCommandParameters, 1);
@@ -1550,7 +1549,7 @@ namespace UnitTests.Controllers
             const string FollowUserId = "SomeFollowUserId";
 
             GameData gameData = MockGameData.RealData;
-            TelemetryClient telemetryClient = new(new TelemetryConfiguration());
+            MockTelemetryClient telemetryClient = new();
 
             Dictionary<string, object> mockDatabaseCommandParameters = new() { { "@UserId", UserId }, { "@FollowUserId", FollowUserId } };
             Mock<IDatabaseCommand> mockDatabaseCommand = MockDatabaseHelper.CreateMockDatabaseCommand(mockDatabaseCommandParameters, 0);
@@ -1621,7 +1620,7 @@ namespace UnitTests.Controllers
             const string UserId = "SomeUserId";
 
             GameData gameData = MockGameData.RealData;
-            TelemetryClient telemetryClient = new(new TelemetryConfiguration());
+            MockTelemetryClient telemetryClient = new();
             Mock<IDatabaseCommandFactory> mockDatabaseCommandFactory = new(MockBehavior.Strict);
 
             UserSettings userSettings = new();
@@ -1681,7 +1680,7 @@ namespace UnitTests.Controllers
             const string UserName = "SomeUserName";
 
             GameData gameData = MockGameData.RealData;
-            TelemetryClient telemetryClient = new(new TelemetryConfiguration());
+            MockTelemetryClient telemetryClient = new();
             Mock<IDatabaseCommandFactory> mockDatabaseCommandFactory = new(MockBehavior.Strict);
             Mock<IUserSettingsProvider> mockUserSettingsProvider = new(MockBehavior.Strict);
             Mock<UserManager<ApplicationUser>> mockUserManager = MockUserManager.CreateMock();
@@ -1722,7 +1721,7 @@ namespace UnitTests.Controllers
             const string UserName = "SomeUserName";
 
             GameData gameData = MockGameData.RealData;
-            TelemetryClient telemetryClient = new(new TelemetryConfiguration());
+            MockTelemetryClient telemetryClient = new();
             Mock<IDatabaseCommandFactory> mockDatabaseCommandFactory = new(MockBehavior.Strict);
             Mock<IUserSettingsProvider> mockUserSettingsProvider = new(MockBehavior.Strict);
 
@@ -1769,7 +1768,7 @@ namespace UnitTests.Controllers
             const string UserId = "SomeUserId";
 
             GameData gameData = MockGameData.RealData;
-            TelemetryClient telemetryClient = new(new TelemetryConfiguration());
+            MockTelemetryClient telemetryClient = new();
             Mock<IDatabaseCommandFactory> mockDatabaseCommandFactory = new(MockBehavior.Strict);
             Mock<IUserSettingsProvider> mockUserSettingsProvider = new(MockBehavior.Strict);
 
@@ -1829,7 +1828,7 @@ namespace UnitTests.Controllers
             const string UserId = "SomeUserId";
 
             GameData gameData = MockGameData.RealData;
-            TelemetryClient telemetryClient = new(new TelemetryConfiguration());
+            MockTelemetryClient telemetryClient = new();
             Mock<IDatabaseCommandFactory> mockDatabaseCommandFactory = new(MockBehavior.Strict);
 
             UserSettings userSettings = new();
@@ -1893,7 +1892,7 @@ namespace UnitTests.Controllers
             const string UserId = "SomeUserId";
 
             GameData gameData = MockGameData.RealData;
-            TelemetryClient telemetryClient = new(new TelemetryConfiguration());
+            MockTelemetryClient telemetryClient = new();
             Mock<IDatabaseCommandFactory> mockDatabaseCommandFactory = new(MockBehavior.Strict);
             UserSettings userSettings = new();
             Mock<IUserSettingsProvider> mockUserSettingsProvider = new(MockBehavior.Strict);
@@ -1953,7 +1952,7 @@ namespace UnitTests.Controllers
             const string UserName = "SomeUserName";
 
             GameData gameData = MockGameData.RealData;
-            TelemetryClient telemetryClient = new(new TelemetryConfiguration());
+            MockTelemetryClient telemetryClient = new();
             Mock<IDatabaseCommandFactory> mockDatabaseCommandFactory = new(MockBehavior.Strict);
             UserSettings userSettings = new();
             Mock<IUserSettingsProvider> mockUserSettingsProvider = new(MockBehavior.Strict);
@@ -1995,7 +1994,7 @@ namespace UnitTests.Controllers
             const string UserName = "SomeUserName";
 
             GameData gameData = MockGameData.RealData;
-            TelemetryClient telemetryClient = new(new TelemetryConfiguration());
+            MockTelemetryClient telemetryClient = new();
             Mock<IDatabaseCommandFactory> mockDatabaseCommandFactory = new(MockBehavior.Strict);
             UserSettings userSettings = new();
             Mock<IUserSettingsProvider> mockUserSettingsProvider = new(MockBehavior.Strict);
@@ -2043,7 +2042,7 @@ namespace UnitTests.Controllers
             const string UserId = "SomeUserId";
 
             GameData gameData = MockGameData.RealData;
-            TelemetryClient telemetryClient = new(new TelemetryConfiguration());
+            MockTelemetryClient telemetryClient = new();
             Mock<IDatabaseCommandFactory> mockDatabaseCommandFactory = new(MockBehavior.Strict);
             UserSettings userSettings = new();
             Mock<IUserSettingsProvider> mockUserSettingsProvider = new(MockBehavior.Strict);
@@ -2104,7 +2103,7 @@ namespace UnitTests.Controllers
             const string UserId = "SomeUserId";
 
             GameData gameData = MockGameData.RealData;
-            TelemetryClient telemetryClient = new(new TelemetryConfiguration());
+            MockTelemetryClient telemetryClient = new();
             Mock<IDatabaseCommandFactory> mockDatabaseCommandFactory = new(MockBehavior.Strict);
             Mock<IUserSettingsProvider> mockUserSettingsProvider = new(MockBehavior.Strict);
             ApplicationUser mockUser = new();
@@ -2183,7 +2182,7 @@ namespace UnitTests.Controllers
             const string UserName = "SomeUserName";
 
             GameData gameData = MockGameData.RealData;
-            TelemetryClient telemetryClient = new(new TelemetryConfiguration());
+            MockTelemetryClient telemetryClient = new();
             Mock<IDatabaseCommandFactory> mockDatabaseCommandFactory = new(MockBehavior.Strict);
             Mock<IUserSettingsProvider> mockUserSettingsProvider = new(MockBehavior.Strict);
             Mock<UserManager<ApplicationUser>> mockUserManager = MockUserManager.CreateMock();
@@ -2224,7 +2223,7 @@ namespace UnitTests.Controllers
             const string UserName = "SomeUserName";
 
             GameData gameData = MockGameData.RealData;
-            TelemetryClient telemetryClient = new(new TelemetryConfiguration());
+            MockTelemetryClient telemetryClient = new();
             Mock<IDatabaseCommandFactory> mockDatabaseCommandFactory = new(MockBehavior.Strict);
             Mock<IUserSettingsProvider> mockUserSettingsProvider = new(MockBehavior.Strict);
 
@@ -2271,7 +2270,7 @@ namespace UnitTests.Controllers
             const string UserId = "SomeUserId";
 
             GameData gameData = MockGameData.RealData;
-            TelemetryClient telemetryClient = new(new TelemetryConfiguration());
+            MockTelemetryClient telemetryClient = new();
             Mock<IDatabaseCommandFactory> mockDatabaseCommandFactory = new(MockBehavior.Strict);
             Mock<IUserSettingsProvider> mockUserSettingsProvider = new(MockBehavior.Strict);
 
@@ -2331,7 +2330,7 @@ namespace UnitTests.Controllers
             const string UserId = "SomeUserId";
 
             GameData gameData = MockGameData.RealData;
-            TelemetryClient telemetryClient = new(new TelemetryConfiguration());
+            MockTelemetryClient telemetryClient = new();
             Mock<IDatabaseCommandFactory> mockDatabaseCommandFactory = new(MockBehavior.Strict);
             Mock<IUserSettingsProvider> mockUserSettingsProvider = new(MockBehavior.Strict);
             ApplicationUser mockUser = new();
@@ -2419,7 +2418,7 @@ namespace UnitTests.Controllers
             };
 
             GameData gameData = MockGameData.RealData;
-            TelemetryClient telemetryClient = new(new TelemetryConfiguration());
+            MockTelemetryClient telemetryClient = new();
             Mock<IDatabaseCommandFactory> mockDatabaseCommandFactory = new(MockBehavior.Strict);
             Mock<IUserSettingsProvider> mockUserSettingsProvider = new(MockBehavior.Strict);
             ApplicationUser mockUser = new();
@@ -2485,7 +2484,7 @@ namespace UnitTests.Controllers
             };
 
             GameData gameData = MockGameData.RealData;
-            TelemetryClient telemetryClient = new(new TelemetryConfiguration());
+            MockTelemetryClient telemetryClient = new();
             Mock<IDatabaseCommandFactory> mockDatabaseCommandFactory = new(MockBehavior.Strict);
             Mock<IUserSettingsProvider> mockUserSettingsProvider = new(MockBehavior.Strict);
             Mock<UserManager<ApplicationUser>> mockUserManager = MockUserManager.CreateMock();
@@ -2534,7 +2533,7 @@ namespace UnitTests.Controllers
             };
 
             GameData gameData = MockGameData.RealData;
-            TelemetryClient telemetryClient = new(new TelemetryConfiguration());
+            MockTelemetryClient telemetryClient = new();
             Mock<IDatabaseCommandFactory> mockDatabaseCommandFactory = new(MockBehavior.Strict);
             Mock<IUserSettingsProvider> mockUserSettingsProvider = new(MockBehavior.Strict);
 
@@ -2589,7 +2588,7 @@ namespace UnitTests.Controllers
             };
 
             GameData gameData = MockGameData.RealData;
-            TelemetryClient telemetryClient = new(new TelemetryConfiguration());
+            MockTelemetryClient telemetryClient = new();
             Mock<IDatabaseCommandFactory> mockDatabaseCommandFactory = new(MockBehavior.Strict);
             Mock<IUserSettingsProvider> mockUserSettingsProvider = new(MockBehavior.Strict);
 
@@ -2657,7 +2656,7 @@ namespace UnitTests.Controllers
             };
 
             GameData gameData = MockGameData.RealData;
-            TelemetryClient telemetryClient = new(new TelemetryConfiguration());
+            MockTelemetryClient telemetryClient = new();
             Mock<IDatabaseCommandFactory> mockDatabaseCommandFactory = new(MockBehavior.Strict);
             Mock<IUserSettingsProvider> mockUserSettingsProvider = new(MockBehavior.Strict);
 
@@ -2728,7 +2727,7 @@ namespace UnitTests.Controllers
             };
 
             GameData gameData = MockGameData.RealData;
-            TelemetryClient telemetryClient = new(new TelemetryConfiguration());
+            MockTelemetryClient telemetryClient = new();
             Mock<IDatabaseCommandFactory> mockDatabaseCommandFactory = new(MockBehavior.Strict);
             Mock<IUserSettingsProvider> mockUserSettingsProvider = new(MockBehavior.Strict);
             ApplicationUser mockUser = new();
@@ -2788,7 +2787,7 @@ namespace UnitTests.Controllers
             const string UserId = "SomeUserId";
 
             GameData gameData = MockGameData.RealData;
-            TelemetryClient telemetryClient = new(new TelemetryConfiguration());
+            MockTelemetryClient telemetryClient = new();
             Mock<IDatabaseCommandFactory> mockDatabaseCommandFactory = new(MockBehavior.Strict);
             UserSettings userSettings = new();
             Mock<IUserSettingsProvider> mockUserSettingsProvider = new(MockBehavior.Strict);
@@ -2858,7 +2857,7 @@ namespace UnitTests.Controllers
             };
 
             GameData gameData = MockGameData.RealData;
-            TelemetryClient telemetryClient = new(new TelemetryConfiguration());
+            MockTelemetryClient telemetryClient = new();
             Mock<IDatabaseCommandFactory> mockDatabaseCommandFactory = new(MockBehavior.Strict);
             Mock<IUserSettingsProvider> mockUserSettingsProvider = new(MockBehavior.Strict);
             ApplicationUser mockUser = new();
@@ -2922,7 +2921,7 @@ namespace UnitTests.Controllers
             };
 
             GameData gameData = MockGameData.RealData;
-            TelemetryClient telemetryClient = new(new TelemetryConfiguration());
+            MockTelemetryClient telemetryClient = new();
             Mock<IDatabaseCommandFactory> mockDatabaseCommandFactory = new(MockBehavior.Strict);
             Mock<IUserSettingsProvider> mockUserSettingsProvider = new(MockBehavior.Strict);
             Mock<UserManager<ApplicationUser>> mockUserManager = MockUserManager.CreateMock();
@@ -2969,7 +2968,7 @@ namespace UnitTests.Controllers
             };
 
             GameData gameData = MockGameData.RealData;
-            TelemetryClient telemetryClient = new(new TelemetryConfiguration());
+            MockTelemetryClient telemetryClient = new();
             Mock<IDatabaseCommandFactory> mockDatabaseCommandFactory = new(MockBehavior.Strict);
             Mock<IUserSettingsProvider> mockUserSettingsProvider = new(MockBehavior.Strict);
 
@@ -3022,7 +3021,7 @@ namespace UnitTests.Controllers
             };
 
             GameData gameData = MockGameData.RealData;
-            TelemetryClient telemetryClient = new(new TelemetryConfiguration());
+            MockTelemetryClient telemetryClient = new();
             Mock<IDatabaseCommandFactory> mockDatabaseCommandFactory = new(MockBehavior.Strict);
             Mock<IUserSettingsProvider> mockUserSettingsProvider = new(MockBehavior.Strict);
 
@@ -3088,7 +3087,7 @@ namespace UnitTests.Controllers
             };
 
             GameData gameData = MockGameData.RealData;
-            TelemetryClient telemetryClient = new(new TelemetryConfiguration());
+            MockTelemetryClient telemetryClient = new();
             Mock<IDatabaseCommandFactory> mockDatabaseCommandFactory = new(MockBehavior.Strict);
             Mock<IUserSettingsProvider> mockUserSettingsProvider = new(MockBehavior.Strict);
 
@@ -3157,7 +3156,7 @@ namespace UnitTests.Controllers
             };
 
             GameData gameData = MockGameData.RealData;
-            TelemetryClient telemetryClient = new(new TelemetryConfiguration());
+            MockTelemetryClient telemetryClient = new();
             Mock<IDatabaseCommandFactory> mockDatabaseCommandFactory = new(MockBehavior.Strict);
             Mock<IUserSettingsProvider> mockUserSettingsProvider = new(MockBehavior.Strict);
             ApplicationUser mockUser = new();
@@ -3225,7 +3224,7 @@ namespace UnitTests.Controllers
             };
 
             GameData gameData = MockGameData.RealData;
-            TelemetryClient telemetryClient = new(new TelemetryConfiguration());
+            MockTelemetryClient telemetryClient = new();
             Mock<IDatabaseCommandFactory> mockDatabaseCommandFactory = new(MockBehavior.Strict);
             Mock<IUserSettingsProvider> mockUserSettingsProvider = new(MockBehavior.Strict);
             ApplicationUser mockUser = new();
@@ -3291,7 +3290,7 @@ namespace UnitTests.Controllers
             };
 
             GameData gameData = MockGameData.RealData;
-            TelemetryClient telemetryClient = new(new TelemetryConfiguration());
+            MockTelemetryClient telemetryClient = new();
             Mock<IDatabaseCommandFactory> mockDatabaseCommandFactory = new(MockBehavior.Strict);
             Mock<IUserSettingsProvider> mockUserSettingsProvider = new(MockBehavior.Strict);
             Mock<UserManager<ApplicationUser>> mockUserManager = MockUserManager.CreateMock();
@@ -3340,7 +3339,7 @@ namespace UnitTests.Controllers
             };
 
             GameData gameData = MockGameData.RealData;
-            TelemetryClient telemetryClient = new(new TelemetryConfiguration());
+            MockTelemetryClient telemetryClient = new();
             Mock<IDatabaseCommandFactory> mockDatabaseCommandFactory = new(MockBehavior.Strict);
             Mock<IUserSettingsProvider> mockUserSettingsProvider = new(MockBehavior.Strict);
 
@@ -3395,7 +3394,7 @@ namespace UnitTests.Controllers
             };
 
             GameData gameData = MockGameData.RealData;
-            TelemetryClient telemetryClient = new(new TelemetryConfiguration());
+            MockTelemetryClient telemetryClient = new();
             Mock<IDatabaseCommandFactory> mockDatabaseCommandFactory = new(MockBehavior.Strict);
             Mock<IUserSettingsProvider> mockUserSettingsProvider = new(MockBehavior.Strict);
 
@@ -3463,7 +3462,7 @@ namespace UnitTests.Controllers
             };
 
             GameData gameData = MockGameData.RealData;
-            TelemetryClient telemetryClient = new(new TelemetryConfiguration());
+            MockTelemetryClient telemetryClient = new();
             Mock<IDatabaseCommandFactory> mockDatabaseCommandFactory = new(MockBehavior.Strict);
             Mock<IUserSettingsProvider> mockUserSettingsProvider = new(MockBehavior.Strict);
 
@@ -3534,7 +3533,7 @@ namespace UnitTests.Controllers
             };
 
             GameData gameData = MockGameData.RealData;
-            TelemetryClient telemetryClient = new(new TelemetryConfiguration());
+            MockTelemetryClient telemetryClient = new();
             Mock<IDatabaseCommandFactory> mockDatabaseCommandFactory = new(MockBehavior.Strict);
             Mock<IUserSettingsProvider> mockUserSettingsProvider = new(MockBehavior.Strict);
             ApplicationUser mockUser = new();
@@ -3598,7 +3597,7 @@ namespace UnitTests.Controllers
             };
 
             GameData gameData = MockGameData.RealData;
-            TelemetryClient telemetryClient = new(new TelemetryConfiguration());
+            MockTelemetryClient telemetryClient = new();
             Mock<IDatabaseCommandFactory> mockDatabaseCommandFactory = new(MockBehavior.Strict);
             Mock<IUserSettingsProvider> mockUserSettingsProvider = new(MockBehavior.Strict);
 
@@ -3650,7 +3649,7 @@ namespace UnitTests.Controllers
             };
 
             GameData gameData = MockGameData.RealData;
-            TelemetryClient telemetryClient = new(new TelemetryConfiguration());
+            MockTelemetryClient telemetryClient = new();
             Mock<IDatabaseCommandFactory> mockDatabaseCommandFactory = new(MockBehavior.Strict);
             Mock<IUserSettingsProvider> mockUserSettingsProvider = new(MockBehavior.Strict);
             Mock<IEmailSender> mockEmailSender = new(MockBehavior.Strict);
@@ -3693,7 +3692,7 @@ namespace UnitTests.Controllers
             };
 
             GameData gameData = MockGameData.RealData;
-            TelemetryClient telemetryClient = new(new TelemetryConfiguration());
+            MockTelemetryClient telemetryClient = new();
             Mock<IDatabaseCommandFactory> mockDatabaseCommandFactory = new(MockBehavior.Strict);
             Mock<IUserSettingsProvider> mockUserSettingsProvider = new(MockBehavior.Strict);
             Mock<IEmailSender> mockEmailSender = new(MockBehavior.Strict);
@@ -3742,7 +3741,7 @@ namespace UnitTests.Controllers
             };
 
             GameData gameData = MockGameData.RealData;
-            TelemetryClient telemetryClient = new(new TelemetryConfiguration());
+            MockTelemetryClient telemetryClient = new();
             Mock<IDatabaseCommandFactory> mockDatabaseCommandFactory = new(MockBehavior.Strict);
             Mock<IUserSettingsProvider> mockUserSettingsProvider = new(MockBehavior.Strict);
             Mock<IEmailSender> mockEmailSender = new(MockBehavior.Strict);
@@ -3785,7 +3784,7 @@ namespace UnitTests.Controllers
             };
 
             GameData gameData = MockGameData.RealData;
-            TelemetryClient telemetryClient = new(new TelemetryConfiguration());
+            MockTelemetryClient telemetryClient = new();
             Mock<IDatabaseCommandFactory> mockDatabaseCommandFactory = new(MockBehavior.Strict);
             Mock<IUserSettingsProvider> mockUserSettingsProvider = new(MockBehavior.Strict);
             Mock<IEmailSender> mockEmailSender = new(MockBehavior.Strict);

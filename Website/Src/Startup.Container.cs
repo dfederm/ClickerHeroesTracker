@@ -6,6 +6,7 @@ using System.Net.Http;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Azure.Data.Tables;
+using Azure.Monitor.OpenTelemetry.AspNetCore;
 using ClickerHeroesTrackerWebsite.Configuration;
 using ClickerHeroesTrackerWebsite.Models;
 using ClickerHeroesTrackerWebsite.Models.Game;
@@ -13,7 +14,6 @@ using ClickerHeroesTrackerWebsite.Models.Settings;
 using ClickerHeroesTrackerWebsite.Services.Authentication;
 using ClickerHeroesTrackerWebsite.Services.Database;
 using ClickerHeroesTrackerWebsite.Services.Email;
-using Microsoft.ApplicationInsights.AspNetCore.Extensions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Hosting;
@@ -25,10 +25,12 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
 using OpenIddict.Abstractions;
 using OpenIddict.Validation.AspNetCore;
+using OpenTelemetry.Metrics;
 using Website.Models.Authentication;
 using Website.Services.Authentication;
 using Website.Services.Clans;
 using Website.Services.SiteNews;
+using Website.Services.Telemetry;
 
 namespace ClickerHeroesTrackerWebsite
 {
@@ -179,11 +181,15 @@ namespace ClickerHeroesTrackerWebsite
                 ? new DeveloperBuildInfoProvider()
                 : new FileBuildInfoProvider(Path.Combine(_environment.ContentRootPath, "BuildInfo.json"));
 
-            services.AddApplicationInsightsTelemetry(new ApplicationInsightsServiceOptions
+            services.ConfigureOpenTelemetryMeterProvider((sp, builder) =>
             {
-                ApplicationVersion = buildInfoProvider.BuildUrl,
-                DeveloperMode = _environment.IsDevelopment(),
+                builder.AddRuntimeInstrumentation();
+                builder.AddSqlClientInstrumentation();
+
+                builder.AddMeter(TelemetryClient.MeterInstance.Name);
             });
+
+            services.AddOpenTelemetry().UseAzureMonitor();
 
             services.AddCors(options =>
             {
@@ -241,6 +247,7 @@ namespace ClickerHeroesTrackerWebsite
             services.AddSingleton(buildInfoProvider);
             services.AddSingleton<IEmailSender, EmailSender>();
             services.AddSingleton<IOptions<PasswordHasherOptions>, PasswordHasherOptionsAccessor>();
+            services.AddSingleton<ITelemetryClient, TelemetryClient>();
 
             // Per request registrations
             services.AddScoped<IClanManager, ClanManager>();

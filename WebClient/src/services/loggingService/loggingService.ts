@@ -10,8 +10,7 @@ export class LoggingService {
     constructor() {
         this.appInsights = new ApplicationInsights({
             config: {
-                // Make sure this matches the API settings as well. Is there a better way to do this?
-                instrumentationKey: "99fba640-790d-484f-83c4-3c97450d8698",
+                connectionString: "InstrumentationKey=388783a8-a141-49d5-9828-d5be7635625d;IngestionEndpoint=https://westus2-2.in.applicationinsights.azure.com/;LiveEndpoint=https://westus2.livediagnostics.monitor.azure.com/;ApplicationId=60c3b37a-d70a-4b52-b3e3-194f2824ea23",
 
                 // log all route changes
                 enableAutoRouteTracking: true,
