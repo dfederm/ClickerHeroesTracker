@@ -70,7 +70,10 @@ namespace UnitTests.Services.Authentication
                 MicrosoftAssertionGrantHandler handler = new(options, http.HttpClient);
                 Task<AssertionGrantResult> resultTask = handler.ValidateAsync(tokenHandler.WriteToken(token));
 
+                await Task.Delay(100); // HACK! Allow time for the request to be sent
                 http.Expect(ConfigurationEndpoint).Respond(OpenIdConnectConfiguration.Write(configuration));
+
+                await Task.Delay(100); // HACK! Allow time for the request to be sent
                 http.Expect(KeysEndpoint).Respond(JsonSerializer.Serialize(jsonWebKeySet));
 
                 AssertionGrantResult result = await resultTask;
@@ -114,7 +117,10 @@ namespace UnitTests.Services.Authentication
                 MicrosoftAssertionGrantHandler handler = new(options, http.HttpClient);
                 Task<AssertionGrantResult> resultTask = handler.ValidateAsync(tokenHandler.WriteToken(token));
 
+                await Task.Delay(100); // HACK! Allow time for the request to be sent
                 http.Expect(ConfigurationEndpoint).Respond(OpenIdConnectConfiguration.Write(configuration));
+
+                await Task.Delay(100); // HACK! Allow time for the request to be sent
                 http.Expect(KeysEndpoint).Respond(JsonSerializer.Serialize(jsonWebKeySet));
 
                 AssertionGrantResult result = await resultTask;
@@ -148,7 +154,10 @@ namespace UnitTests.Services.Authentication
                 MicrosoftAssertionGrantHandler handler = new(options, http.HttpClient);
                 Task<AssertionGrantResult> resultTask = handler.ValidateAsync("SomeBadAssertion");
 
+                await Task.Delay(100); // HACK! Allow time for the request to be sent
                 http.Expect(ConfigurationEndpoint).Respond(OpenIdConnectConfiguration.Write(configuration));
+
+                await Task.Delay(100); // HACK! Allow time for the request to be sent
                 http.Expect(KeysEndpoint).Respond(JsonSerializer.Serialize(jsonWebKeySet));
 
                 AssertionGrantResult result = await resultTask;
