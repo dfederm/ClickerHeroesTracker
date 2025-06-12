@@ -19,7 +19,7 @@ jobs:
     - name: Build
       run: dotnet build --configuration Release --no-restore
     - name: Test
-      run: dotnet test --configuration Release --no-build --logger trx --results-directory TestResults --collect:"XPlat Code Coverage"
+      run: dotnet test --configuration Release --no-restore --no-build --logger trx --results-directory TestResults --collect:"XPlat Code Coverage"
     # - name: Upload coverage to Codecov
     #   uses: codecov/codecov-action@v3
     #   with:
