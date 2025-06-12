@@ -56,7 +56,7 @@
     "@types/crypto-js": "^4.2.2",
     "@types/facebook-js-sdk": "^3.3.12",
     "@types/google.accounts": "^0.0.15",
-    "@types/jasmine": "^5.1.4",
+    "@types/jasmine": "^5.1.8",
     "@types/node": "^20.10.3",
     "@types/pako": "^2.0.3",
     "@typescript-eslint/eslint-plugin": "^7.2.0",
