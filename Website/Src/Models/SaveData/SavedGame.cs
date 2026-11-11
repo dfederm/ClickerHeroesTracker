@@ -82,8 +82,18 @@ namespace ClickerHeroesTrackerWebsite.Models.SaveData
                 return null;
             }
 
+            TextReader decodedReader;
+            try
+            {
+                decodedReader = decodeFunc(encodedSaveData);
+            }
+            catch (FormatException)
+            {
+                return null;
+            }
+
             // Decode the save
-            using (TextReader reader = decodeFunc(encodedSaveData))
+            using (TextReader reader = decodedReader)
             {
                 if (reader == null)
                 {
@@ -282,7 +292,7 @@ namespace ClickerHeroesTrackerWebsite.Models.SaveData
         {
             using (MemoryStream compressedStream = new(16 * 1024))
             {
-                using (MemoryStream jsonStream = new(Encoding.UTF8.GetBytes(json)))
+                using (StringStream jsonStream = new(json, Encoding.UTF8))
                 using (DeflaterOutputStream deflaterStream = new(compressedStream))
                 {
                     jsonStream.CopyTo(deflaterStream);
@@ -305,7 +315,7 @@ namespace ClickerHeroesTrackerWebsite.Models.SaveData
         {
             using (MemoryStream compressedStream = new(16 * 1024))
             {
-                using (MemoryStream jsonStream = new(Encoding.UTF8.GetBytes(json)))
+                using (StringStream jsonStream = new(json, Encoding.UTF8))
                 using (DeflaterOutputStream deflaterStream = new(compressedStream, new Deflater(level: Deflater.DEFAULT_COMPRESSION, noZlibHeaderOrFooter: true)))
                 {
                     jsonStream.CopyTo(deflaterStream);

@@ -39,8 +39,10 @@ namespace UnitTests.Services.Authentication
             Kid = "SomeKid",
         };
 
-        [Fact]
-        public async Task ValidateAsync_Success()
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public async Task ValidateAsync_Identity(bool hasEmail)
         {
             AuthenticationSettings authenticationSettings = new()
             {
@@ -60,9 +62,12 @@ namespace UnitTests.Services.Authentication
             using (HttpClientTestingFactory http = new())
             {
                 JwtSecurityTokenHandler tokenHandler = new();
+                Claim[] claims = hasEmail
+                    ? new[] { new Claim("sub", ExternalUserId), new Claim("email", ExternalUserEmail) }
+                    : new[] { new Claim("sub", ExternalUserId) };
                 JwtSecurityToken token = new(
                     audience: ClientId,
-                    claims: new[] { new Claim("sub", ExternalUserId), new Claim("email", ExternalUserEmail) },
+                    claims: claims,
                     notBefore: DateTime.UtcNow,
                     expires: DateTime.UtcNow + TimeSpan.FromHours(1),
                     signingCredentials: new SigningCredentials(JsonWebKey, JsonWebKey.Alg));
@@ -77,10 +82,17 @@ namespace UnitTests.Services.Authentication
                 http.Expect(KeysEndpoint).Respond(JsonSerializer.Serialize(jsonWebKeySet));
 
                 AssertionGrantResult result = await resultTask;
-                Assert.NotNull(result);
-                Assert.True(result.IsSuccessful);
-                Assert.Equal(ExternalUserId, result.ExternalUserId);
-                Assert.Equal(ExternalUserEmail, result.ExternalUserEmail);
+                if (hasEmail)
+                {
+                    AssertionGrantSuccess success = Assert.IsType<AssertionGrantSuccess>(result.Value);
+                    Assert.Equal(ExternalUserId, success.ExternalUserId);
+                    Assert.Equal(ExternalUserEmail, success.ExternalUserEmail);
+                }
+                else
+                {
+                    AssertionGrantError error = Assert.IsType<AssertionGrantError>(result.Value);
+                    Assert.Null(error.Error);
+                }
 
                 http.EnsureNoOutstandingRequests();
             }
@@ -124,8 +136,7 @@ namespace UnitTests.Services.Authentication
                 http.Expect(KeysEndpoint).Respond(JsonSerializer.Serialize(jsonWebKeySet));
 
                 AssertionGrantResult result = await resultTask;
-                Assert.NotNull(result);
-                Assert.False(result.IsSuccessful);
+                Assert.IsType<AssertionGrantError>(result.Value);
 
                 http.EnsureNoOutstandingRequests();
             }
@@ -161,8 +172,7 @@ namespace UnitTests.Services.Authentication
                 http.Expect(KeysEndpoint).Respond(JsonSerializer.Serialize(jsonWebKeySet));
 
                 AssertionGrantResult result = await resultTask;
-                Assert.NotNull(result);
-                Assert.False(result.IsSuccessful);
+                Assert.IsType<AssertionGrantError>(result.Value);
 
                 http.EnsureNoOutstandingRequests();
             }

@@ -56,7 +56,7 @@ namespace Website.Services.Authentication
                     if (validatedToken is JwtSecurityToken jwtToken && !string.IsNullOrEmpty(jwtToken.Subject))
                     {
                         string email = jwtToken.Claims.FirstOrDefault(claim => claim.Type.Equals("email", StringComparison.OrdinalIgnoreCase))?.Value;
-                        return new AssertionGrantResult { ExternalUserId = jwtToken.Subject, ExternalUserEmail = email };
+                        return AssertionGrantResult.FromIdentity(jwtToken.Subject, email);
                     }
                 }
             }
@@ -67,7 +67,7 @@ namespace Website.Services.Authentication
                 // Just swallow and fall through to returning the error below
             }
 
-            return new AssertionGrantResult { Error = "Token validation failed" };
+            return new AssertionGrantError("Token validation failed");
         }
     }
 }

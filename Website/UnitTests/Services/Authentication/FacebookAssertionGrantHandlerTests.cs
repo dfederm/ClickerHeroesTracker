@@ -45,11 +45,27 @@ namespace UnitTests.Services.Authentication
                 http.Expect(UserEndpoint).Respond(JsonConvert.SerializeObject(new FacebookUser { Id = ExternalUserId, Email = ExternalUserEmail }));
 
                 AssertionGrantResult result = await resultTask;
-                Assert.NotNull(result);
-                Assert.True(result.IsSuccessful);
-                Assert.Equal(ExternalUserId, result.ExternalUserId);
-                Assert.Equal(ExternalUserEmail, result.ExternalUserEmail);
+                AssertionGrantSuccess success = Assert.IsType<AssertionGrantSuccess>(result.Value);
+                Assert.Equal(ExternalUserId, success.ExternalUserId);
+                Assert.Equal(ExternalUserEmail, success.ExternalUserEmail);
 
+                http.EnsureNoOutstandingRequests();
+            }
+        }
+
+        [Fact]
+        public static async Task ValidateAsync_MissingEmail()
+        {
+            AuthenticationSettings settings = new() { Facebook = new FacebookAuthenticationSettings { AppId = AppId } };
+            using (HttpClientTestingFactory http = new(HttpClientTestingFactorySettings))
+            {
+                FacebookAssertionGrantHandler handler = new(Options.Create(settings), http.HttpClient);
+                Task<AssertionGrantResult> resultTask = handler.ValidateAsync(Assertion);
+                http.Expect(AppEndpoint).Respond(JsonConvert.SerializeObject(new FacebookApp { Id = AppId }));
+                http.Expect(UserEndpoint).Respond(JsonConvert.SerializeObject(new FacebookUser { Id = ExternalUserId }));
+
+                AssertionGrantError error = Assert.IsType<AssertionGrantError>((await resultTask).Value);
+                Assert.Null(error.Error);
                 http.EnsureNoOutstandingRequests();
             }
         }
@@ -68,8 +84,7 @@ namespace UnitTests.Services.Authentication
                 http.Expect(AppEndpoint).Respond(HttpStatusCode.BadRequest);
 
                 AssertionGrantResult result = await resultTask;
-                Assert.NotNull(result);
-                Assert.False(result.IsSuccessful);
+                Assert.IsType<AssertionGrantError>(result.Value);
 
                 http.EnsureNoOutstandingRequests();
             }
@@ -96,8 +111,7 @@ namespace UnitTests.Services.Authentication
                 http.Expect(UserEndpoint).Respond(HttpStatusCode.BadRequest);
 
                 AssertionGrantResult result = await resultTask;
-                Assert.NotNull(result);
-                Assert.False(result.IsSuccessful);
+                Assert.IsType<AssertionGrantError>(result.Value);
 
                 http.EnsureNoOutstandingRequests();
             }
@@ -123,8 +137,7 @@ namespace UnitTests.Services.Authentication
                 http.Expect(AppEndpoint).Respond(JsonConvert.SerializeObject(new FacebookApp { Id = "SomeOtherAppId" }));
 
                 AssertionGrantResult result = await resultTask;
-                Assert.NotNull(result);
-                Assert.False(result.IsSuccessful);
+                Assert.IsType<AssertionGrantError>(result.Value);
 
                 http.EnsureNoOutstandingRequests();
             }

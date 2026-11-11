@@ -2,16 +2,16 @@
 
 namespace Website.Services.Authentication
 {
-    public sealed class AssertionGrantResult
+    public union AssertionGrantResult(AssertionGrantSuccess, AssertionGrantError)
     {
-        public string ExternalUserId { get; set; }
+        public static AssertionGrantResult FromIdentity(string externalUserId, string externalUserEmail)
+        {
+            if (string.IsNullOrEmpty(externalUserId) || string.IsNullOrEmpty(externalUserEmail))
+            {
+                return new AssertionGrantError(null);
+            }
 
-        public string ExternalUserEmail { get; set; }
-
-        public string Error { get; set; }
-
-        public bool IsSuccessful => string.IsNullOrEmpty(Error)
-            && !string.IsNullOrEmpty(ExternalUserId)
-            && !string.IsNullOrEmpty(ExternalUserEmail);
+            return new AssertionGrantSuccess(externalUserId, externalUserEmail);
+        }
     }
 }
