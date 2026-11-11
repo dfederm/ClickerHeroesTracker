@@ -9,6 +9,8 @@ indent_size = 4
 
 [*.cs]
 
+# Use the platform's line endings for C# formatting.
+end_of_line = unset
 insert_final_newline = unset
 file_header_template = Copyright (C) Clicker Heroes Tracker. All Rights Reserved.
 
