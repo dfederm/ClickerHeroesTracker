@@ -38,7 +38,7 @@ namespace Website.Services.Authentication
             {
                 if (response.StatusCode != HttpStatusCode.OK)
                 {
-                    return new AssertionGrantResult { Error = "Token validation failed" };
+                    return new AssertionGrantError("Token validation failed");
                 }
 
                 Stream stream = await response.Content.ReadAsStreamAsync();
@@ -52,10 +52,10 @@ namespace Website.Services.Authentication
             // We still validate the aud to ensure it's not a token for some other app
             if (!_authenticationSettings.Google.ClientId.Equals(googleToken.Aud, StringComparison.OrdinalIgnoreCase))
             {
-                return new AssertionGrantResult { Error = "The token was for the wrong audience" };
+                return new AssertionGrantError("The token was for the wrong audience");
             }
 
-            return new AssertionGrantResult { ExternalUserId = googleToken.Sub, ExternalUserEmail = googleToken.Email };
+            return AssertionGrantResult.FromIdentity(googleToken.Sub, googleToken.Email);
         }
     }
 }

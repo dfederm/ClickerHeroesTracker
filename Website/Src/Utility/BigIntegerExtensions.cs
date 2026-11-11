@@ -10,7 +10,7 @@ namespace ClickerHeroesTrackerWebsite.Utility
     {
         /// <summary>
         /// Serialize a <see cref="BigInteger"/> to a string that can be used to transport it or store in system which don't support <see cref="BigInteger"/>.
-        /// It effectively just calls <see cref="BigInteger.ToString"/> with a specific format that should be used throughout the app.
+        /// It effectively just calls <see cref="BigInteger.ToString(string)"/> with a specific format that should be used throughout the app.
         /// </summary>
         /// <returns>A string representation of the <see cref="BigInteger"/>.</returns>
         public static string ToTransportableString(this BigInteger number)

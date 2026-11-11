@@ -145,25 +145,25 @@ namespace ClickerHeroesTrackerWebsite.Controllers
                 }
 
                 AssertionGrantResult validationResult = await assertionGrantHandler.ValidateAsync(request.Assertion);
-                if (!validationResult.IsSuccessful)
+                if (validationResult is not AssertionGrantSuccess success)
                 {
                     AuthenticationProperties properties = new(new Dictionary<string, string>
                     {
                         [OpenIddictServerAspNetCoreConstants.Properties.Error] = OpenIddictConstants.Errors.InvalidGrant,
-                        [OpenIddictServerAspNetCoreConstants.Properties.ErrorDescription] = validationResult.Error,
+                        [OpenIddictServerAspNetCoreConstants.Properties.ErrorDescription] = validationResult is AssertionGrantError error ? error.Error : null,
                     });
 
                     return Forbid(properties, OpenIddictServerAspNetCoreDefaults.AuthenticationScheme);
                 }
 
                 // Find the user associated with this external log in
-                ApplicationUser user = await _userManager.FindByLoginAsync(assertionGrantHandler.Name, validationResult.ExternalUserId);
+                ApplicationUser user = await _userManager.FindByLoginAsync(assertionGrantHandler.Name, success.ExternalUserId);
                 if (user == null)
                 {
                     if (!string.IsNullOrEmpty(request.Username))
                     {
                         // They provided a user name, so try to implicitly create an account for them
-                        user = new ApplicationUser { UserName = request.Username, Email = validationResult.ExternalUserEmail };
+                        user = new ApplicationUser { UserName = request.Username, Email = success.ExternalUserEmail };
                         IdentityResult creationResult = await _userManager.CreateAsync(user);
                         if (!creationResult.Succeeded)
                         {
@@ -186,7 +186,7 @@ namespace ClickerHeroesTrackerWebsite.Controllers
                     // Add the login if we found a user
                     if (user != null)
                     {
-                        UserLoginInfo login = new(assertionGrantHandler.Name, validationResult.ExternalUserId, assertionGrantHandler.Name);
+                        UserLoginInfo login = new(assertionGrantHandler.Name, success.ExternalUserId, assertionGrantHandler.Name);
                         IdentityResult addLoginResult = await _userManager.AddLoginAsync(user, login);
                         if (!addLoginResult.Succeeded)
                         {

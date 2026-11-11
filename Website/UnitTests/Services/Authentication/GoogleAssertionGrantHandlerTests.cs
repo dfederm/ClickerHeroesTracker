@@ -44,11 +44,35 @@ namespace UnitTests.Services.Authentication
                 }));
 
                 AssertionGrantResult result = await resultTask;
-                Assert.NotNull(result);
-                Assert.True(result.IsSuccessful);
-                Assert.Equal(ExternalUserId, result.ExternalUserId);
-                Assert.Equal(ExternalUserEmail, result.ExternalUserEmail);
+                AssertionGrantSuccess success = Assert.IsType<AssertionGrantSuccess>(result.Value);
+                Assert.Equal(ExternalUserId, success.ExternalUserId);
+                Assert.Equal(ExternalUserEmail, success.ExternalUserEmail);
 
+                http.EnsureNoOutstandingRequests();
+            }
+        }
+
+        [Theory]
+        [InlineData(null, ExternalUserEmail)]
+        [InlineData("", ExternalUserEmail)]
+        [InlineData(ExternalUserId, null)]
+        [InlineData(ExternalUserId, "")]
+        public static async Task ValidateAsync_MissingIdentity(string externalUserId, string email)
+        {
+            AuthenticationSettings settings = new() { Google = new GoogleAuthenticationSettings { ClientId = ClientId } };
+            using (HttpClientTestingFactory http = new())
+            {
+                GoogleAssertionGrantHandler handler = new(Options.Create(settings), http.HttpClient);
+                Task<AssertionGrantResult> resultTask = handler.ValidateAsync(Assertion);
+                http.Expect(ValidationEndpoint).Respond(JsonConvert.SerializeObject(new JsonWebToken
+                {
+                    Aud = ClientId,
+                    Sub = externalUserId,
+                    Email = email,
+                }));
+
+                AssertionGrantError error = Assert.IsType<AssertionGrantError>((await resultTask).Value);
+                Assert.Null(error.Error);
                 http.EnsureNoOutstandingRequests();
             }
         }
@@ -67,8 +91,7 @@ namespace UnitTests.Services.Authentication
                 http.Expect(ValidationEndpoint).Respond(HttpStatusCode.BadRequest);
 
                 AssertionGrantResult result = await resultTask;
-                Assert.NotNull(result);
-                Assert.False(result.IsSuccessful);
+                Assert.IsType<AssertionGrantError>(result.Value);
 
                 http.EnsureNoOutstandingRequests();
             }
@@ -98,8 +121,7 @@ namespace UnitTests.Services.Authentication
                 }));
 
                 AssertionGrantResult result = await resultTask;
-                Assert.NotNull(result);
-                Assert.False(result.IsSuccessful);
+                Assert.IsType<AssertionGrantError>(result.Value);
 
                 http.EnsureNoOutstandingRequests();
             }

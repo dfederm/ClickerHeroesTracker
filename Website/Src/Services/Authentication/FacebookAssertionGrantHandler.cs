@@ -37,7 +37,7 @@ namespace Website.Services.Authentication
             {
                 if (response.StatusCode != HttpStatusCode.OK)
                 {
-                    return new AssertionGrantResult { Error = "Token validation failed" };
+                    return new AssertionGrantError("Token validation failed");
                 }
 
                 Stream stream = await response.Content.ReadAsStreamAsync();
@@ -47,7 +47,7 @@ namespace Website.Services.Authentication
                     FacebookApp facebookApp = serializer.Deserialize<FacebookApp>(reader);
                     if (!_authenticationSettings.Facebook.AppId.Equals(facebookApp.Id, StringComparison.OrdinalIgnoreCase))
                     {
-                        return new AssertionGrantResult { Error = "The token was for the wrong app" };
+                        return new AssertionGrantError("The token was for the wrong app");
                     }
                 }
             }
@@ -59,7 +59,7 @@ namespace Website.Services.Authentication
             {
                 if (response.StatusCode != HttpStatusCode.OK)
                 {
-                    return new AssertionGrantResult { Error = "Token validation failed" };
+                    return new AssertionGrantError("Token validation failed");
                 }
 
                 Stream stream = await response.Content.ReadAsStreamAsync();
@@ -72,10 +72,10 @@ namespace Website.Services.Authentication
 
             if (string.IsNullOrEmpty(facebookUser.Id))
             {
-                return new AssertionGrantResult { Error = "The token does not belong to a valid user" };
+                return new AssertionGrantError("The token does not belong to a valid user");
             }
 
-            return new AssertionGrantResult { ExternalUserId = facebookUser.Id, ExternalUserEmail = facebookUser.Email };
+            return AssertionGrantResult.FromIdentity(facebookUser.Id, facebookUser.Email);
         }
     }
 }

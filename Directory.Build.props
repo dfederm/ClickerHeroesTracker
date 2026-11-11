@@ -23,8 +23,13 @@
 
     <BaseArtifactsPath>$(MSBuildThisFileDirectory)artifacts\$(Configuration)\</BaseArtifactsPath>
 
-    <!-- Enabled the built-in analyzers -->
+    <!-- Enable built-in analyzers during builds -->
     <EnableNETAnalyzers>true</EnableNETAnalyzers>
+    <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+
+    <!-- IDE0005 requires XML documentation generation; missing documentation is allowed. -->
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <NoWarn>$(NoWarn);CS1591</NoWarn>
 
     <!-- People know that they're using preview versions -->
     <SuppressNETCoreSdkPreviewMessage>true</SuppressNETCoreSdkPreviewMessage>
@@ -35,12 +40,5 @@
     <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
     <CentralPackageTransitivePinningEnabled>true</CentralPackageTransitivePinningEnabled>
   </PropertyGroup>
-
-  <!-- StyleCop -->
-  <ItemGroup>
-    <AdditionalFiles Include="$(MSBuildThisFileDirectory)\build\stylecop.json">
-      <Visible>false</Visible>
-    </AdditionalFiles>
-  </ItemGroup>
 
 </Project>
